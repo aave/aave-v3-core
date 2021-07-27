@@ -1,5 +1,5 @@
 import { task } from 'hardhat/config';
-import { deployLendingPoolAddressesProvider } from '../../helpers/contracts-deployments';
+import { deployPoolAddressesProvider } from '../../helpers/contracts-deployments';
 import { notFalsyOrZeroAddress, waitForTx } from '../../helpers/misc-utils';
 import {
   ConfigNames,
@@ -23,7 +23,7 @@ task(
     const { MarketId } = poolConfig;
 
     // 1. Deploy address provider and set genesis manager
-    const addressesProvider = await deployLendingPoolAddressesProvider(MarketId, verify);
+    const addressesProvider = await deployPoolAddressesProvider(MarketId, verify);
 
     // 2. Add to registry or setup a new one
     if (!skipRegistry) {

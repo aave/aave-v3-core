@@ -7,7 +7,7 @@ import {
   getEthersSignersAddresses,
 } from '../../helpers/contracts-helpers';
 import {
-  deployLendingPoolAddressesProvider,
+  deployPoolAddressesProvider,
   deployMintableERC20,
   deployLendingPoolAddressesProviderRegistry,
   deployLendingPoolConfigurator,
@@ -98,7 +98,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const mockTokens = await deployAllMockTokens(deployer);
 
-  const addressesProvider = await deployLendingPoolAddressesProvider(AmmConfig.MarketId);
+  const addressesProvider = await deployPoolAddressesProvider(AmmConfig.MarketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list

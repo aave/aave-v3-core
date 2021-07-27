@@ -2,7 +2,7 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import {ILendingPoolAddressesProvider} from './ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 
 interface ILendingPool {
@@ -493,9 +493,9 @@ interface ILendingPool {
   function getReservesList() external view returns (address[] memory);
 
   /**
-   * @dev Returns the cached LendingPoolAddressesProvider connected to this contract
+   * @dev Returns the cached PoolAddressesProvider connected to this contract
    **/
-  function getAddressesProvider() external view returns (ILendingPoolAddressesProvider);
+  function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
    * @dev Set the _pause state of a reserve

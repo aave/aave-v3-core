@@ -4,8 +4,8 @@ pragma experimental ABIEncoderV2;
 
 import {LendingPool} from '../protocol/lendingpool/LendingPool.sol';
 import {
-  LendingPoolAddressesProvider
-} from '../protocol/configuration/LendingPoolAddressesProvider.sol';
+  PoolAddressesProvider
+} from '../protocol/configuration/PoolAddressesProvider.sol';
 import {LendingPoolConfigurator} from '../protocol/lendingpool/LendingPoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
 import {
@@ -53,7 +53,7 @@ contract ATokensAndRatesHelper is Ownable {
         address(new AToken()),
         address(
           new DefaultReserveInterestRateStrategy(
-            LendingPoolAddressesProvider(addressesProvider),
+            PoolAddressesProvider(addressesProvider),
             inputParams[i].rates[0],
             inputParams[i].rates[1],
             inputParams[i].rates[2],

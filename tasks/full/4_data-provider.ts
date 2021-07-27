@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { deployAaveProtocolDataProvider } from '../../helpers/contracts-deployments';
 import { exit } from 'process';
-import { getLendingPoolAddressesProvider } from '../../helpers/contracts-getters';
+import { getPoolAddressesProvider } from '../../helpers/contracts-getters';
 
 task('full:data-provider', 'Initialize lending pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
@@ -9,7 +9,7 @@ task('full:data-provider', 'Initialize lending pool configuration.')
     try {
       await localBRE.run('set-DRE');
 
-      const addressesProvider = await getLendingPoolAddressesProvider();
+      const addressesProvider = await getPoolAddressesProvider();
 
       await deployAaveProtocolDataProvider(addressesProvider.address, verify);
     } catch (err) {

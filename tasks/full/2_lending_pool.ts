@@ -9,7 +9,7 @@ import {
 import { eContractid, eNetwork } from '../../helpers/types';
 import { notFalsyOrZeroAddress, waitForTx } from '../../helpers/misc-utils';
 import {
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getLendingPool,
   getLendingPoolConfiguratorProxy,
 } from '../../helpers/contracts-getters';
@@ -24,7 +24,7 @@ task('full:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
       await DRE.run('set-DRE');
       const network = <eNetwork>DRE.network.name;
       const poolConfig = loadPoolConfig(pool);
-      const addressesProvider = await getLendingPoolAddressesProvider();
+      const addressesProvider = await getPoolAddressesProvider();
 
       const { LendingPool, LendingPoolConfigurator } = poolConfig;
 

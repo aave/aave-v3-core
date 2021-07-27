@@ -15,7 +15,7 @@ import { getAllAggregatorsAddresses, getAllTokenAddresses } from '../../helpers/
 import { ConfigNames, loadPoolConfig, getWethAddress } from '../../helpers/configuration';
 import {
   getAllMockedTokens,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
 import { ethers } from 'ethers';
@@ -41,7 +41,7 @@ task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')
       prev[curr as keyof iAssetBase<string>] = mockTokens[curr].address;
       return prev;
     }, defaultTokenList);
-    const addressesProvider = await getLendingPoolAddressesProvider();
+    const addressesProvider = await getPoolAddressesProvider();
     const admin = await addressesProvider.getPoolAdmin();
 
     const fallbackOracle = await deployPriceOracle(verify);

@@ -8,7 +8,7 @@ import {
 import { eContractid } from '../../helpers/types';
 import { waitForTx } from '../../helpers/misc-utils';
 import {
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getLendingPool,
   getLendingPoolConfiguratorProxy,
 } from '../../helpers/contracts-getters';
@@ -19,7 +19,7 @@ task('dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
 
-    const addressesProvider = await getLendingPoolAddressesProvider();
+    const addressesProvider = await getPoolAddressesProvider();
 
     const lendingPoolImpl = await deployLendingPool(verify);
 

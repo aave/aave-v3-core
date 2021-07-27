@@ -24,7 +24,7 @@ import {
   DefaultReserveInterestRateStrategyFactory,
   DelegationAwareATokenFactory,
   InitializableAdminUpgradeabilityProxyFactory,
-  LendingPoolAddressesProviderFactory,
+  PoolAddressesProviderFactory,
   LendingPoolAddressesProviderRegistryFactory,
   LendingPoolCollateralManagerFactory,
   LendingPoolConfiguratorFactory,
@@ -85,10 +85,10 @@ const readArtifact = async (id: string) => {
   return (DRE as HardhatRuntimeEnvironment).artifacts.readArtifact(id);
 };
 
-export const deployLendingPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
+export const deployPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingPoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
-    eContractid.LendingPoolAddressesProvider,
+    await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
+    eContractid.PoolAddressesProvider,
     [marketId],
     verify
   );

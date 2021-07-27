@@ -11,7 +11,7 @@ import {
   getAToken,
   getFirstSigner,
   getInterestRateStrategy,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getProxy,
   getStableDebtToken,
   getVariableDebtToken,
@@ -29,7 +29,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
     const { ReserveAssets, ReservesConfig } = poolConfig as ICommonConfiguration;
     const treasuryAddress = await getTreasuryAddress(poolConfig);
 
-    const addressesProvider = await getLendingPoolAddressesProvider();
+    const addressesProvider = await getPoolAddressesProvider();
     const lendingPoolProxy = LendingPoolFactory.connect(
       await addressesProvider.getLendingPool(),
       await getFirstSigner()

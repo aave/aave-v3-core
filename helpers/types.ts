@@ -42,7 +42,7 @@ export enum AavePools {
 
 export enum eContractid {
   Example = 'Example',
-  LendingPoolAddressesProvider = 'LendingPoolAddressesProvider',
+  PoolAddressesProvider = 'PoolAddressesProvider',
   MintableERC20 = 'MintableERC20',
   MintableDelegationERC20 = 'MintableDelegationERC20',
   LendingPoolAddressesProviderRegistry = 'LendingPoolAddressesProviderRegistry',
