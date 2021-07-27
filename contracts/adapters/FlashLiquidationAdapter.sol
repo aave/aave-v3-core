@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import {BaseUniswapAdapter} from './BaseUniswapAdapter.sol';
@@ -11,6 +11,7 @@ import {Helpers} from '../protocol/libraries/helpers/Helpers.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '../interfaces/IAToken.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
+import {SafeMath} from '../dependencies/openzeppelin/contracts/SafeMath.sol';
 
 /**
  * @title UniswapLiquiditySwapAdapter
@@ -19,6 +20,8 @@ import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveC
  **/
 contract FlashLiquidationAdapter is BaseUniswapAdapter {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+  using SafeMath for uint256;
+
   uint256 internal constant LIQUIDATION_CLOSE_FACTOR_PERCENT = 5000;
 
   struct LiquidationParams {

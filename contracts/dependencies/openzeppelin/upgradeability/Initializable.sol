@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity >=0.4.24 <0.7.0;
+pragma solidity 0.7.6;
 
 /**
  * @title Initializable

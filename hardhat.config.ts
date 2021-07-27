@@ -22,6 +22,7 @@ import 'hardhat-typechain';
 import '@tenderly/hardhat-tenderly';
 import 'solidity-coverage';
 import { fork } from 'child_process';
+import 'hardhat-contract-sizer';
 
 const SKIP_LOAD = process.env.SKIP_LOAD === 'true';
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
@@ -65,8 +66,16 @@ const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
 let forkMode;
 
 const buidlerConfig: HardhatUserConfig = {
+  gasReporter: {
+    enabled: false,
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: false,
+    disambiguatePaths: false,
+  },
   solidity: {
-    version: '0.6.12',
+    version: '0.7.6',
     settings: {
       optimizer: { enabled: true, runs: 200 },
       evmVersion: 'istanbul',
@@ -112,6 +121,7 @@ const buidlerConfig: HardhatUserConfig = {
         balance,
       })),
       forking: buildForkConfig(),
+      allowUnlimitedContractSize: true,
     },
     buidlerevm_docker: {
       hardfork: 'berlin',

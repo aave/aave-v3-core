@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import {ILendingPoolAddressesProvider} from './ILendingPoolAddressesProvider.sol';
@@ -510,7 +510,7 @@ interface ILendingPool {
   function paused() external view returns (bool);
 
   /**
-   * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium. 
+   * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium.
    * Only callable by the LendingPoolConfigurator contract
    * @param flashBorrower address of the flash borrower
    * @param authorized `true` to authorize, `false` to unauthorize

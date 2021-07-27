@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
@@ -96,10 +96,7 @@ contract AaveProtocolDataProvider {
   function getReserveCaps(address asset)
     external
     view
-    returns (
-      uint256 borrowCap,
-      uint256 supplyCap
-    )
+    returns (uint256 borrowCap, uint256 supplyCap)
   {
     (borrowCap, supplyCap) = ILendingPool(ADDRESSES_PROVIDER.getLendingPool())
       .getConfiguration(asset)

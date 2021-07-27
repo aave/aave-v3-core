@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 
 pragma experimental ABIEncoderV2;
 
@@ -20,6 +20,8 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {LendingPoolStorage} from './LendingPoolStorage.sol';
+import {UserConfiguration} from '../libraries/configuration/UserConfiguration.sol';
+import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 
 /**
  * @title LendingPoolCollateralManager contract
@@ -38,6 +40,9 @@ contract LendingPoolCollateralManager is
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using ReserveLogic for DataTypes.ReserveCache;
+  using ReserveLogic for DataTypes.ReserveData;
+  using UserConfiguration for DataTypes.UserConfigurationMap;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   uint256 internal constant LIQUIDATION_CLOSE_FACTOR_PERCENT = 5000;
 
@@ -96,9 +101,8 @@ contract LendingPoolCollateralManager is
 
     LiquidationCallLocalVars memory vars;
 
-
     (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(user, debtReserve);
-    vars.oracle =  IPriceOracleGetter(_addressesProvider.getPriceOracle());
+    vars.oracle = IPriceOracleGetter(_addressesProvider.getPriceOracle());
 
     (vars.errorCode, vars.errorMsg) = ValidationLogic.validateLiquidationCall(
       collateralReserve,

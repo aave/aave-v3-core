@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -15,7 +15,7 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
   ILendingPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
   ILendingPool public immutable override LENDING_POOL;
 
-  constructor(ILendingPoolAddressesProvider provider) public {
+  constructor(ILendingPoolAddressesProvider provider) {
     ADDRESSES_PROVIDER = provider;
     LENDING_POOL = ILendingPool(provider.getLendingPool());
   }

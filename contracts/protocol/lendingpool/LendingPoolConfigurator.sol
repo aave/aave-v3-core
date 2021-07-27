@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 pragma experimental ABIEncoderV2;
 
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
@@ -471,7 +471,8 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     address[] memory reserves = _pool.getReservesList();
 
     for (uint256 i = 0; i < reserves.length; i++) {
-      if (reserves[i] != address(0)) { //might happen is a reserve was dropped
+      if (reserves[i] != address(0)) {
+        //might happen is a reserve was dropped
         setReservePause(reserves[i], paused);
       }
     }

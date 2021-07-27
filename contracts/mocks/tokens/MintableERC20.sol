@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.7.6;
 
 import {ERC20} from '../../dependencies/openzeppelin/contracts/ERC20.sol';
+import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 
 /**
  * @title ERC20Mintable
  * @dev ERC20 minting logic
  */
 contract MintableERC20 is ERC20 {
+  using SafeMath for uint256;
 
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
@@ -24,7 +26,6 @@ contract MintableERC20 is ERC20 {
     string memory symbol,
     uint8 decimals
   ) public ERC20(name, symbol) {
-
     uint256 chainId;
 
     assembly {
