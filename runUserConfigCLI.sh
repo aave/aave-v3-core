@@ -1,0 +1,1 @@
+certoraRun specs/harness/UserConfigurationHarness.sol  --solc solc6.12 --solc_args '--optimize' --verify UserConfigurationHarness:specs/UserConfiguration.spec --solc_args '--optimize' --settings -useBitVectorTheory --cloud

@@ -1,0 +1,730 @@
+{
+  "title": "LendingPool: Borrow/repay (stable rate)",
+  "description": "Test cases for the borrow function, stable mode.",
+  "stories": [
+    {
+      "description": "User 0 deposits 1000 DAI, user 1 deposits 1 WETH as collateral and tries to borrow 100 DAI at stable rate (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "stable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "revert"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to borrow the rest of the DAI liquidity (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "900",
+            "borrowRateMode": "stable",
+            "user": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "12"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to borrow 100 DAI at variable",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to borrow the rest of the DAI liquidity at stable (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "900",
+            "borrowRateMode": "stable",
+            "user": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "12"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays half of the DAI borrow at stable after one year (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "description": "Mint 10 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "10",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "50",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays half of the variable DAI borrow after one year",
+      "actions": [
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "50",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays the rest of the DAI borrow at stable after one year (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "description": "Mint 15 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "15",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays the rest of the DAI borrow after one year at variable",
+      "actions": [
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 withdraws the deposited DAI plus interest",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 deposits 1000 DAI, user 2 tries to borrow 1000 DAI at a stable rate without any collateral (revert expected) User 1 withdrawws",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "borrowRateMode": "stable",
+            "user": "2"
+          },
+          "expected": "revert",
+          "revertMessage": "The collateral balance is 0"
+        },
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1000 DAI, user 1,2,3,4 deposit 1 WETH each and borrow 100 DAI at stable rate (revert expected) user 0 withdraws",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "stable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "stable",
+            "user": "2",
+            "timeTravel": "365"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "stable",
+            "user": "3",
+            "timeTravel": "365"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "4"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "4"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "4"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "stable",
+            "user": "4",
+            "timeTravel": "365"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "mint",
+          "description": "Mint 15 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "15",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "mint",
+          "description": "Mint 20 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "20",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "2",
+            "onBehalfOf": "2",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "mint",
+          "description": "Mint 30 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "30",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "3",
+            "onBehalfOf": "3",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "mint",
+          "description": "Mint 30 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "30",
+            "user": "4"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "4"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "4",
+            "onBehalfOf": "4",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1000 DAI, user 1 deposits 2 WETH and borrow 100 DAI at stable rate first (revert expected), then 100 DAI at variable rate twice, repays everything. User 0 withdraws",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "2",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "2",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "stable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "description": "Mint 50 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "50",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    }
+  ]
+}

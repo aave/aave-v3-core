@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "dist",
+    "noImplicitAny": false,
+    "resolveJsonModule": true
+  },
+  "include": ["./scripts", "./test", "./tasks", "./helpers", "test-suites/test-aave/uniswapAdapters.repay.spec.ts", "test-suites/test-aave/upgradeability.spec.ts", "test-suites/test-aave/variable-debt-token.spec.ts", "test-suites/test-aave/weth-gateway.spec.ts"],
+  "files": [
+    "./hardhat.config.ts",
+    "./modules/tenderly/tenderly.d.ts",
+    "node_modules/@nomiclabs/buidler-ethers/src/type-extensions.d.ts",
+    "node_modules/buidler-typechain/src/type-extensions.d.ts",
+    "node_modules/@nomiclabs/buidler-waffle/src/type-extensions.d.ts",
+    "node_modules/@nomiclabs/buidler-etherscan/src/type-extensions.d.ts"
+  ]
+}

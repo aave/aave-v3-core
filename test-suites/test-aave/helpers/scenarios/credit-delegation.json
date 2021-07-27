@@ -1,0 +1,157 @@
+{
+  "title": "LendingPool: credit delegation",
+  "description": "Test cases for the credit delegation related functions.",
+  "stories": [
+    {
+      "description": "User 3 deposits 1000 WETH. User 0 deposits 1000 DAI, user 0 delegates borrowing of 1 WETH on variable to user 4, user 4 borrows 1 WETH variable on behalf of user 0",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1000",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1000",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "delegateBorrowAllowance",
+          "args": {
+            "reserve": "WETH",
+            "amount": "2",
+            "user": "0",
+            "borrowRateMode": "variable",
+            "toUser": "4"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "4",
+            "onBehalfOf": "0",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 4 trying to borrow 1 WETH stable on behalf of user 0, revert expected",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "4",
+            "onBehalfOf": "0",
+            "borrowRateMode": "stable"
+          },
+          "expected": "revert",
+          "revertMessage": "59"
+        }
+      ]
+    },
+    {
+      "description": "User 0 delegates borrowing of 1 WETH to user 4, user 4 borrows 3 WETH variable on behalf of user 0, revert expected",
+      "actions": [
+        {
+          "name": "delegateBorrowAllowance",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "0",
+            "borrowRateMode": "variable",
+            "toUser": "4"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "WETH",
+            "amount": "3",
+            "user": "4",
+            "onBehalfOf": "0",
+            "borrowRateMode": "variable"
+          },
+          "expected": "revert",
+          "revertMessage": "59"
+        }
+      ]
+    },
+    {
+      "description": "User 0 delegates borrowing of 1 WETH on stable to user 2, user 2 borrows 1 WETH stable on behalf of user 0",
+      "actions": [
+        {
+          "name": "delegateBorrowAllowance",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "0",
+            "borrowRateMode": "stable",
+            "toUser": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "2",
+            "onBehalfOf": "0",
+            "borrowRateMode": "stable"
+          },
+          "expected": "success"
+        }
+      ]
+    }
+  ]
+}

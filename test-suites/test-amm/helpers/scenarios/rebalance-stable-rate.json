@@ -1,0 +1,198 @@
+{
+  "title": "LendingPool: Rebalance stable rate",
+  "description": "Test cases for the rebalanceStableBorrowRate() function.",
+  "stories": [
+    {
+      "description": "User 0 tries to rebalance user 1 who has no borrows in progress (revert expected)",
+      "actions": [
+        {
+          "name": "rebalanceStableBorrowRate",
+          "args": {
+            "reserve": "USDC",
+            "user": "0",
+            "target": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "User does not have any stable rate loan for this reserve"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1000 USDC, user 1 deposits 7 WETH, borrows 250 USDC at a variable rate, user 0 rebalances user 1 (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "USDC",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "7",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "7",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "250",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "rebalanceStableBorrowRate",
+          "args": {
+            "reserve": "USDC",
+            "user": "0",
+            "target": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "The user borrow is variable and cannot be rebalanced"
+        }
+      ]
+    },
+    {
+      "description": "User 1 borrows another 200 at variable, user 0 tries to rebalance but the conditions are not met (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "200",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "rebalanceStableBorrowRate",
+          "args": {
+            "reserve": "USDC",
+            "user": "0",
+            "target": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "Interest rate rebalance conditions were not met"
+        }
+      ]
+    },
+    {
+      "description": "User 1 borrows another 200 at variable, user 0 tries to rebalance but the conditions are not met (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "200",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "rebalanceStableBorrowRate",
+          "args": {
+            "reserve": "USDC",
+            "user": "0",
+            "target": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "Interest rate rebalance conditions were not met"
+        }
+      ]
+    },
+    {
+      "description": "User 1 borrows another 100 at variable, user 0 tries to rebalance but the conditions are not met (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "280",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "rebalanceStableBorrowRate",
+          "args": {
+            "reserve": "USDC",
+            "user": "0",
+            "target": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "Interest rate rebalance conditions were not met"
+        }
+      ]
+    },
+
+    {
+      "description": "User 1 borrows the remaining USDC (usage ratio = 100%) at variable. User 0 rebalances user 1, fails since there are no stable borrows (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "20",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "rebalanceStableBorrowRate",
+          "args": {
+            "reserve": "USDC",
+            "user": "0",
+            "target": "1"
+          },
+          "expected": "revert"
+        }
+      ]
+    }
+  ]
+}

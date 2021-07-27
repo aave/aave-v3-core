@@ -1,0 +1,945 @@
+{
+  "title": "LendingPool: Borrow/repay (variable rate)",
+  "description": "Test cases for the borrow function, variable mode.",
+  "stories": [
+    {
+      "description": "User 2 deposits 1 DAI to account for rounding errors",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1000 DAI, user 1 deposits 1 WETH as collateral and borrows 100 DAI at variable rate",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to borrow the rest of the DAI liquidity (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "900",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "There is not enough collateral to cover a new borrow"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to repay 0 DAI (revert expected)",
+      "actions": [
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "0",
+            "user": "1",
+            "onBehalfOf": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "Amount must be greater than 0"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays a small amount of DAI, enough to cover a small part of the interest",
+      "actions": [
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1.25",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays the DAI borrow after one year",
+      "actions": [
+        {
+          "name": "mint",
+          "description": "Mint 10 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "10",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 withdraws the deposited DAI plus interest",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 withdraws the collateral",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "user": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 2 deposits a small amount of WETH to account for rounding errors",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0.001",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0.001",
+            "user": "2"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1 WETH, user 1 deposits 100 LINK as collateral and borrows 0.5 WETH at variable rate",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "LINK",
+            "amount": "100",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "LINK",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "LINK",
+            "amount": "100",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0.5",
+            "borrowRateMode": "variable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to repay 0 WETH",
+      "actions": [
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "revert",
+          "revertMessage": "Amount must be greater than 0"
+        }
+      ]
+    },
+    {
+      "description": "User 2 tries to repay everything on behalf of user 1 using uint(-1) (revert expected)",
+      "actions": [
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "user": "2",
+            "borrowRateMode": "variable",
+            "onBehalfOf": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "To repay on behalf of an user an explicit amount to repay is needed"
+        }
+      ]
+    },
+    {
+      "description": "User 3 repays a small amount of WETH on behalf of user 1",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0.2",
+            "user": "3",
+            "borrowRateMode": "variable",
+            "onBehalfOf": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays the WETH borrow after one year",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "borrowRateMode": "variable",
+            "user": "1",
+            "onBehalfOf": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 withdraws the deposited WETH plus interest",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 withdraws the collateral",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "LINK",
+            "amount": "-1",
+            "user": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+
+    {
+      "description": "User 2 deposits 1 USDC to account for rounding errors",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "USDC",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1000 USDC, user 1 deposits 1 WETH as collateral and borrows 100 USDC at variable rate",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "USDC",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to borrow the rest of the USDC liquidity (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "900",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "There is not enough collateral to cover a new borrow"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays the USDC borrow after one year",
+      "actions": [
+        {
+          "name": "mint",
+          "description": "Mint 10 USDC to cover the interest",
+          "args": {
+            "reserve": "USDC",
+            "amount": "10",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "USDC",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "USDC",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 withdraws the deposited USDC plus interest",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "USDC",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 withdraws the collateral",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "user": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 deposits 1000 DAI, user 3 tries to borrow 1000 DAI without any collateral (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "borrowRateMode": "variable",
+            "user": "3"
+          },
+          "expected": "revert",
+          "revertMessage": "The collateral balance is 0"
+        }
+      ]
+    },
+    {
+      "description": "user 3 deposits 0.1 WETH collateral to borrow 100 DAI; 0.1 WETH is not enough to borrow 100 DAI (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0.1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0.1",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "3"
+          },
+          "expected": "revert",
+          "revertMessage": "There is not enough collateral to cover a new borrow"
+        }
+      ]
+    },
+    {
+      "description": "user 3 withdraws the 0.1 WETH",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "user": "3"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 deposits 1000 USDC, user 3 tries to borrow 1000 USDC without any collateral (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "USDC",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "borrowRateMode": "variable",
+            "user": "3"
+          },
+          "expected": "revert",
+          "revertMessage": "The collateral balance is 0"
+        }
+      ]
+    },
+    {
+      "description": "user 3 deposits 0.1 WETH collateral to borrow 100 USDC; 0.1 WETH is not enough to borrow 100 USDC (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "0.1",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "3"
+          },
+          "expected": "revert",
+          "revertMessage": "There is not enough collateral to cover a new borrow"
+        }
+      ]
+    },
+    {
+      "description": "user 3 withdraws the 0.1 WETH",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "user": "3"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1000 DAI, user 6 deposits 2 WETH and borrow 100 DAI at variable rate first, then 100 DAI at stable rate, repays everything. User 0 withdraws",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "2",
+            "user": "6"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "6"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "2",
+            "user": "6"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "6",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "stable",
+            "user": "6",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "description": "Mint 50 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "50",
+            "user": "6"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "6"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "6",
+            "onBehalfOf": "6",
+            "borrowRateMode": "stable"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repay",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "6",
+            "onBehalfOf": "6",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    }
+  ]
+}

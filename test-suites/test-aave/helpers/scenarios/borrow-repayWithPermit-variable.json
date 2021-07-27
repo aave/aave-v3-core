@@ -1,0 +1,191 @@
+{
+  "title": "LendingPool: Borrow/repay with permit with Permit (variable rate)",
+  "description": "Test cases for the borrow function, variable mode.",
+  "stories": [
+    {
+      "description": "User 2 deposits with permit 1 DAI to account for rounding errors",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "depositWithPermit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1",
+            "user": "2"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits with permit 1000 DAI, user 1 deposits 1 WETH as collateral and borrows 100 DAI at variable rate",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "depositWithPermit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "1",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "100",
+            "borrowRateMode": "variable",
+            "user": "1",
+            "timeTravel": "365"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to borrow the rest of the DAI liquidity (revert expected)",
+      "actions": [
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "DAI",
+            "amount": "900",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "There is not enough collateral to cover a new borrow"
+        }
+      ]
+    },
+    {
+      "description": "User 1 tries to repay with permit 0 DAI (revert expected)",
+      "actions": [
+        {
+          "name": "repayWithPermit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "0",
+            "user": "1",
+            "onBehalfOf": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "Amount must be greater than 0"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays with permit a small amount of DAI, enough to cover a small part of the interest",
+      "actions": [
+        {
+          "name": "repayWithPermit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1.25",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 repays with permit the DAI borrow after one year",
+      "actions": [
+        {
+          "name": "mint",
+          "description": "Mint 10 DAI to cover the interest",
+          "args": {
+            "reserve": "DAI",
+            "amount": "10",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "repayWithPermit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "1",
+            "onBehalfOf": "1",
+            "borrowRateMode": "variable"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 withdraws the deposited DAI plus interest",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "-1",
+            "user": "0"
+          },
+          "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 1 withdraws the collateral",
+      "actions": [
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "WETH",
+            "amount": "-1",
+            "user": "1"
+          },
+          "expected": "success"
+        }
+      ]
+    }
+  ]
+}

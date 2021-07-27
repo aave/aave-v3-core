@@ -1,0 +1,92 @@
+stages:
+  - checks
+  - prepare
+  - publish
+
+variables:
+  IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+
+lint:
+  stage: checks
+  tags:
+    - aave-build-runner
+  before_script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml build
+  script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml run contracts-env npm run prettier:check
+  after_script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml run contracts-env npm run ci:clean
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml down
+
+test:
+  stage: checks
+  tags:
+    - aave-build-runner
+  before_script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml build
+  script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml run contracts-env npm run ci:test
+  after_script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml run contracts-env npm run ci:clean
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml down
+  only:
+    - master
+    - merge_requests
+deploy-mainnet-fork:
+  tags:
+    - aave-build-runner
+  stage: checks
+  before_script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml build
+  script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml run contracts-env npm run aave:fork:main
+  after_script:
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml run contracts-env npm run ci:clean
+    - docker-compose -p ${CI_JOB_ID} -f docker-compose.test.yml down
+  only:
+    - master
+    - merge_requests
+
+certora-test:
+  stage: checks
+  image: python:latest
+  before_script:
+    - apt-get update || apt-get update
+    - apt-get install -y software-properties-common
+    - pip3 install certora-cli
+    - wget https://github.com/ethereum/solidity/releases/download/v0.6.12/solc-static-linux
+    - chmod +x solc-static-linux
+    - mv solc-static-linux /usr/bin/solc
+    - export PATH=$PATH:/usr/bin/solc/solc-static-linux
+  script:
+    - certoraRun specs/harness/StableDebtTokenHarness.sol:StableDebtTokenHarness --solc_args "['--optimize']" --verify StableDebtTokenHarness:specs/StableDebtToken.spec --settings -assumeUnwindCond,-b=4 --cache StableDebtToken --cloud
+    - certoraRun specs/harness/UserConfigurationHarness.sol --verify UserConfigurationHarness:specs/UserConfiguration.spec --solc_args "['--optimize']" --settings -useBitVectorTheory --cache UserConfiguration --cloud
+    - certoraRun contracts/protocol/tokenization/VariableDebtToken.sol:VariableDebtToken specs/harness/LendingPoolHarnessForVariableDebtToken.sol --solc_args "['--optimize']" --link VariableDebtToken:POOL=LendingPoolHarnessForVariableDebtToken --verify VariableDebtToken:specs/VariableDebtToken.spec --settings -assumeUnwindCond,-useNonLinearArithmetic,-b=4 --cache VariableDebtToken --cloud
+  only:
+    - master
+    - merge_requests
+
+prepare:
+  stage: prepare
+  tags:
+    - docker-builder
+  script:
+    - docker build -t ${IMAGE} .
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker push ${IMAGE}
+  only:
+    - master
+
+publish:
+  image: ${IMAGE}
+  tags:
+    - docker
+  stage: publish
+  script:
+    - npm ci
+    - echo //registry.npmjs.org/:_authToken=${NPM_V2_PACKAGES_TOKEN} > .npmrc
+    - npm run compile
+    - ${VERSION}
+    - npm publish --access public
+  only:
+    - master

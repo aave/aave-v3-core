@@ -1,0 +1,9 @@
+version: '3.5'
+services:
+  contracts-env:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile_test
+    environment:
+      - MNEMONIC
+      - ALCHEMY_KEY
