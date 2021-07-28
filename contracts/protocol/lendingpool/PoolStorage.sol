@@ -7,7 +7,7 @@ import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 
-contract LendingPoolStorage {
+contract PoolStorage {
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
