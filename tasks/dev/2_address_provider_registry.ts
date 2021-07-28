@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import {
   deployPoolAddressesProvider,
-  deployLendingPoolAddressesProviderRegistry,
+  deployPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-deployments';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { waitForTx } from '../../helpers/misc-utils';
@@ -21,7 +21,7 @@ task(
     await waitForTx(await addressesProvider.setPoolAdmin(admin));
     await waitForTx(await addressesProvider.setEmergencyAdmin(admin));
 
-    const addressesProviderRegistry = await deployLendingPoolAddressesProviderRegistry(verify);
+    const addressesProviderRegistry = await deployPoolAddressesProviderRegistry(verify);
     await waitForTx(
       await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
     );

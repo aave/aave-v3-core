@@ -7,7 +7,7 @@ import {
   GenericLogicFactory,
   InitializableAdminUpgradeabilityProxyFactory,
   PoolAddressesProviderFactory,
-  LendingPoolAddressesProviderRegistryFactory,
+  PoolAddressesProviderRegistryFactory,
   LendingPoolCollateralManagerFactory,
   LendingPoolConfiguratorFactory,
   LendingPoolFactory,
@@ -193,13 +193,13 @@ export const getPairsTokenAggregator = (
   return [mappedPairs, mappedAggregators];
 };
 
-export const getLendingPoolAddressesProviderRegistry = async (address?: tEthereumAddress) =>
-  await LendingPoolAddressesProviderRegistryFactory.connect(
+export const getPoolAddressesProviderRegistry = async (address?: tEthereumAddress) =>
+  await PoolAddressesProviderRegistryFactory.connect(
     notFalsyOrZeroAddress(address)
       ? address
       : (
           await getDb()
-            .get(`${eContractid.LendingPoolAddressesProviderRegistry}.${DRE.network.name}`)
+            .get(`${eContractid.PoolAddressesProviderRegistry}.${DRE.network.name}`)
             .value()
         ).address,
     await getFirstSigner()
