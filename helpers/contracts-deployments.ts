@@ -27,7 +27,7 @@ import {
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
   LendingPoolCollateralManagerFactory,
-  LendingPoolConfiguratorFactory,
+  PoolConfiguratorFactory,
   LendingPoolFactory,
   LendingRateOracleFactory,
   MintableDelegationERC20Factory,
@@ -101,17 +101,17 @@ export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
     verify
   );
 
-export const deployLendingPoolConfigurator = async (verify?: boolean) => {
-  const lendingPoolConfiguratorImpl = await new LendingPoolConfiguratorFactory(
+export const deployPoolConfigurator = async (verify?: boolean) => {
+  const poolConfiguratorImpl = await new PoolConfiguratorFactory(
     await getFirstSigner()
   ).deploy();
   await insertContractAddressInDb(
-    eContractid.LendingPoolConfiguratorImpl,
-    lendingPoolConfiguratorImpl.address
+    eContractid.PoolConfiguratorImpl,
+    poolConfiguratorImpl.address
   );
   return withSaveAndVerify(
-    lendingPoolConfiguratorImpl,
-    eContractid.LendingPoolConfigurator,
+    poolConfiguratorImpl,
+    eContractid.PoolConfigurator,
     [],
     verify
   );

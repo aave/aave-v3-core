@@ -10,7 +10,7 @@ import {
   deployPoolAddressesProvider,
   deployMintableERC20,
   deployPoolAddressesProviderRegistry,
-  deployLendingPoolConfigurator,
+  deployPoolConfigurator,
   deployLendingPool,
   deployPriceOracle,
   deployAaveOracle,
@@ -51,7 +51,7 @@ import AmmConfig from '../../markets/amm';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getLendingPool,
-  getLendingPoolConfiguratorProxy,
+  getPoolConfiguratorProxy,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
@@ -120,16 +120,16 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
 
-  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator();
+  const poolConfiguratorImpl = await deployPoolConfigurator();
   await waitForTx(
-    await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
+    await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImpl.address)
   );
-  const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
+  const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getLendingPoolConfigurator()
   );
   await insertContractAddressInDb(
-    eContractid.LendingPoolConfigurator,
-    lendingPoolConfiguratorProxy.address
+    eContractid.PoolConfigurator,
+    poolConfiguratorProxy.address
   );
 
   // Deploy deployment helpers
@@ -137,7 +137,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await deployATokensAndRatesHelper([
     lendingPoolProxy.address,
     addressesProvider.address,
-    lendingPoolConfiguratorProxy.address,
+    poolConfiguratorProxy.address,
   ]);
 
   const fallbackOracle = await deployPriceOracle();

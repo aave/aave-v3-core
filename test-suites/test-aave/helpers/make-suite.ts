@@ -6,7 +6,7 @@ import {
   getAaveProtocolDataProvider,
   getAToken,
   getMintableERC20,
-  getLendingPoolConfiguratorProxy,
+  getPoolConfiguratorProxy,
   getPriceOracle,
   getPoolAddressesProviderRegistry,
   getWETHMocked,
@@ -22,7 +22,7 @@ import { LendingPool } from '../../../types/LendingPool';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { MintableERC20 } from '../../../types/MintableERC20';
 import { AToken } from '../../../types/AToken';
-import { LendingPoolConfigurator } from '../../../types/LendingPoolConfigurator';
+import { PoolConfigurator } from '../../../types/PoolConfigurator';
 
 import chai from 'chai';
 // @ts-ignore
@@ -58,7 +58,7 @@ export interface TestEnv {
   riskAdmin: SignerWithAddress;
   users: SignerWithAddress[];
   pool: LendingPool;
-  configurator: LendingPoolConfigurator;
+  configurator: PoolConfigurator;
   oracle: PriceOracle;
   helpersContract: AaveProtocolDataProvider;
   weth: WETH9Mocked;
@@ -90,7 +90,7 @@ const testEnv: TestEnv = {
   riskAdmin: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
   pool: {} as LendingPool,
-  configurator: {} as LendingPoolConfigurator,
+  configurator: {} as PoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,
   weth: {} as WETH9Mocked,
@@ -129,7 +129,7 @@ export async function initializeMakeSuite() {
   testEnv.riskAdmin = testEnv.users[2];
   testEnv.pool = await getLendingPool();
 
-  testEnv.configurator = await getLendingPoolConfiguratorProxy();
+  testEnv.configurator = await getPoolConfiguratorProxy();
 
   testEnv.addressesProvider = await getPoolAddressesProvider();
 

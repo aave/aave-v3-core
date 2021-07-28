@@ -104,17 +104,17 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /**
-   * @dev Returns the address of the LendingPoolConfigurator proxy
-   * @return The LendingPoolConfigurator proxy address
+   * @dev Returns the address of the PoolConfigurator proxy
+   * @return The PoolConfigurator proxy address
    **/
   function getLendingPoolConfigurator() external view override returns (address) {
     return getAddress(LENDING_POOL_CONFIGURATOR);
   }
 
   /**
-   * @dev Updates the implementation of the LendingPoolConfigurator, or creates the proxy
+   * @dev Updates the implementation of the PoolConfigurator, or creates the proxy
    * setting the new `configurator` implementation on the first time calling it
-   * @param configurator The new LendingPoolConfigurator implementation
+   * @param configurator The new PoolConfigurator implementation
    **/
   function setLendingPoolConfiguratorImpl(address configurator) external override onlyOwner {
     _updateImpl(LENDING_POOL_CONFIGURATOR, configurator);

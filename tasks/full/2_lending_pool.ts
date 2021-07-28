@@ -3,7 +3,7 @@ import { getParamPerNetwork, insertContractAddressInDb } from '../../helpers/con
 import {
   deployATokensAndRatesHelper,
   deployLendingPool,
-  deployLendingPoolConfigurator,
+  deployPoolConfigurator,
   deployStableAndVariableTokensHelper,
 } from '../../helpers/contracts-deployments';
 import { eContractid, eNetwork } from '../../helpers/types';
@@ -11,7 +11,7 @@ import { notFalsyOrZeroAddress, waitForTx } from '../../helpers/misc-utils';
 import {
   getPoolAddressesProvider,
   getLendingPool,
-  getLendingPoolConfiguratorProxy,
+  getPoolConfiguratorProxy,
 } from '../../helpers/contracts-getters';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { loadPoolConfig, ConfigNames } from '../../helpers/configuration';
@@ -26,7 +26,7 @@ task('full:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
       const poolConfig = loadPoolConfig(pool);
       const addressesProvider = await getPoolAddressesProvider();
 
-      const { LendingPool, LendingPoolConfigurator } = poolConfig;
+      const { LendingPool, PoolConfigurator } = poolConfig;
 
       // Reuse/deploy lending pool implementation
       let lendingPoolImplAddress = getParamPerNetwork(LendingPool, network);
@@ -46,28 +46,28 @@ task('full:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
       await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
 
       // Reuse/deploy lending pool configurator
-      let lendingPoolConfiguratorImplAddress = getParamPerNetwork(LendingPoolConfigurator, network); //await deployLendingPoolConfigurator(verify);
-      if (!notFalsyOrZeroAddress(lendingPoolConfiguratorImplAddress)) {
+      let poolConfiguratorImplAddress = getParamPerNetwork(PoolConfigurator, network); //await deployPoolConfigurator(verify);
+      if (!notFalsyOrZeroAddress(poolConfiguratorImplAddress)) {
         console.log('\tDeploying new configurator implementation...');
-        const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(verify);
-        lendingPoolConfiguratorImplAddress = lendingPoolConfiguratorImpl.address;
+        const poolConfigurator = await deployPoolConfigurator(verify);
+        poolConfiguratorImplAddress = poolConfigurator.address;
       }
       console.log(
         '\tSetting lending pool configurator implementation with address:',
-        lendingPoolConfiguratorImplAddress
+        poolConfiguratorImplAddress
       );
       // Set lending pool conf impl to Address Provider
       await waitForTx(
-        await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImplAddress)
+        await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImplAddress)
       );
 
-      const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
+      const poolConfiguratorProxy = await getPoolConfiguratorProxy(
         await addressesProvider.getLendingPoolConfigurator()
       );
 
       await insertContractAddressInDb(
-        eContractid.LendingPoolConfigurator,
-        lendingPoolConfiguratorProxy.address
+        eContractid.PoolConfigurator,
+        poolConfiguratorProxy.address
       );
       // Deploy deployment helpers
       await deployStableAndVariableTokensHelper(
@@ -75,7 +75,7 @@ task('full:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
         verify
       );
       await deployATokensAndRatesHelper(
-        [lendingPoolProxy.address, addressesProvider.address, lendingPoolConfiguratorProxy.address],
+        [lendingPoolProxy.address, addressesProvider.address, poolConfiguratorProxy.address],
         verify
       );
     } catch (error) {

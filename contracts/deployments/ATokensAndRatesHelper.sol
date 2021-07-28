@@ -6,7 +6,7 @@ import {LendingPool} from '../protocol/lendingpool/LendingPool.sol';
 import {
   PoolAddressesProvider
 } from '../protocol/configuration/PoolAddressesProvider.sol';
-import {LendingPoolConfigurator} from '../protocol/lendingpool/LendingPoolConfigurator.sol';
+import {PoolConfigurator} from '../protocol/lendingpool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
 import {
   DefaultReserveInterestRateStrategy
@@ -67,7 +67,7 @@ contract ATokensAndRatesHelper is Ownable {
   }
 
   function configureReserves(ConfigureReserveInput[] calldata inputParams) external onlyOwner {
-    LendingPoolConfigurator configurator = LendingPoolConfigurator(poolConfigurator);
+    PoolConfigurator configurator = PoolConfigurator(poolConfigurator);
     for (uint256 i = 0; i < inputParams.length; i++) {
       configurator.configureReserveAsCollateral(
         inputParams[i].asset,

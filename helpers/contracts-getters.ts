@@ -9,7 +9,7 @@ import {
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
   LendingPoolCollateralManagerFactory,
-  LendingPoolConfiguratorFactory,
+  PoolConfiguratorFactory,
   LendingPoolFactory,
   LendingRateOracleFactory,
   MintableERC20Factory,
@@ -46,10 +46,10 @@ export const getPoolAddressesProvider = async (address?: tEthereumAddress) => {
     await getFirstSigner()
   );
 };
-export const getLendingPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
-  return await LendingPoolConfiguratorFactory.connect(
+export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
+  return await PoolConfiguratorFactory.connect(
     address ||
-      (await getDb().get(`${eContractid.LendingPoolConfigurator}.${DRE.network.name}`).value())
+      (await getDb().get(`${eContractid.PoolConfigurator}.${DRE.network.name}`).value())
         .address,
     await getFirstSigner()
   );
@@ -290,10 +290,10 @@ export const getLendingPoolImpl = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getLendingPoolConfiguratorImpl = async (address?: tEthereumAddress) =>
-  await LendingPoolConfiguratorFactory.connect(
+export const getPoolConfiguratorImpl = async (address?: tEthereumAddress) =>
+  await PoolConfiguratorFactory.connect(
     address ||
-      (await getDb().get(`${eContractid.LendingPoolConfiguratorImpl}.${DRE.network.name}`).value())
+      (await getDb().get(`${eContractid.PoolConfiguratorImpl}.${DRE.network.name}`).value())
         .address,
     await getFirstSigner()
   );
