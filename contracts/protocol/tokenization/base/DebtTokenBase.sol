@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.6.12;
 
-import {ILendingPool} from '../../../interfaces/ILendingPool.sol';
+import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
 import {
   VersionedInitializable
@@ -141,5 +141,5 @@ abstract contract DebtTokenBase is
 
   function _getUnderlyingAssetAddress() internal view virtual returns (address);
 
-  function _getLendingPool() internal view virtual returns (ILendingPool);
+  function _getLendingPool() internal view virtual returns (IPool);
 }

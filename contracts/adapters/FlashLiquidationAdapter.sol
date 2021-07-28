@@ -119,7 +119,7 @@ contract FlashLiquidationAdapter is BaseUniswapAdapter {
     }
     vars.flashLoanDebt = flashBorrowedAmount.add(premium);
 
-    // Approve LendingPool to use debt token for liquidation
+    // Approve Pool to use debt token for liquidation
     IERC20(borrowedAsset).approve(address(LENDING_POOL), debtToCover);
 
     // Liquidate the user position and release the underlying collateral

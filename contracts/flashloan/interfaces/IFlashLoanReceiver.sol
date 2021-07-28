@@ -2,7 +2,7 @@
 pragma solidity 0.6.12;
 
 import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 
 /**
  * @title IFlashLoanReceiver interface
@@ -21,5 +21,5 @@ interface IFlashLoanReceiver {
 
   function ADDRESSES_PROVIDER() external view returns (ILendingPoolAddressesProvider);
 
-  function LENDING_POOL() external view returns (ILendingPool);
+  function LENDING_POOL() external view returns (IPool);
 }
