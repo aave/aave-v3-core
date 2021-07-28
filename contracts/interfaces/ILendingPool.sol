@@ -388,7 +388,7 @@ interface ILendingPool {
   /**
    * @dev Initializes a reserve, activating it, assigning an aToken and debt tokens and an
    * interest rate strategy
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param aTokenAddress The address of the aToken that will be assigned to the reserve
    * @param stableDebtAddress The address of the StableDebtToken that will be assigned to the reserve
@@ -405,14 +405,14 @@ interface ILendingPool {
 
   /**
    * @dev Drop a reserve
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    **/
   function dropReserve(address asset) external;
 
   /**
    * @dev Updates the address of the interest rate strategy contract
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param rateStrategyAddress The address of the interest rate strategy contract
    **/
@@ -421,7 +421,7 @@ interface ILendingPool {
 
   /**
    * @dev Sets the configuration bitmap of the reserve as a whole
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param configuration The new configuration bitmap
    **/
@@ -499,7 +499,7 @@ interface ILendingPool {
 
   /**
    * @dev Set the _pause state of a reserve
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param val `true` to pause the reserve, `false` to un-pause it
    */
   function setPause(bool val) external;
@@ -511,7 +511,7 @@ interface ILendingPool {
 
   /**
    * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium. 
-   * Only callable by the LendingPoolConfigurator contract
+   * Only callable by the PoolConfigurator contract
    * @param flashBorrower address of the flash borrower
    * @param authorized `true` to authorize, `false` to unauthorize
    */
@@ -529,7 +529,7 @@ interface ILendingPool {
    * flash loan premium consist in 2 parts
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
-   * Only callable by the LendingPoolConfigurator contract
+   * Only callable by the PoolConfigurator contract
    * @param flashLoanPremiumTotal total premium in bps
    * @param flashLoanPremiumToProtocol part of the premium sent to protocol
    */

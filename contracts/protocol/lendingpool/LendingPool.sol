@@ -40,7 +40,7 @@ import {LendingPoolStorage} from './LendingPoolStorage.sol';
  *   # Liquidate positions
  *   # Execute Flash Loans
  * - To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
- * - All admin functions are callable by the LendingPoolConfigurator contract defined also in the
+ * - All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
  * @author Aave
  **/

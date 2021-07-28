@@ -10,7 +10,7 @@ import {
   deployPoolAddressesProvider,
   deployMintableERC20,
   deployPoolAddressesProviderRegistry,
-  deployLendingPoolConfigurator,
+  deployPoolConfigurator,
   deployLendingPool,
   deployPriceOracle,
   deployAaveOracle,
@@ -52,7 +52,7 @@ import AaveConfig from '../../markets/aave';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getLendingPool,
-  getLendingPoolConfiguratorProxy,
+  getPoolConfiguratorProxy,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
@@ -121,17 +121,17 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
 
-  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator();
+  const poolConfiguratorImpl = await deployPoolConfigurator();
   await waitForTx(
-    await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
+    await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImpl.address)
   );
-  const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
+  const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getLendingPoolConfigurator()
   );
-  await waitForTx(await lendingPoolConfiguratorProxy.registerRiskAdmin(addressList[3]));
+  await waitForTx(await poolConfiguratorProxy.registerRiskAdmin(addressList[3]));
   await insertContractAddressInDb(
-    eContractid.LendingPoolConfigurator,
-    lendingPoolConfiguratorProxy.address
+    eContractid.PoolConfigurator,
+    poolConfiguratorProxy.address
   );
 
   // Deploy deployment helpers
@@ -139,7 +139,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await deployATokensAndRatesHelper([
     lendingPoolProxy.address,
     addressesProvider.address,
-    lendingPoolConfiguratorProxy.address,
+    poolConfiguratorProxy.address,
   ]);
 
   const fallbackOracle = await deployPriceOracle();
@@ -267,7 +267,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   );
 
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
-  lendingPoolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
+  poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
 
   const collateralManager = await deployLendingPoolCollateralManager();
   await waitForTx(

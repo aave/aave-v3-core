@@ -18,7 +18,7 @@ import {
 } from '../../helpers/contracts-getters';
 import { getParamPerNetwork, verifyContract } from '../../helpers/contracts-helpers';
 import { eContractid, eNetwork, ICommonConfiguration, IReserveParams } from '../../helpers/types';
-import { LendingPoolConfiguratorFactory, LendingPoolFactory } from '../../types';
+import { PoolConfiguratorFactory, LendingPoolFactory } from '../../types';
 
 task('verify:tokens', 'Deploy oracles for dev enviroment')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
@@ -35,7 +35,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       await getFirstSigner()
     );
 
-    const lendingPoolConfigurator = LendingPoolConfiguratorFactory.connect(
+    const poolConfigurator = PoolConfiguratorFactory.connect(
       await addressesProvider.getLendingPoolConfigurator(),
       await getFirstSigner()
     );
@@ -71,7 +71,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       await verifyContract(
         eContractid.InitializableAdminUpgradeabilityProxy,
         await getProxy(stableDebtTokenAddress),
-        [lendingPoolConfigurator.address]
+        [poolConfigurator.address]
       );
 
       // Proxy Variable Debt
@@ -79,7 +79,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       await verifyContract(
         eContractid.InitializableAdminUpgradeabilityProxy,
         await getProxy(variableDebtTokenAddress),
-        [lendingPoolConfigurator.address]
+        [poolConfigurator.address]
       );
 
       // Proxy aToken
@@ -87,7 +87,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       await verifyContract(
         eContractid.InitializableAdminUpgradeabilityProxy,
         await getProxy(aTokenAddress),
-        [lendingPoolConfigurator.address]
+        [poolConfigurator.address]
       );
 
       // Strategy Rate
