@@ -2,14 +2,14 @@
 pragma solidity 0.6.12;
 
 /**
- * @title LendingPoolAddressesProviderRegistry contract
+ * @title PoolAddressesProviderRegistry contract
  * @dev Main registry of PoolAddressesProvider of multiple Aave protocol's markets
  * - Used for indexing purposes of Aave protocol's markets
  * - The id assigned to a PoolAddressesProvider refers to the market it is connected with,
  *   for example with `0` for the Aave main market and `1` for the next created
  * @author Aave
  **/
-interface ILendingPoolAddressesProviderRegistry {
+interface IPoolAddressesProviderRegistry {
   event AddressesProviderRegistered(address indexed newAddress);
   event AddressesProviderUnregistered(address indexed newAddress);
 

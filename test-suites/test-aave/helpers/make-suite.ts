@@ -8,7 +8,7 @@ import {
   getMintableERC20,
   getLendingPoolConfiguratorProxy,
   getPriceOracle,
-  getLendingPoolAddressesProviderRegistry,
+  getPoolAddressesProviderRegistry,
   getWETHMocked,
   getWETHGateway,
   getUniswapLiquiditySwapAdapter,
@@ -30,7 +30,7 @@ import bignumberChai from 'chai-bignumber';
 import { almostEqual } from './almost-equal';
 import { PriceOracle } from '../../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../../types/PoolAddressesProvider';
-import { LendingPoolAddressesProviderRegistry } from '../../../types/LendingPoolAddressesProviderRegistry';
+import { PoolAddressesProviderRegistry } from '../../../types/PoolAddressesProviderRegistry';
 import { getEthersSigners } from '../../../helpers/contracts-helpers';
 import { UniswapLiquiditySwapAdapter } from '../../../types/UniswapLiquiditySwapAdapter';
 import { UniswapRepayAdapter } from '../../../types/UniswapRepayAdapter';
@@ -73,7 +73,7 @@ export interface TestEnv {
   addressesProvider: PoolAddressesProvider;
   uniswapLiquiditySwapAdapter: UniswapLiquiditySwapAdapter;
   uniswapRepayAdapter: UniswapRepayAdapter;
-  registry: LendingPoolAddressesProviderRegistry;
+  registry: PoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
   flashLiquidationAdapter: FlashLiquidationAdapter;
 }
@@ -106,7 +106,7 @@ const testEnv: TestEnv = {
   uniswapLiquiditySwapAdapter: {} as UniswapLiquiditySwapAdapter,
   uniswapRepayAdapter: {} as UniswapRepayAdapter,
   flashLiquidationAdapter: {} as FlashLiquidationAdapter,
-  registry: {} as LendingPoolAddressesProviderRegistry,
+  registry: {} as PoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
 } as TestEnv;
 
@@ -134,11 +134,11 @@ export async function initializeMakeSuite() {
   testEnv.addressesProvider = await getPoolAddressesProvider();
 
   if (process.env.FORK) {
-    testEnv.registry = await getLendingPoolAddressesProviderRegistry(
+    testEnv.registry = await getPoolAddressesProviderRegistry(
       getParamPerNetwork(AaveConfig.ProviderRegistry, process.env.FORK as eNetwork)
     );
   } else {
-    testEnv.registry = await getLendingPoolAddressesProviderRegistry();
+    testEnv.registry = await getPoolAddressesProviderRegistry();
     testEnv.oracle = await getPriceOracle();
   }
 

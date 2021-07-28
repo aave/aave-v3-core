@@ -6,7 +6,7 @@ import { eNetwork } from '../../helpers/types';
 import {
   getFirstSigner,
   getPoolAddressesProvider,
-  getLendingPoolAddressesProviderRegistry,
+  getPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-getters';
 import { isAddress, parseEther } from 'ethers/lib/utils';
 import { isZeroAddress } from 'ethereumjs-util';
@@ -42,7 +42,7 @@ task('add-market-to-registry', 'Adds address provider to registry')
 
       await DRE.run('full:deploy-address-provider-registry', { verify });
 
-      providerRegistryAddress = (await getLendingPoolAddressesProviderRegistry()).address;
+      providerRegistryAddress = (await getPoolAddressesProviderRegistry()).address;
       providerRegistryOwner = await (await getFirstSigner()).getAddress();
       deployed = true;
     }
@@ -78,7 +78,7 @@ task('add-market-to-registry', 'Adds address provider to registry')
 
     // 1. Address Provider Registry instance
     const addressesProviderRegistry = (
-      await getLendingPoolAddressesProviderRegistry(providerRegistryAddress)
+      await getPoolAddressesProviderRegistry(providerRegistryAddress)
     ).connect(signer);
 
     const addressesProviderInstance = await getPoolAddressesProvider(addressesProvider);

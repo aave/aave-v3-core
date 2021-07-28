@@ -3,7 +3,7 @@ import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 import {
   getAaveProtocolDataProvider,
   getPoolAddressesProvider,
-  getLendingPoolAddressesProviderRegistry,
+  getPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-getters';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { DRE } from '../../helpers/misc-utils';
@@ -22,7 +22,7 @@ task('print-config', 'Inits the DRE, to have access to all the plugins')
 
     const providerRegistryAddress = getParamPerNetwork(poolConfig.ProviderRegistry, network);
 
-    const providerRegistry = await getLendingPoolAddressesProviderRegistry(providerRegistryAddress);
+    const providerRegistry = await getPoolAddressesProviderRegistry(providerRegistryAddress);
 
     const providers = await providerRegistry.getAddressesProvidersList();
 

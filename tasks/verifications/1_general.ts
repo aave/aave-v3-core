@@ -13,7 +13,7 @@ import {
   getAddressById,
   getLendingPool,
   getPoolAddressesProvider,
-  getLendingPoolAddressesProviderRegistry,
+  getPoolAddressesProviderRegistry,
   getLendingPoolCollateralManager,
   getLendingPoolCollateralManagerImpl,
   getLendingPoolConfiguratorImpl,
@@ -49,8 +49,8 @@ task('verify:general', 'Verify contracts at Etherscan')
     const registryAddress = getParamPerNetwork(ProviderRegistry, network);
     const addressesProvider = await getPoolAddressesProvider();
     const addressesProviderRegistry = notFalsyOrZeroAddress(registryAddress)
-      ? await getLendingPoolAddressesProviderRegistry(registryAddress)
-      : await getLendingPoolAddressesProviderRegistry();
+      ? await getPoolAddressesProviderRegistry(registryAddress)
+      : await getPoolAddressesProviderRegistry();
     const lendingPoolAddress = await addressesProvider.getLendingPool();
     const lendingPoolConfiguratorAddress = await addressesProvider.getLendingPoolConfigurator(); //getLendingPoolConfiguratorProxy();
     const lendingPoolCollateralManagerAddress = await addressesProvider.getLendingPoolCollateralManager();
@@ -98,7 +98,7 @@ task('verify:general', 'Verify contracts at Etherscan')
       // Address Provider Registry
       console.log('\n- Verifying address provider registry...\n');
       await verifyContract(
-        eContractid.LendingPoolAddressesProviderRegistry,
+        eContractid.PoolAddressesProviderRegistry,
         addressesProviderRegistry,
         []
       );

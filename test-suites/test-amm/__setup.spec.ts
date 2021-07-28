@@ -9,7 +9,7 @@ import {
 import {
   deployPoolAddressesProvider,
   deployMintableERC20,
-  deployLendingPoolAddressesProviderRegistry,
+  deployPoolAddressesProviderRegistry,
   deployLendingPoolConfigurator,
   deployLendingPool,
   deployPriceOracle,
@@ -106,7 +106,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await waitForTx(await addressesProvider.setEmergencyAdmin(addressList[2]));
 
-  const addressesProviderRegistry = await deployLendingPoolAddressesProviderRegistry();
+  const addressesProviderRegistry = await deployPoolAddressesProviderRegistry();
   await waitForTx(
     await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
   );
