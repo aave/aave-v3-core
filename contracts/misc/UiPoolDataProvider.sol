@@ -17,7 +17,7 @@ import {UserConfiguration} from '../protocol/libraries/configuration/UserConfigu
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 import {
   DefaultReserveInterestRateStrategy
-} from '../protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
 
 contract UiPoolDataProvider is IUiPoolDataProvider {
   using WadRayMath for uint256;
