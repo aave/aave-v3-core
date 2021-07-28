@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: Deposit",
+  "title": "Pool: Deposit",
   "description": "Test cases for the deposit function.",
   "stories": [
     {

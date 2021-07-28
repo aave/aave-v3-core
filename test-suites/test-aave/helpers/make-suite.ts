@@ -18,7 +18,7 @@ import {
   getStableDebtToken,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
-import { LendingPool } from '../../../types/LendingPool';
+import { Pool } from '../../../types/Pool';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { MintableERC20 } from '../../../types/MintableERC20';
 import { AToken } from '../../../types/AToken';
@@ -57,7 +57,7 @@ export interface TestEnv {
   emergencyAdmin: SignerWithAddress;
   riskAdmin: SignerWithAddress;
   users: SignerWithAddress[];
-  pool: LendingPool;
+  pool: Pool;
   configurator: LendingPoolConfigurator;
   oracle: PriceOracle;
   helpersContract: AaveProtocolDataProvider;
@@ -89,7 +89,7 @@ const testEnv: TestEnv = {
   emergencyAdmin: {} as SignerWithAddress,
   riskAdmin: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
-  pool: {} as LendingPool,
+  pool: {} as Pool,
   configurator: {} as LendingPoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,

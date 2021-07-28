@@ -19,10 +19,10 @@
 
 // const expectRevert = require("@openzeppelin/test-helpers").expectRevert
 
-// contract("LendingPool - stable rate economy tests", async ([deployer, ...users]) => {
+// contract("Pool - stable rate economy tests", async ([deployer, ...users]) => {
 //   let _testEnvProvider: ITestEnvWithoutInstances
-//   let _lendingPoolInstance: LendingPoolInstance
-//   let _lendingPoolCoreInstance: LendingPoolCoreInstance
+//   let _poolInstance: LendingPoolInstance
+//   let _poolCoreInstance: LendingPoolCoreInstance
 //   let _aTokenInstances: iATokenBase<ATokenInstance>
 //   let _tokenInstances: iAssetsWithoutETH<MintableERC20Instance>
 
@@ -33,7 +33,7 @@
 
 //   let _web3: Web3
 
-//   before("Initializing LendingPool test variables", async () => {
+//   before("Initializing Pool test variables", async () => {
 //     console.time('setup-test');
 //     _testEnvProvider = await testEnvProviderWithoutInstances(
 //       artifacts,
@@ -56,8 +56,8 @@
 //       getATokenInstances(),
 //       getAllAssetsInstances()
 //     ])
-//     _lendingPoolInstance = instances[0]
-//     _lendingPoolCoreInstance = instances[1]
+//     _poolInstance = instances[0]
+//     _poolCoreInstance = instances[1]
 //     _aTokenInstances = instances[2]
 //     _tokenInstances = instances[3]
 //     _daiAddress = _tokenInstances.DAI.address
@@ -83,36 +83,36 @@
 //     })
 
 //     //approve protocol to access depositor wallet
-//     await daiInstance.approve(_lendingPoolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
+//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
 //       from: _depositorAddress,
 //     })
 
 //     //approve protocol to access borrower wallet
-//     await daiInstance.approve(_lendingPoolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
+//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
 //       from: _borrowerAddress,
 //     })
 
 //     const amountDAItoDeposit = await convertToCurrencyDecimals(_daiAddress, "1000")
 
 //     //user 1 deposits 1000 DAI
-//     const txResult = await _lendingPoolInstance.deposit(_daiAddress, amountDAItoDeposit, "0", {
+//     const txResult = await _poolInstance.deposit(_daiAddress, amountDAItoDeposit, "0", {
 //       from: _depositorAddress,
 //     })
 
 //     //user 2 deposits 1000 DAI, tries to borrow. Needs to be reverted as you can't borrow at a stable rate with the same collateral as the currency.
 //     const amountDAIToDepositBorrower = await convertToCurrencyDecimals(_daiAddress, "1000")
-//     await _lendingPoolInstance.deposit(_daiAddress, amountDAIToDepositBorrower, "0", {
+//     await _poolInstance.deposit(_daiAddress, amountDAIToDepositBorrower, "0", {
 //       from: _borrowerAddress,
 //     })
 
-//     const data: any = await _lendingPoolInstance.getReserveData(_daiAddress)
+//     const data: any = await _poolInstance.getReserveData(_daiAddress)
 
 //     //user 2 tries to borrow
 //     const amountDAIToBorrow = await convertToCurrencyDecimals(_daiAddress, "250")
 
 //     //user 2 tries to borrow
 //     await expectRevert(
-//       _lendingPoolInstance.borrow(_daiAddress, amountDAIToBorrow, RateMode.Stable, "0", {
+//       _poolInstance.borrow(_daiAddress, amountDAIToBorrow, RateMode.Stable, "0", {
 //         from: _borrowerAddress,
 //       }),
 //       "User cannot borrow the selected amount with a stable rate",
@@ -131,18 +131,18 @@
 
 //     //user 2 deposits 5 ETH tries to borrow. needs to be reverted as you can't borrow more than 25% of the available reserve (250 DAI)
 //     const amountETHToDeposit = await convertToCurrencyDecimals(ETHEREUM_ADDRESS, "5")
-//     await _lendingPoolInstance.deposit(ETHEREUM_ADDRESS, amountETHToDeposit, "0", {
+//     await _poolInstance.deposit(ETHEREUM_ADDRESS, amountETHToDeposit, "0", {
 //       from: _borrowerAddress,
 //       value: amountETHToDeposit,
 //     })
 
-//     const data: any = await _lendingPoolInstance.getReserveData(_daiAddress)
+//     const data: any = await _poolInstance.getReserveData(_daiAddress)
 
 //     const amountDAIToBorrow = await convertToCurrencyDecimals(_daiAddress, "500")
 
 //     //user 2 tries to borrow
 //     await expectRevert(
-//       _lendingPoolInstance.borrow(_daiAddress, amountDAIToBorrow, RateMode.Stable, "0", {
+//       _poolInstance.borrow(_daiAddress, amountDAIToBorrow, RateMode.Stable, "0", {
 //         from: _borrowerAddress,
 //       }),
 //       "User is trying to borrow too much liquidity at a stable rate",
@@ -159,18 +159,18 @@
 //     await daiInstance.mint(await convertToCurrencyDecimals(daiInstance.address, "1000"), {
 //       from: user,
 //     })
-//     await daiInstance.approve(_lendingPoolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
+//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
 //       from: user,
 //     })
 
 //     const amountDAIToDeposit = await convertToCurrencyDecimals(daiInstance.address, "1000")
-//     await _lendingPoolInstance.deposit(daiInstance.address, amountDAIToDeposit, "0", {
+//     await _poolInstance.deposit(daiInstance.address, amountDAIToDeposit, "0", {
 //       from: user,
 //     })
 
 //     //user deposits 5 ETH as collateral
 //     const amountETHToDeposit = await convertToCurrencyDecimals(ETHEREUM_ADDRESS, "5")
-//     await _lendingPoolInstance.deposit(ETHEREUM_ADDRESS, amountETHToDeposit, "0", {
+//     await _poolInstance.deposit(ETHEREUM_ADDRESS, amountETHToDeposit, "0", {
 //       from: user,
 //       value: amountETHToDeposit,
 //     })
@@ -184,7 +184,7 @@
 //     })
 
 //     //check the underlying balance is 0
-//     const userData: any = await _lendingPoolInstance.getUserReserveData(daiInstance.address, user)
+//     const userData: any = await _poolInstance.getUserReserveData(daiInstance.address, user)
 
 //     expect(userData.currentATokenBalance.toString()).to.be.equal("0")
 
@@ -192,7 +192,7 @@
 //     const amountDAIToBorrow = await convertToCurrencyDecimals(_daiAddress, "100")
 
 //     //user tries to borrow. No revert expected
-//     await _lendingPoolInstance.borrow(_daiAddress, amountDAIToBorrow, RateMode.Stable, "0", {
+//     await _poolInstance.borrow(_daiAddress, amountDAIToBorrow, RateMode.Stable, "0", {
 //       from: user,
 //     })
 //   })

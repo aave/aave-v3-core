@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: Rebalance stable rate",
+  "title": "Pool: Rebalance stable rate",
   "description": "Test cases for the rebalanceStableBorrowRate() function.",
   "stories": [
     {

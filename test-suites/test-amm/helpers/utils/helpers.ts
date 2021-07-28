@@ -1,4 +1,4 @@
-import { LendingPool } from '../../../../types/LendingPool';
+import { Pool } from '../../../../types/Pool';
 import { ReserveData, UserReserveData } from './interfaces';
 import {
   getLendingRateOracle,
@@ -73,7 +73,7 @@ export const getReserveData = async (
 };
 
 export const getUserData = async (
-  pool: LendingPool,
+  pool: Pool,
   helper: AaveProtocolDataProvider,
   reserve: string,
   user: tEthereumAddress,

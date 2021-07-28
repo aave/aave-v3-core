@@ -11,7 +11,7 @@ import { getUserData, getReserveData } from './helpers/utils/helpers';
 const chai = require('chai');
 const { expect } = chai;
 
-makeSuite('LendingPool liquidation - liquidator receiving aToken', (testEnv) => {
+makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   const {
     LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD,
     INVALID_HF,
