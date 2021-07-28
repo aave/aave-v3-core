@@ -1,4 +1,4 @@
-pragma solidity 0.7.6;
+pragma solidity 0.8.6;
 
 import {ILendingPool} from '../../interfaces/ILendingPool.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';

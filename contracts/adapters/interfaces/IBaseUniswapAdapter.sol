@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.6;
 
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
 import {IUniswapV2Router02} from '../../interfaces/IUniswapV2Router02.sol';

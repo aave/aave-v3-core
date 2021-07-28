@@ -75,7 +75,7 @@ const buidlerConfig: HardhatUserConfig = {
     disambiguatePaths: false,
   },
   solidity: {
-    version: '0.7.6',
+    version: '0.8.6',
     settings: {
       optimizer: { enabled: true, runs: 200 },
       evmVersion: 'istanbul',

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.7.6;
+pragma solidity 0.8.6;
 
 import {ILendingRateOracle} from '../../interfaces/ILendingRateOracle.sol';
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';

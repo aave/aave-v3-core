@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.6;
 
 import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -85,7 +84,7 @@ library GenericLogic {
     CalculateUserAccountDataVars memory vars;
 
     if (userConfig.isEmpty()) {
-      return (0, 0, 0, 0, uint256(-1), false);
+      return (0, 0, 0, 0, type(uint256).max, false);
     }
     for (vars.i = 0; vars.i < reservesCount; vars.i++) {
       if (!userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
@@ -174,7 +173,7 @@ library GenericLogic {
     uint256 totalDebtInBaseCurrency,
     uint256 liquidationThreshold
   ) internal pure returns (uint256) {
-    if (totalDebtInBaseCurrency == 0) return uint256(-1);
+    if (totalDebtInBaseCurrency == 0) return type(uint256).max;
 
     return
       (totalCollateralInBaseCurrency.percentMul(liquidationThreshold)).wadDiv(

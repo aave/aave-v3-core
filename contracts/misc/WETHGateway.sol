@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.6;
 
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -28,7 +27,7 @@ contract WETHGateway is IWETHGateway, Ownable {
   }
 
   function authorizeLendingPool(address lendingPool) external onlyOwner {
-    WETH.approve(lendingPool, uint256(-1));
+    WETH.approve(lendingPool, type(uint256).max);
   }
 
   /**

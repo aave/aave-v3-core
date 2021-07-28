@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.7.6;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.6;
 
 import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -286,7 +285,7 @@ library ValidationLogic {
     );
 
     require(
-      amountSent != uint256(-1) || msg.sender == onBehalfOf,
+      amountSent != type(uint256).max || msg.sender == onBehalfOf,
       Errors.VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
     );
   }
