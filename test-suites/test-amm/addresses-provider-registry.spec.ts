@@ -61,22 +61,22 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   });
 
   it('Tries to remove a unregistered addressesProvider', async () => {
-    const { LPAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
+    const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
 
     const { users, registry } = testEnv;
 
     await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(
-      LPAPR_PROVIDER_NOT_REGISTERED
+      PAPR_PROVIDER_NOT_REGISTERED
     );
   });
 
   it('Tries to remove a unregistered addressesProvider', async () => {
-    const { LPAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
+    const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
 
     const { users, registry } = testEnv;
 
     await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(
-      LPAPR_PROVIDER_NOT_REGISTERED
+      PAPR_PROVIDER_NOT_REGISTERED
     );
   });
 

@@ -57,7 +57,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
    * @param provider The PoolAddressesProvider address
    **/
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviders[provider] > 0, Errors.LPAPR_PROVIDER_NOT_REGISTERED);
+    require(_addressesProviders[provider] > 0, Errors.PAPR_PROVIDER_NOT_REGISTERED);
     _addressesProviders[provider] = 0;
     emit AddressesProviderUnregistered(provider);
   }
