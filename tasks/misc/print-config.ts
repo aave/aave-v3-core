@@ -30,7 +30,7 @@ task('print-config', 'Inits the DRE, to have access to all the plugins')
 
     console.log('Addresses Providers', providers.join(', '));
     console.log('Market Id: ', await addressesProvider.getMarketId());
-    console.log('LendingPool Proxy:', await addressesProvider.getLendingPool());
+    console.log('Pool Proxy:', await addressesProvider.getLendingPool());
     console.log(
       'Lending Pool Collateral Manager',
       await addressesProvider.getLendingPoolCollateralManager()

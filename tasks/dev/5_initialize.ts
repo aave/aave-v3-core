@@ -27,7 +27,7 @@ import {
 } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
-task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
+task('dev:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .setAction(async ({ verify, pool }, localBRE) => {
@@ -90,11 +90,11 @@ task('dev:initialize-lending-pool', 'Initialize lending pool configuration.')
 
     await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
 
-    const lendingPoolAddress = await addressesProvider.getLendingPool();
+    const poolAddress = await addressesProvider.getLendingPool();
 
     let gateway = getParamPerNetwork(WethGateway, network);
     if (!notFalsyOrZeroAddress(gateway)) {
       gateway = (await getWETHGateway()).address;
     }
-    await authorizeWETHGateway(gateway, lendingPoolAddress);
+    await authorizeWETHGateway(gateway, poolAddress);
   });

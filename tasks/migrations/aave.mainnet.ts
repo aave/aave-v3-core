@@ -21,8 +21,8 @@ task('aave:mainnet', 'Deploy development enviroment')
     console.log('1. Deploy address provider');
     await DRE.run('full:deploy-address-provider', { pool: POOL_NAME, skipRegistry });
 
-    console.log('2. Deploy lending pool');
-    await DRE.run('full:deploy-lending-pool', { pool: POOL_NAME });
+    console.log('2. Deploy pool');
+    await DRE.run('full:deploy-pool', { pool: POOL_NAME });
 
     console.log('3. Deploy oracles');
     await DRE.run('full:deploy-oracles', { pool: POOL_NAME });
@@ -33,8 +33,8 @@ task('aave:mainnet', 'Deploy development enviroment')
     console.log('5. Deploy WETH Gateway');
     await DRE.run('full-deploy-weth-gateway', { pool: POOL_NAME });
 
-    console.log('6. Initialize lending pool');
-    await DRE.run('full:initialize-lending-pool', { pool: POOL_NAME });
+    console.log('6. Initialize pool');
+    await DRE.run('full:initialize-pool', { pool: POOL_NAME });
 
     if (verify) {
       printContracts();

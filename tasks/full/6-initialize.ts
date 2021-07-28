@@ -23,7 +23,7 @@ import {
 } from '../../helpers/contracts-getters';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 
-task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
+task('full:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .setAction(async ({ verify, pool }, localBRE) => {
@@ -102,14 +102,14 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
 
       await deployWalletBalancerProvider(verify);
 
-      const lendingPoolAddress = await addressesProvider.getLendingPool();
+      const poolAddress = await addressesProvider.getLendingPool();
 
       let gateWay = getParamPerNetwork(WethGateway, network);
       if (!notFalsyOrZeroAddress(gateWay)) {
         gateWay = (await getWETHGateway()).address;
       }
       console.log('GATEWAY', gateWay);
-      await authorizeWETHGateway(gateWay, lendingPoolAddress);
+      await authorizeWETHGateway(gateWay, poolAddress);
     } catch (err) {
       console.error(err);
       exit(1);
