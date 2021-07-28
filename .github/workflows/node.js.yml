@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [master,protocol-2.5]
+    branches: [master]
   pull_request:
-    branches: [master,protocol-2.5]
+    branches: [master]
 
 jobs:
   build:
