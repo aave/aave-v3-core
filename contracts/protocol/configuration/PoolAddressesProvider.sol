@@ -7,16 +7,16 @@ import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 // prettier-ignore
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 
 /**
- * @title LendingPoolAddressesProvider contract
+ * @title PoolAddressesProvider contract
  * @dev Main registry of addresses part of or connected to the protocol, including permissioned roles
  * - Acting also as factory of proxies and admin of those, so with right to change its implementations
  * - Owned by the Aave Governance
  * @author Aave
  **/
-contract LendingPoolAddressesProvider is Ownable, ILendingPoolAddressesProvider {
+contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   string private _marketId;
   mapping(bytes32 => address) private _addresses;
 
@@ -41,7 +41,7 @@ contract LendingPoolAddressesProvider is Ownable, ILendingPoolAddressesProvider 
   }
 
   /**
-   * @dev Allows to set the market which this LendingPoolAddressesProvider represents
+   * @dev Allows to set the market which this PoolAddressesProvider represents
    * @param marketId The market id
    */
   function setMarketId(string memory marketId) external override onlyOwner {

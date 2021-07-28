@@ -12,7 +12,7 @@ import {
   getAaveProtocolDataProvider,
   getAddressById,
   getLendingPool,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getLendingPoolAddressesProviderRegistry,
   getLendingPoolCollateralManager,
   getLendingPoolCollateralManagerImpl,
@@ -47,7 +47,7 @@ task('verify:general', 'Verify contracts at Etherscan')
     const treasuryAddress = await getTreasuryAddress(poolConfig);
 
     const registryAddress = getParamPerNetwork(ProviderRegistry, network);
-    const addressesProvider = await getLendingPoolAddressesProvider();
+    const addressesProvider = await getPoolAddressesProvider();
     const addressesProviderRegistry = notFalsyOrZeroAddress(registryAddress)
       ? await getLendingPoolAddressesProviderRegistry(registryAddress)
       : await getLendingPoolAddressesProviderRegistry();
@@ -93,7 +93,7 @@ task('verify:general', 'Verify contracts at Etherscan')
 
       // Address Provider
       console.log('\n- Verifying address provider...\n');
-      await verifyContract(eContractid.LendingPoolAddressesProvider, addressesProvider, [MarketId]);
+      await verifyContract(eContractid.PoolAddressesProvider, addressesProvider, [MarketId]);
 
       // Address Provider Registry
       console.log('\n- Verifying address provider registry...\n');

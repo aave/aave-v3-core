@@ -13,7 +13,7 @@ import {
   getAToken,
   getATokensAndRatesHelper,
   getFirstSigner,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getLendingPoolConfiguratorProxy,
   getStableAndVariableTokensHelper,
 } from './contracts-getters';
@@ -61,7 +61,7 @@ export const initReservesByHelper = async (
   let gasUsage = BigNumber.from('0');
   const stableAndVariableDeployer = await getStableAndVariableTokensHelper();
 
-  const addressProvider = await getLendingPoolAddressesProvider();
+  const addressProvider = await getPoolAddressesProvider();
 
   // CHUNK CONFIGURATION
   const initChunks = 4;
@@ -272,7 +272,7 @@ export const configureReservesByHelper = async (
   helpers: AaveProtocolDataProvider,
   admin: tEthereumAddress
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider();
+  const addressProvider = await getPoolAddressesProvider();
   const atokenAndRatesDeployer = await getATokensAndRatesHelper();
   const tokens: string[] = [];
   const symbols: string[] = [];

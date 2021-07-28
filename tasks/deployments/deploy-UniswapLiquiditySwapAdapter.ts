@@ -8,7 +8,7 @@ import { eContractid } from '../../helpers/types';
 const CONTRACT_NAME = 'UniswapLiquiditySwapAdapter';
 
 task(`deploy-${CONTRACT_NAME}`, `Deploys the ${CONTRACT_NAME} contract`)
-  .addParam('provider', 'Address of the LendingPoolAddressesProvider')
+  .addParam('provider', 'Address of the PoolAddressesProvider')
   .addParam('router', 'Address of the uniswap router')
   .addParam('weth', 'Address of the weth token')
   .addFlag('verify', `Verify ${CONTRACT_NAME} contract via Etherscan API.`)

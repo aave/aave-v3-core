@@ -9,8 +9,8 @@ import { deployLendingPool } from '../../helpers/contracts-deployments';
 
 const { utils } = ethers;
 
-makeSuite('LendingPoolAddressesProvider', (testEnv: TestEnv) => {
-  it('Test the accessibility of the LendingPoolAddressesProvider', async () => {
+makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
+  it('Test the accessibility of the PoolAddressesProvider', async () => {
     const { addressesProvider, users } = testEnv;
     const mockAddress = createRandomAddress();
     const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;

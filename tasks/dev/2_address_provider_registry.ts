@@ -1,6 +1,6 @@
 import { task } from 'hardhat/config';
 import {
-  deployLendingPoolAddressesProvider,
+  deployPoolAddressesProvider,
   deployLendingPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-deployments';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
@@ -17,7 +17,7 @@ task(
 
     const admin = await (await getEthersSigners())[0].getAddress();
 
-    const addressesProvider = await deployLendingPoolAddressesProvider(AaveConfig.MarketId, verify);
+    const addressesProvider = await deployPoolAddressesProvider(AaveConfig.MarketId, verify);
     await waitForTx(await addressesProvider.setPoolAdmin(admin));
     await waitForTx(await addressesProvider.setEmergencyAdmin(admin));
 

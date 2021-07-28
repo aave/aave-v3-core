@@ -2,7 +2,7 @@ import { evmRevert, evmSnapshot, DRE } from '../../../helpers/misc-utils';
 import { Signer } from 'ethers';
 import {
   getLendingPool,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getAaveProtocolDataProvider,
   getAToken,
   getMintableERC20,
@@ -27,7 +27,7 @@ import chai from 'chai';
 import bignumberChai from 'chai-bignumber';
 import { almostEqual } from './almost-equal';
 import { PriceOracle } from '../../../types/PriceOracle';
-import { LendingPoolAddressesProvider } from '../../../types/LendingPoolAddressesProvider';
+import { PoolAddressesProvider } from '../../../types/PoolAddressesProvider';
 import { LendingPoolAddressesProviderRegistry } from '../../../types/LendingPoolAddressesProviderRegistry';
 import { getEthersSigners } from '../../../helpers/contracts-helpers';
 import { UniswapLiquiditySwapAdapter } from '../../../types/UniswapLiquiditySwapAdapter';
@@ -62,7 +62,7 @@ export interface TestEnv {
   aDai: AToken;
   usdc: MintableERC20;
   aave: MintableERC20;
-  addressesProvider: LendingPoolAddressesProvider;
+  addressesProvider: PoolAddressesProvider;
   uniswapLiquiditySwapAdapter: UniswapLiquiditySwapAdapter;
   uniswapRepayAdapter: UniswapRepayAdapter;
   registry: LendingPoolAddressesProviderRegistry;
@@ -88,7 +88,7 @@ const testEnv: TestEnv = {
   aDai: {} as AToken,
   usdc: {} as MintableERC20,
   aave: {} as MintableERC20,
-  addressesProvider: {} as LendingPoolAddressesProvider,
+  addressesProvider: {} as PoolAddressesProvider,
   uniswapLiquiditySwapAdapter: {} as UniswapLiquiditySwapAdapter,
   uniswapRepayAdapter: {} as UniswapRepayAdapter,
   flashLiquidationAdapter: {} as FlashLiquidationAdapter,
@@ -114,7 +114,7 @@ export async function initializeMakeSuite() {
 
   testEnv.configurator = await getLendingPoolConfiguratorProxy();
 
-  testEnv.addressesProvider = await getLendingPoolAddressesProvider();
+  testEnv.addressesProvider = await getPoolAddressesProvider();
 
   if (process.env.FORK) {
     testEnv.registry = await getLendingPoolAddressesProviderRegistry(

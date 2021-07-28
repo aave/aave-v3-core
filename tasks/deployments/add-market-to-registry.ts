@@ -5,7 +5,7 @@ import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 import { eNetwork } from '../../helpers/types';
 import {
   getFirstSigner,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getLendingPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-getters';
 import { isAddress, parseEther } from 'ethers/lib/utils';
@@ -81,7 +81,7 @@ task('add-market-to-registry', 'Adds address provider to registry')
       await getLendingPoolAddressesProviderRegistry(providerRegistryAddress)
     ).connect(signer);
 
-    const addressesProviderInstance = await getLendingPoolAddressesProvider(addressesProvider);
+    const addressesProviderInstance = await getPoolAddressesProvider(addressesProvider);
 
     // 2. Set the provider at the Registry
     await waitForTx(
@@ -91,6 +91,6 @@ task('add-market-to-registry', 'Adds address provider to registry')
       )
     );
     console.log(
-      `Added LendingPoolAddressesProvider with address "${addressesProviderInstance.address}" to registry located at ${addressesProviderRegistry.address}`
+      `Added PoolAddressesProvider with address "${addressesProviderInstance.address}" to registry located at ${addressesProviderRegistry.address}`
     );
   });
