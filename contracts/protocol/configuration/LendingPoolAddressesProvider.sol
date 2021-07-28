@@ -122,10 +122,10 @@ contract LendingPoolAddressesProvider is Ownable, ILendingPoolAddressesProvider 
   }
 
   /**
-   * @dev Returns the address of the LendingPoolCollateralManager. Since the manager is used
+   * @dev Returns the address of the PoolCollateralManager. Since the manager is used
    * through delegateCall within the LendingPool contract, the proxy contract pattern does not work properly hence
    * the addresses are changed directly
-   * @return The address of the LendingPoolCollateralManager
+   * @return The address of the PoolCollateralManager
    **/
 
   function getLendingPoolCollateralManager() external view override returns (address) {
@@ -133,8 +133,8 @@ contract LendingPoolAddressesProvider is Ownable, ILendingPoolAddressesProvider 
   }
 
   /**
-   * @dev Updates the address of the LendingPoolCollateralManager
-   * @param manager The new LendingPoolCollateralManager address
+   * @dev Updates the address of the PoolCollateralManager
+   * @param manager The new PoolCollateralManager address
    **/
   function setLendingPoolCollateralManager(address manager) external override onlyOwner {
     _addresses[LENDING_POOL_COLLATERAL_MANAGER] = manager;

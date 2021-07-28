@@ -14,7 +14,7 @@ import {
   deployLendingPool,
   deployPriceOracle,
   deployAaveOracle,
-  deployLendingPoolCollateralManager,
+  deployPoolCollateralManager,
   deployMockFlashLoanReceiver,
   deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
@@ -269,7 +269,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
   lendingPoolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
 
-  const collateralManager = await deployLendingPoolCollateralManager();
+  const collateralManager = await deployPoolCollateralManager();
   await waitForTx(
     await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
   );
