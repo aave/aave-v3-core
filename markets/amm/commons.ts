@@ -174,7 +174,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.main]: '',
     [eEthereumNetwork.tenderlyMain]: '',
   },
-  LendingPool: {
+  Pool: {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',
