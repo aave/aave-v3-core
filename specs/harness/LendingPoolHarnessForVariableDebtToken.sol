@@ -4,8 +4,8 @@ pragma experimental ABIEncoderV2;
 import {ILendingPool} from '../../contracts/interfaces/ILendingPool.sol';
 import {LendingPool} from '../../contracts/protocol/lendingpool/LendingPool.sol';
 import {
-  ILendingPoolAddressesProvider
-} from '../../contracts/interfaces/ILendingPoolAddressesProvider.sol';
+  IPoolAddressesProvider
+} from '../../contracts/interfaces/IPoolAddressesProvider.sol';
 import {DataTypes} from '../../contracts/protocol/libraries/types/DataTypes.sol';
 
 /*
@@ -197,7 +197,7 @@ contract LendingPoolHarnessForVariableDebtToken is ILendingPool {
     originalPool.finalizeTransfer(asset, from, to, amount, balanceFromAfter, balanceToBefore);
   }
 
-  function getAddressesProvider() external view override returns (ILendingPoolAddressesProvider) {
+  function getAddressesProvider() external view override returns (IPoolAddressesProvider) {
     return originalPool.getAddressesProvider();
   }
 }

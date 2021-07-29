@@ -8,7 +8,7 @@ import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 import {IUniswapV2Router02} from '../interfaces/IUniswapV2Router02.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
@@ -38,7 +38,7 @@ abstract contract BaseUniswapAdapter is FlashLoanReceiverBase, IBaseUniswapAdapt
   IUniswapV2Router02 public immutable override UNISWAP_ROUTER;
 
   constructor(
-    ILendingPoolAddressesProvider addressesProvider,
+    IPoolAddressesProvider addressesProvider,
     IUniswapV2Router02 uniswapRouter,
     address wethAddress
   ) public FlashLoanReceiverBase(addressesProvider) {

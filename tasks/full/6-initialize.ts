@@ -19,7 +19,7 @@ import { initReservesByHelper, configureReservesByHelper } from '../../helpers/i
 import { exit } from 'process';
 import {
   getAaveProtocolDataProvider,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
 } from '../../helpers/contracts-getters';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 
@@ -45,7 +45,7 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
 
       const reserveAssets = await getParamPerNetwork(ReserveAssets, network);
       const incentivesController = await getParamPerNetwork(IncentivesController, network);
-      const addressesProvider = await getLendingPoolAddressesProvider();
+      const addressesProvider = await getPoolAddressesProvider();
 
       const testHelpers = await getAaveProtocolDataProvider();
 

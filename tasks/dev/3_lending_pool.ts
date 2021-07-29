@@ -2,15 +2,15 @@ import { task } from 'hardhat/config';
 import {
   deployATokensAndRatesHelper,
   deployLendingPool,
-  deployLendingPoolConfigurator,
+  deployPoolConfigurator,
   deployStableAndVariableTokensHelper,
 } from '../../helpers/contracts-deployments';
 import { eContractid } from '../../helpers/types';
 import { waitForTx } from '../../helpers/misc-utils';
 import {
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getLendingPool,
-  getLendingPoolConfiguratorProxy,
+  getPoolConfiguratorProxy,
 } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
@@ -19,7 +19,7 @@ task('dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
 
-    const addressesProvider = await getLendingPoolAddressesProvider();
+    const addressesProvider = await getPoolAddressesProvider();
 
     const lendingPoolImpl = await deployLendingPool(verify);
 
@@ -31,19 +31,19 @@ task('dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
 
     await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
 
-    const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator(verify);
+    const poolConfiguratorImpl = await deployPoolConfigurator(verify);
 
     // Set lending pool conf impl to Address Provider
     await waitForTx(
-      await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
+      await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImpl.address)
     );
 
-    const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
+    const poolConfiguratorProxy = await getPoolConfiguratorProxy(
       await addressesProvider.getLendingPoolConfigurator()
     );
     await insertContractAddressInDb(
-      eContractid.LendingPoolConfigurator,
-      lendingPoolConfiguratorProxy.address
+      eContractid.PoolConfigurator,
+      poolConfiguratorProxy.address
     );
 
     // Deploy deployment helpers
@@ -52,7 +52,7 @@ task('dev:deploy-lending-pool', 'Deploy lending pool for dev enviroment')
       verify
     );
     await deployATokensAndRatesHelper(
-      [lendingPoolProxy.address, addressesProvider.address, lendingPoolConfiguratorProxy.address],
+      [lendingPoolProxy.address, addressesProvider.address, poolConfiguratorProxy.address],
       verify
     );
   });
