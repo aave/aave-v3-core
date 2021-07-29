@@ -6,7 +6,7 @@ import { strategyWETH } from '../../markets/amm/reservesConfigs';
 
 const { expect } = require('chai');
 
-makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
+makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   const {
     CALLER_NOT_POOL_ADMIN,
     LPC_RESERVE_LIQUIDITY_NOT_0,

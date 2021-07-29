@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import {Address} from '../dependencies/openzeppelin/contracts/Address.sol';
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {ILendingPool} from '../interfaces/ILendingPool.sol';
 import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
@@ -81,7 +81,7 @@ contract WalletBalanceProvider {
     view
     returns (address[] memory, uint256[] memory)
   {
-    ILendingPool pool = ILendingPool(ILendingPoolAddressesProvider(provider).getLendingPool());
+    ILendingPool pool = ILendingPool(IPoolAddressesProvider(provider).getLendingPool());
 
     address[] memory reserves = pool.getReservesList();
     address[] memory reservesWithEth = new address[](reserves.length + 1);

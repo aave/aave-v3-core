@@ -13,7 +13,7 @@ import {
 } from '../../helpers/configuration';
 import {
   getAaveOracle,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getRateOracle,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
@@ -35,7 +35,7 @@ task('full:deploy-oracles', 'Deploy oracles for dev enviroment')
         ChainlinkAggregator,
       } = poolConfig as ICommonConfiguration;
       const rateOracles = getRateOracles(poolConfig);
-      const addressesProvider = await getLendingPoolAddressesProvider();
+      const addressesProvider = await getPoolAddressesProvider();
       const admin = await getGenesisPoolAdmin(poolConfig);
       const aaveOracleAddress = getParamPerNetwork(poolConfig.AaveOracle, network);
       const rateOracleAddressmockPool = getParamPerNetwork(poolConfig.RateOracle, network);
