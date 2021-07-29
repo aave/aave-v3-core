@@ -1,7 +1,7 @@
 import { formatEther } from 'ethers/lib/utils';
 import { task } from 'hardhat/config';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
-import { deployLendingPoolAddressesProviderRegistry } from '../../helpers/contracts-deployments';
+import { deployPoolAddressesProviderRegistry } from '../../helpers/contracts-deployments';
 import { getFirstSigner } from '../../helpers/contracts-getters';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { notFalsyOrZeroAddress } from '../../helpers/misc-utils';
@@ -24,7 +24,7 @@ task('full:deploy-address-provider-registry', 'Deploy address provider registry'
     if (notFalsyOrZeroAddress(providerRegistryAddress)) {
       console.log('Already deployed Provider Registry Address at', providerRegistryAddress);
     } else {
-      const contract = await deployLendingPoolAddressesProviderRegistry(verify);
+      const contract = await deployPoolAddressesProviderRegistry(verify);
       console.log('Deployed Registry Address:', contract.address);
     }
   });

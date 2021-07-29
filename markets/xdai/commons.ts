@@ -77,7 +77,7 @@ export const CommonsConfig: ICommonConfiguration = {
   ProviderRegistryOwner: {
     [eXDaiNetwork.xdai]: '',
   },
-  LendingPoolConfigurator: {
+  PoolConfigurator: {
     [eXDaiNetwork.xdai]: '0',
   },
   LendingPool: {

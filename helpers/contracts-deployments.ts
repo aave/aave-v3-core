@@ -24,10 +24,10 @@ import {
   DefaultReserveInterestRateStrategyFactory,
   DelegationAwareATokenFactory,
   InitializableAdminUpgradeabilityProxyFactory,
-  LendingPoolAddressesProviderFactory,
-  LendingPoolAddressesProviderRegistryFactory,
+  PoolAddressesProviderFactory,
+  PoolAddressesProviderRegistryFactory,
   LendingPoolCollateralManagerFactory,
-  LendingPoolConfiguratorFactory,
+  PoolConfiguratorFactory,
   LendingPoolFactory,
   LendingRateOracleFactory,
   MintableDelegationERC20Factory,
@@ -85,33 +85,33 @@ const readArtifact = async (id: string) => {
   return (DRE as HardhatRuntimeEnvironment).artifacts.readArtifact(id);
 };
 
-export const deployLendingPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
+export const deployPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingPoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
-    eContractid.LendingPoolAddressesProvider,
+    await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
+    eContractid.PoolAddressesProvider,
     [marketId],
     verify
   );
 
-export const deployLendingPoolAddressesProviderRegistry = async (verify?: boolean) =>
+export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingPoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
-    eContractid.LendingPoolAddressesProviderRegistry,
+    await new PoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
+    eContractid.PoolAddressesProviderRegistry,
     [],
     verify
   );
 
-export const deployLendingPoolConfigurator = async (verify?: boolean) => {
-  const lendingPoolConfiguratorImpl = await new LendingPoolConfiguratorFactory(
+export const deployPoolConfigurator = async (verify?: boolean) => {
+  const poolConfiguratorImpl = await new PoolConfiguratorFactory(
     await getFirstSigner()
   ).deploy();
   await insertContractAddressInDb(
-    eContractid.LendingPoolConfiguratorImpl,
-    lendingPoolConfiguratorImpl.address
+    eContractid.PoolConfiguratorImpl,
+    poolConfiguratorImpl.address
   );
   return withSaveAndVerify(
-    lendingPoolConfiguratorImpl,
-    eContractid.LendingPoolConfigurator,
+    poolConfiguratorImpl,
+    eContractid.PoolConfigurator,
     [],
     verify
   );

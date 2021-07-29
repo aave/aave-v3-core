@@ -42,12 +42,12 @@ export enum AavePools {
 
 export enum eContractid {
   Example = 'Example',
-  LendingPoolAddressesProvider = 'LendingPoolAddressesProvider',
+  PoolAddressesProvider = 'PoolAddressesProvider',
   MintableERC20 = 'MintableERC20',
   MintableDelegationERC20 = 'MintableDelegationERC20',
-  LendingPoolAddressesProviderRegistry = 'LendingPoolAddressesProviderRegistry',
+  PoolAddressesProviderRegistry = 'PoolAddressesProviderRegistry',
   LendingPoolParametersProvider = 'LendingPoolParametersProvider',
-  LendingPoolConfigurator = 'LendingPoolConfigurator',
+  PoolConfigurator = 'PoolConfigurator',
   ValidationLogic = 'ValidationLogic',
   ReserveLogic = 'ReserveLogic',
   GenericLogic = 'GenericLogic',
@@ -81,7 +81,7 @@ export enum eContractid {
   WETHMocked = 'WETHMocked',
   SelfdestructTransferMock = 'SelfdestructTransferMock',
   LendingPoolImpl = 'LendingPoolImpl',
-  LendingPoolConfiguratorImpl = 'LendingPoolConfiguratorImpl',
+  PoolConfiguratorImpl = 'PoolConfiguratorImpl',
   LendingPoolCollateralManagerImpl = 'LendingPoolCollateralManagerImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
   UniswapLiquiditySwapAdapter = 'UniswapLiquiditySwapAdapter',
@@ -95,7 +95,7 @@ export enum eContractid {
  *  - MATH = Math libraries
  *  - AT = aToken or DebtTokens
  *  - LP = LendingPool
- *  - LPAPR = LendingPoolAddressesProviderRegistry
+ *  - PAPR = PoolAddressesProviderRegistry
  *  - LPC = LendingPoolConfiguration
  *  - RL = ReserveLogic
  *  - LPCM = LendingPoolCollateralManager
@@ -145,7 +145,7 @@ export enum ProtocolErrors {
   LPC_INVALID_VARIABLE_DEBT_TOKEN_UNDERLYING_ADDRESS = '39', // 'The liquidity of the reserve needs to be 0'
   LPC_INVALID_ADDRESSES_PROVIDER_ID = '40', // 'The liquidity of the reserve needs to be 0'
   LPC_CALLER_NOT_EMERGENCY_ADMIN = '76', // 'The caller must be the emergencya admin'
-  LPAPR_PROVIDER_NOT_REGISTERED = '41', // 'Provider is not registered'
+  PAPR_PROVIDER_NOT_REGISTERED = '41', // 'Provider is not registered'
   LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '42', // 'Health factor is not below the threshold'
   LPCM_COLLATERAL_CANNOT_BE_LIQUIDATED = '43', // 'The collateral chosen cannot be liquidated'
   LPCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '44', // 'User did not borrow the specified currency'
@@ -489,7 +489,7 @@ export interface ICommonConfiguration {
   ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
   ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
   LendingPoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
-  LendingPoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
+  PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
   LendingPool: iParamsPerNetwork<tEthereumAddress>;
   LendingRateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
   LendingRateOracle: iParamsPerNetwork<tEthereumAddress>;

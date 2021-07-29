@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {ILendingPool} from '../interfaces/ILendingPool.sol';
 import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
@@ -23,9 +23,9 @@ contract AaveProtocolDataProvider {
     address tokenAddress;
   }
 
-  ILendingPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
+  IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
-  constructor(ILendingPoolAddressesProvider addressesProvider) public {
+  constructor(IPoolAddressesProvider addressesProvider) public {
     ADDRESSES_PROVIDER = addressesProvider;
   }
 
