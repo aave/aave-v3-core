@@ -1,6 +1,6 @@
 import { task } from 'hardhat/config';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
-import { deployAaveOracle, deployLendingRateOracle } from '../../helpers/contracts-deployments';
+import { deployAaveOracle, deployRateOracle } from '../../helpers/contracts-deployments';
 import { setInitialMarketRatesInRatesOracleByHelper } from '../../helpers/oracles-helpers';
 import { ICommonConfiguration, eNetwork, SymbolMap } from '../../helpers/types';
 import { waitForTx, notFalsyOrZeroAddress } from '../../helpers/misc-utils';
@@ -9,15 +9,15 @@ import {
   loadPoolConfig,
   getWethAddress,
   getGenesisPoolAdmin,
-  getLendingRateOracles,
+  getRateOracles,
 } from '../../helpers/configuration';
 import {
   getAaveOracle,
   getPoolAddressesProvider,
-  getLendingRateOracle,
+  getRateOracle,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
-import { AaveOracle, LendingRateOracle } from '../../types';
+import { AaveOracle, RateOracle } from '../../types';
 import { ethers } from 'ethers';
 
 task('full:deploy-oracles', 'Deploy oracles for dev enviroment')
@@ -34,11 +34,11 @@ task('full:deploy-oracles', 'Deploy oracles for dev enviroment')
         FallbackOracle,
         ChainlinkAggregator,
       } = poolConfig as ICommonConfiguration;
-      const lendingRateOracles = getLendingRateOracles(poolConfig);
+      const rateOracles = getRateOracles(poolConfig);
       const addressesProvider = await getPoolAddressesProvider();
       const admin = await getGenesisPoolAdmin(poolConfig);
       const aaveOracleAddress = getParamPerNetwork(poolConfig.AaveOracle, network);
-      const lendingRateOracleAddress = getParamPerNetwork(poolConfig.LendingRateOracle, network);
+      const rateOracleAddressmockPool = getParamPerNetwork(poolConfig.RateOracle, network);
       const fallbackOracleAddress = await getParamPerNetwork(FallbackOracle, network);
       const reserveAssets = await getParamPerNetwork(ReserveAssets, network);
       const chainlinkAggregators = await getParamPerNetwork(ChainlinkAggregator, network);
@@ -50,7 +50,7 @@ task('full:deploy-oracles', 'Deploy oracles for dev enviroment')
       const [tokens, aggregators] = getPairsTokenAggregator(tokensToWatch, chainlinkAggregators);
 
       let aaveOracle: AaveOracle;
-      let lendingRateOracle: LendingRateOracle;
+      let rateOracle: RateOracle;
 
       if (notFalsyOrZeroAddress(aaveOracleAddress)) {
         aaveOracle = await await getAaveOracle(aaveOracleAddress);
@@ -68,25 +68,25 @@ task('full:deploy-oracles', 'Deploy oracles for dev enviroment')
         await waitForTx(await aaveOracle.setAssetSources(tokens, aggregators));
       }
 
-      if (notFalsyOrZeroAddress(lendingRateOracleAddress)) {
-        lendingRateOracle = await getLendingRateOracle(lendingRateOracleAddress);
+      if (notFalsyOrZeroAddress(rateOracleAddressmockPool)) {
+        rateOracle = await getRateOracle(rateOracleAddressmockPool);
       } else {
-        lendingRateOracle = await deployLendingRateOracle(verify);
+        rateOracle = await deployRateOracle(verify);
         const { USD, ...tokensAddressesWithoutUsd } = tokensToWatch;
         await setInitialMarketRatesInRatesOracleByHelper(
-          lendingRateOracles,
+          rateOracles,
           tokensAddressesWithoutUsd,
-          lendingRateOracle,
+          rateOracle,
           admin
         );
       }
 
-      console.log('Aave Oracle: %s', lendingRateOracle.address);
-      console.log('Lending Rate Oracle: %s', lendingRateOracle.address);
+      console.log('Aave Oracle: %s', rateOracle.address);
+      console.log('Rate Oracle: %s', rateOracle.address);
 
       // Register the proxy price provider on the addressesProvider
       await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
-      await waitForTx(await addressesProvider.setLendingRateOracle(lendingRateOracle.address));
+      await waitForTx(await addressesProvider.setLendingRateOracle(rateOracle.address));
     } catch (error) {
       if (DRE.network.name.includes('tenderly')) {
         const transactionLink = `https://dashboard.tenderly.co/${DRE.config.tenderly.username}/${
