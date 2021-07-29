@@ -55,7 +55,7 @@ export enum eContractid {
   PriceOracle = 'PriceOracle',
   Proxy = 'Proxy',
   MockAggregator = 'MockAggregator',
-  LendingRateOracle = 'LendingRateOracle',
+  RateOracle = 'RateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
   LendingPoolCollateralManager = 'LendingPoolCollateralManager',
@@ -469,11 +469,11 @@ export interface IMocksConfig {
   AllAssetsInitialPrices: iAssetBase<string>;
 }
 
-export interface ILendingRateOracleRatesCommon {
-  [token: string]: ILendingRate;
+export interface IRateOracleRatesCommon {
+  [token: string]: IRate;
 }
 
-export interface ILendingRate {
+export interface IRate {
   borrowRate: string;
 }
 
@@ -491,8 +491,8 @@ export interface ICommonConfiguration {
   LendingPoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
   LendingPoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
   LendingPool: iParamsPerNetwork<tEthereumAddress>;
-  LendingRateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
-  LendingRateOracle: iParamsPerNetwork<tEthereumAddress>;
+  RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
+  RateOracle: iParamsPerNetwork<tEthereumAddress>;
   TokenDistributor: iParamsPerNetwork<tEthereumAddress>;
   AaveOracle: iParamsPerNetwork<tEthereumAddress>;
   FallbackOracle: iParamsPerNetwork<tEthereumAddress>;

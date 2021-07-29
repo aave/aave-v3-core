@@ -29,7 +29,7 @@ import {
   LendingPoolCollateralManagerFactory,
   LendingPoolConfiguratorFactory,
   LendingPoolFactory,
-  LendingRateOracleFactory,
+  RateOracleFactory,
   MintableDelegationERC20Factory,
   MintableERC20Factory,
   MockAggregatorFactory,
@@ -207,10 +207,10 @@ export const deployPriceOracle = async (verify?: boolean) =>
     verify
   );
 
-export const deployLendingRateOracle = async (verify?: boolean) =>
+export const deployRateOracle = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingRateOracleFactory(await getFirstSigner()).deploy(),
-    eContractid.LendingRateOracle,
+    await new RateOracleFactory(await getFirstSigner()).deploy(),
+    eContractid.RateOracle,
     [],
     verify
   );

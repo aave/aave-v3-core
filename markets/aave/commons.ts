@@ -38,7 +38,7 @@ export const CommonsConfig: ICommonConfiguration = {
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
-  LendingRateOracleRatesCommon: {
+  RateOracleRatesCommon: {
     WETH: {
       borrowRate: oneRay.multipliedBy(0.03).toFixed(),
     },
@@ -144,7 +144,7 @@ export const CommonsConfig: ICommonConfiguration = {
     [eEthereumNetwork.buidlerevm]: '',
     [eEthereumNetwork.tenderlyMain]: '0xB9062896ec3A615a4e4444DF183F0531a77218AE',
   },
-  LendingRateOracle: {
+  RateOracle: {
     [eEthereumNetwork.coverage]: '',
     [eEthereumNetwork.hardhat]: '',
     [eEthereumNetwork.buidlerevm]: '',

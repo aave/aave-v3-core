@@ -11,7 +11,7 @@ import {
   LendingPoolCollateralManagerFactory,
   LendingPoolConfiguratorFactory,
   LendingPoolFactory,
-  LendingRateOracleFactory,
+  RateOracleFactory,
   MintableERC20Factory,
   MockATokenFactory,
   MockFlashLoanReceiverFactory,
@@ -130,10 +130,10 @@ export const getMockFlashLoanReceiver = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getLendingRateOracle = async (address?: tEthereumAddress) =>
-  await LendingRateOracleFactory.connect(
+export const getRateOracle = async (address?: tEthereumAddress) =>
+  await RateOracleFactory.connect(
     address ||
-      (await getDb().get(`${eContractid.LendingRateOracle}.${DRE.network.name}`).value()).address,
+      (await getDb().get(`${eContractid.RateOracle}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
