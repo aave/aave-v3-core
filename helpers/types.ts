@@ -55,10 +55,10 @@ export enum eContractid {
   PriceOracle = 'PriceOracle',
   Proxy = 'Proxy',
   MockAggregator = 'MockAggregator',
-  LendingRateOracle = 'LendingRateOracle',
+  RateOracle = 'RateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
-  LendingPoolCollateralManager = 'LendingPoolCollateralManager',
+  PoolCollateralManager = 'PoolCollateralManager',
   InitializableAdminUpgradeabilityProxy = 'InitializableAdminUpgradeabilityProxy',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   WalletBalanceProvider = 'WalletBalanceProvider',
@@ -82,7 +82,7 @@ export enum eContractid {
   SelfdestructTransferMock = 'SelfdestructTransferMock',
   LendingPoolImpl = 'LendingPoolImpl',
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
-  LendingPoolCollateralManagerImpl = 'LendingPoolCollateralManagerImpl',
+  PoolCollateralManagerImpl = 'PoolCollateralManagerImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
   UniswapLiquiditySwapAdapter = 'UniswapLiquiditySwapAdapter',
   UniswapRepayAdapter = 'UniswapRepayAdapter',
@@ -469,11 +469,11 @@ export interface IMocksConfig {
   AllAssetsInitialPrices: iAssetBase<string>;
 }
 
-export interface ILendingRateOracleRatesCommon {
-  [token: string]: ILendingRate;
+export interface IRateOracleRatesCommon {
+  [token: string]: IRate;
 }
 
-export interface ILendingRate {
+export interface IRate {
   borrowRate: string;
 }
 
@@ -488,11 +488,11 @@ export interface ICommonConfiguration {
   Mocks: IMocksConfig;
   ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
   ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
-  LendingPoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
+  PoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
   PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
   LendingPool: iParamsPerNetwork<tEthereumAddress>;
-  LendingRateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
-  LendingRateOracle: iParamsPerNetwork<tEthereumAddress>;
+  RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
+  RateOracle: iParamsPerNetwork<tEthereumAddress>;
   TokenDistributor: iParamsPerNetwork<tEthereumAddress>;
   AaveOracle: iParamsPerNetwork<tEthereumAddress>;
   FallbackOracle: iParamsPerNetwork<tEthereumAddress>;

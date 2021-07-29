@@ -2,7 +2,7 @@ import { task } from 'hardhat/config';
 import {
   deployPriceOracle,
   deployAaveOracle,
-  deployLendingRateOracle,
+  deployRateOracle,
 } from '../../helpers/contracts-deployments';
 import {
   setInitialAssetPricesInOracle,
@@ -29,7 +29,7 @@ task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')
     const {
       Mocks: { AllAssetsInitialPrices },
       ProtocolGlobalParams: { UsdAddress, MockUsdPriceInWei },
-      LendingRateOracleRatesCommon,
+      RateOracleRatesCommon,
     } = poolConfig as ICommonConfiguration;
 
     const defaultTokenList = {
@@ -70,17 +70,17 @@ task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')
     );
     await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
-    const lendingRateOracle = await deployLendingRateOracle(verify);
-    await waitForTx(await addressesProvider.setLendingRateOracle(lendingRateOracle.address));
+    const rateOracle = await deployRateOracle(verify);
+    await waitForTx(await addressesProvider.setLendingRateOracle(rateOracle.address));
 
     const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
     const allReservesAddresses = {
       ...tokensAddressesWithoutUsd,
     };
     await setInitialMarketRatesInRatesOracleByHelper(
-      LendingRateOracleRatesCommon,
+      RateOracleRatesCommon,
       allReservesAddresses,
-      lendingRateOracle,
+      rateOracle,
       admin
     );
   });

@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import {
-  deployLendingPoolCollateralManager,
+  deployPoolCollateralManager,
   deployWalletBalancerProvider,
   deployWETHGateway,
   authorizeWETHGateway,
@@ -38,7 +38,7 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
         SymbolPrefix,
         ReserveAssets,
         ReservesConfig,
-        LendingPoolCollateralManager,
+        PoolCollateralManager,
         WethGateway,
         IncentivesController,
       } = poolConfig as ICommonConfiguration;
@@ -71,17 +71,17 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       await configureReservesByHelper(ReservesConfig, reserveAssets, testHelpers, admin);
 
       let collateralManagerAddress = await getParamPerNetwork(
-        LendingPoolCollateralManager,
+        PoolCollateralManager,
         network
       );
       if (!notFalsyOrZeroAddress(collateralManagerAddress)) {
-        const collateralManager = await deployLendingPoolCollateralManager(verify);
+        const collateralManager = await deployPoolCollateralManager(verify);
         collateralManagerAddress = collateralManager.address;
       }
       // Seems unnecessary to register the collateral manager in the JSON db
 
       console.log(
-        '\tSetting lending pool collateral manager implementation with address',
+        '\tSetting pool collateral manager implementation with address',
         collateralManagerAddress
       );
       await waitForTx(
