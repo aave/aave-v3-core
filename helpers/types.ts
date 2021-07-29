@@ -46,7 +46,7 @@ export enum eContractid {
   MintableERC20 = 'MintableERC20',
   MintableDelegationERC20 = 'MintableDelegationERC20',
   PoolAddressesProviderRegistry = 'PoolAddressesProviderRegistry',
-  LendingPoolParametersProvider = 'LendingPoolParametersProvider',
+  PoolParametersProvider = 'PoolParametersProvider',
   PoolConfigurator = 'PoolConfigurator',
   ValidationLogic = 'ValidationLogic',
   ReserveLogic = 'ReserveLogic',

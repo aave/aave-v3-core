@@ -1,6 +1,6 @@
 // import {
-//   LendingPoolInstance,
-//   LendingPoolCoreInstance,
+//   PoolInstance,
+//   PoolCoreInstance,
 //   MintableERC20Instance,
 //   ATokenInstance,
 // } from "../utils/typechain-types/truffle-contracts"
@@ -21,8 +21,8 @@
 
 // contract("Pool - stable rate economy tests", async ([deployer, ...users]) => {
 //   let _testEnvProvider: ITestEnvWithoutInstances
-//   let _poolInstance: LendingPoolInstance
-//   let _poolCoreInstance: LendingPoolCoreInstance
+//   let _poolInstance: PoolInstance
+//   let _poolCoreInstance: PoolCoreInstance
 //   let _aTokenInstances: iATokenBase<ATokenInstance>
 //   let _tokenInstances: iAssetsWithoutETH<MintableERC20Instance>
 
