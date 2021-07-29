@@ -67,10 +67,10 @@ The JSON artifacts with the ABI and Bytecode are also included into the bundled 
 Import JSON file via Node JS `require`:
 
 ```
-const LendingPoolV2Artifact = require('@aave/protocol-v2/artifacts/contracts/protocol/pool/Pool.sol/Pool.json');
+const PoolV2Artifact = require('@aave/protocol-v2/artifacts/contracts/protocol/pool/Pool.sol/Pool.json');
 
 // Log the ABI into console
-console.log(LendingPoolV2Artifact.abi)
+console.log(PoolV2Artifact.abi)
 ```
 
 ## Setup

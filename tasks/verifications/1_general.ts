@@ -111,7 +111,7 @@ task('verify:general', 'Verify contracts at Etherscan')
       console.log('\n- Verifying Pool Configurator Implementation...\n');
       await verifyContract(eContractid.PoolConfigurator, poolConfiguratorImpl, []);
 
-      // Lending Pool Collateral Manager implementation
+      // Pool Collateral Manager implementation
       console.log('\n- Verifying Pool Collateral Manager Implementation...\n');
       await verifyContract(
         eContractid.PoolCollateralManager,
@@ -120,17 +120,17 @@ task('verify:general', 'Verify contracts at Etherscan')
       );
 
       // Test helpers
-      console.log('\n- Verifying  Aave  Provider Helpers...\n');
+      console.log('\n- Verifying Aave Provider Helpers...\n');
       await verifyContract(eContractid.AaveProtocolDataProvider, dataProvider, [
         addressesProvider.address,
       ]);
 
       // Wallet balance provider
-      console.log('\n- Verifying  Wallet Balance Provider...\n');
+      console.log('\n- Verifying Wallet Balance Provider...\n');
       await verifyContract(eContractid.WalletBalanceProvider, walletProvider, []);
 
       // WETHGateway
-      console.log('\n- Verifying  WETHGateway...\n');
+      console.log('\n- Verifying WETHGateway...\n');
       await verifyContract(eContractid.WETHGateway, wethGateway, [
         await getWethAddress(poolConfig),
       ]);
@@ -150,7 +150,7 @@ task('verify:general', 'Verify contracts at Etherscan')
     );
 
     // Proxy collateral manager
-    console.log('\n- Verifying  Lending Pool Collateral Manager Proxy...\n');
+    console.log('\n- Verifying Pool Collateral Manager Proxy...\n');
     await verifyContract(
       eContractid.InitializableAdminUpgradeabilityProxy,
       poolCollateralManagerProxy,

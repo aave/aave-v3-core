@@ -1,9 +1,9 @@
 // import {iATokenBase, iAssetsWithoutETH, ITestEnvWithoutInstances, RateMode} from '../utils/types';
 // import {
 //   PoolConfiguratorInstance,
-//   LendingPoolInstance,
+//   PoolInstance,
 //   ATokenInstance,
-//   LendingPoolCoreInstance,
+//   PoolCoreInstance,
 //   MintableERC20Instance,
 // } from '../utils/typechain-types/truffle-contracts';
 // import {testEnvProviderWithoutInstances} from '../utils/truffle/dlp-tests-env';
@@ -15,8 +15,8 @@
 // contract('Pool: Modifiers', async ([deployer, ...users]) => {
 //   let _testEnvProvider: ITestEnvWithoutInstances;
 //   let _poolConfiguratorInstance: PoolConfiguratorInstance;
-//   let _lendingPoolInstance: LendingPoolInstance;
-//   let _lendingPoolCoreInstance: LendingPoolCoreInstance;
+//   let _PoolInstance: PoolInstance;
+//   let _PoolCoreInstance: PoolCoreInstance;
 //   let _aTokenInstances: iATokenBase<ATokenInstance>;
 //   let _tokenInstances: iAssetsWithoutETH<MintableERC20Instance>;
 
