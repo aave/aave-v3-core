@@ -6,7 +6,7 @@ import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRat
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
-import {ILendingRateOracle} from '../../interfaces/ILendingRateOracle.sol';
+import {IRateOracle} from '../../interfaces/IRateOracle.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 
 /**
@@ -190,7 +190,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       ? 0
       : vars.totalDebt.rayDiv(availableLiquidity.add(vars.totalDebt));
 
-    vars.currentStableBorrowRate = ILendingRateOracle(addressesProvider.getLendingRateOracle())
+    vars.currentStableBorrowRate = IRateOracle(addressesProvider.getLendingRateOracle())
       .getMarketBorrowRate(reserve);
 
     if (vars.utilizationRate > OPTIMAL_UTILIZATION_RATE) {
