@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
@@ -28,7 +27,6 @@ import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol'
  */
 library ValidationLogic {
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
@@ -59,11 +57,10 @@ library ValidationLogic {
     require(!isFrozen, Errors.VL_RESERVE_FROZEN);
     require(
       supplyCap == 0 ||
-        IAToken(reserveCache.aTokenAddress)
-          .scaledTotalSupply()
-          .rayMul(reserveCache.nextLiquidityIndex)
-          .add(amount)
-          .div(10**reserveDecimals) <
+        (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
+          reserveCache.nextLiquidityIndex
+        ) + amount) /
+          (10**reserveDecimals) <
         supplyCap,
       Errors.VL_SUPPLY_CAP_EXCEEDED
     );
@@ -169,11 +166,9 @@ library ValidationLogic {
           reserveCache.nextVariableBorrowIndex
         );
 
-        vars.totalDebt = reserveCache.currTotalStableDebt.add(vars.totalSupplyVariableDebt).add(
-          amount
-        );
+        vars.totalDebt = reserveCache.currTotalStableDebt + vars.totalSupplyVariableDebt + amount;
         require(
-          vars.totalDebt.div(10**vars.reserveDecimals) < vars.borrowCap,
+          vars.totalDebt / 10**vars.reserveDecimals < vars.borrowCap,
           Errors.VL_BORROW_CAP_EXCEEDED
         );
       }
@@ -203,12 +198,10 @@ library ValidationLogic {
     );
 
     vars.amountInBaseCurrency = IPriceOracleGetter(oracle).getAssetPrice(asset);
-    vars.amountInBaseCurrency = vars.amountInBaseCurrency.mul(amount).div(10**vars.reserveDecimals);
+    vars.amountInBaseCurrency = (vars.amountInBaseCurrency * amount) / 10**vars.reserveDecimals;
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
-    vars.collateralNeededInBaseCurrency = vars
-      .userDebtInBaseCurrency
-      .add(vars.amountInBaseCurrency)
+    vars.collateralNeededInBaseCurrency = (vars.userDebtInBaseCurrency + vars.amountInBaseCurrency)
       .percentDiv(vars.currentLtv); //LTV is calculated in percentage
 
     require(
@@ -330,7 +323,7 @@ library ValidationLogic {
       require(
         !userConfig.isUsingAsCollateral(reserve.id) ||
           reserveCache.reserveConfiguration.getLtvMemory() == 0 ||
-          stableDebt.add(variableDebt) > IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender),
+          stableDebt + variableDebt > IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender),
         Errors.VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY
       );
     } else {
@@ -362,9 +355,9 @@ library ValidationLogic {
 
     //if the usage ratio is below 95%, no rebalances are needed
     uint256 totalDebt =
-      stableDebtToken.totalSupply().add(variableDebtToken.totalSupply()).wadToRay();
+      (stableDebtToken.totalSupply() + variableDebtToken.totalSupply()).wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
-    uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity.add(totalDebt));
+    uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
     //if the liquidity rate is below REBALANCE_UP_THRESHOLD of the max variable APR at 95% usage,
     //then we allow rebalancing of the stable rate positions.

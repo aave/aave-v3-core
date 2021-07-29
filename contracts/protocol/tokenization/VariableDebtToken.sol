@@ -5,7 +5,6 @@ import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {ILendingPool} from '../../interfaces/ILendingPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
@@ -17,7 +16,6 @@ import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesControl
  **/
 contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
-  using SafeMath for uint256;
 
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
@@ -206,7 +204,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
         )
       );
     require(delegator == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
-    _nonces[delegator] = currentValidNonce.add(1);
+    _nonces[delegator] = currentValidNonce + 1;
     _approveDelegation(delegator, delegatee, value);
   }
 

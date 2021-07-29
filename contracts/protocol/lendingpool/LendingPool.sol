@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
@@ -44,7 +43,6 @@ import {LendingPoolStorage} from './LendingPoolStorage.sol';
  * @author Aave
  **/
 contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage {
-  using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
@@ -380,9 +378,9 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
       vars.currentAsset = assets[vars.i];
       vars.currentAmount = amounts[vars.i];
       vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
-      vars.currentAmountPlusPremium = vars.currentAmount.add(vars.totalPremiums[vars.i]);
+      vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
       vars.currentPremiumToProtocol = amounts[vars.i].percentMul(vars.flashloanPremiumToProtocol);
-      vars.currentPremiumToLP = vars.totalPremiums[vars.i].sub(vars.currentPremiumToProtocol);
+      vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
 
       if (DataTypes.InterestRateMode(modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
         DataTypes.ReserveData storage reserve = _reserves[vars.currentAsset];
@@ -393,9 +391,11 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
           IERC20(vars.currentATokenAddress).totalSupply(),
           vars.currentPremiumToLP
         );
-        reserve.accruedToTreasury = reserve.accruedToTreasury.add(
-          vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex)
-        );
+
+        reserve.accruedToTreasury =
+          reserve.accruedToTreasury +
+          vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex);
+
         reserve.updateInterestRates(
           reserveCache,
           vars.currentAsset,
@@ -631,7 +631,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
             _addressesProvider.getPriceOracle()
           );
         }
-        if (balanceFromBefore.sub(amount) == 0) {
+        if (balanceFromBefore - amount == 0) {
           fromConfig.setUsingAsCollateral(reserveId, false);
           emit ReserveUsedAsCollateralDisabled(asset, from);
         }
@@ -933,7 +933,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage
 
     reserve.updateInterestRates(reserveCache, asset, paybackAmount, 0);
 
-    if (stableDebt.add(variableDebt).sub(paybackAmount) == 0) {
+    if (stableDebt + variableDebt - paybackAmount == 0) {
       _usersConfig[onBehalfOf].setBorrowing(reserve.id, false);
     }
 

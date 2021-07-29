@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -21,7 +20,6 @@ import {DataTypes} from '../types/DataTypes.sol';
  * @notice Implements the logic to update the reserves state
  */
 library ReserveLogic {
-  using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
@@ -129,7 +127,7 @@ library ReserveLogic {
   ) internal {
     uint256 amountToLiquidityRatio = amount.wadToRay().rayDiv(totalLiquidity.wadToRay());
 
-    uint256 result = amountToLiquidityRatio.add(WadRayMath.ray());
+    uint256 result = amountToLiquidityRatio + WadRayMath.RAY;
 
     result = result.rayMul(reserve.liquidityIndex);
     require(result <= type(uint128).max, Errors.RL_LIQUIDITY_INDEX_OVERFLOW);
@@ -152,8 +150,8 @@ library ReserveLogic {
   ) external {
     require(reserve.aTokenAddress == address(0), Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
-    reserve.liquidityIndex = uint128(WadRayMath.ray());
-    reserve.variableBorrowIndex = uint128(WadRayMath.ray());
+    reserve.liquidityIndex = uint128(WadRayMath.RAY);
+    reserve.variableBorrowIndex = uint128(WadRayMath.RAY);
     reserve.aTokenAddress = aTokenAddress;
     reserve.stableDebtTokenAddress = stableDebtTokenAddress;
     reserve.variableDebtTokenAddress = variableDebtTokenAddress;
@@ -270,18 +268,18 @@ library ReserveLogic {
     );
 
     //debt accrued is the sum of the current debt minus the sum of the debt at the last update
-    vars.totalDebtAccrued = vars
-      .currTotalVariableDebt
-      .add(reserveCache.currTotalStableDebt)
-      .sub(vars.prevTotalVariableDebt)
-      .sub(vars.prevTotalStableDebt);
+    vars.totalDebtAccrued =
+      vars.currTotalVariableDebt +
+      reserveCache.currTotalStableDebt -
+      vars.prevTotalVariableDebt -
+      vars.prevTotalStableDebt;
 
     vars.amountToMint = vars.totalDebtAccrued.percentMul(vars.reserveFactor);
 
     if (vars.amountToMint != 0) {
-      reserve.accruedToTreasury = reserve.accruedToTreasury.add(
-        vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex)
-      );
+      reserve.accruedToTreasury =
+        reserve.accruedToTreasury +
+        vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex);
     }
   }
 
@@ -398,10 +396,8 @@ library ReserveLogic {
     uint256 variableDebtBurned
   ) internal view {
     if (stableDebtMinted != 0 || stableDebtBurned != 0) {
-      if (cache.currTotalStableDebt.add(stableDebtMinted) > stableDebtBurned) {
-        cache.nextTotalStableDebt = cache.currTotalStableDebt.add(stableDebtMinted).sub(
-          stableDebtBurned
-        );
+      if (cache.currTotalStableDebt + stableDebtMinted > stableDebtBurned) {
+        cache.nextTotalStableDebt = cache.currTotalStableDebt + stableDebtMinted - stableDebtBurned;
         cache.nextAvgStableBorrowRate = IStableDebtToken(cache.stableDebtTokenAddress)
           .getAverageStableRate();
       } else {
@@ -412,9 +408,10 @@ library ReserveLogic {
     if (variableDebtMinted != 0 || variableDebtBurned != 0) {
       uint256 scaledVariableDebtMinted = variableDebtMinted.rayDiv(cache.nextVariableBorrowIndex);
       uint256 scaledVariableDebtBurned = variableDebtBurned.rayDiv(cache.nextVariableBorrowIndex);
-      cache.nextScaledVariableDebt = cache.currScaledVariableDebt.add(scaledVariableDebtMinted).sub(
-        scaledVariableDebtBurned
-      );
+      cache.nextScaledVariableDebt =
+        cache.currScaledVariableDebt +
+        scaledVariableDebtMinted -
+        scaledVariableDebtBurned;
     }
   }
 }

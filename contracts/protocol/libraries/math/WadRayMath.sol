@@ -13,17 +13,11 @@ library WadRayMath {
   uint256 internal constant WAD = 1e18;
   uint256 internal constant halfWAD = WAD / 2;
 
-  uint256 internal constant RAY = 1e27;
+  uint256 public constant RAY = 1e27;
   uint256 internal constant halfRAY = RAY / 2;
 
   uint256 internal constant WAD_RAY_RATIO = 1e9;
 
-  /**
-   * @return One ray, 1e27
-   **/
-  function ray() internal pure returns (uint256) {
-    return RAY;
-  }
 
   /**
    * @return One wad, 1e18

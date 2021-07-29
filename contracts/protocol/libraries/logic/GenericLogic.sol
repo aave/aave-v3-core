@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
@@ -19,7 +18,6 @@ import {DataTypes} from '../types/DataTypes.sol';
  */
 library GenericLogic {
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -109,17 +107,18 @@ library GenericLogic {
         vars.userBalance = IScaledBalanceToken(currentReserve.aTokenAddress).scaledBalanceOf(user);
         vars.userBalance = vars.userBalance.rayMul(vars.normalizedIncome);
 
-        vars.userBalanceInBaseCurrency = vars.assetPrice.mul(vars.userBalance).div(vars.assetUnit);
-        vars.totalCollateralInBaseCurrency = vars.totalCollateralInBaseCurrency.add(
-          vars.userBalanceInBaseCurrency
-        );
+        vars.userBalanceInBaseCurrency = (vars.assetPrice * vars.userBalance) / vars.assetUnit;
+        vars.totalCollateralInBaseCurrency =
+          vars.totalCollateralInBaseCurrency +
+          vars.userBalanceInBaseCurrency;
 
-        vars.avgLtv = vars.avgLtv.add(vars.userBalanceInBaseCurrency.mul(vars.ltv));
+        vars.avgLtv = vars.avgLtv + vars.userBalanceInBaseCurrency * vars.ltv;
         vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
 
-        vars.avgLiquidationThreshold = vars.avgLiquidationThreshold.add(
-          vars.userBalanceInBaseCurrency.mul(vars.liquidationThreshold)
-        );
+        vars.avgLiquidationThreshold =
+          vars.avgLiquidationThreshold +
+          vars.userBalanceInBaseCurrency *
+          vars.liquidationThreshold;
       }
 
       if (userConfig.isBorrowing(vars.i)) {
@@ -131,19 +130,17 @@ library GenericLogic {
           vars.normalizedDebt = currentReserve.getNormalizedDebt();
           vars.userDebt = vars.userDebt.rayMul(vars.normalizedDebt);
         }
-        vars.userDebt = vars.userDebt.add(vars.userStableDebt);
-        vars.userDebtInBaseCurrency = vars.assetPrice.mul(vars.userDebt).div(vars.assetUnit);
-        vars.totalDebtInBaseCurrency = vars.totalDebtInBaseCurrency.add(
-          vars.userDebtInBaseCurrency
-        );
+        vars.userDebt = vars.userDebt + vars.userStableDebt;
+        vars.userDebtInBaseCurrency = (vars.assetPrice * vars.userDebt) / vars.assetUnit;
+        vars.totalDebtInBaseCurrency = vars.totalDebtInBaseCurrency + vars.userDebtInBaseCurrency;
       }
     }
 
     vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
-      ? vars.avgLtv.div(vars.totalCollateralInBaseCurrency)
+      ? vars.avgLtv / vars.totalCollateralInBaseCurrency
       : 0;
     vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
-      ? vars.avgLiquidationThreshold.div(vars.totalCollateralInBaseCurrency)
+      ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency
       : 0;
 
     vars.healthFactor = calculateHealthFactorFromBalances(
@@ -201,7 +198,7 @@ library GenericLogic {
       return 0;
     }
 
-    availableBorrowsInBaseCurrency = availableBorrowsInBaseCurrency.sub(totalDebtInBaseCurrency);
+    availableBorrowsInBaseCurrency = availableBorrowsInBaseCurrency - totalDebtInBaseCurrency;
     return availableBorrowsInBaseCurrency;
   }
 
