@@ -14,11 +14,11 @@ import {
   deployPool,
   deployPriceOracle,
   deployAaveOracle,
-  deployLendingPoolCollateralManager,
+  deployPoolCollateralManager,
   deployMockFlashLoanReceiver,
   deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
-  deployLendingRateOracle,
+  deployRateOracle,
   deployStableAndVariableTokensHelper,
   deployATokensAndRatesHelper,
   deployWETHGateway,
@@ -61,7 +61,7 @@ const MOCK_USD_PRICE_IN_WEI = AaveConfig.ProtocolGlobalParams.MockUsdPriceInWei;
 const ALL_ASSETS_INITIAL_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
 const USD_ADDRESS = AaveConfig.ProtocolGlobalParams.UsdAddress;
 const MOCK_CHAINLINK_AGGREGATORS_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
-const LENDING_RATE_ORACLE_RATES_COMMON = AaveConfig.LendingRateOracleRatesCommon;
+const RATE_ORACLE_RATES_COMMON = AaveConfig.RateOracleRatesCommon;
 
 const deployAllMockTokens = async (deployer: Signer) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked } = {};
@@ -224,17 +224,17 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   ]);
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
-  const lendingRateOracle = await deployLendingRateOracle();
-  await waitForTx(await addressesProvider.setLendingRateOracle(lendingRateOracle.address));
+  const rateOracle = await deployRateOracle();
+  await waitForTx(await addressesProvider.setLendingRateOracle(rateOracle.address));
 
   const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
   const allReservesAddresses = {
     ...tokensAddressesWithoutUsd,
   };
   await setInitialMarketRatesInRatesOracleByHelper(
-    LENDING_RATE_ORACLE_RATES_COMMON,
+    RATE_ORACLE_RATES_COMMON,
     allReservesAddresses,
-    lendingRateOracle,
+    rateOracle,
     aaveAdmin
   );
 
@@ -269,7 +269,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
   poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
 
-  const collateralManager = await deployLendingPoolCollateralManager();
+  const collateralManager = await deployPoolCollateralManager();
   await waitForTx(
     await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
   );

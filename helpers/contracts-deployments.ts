@@ -26,10 +26,10 @@ import {
   InitializableAdminUpgradeabilityProxyFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
-  LendingPoolCollateralManagerFactory,
+  PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
   PoolFactory,
-  LendingRateOracleFactory,
+  RateOracleFactory,
   MintableDelegationERC20Factory,
   MintableERC20Factory,
   MockAggregatorFactory,
@@ -207,10 +207,10 @@ export const deployPriceOracle = async (verify?: boolean) =>
     verify
   );
 
-export const deployLendingRateOracle = async (verify?: boolean) =>
+export const deployRateOracle = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingRateOracleFactory(await getFirstSigner()).deploy(),
-    eContractid.LendingRateOracle,
+    await new RateOracleFactory(await getFirstSigner()).deploy(),
+    eContractid.RateOracle,
     [],
     verify
   );
@@ -234,17 +234,17 @@ export const deployAaveOracle = async (
     verify
   );
 
-export const deployLendingPoolCollateralManager = async (verify?: boolean) => {
-  const collateralManagerImpl = await new LendingPoolCollateralManagerFactory(
+export const deployPoolCollateralManager = async (verify?: boolean) => {
+  const collateralManagerImpl = await new PoolCollateralManagerFactory(
     await getFirstSigner()
   ).deploy();
   await insertContractAddressInDb(
-    eContractid.LendingPoolCollateralManagerImpl,
+    eContractid.PoolCollateralManagerImpl,
     collateralManagerImpl.address
   );
   return withSaveAndVerify(
     collateralManagerImpl,
-    eContractid.LendingPoolCollateralManager,
+    eContractid.PoolCollateralManager,
     [],
     verify
   );

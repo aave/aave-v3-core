@@ -8,10 +8,10 @@ import {
   InitializableAdminUpgradeabilityProxyFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
-  LendingPoolCollateralManagerFactory,
+  PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
   PoolFactory,
-  LendingRateOracleFactory,
+  RateOracleFactory,
   MintableERC20Factory,
   MockATokenFactory,
   MockFlashLoanReceiverFactory,
@@ -130,10 +130,10 @@ export const getMockFlashLoanReceiver = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getLendingRateOracle = async (address?: tEthereumAddress) =>
-  await LendingRateOracleFactory.connect(
+export const getRateOracle = async (address?: tEthereumAddress) =>
+  await RateOracleFactory.connect(
     address ||
-      (await getDb().get(`${eContractid.LendingRateOracle}.${DRE.network.name}`).value()).address,
+      (await getDb().get(`${eContractid.RateOracle}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
@@ -298,12 +298,12 @@ export const getPoolConfiguratorImpl = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getLendingPoolCollateralManagerImpl = async (address?: tEthereumAddress) =>
-  await LendingPoolCollateralManagerFactory.connect(
+export const getPoolCollateralManagerImpl = async (address?: tEthereumAddress) =>
+  await PoolCollateralManagerFactory.connect(
     address ||
       (
         await getDb()
-          .get(`${eContractid.LendingPoolCollateralManagerImpl}.${DRE.network.name}`)
+          .get(`${eContractid.PoolCollateralManagerImpl}.${DRE.network.name}`)
           .value()
       ).address,
     await getFirstSigner()
@@ -317,10 +317,10 @@ export const getWalletProvider = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
-export const getLendingPoolCollateralManager = async (address?: tEthereumAddress) =>
-  await LendingPoolCollateralManagerFactory.connect(
+export const getPoolCollateralManager = async (address?: tEthereumAddress) =>
+  await PoolCollateralManagerFactory.connect(
     address ||
-      (await getDb().get(`${eContractid.LendingPoolCollateralManager}.${DRE.network.name}`).value())
+      (await getDb().get(`${eContractid.PoolCollateralManager}.${DRE.network.name}`).value())
         .address,
     await getFirstSigner()
   );

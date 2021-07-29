@@ -122,15 +122,15 @@ export const getWrappedNativeTokenAddress = async (config: ICommonConfiguration)
   return weth.address;
 };
 
-export const getLendingRateOracles = (poolConfig: ICommonConfiguration) => {
+export const getRateOracles = (poolConfig: ICommonConfiguration) => {
   const {
     ProtocolGlobalParams: { UsdAddress },
-    LendingRateOracleRatesCommon,
+    RateOracleRatesCommon,
     ReserveAssets,
   } = poolConfig;
 
   const network = process.env.FORK ? process.env.FORK : DRE.network.name;
-  return filterMapBy(LendingRateOracleRatesCommon, (key) =>
+  return filterMapBy(RateOracleRatesCommon, (key) =>
     Object.keys(ReserveAssets[network]).includes(key)
   );
 };

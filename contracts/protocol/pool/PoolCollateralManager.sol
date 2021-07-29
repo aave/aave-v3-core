@@ -9,7 +9,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
-import {ILendingPoolCollateralManager} from '../../interfaces/ILendingPoolCollateralManager.sol';
+import {IPoolCollateralManager} from '../../interfaces/IPoolCollateralManager.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {Helpers} from '../libraries/helpers/Helpers.sol';
@@ -22,14 +22,14 @@ import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {LendingPoolStorage} from './LendingPoolStorage.sol';
 
 /**
- * @title LendingPoolCollateralManager contract
+ * @title PoolCollateralManager contract
  * @author Aave
  * @dev Implements actions involving management of collateral in the protocol, the main one being the liquidations
  * IMPORTANT This contract will run always via DELEGATECALL, through the Pool, so the chain of inheritance
  * is the same as the Pool, to have compatible storage layouts
  **/
-contract LendingPoolCollateralManager is
-  ILendingPoolCollateralManager,
+contract PoolCollateralManager is
+  IPoolCollateralManager,
   VersionedInitializable,
   LendingPoolStorage
 {
