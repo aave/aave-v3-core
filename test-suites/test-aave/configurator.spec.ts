@@ -12,7 +12,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 
 const { expect } = require('chai');
 
-makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
+makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   const {
     CALLER_NOT_POOL_ADMIN,
     LPC_RESERVE_LIQUIDITY_NOT_0,

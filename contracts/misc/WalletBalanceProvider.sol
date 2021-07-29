@@ -6,7 +6,7 @@ pragma experimental ABIEncoderV2;
 import {Address} from '../dependencies/openzeppelin/contracts/Address.sol';
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IPool} from '../interfaces/IPool.sol';
 import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';

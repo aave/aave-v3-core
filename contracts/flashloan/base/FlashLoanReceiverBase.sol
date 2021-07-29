@@ -5,17 +5,17 @@ import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IFlashLoanReceiver} from '../interfaces/IFlashLoanReceiver.sol';
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 
 abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  ILendingPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
+  IPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
   IPool public immutable override LENDING_POOL;
 
-  constructor(ILendingPoolAddressesProvider provider) public {
+  constructor(IPoolAddressesProvider provider) public {
     ADDRESSES_PROVIDER = provider;
     LENDING_POOL = IPool(provider.getLendingPool());
   }

@@ -7,10 +7,10 @@ import {
   getEthersSignersAddresses,
 } from '../../helpers/contracts-helpers';
 import {
-  deployLendingPoolAddressesProvider,
+  deployPoolAddressesProvider,
   deployMintableERC20,
-  deployLendingPoolAddressesProviderRegistry,
-  deployLendingPoolConfigurator,
+  deployPoolAddressesProviderRegistry,
+  deployPoolConfigurator,
   deployLendingPool,
   deployPriceOracle,
   deployAaveOracle,
@@ -51,7 +51,7 @@ import AmmConfig from '../../markets/amm';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getLendingPool,
-  getLendingPoolConfiguratorProxy,
+  getPoolConfiguratorProxy,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
@@ -98,7 +98,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const mockTokens = await deployAllMockTokens(deployer);
 
-  const addressesProvider = await deployLendingPoolAddressesProvider(AmmConfig.MarketId);
+  const addressesProvider = await deployPoolAddressesProvider(AmmConfig.MarketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
@@ -106,7 +106,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await waitForTx(await addressesProvider.setEmergencyAdmin(addressList[2]));
 
-  const addressesProviderRegistry = await deployLendingPoolAddressesProviderRegistry();
+  const addressesProviderRegistry = await deployPoolAddressesProviderRegistry();
   await waitForTx(
     await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
   );
@@ -120,16 +120,16 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await insertContractAddressInDb(eContractid.Pool, poolProxy.address);
 
-  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator();
+  const poolConfiguratorImpl = await deployPoolConfigurator();
   await waitForTx(
-    await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
+    await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImpl.address)
   );
-  const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
+  const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getLendingPoolConfigurator()
   );
   await insertContractAddressInDb(
-    eContractid.LendingPoolConfigurator,
-    lendingPoolConfiguratorProxy.address
+    eContractid.PoolConfigurator,
+    poolConfiguratorProxy.address
   );
 
   // Deploy deployment helpers
@@ -137,7 +137,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await deployATokensAndRatesHelper([
     poolProxy.address,
     addressesProvider.address,
-    lendingPoolConfiguratorProxy.address,
+    poolConfiguratorProxy.address,
   ]);
 
   const fallbackOracle = await deployPriceOracle();

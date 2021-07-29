@@ -1,6 +1,6 @@
 // import {iATokenBase, iAssetsWithoutETH, ITestEnvWithoutInstances, RateMode} from '../utils/types';
 // import {
-//   LendingPoolConfiguratorInstance,
+//   PoolConfiguratorInstance,
 //   LendingPoolInstance,
 //   ATokenInstance,
 //   LendingPoolCoreInstance,
@@ -14,9 +14,9 @@
 
 // contract('Pool: Modifiers', async ([deployer, ...users]) => {
 //   let _testEnvProvider: ITestEnvWithoutInstances;
-//   let _lendingPoolConfiguratorInstance: LendingPoolConfiguratorInstance;
-//   let _poolInstance: LendingPoolInstance;
-//   let _poolCoreInstance: LendingPoolCoreInstance;
+//   let _poolConfiguratorInstance: PoolConfiguratorInstance;
+//   let _lendingPoolInstance: LendingPoolInstance;
+//   let _lendingPoolCoreInstance: LendingPoolCoreInstance;
 //   let _aTokenInstances: iATokenBase<ATokenInstance>;
 //   let _tokenInstances: iAssetsWithoutETH<MintableERC20Instance>;
 
@@ -28,20 +28,20 @@
 //       getAllAssetsInstances,
 //       getLendingPoolInstance,
 //       getLendingPoolCoreInstance,
-//       getLendingPoolConfiguratorInstance,
+//       getPoolConfiguratorInstance,
 //       getATokenInstances,
 //     } = _testEnvProvider;
 //     const instances = await Promise.all([
 //       getLendingPoolInstance(),
 //       getLendingPoolCoreInstance(),
-//       getLendingPoolConfiguratorInstance(),
+//       getPoolConfiguratorInstance(),
 //       getATokenInstances(),
 //       getAllAssetsInstances(),
 //     ]);
 
 //     _poolInstance = instances[0];
 //     _poolCoreInstance = instances[1];
-//     _lendingPoolConfiguratorInstance = instances[2];
+//     _poolConfiguratorInstance = instances[2];
 
 //     _aTokenInstances = instances[3];
 //     _tokenInstances = instances[4];
@@ -120,7 +120,7 @@
 //   });
 
 //   it('Freezes the ETH reserve', async () => {
-//     await _lendingPoolConfiguratorInstance.freezeReserve(ETHEREUM_ADDRESS);
+//     await _poolConfiguratorInstance.freezeReserve(ETHEREUM_ADDRESS);
 //   });
 
 //   it('tries to deposit in a freezed reserve', async () => {
@@ -155,7 +155,7 @@
 //     const {aWETH} = _aTokenInstances;
 
 //     //unfreezes the reserve
-//     await _lendingPoolConfiguratorInstance.unfreezeReserve(ETHEREUM_ADDRESS);
+//     await _poolConfiguratorInstance.unfreezeReserve(ETHEREUM_ADDRESS);
 
 //     //deposit 1 ETH
 //     await _poolInstance.deposit(ETHEREUM_ADDRESS, oneEther, '0', {
@@ -163,7 +163,7 @@
 //     });
 
 //     //freezes the reserve
-//     await _lendingPoolConfiguratorInstance.freezeReserve(ETHEREUM_ADDRESS);
+//     await _poolConfiguratorInstance.freezeReserve(ETHEREUM_ADDRESS);
 
 //     const balance = await aWETH.balanceOf(deployer);
 
@@ -175,7 +175,7 @@
 //     const {DAI} = _tokenInstances;
 
 //     //unfreezes the reserve
-//     await _lendingPoolConfiguratorInstance.unfreezeReserve(ETHEREUM_ADDRESS);
+//     await _poolConfiguratorInstance.unfreezeReserve(ETHEREUM_ADDRESS);
 
 //     const amountDAI = await convertToCurrencyDecimals(DAI.address, '100');
 
@@ -200,7 +200,7 @@
 //     });
 
 //     //freezes the reserve
-//     await _lendingPoolConfiguratorInstance.freezeReserve(ETHEREUM_ADDRESS);
+//     await _poolConfiguratorInstance.freezeReserve(ETHEREUM_ADDRESS);
 
 //     //user 1 repays 1 DAI
 //     await DAI.approve(_poolCoreInstance.address, amountDAIToBorrow, {from: users[1]});

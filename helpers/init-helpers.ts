@@ -13,8 +13,8 @@ import {
   getAToken,
   getATokensAndRatesHelper,
   getFirstSigner,
-  getLendingPoolAddressesProvider,
-  getLendingPoolConfiguratorProxy,
+  getPoolAddressesProvider,
+  getPoolConfiguratorProxy,
   getStableAndVariableTokensHelper,
 } from './contracts-getters';
 import { rawInsertContractAddressInDb } from './contracts-helpers';
@@ -61,7 +61,7 @@ export const initReservesByHelper = async (
   let gasUsage = BigNumber.from('0');
   const stableAndVariableDeployer = await getStableAndVariableTokensHelper();
 
-  const addressProvider = await getLendingPoolAddressesProvider();
+  const addressProvider = await getPoolAddressesProvider();
 
   // CHUNK CONFIGURATION
   const initChunks = 4;
@@ -223,7 +223,7 @@ export const initReservesByHelper = async (
   const chunkedSymbols = chunk(reserveSymbols, initChunks);
   const chunkedInitInputParams = chunk(initInputParams, initChunks);
 
-  const configurator = await getLendingPoolConfiguratorProxy();
+  const configurator = await getPoolConfiguratorProxy();
   //await waitForTx(await addressProvider.setPoolAdmin(admin));
 
   console.log(`- Reserves initialization in ${chunkedInitInputParams.length} txs`);
@@ -272,7 +272,7 @@ export const configureReservesByHelper = async (
   helpers: AaveProtocolDataProvider,
   admin: tEthereumAddress
 ) => {
-  const addressProvider = await getLendingPoolAddressesProvider();
+  const addressProvider = await getPoolAddressesProvider();
   const atokenAndRatesDeployer = await getATokensAndRatesHelper();
   const tokens: string[] = [];
   const symbols: string[] = [];

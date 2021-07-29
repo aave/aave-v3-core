@@ -7,16 +7,16 @@ import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 // prettier-ignore
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 
 /**
- * @title LendingPoolAddressesProvider contract
+ * @title PoolAddressesProvider contract
  * @dev Main registry of addresses part of or connected to the protocol, including permissioned roles
  * - Acting also as factory of proxies and admin of those, so with right to change its implementations
  * - Owned by the Aave Governance
  * @author Aave
  **/
-contract LendingPoolAddressesProvider is Ownable, ILendingPoolAddressesProvider {
+contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   string private _marketId;
   mapping(bytes32 => address) private _addresses;
 
@@ -41,7 +41,7 @@ contract LendingPoolAddressesProvider is Ownable, ILendingPoolAddressesProvider 
   }
 
   /**
-   * @dev Allows to set the market which this LendingPoolAddressesProvider represents
+   * @dev Allows to set the market which this PoolAddressesProvider represents
    * @param marketId The market id
    */
   function setMarketId(string memory marketId) external override onlyOwner {
@@ -104,17 +104,17 @@ contract LendingPoolAddressesProvider is Ownable, ILendingPoolAddressesProvider 
   }
 
   /**
-   * @dev Returns the address of the LendingPoolConfigurator proxy
-   * @return The LendingPoolConfigurator proxy address
+   * @dev Returns the address of the PoolConfigurator proxy
+   * @return The PoolConfigurator proxy address
    **/
   function getLendingPoolConfigurator() external view override returns (address) {
     return getAddress(LENDING_POOL_CONFIGURATOR);
   }
 
   /**
-   * @dev Updates the implementation of the LendingPoolConfigurator, or creates the proxy
+   * @dev Updates the implementation of the PoolConfigurator, or creates the proxy
    * setting the new `configurator` implementation on the first time calling it
-   * @param configurator The new LendingPoolConfigurator implementation
+   * @param configurator The new PoolConfigurator implementation
    **/
   function setLendingPoolConfiguratorImpl(address configurator) external override onlyOwner {
     _updateImpl(LENDING_POOL_CONFIGURATOR, configurator);

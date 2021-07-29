@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IAaveIncentivesController} from '../interfaces/IAaveIncentivesController.sol';
 import {IUiPoolDataProvider} from './interfaces/IUiPoolDataProvider.sol';
 import {IPool} from '../interfaces/IPool.sol';
@@ -51,7 +51,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     );
   }
 
-  function getReservesData(ILendingPoolAddressesProvider provider, address user)
+  function getReservesData(IPoolAddressesProvider provider, address user)
     external
     view
     override

@@ -22,7 +22,7 @@ import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getAllMockedTokens,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getWETHGateway,
 } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
@@ -44,7 +44,7 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
     const mockTokens = await getAllMockedTokens();
     const allTokenAddresses = getAllTokenAddresses(mockTokens);
 
-    const addressesProvider = await getLendingPoolAddressesProvider();
+    const addressesProvider = await getPoolAddressesProvider();
 
     const protoPoolReservesAddresses = <{ [symbol: string]: tEthereumAddress }>(
       filterMapBy(allTokenAddresses, (key: string) => !key.includes('UNI_'))
