@@ -23,7 +23,7 @@ abstract contract DebtTokenBase is
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
 
   /**
-   * @dev Only lending pool can call functions marked by this modifier
+   * @dev Only pool can call functions marked by this modifier
    **/
   modifier onlyLendingPool {
     require(_msgSender() == address(_getLendingPool()), Errors.CT_CALLER_MUST_BE_LENDING_POOL);

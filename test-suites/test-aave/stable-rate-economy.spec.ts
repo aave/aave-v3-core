@@ -45,14 +45,14 @@
 //       getAllAssetsInstances,
 //       getFirstBorrowerAddressOnTests,
 //       getFirstDepositorAddressOnTests,
-//       getLendingPoolInstance,
-//       getLendingPoolCoreInstance,
+//       getPoolInstance,
+//       getPoolCoreInstance,
 //       getATokenInstances
 //     } = _testEnvProvider
 
 //     const instances = await Promise.all([
-//       getLendingPoolInstance(),
-//       getLendingPoolCoreInstance(),
+//       getPoolInstance(),
+//       getPoolCoreInstance(),
 //       getATokenInstances(),
 //       getAllAssetsInstances()
 //     ])

@@ -62,7 +62,7 @@ import { StableAndVariableTokensHelperFactory } from '../types/StableAndVariable
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { LendingPoolLibraryAddresses } from '../types/PoolFactory';
+import { PoolLibraryAddresses } from '../types/PoolFactory';
 import { UiPoolDataProvider } from '../types';
 
 export const deployUiPoolDataProvider = async (
@@ -169,7 +169,7 @@ export const deployValidationLogic = async (
 
 export const deployAaveLibraries = async (
   verify?: boolean
-): Promise<LendingPoolLibraryAddresses> => {
+): Promise<PoolLibraryAddresses> => {
   const reserveLogic = await deployReserveLogicLibrary(verify);
   const genericLogic = await deployGenericLogic(reserveLogic, verify);
   const validationLogic = await deployValidationLogic(reserveLogic, genericLogic, verify);
@@ -192,7 +192,7 @@ export const deployAaveLibraries = async (
   };
 };
 
-export const deployLendingPool = async (verify?: boolean) => {
+export const deployPool = async (verify?: boolean) => {
   const libraries = await deployAaveLibraries(verify);
   const poolImpl = await new PoolFactory(libraries, await getFirstSigner()).deploy();
   await insertContractAddressInDb(eContractid.PoolImpl, poolImpl.address);

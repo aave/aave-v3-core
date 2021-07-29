@@ -36,14 +36,14 @@ task('print-config', 'Inits the DRE, to have access to all the plugins')
       await addressesProvider.getLendingPoolCollateralManager()
     );
     console.log(
-      'Lending Pool Configurator proxy',
+      'Pool Configurator proxy',
       await addressesProvider.getLendingPoolConfigurator()
     );
     console.log('Pool admin', await addressesProvider.getPoolAdmin());
     console.log('Emergency admin', await addressesProvider.getEmergencyAdmin());
     console.log('Price Oracle', await addressesProvider.getPriceOracle());
     console.log('Lending Rate Oracle', await addressesProvider.getLendingRateOracle());
-    console.log('Lending Pool Data Provider', dataProvider);
+    console.log('Aave Protocol Data Provider', dataProvider);
     const protocolDataProvider = await getAaveProtocolDataProvider(dataProvider);
 
     const fields = [

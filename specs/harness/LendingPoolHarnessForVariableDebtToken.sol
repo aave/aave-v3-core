@@ -2,7 +2,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {IPool} from '../../contracts/interfaces/IPool.sol';
-import {Pool} from '../../contracts/protocol/lendingpool/Pool.sol';
+import {Pool} from '../../contracts/protocol/pool/Pool.sol';
 import {
   IPoolAddressesProvider
 } from '../../contracts/interfaces/IPoolAddressesProvider.sol';

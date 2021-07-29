@@ -6,7 +6,7 @@ import {Pool} from '../protocol/pool/Pool.sol';
 import {
   PoolAddressesProvider
 } from '../protocol/configuration/PoolAddressesProvider.sol';
-import {PoolConfigurator} from '../protocol/lendingpool/PoolConfigurator.sol';
+import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
 import {
   DefaultReserveInterestRateStrategy

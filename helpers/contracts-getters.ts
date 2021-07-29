@@ -55,7 +55,7 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
   );
 };
 
-export const getLendingPool = async (address?: tEthereumAddress) =>
+export const getPool = async (address?: tEthereumAddress) =>
   await PoolFactory.connect(
     address ||
       (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
@@ -283,7 +283,7 @@ export const getSelfdestructTransferMock = async (address?: tEthereumAddress) =>
 export const getProxy = async (address: tEthereumAddress) =>
   await InitializableAdminUpgradeabilityProxyFactory.connect(address, await getFirstSigner());
 
-export const getLendingPoolImpl = async (address?: tEthereumAddress) =>
+export const getPoolImpl = async (address?: tEthereumAddress) =>
   await PoolFactory.connect(
     address ||
       (await getDb().get(`${eContractid.PoolImpl}.${DRE.network.name}`).value()).address,

@@ -81,7 +81,7 @@ contract WalletBalanceProvider {
     view
     returns (address[] memory, uint256[] memory)
   {
-    IPool pool = IPool(ILendingPoolAddressesProvider(provider).getLendingPool());
+    IPool pool = IPool(IPoolAddressesProvider(provider).getLendingPool());
 
     address[] memory reserves = pool.getReservesList();
     address[] memory reservesWithEth = new address[](reserves.length + 1);

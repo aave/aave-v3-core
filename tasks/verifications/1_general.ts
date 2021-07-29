@@ -11,14 +11,14 @@ import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getAaveProtocolDataProvider,
   getAddressById,
-  getLendingPool,
+  getPool,
   getPoolAddressesProvider,
   getPoolAddressesProviderRegistry,
   getLendingPoolCollateralManager,
   getLendingPoolCollateralManagerImpl,
   getPoolConfiguratorImpl,
   getPoolConfiguratorProxy,
-  getLendingPoolImpl,
+  getPoolImpl,
   getProxy,
   getWalletProvider,
   getWETHGateway,
@@ -62,8 +62,8 @@ task('verify:general', 'Verify contracts at Etherscan')
     if (all) {
       const poolImplAddress = getParamPerNetwork(Pool, network);
       const poolImpl = notFalsyOrZeroAddress(poolImplAddress)
-        ? await getLendingPoolImpl(poolImplAddress)
-        : await getLendingPoolImpl();
+        ? await getPoolImpl(poolImplAddress)
+        : await getPoolImpl();
 
       const poolConfiguratorImplAddress = getParamPerNetwork(
         PoolConfigurator,
@@ -103,11 +103,11 @@ task('verify:general', 'Verify contracts at Etherscan')
         []
       );
 
-      // Lending Pool implementation
+      // Pool implementation
       console.log('\n- Verifying Pool Implementation...\n');
       await verifyContract(eContractid.Pool, poolImpl, []);
 
-      // Lending Pool Configurator implementation
+      // Pool Configurator implementation
       console.log('\n- Verifying Pool Configurator Implementation...\n');
       await verifyContract(eContractid.PoolConfigurator, poolConfiguratorImpl, []);
 
@@ -135,14 +135,14 @@ task('verify:general', 'Verify contracts at Etherscan')
         await getWethAddress(poolConfig),
       ]);
     }
-    // Lending Pool proxy
-    console.log('\n- Verifying  Lending Pool Proxy...\n');
+    // Pool proxy
+    console.log('\n- Verifying Pool Proxy...\n');
     await verifyContract(eContractid.InitializableAdminUpgradeabilityProxy, poolProxy, [
       addressesProvider.address,
     ]);
 
     // Pool Conf proxy
-    console.log('\n- Verifying  Lending Pool Configurator Proxy...\n');
+    console.log('\n- Verifying Pool Configurator Proxy...\n');
     await verifyContract(
       eContractid.InitializableAdminUpgradeabilityProxy,
       poolConfiguratorProxy,

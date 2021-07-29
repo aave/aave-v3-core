@@ -18,7 +18,7 @@ import {
 } from '../../helpers/contracts-getters';
 import { getParamPerNetwork, verifyContract } from '../../helpers/contracts-helpers';
 import { eContractid, eNetwork, ICommonConfiguration, IReserveParams } from '../../helpers/types';
-import { PoolConfiguratorFactory, LendingPoolFactory } from '../../types';
+import { PoolConfiguratorFactory, PoolFactory } from '../../types';
 
 task('verify:tokens', 'Deploy oracles for dev enviroment')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)

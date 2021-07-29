@@ -26,14 +26,14 @@
 
 //     const {
 //       getAllAssetsInstances,
-//       getLendingPoolInstance,
-//       getLendingPoolCoreInstance,
+//       getPoolInstance,
+//       getPoolCoreInstance,
 //       getPoolConfiguratorInstance,
 //       getATokenInstances,
 //     } = _testEnvProvider;
 //     const instances = await Promise.all([
-//       getLendingPoolInstance(),
-//       getLendingPoolCoreInstance(),
+//       getPoolInstance(),
+//       getPoolCoreInstance(),
 //       getPoolConfiguratorInstance(),
 //       getATokenInstances(),
 //       getAllAssetsInstances(),

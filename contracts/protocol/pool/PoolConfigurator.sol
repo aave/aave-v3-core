@@ -9,7 +9,7 @@ import {
 } from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
@@ -31,7 +31,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   IPoolAddressesProvider internal _addressesProvider;
-  ILendingPool internal _pool;
+  IPool internal _pool;
 
   mapping(address => bool) private _riskAdmins;
 
@@ -73,18 +73,18 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   function initialize(IPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
-    _pool = ILendingPool(_addressesProvider.getLendingPool());
+    _pool = IPool(_addressesProvider.getLendingPool());
   }
 
   /// @inheritdoc IPoolConfigurator
   function batchInitReserve(InitReserveInput[] calldata input) external override onlyPoolAdmin {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
       _initReserve(cachedPool, input[i]);
     }
   }
 
-  function _initReserve(ILendingPool pool, InitReserveInput calldata input) internal {
+  function _initReserve(IPool pool, InitReserveInput calldata input) internal {
     address aTokenProxyAddress =
       _initTokenWithProxy(
         input.aTokenImpl,
@@ -167,7 +167,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /// @inheritdoc IPoolConfigurator
   function updateAToken(UpdateATokenInput calldata input) external override onlyPoolAdmin {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
 
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
@@ -197,7 +197,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
 
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
@@ -234,7 +234,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
     (, , , uint256 decimals, ) = cachedPool.getConfiguration(input.asset).getParamsMemory();

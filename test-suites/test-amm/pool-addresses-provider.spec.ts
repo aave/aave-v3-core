@@ -5,7 +5,7 @@ import { ProtocolErrors } from '../../helpers/types';
 import { ethers } from 'ethers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import { waitForTx } from '../../helpers/misc-utils';
-import { deployLendingPool } from '../../helpers/contracts-deployments';
+import { deployPool } from '../../helpers/contracts-deployments';
 
 const { utils } = ethers;
 
@@ -47,13 +47,13 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     const currentAddressesProviderOwner = users[1];
 
-    const mockLendingPool = await deployLendingPool();
+    const mockPool = await deployPool();
     const proxiedAddressId = utils.keccak256(utils.toUtf8Bytes('RANDOM_PROXIED'));
 
     const proxiedAddressSetReceipt = await waitForTx(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
-        .setAddressAsProxy(proxiedAddressId, mockLendingPool.address)
+        .setAddressAsProxy(proxiedAddressId, mockPool.address)
     );
 
     if (!proxiedAddressSetReceipt.events || proxiedAddressSetReceipt.events?.length < 1) {
@@ -64,7 +64,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(proxiedAddressSetReceipt.events[1].event).to.be.equal('AddressSet');
     expect(proxiedAddressSetReceipt.events[1].args?.id).to.be.equal(proxiedAddressId);
     expect(proxiedAddressSetReceipt.events[1].args?.newAddress).to.be.equal(
-      mockLendingPool.address
+      mockPool.address
     );
     expect(proxiedAddressSetReceipt.events[1].args?.hasProxy).to.be.equal(true);
   });

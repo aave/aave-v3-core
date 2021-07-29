@@ -11,7 +11,7 @@ import {
   deployMintableERC20,
   deployPoolAddressesProviderRegistry,
   deployPoolConfigurator,
-  deployLendingPool,
+  deployPool,
   deployPriceOracle,
   deployAaveOracle,
   deployLendingPoolCollateralManager,
@@ -51,7 +51,7 @@ import { initReservesByHelper, configureReservesByHelper } from '../../helpers/i
 import AaveConfig from '../../markets/aave';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
-  getLendingPool,
+  getPool,
   getPoolConfiguratorProxy,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
@@ -112,12 +112,12 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
   );
 
-  const poolImpl = await deployLendingPool();
+  const poolImpl = await deployPool();
 
   await waitForTx(await addressesProvider.setLendingPoolImpl(poolImpl.address));
 
   const poolAddress = await addressesProvider.getLendingPool();
-  const poolProxy = await getLendingPool(poolAddress);
+  const poolProxy = await getPool(poolAddress);
 
   await insertContractAddressInDb(eContractid.Pool, poolProxy.address);
 

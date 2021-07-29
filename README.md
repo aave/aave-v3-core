@@ -171,8 +171,8 @@ run('set-DRE');
 // Import contract getters to retrieve an Ethers.js Contract instance
 const contractGetters = require('./helpers/contracts-getters'); // Import a TS/JS file
 
-// Lending pool instance
-const pool = await contractGetters.getLendingPool("Pool address from 'aave:mainnet' task");
+// Pool instance
+const pool = await contractGetters.getPool("Pool address from 'aave:mainnet' task");
 
 // You can impersonate any Ethereum address
 await network.provider.request({ method: "hardhat_impersonateAccount",  params: ["0xb1adceddb2941033a090dd166a462fe1c2029484"]});
@@ -212,8 +212,8 @@ const contractGetters = require('./helpers/contracts-getters');
 // Load the first signer
 const signer = await contractGetters.getFirstSigner();
 
-// Lending pool instance
-const pool = await contractGetters.getLendingPool("0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9");
+// Pool instance
+const pool = await contractGetters.getPool("0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9");
 
 // ERC20 token DAI Mainnet instance
 const DAI = await contractGetters.getIErc20Detailed("0x6B175474E89094C44Da98b954EedeAC495271d0F");

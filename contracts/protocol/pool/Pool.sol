@@ -7,7 +7,7 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IFlashLoanReceiver} from '../../flashloan/interfaces/IFlashLoanReceiver.sol';
@@ -40,7 +40,7 @@ import {LendingPoolStorage} from './LendingPoolStorage.sol';
  *   # Liquidate positions
  *   # Execute Flash Loans
  * - To be covered by a proxy contract, owned by the LendingPoolAddressesProvider of the specific market
- * - All admin functions are callable by the LendingPoolConfigurator contract defined also in the
+ * - All admin functions are callable by the PoolConfigurator contract defined also in the
  *   LendingPoolAddressesProvider
  * @author Aave
  **/
@@ -76,7 +76,7 @@ contract Pool is VersionedInitializable, IPool, LendingPoolStorage {
    *   on subsequent operations
    * @param provider The address of the LendingPoolAddressesProvider
    **/
-  function initialize(ILendingPoolAddressesProvider provider) public initializer {
+  function initialize(IPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
@@ -575,7 +575,7 @@ contract Pool is VersionedInitializable, IPool, LendingPoolStorage {
   }
 
   ///@inheritdoc IPool
-  function getAddressesProvider() external view override returns (ILendingPoolAddressesProvider) {
+  function getAddressesProvider() external view override returns (IPoolAddressesProvider) {
     return _addressesProvider;
   }
 
