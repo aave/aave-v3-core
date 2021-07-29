@@ -14,8 +14,8 @@ import {
   getLendingPool,
   getPoolAddressesProvider,
   getPoolAddressesProviderRegistry,
-  getLendingPoolCollateralManager,
-  getLendingPoolCollateralManagerImpl,
+  getPoolCollateralManager,
+  getPoolCollateralManagerImpl,
   getPoolConfiguratorImpl,
   getPoolConfiguratorProxy,
   getLendingPoolImpl,
@@ -39,7 +39,7 @@ task('verify:general', 'Verify contracts at Etherscan')
       ReservesConfig,
       ProviderRegistry,
       MarketId,
-      LendingPoolCollateralManager,
+      PoolCollateralManager,
       PoolConfigurator,
       LendingPool,
       WethGateway,
@@ -53,11 +53,11 @@ task('verify:general', 'Verify contracts at Etherscan')
       : await getPoolAddressesProviderRegistry();
     const lendingPoolAddress = await addressesProvider.getLendingPool();
     const poolConfiguratorAddress = await addressesProvider.getLendingPoolConfigurator(); //getPoolConfiguratorProxy();
-    const lendingPoolCollateralManagerAddress = await addressesProvider.getLendingPoolCollateralManager();
+    const poolCollateralManagerAddress = await addressesProvider.getLendingPoolCollateralManager();
 
     const lendingPoolProxy = await getProxy(lendingPoolAddress);
     const poolConfiguratorProxy = await getProxy(poolConfiguratorAddress);
-    const lendingPoolCollateralManagerProxy = await getProxy(lendingPoolCollateralManagerAddress);
+    const poolCollateralManagerProxy = await getProxy(poolCollateralManagerAddress);
 
     if (all) {
       const lendingPoolImplAddress = getParamPerNetwork(LendingPool, network);
@@ -73,15 +73,15 @@ task('verify:general', 'Verify contracts at Etherscan')
         ? await getPoolConfiguratorImpl(poolConfiguratorImplAddress)
         : await getPoolConfiguratorImpl();
 
-      const lendingPoolCollateralManagerImplAddress = getParamPerNetwork(
-        LendingPoolCollateralManager,
+      const poolCollateralManagerImplAddress = getParamPerNetwork(
+        PoolCollateralManager,
         network
       );
-      const lendingPoolCollateralManagerImpl = notFalsyOrZeroAddress(
-        lendingPoolCollateralManagerImplAddress
+      const poolCollateralManagerImpl = notFalsyOrZeroAddress(
+        poolCollateralManagerImplAddress
       )
-        ? await getLendingPoolCollateralManagerImpl(lendingPoolCollateralManagerImplAddress)
-        : await getLendingPoolCollateralManagerImpl();
+        ? await getPoolCollateralManagerImpl(poolCollateralManagerImplAddress)
+        : await getPoolCollateralManagerImpl();
 
       const dataProvider = await getAaveProtocolDataProvider();
       const walletProvider = await getWalletProvider();
@@ -114,8 +114,8 @@ task('verify:general', 'Verify contracts at Etherscan')
       // Lending Pool Collateral Manager implementation
       console.log('\n- Verifying LendingPool Collateral Manager Implementation...\n');
       await verifyContract(
-        eContractid.LendingPoolCollateralManager,
-        lendingPoolCollateralManagerImpl,
+        eContractid.PoolCollateralManager,
+        poolCollateralManagerImpl,
         []
       );
 
@@ -153,7 +153,7 @@ task('verify:general', 'Verify contracts at Etherscan')
     console.log('\n- Verifying  Lending Pool Collateral Manager Proxy...\n');
     await verifyContract(
       eContractid.InitializableAdminUpgradeabilityProxy,
-      lendingPoolCollateralManagerProxy,
+      poolCollateralManagerProxy,
       []
     );
 

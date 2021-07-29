@@ -58,7 +58,7 @@ export enum eContractid {
   LendingRateOracle = 'LendingRateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
-  LendingPoolCollateralManager = 'LendingPoolCollateralManager',
+  PoolCollateralManager = 'PoolCollateralManager',
   InitializableAdminUpgradeabilityProxy = 'InitializableAdminUpgradeabilityProxy',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   WalletBalanceProvider = 'WalletBalanceProvider',
@@ -82,7 +82,7 @@ export enum eContractid {
   SelfdestructTransferMock = 'SelfdestructTransferMock',
   LendingPoolImpl = 'LendingPoolImpl',
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
-  LendingPoolCollateralManagerImpl = 'LendingPoolCollateralManagerImpl',
+  PoolCollateralManagerImpl = 'PoolCollateralManagerImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
   UniswapLiquiditySwapAdapter = 'UniswapLiquiditySwapAdapter',
   UniswapRepayAdapter = 'UniswapRepayAdapter',
@@ -488,7 +488,7 @@ export interface ICommonConfiguration {
   Mocks: IMocksConfig;
   ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
   ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
-  LendingPoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
+  PoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
   PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
   LendingPool: iParamsPerNetwork<tEthereumAddress>;
   LendingRateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;

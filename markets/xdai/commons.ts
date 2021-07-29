@@ -86,7 +86,7 @@ export const CommonsConfig: ICommonConfiguration = {
   LendingRateOracle: {
     [eXDaiNetwork.xdai]: '',
   },
-  LendingPoolCollateralManager: {
+  PoolCollateralManager: {
     [eXDaiNetwork.xdai]: '',
   },
   TokenDistributor: {
