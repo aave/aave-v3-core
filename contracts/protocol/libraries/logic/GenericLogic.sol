@@ -99,7 +99,7 @@ library GenericLogic {
         .configuration
         .getParams();
 
-      vars.assetUnit = 10**vars.decimals;
+      unchecked {vars.assetUnit = 10**vars.decimals;}
       vars.assetPrice = IPriceOracleGetter(oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && userConfig.isUsingAsCollateral(vars.i)) {
