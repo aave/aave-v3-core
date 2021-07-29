@@ -81,7 +81,7 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       // Seems unnecessary to register the collateral manager in the JSON db
 
       console.log(
-        '\tSetting lending pool collateral manager implementation with address',
+        '\tSetting pool collateral manager implementation with address',
         collateralManagerAddress
       );
       await waitForTx(
