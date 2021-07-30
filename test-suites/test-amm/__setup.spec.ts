@@ -216,7 +216,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
   const rateOracle = await deployRateOracle();
-  await waitForTx(await addressesProvider.setLendingRateOracle(rateOracle.address));
+  await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
 
   const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
   const allReservesAddresses = {

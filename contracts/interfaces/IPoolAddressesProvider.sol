@@ -16,7 +16,7 @@ interface IPoolAddressesProvider {
   event PoolConfiguratorUpdated(address indexed newAddress);
   event PoolCollateralManagerUpdated(address indexed newAddress);
   event PriceOracleUpdated(address indexed newAddress);
-  event LendingRateOracleUpdated(address indexed newAddress);
+  event RateOracleUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
@@ -56,5 +56,5 @@ interface IPoolAddressesProvider {
 
   function getRateOracle() external view returns (address);
 
-  function setLendingRateOracle(address lendingRateOracle) external;
+  function setRateOracle(address rateOracle) external;
 }

@@ -177,9 +177,9 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     return getAddress(RATE_ORACLE);
   }
 
-  function setLendingRateOracle(address lendingRateOracle) external override onlyOwner {
-    _addresses[RATE_ORACLE] = lendingRateOracle;
-    emit LendingRateOracleUpdated(lendingRateOracle);
+  function setRateOracle(address rateOracle) external override onlyOwner {
+    _addresses[RATE_ORACLE] = rateOracle;
+    emit RateOracleUpdated(rateOracle);
   }
 
   /**
