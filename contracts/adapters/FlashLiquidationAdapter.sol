@@ -68,7 +68,7 @@ contract FlashLiquidationAdapter is BaseUniswapAdapter {
     address initiator,
     bytes calldata params
   ) external override returns (bool) {
-    require(msg.sender == address(LENDING_POOL), 'CALLER_MUST_BE_LENDING_POOL');
+    require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
 
     LiquidationParams memory decodedParams = _decodeParams(params);
 
@@ -120,10 +120,10 @@ contract FlashLiquidationAdapter is BaseUniswapAdapter {
     vars.flashLoanDebt = flashBorrowedAmount.add(premium);
 
     // Approve Pool to use debt token for liquidation
-    IERC20(borrowedAsset).approve(address(LENDING_POOL), debtToCover);
+    IERC20(borrowedAsset).approve(address(POOL), debtToCover);
 
     // Liquidate the user position and release the underlying collateral
-    LENDING_POOL.liquidationCall(collateralAsset, borrowedAsset, user, debtToCover, false);
+    POOL.liquidationCall(collateralAsset, borrowedAsset, user, debtToCover, false);
 
     // Discover the liquidated tokens
     uint256 collateralBalanceAfter = IERC20(collateralAsset).balanceOf(address(this));
@@ -152,7 +152,7 @@ contract FlashLiquidationAdapter is BaseUniswapAdapter {
     }
 
     // Allow repay of flash loan
-    IERC20(borrowedAsset).approve(address(LENDING_POOL), vars.flashLoanDebt);
+    IERC20(borrowedAsset).approve(address(POOL), vars.flashLoanDebt);
 
     // Transfer remaining tokens to initiator
     if (vars.remainingTokens > 0) {

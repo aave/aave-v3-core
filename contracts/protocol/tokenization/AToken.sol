@@ -42,7 +42,7 @@ contract AToken is
   address internal _underlyingAsset;
   IAaveIncentivesController internal _incentivesController;
 
-  modifier onlyLendingPool {
+  modifier onlyPool {
     require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
     _;
   }
@@ -122,7 +122,7 @@ contract AToken is
     address receiverOfUnderlying,
     uint256 amount,
     uint256 index
-  ) external override onlyLendingPool {
+  ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
     _burn(user, amountScaled);
@@ -145,7 +145,7 @@ contract AToken is
     address user,
     uint256 amount,
     uint256 index
-  ) external override onlyLendingPool returns (bool) {
+  ) external override onlyPool returns (bool) {
     uint256 previousBalance = super.balanceOf(user);
 
     uint256 amountScaled = amount.rayDiv(index);
@@ -164,7 +164,7 @@ contract AToken is
    * @param amount The amount of tokens getting minted
    * @param index The new liquidity index of the reserve
    */
-  function mintToTreasury(uint256 amount, uint256 index) external override onlyLendingPool {
+  function mintToTreasury(uint256 amount, uint256 index) external override onlyPool {
     if (amount == 0) {
       return;
     }
@@ -192,7 +192,7 @@ contract AToken is
     address from,
     address to,
     uint256 value
-  ) external override onlyLendingPool {
+  ) external override onlyPool {
     // Being a normal transfer, the Transfer() and BalanceTransfer() are emitted
     // so no need to emit a specific event here
     _transfer(from, to, value, false);
@@ -308,7 +308,7 @@ contract AToken is
   function transferUnderlyingTo(address target, uint256 amount)
     external
     override
-    onlyLendingPool
+    onlyPool
     returns (uint256)
   {
     IERC20(_underlyingAsset).safeTransfer(target, amount);
@@ -320,7 +320,7 @@ contract AToken is
    * @param user The user executing the repayment
    * @param amount The amount getting repaid
    **/
-  function handleRepayment(address user, uint256 amount) external override onlyLendingPool {}
+  function handleRepayment(address user, uint256 amount) external override onlyPool {}
 
   /**
    * @dev implements the permit function as for

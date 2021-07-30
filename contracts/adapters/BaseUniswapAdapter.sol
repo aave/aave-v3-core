@@ -261,7 +261,7 @@ abstract contract BaseUniswapAdapter is FlashLoanReceiverBase, IBaseUniswapAdapt
    * @return address of the aToken
    */
   function _getReserveData(address asset) internal view returns (DataTypes.ReserveData memory) {
-    return LENDING_POOL.getReserveData(asset);
+    return POOL.getReserveData(asset);
   }
 
   /**
@@ -295,7 +295,7 @@ abstract contract BaseUniswapAdapter is FlashLoanReceiverBase, IBaseUniswapAdapt
     IERC20(reserveAToken).safeTransferFrom(user, address(this), amount);
 
     // withdraw reserve
-    LENDING_POOL.withdraw(reserve, amount, address(this));
+    POOL.withdraw(reserve, amount, address(this));
   }
 
   /**
