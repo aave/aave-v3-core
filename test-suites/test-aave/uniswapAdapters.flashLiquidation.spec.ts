@@ -18,7 +18,7 @@ const { expect } = require('chai');
 makeSuite('Uniswap adapters', (testEnv: TestEnv) => {
   let mockUniswapRouter: MockUniswapV2Router02;
   let evmSnapshotId: string;
-  const { INVALID_HF, LP_LIQUIDATION_CALL_FAILED } = ProtocolErrors;
+  const { INVALID_HF, P_LIQUIDATION_CALL_FAILED } = ProtocolErrors;
 
   before(async () => {
     mockUniswapRouter = await getMockUniswapRouter();
@@ -798,7 +798,7 @@ makeSuite('Uniswap adapters', (testEnv: TestEnv) => {
               params,
               0
             )
-        ).to.be.revertedWith(LP_LIQUIDATION_CALL_FAILED);
+        ).to.be.revertedWith(P_LIQUIDATION_CALL_FAILED);
       });
 
       it('Revert if requested multiple assets', async () => {

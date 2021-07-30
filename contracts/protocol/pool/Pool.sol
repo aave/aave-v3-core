@@ -61,7 +61,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function _onlyPoolConfigurator() internal view {
     require(
       _addressesProvider.getPoolConfigurator() == msg.sender,
-      Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
+      Errors.P_CALLER_NOT_POOL_CONFIGURATOR
     );
   }
 
@@ -315,7 +315,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         )
       );
 
-    require(success, Errors.LP_LIQUIDATION_CALL_FAILED);
+    require(success, Errors.P_LIQUIDATION_CALL_FAILED);
 
     (uint256 returnCode, string memory returnMessage) = abi.decode(result, (uint256, string));
 
@@ -371,7 +371,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
     require(
       vars.receiver.executeOperation(assets, amounts, vars.totalPremiums, msg.sender, params),
-      Errors.LP_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
     );
 
     for (vars.i = 0; vars.i < assets.length; vars.i++) {
@@ -608,7 +608,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceFromBefore,
     uint256 balanceToBefore
   ) external override {
-    require(msg.sender == _reserves[asset].aTokenAddress, Errors.LP_CALLER_MUST_BE_AN_ATOKEN);
+    require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
 
     ValidationLogic.validateTransfer(_reserves[asset]);
 
@@ -651,7 +651,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address variableDebtAddress,
     address interestRateStrategyAddress
   ) external override onlyPoolConfigurator {
-    require(Address.isContract(asset), Errors.LP_NOT_CONTRACT);
+    require(Address.isContract(asset), Errors.P_NOT_CONTRACT);
     _reserves[asset].init(
       aTokenAddress,
       stableDebtAddress,
@@ -947,7 +947,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function _addReserveToList(address asset) internal returns (uint8) {
     uint256 reservesCount = _reservesCount;
 
-    require(reservesCount < _maxNumberOfReserves, Errors.LP_NO_MORE_RESERVES_ALLOWED);
+    require(reservesCount < _maxNumberOfReserves, Errors.P_NO_MORE_RESERVES_ALLOWED);
 
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
 

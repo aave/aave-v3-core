@@ -45,7 +45,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
    * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
    **/
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
-    require(id != 0, Errors.LPAPR_INVALID_ADDRESSES_PROVIDER_ID);
+    require(id != 0, Errors.PAPR_INVALID_ADDRESSES_PROVIDER_ID);
 
     _addressesProviders[provider] = id;
     _addToAddressesProvidersList(provider);

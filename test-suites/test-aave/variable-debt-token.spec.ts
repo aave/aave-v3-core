@@ -4,7 +4,7 @@ import { ProtocolErrors, TokenContractId, eContractid } from '../../helpers/type
 import { getVariableDebtToken } from '../../helpers/contracts-getters';
 
 makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_LENDING_POOL } = ProtocolErrors;
+  const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
 
   it('Tries to invoke mint not being the Pool', async () => {
     const { deployer, pool, dai, helpersContract } = testEnv;
@@ -17,7 +17,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.mint(deployer.address, deployer.address, '1', '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_LENDING_POOL);
+    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
   });
 
   it('Tries to invoke burn not being the Pool', async () => {
@@ -30,7 +30,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
 
     await expect(variableDebtContract.burn(deployer.address, '1', '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_LENDING_POOL
+      CT_CALLER_MUST_BE_POOL
     );
   });
 });

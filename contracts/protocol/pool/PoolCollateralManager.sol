@@ -157,7 +157,7 @@ contract PoolCollateralManager is
       if (currentAvailableCollateral < vars.maxCollateralToLiquidate) {
         return (
           uint256(Errors.CollateralManagerErrors.NOT_ENOUGH_LIQUIDITY),
-          Errors.LPCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE
+          Errors.PCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE
         );
       }
     }
@@ -247,7 +247,7 @@ contract PoolCollateralManager is
       receiveAToken
     );
 
-    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.LPCM_NO_ERRORS);
+    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.PCM_NO_ERRORS);
   }
 
   struct AvailableCollateralToLiquidateLocalVars {
