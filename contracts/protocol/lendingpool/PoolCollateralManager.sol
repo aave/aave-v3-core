@@ -19,7 +19,7 @@ import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
-import {LendingPoolStorage} from './LendingPoolStorage.sol';
+import {PoolStorage} from './PoolStorage.sol';
 
 /**
  * @title PoolCollateralManager contract
@@ -31,7 +31,7 @@ import {LendingPoolStorage} from './LendingPoolStorage.sol';
 contract PoolCollateralManager is
   IPoolCollateralManager,
   VersionedInitializable,
-  LendingPoolStorage
+  PoolStorage
 {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;

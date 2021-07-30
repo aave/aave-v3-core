@@ -25,7 +25,7 @@ import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
-import {LendingPoolStorage} from './LendingPoolStorage.sol';
+import {PoolStorage} from './PoolStorage.sol';
 
 /**
  * @title LendingPool contract
@@ -44,7 +44,7 @@ import {LendingPoolStorage} from './LendingPoolStorage.sol';
  *   PoolAddressesProvider
  * @author Aave
  **/
-contract LendingPool is VersionedInitializable, ILendingPool, LendingPoolStorage {
+contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
   using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
