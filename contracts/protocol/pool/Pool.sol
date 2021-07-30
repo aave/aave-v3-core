@@ -51,14 +51,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   using SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveCache;
 
-  uint256 public constant LENDINGPOOL_REVISION = 0x2;
+  uint256 public constant POOL_REVISION = 0x2;
 
-  modifier onlyLendingPoolConfigurator() {
-    _onlyLendingPoolConfigurator();
+  modifier onlyPoolConfigurator() {
+    _onlyPoolConfigurator();
     _;
   }
 
-  function _onlyLendingPoolConfigurator() internal view {
+  function _onlyPoolConfigurator() internal view {
     require(
       _addressesProvider.getPoolConfigurator() == msg.sender,
       Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
@@ -66,15 +66,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   function getRevision() internal pure override returns (uint256) {
-    return LENDINGPOOL_REVISION;
+    return POOL_REVISION;
   }
 
   /**
    * @dev Function is invoked by the proxy contract when the Pool contract is added to the
-   * LendingPoolAddressesProvider of the market.
-   * - Caching the address of the LendingPoolAddressesProvider in order to reduce gas consumption
+   * PoolAddressesProvider of the market.
+   * - Caching the address of the PoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
-   * @param provider The address of the LendingPoolAddressesProvider
+   * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
@@ -650,7 +650,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address stableDebtAddress,
     address variableDebtAddress,
     address interestRateStrategyAddress
-  ) external override onlyLendingPoolConfigurator {
+  ) external override onlyPoolConfigurator {
     require(Address.isContract(asset), Errors.LP_NOT_CONTRACT);
     _reserves[asset].init(
       aTokenAddress,
@@ -662,7 +662,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   ///@inheritdoc IPool
-  function dropReserve(address asset) external override onlyLendingPoolConfigurator {
+  function dropReserve(address asset) external override onlyPoolConfigurator {
     ValidationLogic.validateDropReserve(_reserves[asset]);
     _removeReserveFromList(asset);
     delete _reserves[asset];
@@ -672,7 +672,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override
-    onlyLendingPoolConfigurator
+    onlyPoolConfigurator
   {
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
@@ -681,13 +681,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function setConfiguration(address asset, uint256 configuration)
     external
     override
-    onlyLendingPoolConfigurator
+    onlyPoolConfigurator
   {
     _reserves[asset].configuration.data = configuration;
   }
 
   ///@inheritdoc IPool
-  function setPause(bool paused) external override onlyLendingPoolConfigurator {
+  function setPause(bool paused) external override onlyPoolConfigurator {
     _paused = paused;
   }
 
@@ -695,7 +695,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function updateFlashBorrowerAuthorization(address flashBorrower, bool authorized)
     external
     override
-    onlyLendingPoolConfigurator
+    onlyPoolConfigurator
   {
     _authorizedFlashBorrowers[flashBorrower] = authorized;
   }
@@ -709,7 +709,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function updateFlashloanPremiums(
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
-  ) external override onlyLendingPoolConfigurator {
+  ) external override onlyPoolConfigurator {
     _flashLoanPremiumTotal = flashLoanPremiumTotal;
     _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
   }
