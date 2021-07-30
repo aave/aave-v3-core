@@ -12,7 +12,7 @@ import {DataTypes} from '../../contracts/protocol/libraries/types/DataTypes.sol'
 Certora: Harness that delegates calls to the original Pool.
 Used for the verification of the VariableDebtToken contract.
 */
-contract LendingPoolHarnessForVariableDebtToken is IPool {
+contract PoolHarnessForVariableDebtToken is IPool {
   Pool private originalPool;
 
   function deposit(
