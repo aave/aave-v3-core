@@ -113,19 +113,19 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const poolImpl = await deployPool();
 
-  await waitForTx(await addressesProvider.setLendingPoolImpl(poolImpl.address));
+  await waitForTx(await addressesProvider.setPoolImpl(poolImpl.address));
 
-  const poolAddress = await addressesProvider.getLendingPool();
+  const poolAddress = await addressesProvider.getPool();
   const poolProxy = await getPool(poolAddress);
 
   await insertContractAddressInDb(eContractid.Pool, poolProxy.address);
 
   const poolConfiguratorImpl = await deployPoolConfigurator();
   await waitForTx(
-    await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImpl.address)
+    await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address)
   );
   const poolConfiguratorProxy = await getPoolConfiguratorProxy(
-    await addressesProvider.getLendingPoolConfigurator()
+    await addressesProvider.getPoolConfigurator()
   );
   await insertContractAddressInDb(
     eContractid.PoolConfigurator,
@@ -216,7 +216,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
   const rateOracle = await deployRateOracle();
-  await waitForTx(await addressesProvider.setLendingRateOracle(rateOracle.address));
+  await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
 
   const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
   const allReservesAddresses = {
@@ -264,7 +264,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const collateralManager = await deployPoolCollateralManager();
   await waitForTx(
-    await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
+    await addressesProvider.setPoolCollateralManager(collateralManager.address)
   );
   await deployMockFlashLoanReceiver(addressesProvider.address);
 

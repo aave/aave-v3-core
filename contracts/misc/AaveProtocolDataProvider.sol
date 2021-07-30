@@ -30,7 +30,7 @@ contract AaveProtocolDataProvider {
   }
 
   function getAllReservesTokens() external view returns (TokenData[] memory) {
-    IPool pool = IPool(ADDRESSES_PROVIDER.getLendingPool());
+    IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
     TokenData[] memory reservesTokens = new TokenData[](reserves.length);
     for (uint256 i = 0; i < reserves.length; i++) {
@@ -51,7 +51,7 @@ contract AaveProtocolDataProvider {
   }
 
   function getAllATokens() external view returns (TokenData[] memory) {
-    IPool pool = IPool(ADDRESSES_PROVIDER.getLendingPool());
+    IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
     TokenData[] memory aTokens = new TokenData[](reserves.length);
     for (uint256 i = 0; i < reserves.length; i++) {
@@ -82,7 +82,7 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveConfigurationMap memory configuration =
-      IPool(ADDRESSES_PROVIDER.getLendingPool()).getConfiguration(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset);
 
     (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
       .getParamsMemory();
@@ -101,13 +101,13 @@ contract AaveProtocolDataProvider {
       uint256 supplyCap
     )
   {
-    (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getLendingPool())
+    (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset)
       .getCapsMemory();
   }
 
   function getPaused(address asset) external view returns (bool isPaused) {
-    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getLendingPool())
+    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset)
       .getFlagsMemory();
   }
@@ -129,7 +129,7 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getLendingPool()).getReserveData(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
     return (
       IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
@@ -161,10 +161,10 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getLendingPool()).getReserveData(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
     DataTypes.UserConfigurationMap memory userConfig =
-      IPool(ADDRESSES_PROVIDER.getLendingPool()).getUserConfiguration(user);
+      IPool(ADDRESSES_PROVIDER.getPool()).getUserConfiguration(user);
 
     currentATokenBalance = IERC20Detailed(reserve.aTokenAddress).balanceOf(user);
     currentVariableDebt = IERC20Detailed(reserve.variableDebtTokenAddress).balanceOf(user);
@@ -189,7 +189,7 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getLendingPool()).getReserveData(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
     return (
       reserve.aTokenAddress,

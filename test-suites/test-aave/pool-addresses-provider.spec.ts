@@ -19,12 +19,12 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     for (const contractFunction of [
       addressesProvider.setMarketId,
-      addressesProvider.setLendingPoolImpl,
-      addressesProvider.setLendingPoolConfiguratorImpl,
-      addressesProvider.setLendingPoolCollateralManager,
+      addressesProvider.setPoolImpl,
+      addressesProvider.setPoolConfiguratorImpl,
+      addressesProvider.setPoolCollateralManager,
       addressesProvider.setPoolAdmin,
       addressesProvider.setPriceOracle,
-      addressesProvider.setLendingRateOracle,
+      addressesProvider.setRateOracle,
     ]) {
       await expect(contractFunction(mockAddress)).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
     }

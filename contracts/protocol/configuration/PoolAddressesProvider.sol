@@ -20,13 +20,13 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   string private _marketId;
   mapping(bytes32 => address) private _addresses;
 
-  bytes32 private constant LENDING_POOL = 'LENDING_POOL';
-  bytes32 private constant LENDING_POOL_CONFIGURATOR = 'LENDING_POOL_CONFIGURATOR';
+  bytes32 private constant POOL = 'POOL';
+  bytes32 private constant POOL_CONFIGURATOR = 'POOL_CONFIGURATOR';
   bytes32 private constant POOL_ADMIN = 'POOL_ADMIN';
   bytes32 private constant EMERGENCY_ADMIN = 'EMERGENCY_ADMIN';
-  bytes32 private constant LENDING_POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
+  bytes32 private constant POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
-  bytes32 private constant LENDING_RATE_ORACLE = 'LENDING_RATE_ORACLE';
+  bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
 
   constructor(string memory marketId) public {
     _setMarketId(marketId);
@@ -89,8 +89,8 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @dev Returns the address of the Pool proxy
    * @return The Pool proxy address
    **/
-  function getLendingPool() external view override returns (address) {
-    return getAddress(LENDING_POOL);
+  function getPool() external view override returns (address) {
+    return getAddress(POOL);
   }
 
   /**
@@ -98,17 +98,17 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * setting the new `pool` implementation on the first time calling it
    * @param pool The new Pool implementation
    **/
-  function setLendingPoolImpl(address pool) external override onlyOwner {
-    _updateImpl(LENDING_POOL, pool);
-    emit LendingPoolUpdated(pool);
+  function setPoolImpl(address pool) external override onlyOwner {
+    _updateImpl(POOL, pool);
+    emit PoolUpdated(pool);
   }
 
   /**
    * @dev Returns the address of the PoolConfigurator proxy
    * @return The PoolConfigurator proxy address
    **/
-  function getLendingPoolConfigurator() external view override returns (address) {
-    return getAddress(LENDING_POOL_CONFIGURATOR);
+  function getPoolConfigurator() external view override returns (address) {
+    return getAddress(POOL_CONFIGURATOR);
   }
 
   /**
@@ -116,9 +116,9 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * setting the new `configurator` implementation on the first time calling it
    * @param configurator The new PoolConfigurator implementation
    **/
-  function setLendingPoolConfiguratorImpl(address configurator) external override onlyOwner {
-    _updateImpl(LENDING_POOL_CONFIGURATOR, configurator);
-    emit LendingPoolConfiguratorUpdated(configurator);
+  function setPoolConfiguratorImpl(address configurator) external override onlyOwner {
+    _updateImpl(POOL_CONFIGURATOR, configurator);
+    emit PoolConfiguratorUpdated(configurator);
   }
 
   /**
@@ -128,17 +128,17 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @return The address of the PoolCollateralManager
    **/
 
-  function getLendingPoolCollateralManager() external view override returns (address) {
-    return getAddress(LENDING_POOL_COLLATERAL_MANAGER);
+  function getPoolCollateralManager() external view override returns (address) {
+    return getAddress(POOL_COLLATERAL_MANAGER);
   }
 
   /**
    * @dev Updates the address of the PoolCollateralManager
    * @param manager The new PoolCollateralManager address
    **/
-  function setLendingPoolCollateralManager(address manager) external override onlyOwner {
-    _addresses[LENDING_POOL_COLLATERAL_MANAGER] = manager;
-    emit LendingPoolCollateralManagerUpdated(manager);
+  function setPoolCollateralManager(address manager) external override onlyOwner {
+    _addresses[POOL_COLLATERAL_MANAGER] = manager;
+    emit PoolCollateralManagerUpdated(manager);
   }
 
   /**
@@ -173,13 +173,13 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     emit PriceOracleUpdated(priceOracle);
   }
 
-  function getLendingRateOracle() external view override returns (address) {
-    return getAddress(LENDING_RATE_ORACLE);
+  function getRateOracle() external view override returns (address) {
+    return getAddress(RATE_ORACLE);
   }
 
-  function setLendingRateOracle(address lendingRateOracle) external override onlyOwner {
-    _addresses[LENDING_RATE_ORACLE] = lendingRateOracle;
-    emit LendingRateOracleUpdated(lendingRateOracle);
+  function setRateOracle(address rateOracle) external override onlyOwner {
+    _addresses[RATE_ORACLE] = rateOracle;
+    emit RateOracleUpdated(rateOracle);
   }
 
   /**

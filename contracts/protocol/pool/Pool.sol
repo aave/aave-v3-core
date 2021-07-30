@@ -60,7 +60,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   function _onlyLendingPoolConfigurator() internal view {
     require(
-      _addressesProvider.getLendingPoolConfigurator() == msg.sender,
+      _addressesProvider.getPoolConfigurator() == msg.sender,
       Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
     );
   }
@@ -300,7 +300,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 debtToCover,
     bool receiveAToken
   ) external override {
-    address collateralManager = _addressesProvider.getLendingPoolCollateralManager();
+    address collateralManager = _addressesProvider.getPoolCollateralManager();
 
     //solium-disable-next-line
     (bool success, bytes memory result) =

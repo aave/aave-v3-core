@@ -71,7 +71,7 @@ task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')
     await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
     const rateOracle = await deployRateOracle(verify);
-    await waitForTx(await addressesProvider.setLendingRateOracle(rateOracle.address));
+    await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
 
     const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
     const allReservesAddresses = {

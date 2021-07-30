@@ -74,7 +74,7 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
 
     const collateralManager = await deployPoolCollateralManager(verify);
     await waitForTx(
-      await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
+      await addressesProvider.setPoolCollateralManager(collateralManager.address)
     );
 
     const mockFlashLoanReceiver = await deployMockFlashLoanReceiver(
@@ -90,7 +90,7 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
 
     await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
 
-    const poolAddress = await addressesProvider.getLendingPool();
+    const poolAddress = await addressesProvider.getPool();
 
     let gateway = getParamPerNetwork(WethGateway, network);
     if (!notFalsyOrZeroAddress(gateway)) {

@@ -85,7 +85,7 @@ task('full:initialize-pool', 'Initialize pool configuration.')
         collateralManagerAddress
       );
       await waitForTx(
-        await addressesProvider.setLendingPoolCollateralManager(collateralManagerAddress)
+        await addressesProvider.setPoolCollateralManager(collateralManagerAddress)
       );
 
       console.log(
@@ -102,7 +102,7 @@ task('full:initialize-pool', 'Initialize pool configuration.')
 
       await deployWalletBalancerProvider(verify);
 
-      const poolAddress = await addressesProvider.getLendingPool();
+      const poolAddress = await addressesProvider.getPool();
 
       let gateWay = getParamPerNetwork(WethGateway, network);
       if (!notFalsyOrZeroAddress(gateWay)) {

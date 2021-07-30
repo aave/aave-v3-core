@@ -17,6 +17,6 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
 
   constructor(IPoolAddressesProvider provider) public {
     ADDRESSES_PROVIDER = provider;
-    LENDING_POOL = IPool(provider.getLendingPool());
+    LENDING_POOL = IPool(provider.getPool());
   }
 }

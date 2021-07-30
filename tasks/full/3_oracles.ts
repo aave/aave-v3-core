@@ -86,7 +86,7 @@ task('full:deploy-oracles', 'Deploy oracles for dev enviroment')
 
       // Register the proxy price provider on the addressesProvider
       await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
-      await waitForTx(await addressesProvider.setLendingRateOracle(rateOracle.address));
+      await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
     } catch (error) {
       if (DRE.network.name.includes('tenderly')) {
         const transactionLink = `https://dashboard.tenderly.co/${DRE.config.tenderly.username}/${

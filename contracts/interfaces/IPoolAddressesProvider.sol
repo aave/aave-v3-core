@@ -10,13 +10,13 @@ pragma solidity 0.6.12;
  **/
 interface IPoolAddressesProvider {
   event MarketIdSet(string newMarketId);
-  event LendingPoolUpdated(address indexed newAddress);
+  event PoolUpdated(address indexed newAddress);
   event ConfigurationAdminUpdated(address indexed newAddress);
   event EmergencyAdminUpdated(address indexed newAddress);
-  event LendingPoolConfiguratorUpdated(address indexed newAddress);
-  event LendingPoolCollateralManagerUpdated(address indexed newAddress);
+  event PoolConfiguratorUpdated(address indexed newAddress);
+  event PoolCollateralManagerUpdated(address indexed newAddress);
   event PriceOracleUpdated(address indexed newAddress);
-  event LendingRateOracleUpdated(address indexed newAddress);
+  event RateOracleUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
@@ -30,17 +30,17 @@ interface IPoolAddressesProvider {
 
   function getAddress(bytes32 id) external view returns (address);
 
-  function getLendingPool() external view returns (address);
+  function getPool() external view returns (address);
 
-  function setLendingPoolImpl(address pool) external;
+  function setPoolImpl(address pool) external;
 
-  function getLendingPoolConfigurator() external view returns (address);
+  function getPoolConfigurator() external view returns (address);
 
-  function setLendingPoolConfiguratorImpl(address configurator) external;
+  function setPoolConfiguratorImpl(address configurator) external;
 
-  function getLendingPoolCollateralManager() external view returns (address);
+  function getPoolCollateralManager() external view returns (address);
 
-  function setLendingPoolCollateralManager(address manager) external;
+  function setPoolCollateralManager(address manager) external;
 
   function getPoolAdmin() external view returns (address);
 
@@ -54,7 +54,7 @@ interface IPoolAddressesProvider {
 
   function setPriceOracle(address priceOracle) external;
 
-  function getLendingRateOracle() external view returns (address);
+  function getRateOracle() external view returns (address);
 
-  function setLendingRateOracle(address lendingRateOracle) external;
+  function setRateOracle(address rateOracle) external;
 }
