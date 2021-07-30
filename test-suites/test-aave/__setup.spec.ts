@@ -11,7 +11,7 @@ import {
   deployMintableERC20,
   deployPoolAddressesProviderRegistry,
   deployPoolConfigurator,
-  deployLendingPool,
+  deployPool,
   deployPriceOracle,
   deployAaveOracle,
   deployPoolCollateralManager,
@@ -51,7 +51,7 @@ import { initReservesByHelper, configureReservesByHelper } from '../../helpers/i
 import AaveConfig from '../../markets/aave';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
-  getLendingPool,
+  getPool,
   getPoolConfiguratorProxy,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
@@ -112,14 +112,14 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
   );
 
-  const lendingPoolImpl = await deployLendingPool();
+  const poolImpl = await deployPool();
 
-  await waitForTx(await addressesProvider.setLendingPoolImpl(lendingPoolImpl.address));
+  await waitForTx(await addressesProvider.setLendingPoolImpl(poolImpl.address));
 
-  const lendingPoolAddress = await addressesProvider.getLendingPool();
-  const lendingPoolProxy = await getLendingPool(lendingPoolAddress);
+  const poolAddress = await addressesProvider.getLendingPool();
+  const poolProxy = await getPool(poolAddress);
 
-  await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
+  await insertContractAddressInDb(eContractid.Pool, poolProxy.address);
 
   const poolConfiguratorImpl = await deployPoolConfigurator();
   await waitForTx(
@@ -135,9 +135,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   );
 
   // Deploy deployment helpers
-  await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address]);
+  await deployStableAndVariableTokensHelper([poolProxy.address, addressesProvider.address]);
   await deployATokensAndRatesHelper([
-    lendingPoolProxy.address,
+    poolProxy.address,
     addressesProvider.address,
     poolConfiguratorProxy.address,
   ]);
@@ -290,7 +290,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await deployWalletBalancerProvider();
 
   const gateWay = await deployWETHGateway([mockTokens.WETH.address]);
-  await authorizeWETHGateway(gateWay.address, lendingPoolAddress);
+  await authorizeWETHGateway(gateWay.address, poolAddress);
 
   console.timeEnd('setup');
 };

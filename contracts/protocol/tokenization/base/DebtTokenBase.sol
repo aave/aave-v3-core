@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.6.12;
 
-import {ILendingPool} from '../../../interfaces/ILendingPool.sol';
+import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
 import {
   VersionedInitializable
@@ -23,7 +23,7 @@ abstract contract DebtTokenBase is
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
 
   /**
-   * @dev Only lending pool can call functions marked by this modifier
+   * @dev Only pool can call functions marked by this modifier
    **/
   modifier onlyLendingPool {
     require(_msgSender() == address(_getLendingPool()), Errors.CT_CALLER_MUST_BE_LENDING_POOL);
@@ -141,5 +141,5 @@ abstract contract DebtTokenBase is
 
   function _getUnderlyingAssetAddress() internal view virtual returns (address);
 
-  function _getLendingPool() internal view virtual returns (ILendingPool);
+  function _getLendingPool() internal view virtual returns (IPool);
 }

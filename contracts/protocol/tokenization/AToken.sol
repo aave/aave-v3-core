@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
@@ -37,7 +37,7 @@ contract AToken is
 
   bytes32 public DOMAIN_SEPARATOR;
 
-  ILendingPool internal _pool;
+  IPool internal _pool;
   address internal _treasury;
   address internal _underlyingAsset;
   IAaveIncentivesController internal _incentivesController;
@@ -53,7 +53,7 @@ contract AToken is
 
   /**
    * @dev Initializes the aToken
-   * @param pool The address of the lending pool where this aToken will be used
+   * @param pool The address of the pool where this aToken will be used
    * @param treasury The address of the Aave treasury, receiving the fees on this aToken
    * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
    * @param incentivesController The smart contract managing potential incentives distribution
@@ -62,7 +62,7 @@ contract AToken is
    * @param aTokenSymbol The symbol of the aToken
    */
   function initialize(
-    ILendingPool pool,
+    IPool pool,
     address treasury,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
@@ -111,7 +111,7 @@ contract AToken is
 
   /**
    * @dev Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
-   * - Only callable by the LendingPool, as extra state updates there need to be managed
+   * - Only callable by the Pool, as extra state updates there need to be managed
    * @param user The owner of the aTokens, getting them burned
    * @param receiverOfUnderlying The address that will receive the underlying
    * @param amount The amount being burned
@@ -135,7 +135,7 @@ contract AToken is
 
   /**
    * @dev Mints `amount` aTokens to `user`
-   * - Only callable by the LendingPool, as extra state updates there need to be managed
+   * - Only callable by the Pool, as extra state updates there need to be managed
    * @param user The address receiving the minted tokens
    * @param amount The amount of tokens getting minted
    * @param index The new liquidity index of the reserve
@@ -160,7 +160,7 @@ contract AToken is
 
   /**
    * @dev Mints aTokens to the reserve treasury
-   * - Only callable by the LendingPool
+   * - Only callable by the Pool
    * @param amount The amount of tokens getting minted
    * @param index The new liquidity index of the reserve
    */
@@ -183,7 +183,7 @@ contract AToken is
 
   /**
    * @dev Transfers aTokens in the event of a borrow being liquidated, in case the liquidators reclaims the aToken
-   * - Only callable by the LendingPool
+   * - Only callable by the Pool
    * @param from The address getting liquidated, current owner of the aTokens
    * @param to The recipient
    * @param value The amount of tokens getting transferred
@@ -278,9 +278,9 @@ contract AToken is
   }
 
   /**
-   * @dev Returns the address of the lending pool where this aToken is used
+   * @dev Returns the address of the pool where this aToken is used
    **/
-  function POOL() public view returns (ILendingPool) {
+  function POOL() public view returns (IPool) {
     return _pool;
   }
 
@@ -299,7 +299,7 @@ contract AToken is
   }
 
   /**
-   * @dev Transfers the underlying asset to `target`. Used by the LendingPool to transfer
+   * @dev Transfers the underlying asset to `target`. Used by the Pool to transfer
    * assets in borrow(), withdraw() and flashLoan()
    * @param target The recipient of the aTokens
    * @param amount The amount getting transferred
@@ -374,7 +374,7 @@ contract AToken is
     bool validate
   ) internal {
     address underlyingAsset = _underlyingAsset;
-    ILendingPool pool = _pool;
+    IPool pool = _pool;
 
     uint256 index = pool.getReserveNormalizedIncome(underlyingAsset);
 

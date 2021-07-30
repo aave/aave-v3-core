@@ -28,7 +28,7 @@ import {
   PoolAddressesProviderRegistryFactory,
   PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
-  LendingPoolFactory,
+  PoolFactory,
   RateOracleFactory,
   MintableDelegationERC20Factory,
   MintableERC20Factory,
@@ -62,7 +62,7 @@ import { StableAndVariableTokensHelperFactory } from '../types/StableAndVariable
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { LendingPoolLibraryAddresses } from '../types/LendingPoolFactory';
+import { PoolLibraryAddresses } from '../types/PoolFactory';
 import { UiPoolDataProvider } from '../types';
 
 export const deployUiPoolDataProvider = async (
@@ -169,19 +169,19 @@ export const deployValidationLogic = async (
 
 export const deployAaveLibraries = async (
   verify?: boolean
-): Promise<LendingPoolLibraryAddresses> => {
+): Promise<PoolLibraryAddresses> => {
   const reserveLogic = await deployReserveLogicLibrary(verify);
   const genericLogic = await deployGenericLogic(reserveLogic, verify);
   const validationLogic = await deployValidationLogic(reserveLogic, genericLogic, verify);
 
   // Hardcoded solidity placeholders, if any library changes path this will fail.
-  // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the LendingPoolLibraryAddresses Type seems to
+  // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
   //
   //  how-to:
   //  1. PLACEHOLDER = solidityKeccak256(['string'], `${libPath}:${libName}`).slice(2, 36)
   //  2. LIB_PLACEHOLDER = `__$${PLACEHOLDER}$__`
-  // or grab placeholdes from LendingPoolLibraryAddresses at Typechain generation.
+  // or grab placeholdes from PoolLibraryAddresses at Typechain generation.
   //
   // libPath example: contracts/libraries/logic/GenericLogic.sol
   // libName example: GenericLogic
@@ -192,11 +192,11 @@ export const deployAaveLibraries = async (
   };
 };
 
-export const deployLendingPool = async (verify?: boolean) => {
+export const deployPool = async (verify?: boolean) => {
   const libraries = await deployAaveLibraries(verify);
-  const lendingPoolImpl = await new LendingPoolFactory(libraries, await getFirstSigner()).deploy();
-  await insertContractAddressInDb(eContractid.LendingPoolImpl, lendingPoolImpl.address);
-  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify);
+  const poolImpl = await new PoolFactory(libraries, await getFirstSigner()).deploy();
+  await insertContractAddressInDb(eContractid.PoolImpl, poolImpl.address);
+  return withSaveAndVerify(poolImpl, eContractid.Pool, [], verify);
 };
 
 export const deployPriceOracle = async (verify?: boolean) =>
@@ -520,11 +520,11 @@ export const deployWETHGateway = async (args: [tEthereumAddress], verify?: boole
 
 export const authorizeWETHGateway = async (
   wethGateWay: tEthereumAddress,
-  lendingPool: tEthereumAddress
+  pool: tEthereumAddress
 ) =>
   await new WETHGatewayFactory(await getFirstSigner())
     .attach(wethGateWay)
-    .authorizeLendingPool(lendingPool);
+    .authorizeLendingPool(pool);
 
 export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],

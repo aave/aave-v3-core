@@ -3,7 +3,7 @@ import { deployWalletBalancerProvider } from '../../helpers/contracts-deployment
 
 import { getPoolAddressesProvider } from '../../helpers/contracts-getters';
 
-task('dev:wallet-balance-provider', 'Initialize lending pool configuration.')
+task('dev:wallet-balance-provider', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');

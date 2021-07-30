@@ -3,7 +3,7 @@ import { deployAaveProtocolDataProvider } from '../../helpers/contracts-deployme
 import { exit } from 'process';
 import { getPoolAddressesProvider } from '../../helpers/contracts-getters';
 
-task('full:data-provider', 'Initialize lending pool configuration.')
+task('full:data-provider', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     try {

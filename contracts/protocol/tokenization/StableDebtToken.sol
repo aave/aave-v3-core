@@ -5,7 +5,7 @@ import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {MathUtils} from '../libraries/math/MathUtils.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 
@@ -33,7 +33,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   mapping(address => uint256) internal _usersStableRate;
   uint40 internal _totalSupplyTimestamp;
 
-  ILendingPool internal _pool;
+  IPool internal _pool;
   address internal _underlyingAsset;
   IAaveIncentivesController internal _incentivesController;
 
@@ -42,7 +42,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   /**
    * @dev Initializes the debt token.
-   * @param pool The address of the lending pool where this aToken will be used
+   * @param pool The address of the pool where this aToken will be used
    * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
    * @param incentivesController The smart contract managing potential incentives distribution
    * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
@@ -50,7 +50,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @param debtTokenSymbol The symbol of the token
    */
   function initialize(
-    ILendingPool pool,
+    IPool pool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
@@ -152,7 +152,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   /**
    * @dev Mints debt token to the `onBehalfOf` address.
-   * -  Only callable by the LendingPool
+   * -  Only callable by the Pool
    * - The resulting rate is the weighted average between the rate of the new debt
    * and the rate of the previous debt
    * @param user The address receiving the borrowed underlying, being the delegatee in case
@@ -416,9 +416,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /**
-   * @dev Returns the address of the lending pool where this aToken is used
+   * @dev Returns the address of the pool where this aToken is used
    **/
-  function POOL() public view returns (ILendingPool) {
+  function POOL() public view returns (IPool) {
     return _pool;
   }
 
@@ -446,7 +446,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   /**
    * @dev For internal usage in the logic of the parent contracts
    **/
-  function _getLendingPool() internal view override returns (ILendingPool) {
+  function _getLendingPool() internal view override returns (IPool) {
     return _pool;
   }
 

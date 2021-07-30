@@ -80,7 +80,7 @@ export const CommonsConfig: ICommonConfiguration = {
   PoolConfigurator: {
     [eXDaiNetwork.xdai]: '0',
   },
-  LendingPool: {
+  Pool: {
     [eXDaiNetwork.xdai]: '0',
   },
   RateOracle: {

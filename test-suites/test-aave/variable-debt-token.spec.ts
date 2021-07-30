@@ -6,7 +6,7 @@ import { getVariableDebtToken } from '../../helpers/contracts-getters';
 makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_LENDING_POOL } = ProtocolErrors;
 
-  it('Tries to invoke mint not being the LendingPool', async () => {
+  it('Tries to invoke mint not being the Pool', async () => {
     const { deployer, pool, dai, helpersContract } = testEnv;
 
     const daiVariableDebtTokenAddress = (
@@ -20,7 +20,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_CALLER_MUST_BE_LENDING_POOL);
   });
 
-  it('Tries to invoke burn not being the LendingPool', async () => {
+  it('Tries to invoke burn not being the Pool', async () => {
     const { deployer, pool, dai, helpersContract } = testEnv;
 
     const daiVariableDebtTokenAddress = (

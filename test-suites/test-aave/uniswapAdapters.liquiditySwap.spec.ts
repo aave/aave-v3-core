@@ -770,7 +770,7 @@ makeSuite('Uniswap adapters', (testEnv: TestEnv) => {
         ).to.be.revertedWith('INCONSISTENT_PARAMS');
       });
 
-      it('should revert if caller not lending pool', async () => {
+      it('should revert if caller not pool', async () => {
         const { users, weth, oracle, dai, aWETH, uniswapLiquiditySwapAdapter } = testEnv;
         const user = users[0].signer;
         const userAddress = users[0].address;

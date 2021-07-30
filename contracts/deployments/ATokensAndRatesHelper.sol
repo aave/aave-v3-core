@@ -2,15 +2,15 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import {LendingPool} from '../protocol/lendingpool/LendingPool.sol';
+import {Pool} from '../protocol/pool/Pool.sol';
 import {
   PoolAddressesProvider
 } from '../protocol/configuration/PoolAddressesProvider.sol';
-import {PoolConfigurator} from '../protocol/lendingpool/PoolConfigurator.sol';
+import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
 import {
   DefaultReserveInterestRateStrategy
-} from '../protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {StringLib} from './StringLib.sol';
 

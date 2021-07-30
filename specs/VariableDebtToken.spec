@@ -1,4 +1,4 @@
-using LendingPoolHarnessForVariableDebtToken as POOL
+using PoolHarnessForVariableDebtToken as POOL
 
 /**
 Checks that each possible opertaion changes the balance of at most one user.

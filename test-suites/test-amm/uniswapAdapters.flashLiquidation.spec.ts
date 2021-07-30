@@ -178,11 +178,11 @@
 //   });
 
 //   describe('Flash Liquidation Adapter', () => {
-//     before('Before LendingPool liquidation: set config', () => {
+//     before('Before Pool liquidation: set config', () => {
 //       BigNumber.config({ DECIMAL_PLACES: 0, ROUNDING_MODE: BigNumber.ROUND_DOWN });
 //     });
 
-//     after('After LendingPool liquidation: reset config', () => {
+//     after('After Pool liquidation: reset config', () => {
 //       BigNumber.config({ DECIMAL_PLACES: 20, ROUNDING_MODE: BigNumber.ROUND_HALF_UP });
 //     });
 

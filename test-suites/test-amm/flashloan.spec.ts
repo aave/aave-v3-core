@@ -16,7 +16,7 @@ import {
 
 const { expect } = require('chai');
 
-makeSuite('LendingPool FlashLoan function', (testEnv: TestEnv) => {
+makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
   const {
     VL_COLLATERAL_BALANCE_IS_0,

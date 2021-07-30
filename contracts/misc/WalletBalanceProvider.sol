@@ -7,7 +7,7 @@ import {Address} from '../dependencies/openzeppelin/contracts/Address.sol';
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 
 import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
-import {ILendingPool} from '../interfaces/ILendingPool.sol';
+import {IPool} from '../interfaces/IPool.sol';
 import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
@@ -81,7 +81,7 @@ contract WalletBalanceProvider {
     view
     returns (address[] memory, uint256[] memory)
   {
-    ILendingPool pool = ILendingPool(IPoolAddressesProvider(provider).getLendingPool());
+    IPool pool = IPool(IPoolAddressesProvider(provider).getLendingPool());
 
     address[] memory reserves = pool.getReservesList();
     address[] memory reservesWithEth = new address[](reserves.length + 1);

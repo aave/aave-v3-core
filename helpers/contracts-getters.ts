@@ -10,7 +10,7 @@ import {
   PoolAddressesProviderRegistryFactory,
   PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
-  LendingPoolFactory,
+  PoolFactory,
   RateOracleFactory,
   MintableERC20Factory,
   MockATokenFactory,
@@ -55,10 +55,10 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
   );
 };
 
-export const getLendingPool = async (address?: tEthereumAddress) =>
-  await LendingPoolFactory.connect(
+export const getPool = async (address?: tEthereumAddress) =>
+  await PoolFactory.connect(
     address ||
-      (await getDb().get(`${eContractid.LendingPool}.${DRE.network.name}`).value()).address,
+      (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
@@ -283,10 +283,10 @@ export const getSelfdestructTransferMock = async (address?: tEthereumAddress) =>
 export const getProxy = async (address: tEthereumAddress) =>
   await InitializableAdminUpgradeabilityProxyFactory.connect(address, await getFirstSigner());
 
-export const getLendingPoolImpl = async (address?: tEthereumAddress) =>
-  await LendingPoolFactory.connect(
+export const getPoolImpl = async (address?: tEthereumAddress) =>
+  await PoolFactory.connect(
     address ||
-      (await getDb().get(`${eContractid.LendingPoolImpl}.${DRE.network.name}`).value()).address,
+      (await getDb().get(`${eContractid.PoolImpl}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

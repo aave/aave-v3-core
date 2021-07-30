@@ -46,12 +46,12 @@ export enum eContractid {
   MintableERC20 = 'MintableERC20',
   MintableDelegationERC20 = 'MintableDelegationERC20',
   PoolAddressesProviderRegistry = 'PoolAddressesProviderRegistry',
-  LendingPoolParametersProvider = 'LendingPoolParametersProvider',
+  PoolParametersProvider = 'PoolParametersProvider',
   PoolConfigurator = 'PoolConfigurator',
   ValidationLogic = 'ValidationLogic',
   ReserveLogic = 'ReserveLogic',
   GenericLogic = 'GenericLogic',
-  LendingPool = 'LendingPool',
+  Pool = 'Pool',
   PriceOracle = 'PriceOracle',
   Proxy = 'Proxy',
   MockAggregator = 'MockAggregator',
@@ -80,7 +80,7 @@ export enum eContractid {
   WETH = 'WETH',
   WETHMocked = 'WETHMocked',
   SelfdestructTransferMock = 'SelfdestructTransferMock',
-  LendingPoolImpl = 'LendingPoolImpl',
+  PoolImpl = 'PoolImpl',
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
   PoolCollateralManagerImpl = 'PoolCollateralManagerImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
@@ -490,7 +490,7 @@ export interface ICommonConfiguration {
   ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
   PoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
   PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
-  LendingPool: iParamsPerNetwork<tEthereumAddress>;
+  Pool: iParamsPerNetwork<tEthereumAddress>;
   RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
   RateOracle: iParamsPerNetwork<tEthereumAddress>;
   TokenDistributor: iParamsPerNetwork<tEthereumAddress>;

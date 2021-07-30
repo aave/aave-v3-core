@@ -13,7 +13,7 @@ import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IFlashLoanReceiver} from '../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
@@ -28,7 +28,7 @@ import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {PoolStorage} from './PoolStorage.sol';
 
 /**
- * @title LendingPool contract
+ * @title Pool contract
  * @dev Main point of interaction with an Aave protocol's market
  * - Users can:
  *   # Deposit
@@ -44,7 +44,7 @@ import {PoolStorage} from './PoolStorage.sol';
  *   PoolAddressesProvider
  * @author Aave
  **/
-contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
+contract Pool is VersionedInitializable, IPool, PoolStorage {
   using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -70,11 +70,11 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
   }
 
   /**
-   * @dev Function is invoked by the proxy contract when the LendingPool contract is added to the
-   * PoolAddressesProvider of the market.
-   * - Caching the address of the PoolAddressesProvider in order to reduce gas consumption
+   * @dev Function is invoked by the proxy contract when the Pool contract is added to the
+   * LendingPoolAddressesProvider of the market.
+   * - Caching the address of the LendingPoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
-   * @param provider The address of the PoolAddressesProvider
+   * @param provider The address of the LendingPoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
@@ -84,7 +84,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     _flashLoanPremiumToProtocol = 0;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function deposit(
     address asset,
     uint256 amount,
@@ -94,7 +94,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     _executeDeposit(asset, amount, onBehalfOf, referralCode);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function depositWithPermit(
     address asset,
     uint256 amount,
@@ -117,7 +117,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     _executeDeposit(asset, amount, onBehalfOf, referralCode);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function withdraw(
     address asset,
     uint256 amount,
@@ -126,7 +126,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _executeWithdraw(asset, amount, to);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function borrow(
     address asset,
     uint256 amount,
@@ -147,7 +147,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function repay(
     address asset,
     uint256 amount,
@@ -157,7 +157,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _executeRepay(asset, amount, rateMode, onBehalfOf);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function repayWithPermit(
     address asset,
     uint256 amount,
@@ -180,7 +180,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _executeRepay(asset, amount, rateMode, onBehalfOf);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function swapBorrowRateMode(address asset, uint256 rateMode) external override {
     DataTypes.ReserveData storage reserve = _reserves[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
@@ -229,7 +229,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     emit Swap(asset, msg.sender, rateMode);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function rebalanceStableBorrowRate(address asset, address user) external override {
     DataTypes.ReserveData storage reserve = _reserves[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
@@ -264,7 +264,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     emit RebalanceStableBorrowRate(asset, user);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
     DataTypes.ReserveData storage reserve = _reserves[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
@@ -292,7 +292,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     }
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function liquidationCall(
     address collateralAsset,
     address debtAsset,
@@ -339,7 +339,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     uint256 flashloanPremiumToProtocol;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function flashLoan(
     address receiverAddress,
     address[] calldata assets,
@@ -432,7 +432,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     }
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function mintToTreasury(address[] calldata assets) external override {
     for (uint256 i = 0; i < assets.length; i++) {
       address assetAddress = assets[i];
@@ -457,7 +457,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     }
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getReserveData(address asset)
     external
     view
@@ -467,7 +467,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _reserves[asset];
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getUserAccountData(address user)
     external
     view
@@ -504,7 +504,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getConfiguration(address asset)
     external
     view
@@ -514,7 +514,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _reserves[asset].configuration;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getUserConfiguration(address user)
     external
     view
@@ -524,7 +524,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _usersConfig[user];
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getReserveNormalizedIncome(address asset)
     external
     view
@@ -535,7 +535,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _reserves[asset].getNormalizedIncome();
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getReserveNormalizedVariableDebt(address asset)
     external
     view
@@ -545,12 +545,12 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return _reserves[asset].getNormalizedDebt();
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function paused() external view override returns (bool) {
     return _paused;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getReservesList() external view override returns (address[] memory) {
     uint256 reserveListCount = _reservesCount;
     uint256 droppedReservesCount = 0;
@@ -574,32 +574,32 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     return undroppedReserves;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function getAddressesProvider() external view override returns (IPoolAddressesProvider) {
     return _addressesProvider;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() public view override returns (uint256) {
     return _maxStableRateBorrowSizePercent;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function FLASHLOAN_PREMIUM_TOTAL() public view override returns (uint256) {
     return _flashLoanPremiumTotal;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function FLASHLOAN_PREMIUM_TO_PROTOCOL() public view override returns (uint256) {
     return _flashLoanPremiumToProtocol;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function MAX_NUMBER_RESERVES() public view override returns (uint256) {
     return _maxNumberOfReserves;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function finalizeTransfer(
     address asset,
     address from,
@@ -643,7 +643,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     }
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function initReserve(
     address asset,
     address aTokenAddress,
@@ -661,14 +661,14 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     _addReserveToList(asset);
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function dropReserve(address asset) external override onlyLendingPoolConfigurator {
     ValidationLogic.validateDropReserve(_reserves[asset]);
     _removeReserveFromList(asset);
     delete _reserves[asset];
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override
@@ -677,7 +677,7 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function setConfiguration(address asset, uint256 configuration)
     external
     override
@@ -686,12 +686,12 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     _reserves[asset].configuration.data = configuration;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function setPause(bool paused) external override onlyLendingPoolConfigurator {
     _paused = paused;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function updateFlashBorrowerAuthorization(address flashBorrower, bool authorized)
     external
     override
@@ -700,12 +700,12 @@ contract LendingPool is VersionedInitializable, ILendingPool, PoolStorage {
     _authorizedFlashBorrowers[flashBorrower] = authorized;
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function isFlashBorrowerAuthorized(address flashBorrower) external view override returns (bool) {
     return _authorizedFlashBorrowers[flashBorrower];
   }
 
-  ///@inheritdoc ILendingPool
+  ///@inheritdoc IPool
   function updateFlashloanPremiums(
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol

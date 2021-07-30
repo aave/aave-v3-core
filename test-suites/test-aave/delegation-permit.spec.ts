@@ -47,7 +47,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     expect(stableSeparator).to.be.equal(stableDomainSeparator, 'Invalid stable domain separator');
   });
 
-  it('Setup the lending pool', async () => {
+  it('Setup the pool', async () => {
     const {
       pool,
       weth,

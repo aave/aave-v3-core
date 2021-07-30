@@ -25,8 +25,8 @@ import {PoolStorage} from './PoolStorage.sol';
  * @title PoolCollateralManager contract
  * @author Aave
  * @dev Implements actions involving management of collateral in the protocol, the main one being the liquidations
- * IMPORTANT This contract will run always via DELEGATECALL, through the LendingPool, so the chain of inheritance
- * is the same as the LendingPool, to have compatible storage layouts
+ * IMPORTANT This contract will run always via DELEGATECALL, through the Pool, so the chain of inheritance
+ * is the same as the Pool, to have compatible storage layouts
  **/
 contract PoolCollateralManager is
   IPoolCollateralManager,
@@ -64,7 +64,7 @@ contract PoolCollateralManager is
 
   /**
    * @dev As thIS contract extends the VersionedInitializable contract to match the state
-   * of the LendingPool contract, the getRevision() function is needed, but the value is not
+   * of the Pool contract, the getRevision() function is needed, but the value is not
    * important, as the initialize() function will never be called here
    */
   function getRevision() internal pure override returns (uint256) {

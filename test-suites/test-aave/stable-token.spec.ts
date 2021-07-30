@@ -6,7 +6,7 @@ import { getStableDebtToken } from '../../helpers/contracts-getters';
 makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_LENDING_POOL } = ProtocolErrors;
 
-  it('Tries to invoke mint not being the LendingPool', async () => {
+  it('Tries to invoke mint not being the Pool', async () => {
     const { deployer, pool, dai, helpersContract } = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
@@ -19,7 +19,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_CALLER_MUST_BE_LENDING_POOL);
   });
 
-  it('Tries to invoke burn not being the LendingPool', async () => {
+  it('Tries to invoke burn not being the Pool', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
