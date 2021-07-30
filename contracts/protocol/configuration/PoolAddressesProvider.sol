@@ -24,7 +24,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant POOL_CONFIGURATOR = 'POOL_CONFIGURATOR';
   bytes32 private constant POOL_ADMIN = 'POOL_ADMIN';
   bytes32 private constant EMERGENCY_ADMIN = 'EMERGENCY_ADMIN';
-  bytes32 private constant LENDING_POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
+  bytes32 private constant POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant LENDING_RATE_ORACLE = 'LENDING_RATE_ORACLE';
 
@@ -128,8 +128,8 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @return The address of the PoolCollateralManager
    **/
 
-  function getLendingPoolCollateralManager() external view override returns (address) {
-    return getAddress(LENDING_POOL_COLLATERAL_MANAGER);
+  function getPoolCollateralManager() external view override returns (address) {
+    return getAddress(POOL_COLLATERAL_MANAGER);
   }
 
   /**
@@ -137,7 +137,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @param manager The new PoolCollateralManager address
    **/
   function setLendingPoolCollateralManager(address manager) external override onlyOwner {
-    _addresses[LENDING_POOL_COLLATERAL_MANAGER] = manager;
+    _addresses[POOL_COLLATERAL_MANAGER] = manager;
     emit LendingPoolCollateralManagerUpdated(manager);
   }
 

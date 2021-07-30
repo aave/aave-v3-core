@@ -33,7 +33,7 @@ task('print-config', 'Inits the DRE, to have access to all the plugins')
     console.log('Pool Proxy:', await addressesProvider.getPool());
     console.log(
       'Pool Collateral Manager',
-      await addressesProvider.getLendingPoolCollateralManager()
+      await addressesProvider.getPoolCollateralManager()
     );
     console.log(
       'Pool Configurator proxy',

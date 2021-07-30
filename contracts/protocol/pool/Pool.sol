@@ -300,7 +300,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 debtToCover,
     bool receiveAToken
   ) external override {
-    address collateralManager = _addressesProvider.getLendingPoolCollateralManager();
+    address collateralManager = _addressesProvider.getPoolCollateralManager();
 
     //solium-disable-next-line
     (bool success, bytes memory result) =
