@@ -115,7 +115,7 @@ interface IPool {
 
   /**
    * @dev Emitted when a borrower is liquidated. This event is emitted by the Pool via
-   * LendingPoolCollateral manager using a DELEGATECALL
+   * PoolCollateral manager using a DELEGATECALL
    * This allows to have the events in the generated ABI for Pool.
    * @param collateralAsset The address of the underlying asset used as collateral, to receive as result of the liquidation
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
