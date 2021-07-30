@@ -377,7 +377,7 @@ library ValidationLogic {
       usageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
         currentLiquidityRate <=
         maxVariableBorrowRate.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
-      Errors.LP_INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
+      Errors.P_INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
   }
 
@@ -478,7 +478,7 @@ library ValidationLogic {
     if (vars.healthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD) {
       return (
         uint256(Errors.CollateralManagerErrors.HEALTH_FACTOR_ABOVE_THRESHOLD),
-        Errors.LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
+        Errors.PCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
       );
     }
 
@@ -490,18 +490,18 @@ library ValidationLogic {
     if (!vars.isCollateralEnabled) {
       return (
         uint256(Errors.CollateralManagerErrors.COLLATERAL_CANNOT_BE_LIQUIDATED),
-        Errors.LPCM_COLLATERAL_CANNOT_BE_LIQUIDATED
+        Errors.PCM_COLLATERAL_CANNOT_BE_LIQUIDATED
       );
     }
 
     if (totalDebt == 0) {
       return (
         uint256(Errors.CollateralManagerErrors.CURRRENCY_NOT_BORROWED),
-        Errors.LPCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER
+        Errors.PCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER
       );
     }
 
-    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.LPCM_NO_ERRORS);
+    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.PCM_NO_ERRORS);
   }
 
   struct validateHFAndLtvLocalVars {

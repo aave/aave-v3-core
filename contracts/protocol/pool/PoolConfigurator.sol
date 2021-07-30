@@ -43,7 +43,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   modifier onlyEmergencyAdmin {
     require(
       _addressesProvider.getEmergencyAdmin() == msg.sender,
-      Errors.LPC_CALLER_NOT_EMERGENCY_ADMIN
+      Errors.PC_CALLER_NOT_EMERGENCY_ADMIN
     );
     _;
   }
@@ -52,7 +52,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(
       _addressesProvider.getEmergencyAdmin() == msg.sender ||
         _addressesProvider.getPoolAdmin() == msg.sender,
-      Errors.LPC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
+      Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
     );
     _;
   }
@@ -60,7 +60,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   modifier onlyRiskOrPoolAdmins {
     require(
       _riskAdmins[msg.sender] || _addressesProvider.getPoolAdmin() == msg.sender,
-      Errors.LPC_CALLER_NOT_RISK_OR_POOL_ADMIN
+      Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
     );
     _;
   }
@@ -303,24 +303,24 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     //validation of the parameters: the LTV can
     //only be lower or equal than the liquidation threshold
     //(otherwise a loan against the asset would cause instantaneous liquidation)
-    require(ltv <= liquidationThreshold, Errors.LPC_INVALID_CONFIGURATION);
+    require(ltv <= liquidationThreshold, Errors.PC_INVALID_CONFIGURATION);
 
     if (liquidationThreshold != 0) {
       //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
       //collateral than needed to cover the debt
       require(
         liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
-        Errors.LPC_INVALID_CONFIGURATION
+        Errors.PC_INVALID_CONFIGURATION
       );
 
       //if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
       //a loan is taken there is enough collateral available to cover the liquidation bonus
       require(
         liquidationThreshold.percentMul(liquidationBonus) <= PercentageMath.PERCENTAGE_FACTOR,
-        Errors.LPC_INVALID_CONFIGURATION
+        Errors.PC_INVALID_CONFIGURATION
       );
     } else {
-      require(liquidationBonus == 0, Errors.LPC_INVALID_CONFIGURATION);
+      require(liquidationBonus == 0, Errors.PC_INVALID_CONFIGURATION);
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
       //we need to ensure no liquidity is deposited
@@ -514,11 +514,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     require(
       flashloanPremiumTotal < PercentageMath.PERCENTAGE_FACTOR,
-      Errors.LPC_FLASHLOAN_PREMIUM_INVALID
+      Errors.PC_FLASHLOAN_PREMIUM_INVALID
     );
     require(
       flashloanPremiumTotal >= _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL(),
-      Errors.LPC_FLASHLOAN_PREMIUMS_MISMATCH
+      Errors.PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     _pool.updateFlashloanPremiums(flashloanPremiumTotal, _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL());
     emit FlashloanPremiumTotalUpdated(flashloanPremiumTotal);
@@ -532,11 +532,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     require(
       flashloanPremiumToProtocol < PercentageMath.PERCENTAGE_FACTOR,
-      Errors.LPC_FLASHLOAN_PREMIUM_INVALID
+      Errors.PC_FLASHLOAN_PREMIUM_INVALID
     );
     require(
       flashloanPremiumToProtocol <= _pool.FLASHLOAN_PREMIUM_TOTAL(),
-      Errors.LPC_FLASHLOAN_PREMIUMS_MISMATCH
+      Errors.PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), flashloanPremiumToProtocol);
     emit FlashloanPremiumToProcolUpdated(flashloanPremiumToProtocol);
@@ -572,7 +572,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
     require(
       availableLiquidity == 0 && reserveData.currentLiquidityRate == 0,
-      Errors.LPC_RESERVE_LIQUIDITY_NOT_0
+      Errors.PC_RESERVE_LIQUIDITY_NOT_0
     );
   }
 }

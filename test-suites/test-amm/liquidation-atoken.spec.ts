@@ -13,10 +13,10 @@ const { expect } = chai;
 
 makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   const {
-    LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD,
+    PCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD,
     INVALID_HF,
-    LPCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER,
-    LPCM_COLLATERAL_CANNOT_BE_LIQUIDATED,
+    PCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER,
+    PCM_COLLATERAL_CANNOT_BE_LIQUIDATED,
   } = ProtocolErrors;
 
   it('Deposits WETH, borrows DAI/Check liquidation fails because health factor is above 1', async () => {
@@ -75,7 +75,7 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
     //someone tries to liquidate user 2
     await expect(
       pool.liquidationCall(weth.address, dai.address, borrower.address, 1, true)
-    ).to.be.revertedWith(LPCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD);
+    ).to.be.revertedWith(PCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD);
   });
 
   it('Drop the health factor below 1', async () => {
@@ -103,7 +103,7 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
     //user 2 tries to borrow
     await expect(
       pool.liquidationCall(weth.address, weth.address, borrower.address, oneEther.toString(), true)
-    ).revertedWith(LPCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+    ).revertedWith(PCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   });
 
   it('Tries to liquidate a different collateral than the borrower collateral', async () => {
@@ -112,7 +112,7 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
 
     await expect(
       pool.liquidationCall(dai.address, dai.address, borrower.address, oneEther.toString(), true)
-    ).revertedWith(LPCM_COLLATERAL_CANNOT_BE_LIQUIDATED);
+    ).revertedWith(PCM_COLLATERAL_CANNOT_BE_LIQUIDATED);
   });
 
   it('Liquidates the borrow', async () => {

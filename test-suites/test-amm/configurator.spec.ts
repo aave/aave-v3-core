@@ -9,7 +9,7 @@ const { expect } = require('chai');
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   const {
     CALLER_NOT_POOL_ADMIN,
-    LPC_RESERVE_LIQUIDITY_NOT_0,
+    PC_RESERVE_LIQUIDITY_NOT_0,
     RC_INVALID_LTV,
     RC_INVALID_LIQ_THRESHOLD,
     RC_INVALID_LIQ_BONUS,
@@ -407,7 +407,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
     await expect(
       configurator.deactivateReserve(dai.address),
-      LPC_RESERVE_LIQUIDITY_NOT_0
-    ).to.be.revertedWith(LPC_RESERVE_LIQUIDITY_NOT_0);
+      PC_RESERVE_LIQUIDITY_NOT_0
+    ).to.be.revertedWith(PC_RESERVE_LIQUIDITY_NOT_0);
   });
 });

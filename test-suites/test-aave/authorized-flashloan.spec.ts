@@ -21,9 +21,9 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
   const {
     VL_COLLATERAL_BALANCE_IS_0,
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
-    LP_INVALID_FLASHLOAN_MODE,
+    P_INVALID_FLASHLOAN_MODE,
     SAFEERC20_LOWLEVEL_CALL,
-    LP_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
+    P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
     LP_BORROW_ALLOWANCE_NOT_ENOUGH,
   } = ProtocolErrors;
 
@@ -142,7 +142,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(LP_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
+    ).to.be.revertedWith(P_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
   });
 
   it('Takes a WETH flashloan with an invalid mode. (revert expected)', async () => {
