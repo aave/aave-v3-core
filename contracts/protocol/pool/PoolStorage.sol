@@ -7,7 +7,7 @@ import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 
-contract LendingPoolStorage {
+contract PoolStorage {
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
@@ -22,7 +22,7 @@ contract LendingPoolStorage {
 
   uint256 internal _reservesCount;
 
-  // Deprecated: global Pool pause state, no longer used
+  // Deprecated: global LendingPool pause state, no longer used
   // Replaced by pause states for each reserve
   bool internal _paused;
 

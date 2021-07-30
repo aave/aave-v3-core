@@ -25,7 +25,7 @@ import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
-import {LendingPoolStorage} from './LendingPoolStorage.sol';
+import {PoolStorage} from './PoolStorage.sol';
 
 /**
  * @title Pool contract
@@ -39,12 +39,12 @@ import {LendingPoolStorage} from './LendingPoolStorage.sol';
  *   # Enable/disable their deposits as collateral rebalance stable rate borrow positions
  *   # Liquidate positions
  *   # Execute Flash Loans
- * - To be covered by a proxy contract, owned by the LendingPoolAddressesProvider of the specific market
+ * - To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
  * - All admin functions are callable by the PoolConfigurator contract defined also in the
- *   LendingPoolAddressesProvider
+ *   PoolAddressesProvider
  * @author Aave
  **/
-contract Pool is VersionedInitializable, IPool, LendingPoolStorage {
+contract Pool is VersionedInitializable, IPool, PoolStorage {
   using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
