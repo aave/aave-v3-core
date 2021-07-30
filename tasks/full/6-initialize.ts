@@ -85,7 +85,7 @@ task('full:initialize-pool', 'Initialize pool configuration.')
         collateralManagerAddress
       );
       await waitForTx(
-        await addressesProvider.setLendingPoolCollateralManager(collateralManagerAddress)
+        await addressesProvider.setPoolCollateralManager(collateralManagerAddress)
       );
 
       console.log(

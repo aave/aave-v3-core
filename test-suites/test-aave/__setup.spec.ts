@@ -271,7 +271,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const collateralManager = await deployPoolCollateralManager();
   await waitForTx(
-    await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
+    await addressesProvider.setPoolCollateralManager(collateralManager.address)
   );
   await deployMockFlashLoanReceiver(addressesProvider.address);
 

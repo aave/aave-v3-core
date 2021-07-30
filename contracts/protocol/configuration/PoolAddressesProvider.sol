@@ -136,9 +136,9 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @dev Updates the address of the PoolCollateralManager
    * @param manager The new PoolCollateralManager address
    **/
-  function setLendingPoolCollateralManager(address manager) external override onlyOwner {
+  function setPoolCollateralManager(address manager) external override onlyOwner {
     _addresses[POOL_COLLATERAL_MANAGER] = manager;
-    emit LendingPoolCollateralManagerUpdated(manager);
+    emit PoolCollateralManagerUpdated(manager);
   }
 
   /**
