@@ -24,7 +24,7 @@ task('dev:deploy-pool', 'Deploy pool for dev enviroment')
     const poolImpl = await deployPool(verify);
 
     // Set pool impl to Address Provider
-    await waitForTx(await addressesProvider.setLendingPoolImpl(poolImpl.address));
+    await waitForTx(await addressesProvider.setPoolImpl(poolImpl.address));
 
     const address = await addressesProvider.getPool();
     const poolProxy = await getPool(address);

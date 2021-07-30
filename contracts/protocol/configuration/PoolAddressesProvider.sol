@@ -98,9 +98,9 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * setting the new `pool` implementation on the first time calling it
    * @param pool The new Pool implementation
    **/
-  function setLendingPoolImpl(address pool) external override onlyOwner {
+  function setPoolImpl(address pool) external override onlyOwner {
     _updateImpl(POOL, pool);
-    emit LendingPoolUpdated(pool);
+    emit PoolUpdated(pool);
   }
 
   /**

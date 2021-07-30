@@ -114,7 +114,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const poolImpl = await deployPool();
 
-  await waitForTx(await addressesProvider.setLendingPoolImpl(poolImpl.address));
+  await waitForTx(await addressesProvider.setPoolImpl(poolImpl.address));
 
   const poolAddress = await addressesProvider.getPool();
   const poolProxy = await getPool(poolAddress);

@@ -19,7 +19,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     for (const contractFunction of [
       addressesProvider.setMarketId,
-      addressesProvider.setLendingPoolImpl,
+      addressesProvider.setPoolImpl,
       addressesProvider.setLendingPoolConfiguratorImpl,
       addressesProvider.setLendingPoolCollateralManager,
       addressesProvider.setPoolAdmin,

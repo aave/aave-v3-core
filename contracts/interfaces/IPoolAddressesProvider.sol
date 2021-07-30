@@ -10,7 +10,7 @@ pragma solidity 0.6.12;
  **/
 interface IPoolAddressesProvider {
   event MarketIdSet(string newMarketId);
-  event LendingPoolUpdated(address indexed newAddress);
+  event PoolUpdated(address indexed newAddress);
   event ConfigurationAdminUpdated(address indexed newAddress);
   event EmergencyAdminUpdated(address indexed newAddress);
   event LendingPoolConfiguratorUpdated(address indexed newAddress);
@@ -32,7 +32,7 @@ interface IPoolAddressesProvider {
 
   function getPool() external view returns (address);
 
-  function setLendingPoolImpl(address pool) external;
+  function setPoolImpl(address pool) external;
 
   function getLendingPoolConfigurator() external view returns (address);
 
