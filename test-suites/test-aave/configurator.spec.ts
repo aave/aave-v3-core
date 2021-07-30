@@ -1,6 +1,6 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import {
-  APPROVAL_AMOUNT_LENDING_POOL,
+  APPROVAL_AMOUNT_POOL,
   MAX_UINT_AMOUNT,
   RAY,
   MAX_BORROW_CAP,
@@ -1277,7 +1277,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await dai.approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.approve(pool.address, APPROVAL_AMOUNT_POOL);
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
     //user 1 deposits 1000 DAI

@@ -524,7 +524,7 @@ export const authorizeWETHGateway = async (
 ) =>
   await new WETHGatewayFactory(await getFirstSigner())
     .attach(wethGateWay)
-    .authorizeLendingPool(pool);
+    .authorizePool(pool);
 
 export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],

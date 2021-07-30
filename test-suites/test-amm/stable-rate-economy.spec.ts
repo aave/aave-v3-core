@@ -11,7 +11,7 @@
 //   RateMode,
 // } from "../utils/types"
 // import {
-//   APPROVAL_AMOUNT_LENDING_POOL_CORE,
+//   APPROVAL_AMOUNT_POOL_CORE,
 //   ETHEREUM_ADDRESS,
 // } from "../utils/constants"
 // import { testEnvProviderWithoutInstances} from "../utils/truffle/dlp-tests-env"
@@ -83,12 +83,12 @@
 //     })
 
 //     //approve protocol to access depositor wallet
-//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
+//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_POOL_CORE, {
 //       from: _depositorAddress,
 //     })
 
 //     //approve protocol to access borrower wallet
-//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
+//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_POOL_CORE, {
 //       from: _borrowerAddress,
 //     })
 
@@ -159,7 +159,7 @@
 //     await daiInstance.mint(await convertToCurrencyDecimals(daiInstance.address, "1000"), {
 //       from: user,
 //     })
-//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_LENDING_POOL_CORE, {
+//     await daiInstance.approve(_poolCoreInstance.address, APPROVAL_AMOUNT_POOL_CORE, {
 //       from: user,
 //     })
 

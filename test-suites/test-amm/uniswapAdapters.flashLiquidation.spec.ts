@@ -10,7 +10,7 @@
 // import { DRE, evmRevert, evmSnapshot, increaseTime, waitForTx } from '../../helpers/misc-utils';
 // import { ethers } from 'ethers';
 // import { ProtocolErrors, RateMode } from '../../helpers/types';
-// import { APPROVAL_AMOUNT_LENDING_POOL, MAX_UINT_AMOUNT, oneEther } from '../../helpers/constants';
+// import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, oneEther } from '../../helpers/constants';
 // import { getUserData } from './helpers/utils/helpers';
 // import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 // const { expect } = require('chai');
@@ -33,7 +33,7 @@
 //     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
 //     //approve protocol to access depositor wallet
-//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     //user 1 deposits 1000 DAI
 //     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
@@ -48,7 +48,7 @@
 //     await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
 
 //     //approve protocol to access the borrower wallet
-//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     await pool
 //       .connect(borrower.signer)
@@ -100,7 +100,7 @@
 //     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
 //     //approve protocol to access depositor wallet
-//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     //user 1 deposits 1000 DAI
 //     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
@@ -115,7 +115,7 @@
 //     await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
 
 //     //approve protocol to access the borrower wallet
-//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     await pool
 //       .connect(borrower.signer)

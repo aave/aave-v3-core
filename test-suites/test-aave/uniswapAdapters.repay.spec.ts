@@ -350,7 +350,7 @@ makeSuite('Uniswap adapters', (testEnv: TestEnv) => {
               userAddress,
               params
             )
-        ).to.be.revertedWith('CALLER_MUST_BE_LENDING_POOL');
+        ).to.be.revertedWith('CALLER_MUST_BE_POOL');
       });
 
       it('should revert if there is not debt to repay with the specified rate mode', async () => {
