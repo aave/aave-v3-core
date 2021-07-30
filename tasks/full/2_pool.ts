@@ -58,7 +58,7 @@ task('full:deploy-pool', 'Deploy pool for dev enviroment')
       );
       // Set pool conf impl to Address Provider
       await waitForTx(
-        await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImplAddress)
+        await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImplAddress)
       );
 
       const poolConfiguratorProxy = await getPoolConfiguratorProxy(

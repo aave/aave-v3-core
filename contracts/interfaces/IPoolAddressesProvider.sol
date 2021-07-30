@@ -13,7 +13,7 @@ interface IPoolAddressesProvider {
   event PoolUpdated(address indexed newAddress);
   event ConfigurationAdminUpdated(address indexed newAddress);
   event EmergencyAdminUpdated(address indexed newAddress);
-  event LendingPoolConfiguratorUpdated(address indexed newAddress);
+  event PoolConfiguratorUpdated(address indexed newAddress);
   event LendingPoolCollateralManagerUpdated(address indexed newAddress);
   event PriceOracleUpdated(address indexed newAddress);
   event LendingRateOracleUpdated(address indexed newAddress);
@@ -36,7 +36,7 @@ interface IPoolAddressesProvider {
 
   function getPoolConfigurator() external view returns (address);
 
-  function setLendingPoolConfiguratorImpl(address configurator) external;
+  function setPoolConfiguratorImpl(address configurator) external;
 
   function getLendingPoolCollateralManager() external view returns (address);
 

@@ -122,7 +122,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const poolConfiguratorImpl = await deployPoolConfigurator();
   await waitForTx(
-    await addressesProvider.setLendingPoolConfiguratorImpl(poolConfiguratorImpl.address)
+    await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address)
   );
   const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getPoolConfigurator()
