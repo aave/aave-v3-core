@@ -55,7 +55,7 @@ contract UniswapRepayAdapter is BaseUniswapAdapter {
     address initiator,
     bytes calldata params
   ) external override returns (bool) {
-    require(msg.sender == address(LENDING_POOL), 'CALLER_MUST_BE_LENDING_POOL');
+    require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
 
     RepayParams memory decodedParams = _decodeParams(params);
 
@@ -142,9 +142,9 @@ contract UniswapRepayAdapter is BaseUniswapAdapter {
     }
 
     // Repay debt. Approves 0 first to comply with tokens that implement the anti frontrunning approval fix
-    IERC20(debtAsset).safeApprove(address(LENDING_POOL), 0);
-    IERC20(debtAsset).safeApprove(address(LENDING_POOL), amountToRepay);
-    LENDING_POOL.repay(debtAsset, amountToRepay, debtRateMode, msg.sender);
+    IERC20(debtAsset).safeApprove(address(POOL), 0);
+    IERC20(debtAsset).safeApprove(address(POOL), amountToRepay);
+    POOL.repay(debtAsset, amountToRepay, debtRateMode, msg.sender);
   }
 
   /**
@@ -173,10 +173,10 @@ contract UniswapRepayAdapter is BaseUniswapAdapter {
     DataTypes.ReserveData memory collateralReserveData = _getReserveData(collateralAsset);
 
     // Repay debt. Approves for 0 first to comply with tokens that implement the anti frontrunning approval fix.
-    IERC20(debtAsset).safeApprove(address(LENDING_POOL), 0);
-    IERC20(debtAsset).safeApprove(address(LENDING_POOL), amount);
+    IERC20(debtAsset).safeApprove(address(POOL), 0);
+    IERC20(debtAsset).safeApprove(address(POOL), amount);
     uint256 repaidAmount = IERC20(debtAsset).balanceOf(address(this));
-    LENDING_POOL.repay(debtAsset, amount, rateMode, initiator);
+    POOL.repay(debtAsset, amount, rateMode, initiator);
     repaidAmount = repaidAmount.sub(IERC20(debtAsset).balanceOf(address(this)));
 
     if (collateralAsset != debtAsset) {
@@ -219,8 +219,8 @@ contract UniswapRepayAdapter is BaseUniswapAdapter {
     }
 
     // Repay flashloan. Approves for 0 first to comply with tokens that implement the anti frontrunning approval fix.
-    IERC20(debtAsset).safeApprove(address(LENDING_POOL), 0);
-    IERC20(debtAsset).safeApprove(address(LENDING_POOL), amount.add(premium));
+    IERC20(debtAsset).safeApprove(address(POOL), 0);
+    IERC20(debtAsset).safeApprove(address(POOL), amount.add(premium));
   }
 
   /**

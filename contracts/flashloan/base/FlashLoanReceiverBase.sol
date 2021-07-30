@@ -13,10 +13,10 @@ abstract contract FlashLoanReceiverBase is IFlashLoanReceiver {
   using SafeMath for uint256;
 
   IPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
-  IPool public immutable override LENDING_POOL;
+  IPool public immutable override POOL;
 
   constructor(IPoolAddressesProvider provider) public {
     ADDRESSES_PROVIDER = provider;
-    LENDING_POOL = IPool(provider.getPool());
+    POOL = IPool(provider.getPool());
   }
 }

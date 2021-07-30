@@ -166,7 +166,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     address onBehalfOf,
     uint256 amount,
     uint256 rate
-  ) external override onlyLendingPool returns (bool) {
+  ) external override onlyPool returns (bool) {
     MintLocalVars memory vars;
 
     if (user != onBehalfOf) {
@@ -222,7 +222,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @param user The address of the user getting his debt burned
    * @param amount The amount of debt tokens getting burned
    **/
-  function burn(address user, uint256 amount) external override onlyLendingPool {
+  function burn(address user, uint256 amount) external override onlyPool {
     (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(user);
 
     uint256 previousSupply = totalSupply();
@@ -446,7 +446,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   /**
    * @dev For internal usage in the logic of the parent contracts
    **/
-  function _getLendingPool() internal view override returns (IPool) {
+  function _getPool() internal view override returns (IPool) {
     return _pool;
   }
 

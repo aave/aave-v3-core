@@ -125,7 +125,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) external override onlyLendingPool returns (bool) {
+  ) external override onlyPool returns (bool) {
     if (user != onBehalfOf) {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
@@ -153,7 +153,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     address user,
     uint256 amount,
     uint256 index
-  ) external override onlyLendingPool {
+  ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
@@ -276,7 +276,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return _underlyingAsset;
   }
 
-  function _getLendingPool() internal view override returns (IPool) {
+  function _getPool() internal view override returns (IPool) {
     return _pool;
   }
 }

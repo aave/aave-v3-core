@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 
 import { TestEnv, makeSuite } from './helpers/make-suite';
-import { APPROVAL_AMOUNT_LENDING_POOL, oneRay } from '../../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, oneRay } from '../../helpers/constants';
 import { convertToCurrencyDecimals, getContract } from '../../helpers/contracts-helpers';
 import { ethers } from 'ethers';
 import { MockFlashLoanReceiver } from '../../types/MockFlashLoanReceiver';
@@ -42,7 +42,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     await weth.mint(amountToDeposit);
 
-    await weth.approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await weth.approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
   });
@@ -173,7 +173,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     await dai.connect(caller.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
-    await dai.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
@@ -244,7 +244,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
-    await usdc.approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await usdc.approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const amountToDeposit = await convertToCurrencyDecimals(usdc.address, '1000');
 
@@ -324,7 +324,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     await weth.connect(caller.signer).mint(await convertToCurrencyDecimals(weth.address, '5'));
 
-    await weth.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await weth.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const amountToDeposit = await convertToCurrencyDecimals(weth.address, '5');
 
@@ -362,7 +362,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     await dai.connect(caller.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
-    await dai.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
@@ -429,7 +429,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
     // Deposit 1000 dai for onBehalfOf user
     await dai.connect(onBehalfOf.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
-    await dai.connect(onBehalfOf.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.connect(onBehalfOf.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 

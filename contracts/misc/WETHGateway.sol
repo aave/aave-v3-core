@@ -27,7 +27,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     WETH = IWETH(weth);
   }
 
-  function authorizeLendingPool(address pool) external onlyOwner {
+  function authorizePool(address pool) external onlyOwner {
     WETH.approve(pool, uint256(-1));
   }
 

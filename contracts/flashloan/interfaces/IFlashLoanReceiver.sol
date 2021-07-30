@@ -21,5 +21,5 @@ interface IFlashLoanReceiver {
 
   function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
 
-  function LENDING_POOL() external view returns (IPool);
+  function POOL() external view returns (IPool);
 }

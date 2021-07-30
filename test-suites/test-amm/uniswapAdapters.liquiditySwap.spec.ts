@@ -825,7 +825,7 @@
 //               userAddress,
 //               params
 //             )
-//         ).to.be.revertedWith('CALLER_MUST_BE_LENDING_POOL');
+//         ).to.be.revertedWith('CALLER_MUST_BE_POOL');
 //       });
 
 //       it('should work correctly with tokens of different decimals', async () => {

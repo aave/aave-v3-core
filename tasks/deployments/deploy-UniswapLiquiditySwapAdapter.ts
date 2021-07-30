@@ -21,7 +21,7 @@ task(`deploy-${CONTRACT_NAME}`, `Deploys the ${CONTRACT_NAME} contract`)
 
     console.log(`\n- ${CONTRACT_NAME} deployment`);
     /*const args = [
-      '0x88757f2f99175387aB4C6a4b3067c77A695b0349', // lending  provider kovan address
+      '0x88757f2f99175387aB4C6a4b3067c77A695b0349', // provider kovan address
       '0xfcd87315f0e4067070ade8682fcdbc3006631441', // uniswap router address
     ];
     */
