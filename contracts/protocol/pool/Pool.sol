@@ -60,7 +60,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   function _onlyLendingPoolConfigurator() internal view {
     require(
-      _addressesProvider.getLendingPoolConfigurator() == msg.sender,
+      _addressesProvider.getPoolConfigurator() == msg.sender,
       Errors.LP_CALLER_NOT_LENDING_POOL_CONFIGURATOR
     );
   }

@@ -21,7 +21,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   mapping(bytes32 => address) private _addresses;
 
   bytes32 private constant POOL = 'POOL';
-  bytes32 private constant LENDING_POOL_CONFIGURATOR = 'LENDING_POOL_CONFIGURATOR';
+  bytes32 private constant POOL_CONFIGURATOR = 'POOL_CONFIGURATOR';
   bytes32 private constant POOL_ADMIN = 'POOL_ADMIN';
   bytes32 private constant EMERGENCY_ADMIN = 'EMERGENCY_ADMIN';
   bytes32 private constant LENDING_POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
@@ -107,8 +107,8 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @dev Returns the address of the PoolConfigurator proxy
    * @return The PoolConfigurator proxy address
    **/
-  function getLendingPoolConfigurator() external view override returns (address) {
-    return getAddress(LENDING_POOL_CONFIGURATOR);
+  function getPoolConfigurator() external view override returns (address) {
+    return getAddress(POOL_CONFIGURATOR);
   }
 
   /**
@@ -117,7 +117,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @param configurator The new PoolConfigurator implementation
    **/
   function setLendingPoolConfiguratorImpl(address configurator) external override onlyOwner {
-    _updateImpl(LENDING_POOL_CONFIGURATOR, configurator);
+    _updateImpl(POOL_CONFIGURATOR, configurator);
     emit LendingPoolConfiguratorUpdated(configurator);
   }
 

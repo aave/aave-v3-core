@@ -39,7 +39,7 @@ task('dev:deploy-pool', 'Deploy pool for dev enviroment')
     );
 
     const poolConfiguratorProxy = await getPoolConfiguratorProxy(
-      await addressesProvider.getLendingPoolConfigurator()
+      await addressesProvider.getPoolConfigurator()
     );
     await insertContractAddressInDb(
       eContractid.PoolConfigurator,

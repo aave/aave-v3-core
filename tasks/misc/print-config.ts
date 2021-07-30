@@ -37,7 +37,7 @@ task('print-config', 'Inits the DRE, to have access to all the plugins')
     );
     console.log(
       'Pool Configurator proxy',
-      await addressesProvider.getLendingPoolConfigurator()
+      await addressesProvider.getPoolConfigurator()
     );
     console.log('Pool admin', await addressesProvider.getPoolAdmin());
     console.log('Emergency admin', await addressesProvider.getEmergencyAdmin());

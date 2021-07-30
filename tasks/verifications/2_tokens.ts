@@ -36,7 +36,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
     );
 
     const poolConfigurator = PoolConfiguratorFactory.connect(
-      await addressesProvider.getLendingPoolConfigurator(),
+      await addressesProvider.getPoolConfigurator(),
       await getFirstSigner()
     );
 
