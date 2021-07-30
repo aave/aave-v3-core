@@ -54,7 +54,7 @@ interface IPoolAddressesProvider {
 
   function setPriceOracle(address priceOracle) external;
 
-  function getLendingRateOracle() external view returns (address);
+  function getRateOracle() external view returns (address);
 
   function setLendingRateOracle(address lendingRateOracle) external;
 }

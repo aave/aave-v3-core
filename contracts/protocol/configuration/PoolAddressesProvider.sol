@@ -26,7 +26,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant EMERGENCY_ADMIN = 'EMERGENCY_ADMIN';
   bytes32 private constant POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
-  bytes32 private constant LENDING_RATE_ORACLE = 'LENDING_RATE_ORACLE';
+  bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
 
   constructor(string memory marketId) public {
     _setMarketId(marketId);
@@ -173,12 +173,12 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     emit PriceOracleUpdated(priceOracle);
   }
 
-  function getLendingRateOracle() external view override returns (address) {
-    return getAddress(LENDING_RATE_ORACLE);
+  function getRateOracle() external view override returns (address) {
+    return getAddress(RATE_ORACLE);
   }
 
   function setLendingRateOracle(address lendingRateOracle) external override onlyOwner {
-    _addresses[LENDING_RATE_ORACLE] = lendingRateOracle;
+    _addresses[RATE_ORACLE] = lendingRateOracle;
     emit LendingRateOracleUpdated(lendingRateOracle);
   }
 
