@@ -115,7 +115,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await waitForTx(await addressesProvider.setLendingPoolImpl(poolImpl.address));
 
-  const poolAddress = await addressesProvider.getLendingPool();
+  const poolAddress = await addressesProvider.getPool();
   const poolProxy = await getPool(poolAddress);
 
   await insertContractAddressInDb(eContractid.Pool, poolProxy.address);

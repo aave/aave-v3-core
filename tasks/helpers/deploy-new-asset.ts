@@ -46,7 +46,7 @@ WRONG RESERVE ASSET SETUP:
     const addressProvider = await getPoolAddressesProvider(
       LENDING_POOL_ADDRESS_PROVIDER[network]
     );
-    const poolAddress = await addressProvider.getLendingPool();
+    const poolAddress = await addressProvider.getPool();
     const treasuryAddress = await getTreasuryAddress(marketConfigs.AaveConfig);
     const aToken = await deployCustomAToken(
       [

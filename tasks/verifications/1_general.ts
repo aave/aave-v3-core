@@ -51,7 +51,7 @@ task('verify:general', 'Verify contracts at Etherscan')
     const addressesProviderRegistry = notFalsyOrZeroAddress(registryAddress)
       ? await getPoolAddressesProviderRegistry(registryAddress)
       : await getPoolAddressesProviderRegistry();
-    const poolAddress = await addressesProvider.getLendingPool();
+    const poolAddress = await addressesProvider.getPool();
     const poolConfiguratorAddress = await addressesProvider.getLendingPoolConfigurator(); //getPoolConfiguratorProxy();
     const poolCollateralManagerAddress = await addressesProvider.getLendingPoolCollateralManager();
 

@@ -102,7 +102,7 @@ task('full:initialize-pool', 'Initialize pool configuration.')
 
       await deployWalletBalancerProvider(verify);
 
-      const poolAddress = await addressesProvider.getLendingPool();
+      const poolAddress = await addressesProvider.getPool();
 
       let gateWay = getParamPerNetwork(WethGateway, network);
       if (!notFalsyOrZeroAddress(gateWay)) {

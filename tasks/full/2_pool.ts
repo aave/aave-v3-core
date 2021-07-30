@@ -40,7 +40,7 @@ task('full:deploy-pool', 'Deploy pool for dev enviroment')
       // Set pool impl to Address provider
       await waitForTx(await addressesProvider.setLendingPoolImpl(poolImplAddress));
 
-      const address = await addressesProvider.getLendingPool();
+      const address = await addressesProvider.getPool();
       const poolProxy = await getPool(address);
 
       await insertContractAddressInDb(eContractid.Pool, poolProxy.address);

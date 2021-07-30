@@ -30,7 +30,7 @@ interface IPoolAddressesProvider {
 
   function getAddress(bytes32 id) external view returns (address);
 
-  function getLendingPool() external view returns (address);
+  function getPool() external view returns (address);
 
   function setLendingPoolImpl(address pool) external;
 

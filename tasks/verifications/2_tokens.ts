@@ -31,7 +31,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
 
     const addressesProvider = await getPoolAddressesProvider();
     const poolProxy = PoolFactory.connect(
-      await addressesProvider.getLendingPool(),
+      await addressesProvider.getPool(),
       await getFirstSigner()
     );
 

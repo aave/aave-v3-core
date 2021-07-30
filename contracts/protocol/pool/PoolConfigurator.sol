@@ -73,7 +73,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   function initialize(IPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
-    _pool = IPool(_addressesProvider.getLendingPool());
+    _pool = IPool(_addressesProvider.getPool());
   }
 
   /// @inheritdoc IPoolConfigurator

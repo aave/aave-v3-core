@@ -62,7 +62,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       uint256
     )
   {
-    IPool pool = IPool(provider.getLendingPool());
+    IPool pool = IPool(provider.getPool());
     address[] memory reserves = pool.getReservesList();
     DataTypes.UserConfigurationMap memory userConfig = pool.getUserConfiguration(user);
 
