@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: Borrow/repay (variable rate)",
+  "title": "Pool: Borrow/repay (variable rate)",
   "description": "Test cases for the borrow function, variable mode.",
   "stories": [
     {

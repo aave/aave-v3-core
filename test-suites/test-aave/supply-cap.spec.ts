@@ -1,6 +1,6 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import {
-  APPROVAL_AMOUNT_LENDING_POOL,
+  APPROVAL_AMOUNT_POOL,
   MAX_UINT_AMOUNT,
   RAY,
   MAX_SUPPLY_CAP,

@@ -10,7 +10,7 @@ import { ProtocolErrors } from '../../helpers/types';
 
 const { expect } = require('chai');
 
-makeSuite('Use native ETH at LendingPool via WETHGateway', (testEnv: TestEnv) => {
+makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
   const zero = BigNumber.from('0');
   const depositSize = parseEther('5');
   const daiSize = parseEther('10000');

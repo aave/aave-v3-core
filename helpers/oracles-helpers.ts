@@ -7,7 +7,7 @@ import {
   SymbolMap,
 } from './types';
 
-import { LendingRateOracle } from '../types/LendingRateOracle';
+import { RateOracle } from '../types/RateOracle';
 import { PriceOracle } from '../types/PriceOracle';
 import { MockAggregator } from '../types/MockAggregator';
 import { deployMockAggregator } from './contracts-deployments';
@@ -17,7 +17,7 @@ import { getStableAndVariableTokensHelper } from './contracts-getters';
 export const setInitialMarketRatesInRatesOracleByHelper = async (
   marketRates: iMultiPoolsAssets<IMarketRates>,
   assetsAddresses: { [x: string]: tEthereumAddress },
-  lendingRateOracleInstance: LendingRateOracle,
+  rateOracleInstance: RateOracle,
   admin: tEthereumAddress
 ) => {
   const stableAndVariableTokenHelper = await getStableAndVariableTokensHelper();
@@ -45,9 +45,7 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
   const chunkedSymbols = chunk(symbols, ratesChunks);
 
   // Set helper as owner
-  await waitForTx(
-    await lendingRateOracleInstance.transferOwnership(stableAndVariableTokenHelper.address)
-  );
+  await waitForTx(await rateOracleInstance.transferOwnership(stableAndVariableTokenHelper.address));
 
   console.log(`- Oracle borrow initalization in ${chunkedTokens.length} txs`);
   for (let chunkIndex = 0; chunkIndex < chunkedTokens.length; chunkIndex++) {
@@ -55,14 +53,14 @@ export const setInitialMarketRatesInRatesOracleByHelper = async (
       await stableAndVariableTokenHelper.setOracleBorrowRates(
         chunkedTokens[chunkIndex],
         chunkedRates[chunkIndex],
-        lendingRateOracleInstance.address
+        rateOracleInstance.address
       )
     );
     console.log(`  - Setted Oracle Borrow Rates for: ${chunkedSymbols[chunkIndex].join(', ')}`);
   }
   // Set back ownership
   await waitForTx(
-    await stableAndVariableTokenHelper.setOracleOwnership(lendingRateOracleInstance.address, admin)
+    await stableAndVariableTokenHelper.setOracleOwnership(rateOracleInstance.address, admin)
   );
 };
 

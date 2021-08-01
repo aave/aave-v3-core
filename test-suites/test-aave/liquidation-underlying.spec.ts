@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 
 import { DRE, increaseTime } from '../../helpers/misc-utils';
-import { APPROVAL_AMOUNT_LENDING_POOL, oneEther } from '../../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, oneEther } from '../../helpers/constants';
 import { convertToCurrencyDecimals } from '../../helpers/contracts-helpers';
 import { makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../../helpers/types';
@@ -15,14 +15,14 @@ const chai = require('chai');
 
 const { expect } = chai;
 
-makeSuite('LendingPool liquidation - liquidator receiving the underlying asset', (testEnv) => {
+makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;
 
-  before('Before LendingPool liquidation: set config', () => {
+  before('Before Pool liquidation: set config', () => {
     BigNumber.config({ DECIMAL_PLACES: 0, ROUNDING_MODE: BigNumber.ROUND_DOWN });
   });
 
-  after('After LendingPool liquidation: reset config', () => {
+  after('After Pool liquidation: reset config', () => {
     BigNumber.config({ DECIMAL_PLACES: 20, ROUNDING_MODE: BigNumber.ROUND_HALF_UP });
   });
 
@@ -55,7 +55,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     //user 1 deposits 1000 DAI
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
@@ -70,7 +70,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
     await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
 
     //approve protocol to access the borrower wallet
-    await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     await pool
       .connect(borrower.signer)
@@ -129,7 +129,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
     await dai.connect(liquidator.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access the liquidator wallet
-    await dai.connect(liquidator.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.connect(liquidator.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const daiReserveDataBefore = await helpersContract.getReserveData(dai.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
@@ -238,7 +238,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
       .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await usdc.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await usdc.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     //depositor deposits 1000 USDC
     const amountUSDCtoDeposit = await convertToCurrencyDecimals(usdc.address, '1000');
@@ -254,7 +254,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
     await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
 
     //approve protocol to access the borrower wallet
-    await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     await pool
       .connect(borrower.signer)
@@ -290,7 +290,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
       .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await usdc.connect(liquidator.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await usdc.connect(liquidator.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const userReserveDataBefore = await helpersContract.getUserReserveData(
       usdc.address,
@@ -389,7 +389,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
     await aave.connect(borrower.signer).mint(await convertToCurrencyDecimals(aave.address, '10'));
 
     //approve protocol to access the borrower wallet
-    await aave.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await aave.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     //borrower deposits 10 AAVE
     const amountToDeposit = await convertToCurrencyDecimals(aave.address, '10');
@@ -411,7 +411,7 @@ makeSuite('LendingPool liquidation - liquidator receiving the underlying asset',
       .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await usdc.connect(liquidator.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await usdc.connect(liquidator.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     const userReserveDataBefore = await helpersContract.getUserReserveData(
       usdc.address,

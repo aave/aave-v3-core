@@ -7,18 +7,18 @@ import {
   getEthersSignersAddresses,
 } from '../../helpers/contracts-helpers';
 import {
-  deployLendingPoolAddressesProvider,
+  deployPoolAddressesProvider,
   deployMintableERC20,
-  deployLendingPoolAddressesProviderRegistry,
-  deployLendingPoolConfigurator,
-  deployLendingPool,
+  deployPoolAddressesProviderRegistry,
+  deployPoolConfigurator,
+  deployPool,
   deployPriceOracle,
   deployAaveOracle,
-  deployLendingPoolCollateralManager,
+  deployPoolCollateralManager,
   deployMockFlashLoanReceiver,
   deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
-  deployLendingRateOracle,
+  deployRateOracle,
   deployStableAndVariableTokensHelper,
   deployATokensAndRatesHelper,
   deployWETHGateway,
@@ -48,8 +48,8 @@ import { initReservesByHelper, configureReservesByHelper } from '../../helpers/i
 import AaveConfig from '../../markets/aave';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
-  getLendingPool,
-  getLendingPoolConfiguratorProxy,
+  getPool,
+  getPoolConfiguratorProxy,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
@@ -58,7 +58,7 @@ const MOCK_USD_PRICE_IN_WEI = AaveConfig.ProtocolGlobalParams.MockUsdPriceInWei;
 const ALL_ASSETS_INITIAL_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
 const USD_ADDRESS = AaveConfig.ProtocolGlobalParams.UsdAddress;
 const MOCK_CHAINLINK_AGGREGATORS_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
-const LENDING_RATE_ORACLE_RATES_COMMON = AaveConfig.LendingRateOracleRatesCommon;
+const RATE_ORACLE_RATES_COMMON = AaveConfig.RateOracleRatesCommon;
 
 const deployAllMockTokens = async (deployer: Signer) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked } = {};
@@ -96,7 +96,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const mockTokens = await deployAllMockTokens(deployer);
   console.log('Deployed mocks');
-  const addressesProvider = await deployLendingPoolAddressesProvider(AaveConfig.MarketId);
+  const addressesProvider = await deployPoolAddressesProvider(AaveConfig.MarketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
@@ -104,39 +104,34 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   await waitForTx(await addressesProvider.setEmergencyAdmin(addressList[2]));
 
-  const addressesProviderRegistry = await deployLendingPoolAddressesProviderRegistry();
+  const addressesProviderRegistry = await deployPoolAddressesProviderRegistry();
   await waitForTx(
     await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
   );
 
-  const lendingPoolImpl = await deployLendingPool();
+  const poolImpl = await deployPool();
 
-  await waitForTx(await addressesProvider.setLendingPoolImpl(lendingPoolImpl.address));
+  await waitForTx(await addressesProvider.setPoolImpl(poolImpl.address));
 
-  const lendingPoolAddress = await addressesProvider.getLendingPool();
-  const lendingPoolProxy = await getLendingPool(lendingPoolAddress);
+  const poolAddress = await addressesProvider.getPool();
+  const poolProxy = await getPool(poolAddress);
 
-  await insertContractAddressInDb(eContractid.LendingPool, lendingPoolProxy.address);
+  await insertContractAddressInDb(eContractid.Pool, poolProxy.address);
 
-  const lendingPoolConfiguratorImpl = await deployLendingPoolConfigurator();
-  await waitForTx(
-    await addressesProvider.setLendingPoolConfiguratorImpl(lendingPoolConfiguratorImpl.address)
+  const poolConfiguratorImpl = await deployPoolConfigurator();
+  await waitForTx(await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address));
+  const poolConfiguratorProxy = await getPoolConfiguratorProxy(
+    await addressesProvider.getPoolConfigurator()
   );
-  const lendingPoolConfiguratorProxy = await getLendingPoolConfiguratorProxy(
-    await addressesProvider.getLendingPoolConfigurator()
-  );
-  await waitForTx(await lendingPoolConfiguratorProxy.registerRiskAdmin(addressList[3]));
-  await insertContractAddressInDb(
-    eContractid.LendingPoolConfigurator,
-    lendingPoolConfiguratorProxy.address
-  );
+  await waitForTx(await poolConfiguratorProxy.registerRiskAdmin(addressList[3]));
+  await insertContractAddressInDb(eContractid.PoolConfigurator, poolConfiguratorProxy.address);
 
   // Deploy deployment helpers
-  await deployStableAndVariableTokensHelper([lendingPoolProxy.address, addressesProvider.address]);
+  await deployStableAndVariableTokensHelper([poolProxy.address, addressesProvider.address]);
   await deployATokensAndRatesHelper([
-    lendingPoolProxy.address,
+    poolProxy.address,
     addressesProvider.address,
-    lendingPoolConfiguratorProxy.address,
+    poolConfiguratorProxy.address,
   ]);
 
   const fallbackOracle = await deployPriceOracle();
@@ -221,17 +216,17 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   ]);
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
-  const lendingRateOracle = await deployLendingRateOracle();
-  await waitForTx(await addressesProvider.setLendingRateOracle(lendingRateOracle.address));
+  const rateOracle = await deployRateOracle();
+  await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
 
   const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
   const allReservesAddresses = {
     ...tokensAddressesWithoutUsd,
   };
   await setInitialMarketRatesInRatesOracleByHelper(
-    LENDING_RATE_ORACLE_RATES_COMMON,
+    RATE_ORACLE_RATES_COMMON,
     allReservesAddresses,
-    lendingRateOracle,
+    rateOracle,
     aaveAdmin
   );
 
@@ -264,12 +259,10 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   );
 
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
-  lendingPoolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
+  poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
 
-  const collateralManager = await deployLendingPoolCollateralManager();
-  await waitForTx(
-    await addressesProvider.setLendingPoolCollateralManager(collateralManager.address)
-  );
+  const collateralManager = await deployPoolCollateralManager();
+  await waitForTx(await addressesProvider.setPoolCollateralManager(collateralManager.address));
   await deployMockFlashLoanReceiver(addressesProvider.address);
 
   const mockUniswapRouter = await deployMockUniswapRouter();
@@ -277,7 +270,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await deployWalletBalancerProvider();
 
   const gateWay = await deployWETHGateway([mockTokens.WETH.address]);
-  await authorizeWETHGateway(gateWay.address, lendingPoolAddress);
+  await authorizeWETHGateway(gateWay.address, poolAddress);
 
   console.timeEnd('setup');
 };

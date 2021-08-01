@@ -1,33 +1,33 @@
 import { evmRevert, evmSnapshot, DRE } from '../../../helpers/misc-utils';
 import { Signer } from 'ethers';
 import {
-  getLendingPool,
-  getLendingPoolAddressesProvider,
+  getPool,
+  getPoolAddressesProvider,
   getAaveProtocolDataProvider,
   getAToken,
   getMintableERC20,
-  getLendingPoolConfiguratorProxy,
+  getPoolConfiguratorProxy,
   getPriceOracle,
-  getLendingPoolAddressesProviderRegistry,
+  getPoolAddressesProviderRegistry,
   getWETHMocked,
   getWETHGateway,
   getVariableDebtToken,
   getStableDebtToken,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
-import { LendingPool } from '../../../types/LendingPool';
+import { Pool } from '../../../types/Pool';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { MintableERC20 } from '../../../types/MintableERC20';
 import { AToken } from '../../../types/AToken';
-import { LendingPoolConfigurator } from '../../../types/LendingPoolConfigurator';
+import { PoolConfigurator } from '../../../types/PoolConfigurator';
 
 import chai from 'chai';
 // @ts-ignore
 import bignumberChai from 'chai-bignumber';
 import { almostEqual } from './almost-equal';
 import { PriceOracle } from '../../../types/PriceOracle';
-import { LendingPoolAddressesProvider } from '../../../types/LendingPoolAddressesProvider';
-import { LendingPoolAddressesProviderRegistry } from '../../../types/LendingPoolAddressesProviderRegistry';
+import { PoolAddressesProvider } from '../../../types/PoolAddressesProvider';
+import { PoolAddressesProviderRegistry } from '../../../types/PoolAddressesProviderRegistry';
 import { getEthersSigners } from '../../../helpers/contracts-helpers';
 import { getParamPerNetwork } from '../../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../../types/WETH9Mocked';
@@ -52,8 +52,8 @@ export interface TestEnv {
   emergencyAdmin: SignerWithAddress;
   riskAdmin: SignerWithAddress;
   users: SignerWithAddress[];
-  pool: LendingPool;
-  configurator: LendingPoolConfigurator;
+  pool: Pool;
+  configurator: PoolConfigurator;
   oracle: PriceOracle;
   helpersContract: AaveProtocolDataProvider;
   weth: WETH9Mocked;
@@ -65,8 +65,8 @@ export interface TestEnv {
   aUsdc: AToken;
   usdc: MintableERC20;
   aave: MintableERC20;
-  addressesProvider: LendingPoolAddressesProvider;
-  registry: LendingPoolAddressesProviderRegistry;
+  addressesProvider: PoolAddressesProvider;
+  registry: PoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
 }
 
@@ -81,8 +81,8 @@ const testEnv: TestEnv = {
   emergencyAdmin: {} as SignerWithAddress,
   riskAdmin: {} as SignerWithAddress,
   users: [] as SignerWithAddress[],
-  pool: {} as LendingPool,
-  configurator: {} as LendingPoolConfigurator,
+  pool: {} as Pool,
+  configurator: {} as PoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,
   weth: {} as WETH9Mocked,
@@ -94,8 +94,8 @@ const testEnv: TestEnv = {
   aUsdc: {} as AToken,
   usdc: {} as MintableERC20,
   aave: {} as MintableERC20,
-  addressesProvider: {} as LendingPoolAddressesProvider,
-  registry: {} as LendingPoolAddressesProviderRegistry,
+  addressesProvider: {} as PoolAddressesProvider,
+  registry: {} as PoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
 } as TestEnv;
 
@@ -116,18 +116,18 @@ export async function initializeMakeSuite() {
   testEnv.poolAdmin = deployer;
   testEnv.emergencyAdmin = testEnv.users[1];
   testEnv.riskAdmin = testEnv.users[2];
-  testEnv.pool = await getLendingPool();
+  testEnv.pool = await getPool();
 
-  testEnv.configurator = await getLendingPoolConfiguratorProxy();
+  testEnv.configurator = await getPoolConfiguratorProxy();
 
-  testEnv.addressesProvider = await getLendingPoolAddressesProvider();
+  testEnv.addressesProvider = await getPoolAddressesProvider();
 
   if (process.env.FORK) {
-    testEnv.registry = await getLendingPoolAddressesProviderRegistry(
+    testEnv.registry = await getPoolAddressesProviderRegistry(
       getParamPerNetwork(AaveConfig.ProviderRegistry, process.env.FORK as eNetwork)
     );
   } else {
-    testEnv.registry = await getLendingPoolAddressesProviderRegistry();
+    testEnv.registry = await getPoolAddressesProviderRegistry();
     testEnv.oracle = await getPriceOracle();
   }
 

@@ -50,7 +50,7 @@
     "amm:kovan:add-market-to-new-registry": "npm run compile && npm run hardhat:kovan -- add-market-to-registry --pool Amm --verify --deploy-registry",
     "matic:matic:add-market-to-new-registry": "npm run compile && npm run hardhat:matic -- add-market-to-registry --pool Matic --verify --deploy-registry",
     "aave:main:add-market-to-new-registry": "npm run compile && npm run hardhat:matic -- add-market-to-registry --pool Matic --verify --deploy-registry",
-    "aave:kovan:full:initialize": "npm run hardhat:kovan -- full:initialize-lending-pool --verify --pool Aave",
+    "aave:kovan:full:initialize": "npm run hardhat:kovan -- full:initialize-pool --verify --pool Aave",
     "aave:ropsten:full:migration": "npm run compile && npm run hardhat:ropsten -- aave:mainnet --verify",
     "aave:fork:main:tenderly": "npm run compile && npm run hardhat:tenderly-main -- aave:mainnet",
     "aave:fork:main": "npm run compile && FORK=main hardhat aave:mainnet",

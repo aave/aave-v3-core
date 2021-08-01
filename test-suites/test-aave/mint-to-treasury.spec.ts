@@ -1,6 +1,6 @@
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { RateMode } from '../../helpers/types';
-import { APPROVAL_AMOUNT_LENDING_POOL, ONE_YEAR } from '../../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, ONE_YEAR } from '../../helpers/constants';
 import { convertToCurrencyDecimals } from '../../helpers/contracts-helpers';
 import { BigNumber } from 'bignumber.js';
 import { advanceTimeAndBlock, waitForTx } from '../../helpers/misc-utils';
@@ -18,9 +18,7 @@ makeSuite('Mint to treasury', (testEnv: TestEnv) => {
     await waitForTx(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
 
     // user 0 deposits 1000 DAI
-    await waitForTx(
-      await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL)
-    );
+    await waitForTx(await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL));
     await waitForTx(
       await pool
         .connect(users[0].signer)
@@ -74,15 +72,17 @@ makeSuite('Mint to treasury', (testEnv: TestEnv) => {
     const { accruedToTreasury } = await pool.getReserveData(dai.address);
 
     await waitForTx(await pool.connect(users[0].signer).mintToTreasury([dai.address]));
-    const normalizedIncome =  await pool.getReserveNormalizedIncome(dai.address);
+    const normalizedIncome = await pool.getReserveNormalizedIncome(dai.address);
 
     const treasuryBalance = await aDai.balanceOf(treasuryAddress);
 
     const expectedTreasuryBalance = new BigNumber(accruedToTreasury.toString()).rayMul(
       new BigNumber(normalizedIncome.toString())
     );
-    
-    expect(treasuryBalance.toString()).to.be.bignumber.almostEqual(expectedTreasuryBalance, "Invalid treasury balance after minting");
 
+    expect(treasuryBalance.toString()).to.be.bignumber.almostEqual(
+      expectedTreasuryBalance,
+      'Invalid treasury balance after minting'
+    );
   });
 });

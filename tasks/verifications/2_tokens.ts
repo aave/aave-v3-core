@@ -11,14 +11,14 @@ import {
   getAToken,
   getFirstSigner,
   getInterestRateStrategy,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
   getProxy,
   getStableDebtToken,
   getVariableDebtToken,
 } from '../../helpers/contracts-getters';
 import { getParamPerNetwork, verifyContract } from '../../helpers/contracts-helpers';
 import { eContractid, eNetwork, ICommonConfiguration, IReserveParams } from '../../helpers/types';
-import { LendingPoolConfiguratorFactory, LendingPoolFactory } from '../../types';
+import { PoolConfiguratorFactory, PoolFactory } from '../../types';
 
 task('verify:tokens', 'Deploy oracles for dev enviroment')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
@@ -29,14 +29,14 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
     const { ReserveAssets, ReservesConfig } = poolConfig as ICommonConfiguration;
     const treasuryAddress = await getTreasuryAddress(poolConfig);
 
-    const addressesProvider = await getLendingPoolAddressesProvider();
-    const lendingPoolProxy = LendingPoolFactory.connect(
-      await addressesProvider.getLendingPool(),
+    const addressesProvider = await getPoolAddressesProvider();
+    const poolProxy = PoolFactory.connect(
+      await addressesProvider.getPool(),
       await getFirstSigner()
     );
 
-    const lendingPoolConfigurator = LendingPoolConfiguratorFactory.connect(
-      await addressesProvider.getLendingPoolConfigurator(),
+    const poolConfigurator = PoolConfiguratorFactory.connect(
+      await addressesProvider.getPoolConfigurator(),
       await getFirstSigner()
     );
 
@@ -49,7 +49,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
         variableDebtTokenAddress,
         aTokenAddress,
         interestRateStrategyAddress,
-      } = await lendingPoolProxy.getReserveData(tokenAddress);
+      } = await poolProxy.getReserveData(tokenAddress);
 
       const tokenConfig = configs.find(([symbol]) => symbol === token);
       if (!tokenConfig) {
@@ -71,7 +71,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       await verifyContract(
         eContractid.InitializableAdminUpgradeabilityProxy,
         await getProxy(stableDebtTokenAddress),
-        [lendingPoolConfigurator.address]
+        [poolConfigurator.address]
       );
 
       // Proxy Variable Debt
@@ -79,7 +79,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       await verifyContract(
         eContractid.InitializableAdminUpgradeabilityProxy,
         await getProxy(variableDebtTokenAddress),
-        [lendingPoolConfigurator.address]
+        [poolConfigurator.address]
       );
 
       // Proxy aToken
@@ -87,7 +87,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       await verifyContract(
         eContractid.InitializableAdminUpgradeabilityProxy,
         await getProxy(aTokenAddress),
-        [lendingPoolConfigurator.address]
+        [poolConfigurator.address]
       );
 
       // Strategy Rate
@@ -113,7 +113,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       if (aToken) {
         console.log('\n- Verifying aToken...\n');
         await verifyContract(eContractid.AToken, await getAToken(aToken), [
-          lendingPoolProxy.address,
+          poolProxy.address,
           tokenAddress,
           treasuryAddress,
           `Aave interest bearing ${token}`,
@@ -126,7 +126,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
       if (stableDebt) {
         console.log('\n- Verifying StableDebtToken...\n');
         await verifyContract(eContractid.StableDebtToken, await getStableDebtToken(stableDebt), [
-          lendingPoolProxy.address,
+          poolProxy.address,
           tokenAddress,
           `Aave stable debt bearing ${token}`,
           `stableDebt${token}`,
@@ -141,7 +141,7 @@ task('verify:tokens', 'Deploy oracles for dev enviroment')
           eContractid.VariableDebtToken,
           await getVariableDebtToken(variableDebt),
           [
-            lendingPoolProxy.address,
+            poolProxy.address,
             tokenAddress,
             `Aave variable debt bearing ${token}`,
             `variableDebt${token}`,
