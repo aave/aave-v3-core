@@ -195,7 +195,7 @@ library GenericLogic {
 
   /**
    * @dev proxy call for calculateUserAccountData as external function.
-   * Used in LendingPool to work around contract size limit issues
+   * Used in Pool to work around contract size limit issues
    * @param user The address of the user
    * @param reservesData Data of all the reserves
    * @param userConfig The configuration of the user

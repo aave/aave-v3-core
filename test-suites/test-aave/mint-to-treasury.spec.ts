@@ -1,6 +1,6 @@
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { RateMode } from '../../helpers/types';
-import { APPROVAL_AMOUNT_LENDING_POOL, ONE_YEAR } from '../../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, ONE_YEAR } from '../../helpers/constants';
 import { convertToCurrencyDecimals } from '../../helpers/contracts-helpers';
 import { BigNumber } from 'bignumber.js';
 import { advanceTimeAndBlock, waitForTx } from '../../helpers/misc-utils';
@@ -19,7 +19,7 @@ makeSuite('Mint to treasury', (testEnv: TestEnv) => {
 
     // user 0 deposits 1000 DAI
     await waitForTx(
-      await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL)
+      await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL)
     );
     await waitForTx(
       await pool

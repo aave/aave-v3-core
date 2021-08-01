@@ -307,7 +307,7 @@
 //         expect(userAEthBalance).to.be.gte(userAEthBalanceBefore.sub(liquidityToSwap));
 //       });
 
-//       it('should revert if caller not lending pool', async () => {
+//       it('should revert if caller not pool', async () => {
 //         const { users, pool, weth, aWETH, oracle, dai, uniswapRepayAdapter } = testEnv;
 //         const user = users[0].signer;
 //         const userAddress = users[0].address;
@@ -350,7 +350,7 @@
 //               userAddress,
 //               params
 //             )
-//         ).to.be.revertedWith('CALLER_MUST_BE_LENDING_POOL');
+//         ).to.be.revertedWith('CALLER_MUST_BE_POOL');
 //       });
 
 //       it('should revert if there is not debt to repay with the specified rate mode', async () => {

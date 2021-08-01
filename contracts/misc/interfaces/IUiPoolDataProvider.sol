@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
 interface IUiPoolDataProvider {
@@ -70,7 +70,7 @@ interface IUiPoolDataProvider {
     uint256 sTokenincentivesUserIndex;
   }
 
-  function getReservesData(ILendingPoolAddressesProvider provider, address user)
+  function getReservesData(IPoolAddressesProvider provider, address user)
     external
     view
     returns (

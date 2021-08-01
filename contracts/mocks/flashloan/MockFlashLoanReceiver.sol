@@ -8,13 +8,13 @@ import {FlashLoanReceiverBase} from '../../flashloan/base/FlashLoanReceiverBase.
 import {MintableERC20} from '../tokens/MintableERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 
 contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  ILendingPoolAddressesProvider internal _provider;
+  IPoolAddressesProvider internal _provider;
 
   event ExecutedWithFail(address[] _assets, uint256[] _amounts, uint256[] _premiums);
   event ExecutedWithSuccess(address[] _assets, uint256[] _amounts, uint256[] _premiums);
@@ -23,7 +23,7 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   uint256 _amountToApprove;
   bool _simulateEOA;
 
-  constructor(ILendingPoolAddressesProvider provider) public FlashLoanReceiverBase(provider) {}
+  constructor(IPoolAddressesProvider provider) public FlashLoanReceiverBase(provider) {}
 
   function setFailExecutionTransfer(bool fail) public {
     _failExecution = fail;
@@ -76,7 +76,7 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
 
       token.mint(premiums[i]);
 
-      IERC20(assets[i]).approve(address(LENDING_POOL), amountToReturn);
+      IERC20(assets[i]).approve(address(POOL), amountToReturn);
     }
 
     emit ExecutedWithSuccess(assets, amounts, premiums);

@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: credit delegation",
+  "title": "Pool: credit delegation",
   "description": "Test cases for the credit delegation related functions.",
   "stories": [
     {

@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: Redeem negative test cases",
+  "title": "Pool: Redeem negative test cases",
   "description": "Redeem function.",
   "stories": [
     {

@@ -2,8 +2,8 @@
 pragma solidity 0.8.6;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
-import {ILendingPool} from '../interfaces/ILendingPool.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
+import {IPool} from '../interfaces/IPool.sol';
 import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
@@ -22,14 +22,14 @@ contract AaveProtocolDataProvider {
     address tokenAddress;
   }
 
-  ILendingPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
+  IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
-  constructor(ILendingPoolAddressesProvider addressesProvider) public {
+  constructor(IPoolAddressesProvider addressesProvider) public {
     ADDRESSES_PROVIDER = addressesProvider;
   }
 
   function getAllReservesTokens() external view returns (TokenData[] memory) {
-    ILendingPool pool = ILendingPool(ADDRESSES_PROVIDER.getLendingPool());
+    IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
     TokenData[] memory reservesTokens = new TokenData[](reserves.length);
     for (uint256 i = 0; i < reserves.length; i++) {
@@ -50,7 +50,7 @@ contract AaveProtocolDataProvider {
   }
 
   function getAllATokens() external view returns (TokenData[] memory) {
-    ILendingPool pool = ILendingPool(ADDRESSES_PROVIDER.getLendingPool());
+    IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
     TokenData[] memory aTokens = new TokenData[](reserves.length);
     for (uint256 i = 0; i < reserves.length; i++) {
@@ -81,7 +81,7 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveConfigurationMap memory configuration =
-      ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getConfiguration(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset);
 
     (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
       .getParamsMemory();
@@ -97,13 +97,13 @@ contract AaveProtocolDataProvider {
     view
     returns (uint256 borrowCap, uint256 supplyCap)
   {
-    (borrowCap, supplyCap) = ILendingPool(ADDRESSES_PROVIDER.getLendingPool())
+    (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset)
       .getCapsMemory();
   }
 
   function getPaused(address asset) external view returns (bool isPaused) {
-    (, , , , isPaused) = ILendingPool(ADDRESSES_PROVIDER.getLendingPool())
+    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset)
       .getFlagsMemory();
   }
@@ -125,7 +125,7 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveData memory reserve =
-      ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getReserveData(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
     return (
       IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
@@ -157,10 +157,10 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveData memory reserve =
-      ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getReserveData(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
     DataTypes.UserConfigurationMap memory userConfig =
-      ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getUserConfiguration(user);
+      IPool(ADDRESSES_PROVIDER.getPool()).getUserConfiguration(user);
 
     currentATokenBalance = IERC20Detailed(reserve.aTokenAddress).balanceOf(user);
     currentVariableDebt = IERC20Detailed(reserve.variableDebtTokenAddress).balanceOf(user);
@@ -185,7 +185,7 @@ contract AaveProtocolDataProvider {
     )
   {
     DataTypes.ReserveData memory reserve =
-      ILendingPool(ADDRESSES_PROVIDER.getLendingPool()).getReserveData(asset);
+      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
     return (
       reserve.aTokenAddress,

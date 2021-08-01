@@ -1,19 +1,19 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import {ILendingPool} from '../../contracts/interfaces/ILendingPool.sol';
-import {LendingPool} from '../../contracts/protocol/lendingpool/LendingPool.sol';
+import {IPool} from '../../contracts/interfaces/IPool.sol';
+import {Pool} from '../../contracts/protocol/pool/Pool.sol';
 import {
-  ILendingPoolAddressesProvider
-} from '../../contracts/interfaces/ILendingPoolAddressesProvider.sol';
+  IPoolAddressesProvider
+} from '../../contracts/interfaces/IPoolAddressesProvider.sol';
 import {DataTypes} from '../../contracts/protocol/libraries/types/DataTypes.sol';
 
 /*
-Certora: Harness that delegates calls to the original LendingPool.
+Certora: Harness that delegates calls to the original Pool.
 Used for the verification of the VariableDebtToken contract.
 */
-contract LendingPoolHarnessForVariableDebtToken is ILendingPool {
-  LendingPool private originalPool;
+contract PoolHarnessForVariableDebtToken is IPool {
+  Pool private originalPool;
 
   function deposit(
     address asset,
@@ -197,7 +197,7 @@ contract LendingPoolHarnessForVariableDebtToken is ILendingPool {
     originalPool.finalizeTransfer(asset, from, to, amount, balanceFromAfter, balanceToBefore);
   }
 
-  function getAddressesProvider() external view override returns (ILendingPoolAddressesProvider) {
+  function getAddressesProvider() external view override returns (IPoolAddressesProvider) {
     return originalPool.getAddressesProvider();
   }
 }

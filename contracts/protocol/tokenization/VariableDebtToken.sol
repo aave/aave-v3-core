@@ -5,7 +5,7 @@ import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
 /**
@@ -27,7 +27,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
-  ILendingPool internal _pool;
+  IPool internal _pool;
   address internal _underlyingAsset;
   IAaveIncentivesController internal _incentivesController;
 
@@ -36,7 +36,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   /**
    * @dev Initializes the debt token.
-   * @param pool The address of the lending pool where this aToken will be used
+   * @param pool The address of the pool where this aToken will be used
    * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
    * @param incentivesController The smart contract managing potential incentives distribution
    * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
@@ -44,7 +44,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
    * @param debtTokenSymbol The symbol of the token
    */
   function initialize(
-    ILendingPool pool,
+    IPool pool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
@@ -112,7 +112,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   /**
    * @dev Mints debt token to the `onBehalfOf` address
-   * -  Only callable by the LendingPool
+   * -  Only callable by the Pool
    * @param user The address receiving the borrowed underlying, being the delegatee in case
    * of credit delegate, or same as `onBehalfOf` otherwise
    * @param onBehalfOf The address receiving the debt tokens
@@ -125,7 +125,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) external override onlyLendingPool returns (bool) {
+  ) external override onlyPool returns (bool) {
     if (user != onBehalfOf) {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
@@ -144,7 +144,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   /**
    * @dev Burns user variable debt
-   * - Only callable by the LendingPool
+   * - Only callable by the Pool
    * @param user The user whose debt is getting burned
    * @param amount The amount getting burned
    * @param index The variable debt index of the reserve
@@ -153,7 +153,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     address user,
     uint256 amount,
     uint256 index
-  ) external override onlyLendingPool {
+  ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
@@ -262,9 +262,9 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   }
 
   /**
-   * @dev Returns the address of the lending pool where this aToken is used
+   * @dev Returns the address of the pool where this aToken is used
    **/
-  function POOL() public view returns (ILendingPool) {
+  function POOL() public view returns (IPool) {
     return _pool;
   }
 
@@ -276,7 +276,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return _underlyingAsset;
   }
 
-  function _getLendingPool() internal view override returns (ILendingPool) {
+  function _getPool() internal view override returns (IPool) {
     return _pool;
   }
 }

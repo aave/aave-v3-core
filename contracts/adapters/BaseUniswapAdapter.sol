@@ -7,7 +7,7 @@ import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 import {IUniswapV2Router02} from '../interfaces/IUniswapV2Router02.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
@@ -27,7 +27,7 @@ abstract contract BaseUniswapAdapter is FlashLoanReceiverBase, IBaseUniswapAdapt
 
   // Max slippage percent allowed
   uint256 public constant override MAX_SLIPPAGE_PERCENT = 3000; // 30%
-  // FLash Loan fee set in lending pool
+  // FLash Loan fee set in pool
   uint256 public constant override FLASHLOAN_PREMIUM_TOTAL = 9;
   // USD oracle asset address
   address public constant override USD_ADDRESS = 0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96;
@@ -37,7 +37,7 @@ abstract contract BaseUniswapAdapter is FlashLoanReceiverBase, IBaseUniswapAdapt
   IUniswapV2Router02 public immutable override UNISWAP_ROUTER;
 
   constructor(
-    ILendingPoolAddressesProvider addressesProvider,
+    IPoolAddressesProvider addressesProvider,
     IUniswapV2Router02 uniswapRouter,
     address wethAddress
   ) FlashLoanReceiverBase(addressesProvider) {
@@ -260,7 +260,7 @@ abstract contract BaseUniswapAdapter is FlashLoanReceiverBase, IBaseUniswapAdapt
    * @return address of the aToken
    */
   function _getReserveData(address asset) internal view returns (DataTypes.ReserveData memory) {
-    return LENDING_POOL.getReserveData(asset);
+    return POOL.getReserveData(asset);
   }
 
   /**
@@ -294,7 +294,7 @@ abstract contract BaseUniswapAdapter is FlashLoanReceiverBase, IBaseUniswapAdapt
     IERC20(reserveAToken).safeTransferFrom(user, address(this), amount);
 
     // withdraw reserve
-    LENDING_POOL.withdraw(reserve, amount, address(this));
+    POOL.withdraw(reserve, amount, address(this));
   }
 
   /**

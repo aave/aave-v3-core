@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {ILendingRateOracle} from '../../interfaces/ILendingRateOracle.sol';
+import {IRateOracle} from '../../interfaces/IRateOracle.sol';
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 
-contract LendingRateOracle is ILendingRateOracle, Ownable {
+contract RateOracle is IRateOracle, Ownable {
   mapping(address => uint256) borrowRates;
   mapping(address => uint256) liquidityRates;
 

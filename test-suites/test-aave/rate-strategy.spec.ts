@@ -1,7 +1,7 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { deployDefaultReserveInterestRateStrategy } from '../../helpers/contracts-deployments';
 
-import { APPROVAL_AMOUNT_LENDING_POOL, PERCENTAGE_FACTOR, RAY } from '../../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, PERCENTAGE_FACTOR, RAY } from '../../helpers/constants';
 
 import { rateStrategyStableOne } from '../../markets/aave/rateStrategies';
 

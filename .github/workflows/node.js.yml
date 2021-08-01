@@ -1,0 +1,51 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+      - uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: Install dependencies
+        run: npm ci
+      - name: Test
+        run: npm run ci:test
+      - name: Dev deployment
+        run: npm run aave:evm:dev:migration
+      - name: Mainnet deployment at Mainnet fork
+        run: npm run aave:fork:main
+        env:
+          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
+      - name: Amm deployment at Mainnet fork
+        run: npm run amm:fork:main
+        env:
+          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
+      - name: Aave deployment at Kovan fork
+        run: npm run aave:fork:kovan
+        env:
+          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
+      # - name: Coverage
+      #   run: npm run coverage
+      # - uses: codecov/codecov-action@v1
+      #   with:
+      #     fail_ci_if_error: true

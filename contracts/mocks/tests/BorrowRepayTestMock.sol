@@ -1,18 +1,14 @@
 pragma solidity 0.8.6;
 
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';
 
 contract BorrowRepayTestMock {
-  ILendingPool _pool;
+  IPool _pool;
   address _weth;
   address _dai;
 
-  constructor(
-    ILendingPool pool,
-    address weth,
-    address dai
-  ) public {
+  constructor(IPool pool, address weth, address dai) {
     _pool = pool;
     _weth = weth;
     _dai = dai;

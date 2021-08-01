@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {ILendingPoolAddressesProvider} from './ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 
-interface ILendingPool {
+interface IPool {
   /**
    * @dev Emitted on deposit()
    * @param reserve The address of the underlying asset of the reserve
@@ -113,9 +113,9 @@ interface ILendingPool {
   );
 
   /**
-   * @dev Emitted when a borrower is liquidated. This event is emitted by the LendingPool via
-   * LendingPoolCollateral manager using a DELEGATECALL
-   * This allows to have the events in the generated ABI for LendingPool.
+   * @dev Emitted when a borrower is liquidated. This event is emitted by the Pool via
+   * PoolCollateral manager using a DELEGATECALL
+   * This allows to have the events in the generated ABI for Pool.
    * @param collateralAsset The address of the underlying asset used as collateral, to receive as result of the liquidation
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param user The address of the borrower getting liquidated
@@ -138,8 +138,8 @@ interface ILendingPool {
   /**
    * @dev Emitted when the state of a reserve is updated. NOTE: This event is actually declared
    * in the ReserveLogic library and emitted in the updateInterestRates() function. Since the function is internal,
-   * the event will actually be fired by the LendingPool contract. The event is therefore replicated here so it
-   * gets added to the LendingPool ABI
+   * the event will actually be fired by the Pool contract. The event is therefore replicated here so it
+   * gets added to the Pool ABI
    * @param reserve The address of the underlying asset of the reserve
    * @param liquidityRate The new liquidity rate
    * @param stableBorrowRate The new stable borrow rate
@@ -387,7 +387,7 @@ interface ILendingPool {
   /**
    * @dev Initializes a reserve, activating it, assigning an aToken and debt tokens and an
    * interest rate strategy
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param aTokenAddress The address of the aToken that will be assigned to the reserve
    * @param stableDebtAddress The address of the StableDebtToken that will be assigned to the reserve
@@ -404,14 +404,14 @@ interface ILendingPool {
 
   /**
    * @dev Drop a reserve
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    **/
   function dropReserve(address asset) external;
 
   /**
    * @dev Updates the address of the interest rate strategy contract
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param rateStrategyAddress The address of the interest rate strategy contract
    **/
@@ -420,7 +420,7 @@ interface ILendingPool {
 
   /**
    * @dev Sets the configuration bitmap of the reserve as a whole
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param configuration The new configuration bitmap
    **/
@@ -492,25 +492,25 @@ interface ILendingPool {
   function getReservesList() external view returns (address[] memory);
 
   /**
-   * @dev Returns the cached LendingPoolAddressesProvider connected to this contract
+   * @dev Returns the cached PoolAddressesProvider connected to this contract
    **/
-  function getAddressesProvider() external view returns (ILendingPoolAddressesProvider);
+  function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
    * @dev Set the _pause state of a reserve
-   * - Only callable by the LendingPoolConfigurator contract
+   * - Only callable by the PoolConfigurator contract
    * @param val `true` to pause the reserve, `false` to un-pause it
    */
   function setPause(bool val) external;
 
   /**
-   * @dev Returns if the LendingPool is paused
+   * @dev Returns if the Pool is paused
    */
   function paused() external view returns (bool);
 
   /**
-   * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium.
-   * Only callable by the LendingPoolConfigurator contract
+   * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium. 
+   * Only callable by the PoolConfigurator contract
    * @param flashBorrower address of the flash borrower
    * @param authorized `true` to authorize, `false` to unauthorize
    */
@@ -528,7 +528,7 @@ interface ILendingPool {
    * flash loan premium consist in 2 parts
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
-   * Only callable by the LendingPoolConfigurator contract
+   * Only callable by the PoolConfigurator contract
    * @param flashLoanPremiumTotal total premium in bps
    * @param flashLoanPremiumToProtocol part of the premium sent to protocol
    */
@@ -553,7 +553,7 @@ interface ILendingPool {
   function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint256);
 
   /**
-   * @dev Returns the maximum number of reserves supported to be listed in this LendingPool
+   * @dev Returns the maximum number of reserves supported to be listed in this Pool
    */
   function MAX_NUMBER_RESERVES() external view returns (uint256);
 

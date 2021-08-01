@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {IDelegationToken} from '../../interfaces/IDelegationToken.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {AToken} from './AToken.sol';
@@ -14,7 +14,7 @@ import {AToken} from './AToken.sol';
 contract DelegationAwareAToken is AToken {
   modifier onlyPoolAdmin {
     require(
-      _msgSender() == ILendingPool(_pool).getAddressesProvider().getPoolAdmin(),
+      _msgSender() == IPool(_pool).getAddressesProvider().getPoolAdmin(),
       Errors.CALLER_NOT_POOL_ADMIN
     );
     _;

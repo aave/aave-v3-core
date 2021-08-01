@@ -3,7 +3,7 @@ pragma solidity 0.8.6;
 
 import {StableDebtToken} from '../protocol/tokenization/StableDebtToken.sol';
 import {VariableDebtToken} from '../protocol/tokenization/VariableDebtToken.sol';
-import {LendingRateOracle} from '../mocks/oracle/LendingRateOracle.sol';
+import {RateOracle} from '../mocks/oracle/RateOracle.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {StringLib} from './StringLib.sol';
 
@@ -33,14 +33,14 @@ contract StableAndVariableTokensHelper is Ownable {
     require(assets.length == rates.length, 'Arrays not same length');
 
     for (uint256 i = 0; i < assets.length; i++) {
-      // LendingRateOracle owner must be this contract
-      LendingRateOracle(oracle).setMarketBorrowRate(assets[i], rates[i]);
+      // RateOracle owner must be this contract
+      RateOracle(oracle).setMarketBorrowRate(assets[i], rates[i]);
     }
   }
 
   function setOracleOwnership(address oracle, address admin) external onlyOwner {
     require(admin != address(0), 'owner can not be zero');
-    require(LendingRateOracle(oracle).owner() == address(this), 'helper is not owner');
-    LendingRateOracle(oracle).transferOwnership(admin);
+    require(RateOracle(oracle).owner() == address(this), 'helper is not owner');
+    RateOracle(oracle).transferOwnership(admin);
   }
 }

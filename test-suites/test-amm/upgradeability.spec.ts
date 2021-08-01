@@ -60,7 +60,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
     newStableTokenAddress = stableDebtTokenInstance.address;
   });
 
-  it('Tries to update the DAI Atoken implementation with a different address than the lendingPoolManager', async () => {
+  it('Tries to update the DAI Atoken implementation with a different address than the poolManager', async () => {
     const { dai, configurator, users } = testEnv;
 
     const name = await (await getAToken(newATokenAddress)).name();
@@ -116,7 +116,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
     expect(tokenName).to.be.eq('Aave AMM Market DAI updated', 'Invalid token name');
   });
 
-  it('Tries to update the DAI Stable debt token implementation with a different address than the lendingPoolManager', async () => {
+  it('Tries to update the DAI Stable debt token implementation with a different address than the poolManager', async () => {
     const { dai, configurator, users } = testEnv;
 
     const name = await (await getStableDebtToken(newStableTokenAddress)).name();
@@ -176,7 +176,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
     expect(tokenName).to.be.eq('Aave AMM Market stable debt DAI updated', 'Invalid token name');
   });
 
-  it('Tries to update the DAI variable debt token implementation with a different address than the lendingPoolManager', async () => {
+  it('Tries to update the DAI variable debt token implementation with a different address than the poolManager', async () => {
     const {dai, configurator, users} = testEnv;
     
     const name = await (await getVariableDebtToken(newVariableTokenAddress)).name();

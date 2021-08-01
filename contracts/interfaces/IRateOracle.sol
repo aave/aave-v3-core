@@ -2,11 +2,11 @@
 pragma solidity 0.8.6;
 
 /**
- * @title ILendingRateOracle interface
+ * @title IRateOracle interface
  * @notice Interface for the Aave borrow rate oracle. Provides the average market borrow rate to be used as a base for the stable borrow rate calculations
  **/
 
-interface ILendingRateOracle {
+interface IRateOracle {
   /**
     @dev returns the market borrow rate in ray
     **/

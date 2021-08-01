@@ -8,7 +8,7 @@ import { eContractid } from '../../helpers/types';
 const CONTRACT_NAME = 'UniswapRepayAdapter';
 
 task(`deploy-${CONTRACT_NAME}`, `Deploys the ${CONTRACT_NAME} contract`)
-  .addParam('provider', 'Address of the LendingPoolAddressesProvider')
+  .addParam('provider', 'Address of the PoolAddressesProvider')
   .addParam('router', 'Address of the uniswap router')
   .addParam('weth', 'Address of the weth token')
   .addFlag('verify', `Verify ${CONTRACT_NAME} contract via Etherscan API.`)
@@ -21,7 +21,7 @@ task(`deploy-${CONTRACT_NAME}`, `Deploys the ${CONTRACT_NAME} contract`)
 
     console.log(`\n- ${CONTRACT_NAME} deployment`);
     // const args = [
-    //   '0x88757f2f99175387aB4C6a4b3067c77A695b0349', // lending  provider kovan address
+    //   '0x88757f2f99175387aB4C6a4b3067c77A695b0349', // provider kovan address
     //   '0xfcd87315f0e4067070ade8682fcdbc3006631441', // uniswap router address
     // ];
     const uniswapRepayAdapter = await new UniswapRepayAdapterFactory(await getFirstSigner()).deploy(
