@@ -291,36 +291,6 @@ export const buildLiquiditySwapParams = (
   );
 };
 
-export const buildRepayAdapterParams = (
-  collateralAsset: tEthereumAddress,
-  collateralAmount: BigNumberish,
-  rateMode: BigNumberish,
-  permitAmount: BigNumberish,
-  deadline: BigNumberish,
-  v: BigNumberish,
-  r: string | Buffer,
-  s: string | Buffer,
-  useEthPath: boolean
-) => {
-  return ethers.utils.defaultAbiCoder.encode(
-    ['address', 'uint256', 'uint256', 'uint256', 'uint256', 'uint8', 'bytes32', 'bytes32', 'bool'],
-    [collateralAsset, collateralAmount, rateMode, permitAmount, deadline, v, r, s, useEthPath]
-  );
-};
-
-export const buildFlashLiquidationAdapterParams = (
-  collateralAsset: tEthereumAddress,
-  debtAsset: tEthereumAddress,
-  user: tEthereumAddress,
-  debtToCover: BigNumberish,
-  useEthPath: boolean
-) => {
-  return ethers.utils.defaultAbiCoder.encode(
-    ['address', 'address', 'address', 'uint256', 'bool'],
-    [collateralAsset, debtAsset, user, debtToCover, useEthPath]
-  );
-};
-
 export const buildPermitDelegationParams = (
   chainId: number,
   token: tEthereumAddress,

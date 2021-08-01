@@ -11,9 +11,6 @@ import {
   getLendingPoolAddressesProviderRegistry,
   getWETHMocked,
   getWETHGateway,
-  getUniswapLiquiditySwapAdapter,
-  getUniswapRepayAdapter,
-  getFlashLiquidationAdapter,
   getVariableDebtToken,
   getStableDebtToken,
 } from '../../../helpers/contracts-getters';
@@ -32,14 +29,12 @@ import { PriceOracle } from '../../../types/PriceOracle';
 import { LendingPoolAddressesProvider } from '../../../types/LendingPoolAddressesProvider';
 import { LendingPoolAddressesProviderRegistry } from '../../../types/LendingPoolAddressesProviderRegistry';
 import { getEthersSigners } from '../../../helpers/contracts-helpers';
-import { UniswapLiquiditySwapAdapter } from '../../../types/UniswapLiquiditySwapAdapter';
-import { UniswapRepayAdapter } from '../../../types/UniswapRepayAdapter';
 import { getParamPerNetwork } from '../../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../../types/WETH9Mocked';
 import { WETHGateway } from '../../../types/WETHGateway';
 import { solidity } from 'ethereum-waffle';
 import { AaveConfig } from '../../../markets/aave';
-import { FlashLiquidationAdapter, StableDebtToken, VariableDebtToken } from '../../../types';
+import { StableDebtToken, VariableDebtToken } from '../../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../../helpers/tenderly-utils';
 
@@ -71,11 +66,8 @@ export interface TestEnv {
   usdc: MintableERC20;
   aave: MintableERC20;
   addressesProvider: LendingPoolAddressesProvider;
-  uniswapLiquiditySwapAdapter: UniswapLiquiditySwapAdapter;
-  uniswapRepayAdapter: UniswapRepayAdapter;
   registry: LendingPoolAddressesProviderRegistry;
   wethGateway: WETHGateway;
-  flashLiquidationAdapter: FlashLiquidationAdapter;
 }
 
 let buidlerevmSnapshotId: string = '0x1';
@@ -103,9 +95,6 @@ const testEnv: TestEnv = {
   usdc: {} as MintableERC20,
   aave: {} as MintableERC20,
   addressesProvider: {} as LendingPoolAddressesProvider,
-  uniswapLiquiditySwapAdapter: {} as UniswapLiquiditySwapAdapter,
-  uniswapRepayAdapter: {} as UniswapRepayAdapter,
-  flashLiquidationAdapter: {} as FlashLiquidationAdapter,
   registry: {} as LendingPoolAddressesProviderRegistry,
   wethGateway: {} as WETHGateway,
 } as TestEnv;
@@ -179,10 +168,6 @@ export async function initializeMakeSuite() {
   testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
   testEnv.wethGateway = await getWETHGateway();
-
-  testEnv.uniswapLiquiditySwapAdapter = await getUniswapLiquiditySwapAdapter();
-  testEnv.uniswapRepayAdapter = await getUniswapRepayAdapter();
-  testEnv.flashLiquidationAdapter = await getFlashLiquidationAdapter();
 }
 
 const setSnapshot = async () => {

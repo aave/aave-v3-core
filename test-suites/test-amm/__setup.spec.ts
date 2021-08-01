@@ -24,9 +24,6 @@ import {
   deployWETHGateway,
   deployWETHMocked,
   deployMockUniswapRouter,
-  deployUniswapLiquiditySwapAdapter,
-  deployUniswapRepayAdapter,
-  deployFlashLiquidationAdapter,
   authorizeWETHGateway,
 } from '../../helpers/contracts-deployments';
 import { ethers, Signer } from 'ethers';
@@ -212,7 +209,13 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
 
-  await deployAaveOracle([tokens, aggregators, fallbackOracle.address, mockTokens.WETH.address, ethers.constants.WeiPerEther.toString()]);
+  await deployAaveOracle([
+    tokens,
+    aggregators,
+    fallbackOracle.address,
+    mockTokens.WETH.address,
+    ethers.constants.WeiPerEther.toString(),
+  ]);
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
   const lendingRateOracle = await deployLendingRateOracle();
@@ -240,12 +243,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const config = loadPoolConfig(ConfigNames.Amm);
 
-  const {
-    ATokenNamePrefix,
-    StableDebtTokenNamePrefix,
-    VariableDebtTokenNamePrefix,
-    SymbolPrefix,
-  } = config;
+  const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
+    config;
   const treasuryAddress = await getTreasuryAddress(config);
 
   await initReservesByHelper(
@@ -269,16 +268,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await deployMockFlashLoanReceiver(addressesProvider.address);
 
   const mockUniswapRouter = await deployMockUniswapRouter();
-
-  const adapterParams: [string, string, string] = [
-    addressesProvider.address,
-    mockUniswapRouter.address,
-    mockTokens.WETH.address,
-  ];
-
-  await deployUniswapLiquiditySwapAdapter(adapterParams);
-  await deployUniswapRepayAdapter(adapterParams);
-  await deployFlashLiquidationAdapter(adapterParams);
 
   await deployWalletBalancerProvider();
 
