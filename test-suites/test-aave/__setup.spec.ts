@@ -21,10 +21,8 @@ import {
   deployLendingRateOracle,
   deployStableAndVariableTokensHelper,
   deployATokensAndRatesHelper,
-  deployWETHGateway,
   deployWETHMocked,
   deployMockUniswapRouter,
-  authorizeWETHGateway,
 } from '../../helpers/contracts-deployments';
 import { eEthereumNetwork } from '../../helpers/types';
 import { ethers, Signer } from 'ethers';
@@ -275,9 +273,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const mockUniswapRouter = await deployMockUniswapRouter();
 
   await deployWalletBalancerProvider();
-
-  const gateWay = await deployWETHGateway([mockTokens.WETH.address]);
-  await authorizeWETHGateway(gateWay.address, lendingPoolAddress);
 
   console.timeEnd('setup');
 };

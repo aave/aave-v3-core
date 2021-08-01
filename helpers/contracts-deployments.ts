@@ -45,7 +45,6 @@ import {
   VariableDebtTokenFactory,
   WalletBalanceProviderFactory,
   WETH9MockedFactory,
-  WETHGatewayFactory,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -506,22 +505,6 @@ export const deployATokensAndRatesHelper = async (
     args,
     verify
   );
-
-export const deployWETHGateway = async (args: [tEthereumAddress], verify?: boolean) =>
-  withSaveAndVerify(
-    await new WETHGatewayFactory(await getFirstSigner()).deploy(...args),
-    eContractid.WETHGateway,
-    args,
-    verify
-  );
-
-export const authorizeWETHGateway = async (
-  wethGateWay: tEthereumAddress,
-  lendingPool: tEthereumAddress
-) =>
-  await new WETHGatewayFactory(await getFirstSigner())
-    .attach(wethGateWay)
-    .authorizeLendingPool(lendingPool);
 
 export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],
