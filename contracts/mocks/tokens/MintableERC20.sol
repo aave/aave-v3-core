@@ -2,14 +2,12 @@
 pragma solidity 0.8.6;
 
 import {ERC20} from '../../dependencies/openzeppelin/contracts/ERC20.sol';
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 
 /**
  * @title ERC20Mintable
  * @dev ERC20 minting logic
  */
 contract MintableERC20 is ERC20 {
-  using SafeMath for uint256;
 
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
@@ -66,7 +64,7 @@ contract MintableERC20 is ERC20 {
         )
       );
     require(owner == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
-    _nonces[owner] = currentValidNonce.add(1);
+    _nonces[owner] = currentValidNonce + 1;
     _approve(owner, spender, value);
   }
 

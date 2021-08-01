@@ -24,10 +24,12 @@ library UserConfiguration {
     uint256 reserveIndex,
     bool borrowing
   ) internal {
-    require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
-    self.data =
-      (self.data & ~(1 << (reserveIndex * 2))) |
-      (uint256(borrowing ? 1 : 0) << (reserveIndex * 2));
+    unchecked {
+      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      self.data =
+        (self.data & ~(1 << (reserveIndex * 2))) |
+        (uint256(borrowing ? 1 : 0) << (reserveIndex * 2));
+    }
   }
 
   /**
@@ -41,10 +43,12 @@ library UserConfiguration {
     uint256 reserveIndex,
     bool usingAsCollateral
   ) internal {
-    require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
-    self.data =
-      (self.data & ~(1 << (reserveIndex * 2 + 1))) |
-      (uint256(usingAsCollateral ? 1 : 0) << (reserveIndex * 2 + 1));
+    unchecked {
+      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      self.data =
+        (self.data & ~(1 << (reserveIndex * 2 + 1))) |
+        (uint256(usingAsCollateral ? 1 : 0) << (reserveIndex * 2 + 1));
+    }
   }
 
   /**
@@ -57,8 +61,10 @@ library UserConfiguration {
     DataTypes.UserConfigurationMap memory self,
     uint256 reserveIndex
   ) internal pure returns (bool) {
-    require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
-    return (self.data >> (reserveIndex * 2)) & 3 != 0;
+    unchecked {
+      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      return (self.data >> (reserveIndex * 2)) & 3 != 0;
+    }
   }
 
   /**
@@ -72,8 +78,10 @@ library UserConfiguration {
     pure
     returns (bool)
   {
-    require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
-    return (self.data >> (reserveIndex * 2)) & 1 != 0;
+    unchecked {
+      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      return (self.data >> (reserveIndex * 2)) & 1 != 0;
+    }
   }
 
   /**
@@ -87,8 +95,10 @@ library UserConfiguration {
     pure
     returns (bool)
   {
-    require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
-    return (self.data >> (reserveIndex * 2 + 1)) & 1 != 0;
+    unchecked {
+      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      return (self.data >> (reserveIndex * 2 + 1)) & 1 != 0;
+    }
   }
 
   /**

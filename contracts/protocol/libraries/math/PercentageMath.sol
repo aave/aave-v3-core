@@ -44,7 +44,6 @@ library PercentageMath {
    **/
   function percentDiv(uint256 value, uint256 percentage) internal pure returns (uint256) {
     unchecked {
-      require(percentage != 0, Errors.MATH_DIVISION_BY_ZERO);
       uint256 halfPercentage = percentage / 2;
 
       require(

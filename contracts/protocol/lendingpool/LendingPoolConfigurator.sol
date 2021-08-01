@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {
   InitializableImmutableAdminUpgradeabilityProxy
@@ -25,7 +24,6 @@ import {ILendingPoolConfigurator} from '../../interfaces/ILendingPoolConfigurato
  **/
 
 contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigurator {
-  using SafeMath for uint256;
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 

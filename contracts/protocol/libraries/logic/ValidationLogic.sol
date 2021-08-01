@@ -98,6 +98,7 @@ library ValidationLogic {
     uint256 reserveDecimals;
     uint256 borrowCap;
     uint256 amountInBaseCurrency;
+    uint256 assetUnit;
     bool isActive;
     bool isFrozen;
     bool isPaused;
@@ -159,6 +160,7 @@ library ValidationLogic {
     );
 
     vars.borrowCap = reserveCache.reserveConfiguration.getBorrowCapMemory();
+    unchecked {vars.assetUnit = 10**vars.reserveDecimals;}
 
     if (vars.borrowCap != 0) {
       {
@@ -167,10 +169,9 @@ library ValidationLogic {
         );
 
         vars.totalDebt = reserveCache.currTotalStableDebt + vars.totalSupplyVariableDebt + amount;
-        require(
-          vars.totalDebt / 10**vars.reserveDecimals < vars.borrowCap,
-          Errors.VL_BORROW_CAP_EXCEEDED
-        );
+        unchecked {
+          require(vars.totalDebt / vars.assetUnit < vars.borrowCap, Errors.VL_BORROW_CAP_EXCEEDED);
+        }
       }
     }
 
@@ -197,8 +198,8 @@ library ValidationLogic {
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 
-    vars.amountInBaseCurrency = IPriceOracleGetter(oracle).getAssetPrice(asset);
-    vars.amountInBaseCurrency = (vars.amountInBaseCurrency * amount) / 10**vars.reserveDecimals;
+    vars.amountInBaseCurrency = IPriceOracleGetter(oracle).getAssetPrice(asset) * amount;
+    unchecked {vars.amountInBaseCurrency /= 10**vars.reserveDecimals;}
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
     vars.collateralNeededInBaseCurrency = (vars.userDebtInBaseCurrency + vars.amountInBaseCurrency)
