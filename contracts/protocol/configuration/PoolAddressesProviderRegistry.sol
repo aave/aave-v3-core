@@ -3,19 +3,19 @@ pragma solidity 0.6.12;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 import {
-  ILendingPoolAddressesProviderRegistry
-} from '../../interfaces/ILendingPoolAddressesProviderRegistry.sol';
+  IPoolAddressesProviderRegistry
+} from '../../interfaces/IPoolAddressesProviderRegistry.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
- * @title LendingPoolAddressesProviderRegistry contract
- * @dev Main registry of LendingPoolAddressesProvider of multiple Aave protocol's markets
+ * @title PoolAddressesProviderRegistry contract
+ * @dev Main registry of PoolAddressesProvider of multiple Aave protocol's markets
  * - Used for indexing purposes of Aave protocol's markets
- * - The id assigned to a LendingPoolAddressesProvider refers to the market it is connected with,
+ * - The id assigned to a PoolAddressesProvider refers to the market it is connected with,
  *   for example with `0` for the Aave main market and `1` for the next created
  * @author Aave
  **/
-contract LendingPoolAddressesProviderRegistry is Ownable, ILendingPoolAddressesProviderRegistry {
+contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
   mapping(address => uint256) private _addressesProviders;
   address[] private _addressesProvidersList;
 
@@ -41,11 +41,11 @@ contract LendingPoolAddressesProviderRegistry is Ownable, ILendingPoolAddressesP
 
   /**
    * @dev Registers an addresses provider
-   * @param provider The address of the new LendingPoolAddressesProvider
-   * @param id The id for the new LendingPoolAddressesProvider, referring to the market it belongs to
+   * @param provider The address of the new PoolAddressesProvider
+   * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
    **/
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
-    require(id != 0, Errors.LPAPR_INVALID_ADDRESSES_PROVIDER_ID);
+    require(id != 0, Errors.PAPR_INVALID_ADDRESSES_PROVIDER_ID);
 
     _addressesProviders[provider] = id;
     _addToAddressesProvidersList(provider);
@@ -53,18 +53,18 @@ contract LendingPoolAddressesProviderRegistry is Ownable, ILendingPoolAddressesP
   }
 
   /**
-   * @dev Removes a LendingPoolAddressesProvider from the list of registered addresses provider
-   * @param provider The LendingPoolAddressesProvider address
+   * @dev Removes a PoolAddressesProvider from the list of registered addresses provider
+   * @param provider The PoolAddressesProvider address
    **/
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviders[provider] > 0, Errors.LPAPR_PROVIDER_NOT_REGISTERED);
+    require(_addressesProviders[provider] > 0, Errors.PAPR_PROVIDER_NOT_REGISTERED);
     _addressesProviders[provider] = 0;
     emit AddressesProviderUnregistered(provider);
   }
 
   /**
-   * @dev Returns the id on a registered LendingPoolAddressesProvider
-   * @return The id or 0 if the LendingPoolAddressesProvider is not registered
+   * @dev Returns the id on a registered PoolAddressesProvider
+   * @return The id or 0 if the PoolAddressesProvider is not registered
    */
   function getAddressesProviderIdByAddress(address addressesProvider)
     external

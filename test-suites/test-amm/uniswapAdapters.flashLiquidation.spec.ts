@@ -10,7 +10,7 @@
 // import { DRE, evmRevert, evmSnapshot, increaseTime, waitForTx } from '../../helpers/misc-utils';
 // import { ethers } from 'ethers';
 // import { ProtocolErrors, RateMode } from '../../helpers/types';
-// import { APPROVAL_AMOUNT_LENDING_POOL, MAX_UINT_AMOUNT, oneEther } from '../../helpers/constants';
+// import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, oneEther } from '../../helpers/constants';
 // import { getUserData } from './helpers/utils/helpers';
 // import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 // const { expect } = require('chai');
@@ -18,7 +18,7 @@
 // makeSuite('Uniswap adapters', (testEnv: TestEnv) => {
 //   let mockUniswapRouter: MockUniswapV2Router02;
 //   let evmSnapshotId: string;
-//   const { INVALID_HF, LP_LIQUIDATION_CALL_FAILED } = ProtocolErrors;
+//   const { INVALID_HF, P_LIQUIDATION_CALL_FAILED } = ProtocolErrors;
 
 //   before(async () => {
 //     mockUniswapRouter = await getMockUniswapRouter();
@@ -33,7 +33,7 @@
 //     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
 //     //approve protocol to access depositor wallet
-//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     //user 1 deposits 1000 DAI
 //     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
@@ -48,7 +48,7 @@
 //     await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
 
 //     //approve protocol to access the borrower wallet
-//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     await pool
 //       .connect(borrower.signer)
@@ -100,7 +100,7 @@
 //     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
 //     //approve protocol to access depositor wallet
-//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     //user 1 deposits 1000 DAI
 //     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
@@ -115,7 +115,7 @@
 //     await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
 
 //     //approve protocol to access the borrower wallet
-//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+//     await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
 //     await pool
 //       .connect(borrower.signer)
@@ -178,11 +178,11 @@
 //   });
 
 //   describe('Flash Liquidation Adapter', () => {
-//     before('Before LendingPool liquidation: set config', () => {
+//     before('Before Pool liquidation: set config', () => {
 //       BigNumber.config({ DECIMAL_PLACES: 0, ROUNDING_MODE: BigNumber.ROUND_DOWN });
 //     });
 
-//     after('After LendingPool liquidation: reset config', () => {
+//     after('After Pool liquidation: reset config', () => {
 //       BigNumber.config({ DECIMAL_PLACES: 20, ROUNDING_MODE: BigNumber.ROUND_HALF_UP });
 //     });
 
@@ -798,7 +798,7 @@
 //               params,
 //               0
 //             )
-//         ).to.be.revertedWith(LP_LIQUIDATION_CALL_FAILED);
+//         ).to.be.revertedWith(P_LIQUIDATION_CALL_FAILED);
 //       });
 
 //       it('Revert if requested multiple assets', async () => {

@@ -2,15 +2,15 @@
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
-import {LendingPool} from '../protocol/lendingpool/LendingPool.sol';
+import {Pool} from '../protocol/pool/Pool.sol';
 import {
-  LendingPoolAddressesProvider
-} from '../protocol/configuration/LendingPoolAddressesProvider.sol';
-import {LendingPoolConfigurator} from '../protocol/lendingpool/LendingPoolConfigurator.sol';
+  PoolAddressesProvider
+} from '../protocol/configuration/PoolAddressesProvider.sol';
+import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
 import {
   DefaultReserveInterestRateStrategy
-} from '../protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {StringLib} from './StringLib.sol';
 
@@ -53,7 +53,7 @@ contract ATokensAndRatesHelper is Ownable {
         address(new AToken()),
         address(
           new DefaultReserveInterestRateStrategy(
-            LendingPoolAddressesProvider(addressesProvider),
+            PoolAddressesProvider(addressesProvider),
             inputParams[i].rates[0],
             inputParams[i].rates[1],
             inputParams[i].rates[2],
@@ -67,7 +67,7 @@ contract ATokensAndRatesHelper is Ownable {
   }
 
   function configureReserves(ConfigureReserveInput[] calldata inputParams) external onlyOwner {
-    LendingPoolConfigurator configurator = LendingPoolConfigurator(poolConfigurator);
+    PoolConfigurator configurator = PoolConfigurator(poolConfigurator);
     for (uint256 i = 0; i < inputParams.length; i++) {
       configurator.configureReserveAsCollateral(
         inputParams[i].asset,

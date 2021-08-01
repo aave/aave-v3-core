@@ -38,7 +38,7 @@ export const CommonsConfig: ICommonConfiguration = {
     },
   },
   // TODO: reorg alphabetically, checking the reason of tests failing
-  LendingRateOracleRatesCommon: {
+  RateOracleRatesCommon: {
     WETH: {
       borrowRate: oneRay.multipliedBy(0.03).toFixed(),
     },
@@ -77,16 +77,16 @@ export const CommonsConfig: ICommonConfiguration = {
   ProviderRegistryOwner: {
     [eXDaiNetwork.xdai]: '',
   },
-  LendingPoolConfigurator: {
+  PoolConfigurator: {
     [eXDaiNetwork.xdai]: '0',
   },
-  LendingPool: {
+  Pool: {
     [eXDaiNetwork.xdai]: '0',
   },
-  LendingRateOracle: {
+  RateOracle: {
     [eXDaiNetwork.xdai]: '',
   },
-  LendingPoolCollateralManager: {
+  PoolCollateralManager: {
     [eXDaiNetwork.xdai]: '',
   },
   TokenDistributor: {

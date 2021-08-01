@@ -1,6 +1,6 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import {
-  APPROVAL_AMOUNT_LENDING_POOL,
+  APPROVAL_AMOUNT_POOL,
   MAX_UINT_AMOUNT,
   RAY,
   MAX_BORROW_CAP,
@@ -12,10 +12,10 @@ import { BigNumber } from '@ethersproject/bignumber';
 
 const { expect } = require('chai');
 
-makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
+makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   const {
     CALLER_NOT_POOL_ADMIN,
-    LPC_RESERVE_LIQUIDITY_NOT_0,
+    PC_RESERVE_LIQUIDITY_NOT_0,
     RC_INVALID_LTV,
     RC_INVALID_LIQ_THRESHOLD,
     RC_INVALID_LIQ_BONUS,
@@ -23,11 +23,11 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     RC_INVALID_RESERVE_FACTOR,
     RC_INVALID_BORROW_CAP,
     RC_INVALID_SUPPLY_CAP,
-    LPC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN,
-    LPC_CALLER_NOT_RISK_OR_POOL_ADMIN,
+    PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN,
+    PC_CALLER_NOT_RISK_OR_POOL_ADMIN,
     VL_RESERVE_PAUSED,
-    LPC_FLASHLOAN_PREMIUMS_MISMATCH,
-    LPC_FLASHLOAN_PREMIUM_INVALID,
+    PC_FLASHLOAN_PREMIUMS_MISMATCH,
+    PC_FLASHLOAN_PREMIUM_INVALID,
   } = ProtocolErrors;
 
   it('Reverts trying to set an invalid reserve factor', async () => {
@@ -204,7 +204,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, true),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
   });
 
   it('Check the only admin or emergency admin can unpauseReserve ', async () => {
@@ -212,7 +212,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, false),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
   });
   it('Pauses the ETH reserve by the pool admin', async () => {
     const { configurator, weth, helpersContract, addressesProvider, users, emergencyAdmin } =
@@ -354,7 +354,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, true),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
   });
 
   it('Check the only admin or emergency admin can unpauseReserve ', async () => {
@@ -362,7 +362,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, false),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
   });
 
   it('Freezes the ETH reserve by pool Admin', async () => {
@@ -504,16 +504,16 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     const { configurator, users, weth, emergencyAdmin } = testEnv;
     await expect(
       configurator.connect(emergencyAdmin.signer).freezeReserve(weth.address),
-      LPC_CALLER_NOT_RISK_OR_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+      PC_CALLER_NOT_RISK_OR_POOL_ADMIN
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Check the onlyRiskOrPoolAdmins on unfreezeReserve ', async () => {
     const { configurator, users, weth, emergencyAdmin } = testEnv;
     await expect(
       configurator.connect(emergencyAdmin.signer).unfreezeReserve(weth.address),
-      LPC_CALLER_NOT_RISK_OR_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+      PC_CALLER_NOT_RISK_OR_POOL_ADMIN
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Deactivates the ETH reserve for borrowing via pool admin', async () => {
@@ -662,7 +662,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(emergencyAdmin.signer).disableBorrowingOnReserve(weth.address),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Check the onlyAaveAdmin or Risk admin on enableBorrowingOnReserve ', async () => {
@@ -672,7 +672,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
         .connect(emergencyAdmin.signer)
         .enableBorrowingOnReserve(weth.address, MAX_BORROW_CAP, true),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Deactivates the ETH reserve as collateral via pool admin', async () => {
@@ -822,7 +822,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
         .connect(emergencyAdmin.signer)
         .configureReserveAsCollateral(weth.address, '7500', '8000', '10500'),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Disable stable borrow rate on the ETH reserve via pool admin', async () => {
@@ -962,7 +962,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(emergencyAdmin.signer).disableReserveStableRate(weth.address),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Check the onlyRiskOrPoolAdmin on enableReserveStableRate', async () => {
@@ -970,7 +970,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(emergencyAdmin.signer).enableReserveStableRate(weth.address),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Check the onlyRiskOrPoolAdmin on setReserveFactor', async () => {
@@ -978,7 +978,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(emergencyAdmin.signer).setReserveFactor(weth.address, '1000'),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Check the onlyRiskOrPoolAdmin on setBorrowCap', async () => {
@@ -986,14 +986,14 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(emergencyAdmin.signer).setBorrowCap(weth.address, '3000000000'),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
   it('Check the onlyRiskOrPoolAdmin on setSupplyCap', async () => {
     const { configurator, users, weth, emergencyAdmin } = testEnv;
     await expect(
       configurator.connect(emergencyAdmin.signer).setSupplyCap(weth.address, '3000000000'),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(LPC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+    ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
   });
 
   it('Changes the reserve factor of WETH via pool admin', async () => {
@@ -1277,7 +1277,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await dai.approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.approve(pool.address, APPROVAL_AMOUNT_POOL);
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
     //user 1 deposits 1000 DAI
@@ -1285,8 +1285,8 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
 
     await expect(
       configurator.deactivateReserve(dai.address),
-      LPC_RESERVE_LIQUIDITY_NOT_0
-    ).to.be.revertedWith(LPC_RESERVE_LIQUIDITY_NOT_0);
+      PC_RESERVE_LIQUIDITY_NOT_0
+    ).to.be.revertedWith(PC_RESERVE_LIQUIDITY_NOT_0);
   });
   it('Register a new risk Admin', async () => {
     const { dai, pool, configurator, users, riskAdmin } = testEnv;
@@ -1382,11 +1382,11 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     const newPremiumToProtocol = 41;
 
     await expect(configurator.updateFlashloanPremiumTotal(newPremiumTotal)).to.be.revertedWith(
-      LPC_FLASHLOAN_PREMIUMS_MISMATCH
+      PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     await expect(
       configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
-    ).to.be.revertedWith(LPC_FLASHLOAN_PREMIUMS_MISMATCH);
+    ).to.be.revertedWith(PC_FLASHLOAN_PREMIUMS_MISMATCH);
   });
   it('Fails to update flahloan premiums > 100%', async () => {
     const { dai, pool, configurator, users } = testEnv;
@@ -1394,11 +1394,11 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     const newPremiumToProtocol = 10100;
 
     await expect(configurator.updateFlashloanPremiumTotal(newPremiumTotal)).to.be.revertedWith(
-      LPC_FLASHLOAN_PREMIUM_INVALID
+      PC_FLASHLOAN_PREMIUM_INVALID
     );
     await expect(
       configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
-    ).to.be.revertedWith(LPC_FLASHLOAN_PREMIUM_INVALID);
+    ).to.be.revertedWith(PC_FLASHLOAN_PREMIUM_INVALID);
   });
   it('Checks only pool admin can update flashloan premiums', async () => {
     const { dai, pool, configurator, users, riskAdmin, emergencyAdmin } = testEnv;

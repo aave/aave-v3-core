@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: Borrow negatives (reverts)",
+  "title": "Pool: Borrow negatives (reverts)",
   "description": "Test cases for the deposit function.",
   "stories": [
     {

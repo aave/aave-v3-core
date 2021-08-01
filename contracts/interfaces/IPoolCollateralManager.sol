@@ -2,11 +2,11 @@
 pragma solidity 0.6.12;
 
 /**
- * @title ILendingPoolCollateralManager
+ * @title IPoolCollateralManager
  * @author Aave
  * @notice Defines the actions involving management of collateral in the protocol.
  **/
-interface ILendingPoolCollateralManager {
+interface IPoolCollateralManager {
   /**
    * @dev Emitted when a borrower is liquidated
    * @param collateral The address of the collateral being liquidated

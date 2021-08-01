@@ -1,7 +1,7 @@
-import { LendingPool } from '../../../../types/LendingPool';
+import { Pool } from '../../../../types/Pool';
 import { ReserveData, UserReserveData } from './interfaces';
 import {
-  getLendingRateOracle,
+  getRateOracle,
   getIErc20Detailed,
   getMintableERC20,
   getAToken,
@@ -20,7 +20,7 @@ export const getReserveData = async (
   const [reserveData, tokenAddresses, rateOracle, token] = await Promise.all([
     helper.getReserveData(reserve),
     helper.getReserveTokensAddresses(reserve),
-    getLendingRateOracle(),
+    getRateOracle(),
     getIErc20Detailed(reserve),
   ]);
 
@@ -73,7 +73,7 @@ export const getReserveData = async (
 };
 
 export const getUserData = async (
-  pool: LendingPool,
+  pool: Pool,
   helper: AaveProtocolDataProvider,
   reserve: string,
   user: tEthereumAddress,

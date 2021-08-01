@@ -1,15 +1,15 @@
 import { task } from 'hardhat/config';
 import { deployAaveProtocolDataProvider } from '../../helpers/contracts-deployments';
 import { exit } from 'process';
-import { getLendingPoolAddressesProvider } from '../../helpers/contracts-getters';
+import { getPoolAddressesProvider } from '../../helpers/contracts-getters';
 
-task('full:data-provider', 'Initialize lending pool configuration.')
+task('full:data-provider', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .setAction(async ({ verify }, localBRE) => {
     try {
       await localBRE.run('set-DRE');
 
-      const addressesProvider = await getLendingPoolAddressesProvider();
+      const addressesProvider = await getPoolAddressesProvider();
 
       await deployAaveProtocolDataProvider(addressesProvider.address, verify);
     } catch (err) {

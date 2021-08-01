@@ -1,15 +1,15 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
-import { APPROVAL_AMOUNT_LENDING_POOL, MAX_BORROW_CAP, RAY } from '../../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, MAX_BORROW_CAP, RAY } from '../../helpers/constants';
 import { convertToCurrencyDecimals } from '../../helpers/contracts-helpers';
 import { ProtocolErrors } from '../../helpers/types';
 import { strategyWETH } from '../../markets/amm/reservesConfigs';
 
 const { expect } = require('chai');
 
-makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
+makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   const {
     CALLER_NOT_POOL_ADMIN,
-    LPC_RESERVE_LIQUIDITY_NOT_0,
+    PC_RESERVE_LIQUIDITY_NOT_0,
     RC_INVALID_LTV,
     RC_INVALID_LIQ_THRESHOLD,
     RC_INVALID_LIQ_BONUS,
@@ -385,7 +385,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     expect(reserveFactor).to.be.equal(1000);
   });
 
-  it('Check the onlyLendingPoolManager on setReserveFactor', async () => {
+  it('Check the onlyPoolManager on setReserveFactor', async () => {
     const { configurator, users, weth } = testEnv;
     await expect(
       configurator.connect(users[2].signer).setReserveFactor(weth.address, '2000'),
@@ -399,7 +399,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await dai.approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.approve(pool.address, APPROVAL_AMOUNT_POOL);
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
     //user 1 deposits 1000 DAI
@@ -407,7 +407,7 @@ makeSuite('LendingPoolConfigurator', (testEnv: TestEnv) => {
 
     await expect(
       configurator.deactivateReserve(dai.address),
-      LPC_RESERVE_LIQUIDITY_NOT_0
-    ).to.be.revertedWith(LPC_RESERVE_LIQUIDITY_NOT_0);
+      PC_RESERVE_LIQUIDITY_NOT_0
+    ).to.be.revertedWith(PC_RESERVE_LIQUIDITY_NOT_0);
   });
 });

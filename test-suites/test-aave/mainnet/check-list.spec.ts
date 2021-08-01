@@ -289,7 +289,7 @@ makeSuite('Mainnet Check list', (testEnv: TestEnv) => {
 
     const WETHAddress = await wethGateway.getWETHAddress();
     const aWETHAddress = await wethGateway.getAWETHAddress();
-    const poolAddress = await wethGateway.getLendingPoolAddress();
+    const poolAddress = await wethGateway.getPoolAddress();
 
     expect(WETHAddress).to.be.equal(weth.address);
     expect(aWETHAddress).to.be.equal(aWETH.address);

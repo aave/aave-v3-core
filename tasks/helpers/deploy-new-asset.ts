@@ -4,7 +4,7 @@ import { getTreasuryAddress } from '../../helpers/configuration';
 import * as marketConfigs from '../../markets/aave';
 import * as reserveConfigs from '../../markets/aave/reservesConfigs';
 import { chooseATokenDeployment } from '../../helpers/init-helpers';
-import { getLendingPoolAddressesProvider } from './../../helpers/contracts-getters';
+import { getPoolAddressesProvider } from './../../helpers/contracts-getters';
 import {
   deployDefaultReserveInterestRateStrategy,
   deployStableDebtToken,
@@ -13,7 +13,7 @@ import {
 import { setDRE } from '../../helpers/misc-utils';
 import { ZERO_ADDRESS } from './../../helpers/constants';
 
-const LENDING_POOL_ADDRESS_PROVIDER = {
+const POOL_ADDRESS_PROVIDER = {
   main: '0xb53c1a33016b2dc2ff3653530bff1848a515c8c5',
   kovan: '0x652B2937Efd0B5beA1c8d54293FC1289672AFC6b',
 };
@@ -43,10 +43,10 @@ WRONG RESERVE ASSET SETUP:
     const reserveAssetAddress =
       marketConfigs.AaveConfig.ReserveAssets[localBRE.network.name][symbol];
     const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
-    const addressProvider = await getLendingPoolAddressesProvider(
-      LENDING_POOL_ADDRESS_PROVIDER[network]
+    const addressProvider = await getPoolAddressesProvider(
+      POOL_ADDRESS_PROVIDER[network]
     );
-    const poolAddress = await addressProvider.getLendingPool();
+    const poolAddress = await addressProvider.getPool();
     const treasuryAddress = await getTreasuryAddress(marketConfigs.AaveConfig);
     const aToken = await deployCustomAToken(
       [

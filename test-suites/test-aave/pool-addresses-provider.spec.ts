@@ -5,12 +5,12 @@ import { ProtocolErrors } from '../../helpers/types';
 import { ethers } from 'ethers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import { waitForTx } from '../../helpers/misc-utils';
-import { deployLendingPool } from '../../helpers/contracts-deployments';
+import { deployPool } from '../../helpers/contracts-deployments';
 
 const { utils } = ethers;
 
-makeSuite('LendingPoolAddressesProvider', (testEnv: TestEnv) => {
-  it('Test the accessibility of the LendingPoolAddressesProvider', async () => {
+makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
+  it('Test the accessibility of the PoolAddressesProvider', async () => {
     const { addressesProvider, users } = testEnv;
     const mockAddress = createRandomAddress();
     const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
@@ -19,12 +19,12 @@ makeSuite('LendingPoolAddressesProvider', (testEnv: TestEnv) => {
 
     for (const contractFunction of [
       addressesProvider.setMarketId,
-      addressesProvider.setLendingPoolImpl,
-      addressesProvider.setLendingPoolConfiguratorImpl,
-      addressesProvider.setLendingPoolCollateralManager,
+      addressesProvider.setPoolImpl,
+      addressesProvider.setPoolConfiguratorImpl,
+      addressesProvider.setPoolCollateralManager,
       addressesProvider.setPoolAdmin,
       addressesProvider.setPriceOracle,
-      addressesProvider.setLendingRateOracle,
+      addressesProvider.setRateOracle,
     ]) {
       await expect(contractFunction(mockAddress)).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
     }
@@ -47,13 +47,13 @@ makeSuite('LendingPoolAddressesProvider', (testEnv: TestEnv) => {
 
     const currentAddressesProviderOwner = users[1];
 
-    const mockLendingPool = await deployLendingPool();
+    const mockPool = await deployPool();
     const proxiedAddressId = utils.keccak256(utils.toUtf8Bytes('RANDOM_PROXIED'));
 
     const proxiedAddressSetReceipt = await waitForTx(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
-        .setAddressAsProxy(proxiedAddressId, mockLendingPool.address)
+        .setAddressAsProxy(proxiedAddressId, mockPool.address)
     );
 
     if (!proxiedAddressSetReceipt.events || proxiedAddressSetReceipt.events?.length < 1) {
@@ -64,7 +64,7 @@ makeSuite('LendingPoolAddressesProvider', (testEnv: TestEnv) => {
     expect(proxiedAddressSetReceipt.events[1].event).to.be.equal('AddressSet');
     expect(proxiedAddressSetReceipt.events[1].args?.id).to.be.equal(proxiedAddressId);
     expect(proxiedAddressSetReceipt.events[1].args?.newAddress).to.be.equal(
-      mockLendingPool.address
+      mockPool.address
     );
     expect(proxiedAddressSetReceipt.events[1].args?.hasProxy).to.be.equal(true);
   });

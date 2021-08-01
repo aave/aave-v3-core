@@ -1,4 +1,4 @@
-import { APPROVAL_AMOUNT_LENDING_POOL, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../../helpers/constants';
 import { convertToCurrencyDecimals } from '../../helpers/contracts-helpers';
 import { expect } from 'chai';
 import { ethers } from 'ethers';
@@ -20,7 +20,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
-    await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     //user 1 deposits 1000 DAI
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
@@ -51,7 +51,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     await weth.connect(users[0].signer).mint(await convertToCurrencyDecimals(weth.address, '1'));
 
-    await weth.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_LENDING_POOL);
+    await weth.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
 
     await pool
       .connect(users[0].signer)

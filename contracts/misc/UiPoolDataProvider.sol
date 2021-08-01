@@ -3,10 +3,10 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IAaveIncentivesController} from '../interfaces/IAaveIncentivesController.sol';
 import {IUiPoolDataProvider} from './interfaces/IUiPoolDataProvider.sol';
-import {ILendingPool} from '../interfaces/ILendingPool.sol';
+import {IPool} from '../interfaces/IPool.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '../interfaces/IAToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
@@ -17,7 +17,7 @@ import {UserConfiguration} from '../protocol/libraries/configuration/UserConfigu
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 import {
   DefaultReserveInterestRateStrategy
-} from '../protocol/lendingpool/DefaultReserveInterestRateStrategy.sol';
+} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
 
 contract UiPoolDataProvider is IUiPoolDataProvider {
   using WadRayMath for uint256;
@@ -51,7 +51,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
     );
   }
 
-  function getReservesData(ILendingPoolAddressesProvider provider, address user)
+  function getReservesData(IPoolAddressesProvider provider, address user)
     external
     view
     override
@@ -62,9 +62,9 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
       uint256
     )
   {
-    ILendingPool lendingPool = ILendingPool(provider.getLendingPool());
-    address[] memory reserves = lendingPool.getReservesList();
-    DataTypes.UserConfigurationMap memory userConfig = lendingPool.getUserConfiguration(user);
+    IPool pool = IPool(provider.getPool());
+    address[] memory reserves = pool.getReservesList();
+    DataTypes.UserConfigurationMap memory userConfig = pool.getUserConfiguration(user);
 
     AggregatedReserveData[] memory reservesData = new AggregatedReserveData[](reserves.length);
     UserReserveData[] memory userReservesData =
@@ -76,7 +76,7 @@ contract UiPoolDataProvider is IUiPoolDataProvider {
 
       // reserve current state
       DataTypes.ReserveData memory baseData =
-        lendingPool.getReserveData(reserveData.underlyingAsset);
+        pool.getReserveData(reserveData.underlyingAsset);
       reserveData.liquidityIndex = baseData.liquidityIndex;
       reserveData.variableBorrowIndex = baseData.variableBorrowIndex;
       reserveData.liquidityRate = baseData.currentLiquidityRate;

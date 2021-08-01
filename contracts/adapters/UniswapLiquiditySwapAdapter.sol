@@ -3,7 +3,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {BaseUniswapAdapter} from './BaseUniswapAdapter.sol';
-import {ILendingPoolAddressesProvider} from '../interfaces/ILendingPoolAddressesProvider.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IUniswapV2Router02} from '../interfaces/IUniswapV2Router02.sol';
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 
@@ -30,7 +30,7 @@ contract UniswapLiquiditySwapAdapter is BaseUniswapAdapter {
   }
 
   constructor(
-    ILendingPoolAddressesProvider addressesProvider,
+    IPoolAddressesProvider addressesProvider,
     IUniswapV2Router02 uniswapRouter,
     address wethAddress
   ) public BaseUniswapAdapter(addressesProvider, uniswapRouter, wethAddress) {}
@@ -61,7 +61,7 @@ contract UniswapLiquiditySwapAdapter is BaseUniswapAdapter {
     address initiator,
     bytes calldata params
   ) external override returns (bool) {
-    require(msg.sender == address(LENDING_POOL), 'CALLER_MUST_BE_LENDING_POOL');
+    require(msg.sender == address(POOL), 'CALLER_MUST_BE_POOL');
 
     SwapParams memory decodedParams = _decodeParams(params);
 
@@ -170,9 +170,9 @@ contract UniswapLiquiditySwapAdapter is BaseUniswapAdapter {
       );
 
       // Deposit new reserve
-      IERC20(assetToSwapToList[vars.i]).safeApprove(address(LENDING_POOL), 0);
-      IERC20(assetToSwapToList[vars.i]).safeApprove(address(LENDING_POOL), vars.receivedAmount);
-      LENDING_POOL.deposit(assetToSwapToList[vars.i], vars.receivedAmount, msg.sender, 0);
+      IERC20(assetToSwapToList[vars.i]).safeApprove(address(POOL), 0);
+      IERC20(assetToSwapToList[vars.i]).safeApprove(address(POOL), vars.receivedAmount);
+      POOL.deposit(assetToSwapToList[vars.i], vars.receivedAmount, msg.sender, 0);
     }
   }
 
@@ -226,9 +226,9 @@ contract UniswapLiquiditySwapAdapter is BaseUniswapAdapter {
     );
 
     // Deposit new reserve
-    IERC20(assetTo).safeApprove(address(LENDING_POOL), 0);
-    IERC20(assetTo).safeApprove(address(LENDING_POOL), vars.receivedAmount);
-    LENDING_POOL.deposit(assetTo, vars.receivedAmount, initiator, 0);
+    IERC20(assetTo).safeApprove(address(POOL), 0);
+    IERC20(assetTo).safeApprove(address(POOL), vars.receivedAmount);
+    POOL.deposit(assetTo, vars.receivedAmount, initiator, 0);
 
     vars.flashLoanDebt = amount.add(premium);
     vars.amountToPull = vars.amountToSwap.add(premium);
@@ -236,8 +236,8 @@ contract UniswapLiquiditySwapAdapter is BaseUniswapAdapter {
     _pullAToken(assetFrom, vars.aToken, initiator, vars.amountToPull, permitSignature);
 
     // Repay flash loan
-    IERC20(assetFrom).safeApprove(address(LENDING_POOL), 0);
-    IERC20(assetFrom).safeApprove(address(LENDING_POOL), vars.flashLoanDebt);
+    IERC20(assetFrom).safeApprove(address(POOL), 0);
+    IERC20(assetFrom).safeApprove(address(POOL), vars.flashLoanDebt);
   }
 
   /**
