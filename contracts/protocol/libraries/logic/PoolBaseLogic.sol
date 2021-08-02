@@ -3,23 +3,21 @@ pragma solidity 0.8.6;
 
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
-
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
-
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-
+import {Helpers} from '../helpers/Helpers.sol';
+import {UserConfiguration} from './../configuration/UserConfiguration.sol';
+import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
-
-import {Helpers} from '../helpers/Helpers.sol';
-
-import {UserConfiguration} from './../configuration/UserConfiguration.sol';
-
-import {DataTypes} from '../types/DataTypes.sol';
-
 import {WadRayMath} from '../math/WadRayMath.sol';
 
+/**
+ * @title PoolBaseLogic library
+ * @author Aave
+ * @notice Implements the base logic for the POOL
+ */
 library PoolBaseLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
@@ -27,6 +25,7 @@ library PoolBaseLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using WadRayMath for uint256;
 
+  // See `IPool` for descriptions
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
   event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
