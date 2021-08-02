@@ -24,12 +24,12 @@ import {
   DefaultReserveInterestRateStrategyFactory,
   DelegationAwareATokenFactory,
   InitializableAdminUpgradeabilityProxyFactory,
-  LendingPoolAddressesProviderFactory,
-  LendingPoolAddressesProviderRegistryFactory,
-  LendingPoolCollateralManagerFactory,
-  LendingPoolConfiguratorFactory,
-  LendingPoolFactory,
-  LendingRateOracleFactory,
+  PoolAddressesProviderFactory,
+  PoolAddressesProviderRegistryFactory,
+  PoolCollateralManagerFactory,
+  PoolConfiguratorFactory,
+  PoolFactory,
+  RateOracleFactory,
   MintableDelegationERC20Factory,
   MintableERC20Factory,
   MockAggregatorFactory,
@@ -58,7 +58,7 @@ import { StableAndVariableTokensHelperFactory } from '../types/StableAndVariable
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { LendingPoolLibraryAddresses } from '../types/LendingPoolFactory';
+import { PoolLibraryAddresses } from '../types/PoolFactory';
 import { UiPoolDataProvider } from '../types';
 
 export const deployUiPoolDataProvider = async (
@@ -81,36 +81,26 @@ const readArtifact = async (id: string) => {
   return (DRE as HardhatRuntimeEnvironment).artifacts.readArtifact(id);
 };
 
-export const deployLendingPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
+export const deployPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingPoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
-    eContractid.LendingPoolAddressesProvider,
+    await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
+    eContractid.PoolAddressesProvider,
     [marketId],
     verify
   );
 
-export const deployLendingPoolAddressesProviderRegistry = async (verify?: boolean) =>
+export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingPoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
-    eContractid.LendingPoolAddressesProviderRegistry,
+    await new PoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
+    eContractid.PoolAddressesProviderRegistry,
     [],
     verify
   );
 
-export const deployLendingPoolConfigurator = async (verify?: boolean) => {
-  const lendingPoolConfiguratorImpl = await new LendingPoolConfiguratorFactory(
-    await getFirstSigner()
-  ).deploy();
-  await insertContractAddressInDb(
-    eContractid.LendingPoolConfiguratorImpl,
-    lendingPoolConfiguratorImpl.address
-  );
-  return withSaveAndVerify(
-    lendingPoolConfiguratorImpl,
-    eContractid.LendingPoolConfigurator,
-    [],
-    verify
-  );
+export const deployPoolConfigurator = async (verify?: boolean) => {
+  const poolConfiguratorImpl = await new PoolConfiguratorFactory(await getFirstSigner()).deploy();
+  await insertContractAddressInDb(eContractid.PoolConfiguratorImpl, poolConfiguratorImpl.address);
+  return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
 
 export const deployReserveLogicLibrary = async (verify?: boolean) =>
@@ -163,21 +153,19 @@ export const deployValidationLogic = async (
   return withSaveAndVerify(validationLogic, eContractid.ValidationLogic, [], verify);
 };
 
-export const deployAaveLibraries = async (
-  verify?: boolean
-): Promise<LendingPoolLibraryAddresses> => {
+export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
   const reserveLogic = await deployReserveLogicLibrary(verify);
   const genericLogic = await deployGenericLogic(reserveLogic, verify);
   const validationLogic = await deployValidationLogic(reserveLogic, genericLogic, verify);
 
   // Hardcoded solidity placeholders, if any library changes path this will fail.
-  // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the LendingPoolLibraryAddresses Type seems to
+  // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
   //
   //  how-to:
   //  1. PLACEHOLDER = solidityKeccak256(['string'], `${libPath}:${libName}`).slice(2, 36)
   //  2. LIB_PLACEHOLDER = `__$${PLACEHOLDER}$__`
-  // or grab placeholdes from LendingPoolLibraryAddresses at Typechain generation.
+  // or grab placeholdes from PoolLibraryAddresses at Typechain generation.
   //
   // libPath example: contracts/libraries/logic/GenericLogic.sol
   // libName example: GenericLogic
@@ -188,11 +176,11 @@ export const deployAaveLibraries = async (
   };
 };
 
-export const deployLendingPool = async (verify?: boolean) => {
+export const deployPool = async (verify?: boolean) => {
   const libraries = await deployAaveLibraries(verify);
-  const lendingPoolImpl = await new LendingPoolFactory(libraries, await getFirstSigner()).deploy();
-  await insertContractAddressInDb(eContractid.LendingPoolImpl, lendingPoolImpl.address);
-  return withSaveAndVerify(lendingPoolImpl, eContractid.LendingPool, [], verify);
+  const poolImpl = await new PoolFactory(libraries, await getFirstSigner()).deploy();
+  await insertContractAddressInDb(eContractid.PoolImpl, poolImpl.address);
+  return withSaveAndVerify(poolImpl, eContractid.Pool, [], verify);
 };
 
 export const deployPriceOracle = async (verify?: boolean) =>
@@ -203,10 +191,10 @@ export const deployPriceOracle = async (verify?: boolean) =>
     verify
   );
 
-export const deployLendingRateOracle = async (verify?: boolean) =>
+export const deployRateOracle = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new LendingRateOracleFactory(await getFirstSigner()).deploy(),
-    eContractid.LendingRateOracle,
+    await new RateOracleFactory(await getFirstSigner()).deploy(),
+    eContractid.RateOracle,
     [],
     verify
   );
@@ -230,20 +218,15 @@ export const deployAaveOracle = async (
     verify
   );
 
-export const deployLendingPoolCollateralManager = async (verify?: boolean) => {
-  const collateralManagerImpl = await new LendingPoolCollateralManagerFactory(
+export const deployPoolCollateralManager = async (verify?: boolean) => {
+  const collateralManagerImpl = await new PoolCollateralManagerFactory(
     await getFirstSigner()
   ).deploy();
   await insertContractAddressInDb(
-    eContractid.LendingPoolCollateralManagerImpl,
+    eContractid.PoolCollateralManagerImpl,
     collateralManagerImpl.address
   );
-  return withSaveAndVerify(
-    collateralManagerImpl,
-    eContractid.LendingPoolCollateralManager,
-    [],
-    verify
-  );
+  return withSaveAndVerify(collateralManagerImpl, eContractid.PoolCollateralManager, [], verify);
 };
 
 export const deployInitializableAdminUpgradeabilityProxy = async (verify?: boolean) =>

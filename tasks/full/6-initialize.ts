@@ -1,7 +1,7 @@
 import { task } from 'hardhat/config';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import {
-  deployLendingPoolCollateralManager,
+  deployPoolCollateralManager,
   deployWalletBalancerProvider,
 } from '../../helpers/contracts-deployments';
 import {
@@ -16,11 +16,11 @@ import { initReservesByHelper, configureReservesByHelper } from '../../helpers/i
 import { exit } from 'process';
 import {
   getAaveProtocolDataProvider,
-  getLendingPoolAddressesProvider,
+  getPoolAddressesProvider,
 } from '../../helpers/contracts-getters';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 
-task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
+task('full:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
   .setAction(async ({ verify, pool }, localBRE) => {
@@ -35,13 +35,13 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
         SymbolPrefix,
         ReserveAssets,
         ReservesConfig,
-        LendingPoolCollateralManager,
+        PoolCollateralManager,
         IncentivesController,
       } = poolConfig as ICommonConfiguration;
 
       const reserveAssets = await getParamPerNetwork(ReserveAssets, network);
       const incentivesController = await getParamPerNetwork(IncentivesController, network);
-      const addressesProvider = await getLendingPoolAddressesProvider();
+      const addressesProvider = await getPoolAddressesProvider();
 
       const testHelpers = await getAaveProtocolDataProvider();
 
@@ -66,23 +66,18 @@ task('full:initialize-lending-pool', 'Initialize lending pool configuration.')
       );
       await configureReservesByHelper(ReservesConfig, reserveAssets, testHelpers, admin);
 
-      let collateralManagerAddress = await getParamPerNetwork(
-        LendingPoolCollateralManager,
-        network
-      );
+      let collateralManagerAddress = await getParamPerNetwork(PoolCollateralManager, network);
       if (!notFalsyOrZeroAddress(collateralManagerAddress)) {
-        const collateralManager = await deployLendingPoolCollateralManager(verify);
+        const collateralManager = await deployPoolCollateralManager(verify);
         collateralManagerAddress = collateralManager.address;
       }
       // Seems unnecessary to register the collateral manager in the JSON db
 
       console.log(
-        '\tSetting lending pool collateral manager implementation with address',
+        '\tSetting pool collateral manager implementation with address',
         collateralManagerAddress
       );
-      await waitForTx(
-        await addressesProvider.setLendingPoolCollateralManager(collateralManagerAddress)
-      );
+      await waitForTx(await addressesProvider.setPoolCollateralManager(collateralManagerAddress));
 
       console.log(
         '\tSetting AaveProtocolDataProvider at AddressesProvider at id: 0x01',

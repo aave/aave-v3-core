@@ -9,7 +9,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
-import {ILendingPoolCollateralManager} from '../../interfaces/ILendingPoolCollateralManager.sol';
+import {IPoolCollateralManager} from '../../interfaces/IPoolCollateralManager.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {Helpers} from '../libraries/helpers/Helpers.sol';
@@ -19,20 +19,16 @@ import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
-import {LendingPoolStorage} from './LendingPoolStorage.sol';
+import {PoolStorage} from './PoolStorage.sol';
 
 /**
- * @title LendingPoolCollateralManager contract
+ * @title PoolCollateralManager contract
  * @author Aave
  * @dev Implements actions involving management of collateral in the protocol, the main one being the liquidations
- * IMPORTANT This contract will run always via DELEGATECALL, through the LendingPool, so the chain of inheritance
- * is the same as the LendingPool, to have compatible storage layouts
+ * IMPORTANT This contract will run always via DELEGATECALL, through the Pool, so the chain of inheritance
+ * is the same as the Pool, to have compatible storage layouts
  **/
-contract LendingPoolCollateralManager is
-  ILendingPoolCollateralManager,
-  VersionedInitializable,
-  LendingPoolStorage
-{
+contract PoolCollateralManager is IPoolCollateralManager, VersionedInitializable, PoolStorage {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
   using WadRayMath for uint256;
@@ -64,7 +60,7 @@ contract LendingPoolCollateralManager is
 
   /**
    * @dev As thIS contract extends the VersionedInitializable contract to match the state
-   * of the LendingPool contract, the getRevision() function is needed, but the value is not
+   * of the Pool contract, the getRevision() function is needed, but the value is not
    * important, as the initialize() function will never be called here
    */
   function getRevision() internal pure override returns (uint256) {
@@ -96,9 +92,8 @@ contract LendingPoolCollateralManager is
 
     LiquidationCallLocalVars memory vars;
 
-
     (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(user, debtReserve);
-    vars.oracle =  IPriceOracleGetter(_addressesProvider.getPriceOracle());
+    vars.oracle = IPriceOracleGetter(_addressesProvider.getPriceOracle());
 
     (vars.errorCode, vars.errorMsg) = ValidationLogic.validateLiquidationCall(
       collateralReserve,
@@ -157,7 +152,7 @@ contract LendingPoolCollateralManager is
       if (currentAvailableCollateral < vars.maxCollateralToLiquidate) {
         return (
           uint256(Errors.CollateralManagerErrors.NOT_ENOUGH_LIQUIDITY),
-          Errors.LPCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE
+          Errors.PCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE
         );
       }
     }
@@ -247,7 +242,7 @@ contract LendingPoolCollateralManager is
       receiveAToken
     );
 
-    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.LPCM_NO_ERRORS);
+    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.PCM_NO_ERRORS);
   }
 
   struct AvailableCollateralToLiquidateLocalVars {

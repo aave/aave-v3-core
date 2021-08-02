@@ -2,8 +2,8 @@ import { task } from 'hardhat/config';
 import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 import {
   getAaveProtocolDataProvider,
-  getLendingPoolAddressesProvider,
-  getLendingPoolAddressesProviderRegistry,
+  getPoolAddressesProvider,
+  getPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-getters';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { DRE } from '../../helpers/misc-utils';
@@ -22,28 +22,22 @@ task('print-config', 'Inits the DRE, to have access to all the plugins')
 
     const providerRegistryAddress = getParamPerNetwork(poolConfig.ProviderRegistry, network);
 
-    const providerRegistry = await getLendingPoolAddressesProviderRegistry(providerRegistryAddress);
+    const providerRegistry = await getPoolAddressesProviderRegistry(providerRegistryAddress);
 
     const providers = await providerRegistry.getAddressesProvidersList();
 
-    const addressesProvider = await getLendingPoolAddressesProvider(providers[0]); // Checks first provider
+    const addressesProvider = await getPoolAddressesProvider(providers[0]); // Checks first provider
 
     console.log('Addresses Providers', providers.join(', '));
     console.log('Market Id: ', await addressesProvider.getMarketId());
-    console.log('LendingPool Proxy:', await addressesProvider.getLendingPool());
-    console.log(
-      'Lending Pool Collateral Manager',
-      await addressesProvider.getLendingPoolCollateralManager()
-    );
-    console.log(
-      'Lending Pool Configurator proxy',
-      await addressesProvider.getLendingPoolConfigurator()
-    );
+    console.log('Pool Proxy:', await addressesProvider.getPool());
+    console.log('Pool Collateral Manager', await addressesProvider.getPoolCollateralManager());
+    console.log('Pool Configurator proxy', await addressesProvider.getPoolConfigurator());
     console.log('Pool admin', await addressesProvider.getPoolAdmin());
     console.log('Emergency admin', await addressesProvider.getEmergencyAdmin());
     console.log('Price Oracle', await addressesProvider.getPriceOracle());
-    console.log('Lending Rate Oracle', await addressesProvider.getLendingRateOracle());
-    console.log('Lending Pool Data Provider', dataProvider);
+    console.log('Rate Oracle', await addressesProvider.getRateOracle());
+    console.log('Aave Protocol Data Provider', dataProvider);
     const protocolDataProvider = await getAaveProtocolDataProvider(dataProvider);
 
     const fields = [

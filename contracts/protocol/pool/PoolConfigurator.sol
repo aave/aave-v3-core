@@ -8,8 +8,8 @@ import {
   InitializableImmutableAdminUpgradeabilityProxy
 } from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
-import {ILendingPool} from '../../interfaces/ILendingPool.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
@@ -17,21 +17,21 @@ import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
-import {ILendingPoolConfigurator} from '../../interfaces/ILendingPoolConfigurator.sol';
+import {IPoolConfigurator} from '../../interfaces/IPoolConfigurator.sol';
 
 /**
- * @title LendingPoolConfigurator contract
+ * @title PoolConfigurator contract
  * @author Aave
  * @dev Implements the configuration methods for the Aave protocol
  **/
 
-contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigurator {
+contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   using SafeMath for uint256;
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-  ILendingPoolAddressesProvider internal _addressesProvider;
-  ILendingPool internal _pool;
+  IPoolAddressesProvider internal _addressesProvider;
+  IPool internal _pool;
 
   mapping(address => bool) private _riskAdmins;
 
@@ -43,7 +43,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
   modifier onlyEmergencyAdmin {
     require(
       _addressesProvider.getEmergencyAdmin() == msg.sender,
-      Errors.LPC_CALLER_NOT_EMERGENCY_ADMIN
+      Errors.PC_CALLER_NOT_EMERGENCY_ADMIN
     );
     _;
   }
@@ -52,7 +52,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     require(
       _addressesProvider.getEmergencyAdmin() == msg.sender ||
         _addressesProvider.getPoolAdmin() == msg.sender,
-      Errors.LPC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
+      Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
     );
     _;
   }
@@ -60,7 +60,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
   modifier onlyRiskOrPoolAdmins {
     require(
       _riskAdmins[msg.sender] || _addressesProvider.getPoolAdmin() == msg.sender,
-      Errors.LPC_CALLER_NOT_RISK_OR_POOL_ADMIN
+      Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
     );
     _;
   }
@@ -71,20 +71,20 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     return CONFIGURATOR_REVISION;
   }
 
-  function initialize(ILendingPoolAddressesProvider provider) public initializer {
+  function initialize(IPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
-    _pool = ILendingPool(_addressesProvider.getLendingPool());
+    _pool = IPool(_addressesProvider.getPool());
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function batchInitReserve(InitReserveInput[] calldata input) external override onlyPoolAdmin {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
       _initReserve(cachedPool, input[i]);
     }
   }
 
-  function _initReserve(ILendingPool pool, InitReserveInput calldata input) internal {
+  function _initReserve(IPool pool, InitReserveInput calldata input) internal {
     address aTokenProxyAddress =
       _initTokenWithProxy(
         input.aTokenImpl,
@@ -159,15 +159,15 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     );
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function dropReserve(address asset) external override onlyPoolAdmin {
     _pool.dropReserve(asset);
     emit ReserveDropped(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function updateAToken(UpdateATokenInput calldata input) external override onlyPoolAdmin {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
 
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
@@ -191,13 +191,13 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit ATokenUpgraded(input.asset, reserveData.aTokenAddress, input.implementation);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function updateStableDebtToken(UpdateDebtTokenInput calldata input)
     external
     override
     onlyPoolAdmin
   {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
 
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
@@ -228,13 +228,13 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     );
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function updateVariableDebtToken(UpdateDebtTokenInput calldata input)
     external
     override
     onlyPoolAdmin
   {
-    ILendingPool cachedPool = _pool;
+    IPool cachedPool = _pool;
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
     (, , , uint256 decimals, ) = cachedPool.getConfiguration(input.asset).getParamsMemory();
@@ -264,7 +264,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     );
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function enableBorrowingOnReserve(
     address asset,
     uint256 borrowCap,
@@ -281,7 +281,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit BorrowingEnabledOnReserve(asset, stableBorrowRateEnabled);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function disableBorrowingOnReserve(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -291,7 +291,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit BorrowingDisabledOnReserve(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function configureReserveAsCollateral(
     address asset,
     uint256 ltv,
@@ -303,24 +303,21 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     //validation of the parameters: the LTV can
     //only be lower or equal than the liquidation threshold
     //(otherwise a loan against the asset would cause instantaneous liquidation)
-    require(ltv <= liquidationThreshold, Errors.LPC_INVALID_CONFIGURATION);
+    require(ltv <= liquidationThreshold, Errors.PC_INVALID_CONFIGURATION);
 
     if (liquidationThreshold != 0) {
       //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
       //collateral than needed to cover the debt
-      require(
-        liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
-        Errors.LPC_INVALID_CONFIGURATION
-      );
+      require(liquidationBonus > PercentageMath.PERCENTAGE_FACTOR, Errors.PC_INVALID_CONFIGURATION);
 
       //if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
       //a loan is taken there is enough collateral available to cover the liquidation bonus
       require(
         liquidationThreshold.percentMul(liquidationBonus) <= PercentageMath.PERCENTAGE_FACTOR,
-        Errors.LPC_INVALID_CONFIGURATION
+        Errors.PC_INVALID_CONFIGURATION
       );
     } else {
-      require(liquidationBonus == 0, Errors.LPC_INVALID_CONFIGURATION);
+      require(liquidationBonus == 0, Errors.PC_INVALID_CONFIGURATION);
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
       //we need to ensure no liquidity is deposited
@@ -336,7 +333,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit CollateralConfigurationChanged(asset, ltv, liquidationThreshold, liquidationBonus);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function enableReserveStableRate(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -347,7 +344,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit StableRateEnabledOnReserve(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function disableReserveStableRate(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -358,7 +355,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit StableRateDisabledOnReserve(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function activateReserve(address asset) external override onlyPoolAdmin {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -369,7 +366,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit ReserveActivated(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function deactivateReserve(address asset) external override onlyPoolAdmin {
     _checkNoLiquidity(asset);
 
@@ -382,7 +379,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit ReserveDeactivated(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function freezeReserve(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -393,7 +390,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit ReserveFrozen(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function unfreezeReserve(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -404,7 +401,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit ReserveUnfrozen(asset);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setReservePause(address asset, bool paused) public override onlyEmergencyOrPoolAdmin {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -419,7 +416,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     }
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setReserveFactor(address asset, uint256 reserveFactor)
     external
     override
@@ -434,7 +431,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit ReserveFactorChanged(asset, reserveFactor);
   }
 
-  ///@inheritdoc ILendingPoolConfigurator
+  ///@inheritdoc IPoolConfigurator
   function setBorrowCap(address asset, uint256 borrowCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -445,7 +442,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit BorrowCapChanged(asset, borrowCap);
   }
 
-  ///@inheritdoc ILendingPoolConfigurator
+  ///@inheritdoc IPoolConfigurator
   function setSupplyCap(address asset, uint256 supplyCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
@@ -456,7 +453,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit SupplyCapChanged(asset, supplyCap);
   }
 
-  ///@inheritdoc ILendingPoolConfigurator
+  ///@inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override
@@ -466,47 +463,48 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
     emit ReserveInterestRateStrategyChanged(asset, rateStrategyAddress);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setPoolPause(bool paused) external override onlyEmergencyAdmin {
     address[] memory reserves = _pool.getReservesList();
 
     for (uint256 i = 0; i < reserves.length; i++) {
-      if (reserves[i] != address(0)) { //might happen is a reserve was dropped
+      if (reserves[i] != address(0)) {
+        //might happen is a reserve was dropped
         setReservePause(reserves[i], paused);
       }
     }
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function registerRiskAdmin(address admin) external override onlyPoolAdmin {
     _riskAdmins[admin] = true;
     emit RiskAdminRegistered(admin);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function unregisterRiskAdmin(address admin) external override onlyPoolAdmin {
     _riskAdmins[admin] = false;
     emit RiskAdminUnregistered(admin);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function authorizeFlashBorrower(address flashBorrower) external override onlyPoolAdmin {
     _pool.updateFlashBorrowerAuthorization(flashBorrower, true);
     emit FlashBorrowerAuthorized(flashBorrower);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function unauthorizeFlashBorrower(address flashBorrower) external override onlyPoolAdmin {
     _pool.updateFlashBorrowerAuthorization(flashBorrower, false);
     emit FlashBorrowerUnauthorized(flashBorrower);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function isRiskAdmin(address admin) external view override onlyPoolAdmin returns (bool) {
     return _riskAdmins[admin];
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function updateFlashloanPremiumTotal(uint256 flashloanPremiumTotal)
     external
     override
@@ -514,17 +512,17 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
   {
     require(
       flashloanPremiumTotal < PercentageMath.PERCENTAGE_FACTOR,
-      Errors.LPC_FLASHLOAN_PREMIUM_INVALID
+      Errors.PC_FLASHLOAN_PREMIUM_INVALID
     );
     require(
       flashloanPremiumTotal >= _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL(),
-      Errors.LPC_FLASHLOAN_PREMIUMS_MISMATCH
+      Errors.PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     _pool.updateFlashloanPremiums(flashloanPremiumTotal, _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL());
     emit FlashloanPremiumTotalUpdated(flashloanPremiumTotal);
   }
 
-  /// @inheritdoc ILendingPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function updateFlashloanPremiumToProtocol(uint256 flashloanPremiumToProtocol)
     external
     override
@@ -532,11 +530,11 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
   {
     require(
       flashloanPremiumToProtocol < PercentageMath.PERCENTAGE_FACTOR,
-      Errors.LPC_FLASHLOAN_PREMIUM_INVALID
+      Errors.PC_FLASHLOAN_PREMIUM_INVALID
     );
     require(
       flashloanPremiumToProtocol <= _pool.FLASHLOAN_PREMIUM_TOTAL(),
-      Errors.LPC_FLASHLOAN_PREMIUMS_MISMATCH
+      Errors.PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), flashloanPremiumToProtocol);
     emit FlashloanPremiumToProcolUpdated(flashloanPremiumToProtocol);
@@ -572,7 +570,7 @@ contract LendingPoolConfigurator is VersionedInitializable, ILendingPoolConfigur
 
     require(
       availableLiquidity == 0 && reserveData.currentLiquidityRate == 0,
-      Errors.LPC_RESERVE_LIQUIDITY_NOT_0
+      Errors.PC_RESERVE_LIQUIDITY_NOT_0
     );
   }
 }

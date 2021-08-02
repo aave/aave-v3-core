@@ -51,12 +51,12 @@ You can install `@aave/protocol-v2` as an NPM package in your Hardhat, Buidler o
 Import at Solidity files:
 
 ```
-import {ILendingPool} from "@aave/protocol-v2/contracts/interfaces/ILendingPool.sol";
+import {IPool} from "@aave/protocol-v2/contracts/interfaces/IPool.sol";
 
 contract Misc {
 
   function deposit(address pool, address token, address user, uint256 amount) public {
-    ILendingPool(pool).deposit(token, amount, user, 0);
+    IPool(pool).deposit(token, amount, user, 0);
     {...}
   }
 }
@@ -67,10 +67,10 @@ The JSON artifacts with the ABI and Bytecode are also included into the bundled 
 Import JSON file via Node JS `require`:
 
 ```
-const LendingPoolV2Artifact = require('@aave/protocol-v2/artifacts/contracts/protocol/lendingpool/LendingPool.sol/LendingPool.json');
+const PoolV2Artifact = require('@aave/protocol-v2/artifacts/contracts/protocol/pool/Pool.sol/Pool.json');
 
 // Log the ABI into console
-console.log(LendingPoolV2Artifact.abi)
+console.log(PoolV2Artifact.abi)
 ```
 
 ## Setup
@@ -171,8 +171,8 @@ run('set-DRE');
 // Import contract getters to retrieve an Ethers.js Contract instance
 const contractGetters = require('./helpers/contracts-getters'); // Import a TS/JS file
 
-// Lending pool instance
-const lendingPool = await contractGetters.getLendingPool("LendingPool address from 'aave:mainnet' task");
+// Pool instance
+const pool = await contractGetters.getPool("Pool address from 'aave:mainnet' task");
 
 // You can impersonate any Ethereum address
 await network.provider.request({ method: "hardhat_impersonateAccount",  params: ["0xb1adceddb2941033a090dd166a462fe1c2029484"]});
@@ -182,11 +182,11 @@ const signer = await ethers.provider.getSigner("0xb1adceddb2941033a090dd166a462f
 // ERC20 token DAI Mainnet instance
 const DAI = await contractGetters.getIErc20Detailed("0x6B175474E89094C44Da98b954EedeAC495271d0F");
 
-// Approve 100 DAI to LendingPool address
-await DAI.connect(signer).approve(lendingPool.address, ethers.utils.parseUnits('100'));
+// Approve 100 DAI to Pool address
+await DAI.connect(signer).approve(pool.address, ethers.utils.parseUnits('100'));
 
 // Deposit 100 DAI
-await lendingPool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
+await pool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
 
 ```
 
@@ -212,15 +212,15 @@ const contractGetters = require('./helpers/contracts-getters');
 // Load the first signer
 const signer = await contractGetters.getFirstSigner();
 
-// Lending pool instance
-const lendingPool = await contractGetters.getLendingPool("0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9");
+// Pool instance
+const pool = await contractGetters.getPool("0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9");
 
 // ERC20 token DAI Mainnet instance
 const DAI = await contractGetters.getIErc20Detailed("0x6B175474E89094C44Da98b954EedeAC495271d0F");
 
-// Approve 100 DAI to LendingPool address
-await DAI.connect(signer).approve(lendingPool.address, ethers.utils.parseUnits('100'));
+// Approve 100 DAI to Pool address
+await DAI.connect(signer).approve(pool.address, ethers.utils.parseUnits('100'));
 
 // Deposit 100 DAI
-await lendingPool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
+await pool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
 ```

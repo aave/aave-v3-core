@@ -8,7 +8,6 @@ import {ERC20} from '../../dependencies/openzeppelin/contracts/ERC20.sol';
  * @dev ERC20 minting logic
  */
 contract MintableERC20 is ERC20 {
-
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
     keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
@@ -24,7 +23,6 @@ contract MintableERC20 is ERC20 {
     string memory symbol,
     uint8 decimals
   ) public ERC20(name, symbol) {
-
     uint256 chainId;
 
     assembly {

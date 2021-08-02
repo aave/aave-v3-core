@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: Borrow/repay (stable rate)",
+  "title": "Pool: Borrow/repay (stable rate)",
   "description": "Test cases for the borrow function, stable mode.",
   "stories": [
     {

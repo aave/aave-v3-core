@@ -1,5 +1,5 @@
 {
-  "title": "LendingPool: Usage as collateral",
+  "title": "Pool: Usage as collateral",
   "description": "Test cases for the setUserUseReserveAsCollateral() function.",
   "stories": [
     {

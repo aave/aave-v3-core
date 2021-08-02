@@ -5,8 +5,8 @@ import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
-import {ILendingPoolAddressesProvider} from '../../interfaces/ILendingPoolAddressesProvider.sol';
-import {ILendingRateOracle} from '../../interfaces/ILendingRateOracle.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {IRateOracle} from '../../interfaces/IRateOracle.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 
 /**
@@ -15,7 +15,7 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
  * @dev The model of interest rate is based on 2 slopes, one before the `OPTIMAL_UTILIZATION_RATE`
  * point of utilization and another from that one to 100%
  * - An instance of this same contract, can't be used across different Aave markets, due to the caching
- *   of the LendingPoolAddressesProvider
+ *   of the PoolAddressesProvider
  * @author Aave
  **/
 contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
@@ -37,7 +37,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   uint256 public immutable EXCESS_UTILIZATION_RATE;
 
-  ILendingPoolAddressesProvider public immutable addressesProvider;
+  IPoolAddressesProvider public immutable addressesProvider;
 
   // Base variable borrow rate when Utilization rate = 0. Expressed in ray
   uint256 internal immutable _baseVariableBorrowRate;
@@ -55,7 +55,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   uint256 internal immutable _stableRateSlope2;
 
   constructor(
-    ILendingPoolAddressesProvider provider,
+    IPoolAddressesProvider provider,
     uint256 optimalUtilizationRate,
     uint256 baseVariableBorrowRate,
     uint256 variableRateSlope1,
@@ -190,7 +190,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       ? 0
       : vars.totalDebt.rayDiv(availableLiquidity.add(vars.totalDebt));
 
-    vars.currentStableBorrowRate = ILendingRateOracle(addressesProvider.getLendingRateOracle())
+    vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
       .getMarketBorrowRate(reserve);
 
     if (vars.utilizationRate > OPTIMAL_UTILIZATION_RATE) {
