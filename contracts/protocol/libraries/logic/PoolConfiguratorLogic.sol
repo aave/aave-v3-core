@@ -347,8 +347,7 @@ library PoolConfiguratorLogic {
     address asset,
     bool paused
   ) public {
-    DataTypes.ReserveConfigurationMap memory currentConfig = pool.getConfiguration(asset);
-
+    //DataTypes.ReserveConfigurationMap memory currentConfig = pool.getConfiguration(asset);
     currentConfig.setPaused(paused);
 
     pool.setConfiguration(asset, currentConfig.data);
