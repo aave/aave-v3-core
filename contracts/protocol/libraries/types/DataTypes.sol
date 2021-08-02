@@ -73,4 +73,14 @@ library DataTypes {
     uint40 reserveLastUpdateTimestamp;
     uint40 stableDebtLastUpdateTimestamp;
   }
+
+  struct ExecuteBorrowParams {
+    address asset;
+    address user;
+    address onBehalfOf;
+    uint256 amount;
+    uint256 interestRateMode;
+    uint16 referralCode;
+    bool releaseUnderlying;
+  }
 }
