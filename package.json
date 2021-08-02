@@ -142,7 +142,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern 'contracts/**/*.sol' --pattern 'helpers/**/*.ts'  --pattern 'test-suites/test-aave/**/*.ts' --pattern 'test-suites/test-amm/**/*.ts' --pattern 'tasks/**/*.ts' --pattern ''markets/**/*.ts'"
+      "pre-commit": "pretty-quick --staged --pattern 'contracts/**/*.sol' --pattern 'helpers/**/*.ts'  --pattern 'test-suites/test-aave/**/*.ts' --pattern 'test-suites/test-amm/**/*.ts' --pattern 'tasks/**/*.ts' --pattern 'markets/**/*.ts'"
     }
   },
   "author": "Aave",
