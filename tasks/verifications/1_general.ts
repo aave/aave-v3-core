@@ -100,10 +100,6 @@ task('verify:general', 'Verify contracts at Etherscan')
       await verifyContract(eContractid.AaveProtocolDataProvider, dataProvider, [
         addressesProvider.address,
       ]);
-
-      // Wallet balance provider
-      console.log('\n- Verifying Wallet Balance Provider...\n');
-      await verifyContract(eContractid.WalletBalanceProvider, walletProvider, []);
     }
     // Pool proxy
     console.log('\n- Verifying Pool Proxy...\n');

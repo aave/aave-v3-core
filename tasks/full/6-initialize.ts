@@ -1,9 +1,6 @@
 import { task } from 'hardhat/config';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
-import {
-  deployPoolCollateralManager,
-  deployWalletBalancerProvider,
-} from '../../helpers/contracts-deployments';
+import { deployPoolCollateralManager } from '../../helpers/contracts-deployments';
 import {
   loadPoolConfig,
   ConfigNames,
@@ -90,8 +87,6 @@ task('full:initialize-pool', 'Initialize pool configuration.')
           aaveProtocolDataProvider.address
         )
       );
-
-      await deployWalletBalancerProvider(verify);
     } catch (err) {
       console.error(err);
       exit(1);
