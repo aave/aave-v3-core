@@ -98,6 +98,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   /**
    * @dev Calculates the interest rates depending on the reserve's state and configurations
    * @param reserve The address of the reserve
+   * @param aToken The address of the aToken
+   * @param pendingTreasuryMint The pending amount to be minted to the treasury
    * @param liquidityAdded The liquidity added during the operation
    * @param liquidityTaken The liquidity taken during the operation
    * @param totalStableDebt The total borrowed from the reserve a stable rate
@@ -109,6 +111,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   function calculateInterestRates(
     address reserve,
     address aToken,
+    uint256 pendingTreasuryMint,
     uint256 liquidityAdded,
     uint256 liquidityTaken,
     uint256 totalStableDebt,
@@ -125,14 +128,16 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       uint256
     )
   {
-    uint256 availableLiquidity = IERC20(reserve).balanceOf(aToken);
+    // uint256 availableLiquidity = IERC20(reserve).balanceOf(aToken);
+    uint256 adjustedLiquidity = IERC20(aToken).totalSupply();
     //avoid stack too deep
-    availableLiquidity = availableLiquidity + liquidityAdded - liquidityTaken;
+    adjustedLiquidity = adjustedLiquidity + pendingTreasuryMint + liquidityAdded - liquidityTaken;
 
     return
       calculateInterestRates(
         reserve,
-        availableLiquidity,
+        // availableLiquidity,
+        adjustedLiquidity,
         totalStableDebt,
         totalVariableDebt,
         averageStableBorrowRate,
@@ -153,7 +158,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * NOTE This function is kept for compatibility with the previous DefaultInterestRateStrategy interface.
    * New protocol implementation uses the new calculateInterestRates() interface
    * @param reserve The address of the reserve
-   * @param availableLiquidity The liquidity available in the corresponding aToken
+   * @param adjustedLiquidity The adjusted liquidity (aToken supply + pending treasury mint)
    * @param totalStableDebt The total borrowed from the reserve a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate loans
@@ -162,7 +167,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    **/
   function calculateInterestRates(
     address reserve,
-    uint256 availableLiquidity,
+    uint256 adjustedLiquidity,
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
@@ -186,7 +191,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
     vars.utilizationRate = vars.totalDebt == 0
       ? 0
-      : vars.totalDebt.rayDiv(availableLiquidity + vars.totalDebt);
+      : vars.totalDebt.rayDiv(adjustedLiquidity);
 
     vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
       .getMarketBorrowRate(reserve);

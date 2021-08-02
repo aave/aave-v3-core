@@ -184,6 +184,12 @@ library ReserveLogic {
     vars.totalVariableDebt = reserveCache.nextScaledVariableDebt.rayMul(
       reserveCache.nextVariableBorrowIndex
     );
+    
+    // This is actually redundant since we're already caching the necessary components
+    // to calculate the normalized income with reserveCache (liquidity index & rate), but
+    // reserve.getNormalizedIncome accesses storage *twice*.
+    // Also, we have to calculate it inlined into the function parameters to prevent
+    // the dreaded "stack too deep" error.
     (
       vars.newLiquidityRate,
       vars.newStableRate,
@@ -191,6 +197,7 @@ library ReserveLogic {
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
+      reserve.accruedToTreasury.rayMul(reserve.getNormalizedIncome()),
       liquidityAdded,
       liquidityTaken,
       reserveCache.nextTotalStableDebt,
