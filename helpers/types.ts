@@ -53,6 +53,7 @@ export enum eContractid {
   GenericLogic = 'GenericLogic',
   PoolBaseLogic = 'PoolBaseLogic',
   PoolHelperLogic = 'PoolHelperLogic',
+  PoolConfiguratorLogic = 'PoolConfiguratorLogic',
   Pool = 'Pool',
   PriceOracle = 'PriceOracle',
   Proxy = 'Proxy',

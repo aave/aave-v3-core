@@ -50,6 +50,7 @@ import {
   WETHGatewayFactory,
   FlashLiquidationAdapterFactory,
   PoolBaseLogic,
+  PoolConfiguratorLogicFactory,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -102,8 +103,20 @@ export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
     verify
   );
 
+export const deployPoolConfiguratorLogicLibrary = async (verify?: boolean) =>
+  withSaveAndVerify(
+    await new PoolConfiguratorLogicFactory(await getFirstSigner()).deploy(),
+    eContractid.PoolConfiguratorLogic,
+    [],
+    verify
+  );
+
 export const deployPoolConfigurator = async (verify?: boolean) => {
-  const poolConfiguratorImpl = await new PoolConfiguratorFactory(await getFirstSigner()).deploy();
+  const poolConfiguratorLogic = await deployPoolConfiguratorLogicLibrary(verify);
+  const poolConfiguratorImpl = await new PoolConfiguratorFactory(
+    { ['__$4915e286ccea648899157905d465011458$__']: poolConfiguratorLogic.address },
+    await getFirstSigner()
+  ).deploy();
   await insertContractAddressInDb(eContractid.PoolConfiguratorImpl, poolConfiguratorImpl.address);
   return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
