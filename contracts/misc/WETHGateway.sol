@@ -86,10 +86,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     address onBehalfOf
   ) external payable override {
     (uint256 stableDebt, uint256 variableDebt) =
-      Helpers.getUserCurrentDebtMemory(
-        onBehalfOf,
-        IPool(pool).getReserveData(address(WETH))
-      );
+      Helpers.getUserCurrentDebtMemory(onBehalfOf, IPool(pool).getReserveData(address(WETH)));
 
     uint256 paybackAmount =
       DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE
@@ -120,13 +117,7 @@ contract WETHGateway is IWETHGateway, Ownable {
     uint256 interesRateMode,
     uint16 referralCode
   ) external override {
-    IPool(pool).borrow(
-      address(WETH),
-      amount,
-      interesRateMode,
-      referralCode,
-      msg.sender
-    );
+    IPool(pool).borrow(address(WETH), amount, interesRateMode, referralCode, msg.sender);
     WETH.withdraw(amount);
     _safeTransferETH(msg.sender, amount);
   }

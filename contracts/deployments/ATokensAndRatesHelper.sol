@@ -3,9 +3,7 @@ pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 import {Pool} from '../protocol/pool/Pool.sol';
-import {
-  PoolAddressesProvider
-} from '../protocol/configuration/PoolAddressesProvider.sol';
+import {PoolAddressesProvider} from '../protocol/configuration/PoolAddressesProvider.sol';
 import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
 import {

@@ -96,10 +96,7 @@ contract AaveProtocolDataProvider {
   function getReserveCaps(address asset)
     external
     view
-    returns (
-      uint256 borrowCap,
-      uint256 supplyCap
-    )
+    returns (uint256 borrowCap, uint256 supplyCap)
   {
     (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset)

@@ -73,9 +73,7 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
     await configureReservesByHelper(reservesParams, protoPoolReservesAddresses, testHelpers, admin);
 
     const collateralManager = await deployPoolCollateralManager(verify);
-    await waitForTx(
-      await addressesProvider.setPoolCollateralManager(collateralManager.address)
-    );
+    await waitForTx(await addressesProvider.setPoolCollateralManager(collateralManager.address));
 
     const mockFlashLoanReceiver = await deployMockFlashLoanReceiver(
       addressesProvider.address,

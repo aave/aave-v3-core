@@ -65,21 +65,13 @@ task('verify:general', 'Verify contracts at Etherscan')
         ? await getPoolImpl(poolImplAddress)
         : await getPoolImpl();
 
-      const poolConfiguratorImplAddress = getParamPerNetwork(
-        PoolConfigurator,
-        network
-      );
+      const poolConfiguratorImplAddress = getParamPerNetwork(PoolConfigurator, network);
       const poolConfiguratorImpl = notFalsyOrZeroAddress(poolConfiguratorImplAddress)
         ? await getPoolConfiguratorImpl(poolConfiguratorImplAddress)
         : await getPoolConfiguratorImpl();
 
-      const poolCollateralManagerImplAddress = getParamPerNetwork(
-        PoolCollateralManager,
-        network
-      );
-      const poolCollateralManagerImpl = notFalsyOrZeroAddress(
-        poolCollateralManagerImplAddress
-      )
+      const poolCollateralManagerImplAddress = getParamPerNetwork(PoolCollateralManager, network);
+      const poolCollateralManagerImpl = notFalsyOrZeroAddress(poolCollateralManagerImplAddress)
         ? await getPoolCollateralManagerImpl(poolCollateralManagerImplAddress)
         : await getPoolCollateralManagerImpl();
 
@@ -113,11 +105,7 @@ task('verify:general', 'Verify contracts at Etherscan')
 
       // Pool Collateral Manager implementation
       console.log('\n- Verifying Pool Collateral Manager Implementation...\n');
-      await verifyContract(
-        eContractid.PoolCollateralManager,
-        poolCollateralManagerImpl,
-        []
-      );
+      await verifyContract(eContractid.PoolCollateralManager, poolCollateralManagerImpl, []);
 
       // Test helpers
       console.log('\n- Verifying Aave Provider Helpers...\n');
@@ -143,11 +131,9 @@ task('verify:general', 'Verify contracts at Etherscan')
 
     // Pool Conf proxy
     console.log('\n- Verifying Pool Configurator Proxy...\n');
-    await verifyContract(
-      eContractid.InitializableAdminUpgradeabilityProxy,
-      poolConfiguratorProxy,
-      [addressesProvider.address]
-    );
+    await verifyContract(eContractid.InitializableAdminUpgradeabilityProxy, poolConfiguratorProxy, [
+      addressesProvider.address,
+    ]);
 
     // Proxy collateral manager
     console.log('\n- Verifying Pool Collateral Manager Proxy...\n');

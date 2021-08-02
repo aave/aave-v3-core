@@ -207,9 +207,10 @@ library ValidationLogic {
     vars.amountInBaseCurrency = vars.amountInBaseCurrency.mul(amount).div(10**vars.reserveDecimals);
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
-    vars.collateralNeededInBaseCurrency = vars.userDebtInBaseCurrency.add(vars.amountInBaseCurrency).percentDiv(
-      vars.currentLtv
-    ); //LTV is calculated in percentage
+    vars.collateralNeededInBaseCurrency = vars
+      .userDebtInBaseCurrency
+      .add(vars.amountInBaseCurrency)
+      .percentDiv(vars.currentLtv); //LTV is calculated in percentage
 
     require(
       vars.collateralNeededInBaseCurrency <= vars.userCollateralInBaseCurrency,

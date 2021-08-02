@@ -308,10 +308,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     if (liquidationThreshold != 0) {
       //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
       //collateral than needed to cover the debt
-      require(
-        liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
-        Errors.PC_INVALID_CONFIGURATION
-      );
+      require(liquidationBonus > PercentageMath.PERCENTAGE_FACTOR, Errors.PC_INVALID_CONFIGURATION);
 
       //if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
       //a loan is taken there is enough collateral available to cover the liquidation bonus
@@ -471,7 +468,8 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address[] memory reserves = _pool.getReservesList();
 
     for (uint256 i = 0; i < reserves.length; i++) {
-      if (reserves[i] != address(0)) { //might happen is a reserve was dropped
+      if (reserves[i] != address(0)) {
+        //might happen is a reserve was dropped
         setReservePause(reserves[i], paused);
       }
     }
