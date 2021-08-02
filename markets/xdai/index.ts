@@ -18,7 +18,7 @@ import {
 export const XDAIConfig: IXDAIConfiguration = {
   ...CommonsConfig,
   MarketId: 'XDAI Market',
-  ProviderId: 4,    // Unknown?
+  ProviderId: 4, // Unknown?
   ReservesConfig: {
     DAI: strategyDAI,
     USDC: strategyUSDC,
@@ -34,7 +34,7 @@ export const XDAIConfig: IXDAIConfiguration = {
       USDT: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6',
       WBTC: '0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252',
       WETH: '0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1',
-      STAKE: '0xb7D311E2Eb55F2f68a9440da38e7989210b9A05e'
+      STAKE: '0xb7D311E2Eb55F2f68a9440da38e7989210b9A05e',
     },
   },
 };
