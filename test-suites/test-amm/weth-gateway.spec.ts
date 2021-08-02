@@ -26,7 +26,9 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
       .depositETH(pool.address, depositor.address, '0', { value: depositSize });
 
     // Deposit with native ETH
-    await wethGateway.connect(user.signer).depositETH(pool.address, user.address, '0', { value: depositSize });
+    await wethGateway
+      .connect(user.signer)
+      .depositETH(pool.address, user.address, '0', { value: depositSize });
 
     const aTokensBalance = await aWETH.balanceOf(user.address);
 
@@ -54,7 +56,9 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
 
     // Partial Withdraw and send native Ether to user
     const { gasUsed: withdrawGas } = await waitForTx(
-      await wethGateway.connect(user.signer).withdrawETH(pool.address, partialWithdraw, user.address)
+      await wethGateway
+        .connect(user.signer)
+        .withdrawETH(pool.address, partialWithdraw, user.address)
     );
 
     const afterPartialEtherBalance = await user.signer.getBalance();
@@ -88,7 +92,9 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
 
     // Full withdraw
     const { gasUsed: withdrawGas } = await waitForTx(
-      await wethGateway.connect(user.signer).withdrawETH(pool.address, MAX_UINT_AMOUNT, user.address)
+      await wethGateway
+        .connect(user.signer)
+        .withdrawETH(pool.address, MAX_UINT_AMOUNT, user.address)
     );
 
     const afterFullEtherBalance = await user.signer.getBalance();
@@ -131,10 +137,10 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     expect(aTokensBalance).to.be.gte(daiSize);
 
     // Borrow WETH with WETH as collateral
- 
-    await expect(pool.connect(user.signer).borrow(weth.address, borrowSize, '1', '0', user.address))
-      .to.be.revertedWith(ProtocolErrors.VL_STABLE_BORROWING_NOT_ENABLED);
 
+    await expect(
+      pool.connect(user.signer).borrow(weth.address, borrowSize, '1', '0', user.address)
+    ).to.be.revertedWith(ProtocolErrors.VL_STABLE_BORROWING_NOT_ENABLED);
 
     // const debtBalance = await stableDebtToken.balanceOf(user.address);
 
@@ -168,7 +174,9 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     const varDebtToken = await getVariableDebtToken(variableDebtTokenAddress);
 
     // Deposit with native ETH
-    await wethGateway.connect(user.signer).depositETH(pool.address, user.address, '0', { value: depositSize });
+    await wethGateway
+      .connect(user.signer)
+      .depositETH(pool.address, user.address, '0', { value: depositSize });
 
     const aTokensBalance = await aWETH.balanceOf(user.address);
 
@@ -218,7 +226,9 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     expect(priorDebtBalance).to.be.eq(zero);
 
     // Deposit WETH with native ETH
-    await wethGateway.connect(user.signer).depositETH(pool.address, user.address, '0', { value: depositSize });
+    await wethGateway
+      .connect(user.signer)
+      .depositETH(pool.address, user.address, '0', { value: depositSize });
 
     const aTokensBalance = await aWETH.balanceOf(user.address);
 
@@ -231,7 +241,9 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
     );
 
     // Borrows ETH with WETH as collateral
-    await waitForTx(await wethGateway.connect(user.signer).borrowETH(pool.address, borrowSize, '2', '0'));
+    await waitForTx(
+      await wethGateway.connect(user.signer).borrowETH(pool.address, borrowSize, '2', '0')
+    );
 
     const debtBalance = await varDebtToken.balanceOf(user.address);
 
@@ -298,7 +310,6 @@ makeSuite('Use native ETH at Pool via WETHGateway', (testEnv: TestEnv) => {
       })
     ).to.be.revertedWith('Fallback not allowed');
   });
-
 
   it('Owner can do emergency token recovery', async () => {
     const { users, dai, wethGateway, deployer } = testEnv;
