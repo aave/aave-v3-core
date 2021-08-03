@@ -7,7 +7,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
 
   it('Tries to invoke mint not being the Pool', async () => {
-    const { deployer, pool, dai, helpersContract } = testEnv;
+    const { deployer, dai, helpersContract } = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;

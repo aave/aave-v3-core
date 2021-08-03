@@ -1,6 +1,6 @@
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { APPROVAL_AMOUNT_POOL, oneEther } from '../helpers/constants';
+import { APPROVAL_AMOUNT_POOL } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { parseEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'bignumber.js';

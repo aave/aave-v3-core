@@ -13,7 +13,7 @@ import {
   getVariableDebtToken,
   getStableDebtToken,
 } from '../../helpers/contracts-getters';
-import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../helpers/types';
+import { eNetwork, tEthereumAddress } from '../../helpers/types';
 import { Pool } from '../../types/Pool';
 import { AaveProtocolDataProvider } from '../../types/AaveProtocolDataProvider';
 import { MintableERC20 } from '../../types/MintableERC20';

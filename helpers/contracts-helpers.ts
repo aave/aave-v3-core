@@ -14,7 +14,6 @@ import {
   ePolygonNetwork,
   eXDaiNetwork,
   eNetwork,
-  iParamsPerNetworkAll,
   iEthereumParamsPerNetwork,
   iPolygonParamsPerNetwork,
   iXDaiParamsPerNetwork,

@@ -1,13 +1,7 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
-import {
-  APPROVAL_AMOUNT_POOL,
-  MAX_UINT_AMOUNT,
-  RAY,
-  MAX_BORROW_CAP,
-  MAX_SUPPLY_CAP,
-} from '../helpers/constants';
+import { MAX_UINT_AMOUNT, MAX_BORROW_CAP } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import { MintableERC20, WETH9, WETH9Mocked } from '../types';
+import { MintableERC20, WETH9Mocked } from '../types';
 import { parseEther } from '@ethersproject/units';
 import { BigNumber } from '@ethersproject/bignumber';
 

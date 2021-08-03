@@ -23,7 +23,6 @@ import {
   deployWETHMocked,
   deployMockUniswapRouter,
 } from '../helpers/contracts-deployments';
-import { eEthereumNetwork } from '../helpers/types';
 import { ethers, Signer } from 'ethers';
 import { TokenContractId, eContractid, tEthereumAddress, AavePools } from '../helpers/types';
 import { MintableERC20 } from '../types/MintableERC20';
@@ -40,7 +39,7 @@ import {
   deployAllMockAggregators,
   setInitialMarketRatesInRatesOracleByHelper,
 } from '../helpers/oracles-helpers';
-import { DRE, waitForTx } from '../helpers/misc-utils';
+import { waitForTx } from '../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../helpers/init-helpers';
 import AaveConfig from '../markets/aave';
 import { ZERO_ADDRESS } from '../helpers/constants';

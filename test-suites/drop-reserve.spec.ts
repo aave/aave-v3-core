@@ -1,12 +1,9 @@
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { ProtocolErrors, RateMode } from '../helpers/types';
-import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { parseEther, parseUnits } from 'ethers/lib/utils';
-import { BigNumber } from 'bignumber.js';
+import { ProtocolErrors } from '../helpers/types';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { parseEther } from 'ethers/lib/utils';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
-import { domainToUnicode } from 'url';
 
 const { expect } = require('chai');
 

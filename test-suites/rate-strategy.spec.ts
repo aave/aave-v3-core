@@ -1,12 +1,12 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { deployDefaultReserveInterestRateStrategy } from '../helpers/contracts-deployments';
 
-import { APPROVAL_AMOUNT_POOL, PERCENTAGE_FACTOR, RAY } from '../helpers/constants';
+import { PERCENTAGE_FACTOR, RAY } from '../helpers/constants';
 
 import { rateStrategyStableOne } from '../markets/aave/rateStrategies';
 
 import { strategyDAI } from '../markets/aave/reservesConfigs';
-import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../../types';
+import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';
 import BigNumber from 'bignumber.js';
 import './helpers/utils/math';
 

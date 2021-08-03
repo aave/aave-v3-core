@@ -1,12 +1,7 @@
 import { task } from 'hardhat/config';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { deployPoolCollateralManager } from '../../helpers/contracts-deployments';
-import {
-  loadPoolConfig,
-  ConfigNames,
-  getWethAddress,
-  getTreasuryAddress,
-} from '../../helpers/configuration';
+import { loadPoolConfig, ConfigNames, getTreasuryAddress } from '../../helpers/configuration';
 import { eNetwork, ICommonConfiguration } from '../../helpers/types';
 import { notFalsyOrZeroAddress, waitForTx } from '../../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../../helpers/init-helpers';
@@ -15,7 +10,6 @@ import {
   getAaveProtocolDataProvider,
   getPoolAddressesProvider,
 } from '../../helpers/contracts-getters';
-import { ZERO_ADDRESS } from '../../helpers/constants';
 
 task('full:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')

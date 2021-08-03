@@ -1,14 +1,8 @@
 import BigNumber from 'bignumber.js';
 import { ONE_YEAR, RAY, MAX_UINT_AMOUNT, PERCENTAGE_FACTOR } from '../../../helpers/constants';
-import {
-  IReserveParams,
-  iAavePoolAssets,
-  RateMode,
-  tEthereumAddress,
-} from '../../../helpers/types';
+import { IReserveParams, iAavePoolAssets, RateMode } from '../../../helpers/types';
 import './math';
 import { ReserveData, UserReserveData } from './interfaces';
-import { expect } from 'chai';
 
 export const strToBN = (amount: string): BigNumber => new BigNumber(amount);
 
