@@ -52,7 +52,7 @@ library PoolBaseLogic {
     uint256 amount
   );
 
-  function _executeDeposit(
+  function executeDeposit(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
@@ -81,7 +81,7 @@ library PoolBaseLogic {
     emit Deposit(asset, msg.sender, onBehalfOf, amount, referralCode);
   }
 
-  function _executeWithdraw(
+  function executeWithdraw(
     mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
@@ -138,7 +138,7 @@ library PoolBaseLogic {
     return amountToWithdraw;
   }
 
-  function _executeBorrow(
+  function executeBorrow(
     mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
@@ -214,7 +214,7 @@ library PoolBaseLogic {
     );
   }
 
-  function _executeRepay(
+  function executeRepay(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory vars

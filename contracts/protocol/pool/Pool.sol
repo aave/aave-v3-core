@@ -637,7 +637,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function _executeBorrow(DataTypes.ExecuteBorrowParams memory vars) internal {
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[vars.onBehalfOf];
 
-    PoolBaseLogic._executeBorrow(
+    PoolBaseLogic.executeBorrow(
       _reserves,
       userConfig,
       _reservesList,
@@ -661,7 +661,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) internal {
     DataTypes.ReserveData storage reserve = _reserves[asset];
 
-    PoolBaseLogic._executeDeposit(
+    PoolBaseLogic.executeDeposit(
       reserve,
       _usersConfig[onBehalfOf],
       asset,
@@ -678,7 +678,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) internal returns (uint256) {
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
     return
-      PoolBaseLogic._executeWithdraw(
+      PoolBaseLogic.executeWithdraw(
         _reserves,
         userConfig,
         _reservesList,
@@ -701,7 +701,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     DataTypes.ReserveData storage reserve = _reserves[asset];
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
     return
-      PoolBaseLogic._executeRepay(
+      PoolBaseLogic.executeRepay(
         reserve,
         userConfig,
         DataTypes.ExecuteRepayParams(
