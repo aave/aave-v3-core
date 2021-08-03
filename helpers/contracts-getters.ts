@@ -26,7 +26,6 @@ import {
   VariableDebtTokenFactory,
   WalletBalanceProviderFactory,
   WETH9MockedFactory,
-  WETHGatewayFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -247,15 +246,6 @@ export const getATokensAndRatesHelper = async (address?: tEthereumAddress) =>
     address ||
       (
         await getDb().get(`${eContractid.ATokensAndRatesHelper}.${DRE.network.name}`).value()
-      ).address,
-    await getFirstSigner()
-  );
-
-export const getWETHGateway = async (address?: tEthereumAddress) =>
-  await WETHGatewayFactory.connect(
-    address ||
-      (
-        await getDb().get(`${eContractid.WETHGateway}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );

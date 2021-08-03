@@ -4,7 +4,6 @@ import {
   deployMockFlashLoanReceiver,
   deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
-  authorizeWETHGateway,
 } from '../../helpers/contracts-deployments';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
@@ -20,11 +19,7 @@ import { waitForTx, filterMapBy, notFalsyOrZeroAddress } from '../../helpers/mis
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
 import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
-import {
-  getAllMockedTokens,
-  getPoolAddressesProvider,
-  getWETHGateway,
-} from '../../helpers/contracts-getters';
+import { getAllMockedTokens, getPoolAddressesProvider } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
 task('dev:initialize-pool', 'Initialize pool configuration.')
@@ -39,7 +34,6 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
       StableDebtTokenNamePrefix,
       VariableDebtTokenNamePrefix,
       SymbolPrefix,
-      WethGateway,
     } = poolConfig;
     const mockTokens = await getAllMockedTokens();
     const allTokenAddresses = getAllTokenAddresses(mockTokens);
@@ -87,12 +81,4 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
     await deployWalletBalancerProvider(verify);
 
     await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
-
-    const poolAddress = await addressesProvider.getPool();
-
-    let gateway = getParamPerNetwork(WethGateway, network);
-    if (!notFalsyOrZeroAddress(gateway)) {
-      gateway = (await getWETHGateway()).address;
-    }
-    await authorizeWETHGateway(gateway, poolAddress);
   });

@@ -10,7 +10,6 @@ import {
   getPriceOracle,
   getPoolAddressesProviderRegistry,
   getWETHMocked,
-  getWETHGateway,
 } from '../../../helpers/contracts-getters';
 import { eEthereumNetwork, eNetwork, tEthereumAddress } from '../../../helpers/types';
 import { Pool } from '../../../types/Pool';
@@ -29,7 +28,6 @@ import { PoolAddressesProviderRegistry } from '../../../types/PoolAddressesProvi
 import { getEthersSigners } from '../../../helpers/contracts-helpers';
 import { getParamPerNetwork } from '../../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../../types/WETH9Mocked';
-import { WETHGateway } from '../../../types/WETHGateway';
 import { solidity } from 'ethereum-waffle';
 import { AmmConfig } from '../../../markets/amm';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
@@ -58,7 +56,6 @@ export interface TestEnv {
   aave: MintableERC20;
   addressesProvider: PoolAddressesProvider;
   registry: PoolAddressesProviderRegistry;
-  wethGateway: WETHGateway;
 }
 
 let buidlerevmSnapshotId: string = '0x1';
@@ -81,7 +78,6 @@ const testEnv: TestEnv = {
   aave: {} as MintableERC20,
   addressesProvider: {} as PoolAddressesProvider,
   registry: {} as PoolAddressesProviderRegistry,
-  wethGateway: {} as WETHGateway,
 } as TestEnv;
 
 export async function initializeMakeSuite() {
@@ -141,7 +137,6 @@ export async function initializeMakeSuite() {
   testEnv.usdc = await getMintableERC20(usdcAddress);
   testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
-  testEnv.wethGateway = await getWETHGateway();
 }
 
 const setSnapshot = async () => {
