@@ -1,23 +1,13 @@
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { BUIDLEREVM_CHAINID } from '../helpers/buidler-constants';
-import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contracts-helpers';
+import { ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE } from '../helpers/misc-utils';
-import {
-  ConfigNames,
-  getATokenDomainSeparatorPerNetwork,
-  getTreasuryAddress,
-  loadPoolConfig,
-} from '../helpers/configuration';
-import { waitForTx } from '../helpers/misc-utils';
+import { getTreasuryAddress } from '../helpers/configuration';
 import {
   deployDelegationAwareAToken,
   deployMintableDelegationERC20,
 } from '../helpers/contracts-deployments';
-import { DelegationAwareATokenFactory } from '../types';
 import { DelegationAwareAToken } from '../types/DelegationAwareAToken';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import AaveConfig from '../markets/aave';
@@ -25,7 +15,6 @@ import AaveConfig from '../markets/aave';
 const { parseEther } = ethers.utils;
 
 makeSuite('AToken: underlying delegation', (testEnv: TestEnv) => {
-  const poolConfig = loadPoolConfig(ConfigNames.Commons);
   let delegationAToken = <DelegationAwareAToken>{};
   let delegationERC20 = <MintableDelegationERC20>{};
 

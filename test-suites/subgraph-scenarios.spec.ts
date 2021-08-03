@@ -9,7 +9,7 @@ import { executeStory } from './helpers/scenario-engine';
 
 makeSuite('Subgraph scenario tests', async (testEnv) => {
   let story: any;
-  let scenario;
+
   before('Initializing configuration', async () => {
     const scenario = require(`./helpers/scenarios/borrow-repay-stable`);
     story = scenario.stories[0];

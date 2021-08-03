@@ -1,7 +1,7 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
-import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, RAY, MAX_SUPPLY_CAP } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, MAX_SUPPLY_CAP } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import { MintableERC20, WETH9, WETH9Mocked } from '../types';
+import { MintableERC20, WETH9Mocked } from '../types';
 import { parseEther } from '@ethersproject/units';
 import { BigNumber } from '@ethersproject/bignumber';
 
@@ -14,16 +14,7 @@ makeSuite('supply Cap', (testEnv: TestEnv) => {
     BigNumber.from(nb).mul(BigNumber.from('10').pow((await token.decimals()) - 3));
 
   it('Reserves should initially have supply cap disabled (supplyCap = 0)', async () => {
-    const {
-      configurator,
-      weth,
-      pool,
-      dai,
-      usdc,
-      deployer,
-      helpersContract,
-      users: [user1],
-    } = testEnv;
+    const { weth, pool, dai, usdc, helpersContract } = testEnv;
 
     const mintedAmount = parseEther('1000000000');
     await dai.mint(mintedAmount);
@@ -41,16 +32,7 @@ makeSuite('supply Cap', (testEnv: TestEnv) => {
     expect(daiSupplyCap).to.be.equal('0');
   });
   it('Should be able to deposit 1000 Dai, 1000 USDC and 1000 Weth', async () => {
-    const {
-      configurator,
-      weth,
-      pool,
-      dai,
-      usdc,
-      deployer,
-      helpersContract,
-      users: [user1],
-    } = testEnv;
+    const { weth, pool, dai, usdc, deployer } = testEnv;
 
     const suppliedAmount = 1000;
     const precisionSuppliedAmount = (suppliedAmount * 1000).toString();
@@ -76,16 +58,7 @@ makeSuite('supply Cap', (testEnv: TestEnv) => {
     );
   });
   it('Sets the supply cap for Weth and DAI to 1000 Unit', async () => {
-    const {
-      configurator,
-      weth,
-      pool,
-      dai,
-      usdc,
-      deployer,
-      helpersContract,
-      users: [user1],
-    } = testEnv;
+    const { configurator, dai, usdc, helpersContract } = testEnv;
 
     const newCap = '1000';
 
@@ -274,7 +247,7 @@ makeSuite('supply Cap', (testEnv: TestEnv) => {
     expect(daiSupplyCap).to.be.equal(newCap);
   });
   it('should succeed to supply 100 dai and 100 usdc', async () => {
-    const { usdc, pool, dai, deployer, helpersContract } = testEnv;
+    const { usdc, pool, dai, deployer } = testEnv;
     const suppliedAmount = 100;
     const precisionSuppliedAmount = (suppliedAmount * 1000).toString();
     await pool.deposit(

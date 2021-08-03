@@ -14,7 +14,6 @@ import {
   depositWithPermit,
 } from './actions';
 import { RateMode } from '../../helpers/types';
-import { Wallet } from '@ethersproject/wallet';
 
 export interface Action {
   name: string;

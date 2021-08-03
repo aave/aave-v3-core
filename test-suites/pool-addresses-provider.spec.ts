@@ -3,7 +3,6 @@ import { createRandomAddress } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
 import { ethers } from 'ethers';
-import { ZERO_ADDRESS } from '../helpers/constants';
 import { waitForTx } from '../helpers/misc-utils';
 import { deployPool } from '../helpers/contracts-deployments';
 

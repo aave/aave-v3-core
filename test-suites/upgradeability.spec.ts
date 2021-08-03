@@ -1,10 +1,6 @@
 import { expect } from 'chai';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { ProtocolErrors, eContractid } from '../helpers/types';
-import { deployContract, getContract } from '../helpers/contracts-helpers';
-import { MockAToken } from '../types/MockAToken';
-import { MockStableDebtToken } from '../types/MockStableDebtToken';
-import { MockVariableDebtToken } from '../types/MockVariableDebtToken';
+import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import {
   getAToken,
@@ -146,7 +142,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
   });
 
   it('Upgrades the DAI stable debt token implementation ', async () => {
-    const { dai, configurator, pool, helpersContract } = testEnv;
+    const { dai, configurator, helpersContract } = testEnv;
 
     const name = await (await getStableDebtToken(newStableTokenAddress)).name();
     const symbol = await (await getStableDebtToken(newStableTokenAddress)).symbol();
@@ -206,7 +202,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
   });
 
   it('Upgrades the DAI variable debt token implementation ', async () => {
-    const { dai, configurator, pool, helpersContract } = testEnv;
+    const { dai, configurator, helpersContract } = testEnv;
 
     const name = await (await getVariableDebtToken(newVariableTokenAddress)).name();
     const symbol = await (await getVariableDebtToken(newVariableTokenAddress)).symbol();

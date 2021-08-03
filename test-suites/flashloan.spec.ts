@@ -1,13 +1,11 @@
 import BigNumber from 'bignumber.js';
 
 import { TestEnv, makeSuite } from './helpers/make-suite';
-import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, oneRay } from '../helpers/constants';
-import { convertToCurrencyDecimals, getContract } from '../helpers/contracts-helpers';
+import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT } from '../helpers/constants';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ethers } from 'ethers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
-import { ProtocolErrors, eContractid } from '../helpers/types';
-import { VariableDebtToken } from '../types/VariableDebtToken';
-import { StableDebtToken } from '../types/StableDebtToken';
+import { ProtocolErrors } from '../helpers/types';
 import {
   getMockFlashLoanReceiver,
   getStableDebtToken,
