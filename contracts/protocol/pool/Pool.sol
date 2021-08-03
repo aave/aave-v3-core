@@ -19,7 +19,6 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
-import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
@@ -240,23 +239,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     require(returnCode == 0, string(abi.encodePacked(returnMessage)));
   }
 
-  struct FlashLoanLocalVars {
-    IFlashLoanReceiver receiver;
-    address oracle;
-    uint256 i;
-    address currentAsset;
-    address currentATokenAddress;
-    uint256 currentAmount;
-    uint256 currentPremiumToLP;
-    uint256 currentPremiumToProtocol;
-    uint256 currentAmountPlusPremium;
-    address debtToken;
-    address[] aTokenAddresses;
-    uint256[] totalPremiums;
-    uint256 flashloanPremiumTotal;
-    uint256 flashloanPremiumToProtocol;
-  }
-
   ///@inheritdoc IPool
   function flashLoan(
     address receiverAddress,
@@ -267,89 +249,33 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    FlashLoanLocalVars memory vars;
+    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[onBehalfOf];
 
-    vars.aTokenAddresses = new address[](assets.length);
-    vars.totalPremiums = new uint256[](assets.length);
-
-    ValidationLogic.validateFlashloan(assets, amounts, _reserves);
-
-    vars.receiver = IFlashLoanReceiver(receiverAddress);
-    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = _authorizedFlashBorrowers[
-      msg.sender
-    ]
-      ? (0, 0)
-      : (_flashLoanPremiumTotal, _flashLoanPremiumToProtocol);
-
-    for (vars.i = 0; vars.i < assets.length; vars.i++) {
-      vars.aTokenAddresses[vars.i] = _reserves[assets[vars.i]].aTokenAddress;
-      vars.totalPremiums[vars.i] = amounts[vars.i].percentMul(vars.flashloanPremiumTotal);
-      IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(receiverAddress, amounts[vars.i]);
-    }
-
-    require(
-      vars.receiver.executeOperation(assets, amounts, vars.totalPremiums, msg.sender, params),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
-    );
-
-    for (vars.i = 0; vars.i < assets.length; vars.i++) {
-      vars.currentAsset = assets[vars.i];
-      vars.currentAmount = amounts[vars.i];
-      vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
-      vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
-      vars.currentPremiumToProtocol = amounts[vars.i].percentMul(vars.flashloanPremiumToProtocol);
-      vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
-
-      if (DataTypes.InterestRateMode(modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
-        DataTypes.ReserveData storage reserve = _reserves[vars.currentAsset];
-        DataTypes.ReserveCache memory reserveCache = reserve.cache();
-
-        reserve.updateState(reserveCache);
-        reserve.cumulateToLiquidityIndex(
-          IERC20(vars.currentATokenAddress).totalSupply(),
-          vars.currentPremiumToLP
-        );
-
-        reserve.accruedToTreasury =
-          reserve.accruedToTreasury +
-          vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex);
-
-        reserve.updateInterestRates(
-          reserveCache,
-          vars.currentAsset,
-          vars.currentAmountPlusPremium,
-          0
-        );
-
-        IERC20(vars.currentAsset).safeTransferFrom(
-          receiverAddress,
-          vars.currentATokenAddress,
-          vars.currentAmountPlusPremium
-        );
-      } else {
-        // If the user chose to not return the funds, the system checks if there is enough collateral and
-        // eventually opens a debt position
-        _executeBorrow(
-          DataTypes.ExecuteBorrowParams(
-            vars.currentAsset,
-            msg.sender,
-            onBehalfOf,
-            vars.currentAmount,
-            modes[vars.i],
-            referralCode,
-            false
-          )
-        );
-      }
-      emit FlashLoan(
+    DataTypes.FlashloanParams memory flashParams =
+      DataTypes.FlashloanParams(
         receiverAddress,
-        msg.sender,
-        vars.currentAsset,
-        vars.currentAmount,
-        vars.totalPremiums[vars.i],
-        referralCode
+        assets,
+        amounts,
+        modes,
+        onBehalfOf,
+        params,
+        referralCode,
+        _flashLoanPremiumToProtocol,
+        _flashLoanPremiumTotal,
+        DataTypes.ExecuteBorrowHelperParams(
+          _maxStableRateBorrowSizePercent,
+          _reservesCount,
+          _addressesProvider.getPriceOracle()
+        )
       );
-    }
+
+    PoolBaseLogic.flashLoan(
+      _reserves,
+      _reservesList,
+      _authorizedFlashBorrowers,
+      userConfig,
+      flashParams
+    );
   }
 
   ///@inheritdoc IPool

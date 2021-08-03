@@ -12,6 +12,9 @@ import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
+import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
+import {Errors} from '../helpers/Errors.sol';
+import {PercentageMath} from '../math/PercentageMath.sol';
 
 /**
  * @title PoolBaseLogic library
@@ -24,6 +27,7 @@ library PoolBaseLogic {
   using SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using WadRayMath for uint256;
+  using PercentageMath for uint256;
 
   // See `IPool` for descriptions
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
@@ -50,6 +54,14 @@ library PoolBaseLogic {
     address indexed user,
     address indexed repayer,
     uint256 amount
+  );
+  event FlashLoan(
+    address indexed target,
+    address indexed initiator,
+    address indexed asset,
+    uint256 amount,
+    uint256 premium,
+    uint16 referralCode
   );
 
   function executeDeposit(
@@ -307,6 +319,134 @@ library PoolBaseLogic {
         toConfig.setUsingAsCollateral(reserveId, true);
         emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
       }
+    }
+  }
+
+  struct FlashLoanLocalVars {
+    IFlashLoanReceiver receiver;
+    address oracle;
+    uint256 i;
+    address currentAsset;
+    address currentATokenAddress;
+    uint256 currentAmount;
+    uint256 currentPremiumToLP;
+    uint256 currentPremiumToProtocol;
+    uint256 currentAmountPlusPremium;
+    address debtToken;
+    address[] aTokenAddresses;
+    uint256[] totalPremiums;
+    uint256 flashloanPremiumTotal;
+    uint256 flashloanPremiumToProtocol;
+  }
+
+  function flashLoan(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
+    mapping(address => bool) storage authorizedFlashBorrowers,
+    DataTypes.UserConfigurationMap storage userConfig,
+    DataTypes.FlashloanParams memory flashParams
+  ) public {
+    FlashLoanLocalVars memory vars;
+
+    vars.aTokenAddresses = new address[](flashParams.assets.length);
+    vars.totalPremiums = new uint256[](flashParams.assets.length);
+
+    ValidationLogic.validateFlashloan(flashParams.assets, flashParams.amounts, reserves);
+
+    vars.receiver = IFlashLoanReceiver(flashParams.receiverAddress);
+    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = authorizedFlashBorrowers[
+      msg.sender
+    ]
+      ? (0, 0)
+      : (flashParams.flashLoanPremiumTotal, flashParams.flashLoanPremiumToProtocol);
+
+    for (vars.i = 0; vars.i < flashParams.assets.length; vars.i++) {
+      vars.aTokenAddresses[vars.i] = reserves[flashParams.assets[vars.i]].aTokenAddress;
+      vars.totalPremiums[vars.i] = flashParams.amounts[vars.i].percentMul(
+        vars.flashloanPremiumTotal
+      );
+      IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
+        flashParams.receiverAddress,
+        flashParams.amounts[vars.i]
+      );
+    }
+
+    require(
+      vars.receiver.executeOperation(
+        flashParams.assets,
+        flashParams.amounts,
+        vars.totalPremiums,
+        msg.sender,
+        flashParams.params
+      ),
+      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+    );
+
+    for (vars.i = 0; vars.i < flashParams.assets.length; vars.i++) {
+      vars.currentAsset = flashParams.assets[vars.i];
+      vars.currentAmount = flashParams.amounts[vars.i];
+      vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
+      vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
+      vars.currentPremiumToProtocol = flashParams.amounts[vars.i].percentMul(
+        vars.flashloanPremiumToProtocol
+      );
+      vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
+
+      if (
+        DataTypes.InterestRateMode(flashParams.modes[vars.i]) == DataTypes.InterestRateMode.NONE
+      ) {
+        DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
+        DataTypes.ReserveCache memory reserveCache = reserve.cache();
+
+        reserve.updateState(reserveCache);
+        reserve.cumulateToLiquidityIndex(
+          IERC20(vars.currentATokenAddress).totalSupply(),
+          vars.currentPremiumToLP
+        );
+
+        reserve.accruedToTreasury =
+          reserve.accruedToTreasury +
+          vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex);
+
+        reserve.updateInterestRates(
+          reserveCache,
+          vars.currentAsset,
+          vars.currentAmountPlusPremium,
+          0
+        );
+
+        IERC20(vars.currentAsset).safeTransferFrom(
+          flashParams.receiverAddress,
+          vars.currentATokenAddress,
+          vars.currentAmountPlusPremium
+        );
+      } else {
+        // If the user chose to not return the funds, the system checks if there is enough collateral and
+        // eventually opens a debt position
+        executeBorrow(
+          reserves,
+          userConfig,
+          reservesList,
+          DataTypes.ExecuteBorrowParams(
+            vars.currentAsset,
+            msg.sender,
+            flashParams.onBehalfOf,
+            vars.currentAmount,
+            flashParams.modes[vars.i],
+            flashParams.referralCode,
+            false
+          ),
+          flashParams.borrowHelperParams
+        );
+      }
+      emit FlashLoan(
+        flashParams.receiverAddress,
+        msg.sender,
+        vars.currentAsset,
+        vars.currentAmount,
+        vars.totalPremiums[vars.i],
+        flashParams.referralCode
+      );
     }
   }
 }

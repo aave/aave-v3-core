@@ -117,4 +117,17 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
   }
+
+  struct FlashloanParams {
+    address receiverAddress;
+    address[] assets;
+    uint256[] amounts;
+    uint256[] modes;
+    address onBehalfOf;
+    bytes params;
+    uint16 referralCode;
+    uint256 flashLoanPremiumToProtocol;
+    uint256 flashLoanPremiumTotal;
+    ExecuteBorrowHelperParams borrowHelperParams;
+  }
 }
