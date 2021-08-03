@@ -635,27 +635,19 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   function _executeBorrow(DataTypes.ExecuteBorrowParams memory vars) internal {
-    DataTypes.ReserveData storage reserve = _reserves[vars.asset];
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[vars.onBehalfOf];
-    DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
-    reserve.updateState(reserveCache);
-
-    ValidationLogic.validateBorrow(
-      reserveCache,
-      vars.asset,
-      vars.onBehalfOf,
-      vars.amount,
-      vars.interestRateMode,
-      _maxStableRateBorrowSizePercent,
+    PoolBaseLogic._executeBorrow(
       _reserves,
       userConfig,
       _reservesList,
-      _reservesCount,
-      _addressesProvider.getPriceOracle()
+      vars,
+      DataTypes.ExecuteBorrowHelperParams(
+        _maxStableRateBorrowSizePercent,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
+      )
     );
-
-    PoolBaseLogic._executeBorrow(_reserves, reserveCache, userConfig, vars);
 
     _lastBorrower = vars.user;
     _lastBorrowTimestamp = uint40(block.timestamp);

@@ -84,6 +84,12 @@ library DataTypes {
     bool releaseUnderlying;
   }
 
+  struct ExecuteBorrowHelperParams {
+    uint256 maxStableRateBorrowSizePercent;
+    uint256 reservesCount;
+    address oracle;
+  }
+
   struct ExecuteRepayParams {
     address asset;
     uint256 amount;

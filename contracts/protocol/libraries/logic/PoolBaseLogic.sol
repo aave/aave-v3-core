@@ -155,11 +155,29 @@ library PoolBaseLogic {
 
   function _executeBorrow(
     mapping(address => DataTypes.ReserveData) storage reserves,
-    DataTypes.ReserveCache memory reserveCache,
     DataTypes.UserConfigurationMap storage userConfig,
-    DataTypes.ExecuteBorrowParams memory vars
+    mapping(uint256 => address) storage reservesList,
+    DataTypes.ExecuteBorrowParams memory vars,
+    DataTypes.ExecuteBorrowHelperParams memory helperVars
   ) public {
     DataTypes.ReserveData storage reserve = reserves[vars.asset];
+    DataTypes.ReserveCache memory reserveCache = reserve.cache();
+
+    reserve.updateState(reserveCache);
+
+    ValidationLogic.validateBorrow(
+      reserveCache,
+      vars.asset,
+      vars.onBehalfOf,
+      vars.amount,
+      vars.interestRateMode,
+      helperVars.maxStableRateBorrowSizePercent,
+      reserves,
+      userConfig,
+      reservesList,
+      helperVars.reservesCount,
+      helperVars.oracle
+    );
 
     uint256 currentStableRate = 0;
     bool isFirstBorrowing = false;
