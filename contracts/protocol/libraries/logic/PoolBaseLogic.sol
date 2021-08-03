@@ -214,24 +214,20 @@ library PoolBaseLogic {
   function _executeRepay(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    uint256 amount,
-    uint256 rateMode,
-    address onBehalfOf,
-    address lastBorrower,
-    uint40 lastBorrowTimestamp
+    DataTypes.ExecuteRepayParams memory vars
   ) public returns (uint256) {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
-    (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(onBehalfOf, reserve);
-    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(rateMode);
+    (uint256 stableDebt, uint256 variableDebt) =
+      Helpers.getUserCurrentDebt(vars.onBehalfOf, reserve);
+    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(vars.rateMode);
 
     ValidationLogic.validateRepay(
-      lastBorrower,
-      lastBorrowTimestamp,
+      vars.lastBorrower,
+      vars.lastBorrowTimestamp,
       reserveCache,
-      amount,
+      vars.amount,
       interestRateMode,
-      onBehalfOf,
+      vars.onBehalfOf,
       stableDebt,
       variableDebt
     );
@@ -239,58 +235,35 @@ library PoolBaseLogic {
     uint256 paybackAmount =
       interestRateMode == DataTypes.InterestRateMode.STABLE ? stableDebt : variableDebt;
 
-    if (amount < paybackAmount) {
-      paybackAmount = amount;
+    if (vars.amount < paybackAmount) {
+      paybackAmount = vars.amount;
     }
 
     reserve.updateState(reserveCache);
 
     if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
-      IStableDebtToken(reserveCache.stableDebtTokenAddress).burn(onBehalfOf, paybackAmount);
+      IStableDebtToken(reserveCache.stableDebtTokenAddress).burn(vars.onBehalfOf, paybackAmount);
       reserveCache.refreshDebt(0, paybackAmount, 0, 0);
     } else {
       IVariableDebtToken(reserveCache.variableDebtTokenAddress).burn(
-        onBehalfOf,
+        vars.onBehalfOf,
         paybackAmount,
         reserveCache.nextVariableBorrowIndex
       );
       reserveCache.refreshDebt(0, 0, 0, paybackAmount);
     }
 
-    return
-      _executeRepayHelper(
-        reserve,
-        reserveCache,
-        userConfig,
-        asset,
-        onBehalfOf,
-        paybackAmount,
-        variableDebt,
-        stableDebt
-      );
-  }
-
-  function _executeRepayHelper(
-    DataTypes.ReserveData storage reserve,
-    DataTypes.ReserveCache memory reserveCache,
-    DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    address onBehalfOf,
-    uint256 paybackAmount,
-    uint256 variableDebt,
-    uint256 stableDebt
-  ) public returns (uint256) {
-    reserve.updateInterestRates(reserveCache, asset, paybackAmount, 0);
+    reserve.updateInterestRates(reserveCache, vars.asset, paybackAmount, 0);
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
     }
 
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, paybackAmount);
+    IERC20(vars.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, paybackAmount);
 
     IAToken(reserveCache.aTokenAddress).handleRepayment(msg.sender, paybackAmount);
 
-    emit Repay(asset, onBehalfOf, msg.sender, paybackAmount);
+    emit Repay(vars.asset, vars.onBehalfOf, msg.sender, paybackAmount);
 
     return paybackAmount;
   }

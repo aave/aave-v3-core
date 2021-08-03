@@ -710,12 +710,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       PoolBaseLogic._executeRepay(
         reserve,
         userConfig,
-        asset,
-        amount,
-        rateMode,
-        onBehalfOf,
-        _lastBorrower,
-        _lastBorrowTimestamp
+        DataTypes.ExecuteRepayParams(
+          asset,
+          amount,
+          rateMode,
+          onBehalfOf,
+          _lastBorrower,
+          _lastBorrowTimestamp
+        )
       );
   }
 

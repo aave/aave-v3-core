@@ -83,4 +83,13 @@ library DataTypes {
     uint16 referralCode;
     bool releaseUnderlying;
   }
+
+  struct ExecuteRepayParams {
+    address asset;
+    uint256 amount;
+    uint256 rateMode;
+    address onBehalfOf;
+    address lastBorrower;
+    uint40 lastBorrowTimestamp;
+  }
 }
