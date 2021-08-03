@@ -233,7 +233,7 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   return {
     ['__$56265c55042e83ee819cd4de36b013885b$__']: poolHelperLogic.address,
     ['__$f5cc2bc164fcad054d46ecbbc8bf13ff3e$__']: poolBaseLogic.address,
-    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
+    //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
     ['__$22cd43a9dda9ce44e9b92ba393b88fb9ac$__']: reserveLogic.address,
     ['__$52a8a86ab43135662ff256bbc95497e8e3$__']: genericLogic.address,
   };

@@ -529,38 +529,21 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceToBefore
   ) external override {
     require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
-
-    ValidationLogic.validateTransfer(_reserves[asset]);
-
-    uint256 reserveId = _reserves[asset].id;
-
-    if (from != to) {
-      DataTypes.UserConfigurationMap storage fromConfig = _usersConfig[from];
-
-      if (fromConfig.isUsingAsCollateral(reserveId)) {
-        if (fromConfig.isBorrowingAny()) {
-          ValidationLogic.validateHFAndLtv(
-            asset,
-            from,
-            _reserves,
-            _usersConfig[from],
-            _reservesList,
-            _reservesCount,
-            _addressesProvider.getPriceOracle()
-          );
-        }
-        if (balanceFromBefore - amount == 0) {
-          fromConfig.setUsingAsCollateral(reserveId, false);
-          emit ReserveUsedAsCollateralDisabled(asset, from);
-        }
-      }
-
-      if (balanceToBefore == 0 && amount != 0) {
-        DataTypes.UserConfigurationMap storage toConfig = _usersConfig[to];
-        toConfig.setUsingAsCollateral(reserveId, true);
-        emit ReserveUsedAsCollateralEnabled(asset, to);
-      }
-    }
+    PoolBaseLogic.finalizeTransfer(
+      _reserves,
+      _reservesList,
+      _usersConfig,
+      DataTypes.FinalizeTransferParams(
+        asset,
+        from,
+        to,
+        amount,
+        balanceFromBefore,
+        balanceToBefore,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
+      )
+    );
   }
 
   ///@inheritdoc IPool

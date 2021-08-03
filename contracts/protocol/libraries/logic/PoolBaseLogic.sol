@@ -270,4 +270,43 @@ library PoolBaseLogic {
 
     return paybackAmount;
   }
+
+  function finalizeTransfer(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
+    mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
+    DataTypes.FinalizeTransferParams memory vars
+  ) public {
+    ValidationLogic.validateTransfer(reserves[vars.asset]);
+
+    uint256 reserveId = reserves[vars.asset].id;
+
+    if (vars.from != vars.to) {
+      DataTypes.UserConfigurationMap storage fromConfig = usersConfig[vars.from];
+
+      if (fromConfig.isUsingAsCollateral(reserveId)) {
+        if (fromConfig.isBorrowingAny()) {
+          ValidationLogic.validateHFAndLtv(
+            vars.asset,
+            vars.from,
+            reserves,
+            usersConfig[vars.from],
+            reservesList,
+            vars.reservesCount,
+            vars.oracle
+          );
+        }
+        if (vars.balanceFromBefore - vars.amount == 0) {
+          fromConfig.setUsingAsCollateral(reserveId, false);
+          emit ReserveUsedAsCollateralDisabled(vars.asset, vars.from);
+        }
+      }
+
+      if (vars.balanceToBefore == 0 && vars.amount != 0) {
+        DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
+        toConfig.setUsingAsCollateral(reserveId, true);
+        emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
+      }
+    }
+  }
 }
