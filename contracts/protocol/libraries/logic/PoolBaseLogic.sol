@@ -52,25 +52,6 @@ library PoolBaseLogic {
     uint256 amount
   );
 
-  function _validateHFAndLtv(
-    address asset,
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    DataTypes.UserConfigurationMap storage userConfig,
-    mapping(uint256 => address) storage reservesList,
-    uint256 reservesCount,
-    address priceOracle
-  ) internal view {
-    ValidationLogic.validateHFAndLtv(
-      asset,
-      msg.sender,
-      reserves,
-      userConfig,
-      reservesList,
-      reservesCount,
-      priceOracle
-    );
-  }
-
   function _executeDeposit(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
@@ -103,14 +84,10 @@ library PoolBaseLogic {
   function _executeWithdraw(
     mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    uint256 amount,
-    address to,
     mapping(uint256 => address) storage reservesList,
-    uint256 reservesCount,
-    address priceOracle
+    DataTypes.ExecuteWithdrawParams memory vars
   ) public returns (uint256) {
-    DataTypes.ReserveData storage reserve = reserves[asset];
+    DataTypes.ReserveData storage reserve = reserves[vars.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
@@ -120,35 +97,43 @@ library PoolBaseLogic {
         reserveCache.nextLiquidityIndex
       );
 
-    uint256 amountToWithdraw = amount;
+    uint256 amountToWithdraw = vars.amount;
 
-    if (amount == type(uint256).max) {
+    if (vars.amount == type(uint256).max) {
       amountToWithdraw = userBalance;
     }
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
 
-    reserve.updateInterestRates(reserveCache, asset, 0, amountToWithdraw);
+    reserve.updateInterestRates(reserveCache, vars.asset, 0, amountToWithdraw);
 
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,
-      to,
+      vars.to,
       amountToWithdraw,
       reserveCache.nextLiquidityIndex
     );
 
     if (userConfig.isUsingAsCollateral(reserve.id)) {
       if (userConfig.isBorrowingAny()) {
-        _validateHFAndLtv(asset, reserves, userConfig, reservesList, reservesCount, priceOracle);
+        ValidationLogic.validateHFAndLtv(
+          vars.asset,
+          msg.sender,
+          reserves,
+          userConfig,
+          reservesList,
+          vars.reservesCount,
+          vars.oracle
+        );
       }
 
       if (amountToWithdraw == userBalance) {
         userConfig.setUsingAsCollateral(reserve.id, false);
-        emit ReserveUsedAsCollateralDisabled(asset, msg.sender);
+        emit ReserveUsedAsCollateralDisabled(vars.asset, msg.sender);
       }
     }
 
-    emit Withdraw(asset, msg.sender, to, amountToWithdraw);
+    emit Withdraw(vars.asset, msg.sender, vars.to, amountToWithdraw);
 
     return amountToWithdraw;
   }

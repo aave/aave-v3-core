@@ -98,4 +98,12 @@ library DataTypes {
     address lastBorrower;
     uint40 lastBorrowTimestamp;
   }
+
+  struct ExecuteWithdrawParams {
+    address asset;
+    uint256 amount;
+    address to;
+    uint256 reservesCount;
+    address oracle;
+  }
 }

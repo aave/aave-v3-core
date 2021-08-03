@@ -681,12 +681,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       PoolBaseLogic._executeWithdraw(
         _reserves,
         userConfig,
-        asset,
-        amount,
-        to,
         _reservesList,
-        _reservesCount,
-        _addressesProvider.getPriceOracle()
+        DataTypes.ExecuteWithdrawParams(
+          asset,
+          amount,
+          to,
+          _reservesCount,
+          _addressesProvider.getPriceOracle()
+        )
       );
   }
 
