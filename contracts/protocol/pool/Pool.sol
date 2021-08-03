@@ -583,9 +583,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   ///@inheritdoc IPool
   function dropReserve(address asset) external override onlyPoolConfigurator {
-    ValidationLogic.validateDropReserve(_reserves[asset]);
-    _removeReserveFromList(asset);
-    delete _reserves[asset];
+    PoolHelperLogic.dropReserve(_reserves, _reservesList, asset);
   }
 
   ///@inheritdoc IPool
@@ -732,9 +730,5 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         }
       }
     }
-  }
-
-  function _removeReserveFromList(address asset) internal {
-    _reservesList[_reserves[asset].id] = address(0);
   }
 }

@@ -151,4 +151,22 @@ library PoolHelperLogic {
       emit ReserveUsedAsCollateralDisabled(asset, msg.sender);
     }
   }
+
+  function dropReserve(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
+    address asset
+  ) public {
+    ValidationLogic.validateDropReserve(reserves[asset]);
+    _removeReserveFromList(reserves, reservesList, asset);
+    delete reserves[asset];
+  }
+
+  function _removeReserveFromList(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
+    address asset
+  ) internal {
+    reservesList[reserves[asset].id] = address(0);
+  }
 }
