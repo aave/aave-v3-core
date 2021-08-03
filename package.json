@@ -63,21 +63,13 @@
     "aave:main:full:migration": "npm run compile && npm run hardhat:main -- aave:mainnet --verify",
     "aave:main:full:initialize": "npm run compile && FORK=main full:initialize-tokens --pool Aave",
     "amm:main:full:migration": "npm run compile && npm run hardhat:main -- amm:mainnet --verify",
-    "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/test-aave/**/*.ts'",
-    "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/test-aave/**/*.ts'",
+    "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/test-aave/**/*.ts' 'test-suites/test-amm/**/*.ts' 'markets/**/*.ts'",
+    "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/test-aave/**/*.ts' 'test-suites/test-amm/**/*.ts' 'markets/**/*.ts'",
     "ci:test": "npm run compile && npm run test",
     "ci:clean": "rm -rf ./artifacts ./cache ./types",
     "print-contracts:kovan": "npm run hardhat:kovan -- print-contracts",
     "print-contracts:main": "npm run hardhat:main -- print-contracts",
     "print-contracts:ropsten": "npm run hardhat:main -- print-contracts",
-    "dev:deployUIProvider": "hardhat --network kovan deploy-UiPoolDataProvider --verify",
-    "main:deployUIProvider": "hardhat --network main deploy-UiPoolDataProvider --verify",
-    "matic:deployUIProvider": "hardhat --network matic deploy-UiPoolDataProvider",
-    "mumbai:deployUIProvider": "hardhat --network mumbai deploy-UiPoolDataProvider",
-    "dev:deployUniswapRepayAdapter": "hardhat --network kovan deploy-UniswapRepayAdapter --provider 0x88757f2f99175387aB4C6a4b3067c77A695b0349 --router 0xfcd87315f0e4067070ade8682fcdbc3006631441 --weth 0xd0a1e359811322d97991e03f863a0c30c2cf029c",
-    "dev:UniswapLiquiditySwapAdapter": "hardhat --network kovan deploy-UniswapLiquiditySwapAdapter --provider 0x88757f2f99175387aB4C6a4b3067c77A695b0349 --router 0xfcd87315f0e4067070ade8682fcdbc3006631441 --weth 0xd0a1e359811322d97991e03f863a0c30c2cf029c",
-    "main:deployUniswapRepayAdapter": "hardhat --network main deploy-UniswapRepayAdapter --provider 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 --router 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D --weth 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
-    "main:UniswapLiquiditySwapAdapter": "hardhat --network main deploy-UniswapLiquiditySwapAdapter  --provider 0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5 --router 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D --weth 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "kovan:verify": "npm run hardhat:kovan verify:general -- --all --pool Aave",
     "ropsten:verify": "npm run hardhat:ropsten verify:general -- --all --pool Aave",
     "mainnet:verify": "npm run hardhat:main verify:general -- --all --pool Aave",
@@ -145,7 +137,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern 'contracts/**/*.sol' --pattern 'helpers/**/*.ts'  --pattern 'test-suites/test-aave/**/*.ts' --pattern 'tasks/**/*.ts'"
+      "pre-commit": "pretty-quick --staged --pattern 'contracts/**/*.sol' --pattern 'helpers/**/*.ts'  --pattern 'test-suites/test-aave/**/*.ts' --pattern 'test-suites/test-amm/**/*.ts' --pattern 'tasks/**/*.ts' --pattern 'markets/**/*.ts'"
     }
   },
   "author": "Aave",

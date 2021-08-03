@@ -305,10 +305,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     if (liquidationThreshold != 0) {
       //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
       //collateral than needed to cover the debt
-      require(
-        liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
-        Errors.PC_INVALID_CONFIGURATION
-      );
+      require(liquidationBonus > PercentageMath.PERCENTAGE_FACTOR, Errors.PC_INVALID_CONFIGURATION);
 
       //if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
       //a loan is taken there is enough collateral available to cover the liquidation bonus

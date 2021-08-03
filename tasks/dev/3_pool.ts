@@ -34,17 +34,12 @@ task('dev:deploy-pool', 'Deploy pool for dev enviroment')
     const poolConfiguratorImpl = await deployPoolConfigurator(verify);
 
     // Set pool conf impl to Address Provider
-    await waitForTx(
-      await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address)
-    );
+    await waitForTx(await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address));
 
     const poolConfiguratorProxy = await getPoolConfiguratorProxy(
       await addressesProvider.getPoolConfigurator()
     );
-    await insertContractAddressInDb(
-      eContractid.PoolConfigurator,
-      poolConfiguratorProxy.address
-    );
+    await insertContractAddressInDb(eContractid.PoolConfigurator, poolConfiguratorProxy.address);
 
     // Deploy deployment helpers
     await deployStableAndVariableTokensHelper(

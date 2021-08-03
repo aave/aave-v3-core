@@ -92,9 +92,6 @@ export const CommonsConfig: ICommonConfiguration = {
   TokenDistributor: {
     [eXDaiNetwork.xdai]: '',
   },
-  WethGateway: {
-    [eXDaiNetwork.xdai]: '',
-  },
   AaveOracle: {
     [eXDaiNetwork.xdai]: '',
   },
