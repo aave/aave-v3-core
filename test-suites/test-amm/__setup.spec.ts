@@ -121,16 +121,11 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await insertContractAddressInDb(eContractid.Pool, poolProxy.address);
 
   const poolConfiguratorImpl = await deployPoolConfigurator();
-  await waitForTx(
-    await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address)
-  );
+  await waitForTx(await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address));
   const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getPoolConfigurator()
   );
-  await insertContractAddressInDb(
-    eContractid.PoolConfigurator,
-    poolConfiguratorProxy.address
-  );
+  await insertContractAddressInDb(eContractid.PoolConfigurator, poolConfiguratorProxy.address);
 
   // Deploy deployment helpers
   await deployStableAndVariableTokensHelper([poolProxy.address, addressesProvider.address]);
@@ -212,7 +207,13 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
 
-  await deployAaveOracle([tokens, aggregators, fallbackOracle.address, mockTokens.WETH.address, ethers.constants.WeiPerEther.toString()]);
+  await deployAaveOracle([
+    tokens,
+    aggregators,
+    fallbackOracle.address,
+    mockTokens.WETH.address,
+    ethers.constants.WeiPerEther.toString(),
+  ]);
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
   const rateOracle = await deployRateOracle();
@@ -240,12 +241,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   const config = loadPoolConfig(ConfigNames.Amm);
 
-  const {
-    ATokenNamePrefix,
-    StableDebtTokenNamePrefix,
-    VariableDebtTokenNamePrefix,
-    SymbolPrefix,
-  } = config;
+  const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
+    config;
   const treasuryAddress = await getTreasuryAddress(config);
 
   await initReservesByHelper(
@@ -263,9 +260,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
 
   const collateralManager = await deployPoolCollateralManager();
-  await waitForTx(
-    await addressesProvider.setPoolCollateralManager(collateralManager.address)
-  );
+  await waitForTx(await addressesProvider.setPoolCollateralManager(collateralManager.address));
   await deployMockFlashLoanReceiver(addressesProvider.address);
 
   const mockUniswapRouter = await deployMockUniswapRouter();

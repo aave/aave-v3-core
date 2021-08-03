@@ -510,7 +510,7 @@ interface IPool {
   function paused() external view returns (bool);
 
   /**
-   * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium. 
+   * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium.
    * Only callable by the PoolConfigurator contract
    * @param flashBorrower address of the flash borrower
    * @param authorized `true` to authorize, `false` to unauthorize

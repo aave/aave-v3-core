@@ -103,9 +103,10 @@ export const getUserData = async (
 };
 
 export const getReserveAddressFromSymbol = async (symbol: string) => {
-
   const token = await getMintableERC20(
-    (await getDb().get(`${symbol}.${DRE.network.name}`).value()).address
+    (
+      await getDb().get(`${symbol}.${DRE.network.name}`).value()
+    ).address
   );
 
   if (!token) {

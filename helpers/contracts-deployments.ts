@@ -102,19 +102,9 @@ export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
   );
 
 export const deployPoolConfigurator = async (verify?: boolean) => {
-  const poolConfiguratorImpl = await new PoolConfiguratorFactory(
-    await getFirstSigner()
-  ).deploy();
-  await insertContractAddressInDb(
-    eContractid.PoolConfiguratorImpl,
-    poolConfiguratorImpl.address
-  );
-  return withSaveAndVerify(
-    poolConfiguratorImpl,
-    eContractid.PoolConfigurator,
-    [],
-    verify
-  );
+  const poolConfiguratorImpl = await new PoolConfiguratorFactory(await getFirstSigner()).deploy();
+  await insertContractAddressInDb(eContractid.PoolConfiguratorImpl, poolConfiguratorImpl.address);
+  return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
 
 export const deployReserveLogicLibrary = async (verify?: boolean) =>
@@ -167,9 +157,7 @@ export const deployValidationLogic = async (
   return withSaveAndVerify(validationLogic, eContractid.ValidationLogic, [], verify);
 };
 
-export const deployAaveLibraries = async (
-  verify?: boolean
-): Promise<PoolLibraryAddresses> => {
+export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
   const reserveLogic = await deployReserveLogicLibrary(verify);
   const genericLogic = await deployGenericLogic(reserveLogic, verify);
   const validationLogic = await deployValidationLogic(reserveLogic, genericLogic, verify);
@@ -242,12 +230,7 @@ export const deployPoolCollateralManager = async (verify?: boolean) => {
     eContractid.PoolCollateralManagerImpl,
     collateralManagerImpl.address
   );
-  return withSaveAndVerify(
-    collateralManagerImpl,
-    eContractid.PoolCollateralManager,
-    [],
-    verify
-  );
+  return withSaveAndVerify(collateralManagerImpl, eContractid.PoolCollateralManager, [], verify);
 };
 
 export const deployInitializableAdminUpgradeabilityProxy = async (verify?: boolean) =>
@@ -518,13 +501,8 @@ export const deployWETHGateway = async (args: [tEthereumAddress], verify?: boole
     verify
   );
 
-export const authorizeWETHGateway = async (
-  wethGateWay: tEthereumAddress,
-  pool: tEthereumAddress
-) =>
-  await new WETHGatewayFactory(await getFirstSigner())
-    .attach(wethGateWay)
-    .authorizePool(pool);
+export const authorizeWETHGateway = async (wethGateWay: tEthereumAddress, pool: tEthereumAddress) =>
+  await new WETHGatewayFactory(await getFirstSigner()).attach(wethGateWay).authorizePool(pool);
 
 export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],

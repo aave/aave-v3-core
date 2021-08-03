@@ -70,10 +70,7 @@ task('full:initialize-pool', 'Initialize pool configuration.')
       );
       await configureReservesByHelper(ReservesConfig, reserveAssets, testHelpers, admin);
 
-      let collateralManagerAddress = await getParamPerNetwork(
-        PoolCollateralManager,
-        network
-      );
+      let collateralManagerAddress = await getParamPerNetwork(PoolCollateralManager, network);
       if (!notFalsyOrZeroAddress(collateralManagerAddress)) {
         const collateralManager = await deployPoolCollateralManager(verify);
         collateralManagerAddress = collateralManager.address;
@@ -84,9 +81,7 @@ task('full:initialize-pool', 'Initialize pool configuration.')
         '\tSetting pool collateral manager implementation with address',
         collateralManagerAddress
       );
-      await waitForTx(
-        await addressesProvider.setPoolCollateralManager(collateralManagerAddress)
-      );
+      await waitForTx(await addressesProvider.setPoolCollateralManager(collateralManagerAddress));
 
       console.log(
         '\tSetting AaveProtocolDataProvider at AddressesProvider at id: 0x01',

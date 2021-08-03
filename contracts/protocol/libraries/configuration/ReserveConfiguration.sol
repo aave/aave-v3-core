@@ -65,15 +65,18 @@ library ReserveConfiguration {
     return self.data & ~LTV_MASK;
   }
 
-    /**
+  /**
    * @dev Gets the Loan to Value of the reserve
    * @param self The reserve configuration
    * @return The loan to value
    **/
-  function getLtvMemory(DataTypes.ReserveConfigurationMap memory self) internal pure returns (uint256) {
+  function getLtvMemory(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (uint256)
+  {
     return self.data & ~LTV_MASK;
   }
-
 
   /**
    * @dev Sets the liquidation threshold of the reserve
@@ -445,10 +448,7 @@ library ReserveConfiguration {
   function getCaps(DataTypes.ReserveConfigurationMap storage self)
     internal
     view
-    returns (
-      uint256,
-      uint256
-    )
+    returns (uint256, uint256)
   {
     uint256 dataLocal = self.data;
 
@@ -491,10 +491,7 @@ library ReserveConfiguration {
   function getCapsMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
     pure
-    returns (
-      uint256,
-      uint256
-    )
+    returns (uint256, uint256)
   {
     return (
       (self.data & ~BORROW_CAP_MASK) >> BORROW_CAP_START_BIT_POSITION,

@@ -24,7 +24,6 @@ export const strategyBUSD: IReserveParams = {
   reserveFactor: '1000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyDAI: IReserveParams = {
@@ -39,7 +38,6 @@ export const strategyDAI: IReserveParams = {
   reserveFactor: '1000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategySUSD: IReserveParams = {
@@ -54,7 +52,6 @@ export const strategySUSD: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyTUSD: IReserveParams = {
@@ -69,7 +66,6 @@ export const strategyTUSD: IReserveParams = {
   reserveFactor: '1000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyUSDC: IReserveParams = {
@@ -84,7 +80,6 @@ export const strategyUSDC: IReserveParams = {
   reserveFactor: '1000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyUSDT: IReserveParams = {
@@ -99,7 +94,6 @@ export const strategyUSDT: IReserveParams = {
   reserveFactor: '1000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyAAVE: IReserveParams = {
@@ -114,7 +108,6 @@ export const strategyAAVE: IReserveParams = {
   reserveFactor: '0',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyBAT: IReserveParams = {
@@ -129,7 +122,6 @@ export const strategyBAT: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyENJ: IReserveParams = {
@@ -144,7 +136,6 @@ export const strategyENJ: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyWETH: IReserveParams = {
@@ -159,7 +150,6 @@ export const strategyWETH: IReserveParams = {
   reserveFactor: '1000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyKNC: IReserveParams = {
@@ -174,7 +164,6 @@ export const strategyKNC: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyLINK: IReserveParams = {
@@ -189,7 +178,6 @@ export const strategyLINK: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyMANA: IReserveParams = {
@@ -204,7 +192,6 @@ export const strategyMANA: IReserveParams = {
   reserveFactor: '3500',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyMKR: IReserveParams = {
@@ -219,7 +206,6 @@ export const strategyMKR: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyREN: IReserveParams = {
@@ -234,7 +220,6 @@ export const strategyREN: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategySNX: IReserveParams = {
@@ -249,7 +234,6 @@ export const strategySNX: IReserveParams = {
   reserveFactor: '3500',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 // Invalid borrow rates in params currently, replaced with snx params
@@ -265,7 +249,6 @@ export const strategyUNI: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyWBTC: IReserveParams = {
@@ -280,7 +263,6 @@ export const strategyWBTC: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyYFI: IReserveParams = {
@@ -295,7 +277,6 @@ export const strategyYFI: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyZRX: IReserveParams = {
@@ -310,7 +291,6 @@ export const strategyZRX: IReserveParams = {
   reserveFactor: '2000',
   borrowCap: '0',
   supplyCap: '0',
-
 };
 
 export const strategyXSUSHI: IReserveParams = {
@@ -325,5 +305,4 @@ export const strategyXSUSHI: IReserveParams = {
   reserveFactor: '3500',
   borrowCap: '0',
   supplyCap: '0',
-
 };

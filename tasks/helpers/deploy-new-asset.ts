@@ -43,9 +43,7 @@ WRONG RESERVE ASSET SETUP:
     const reserveAssetAddress =
       marketConfigs.AaveConfig.ReserveAssets[localBRE.network.name][symbol];
     const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
-    const addressProvider = await getPoolAddressesProvider(
-      POOL_ADDRESS_PROVIDER[network]
-    );
+    const addressProvider = await getPoolAddressesProvider(POOL_ADDRESS_PROVIDER[network]);
     const poolAddress = await addressProvider.getPool();
     const treasuryAddress = await getTreasuryAddress(marketConfigs.AaveConfig);
     const aToken = await deployCustomAToken(
