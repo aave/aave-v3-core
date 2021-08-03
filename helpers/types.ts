@@ -84,9 +84,6 @@ export enum eContractid {
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
   PoolCollateralManagerImpl = 'PoolCollateralManagerImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
-  UniswapLiquiditySwapAdapter = 'UniswapLiquiditySwapAdapter',
-  UniswapRepayAdapter = 'UniswapRepayAdapter',
-  FlashLiquidationAdapter = 'FlashLiquidationAdapter',
 }
 
 /*
