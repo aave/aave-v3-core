@@ -2,7 +2,6 @@ import { task } from 'hardhat/config';
 import {
   deployPoolCollateralManager,
   deployMockFlashLoanReceiver,
-  deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { getParamPerNetwork } from '../../helpers/contracts-helpers';
@@ -77,8 +76,6 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
       eContractid.MockFlashLoanReceiver,
       mockFlashLoanReceiver.address
     );
-
-    await deployWalletBalancerProvider(verify);
 
     await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
   });

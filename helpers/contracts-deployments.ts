@@ -43,7 +43,6 @@ import {
   SelfdestructTransferFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
-  WalletBalanceProviderFactory,
   WETH9MockedFactory,
 } from '../types';
 import {
@@ -231,14 +230,6 @@ export const deployMockFlashLoanReceiver = async (
     await new MockFlashLoanReceiverFactory(await getFirstSigner()).deploy(addressesProvider),
     eContractid.MockFlashLoanReceiver,
     [addressesProvider],
-    verify
-  );
-
-export const deployWalletBalancerProvider = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new WalletBalanceProviderFactory(await getFirstSigner()).deploy(),
-    eContractid.WalletBalanceProvider,
-    [],
     verify
   );
 

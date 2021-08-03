@@ -24,7 +24,6 @@ import {
   StableAndVariableTokensHelperFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
-  WalletBalanceProviderFactory,
   WETH9MockedFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
@@ -312,15 +311,6 @@ export const getPoolCollateralManagerImpl = async (address?: tEthereumAddress) =
     address ||
       (
         await getDb().get(`${eContractid.PoolCollateralManagerImpl}.${DRE.network.name}`).value()
-      ).address,
-    await getFirstSigner()
-  );
-
-export const getWalletProvider = async (address?: tEthereumAddress) =>
-  await WalletBalanceProviderFactory.connect(
-    address ||
-      (
-        await getDb().get(`${eContractid.WalletBalanceProvider}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
