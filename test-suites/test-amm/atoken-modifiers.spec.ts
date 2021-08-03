@@ -7,9 +7,7 @@ makeSuite('AToken: Modifiers', (testEnv: TestEnv) => {
 
   it('Tries to invoke mint not being the Pool', async () => {
     const { deployer, aDai } = testEnv;
-    await expect(aDai.mint(deployer.address, '1', '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
-    );
+    await expect(aDai.mint(deployer.address, '1', '1')).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
   });
 
   it('Tries to invoke burn not being the Pool', async () => {

@@ -27,11 +27,7 @@ import {PoolStorage} from './PoolStorage.sol';
  * IMPORTANT This contract will run always via DELEGATECALL, through the Pool, so the chain of inheritance
  * is the same as the Pool, to have compatible storage layouts
  **/
-contract PoolCollateralManager is
-  IPoolCollateralManager,
-  VersionedInitializable,
-  PoolStorage
-{
+contract PoolCollateralManager is IPoolCollateralManager, VersionedInitializable, PoolStorage {
   using SafeERC20 for IERC20;
   using WadRayMath for uint256;
   using PercentageMath for uint256;

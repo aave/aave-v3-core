@@ -396,17 +396,19 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
-    await expect(pool
-      .connect(caller.signer)
-      .flashLoan(
-        _mockFlashLoanReceiver.address,
-        [weth.address],
-        [flashAmount],
-        [1],
-        caller.address,
-        '0x10',
-        '0'
-      )).to.be.revertedWith(VL_STABLE_BORROWING_NOT_ENABLED);
+    await expect(
+      pool
+        .connect(caller.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [weth.address],
+          [flashAmount],
+          [1],
+          caller.address,
+          '0x10',
+          '0'
+        )
+    ).to.be.revertedWith(VL_STABLE_BORROWING_NOT_ENABLED);
 
     const { stableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       weth.address
@@ -540,17 +542,19 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
-    await expect(pool
-      .connect(caller.signer)
-      .flashLoan(
-        _mockFlashLoanReceiver.address,
-        [weth.address],
-        [flashAmount],
-        [1],
-        onBehalfOf.address,
-        '0x10',
-        '0'
-      )).to.be.revertedWith(VL_STABLE_BORROWING_NOT_ENABLED);
+    await expect(
+      pool
+        .connect(caller.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [weth.address],
+          [flashAmount],
+          [1],
+          onBehalfOf.address,
+          '0x10',
+          '0'
+        )
+    ).to.be.revertedWith(VL_STABLE_BORROWING_NOT_ENABLED);
 
     const { stableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       weth.address
@@ -560,10 +564,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
 
     const onBehalfOfDebt = await wethDebtToken.balanceOf(onBehalfOf.address);
 
-    expect(onBehalfOfDebt.toString()).to.be.equal(
-      '0',
-      'Invalid onBehalfOf user debt'
-    );
+    expect(onBehalfOfDebt.toString()).to.be.equal('0', 'Invalid onBehalfOf user debt');
   });
 
   it('Caller takes a WETH flashloan with mode = 2 onBehalfOf user with allowance. A loan for onBehalfOf is created.', async () => {
@@ -579,21 +580,25 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
     const variableDebtToken = await getVariableDebtToken(reserveData.variableDebtTokenAddress);
 
     // Deposited for onBehalfOf user already, delegate borrow allowance
-    await variableDebtToken.connect(onBehalfOf.signer).approveDelegation(caller.address, flashAmount);
+    await variableDebtToken
+      .connect(onBehalfOf.signer)
+      .approveDelegation(caller.address, flashAmount);
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
-    await expect(pool
-      .connect(caller.signer)
-      .flashLoan(
-        _mockFlashLoanReceiver.address,
-        [weth.address],
-        [flashAmount],
-        [2],
-        onBehalfOf.address,
-        '0x10',
-        '0'
-      )).to.not.be.reverted;
+    await expect(
+      pool
+        .connect(caller.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [weth.address],
+          [flashAmount],
+          [2],
+          onBehalfOf.address,
+          '0x10',
+          '0'
+        )
+    ).to.not.be.reverted;
 
     const { variableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       weth.address

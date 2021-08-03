@@ -186,7 +186,7 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
     const txTimestamp = new BigNumber(
       (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
-    const reserve = await getReserveData
+    const reserve = await getReserveData;
     const variableDebtBeforeTx = calcExpectedVariableDebtTokenBalance(
       daiReserveBefore,
       userReserveDataBefore,

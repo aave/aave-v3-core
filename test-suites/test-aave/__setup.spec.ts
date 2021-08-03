@@ -16,18 +16,12 @@ import {
   deployAaveOracle,
   deployPoolCollateralManager,
   deployMockFlashLoanReceiver,
-  deployWalletBalancerProvider,
   deployAaveProtocolDataProvider,
   deployRateOracle,
   deployStableAndVariableTokensHelper,
   deployATokensAndRatesHelper,
-  deployWETHGateway,
   deployWETHMocked,
   deployMockUniswapRouter,
-  deployUniswapLiquiditySwapAdapter,
-  deployUniswapRepayAdapter,
-  deployFlashLiquidationAdapter,
-  authorizeWETHGateway,
 } from '../../helpers/contracts-deployments';
 import { eEthereumNetwork } from '../../helpers/types';
 import { ethers, Signer } from 'ethers';
@@ -122,17 +116,12 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await insertContractAddressInDb(eContractid.Pool, poolProxy.address);
 
   const poolConfiguratorImpl = await deployPoolConfigurator();
-  await waitForTx(
-    await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address)
-  );
+  await waitForTx(await addressesProvider.setPoolConfiguratorImpl(poolConfiguratorImpl.address));
   const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getPoolConfigurator()
   );
   await waitForTx(await poolConfiguratorProxy.registerRiskAdmin(addressList[3]));
-  await insertContractAddressInDb(
-    eContractid.PoolConfigurator,
-    poolConfiguratorProxy.address
-  );
+  await insertContractAddressInDb(eContractid.PoolConfigurator, poolConfiguratorProxy.address);
 
   // Deploy deployment helpers
   await deployStableAndVariableTokensHelper([poolProxy.address, addressesProvider.address]);
@@ -270,27 +259,10 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
 
   const collateralManager = await deployPoolCollateralManager();
-  await waitForTx(
-    await addressesProvider.setPoolCollateralManager(collateralManager.address)
-  );
+  await waitForTx(await addressesProvider.setPoolCollateralManager(collateralManager.address));
   await deployMockFlashLoanReceiver(addressesProvider.address);
 
   const mockUniswapRouter = await deployMockUniswapRouter();
-
-  const adapterParams: [string, string, string] = [
-    addressesProvider.address,
-    mockUniswapRouter.address,
-    mockTokens.WETH.address,
-  ];
-
-  await deployUniswapLiquiditySwapAdapter(adapterParams);
-  await deployUniswapRepayAdapter(adapterParams);
-  await deployFlashLiquidationAdapter(adapterParams);
-
-  await deployWalletBalancerProvider();
-
-  const gateWay = await deployWETHGateway([mockTokens.WETH.address]);
-  await authorizeWETHGateway(gateWay.address, poolAddress);
 
   console.timeEnd('setup');
 };

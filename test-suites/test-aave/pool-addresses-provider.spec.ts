@@ -63,9 +63,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(proxiedAddressSetReceipt.events[0].event).to.be.equal('ProxyCreated');
     expect(proxiedAddressSetReceipt.events[1].event).to.be.equal('AddressSet');
     expect(proxiedAddressSetReceipt.events[1].args?.id).to.be.equal(proxiedAddressId);
-    expect(proxiedAddressSetReceipt.events[1].args?.newAddress).to.be.equal(
-      mockPool.address
-    );
+    expect(proxiedAddressSetReceipt.events[1].args?.newAddress).to.be.equal(mockPool.address);
     expect(proxiedAddressSetReceipt.events[1].args?.hasProxy).to.be.equal(true);
   });
 

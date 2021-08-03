@@ -64,7 +64,6 @@ export enum eContractid {
   PoolCollateralManager = 'PoolCollateralManager',
   InitializableAdminUpgradeabilityProxy = 'InitializableAdminUpgradeabilityProxy',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
-  WalletBalanceProvider = 'WalletBalanceProvider',
   AToken = 'AToken',
   MockAToken = 'MockAToken',
   DelegationAwareAToken = 'DelegationAwareAToken',
@@ -78,8 +77,6 @@ export enum eContractid {
   TokenDistributor = 'TokenDistributor',
   StableAndVariableTokensHelper = 'StableAndVariableTokensHelper',
   ATokensAndRatesHelper = 'ATokensAndRatesHelper',
-  UiPoolDataProvider = 'UiPoolDataProvider',
-  WETHGateway = 'WETHGateway',
   WETH = 'WETH',
   WETHMocked = 'WETHMocked',
   SelfdestructTransferMock = 'SelfdestructTransferMock',
@@ -87,9 +84,6 @@ export enum eContractid {
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
   PoolCollateralManagerImpl = 'PoolCollateralManagerImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
-  UniswapLiquiditySwapAdapter = 'UniswapLiquiditySwapAdapter',
-  UniswapRepayAdapter = 'UniswapRepayAdapter',
-  FlashLiquidationAdapter = 'FlashLiquidationAdapter',
 }
 
 /*
@@ -509,7 +503,6 @@ export interface ICommonConfiguration {
   ATokenDomainSeparator: iParamsPerNetwork<string>;
   WETH: iParamsPerNetwork<tEthereumAddress>;
   WrappedNativeToken: iParamsPerNetwork<tEthereumAddress>;
-  WethGateway: iParamsPerNetwork<tEthereumAddress>;
   ReserveFactorTreasuryAddress: iParamsPerNetwork<tEthereumAddress>;
   IncentivesController: iParamsPerNetwork<tEthereumAddress>;
 }
