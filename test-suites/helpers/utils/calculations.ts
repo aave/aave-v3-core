@@ -1,13 +1,18 @@
 import BigNumber from 'bignumber.js';
 import { ONE_YEAR, RAY, MAX_UINT_AMOUNT, PERCENTAGE_FACTOR } from '../../../helpers/constants';
-import { IReserveParams, iAavePoolAssets, RateMode } from '../../../helpers/types';
+import {
+  IReserveParams,
+  iMultiPoolsAssets,
+  iAavePoolAssets,
+  RateMode,
+} from '../../../helpers/types';
 import './math';
 import { ReserveData, UserReserveData } from './interfaces';
 
 export const strToBN = (amount: string): BigNumber => new BigNumber(amount);
 
 interface Configuration {
-  reservesParams: iAavePoolAssets<IReserveParams>;
+  reservesParams: iMultiPoolsAssets<IReserveParams>;
 }
 
 export const configuration: Configuration = <Configuration>{};

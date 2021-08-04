@@ -34,16 +34,6 @@ export const loadPoolConfig = (configName: ConfigNames): PoolConfiguration => {
 // PROTOCOL PARAMS PER POOL
 // ----------------
 
-export const getReservesConfigByPool = (pool: AavePools): iMultiPoolsAssets<IReserveParams> =>
-  getParamPerPool<iMultiPoolsAssets<IReserveParams>>(
-    {
-      [AavePools.proto]: {
-        ...AaveConfig.ReservesConfig,
-      },
-    },
-    pool
-  );
-
 export const getGenesisPoolAdmin = async (
   config: ICommonConfiguration
 ): Promise<tEthereumAddress> => {

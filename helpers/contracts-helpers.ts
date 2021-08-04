@@ -8,10 +8,7 @@ import {
   eContractid,
   tStringTokenSmallUnits,
   eEthereumNetwork,
-  AavePools,
   iParamsPerNetwork,
-  iParamsPerPool,
-  ePolygonNetwork,
   eNetwork,
   iEthereumParamsPerNetwork,
 } from './types';
@@ -134,40 +131,6 @@ export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: an
   }
 
   return bytecode;
-};
-
-export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNetwork) => {
-  const { main, ropsten, kovan, coverage, buidlerevm, tenderlyMain } =
-    param as iEthereumParamsPerNetwork<T>;
-  if (process.env.FORK) {
-    return param[process.env.FORK as eNetwork] as T;
-  }
-
-  switch (network) {
-    case eEthereumNetwork.coverage:
-      return coverage;
-    case eEthereumNetwork.buidlerevm:
-      return buidlerevm;
-    case eEthereumNetwork.hardhat:
-      return buidlerevm;
-    case eEthereumNetwork.kovan:
-      return kovan;
-    case eEthereumNetwork.ropsten:
-      return ropsten;
-    case eEthereumNetwork.main:
-      return main;
-    case eEthereumNetwork.tenderlyMain:
-      return tenderlyMain;
-  }
-};
-
-export const getParamPerPool = <T>({ proto }: iParamsPerPool<T>, pool: AavePools) => {
-  switch (pool) {
-    case AavePools.proto:
-      return proto;
-    default:
-      return proto;
-  }
 };
 
 export const convertToCurrencyDecimals = async (tokenAddress: tEthereumAddress, amount: string) => {

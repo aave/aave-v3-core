@@ -24,16 +24,10 @@ import {
   deployMockUniswapRouter,
 } from '../helpers/contracts-deployments';
 import { ethers, Signer } from 'ethers';
-import { TokenContractId, eContractid, tEthereumAddress, AavePools } from '../helpers/types';
+import { TokenContractId, eContractid, tEthereumAddress } from '../helpers/types';
 import { MintableERC20 } from '../types/MintableERC20';
-import {
-  ConfigNames,
-  getReservesConfigByPool,
-  getTreasuryAddress,
-  loadPoolConfig,
-} from '../helpers/configuration';
+import { ConfigNames, getTreasuryAddress, loadPoolConfig } from '../helpers/configuration';
 import { initializeMakeSuite } from './helpers/make-suite';
-
 import {
   setInitialAssetPricesInOracle,
   deployAllMockAggregators,
@@ -59,7 +53,7 @@ const RATE_ORACLE_RATES_COMMON = AaveConfig.RateOracleRatesCommon;
 const deployAllMockTokens = async (deployer: Signer) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked } = {};
 
-  const protoConfigData = getReservesConfigByPool(AavePools.proto);
+  const protoConfigData = AaveConfig.ReservesConfig;
 
   for (const tokenSymbol of Object.keys(TokenContractId)) {
     if (tokenSymbol === 'WETH') {
@@ -226,7 +220,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     aaveAdmin
   );
 
-  const reservesParams = getReservesConfigByPool(AavePools.proto);
+  const reservesParams = AaveConfig.ReservesConfig;
 
   const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address);
 

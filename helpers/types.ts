@@ -16,10 +16,6 @@ export enum eEthereumNetwork {
   tenderlyMain = 'tenderlyMain',
 }
 
-export enum AavePools {
-  proto = 'proto',
-}
-
 export enum eContractid {
   Example = 'Example',
   PoolAddressesProvider = 'PoolAddressesProvider',
@@ -384,10 +380,6 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.tenderlyMain]: T;
 }
 
-export interface iParamsPerPool<T> {
-  [AavePools.proto]: T;
-}
-
 export interface iBasicDistributionParams {
   receivers: string[];
   percentages: string[];
@@ -449,16 +441,16 @@ export interface ICommonConfiguration {
   EmergencyAdmin: tEthereumAddress | undefined;
   EmergencyAdminIndex: number;
   ReserveAssets: SymbolMap<tEthereumAddress>;
-  ReservesConfig: IReserveParams;
+  ReservesConfig: iMultiPoolsAssets<IReserveParams>;
   ATokenDomainSeparator: string;
   WETH: tEthereumAddress | undefined;
   WrappedNativeToken: tEthereumAddress | undefined;
-  ReserveFactorTreasuryAddress: tEthereumAddress | undefined;
+  ReserveFactorTreasuryAddress: tEthereumAddress;
   IncentivesController: tEthereumAddress | undefined;
 }
 
 export interface IAaveConfiguration extends ICommonConfiguration {
-  ReservesConfig: IReserveParams;
+  ReservesConfig: iMultiPoolsAssets<IReserveParams>;
 }
 
 export interface ITokenAddress {

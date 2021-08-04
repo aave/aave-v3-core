@@ -13,7 +13,6 @@ import {
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { MockContract } from 'ethereum-waffle';
-import { getReservesConfigByPool } from './configuration';
 import { getFirstSigner } from './contracts-getters';
 import {
   AaveProtocolDataProviderFactory,
