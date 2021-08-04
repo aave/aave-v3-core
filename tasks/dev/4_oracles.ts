@@ -18,7 +18,7 @@ import {
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
 import { deployWETHMocked } from '../../helpers/contracts-deployments';
-import AaveConfig from '../../marketConfig';
+import AaveConfig from '../../market-config';
 import { ethers } from 'ethers';
 
 task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')

@@ -3,9 +3,9 @@ import { deployDefaultReserveInterestRateStrategy } from '../helpers/contracts-d
 
 import { PERCENTAGE_FACTOR, RAY } from '../helpers/constants';
 
-import { rateStrategyStableOne } from '../marketConfig/rateStrategies';
+import { rateStrategyStableOne } from '../market-config/rateStrategies';
 
-import { strategyDAI } from '../marketConfig/reservesConfigs';
+import { strategyDAI } from '../market-config/reservesConfigs';
 import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';
 import BigNumber from 'bignumber.js';
 import './helpers/utils/math';

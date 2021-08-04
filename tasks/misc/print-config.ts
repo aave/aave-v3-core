@@ -5,7 +5,7 @@ import {
   getPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-getters';
 import { eNetwork } from '../../helpers/types';
-import AaveConfig from '../../marketConfig';
+import AaveConfig from '../../market-config';
 
 task('print-config', 'Inits the DRE, to have access to all the plugins')
   .addParam('dataProvider', 'Address of AaveProtocolDataProvider')

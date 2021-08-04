@@ -2,7 +2,7 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 import { APPROVAL_AMOUNT_POOL, RAY, MAX_BORROW_CAP } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
-import { strategyWETH } from '../marketConfig/reservesConfigs';
+import { strategyWETH } from '../market-config/reservesConfigs';
 import { BigNumber } from '@ethersproject/bignumber';
 
 const { expect } = require('chai');

@@ -9,7 +9,7 @@ import {
 } from '../helpers/contracts-deployments';
 import { DelegationAwareAToken } from '../types/DelegationAwareAToken';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
-import AaveConfig from '../marketConfig';
+import AaveConfig from '../market-config';
 
 const { parseEther } = ethers.utils;
 

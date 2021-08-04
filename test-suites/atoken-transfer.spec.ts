@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { RateMode, ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import AaveConfig from '../marketConfig';
+import AaveConfig from '../market-config';
 
 const AAVE_REFERRAL = AaveConfig.ProtocolGlobalParams.AaveReferral;
 

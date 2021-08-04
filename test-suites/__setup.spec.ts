@@ -34,7 +34,7 @@ import {
 } from '../helpers/oracles-helpers';
 import { waitForTx } from '../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../helpers/init-helpers';
-import AaveConfig from '../marketConfig';
+import AaveConfig from '../market-config';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import {
   getPool,

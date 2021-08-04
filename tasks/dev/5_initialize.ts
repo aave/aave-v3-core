@@ -13,7 +13,7 @@ import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import { getAllMockedTokens, getPoolAddressesProvider } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
-import AaveConfig from '../../marketConfig';
+import AaveConfig from '../../market-config';
 
 task('dev:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')

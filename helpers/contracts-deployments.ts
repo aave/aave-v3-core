@@ -48,7 +48,7 @@ import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
-import AaveConfig from '../marketConfig';
+import AaveConfig from '../market-config';
 
 const readArtifact = async (id: string) => {
   if (DRE.network.name === eEthereumNetwork.buidlerevm) {

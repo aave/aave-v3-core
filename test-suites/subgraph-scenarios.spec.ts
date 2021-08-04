@@ -4,7 +4,7 @@ import { configuration as calculationsConfiguration } from './helpers/utils/calc
 import BigNumber from 'bignumber.js';
 import { makeSuite } from './helpers/make-suite';
 import { executeStory } from './helpers/scenario-engine';
-import AaveConfig from '../marketConfig';
+import AaveConfig from '../market-config';
 
 makeSuite('Subgraph scenario tests', async (testEnv) => {
   let story: any;
