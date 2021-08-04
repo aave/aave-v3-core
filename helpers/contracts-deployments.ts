@@ -44,7 +44,6 @@ import {
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
-  PoolBaseLogic,
   PoolConfiguratorLogicFactory
 } from '../types';
 import {
@@ -152,26 +151,51 @@ export const deployValidationLogic = async (
   return withSaveAndVerify(validationLogic, eContractid.ValidationLogic, [], verify);
 };
 
-export const deployPoolBaseLogic = async (
+export const deployDepositLogic = async (
   validationLogic: Contract,
   reserveLogic: Contract,
   verify?: boolean
 ) => {
-  const poolBaseLogicArtifact = await readArtifact(eContractid.PoolBaseLogic);
-  const linkedPoolBaseLogicByteCode = linkBytecode(poolBaseLogicArtifact, {
+  const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
+  
+  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {
     [eContractid.ValidationLogic]: validationLogic.address,
     [eContractid.ReserveLogic]: reserveLogic.address,
   });
-  const poolBaseLogicFactory = await DRE.ethers.getContractFactory(
-    poolBaseLogicArtifact.abi,
-    linkedPoolBaseLogicByteCode
+  const depositLogicFactory = await DRE.ethers.getContractFactory(
+    depositLogicArtifact.abi,
+    linkedDepositLogicByteCode
   );
-  const poolBaseLogic = await (
-    await poolBaseLogicFactory.connect(await getFirstSigner()).deploy()
+  const depositLogic = await (
+    await depositLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
-  return withSaveAndVerify(poolBaseLogic, eContractid.PoolBaseLogic, [], verify);
+  return withSaveAndVerify(depositLogic, eContractid.DepositLogic, [], verify);
 };
+
+
+export const deployBorrowLogic = async (
+  validationLogic: Contract,
+  reserveLogic: Contract,
+  verify?: boolean
+) => {
+  const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
+  
+  const linkedBorrowLogicByteCode = linkBytecode(borrowLogicArtifact, {
+    [eContractid.ValidationLogic]: validationLogic.address,
+    [eContractid.ReserveLogic]: reserveLogic.address,
+  });
+  const borrowLogicFactory = await DRE.ethers.getContractFactory(
+    borrowLogicArtifact.abi,
+    linkedBorrowLogicByteCode
+  );
+  const borrowLogic = await (
+    await borrowLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSaveAndVerify(borrowLogic, eContractid.BorrowLogic, [], verify);
+};
+
 
 export const deployPoolHelperLogic = async (
   validationLogic: Contract,
@@ -198,7 +222,9 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   const reserveLogic = await deployReserveLogicLibrary(verify);
   const genericLogic = await deployGenericLogic(reserveLogic, verify);
   const validationLogic = await deployValidationLogic(reserveLogic, genericLogic, verify);
-  const poolBaseLogic = await deployPoolBaseLogic(validationLogic, reserveLogic, verify);
+  const depositLogic = await deployDepositLogic(validationLogic, reserveLogic, verify);
+  const borrowLogic = await deployBorrowLogic(validationLogic, reserveLogic, verify);
+
   const poolHelperLogic = await deployPoolHelperLogic(validationLogic, reserveLogic, verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
@@ -207,16 +233,18 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   //  how-to:
   //  1. PLACEHOLDER = solidityKeccak256(['string'], `${libPath}:${libName}`).slice(2, 36)
   //  2. LIB_PLACEHOLDER = `__$${PLACEHOLDER}$__`
-  // or grab placeholdes from PoolLibraryAddresses at Typechain generation.
+  // or grab placeholders from PoolLibraryAddresses at Typechain generation.
   //
   // libPath example: contracts/libraries/logic/GenericLogic.sol
   // libName example: GenericLogic
   return {
     ['__$56265c55042e83ee819cd4de36b013885b$__']: poolHelperLogic.address,
-    ['__$f5cc2bc164fcad054d46ecbbc8bf13ff3e$__']: poolBaseLogic.address,
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
     ['__$22cd43a9dda9ce44e9b92ba393b88fb9ac$__']: reserveLogic.address,
     ['__$52a8a86ab43135662ff256bbc95497e8e3$__']: genericLogic.address,
+    ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
+    ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address
+
   };
 };
 

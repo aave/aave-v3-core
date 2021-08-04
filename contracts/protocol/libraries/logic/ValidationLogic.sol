@@ -132,7 +132,7 @@ library ValidationLogic {
     mapping(uint256 => address) storage reserves,
     uint256 reservesCount,
     address oracle
-  ) external view {
+  ) internal view {
     ValidateBorrowLocalVars memory vars;
 
     (, , , vars.reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
@@ -258,7 +258,7 @@ library ValidationLogic {
     address onBehalfOf,
     uint256 stableDebt,
     uint256 variableDebt
-  ) external view {
+  ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);

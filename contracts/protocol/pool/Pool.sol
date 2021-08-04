@@ -19,13 +19,14 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
+import {DepositLogic} from '../libraries/logic/DepositLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {PoolStorage} from './PoolStorage.sol';
 
-import {PoolBaseLogic} from '../libraries/logic/PoolBaseLogic.sol';
 import {PoolHelperLogic} from '../libraries/logic/PoolHelperLogic.sol';
+import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 
 /**
  * @title Pool contract
@@ -93,7 +94,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode
   ) external override {
-    _executeDeposit(asset, amount, onBehalfOf, referralCode);
+    DataTypes.ReserveData storage reserve = _reserves[asset];
+
+    DepositLogic.executeDeposit(
+      reserve,
+      _usersConfig[onBehalfOf],
+      asset,
+      amount,
+      onBehalfOf,
+      referralCode
+    );
   }
 
   ///@inheritdoc IPool
@@ -116,7 +126,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       permitR,
       permitS
     );
-    _executeDeposit(asset, amount, onBehalfOf, referralCode);
+    DataTypes.ReserveData storage reserve = _reserves[asset];
+
+    DepositLogic.executeDeposit(
+      reserve,
+      _usersConfig[onBehalfOf],
+      asset,
+      amount,
+      onBehalfOf,
+      referralCode
+    );
   }
 
   ///@inheritdoc IPool
@@ -125,7 +144,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     address to
   ) external override returns (uint256) {
-    return _executeWithdraw(asset, amount, to);
+    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
+    return
+      DepositLogic.executeWithdraw(
+        _reserves,
+        userConfig,
+        _reservesList,
+        DataTypes.ExecuteWithdrawParams(
+          asset,
+          amount,
+          to,
+          _reservesCount,
+          _addressesProvider.getPriceOracle()
+        )
+      );
   }
 
   ///@inheritdoc IPool
@@ -136,8 +168,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint16 referralCode,
     address onBehalfOf
   ) external override {
-    _executeBorrow(
-      DataTypes.ExecuteBorrowParams(
+    BorrowLogic.executeBorrow(
+      _reserves,
+      _usersConfig[onBehalfOf],
+      _reservesList,
+       DataTypes.ExecuteBorrowParams(
         asset,
         msg.sender,
         onBehalfOf,
@@ -145,8 +180,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         interestRateMode,
         referralCode,
         true
+      ),
+      DataTypes.ExecuteBorrowHelperParams(
+        _maxStableRateBorrowSizePercent,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
       )
     );
+    _lastBorrower = msg.sender;
+    _lastBorrowTimestamp = uint40(block.timestamp);
+
   }
 
   ///@inheritdoc IPool
@@ -156,7 +199,19 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 rateMode,
     address onBehalfOf
   ) external override returns (uint256) {
-    return _executeRepay(asset, amount, rateMode, onBehalfOf);
+    return
+      BorrowLogic.executeRepay(
+        _reserves[asset],
+        _usersConfig[onBehalfOf],
+        DataTypes.ExecuteRepayParams(
+          asset,
+          amount,
+          rateMode,
+          onBehalfOf,
+          _lastBorrower,
+          _lastBorrowTimestamp
+        )
+      );
   }
 
   ///@inheritdoc IPool
@@ -179,20 +234,32 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       permitR,
       permitS
     );
-    return _executeRepay(asset, amount, rateMode, onBehalfOf);
+    return
+      BorrowLogic.executeRepay(
+        _reserves[asset],
+        _usersConfig[onBehalfOf],
+        DataTypes.ExecuteRepayParams(
+          asset,
+          amount,
+          rateMode,
+          onBehalfOf,
+          _lastBorrower,
+          _lastBorrowTimestamp
+        )
+      );
   }
 
   ///@inheritdoc IPool
   function swapBorrowRateMode(address asset, uint256 rateMode) external override {
     DataTypes.ReserveData storage reserve = _reserves[asset];
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
-    PoolHelperLogic.swapBorrowRateMode(reserve, userConfig, asset, rateMode);
+    BorrowLogic.swapBorrowRateMode(reserve, userConfig, asset, rateMode);
   }
 
   ///@inheritdoc IPool
   function rebalanceStableBorrowRate(address asset, address user) external override {
     DataTypes.ReserveData storage reserve = _reserves[asset];
-    PoolHelperLogic.rebalanceStableBorrowRate(reserve, asset, user);
+    BorrowLogic.rebalanceStableBorrowRate(reserve, asset, user);
   }
 
   ///@inheritdoc IPool
@@ -249,8 +316,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[onBehalfOf];
-
     DataTypes.FlashloanParams memory flashParams =
       DataTypes.FlashloanParams(
         receiverAddress,
@@ -269,11 +334,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         )
       );
 
-    PoolBaseLogic.flashLoan(
+    BorrowLogic.executeFlashLoan(
       _reserves,
       _reservesList,
       _authorizedFlashBorrowers,
-      userConfig,
+      _usersConfig[onBehalfOf],
       flashParams
     );
   }
@@ -455,7 +520,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceToBefore
   ) external override {
     require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
-    PoolBaseLogic.finalizeTransfer(
+    DepositLogic.finalizeTransfer(
       _reserves,
       _reservesList,
       _usersConfig,
@@ -539,87 +604,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override onlyPoolConfigurator {
     _flashLoanPremiumTotal = flashLoanPremiumTotal;
     _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
-  }
-
-  function _executeBorrow(DataTypes.ExecuteBorrowParams memory vars) internal {
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[vars.onBehalfOf];
-
-    PoolBaseLogic.executeBorrow(
-      _reserves,
-      userConfig,
-      _reservesList,
-      vars,
-      DataTypes.ExecuteBorrowHelperParams(
-        _maxStableRateBorrowSizePercent,
-        _reservesCount,
-        _addressesProvider.getPriceOracle()
-      )
-    );
-
-    _lastBorrower = vars.user;
-    _lastBorrowTimestamp = uint40(block.timestamp);
-  }
-
-  function _executeDeposit(
-    address asset,
-    uint256 amount,
-    address onBehalfOf,
-    uint16 referralCode
-  ) internal {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-
-    PoolBaseLogic.executeDeposit(
-      reserve,
-      _usersConfig[onBehalfOf],
-      asset,
-      amount,
-      onBehalfOf,
-      referralCode
-    );
-  }
-
-  function _executeWithdraw(
-    address asset,
-    uint256 amount,
-    address to
-  ) internal returns (uint256) {
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
-    return
-      PoolBaseLogic.executeWithdraw(
-        _reserves,
-        userConfig,
-        _reservesList,
-        DataTypes.ExecuteWithdrawParams(
-          asset,
-          amount,
-          to,
-          _reservesCount,
-          _addressesProvider.getPriceOracle()
-        )
-      );
-  }
-
-  function _executeRepay(
-    address asset,
-    uint256 amount,
-    uint256 rateMode,
-    address onBehalfOf
-  ) internal returns (uint256) {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
-    return
-      PoolBaseLogic.executeRepay(
-        reserve,
-        userConfig,
-        DataTypes.ExecuteRepayParams(
-          asset,
-          amount,
-          rateMode,
-          onBehalfOf,
-          _lastBorrower,
-          _lastBorrowTimestamp
-        )
-      );
   }
 
   function _addReserveToList(address asset) internal returns (uint8) {

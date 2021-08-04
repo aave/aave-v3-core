@@ -14,8 +14,7 @@ import {
   getPoolConfiguratorImpl,
   getPoolConfiguratorProxy,
   getPoolImpl,
-  getProxy,
-  getWalletProvider,
+  getProxy
 } from '../../helpers/contracts-getters';
 import { verifyContract, getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { notFalsyOrZeroAddress } from '../../helpers/misc-utils';
@@ -69,7 +68,6 @@ task('verify:general', 'Verify contracts at Etherscan')
         : await getPoolCollateralManagerImpl();
 
       const dataProvider = await getAaveProtocolDataProvider();
-      const walletProvider = await getWalletProvider();
 
       // Address Provider
       console.log('\n- Verifying address provider...\n');

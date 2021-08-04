@@ -27,7 +27,7 @@ import 'hardhat-contract-sizer';
 const SKIP_LOAD = process.env.SKIP_LOAD === 'true';
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const DEFAULT_GAS_MUL = 5;
-const HARDFORK = 'istanbul';
+const HARDFORK = 'berlin';
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 const MNEMONIC_PATH = "m/44'/60'/0'/0";
 const MNEMONIC = process.env.MNEMONIC || '';
@@ -77,8 +77,8 @@ const buidlerConfig: HardhatUserConfig = {
   solidity: {
     version: '0.8.6',
     settings: {
-      optimizer: { enabled: true, runs: 200 },
-      evmVersion: 'istanbul',
+      optimizer: { enabled: true, runs: 100000 },
+      evmVersion: 'berlin',
     },
   },
   typechain: {
