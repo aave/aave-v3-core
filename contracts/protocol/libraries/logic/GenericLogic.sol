@@ -211,7 +211,7 @@ library GenericLogic {
     uint256 reservesCount,
     address oracle
   )
-    external
+    internal
     view
     returns (
       uint256,

@@ -39,7 +39,6 @@ import {
   MockVariableDebtTokenFactory,
   MockUniswapV2Router02Factory,
   PriceOracleFactory,
-  ReserveLogicFactory,
   SelfdestructTransferFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
@@ -102,22 +101,6 @@ export const deployPoolConfigurator = async (verify?: boolean) => {
   return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
 
-export const deployGenericLogic = async (verify?: boolean) => {
-  const genericLogicArtifact = await readArtifact(eContractid.GenericLogic);
-
-  const linkedGenericLogicByteCode = linkBytecode(genericLogicArtifact, {});
-
-  const genericLogicFactory = await DRE.ethers.getContractFactory(
-    genericLogicArtifact.abi,
-    linkedGenericLogicByteCode
-  );
-
-  const genericLogic = await (
-    await genericLogicFactory.connect(await getFirstSigner()).deploy()
-  ).deployed();
-  return withSaveAndVerify(genericLogic, eContractid.GenericLogic, [], verify);
-};
-
 export const deployPoolBaseLogic = async (verify?: boolean) => {
   const poolBaseLogicArtifact = await readArtifact(eContractid.PoolBaseLogic);
   const linkedPoolBaseLogicByteCode = linkBytecode(poolBaseLogicArtifact, {});
@@ -147,7 +130,6 @@ export const deployPoolHelperLogic = async (verify?: boolean) => {
 };
 
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
-  const genericLogic = await deployGenericLogic(verify);
   const poolBaseLogic = await deployPoolBaseLogic(verify);
   const poolHelperLogic = await deployPoolHelperLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
@@ -164,8 +146,6 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   return {
     ['__$56265c55042e83ee819cd4de36b013885b$__']: poolHelperLogic.address,
     ['__$f5cc2bc164fcad054d46ecbbc8bf13ff3e$__']: poolBaseLogic.address,
-    //['__$22cd43a9dda9ce44e9b92ba393b88fb9ac$__']: reserveLogic.address,
-    ['__$52a8a86ab43135662ff256bbc95497e8e3$__']: genericLogic.address,
   };
 };
 
