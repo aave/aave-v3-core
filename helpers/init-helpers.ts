@@ -1,6 +1,6 @@
 import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from './types';
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
-import { chunk, waitForTx } from './misc-utils';
+import { chunk, getDb, waitForTx } from './misc-utils';
 import {
   getATokensAndRatesHelper,
   getPoolAddressesProvider,
@@ -26,8 +26,7 @@ export const initReservesByHelper = async (
   symbolPrefix: string,
   admin: tEthereumAddress,
   treasuryAddress: tEthereumAddress,
-  incentivesController: tEthereumAddress,
-  verify: boolean
+  incentivesController: tEthereumAddress
 ): Promise<BigNumber> => {
   let gasUsage = BigNumber.from('0');
   const stableAndVariableDeployer = await getStableAndVariableTokensHelper();
@@ -94,7 +93,7 @@ export const initReservesByHelper = async (
   stableDebtTokenImplementationAddress = await (await deployGenericStableDebtToken()).address;
   variableDebtTokenImplementationAddress = await (await deployGenericVariableDebtToken()).address;
 
-  const aTokenImplementation = await deployGenericATokenImpl(verify);
+  const aTokenImplementation = await deployGenericATokenImpl();
   aTokenImplementationAddress = aTokenImplementation.address;
   rawInsertContractAddressInDb(`aTokenImpl`, aTokenImplementationAddress);
 
@@ -103,7 +102,7 @@ export const initReservesByHelper = async (
   ) as [string, IReserveParams][];
 
   if (delegatedAwareReserves.length > 0) {
-    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl(verify);
+    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl();
     delegationAwareATokenImplementationAddress = delegationAwareATokenImplementation.address;
     rawInsertContractAddressInDb(
       `delegationAwareATokenImpl`,
@@ -142,7 +141,7 @@ export const initReservesByHelper = async (
         stableRateSlope2,
       ];
       strategyAddresses[strategy.name] = (
-        await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name], verify)
+        await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name])
       ).address;
       // This causes the last strategy to be printed twice, once under "DefaultReserveInterestRateStrategy"
       // and once under the actual `strategyASSET` key.

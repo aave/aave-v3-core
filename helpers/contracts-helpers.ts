@@ -63,9 +63,7 @@ export const getEthersSignersAddresses = async (): Promise<tEthereumAddress[]> =
 
 export const withSave = async <ContractType extends Contract>(
   instance: ContractType,
-  id: string,
-  args: (string | string[])[],
-  verify?: boolean
+  id: string
 ): Promise<ContractType> => {
   await waitForTx(instance.deployTransaction);
   await registerContractInJsonDb(id, instance);

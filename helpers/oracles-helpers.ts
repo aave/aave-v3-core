@@ -80,10 +80,7 @@ export const setInitialAssetPricesInOracle = async (
   }
 };
 
-export const deployAllMockAggregators = async (
-  initialPrices: iAssetAggregatorBase<string>,
-  verify?: boolean
-) => {
+export const deployAllMockAggregators = async (initialPrices: iAssetAggregatorBase<string>) => {
   const aggregators: { [tokenSymbol: string]: MockAggregator } = {};
   for (const tokenContractName of Object.keys(initialPrices)) {
     if (tokenContractName !== 'ETH') {
@@ -91,7 +88,7 @@ export const deployAllMockAggregators = async (
         (value) => value === tokenContractName
       );
       const [, price] = (Object.entries(initialPrices) as [string, string][])[priceIndex];
-      aggregators[tokenContractName] = await deployMockAggregator(price, verify);
+      aggregators[tokenContractName] = await deployMockAggregator(price);
     }
   }
   return aggregators;
