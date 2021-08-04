@@ -1,4 +1,4 @@
-import { eContractid, IReserveParams } from '../../helpers/types';
+import { eContractid, IReserveParams } from '../helpers/types';
 
 import {
   rateStrategyStableOne,

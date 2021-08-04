@@ -61,7 +61,7 @@ export const getEthersSigners = async (): Promise<Signer[]> => {
 export const getEthersSignersAddresses = async (): Promise<tEthereumAddress[]> =>
   await Promise.all((await getEthersSigners()).map((signer) => signer.getAddress()));
 
-export const withSaveAndVerify = async <ContractType extends Contract>(
+export const withSave = async <ContractType extends Contract>(
   instance: ContractType,
   id: string,
   args: (string | string[])[],
@@ -69,9 +69,6 @@ export const withSaveAndVerify = async <ContractType extends Contract>(
 ): Promise<ContractType> => {
   await waitForTx(instance.deployTransaction);
   await registerContractInJsonDb(id, instance);
-  if (verify) {
-    await verifyContract(id, instance, args);
-  }
   return instance;
 };
 

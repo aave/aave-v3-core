@@ -5,9 +5,6 @@ import {
   eContractid,
   tStringTokenSmallUnits,
   TokenContractId,
-  iMultiPoolsAssets,
-  IReserveParams,
-  PoolConfiguration,
   eEthereumNetwork,
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
@@ -20,7 +17,6 @@ import {
   AaveOracleFactory,
   DefaultReserveInterestRateStrategyFactory,
   DelegationAwareATokenFactory,
-  InitializableAdminUpgradeabilityProxyFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
   PoolCollateralManagerFactory,
@@ -37,13 +33,12 @@ import {
   MockUniswapV2Router02Factory,
   PriceOracleFactory,
   ReserveLogicFactory,
-  SelfdestructTransferFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
 } from '../types';
 import {
-  withSaveAndVerify,
+  withSave,
   registerContractInJsonDb,
   linkBytecode,
   insertContractAddressInDb,
@@ -53,7 +48,7 @@ import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
-import AaveConfig from '../markets/aave';
+import AaveConfig from '../marketConfig';
 
 const readArtifact = async (id: string) => {
   if (DRE.network.name === eEthereumNetwork.buidlerevm) {
@@ -63,7 +58,7 @@ const readArtifact = async (id: string) => {
 };
 
 export const deployPoolAddressesProvider = async (marketId: string, verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(marketId),
     eContractid.PoolAddressesProvider,
     [marketId],
@@ -71,7 +66,7 @@ export const deployPoolAddressesProvider = async (marketId: string, verify?: boo
   );
 
 export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new PoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
     eContractid.PoolAddressesProviderRegistry,
     [],
@@ -81,11 +76,11 @@ export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
 export const deployPoolConfigurator = async (verify?: boolean) => {
   const poolConfiguratorImpl = await new PoolConfiguratorFactory(await getFirstSigner()).deploy();
   await insertContractAddressInDb(eContractid.PoolConfiguratorImpl, poolConfiguratorImpl.address);
-  return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
+  return withSave(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
 
 export const deployReserveLogicLibrary = async (verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new ReserveLogicFactory(await getFirstSigner()).deploy(),
     eContractid.ReserveLogic,
     [],
@@ -107,7 +102,7 @@ export const deployGenericLogic = async (reserveLogic: Contract, verify?: boolea
   const genericLogic = await (
     await genericLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
-  return withSaveAndVerify(genericLogic, eContractid.GenericLogic, [], verify);
+  return withSave(genericLogic, eContractid.GenericLogic, [], verify);
 };
 
 export const deployValidationLogic = async (
@@ -131,7 +126,7 @@ export const deployValidationLogic = async (
     await validationLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
-  return withSaveAndVerify(validationLogic, eContractid.ValidationLogic, [], verify);
+  return withSave(validationLogic, eContractid.ValidationLogic, [], verify);
 };
 
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
@@ -161,11 +156,11 @@ export const deployPool = async (verify?: boolean) => {
   const libraries = await deployAaveLibraries(verify);
   const poolImpl = await new PoolFactory(libraries, await getFirstSigner()).deploy();
   await insertContractAddressInDb(eContractid.PoolImpl, poolImpl.address);
-  return withSaveAndVerify(poolImpl, eContractid.Pool, [], verify);
+  return withSave(poolImpl, eContractid.Pool, [], verify);
 };
 
 export const deployPriceOracle = async (verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new PriceOracleFactory(await getFirstSigner()).deploy(),
     eContractid.PriceOracle,
     [],
@@ -173,7 +168,7 @@ export const deployPriceOracle = async (verify?: boolean) =>
   );
 
 export const deployRateOracle = async (verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new RateOracleFactory(await getFirstSigner()).deploy(),
     eContractid.RateOracle,
     [],
@@ -181,7 +176,7 @@ export const deployRateOracle = async (verify?: boolean) =>
   );
 
 export const deployMockAggregator = async (price: tStringTokenSmallUnits, verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new MockAggregatorFactory(await getFirstSigner()).deploy(price),
     eContractid.MockAggregator,
     [price],
@@ -192,7 +187,7 @@ export const deployAaveOracle = async (
   args: [tEthereumAddress[], tEthereumAddress[], tEthereumAddress, tEthereumAddress, string],
   verify?: boolean
 ) =>
-  withSaveAndVerify(
+  withSave(
     await new AaveOracleFactory(await getFirstSigner()).deploy(...args),
     eContractid.AaveOracle,
     args,
@@ -207,14 +202,14 @@ export const deployPoolCollateralManager = async (verify?: boolean) => {
     eContractid.PoolCollateralManagerImpl,
     collateralManagerImpl.address
   );
-  return withSaveAndVerify(collateralManagerImpl, eContractid.PoolCollateralManager, [], verify);
+  return withSave(collateralManagerImpl, eContractid.PoolCollateralManager, [], verify);
 };
 
 export const deployMockFlashLoanReceiver = async (
   addressesProvider: tEthereumAddress,
   verify?: boolean
 ) =>
-  withSaveAndVerify(
+  withSave(
     await new MockFlashLoanReceiverFactory(await getFirstSigner()).deploy(addressesProvider),
     eContractid.MockFlashLoanReceiver,
     [addressesProvider],
@@ -225,7 +220,7 @@ export const deployAaveProtocolDataProvider = async (
   addressesProvider: tEthereumAddress,
   verify?: boolean
 ) =>
-  withSaveAndVerify(
+  withSave(
     await new AaveProtocolDataProviderFactory(await getFirstSigner()).deploy(addressesProvider),
     eContractid.AaveProtocolDataProvider,
     [addressesProvider],
@@ -236,7 +231,7 @@ export const deployMintableERC20 = async (
   args: [string, string, string],
   verify?: boolean
 ): Promise<MintableERC20> =>
-  withSaveAndVerify(
+  withSave(
     await new MintableERC20Factory(await getFirstSigner()).deploy(...args),
     eContractid.MintableERC20,
     args,
@@ -247,7 +242,7 @@ export const deployMintableDelegationERC20 = async (
   args: [string, string, string],
   verify?: boolean
 ): Promise<MintableDelegationERC20> =>
-  withSaveAndVerify(
+  withSave(
     await new MintableDelegationERC20Factory(await getFirstSigner()).deploy(...args),
     eContractid.MintableDelegationERC20,
     args,
@@ -257,7 +252,7 @@ export const deployDefaultReserveInterestRateStrategy = async (
   args: [tEthereumAddress, string, string, string, string, string, string],
   verify: boolean
 ) =>
-  withSaveAndVerify(
+  withSave(
     await new DefaultReserveInterestRateStrategyFactory(await getFirstSigner()).deploy(...args),
     eContractid.DefaultReserveInterestRateStrategy,
     args,
@@ -269,7 +264,7 @@ export const deployDefaultReserveInterestRateStrategy = async (
 //   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string],
 //   verify: boolean
 // ) => {
-//   const instance = await withSaveAndVerify(
+//   const instance = await withSave(
 //     await new StableDebtTokenFactory(await getFirstSigner()).deploy(),
 //     eContractid.StableDebtToken,
 //     [],
@@ -285,7 +280,7 @@ export const deployDefaultReserveInterestRateStrategy = async (
 //   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string],
 //   verify: boolean
 // ) => {
-//   const instance = await withSaveAndVerify(
+//   const instance = await withSave(
 //     await new VariableDebtTokenFactory(await getFirstSigner()).deploy(),
 //     eContractid.VariableDebtToken,
 //     [],
@@ -298,7 +293,7 @@ export const deployDefaultReserveInterestRateStrategy = async (
 // };
 
 export const deployGenericStableDebtToken = async () =>
-  withSaveAndVerify(
+  withSave(
     await new StableDebtTokenFactory(await getFirstSigner()).deploy(),
     eContractid.StableDebtToken,
     [],
@@ -306,7 +301,7 @@ export const deployGenericStableDebtToken = async () =>
   );
 
 export const deployGenericVariableDebtToken = async () =>
-  withSaveAndVerify(
+  withSave(
     await new VariableDebtTokenFactory(await getFirstSigner()).deploy(),
     eContractid.VariableDebtToken,
     [],
@@ -324,7 +319,7 @@ export const deployGenericAToken = async (
   ],
   verify: boolean
 ) => {
-  const instance = await withSaveAndVerify(
+  const instance = await withSave(
     await new ATokenFactory(await getFirstSigner()).deploy(),
     eContractid.AToken,
     [],
@@ -346,7 +341,7 @@ export const deployGenericAToken = async (
 };
 
 export const deployGenericATokenImpl = async (verify: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new ATokenFactory(await getFirstSigner()).deploy(),
     eContractid.AToken,
     [],
@@ -364,7 +359,7 @@ export const deployDelegationAwareAToken = async (
   ],
   verify: boolean
 ) => {
-  const instance = await withSaveAndVerify(
+  const instance = await withSave(
     await new DelegationAwareATokenFactory(await getFirstSigner()).deploy(),
     eContractid.DelegationAwareAToken,
     [],
@@ -386,7 +381,7 @@ export const deployDelegationAwareAToken = async (
 };
 
 export const deployDelegationAwareATokenImpl = async (verify: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new DelegationAwareATokenFactory(await getFirstSigner()).deploy(),
     eContractid.DelegationAwareAToken,
     [],
@@ -416,7 +411,7 @@ export const deployStableAndVariableTokensHelper = async (
   args: [tEthereumAddress, tEthereumAddress],
   verify?: boolean
 ) =>
-  withSaveAndVerify(
+  withSave(
     await new StableAndVariableTokensHelperFactory(await getFirstSigner()).deploy(...args),
     eContractid.StableAndVariableTokensHelper,
     args,
@@ -427,7 +422,7 @@ export const deployATokensAndRatesHelper = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress],
   verify?: boolean
 ) =>
-  withSaveAndVerify(
+  withSave(
     await new ATokensAndRatesHelperFactory(await getFirstSigner()).deploy(...args),
     eContractid.ATokensAndRatesHelper,
     args,
@@ -438,7 +433,7 @@ export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],
   verify?: boolean
 ) => {
-  const instance = await withSaveAndVerify(
+  const instance = await withSave(
     await new MockStableDebtTokenFactory(await getFirstSigner()).deploy(),
     eContractid.MockStableDebtToken,
     [],
@@ -451,7 +446,7 @@ export const deployMockStableDebtToken = async (
 };
 
 export const deployWETHMocked = async (verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new WETH9MockedFactory(await getFirstSigner()).deploy(),
     eContractid.WETHMocked,
     [],
@@ -462,7 +457,7 @@ export const deployMockVariableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string],
   verify?: boolean
 ) => {
-  const instance = await withSaveAndVerify(
+  const instance = await withSave(
     await new MockVariableDebtTokenFactory(await getFirstSigner()).deploy(),
     eContractid.MockVariableDebtToken,
     [],
@@ -486,7 +481,7 @@ export const deployMockAToken = async (
   ],
   verify?: boolean
 ) => {
-  const instance = await withSaveAndVerify(
+  const instance = await withSave(
     await new MockATokenFactory(await getFirstSigner()).deploy(),
     eContractid.MockAToken,
     [],
@@ -499,7 +494,7 @@ export const deployMockAToken = async (
 };
 
 export const deployMockUniswapRouter = async (verify?: boolean) =>
-  withSaveAndVerify(
+  withSave(
     await new MockUniswapV2Router02Factory(await getFirstSigner()).deploy(),
     eContractid.MockUniswapV2Router02,
     [],

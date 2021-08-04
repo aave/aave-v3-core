@@ -5,7 +5,7 @@ import {
 } from '../../helpers/contracts-deployments';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { waitForTx } from '../../helpers/misc-utils';
-import { AaveConfig } from '../../markets/aave';
+import AaveConfig from '../../marketConfig';
 
 task(
   'dev:deploy-address-provider',

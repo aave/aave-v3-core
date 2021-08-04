@@ -5,7 +5,7 @@ import fs from 'fs';
 import BigNumber from 'bignumber.js';
 import { makeSuite } from './helpers/make-suite';
 import { executeStory } from './helpers/scenario-engine';
-import AaveConfig from '../markets/aave';
+import AaveConfig from '../marketConfig';
 
 const scenarioFolder = './test-suites/helpers/scenarios/';
 

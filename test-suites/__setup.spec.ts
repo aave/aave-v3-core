@@ -26,7 +26,6 @@ import {
 import { ethers, Signer } from 'ethers';
 import { TokenContractId, eContractid, tEthereumAddress } from '../helpers/types';
 import { MintableERC20 } from '../types/MintableERC20';
-import { ConfigNames, getTreasuryAddress, loadPoolConfig } from '../helpers/configuration';
 import { initializeMakeSuite } from './helpers/make-suite';
 import {
   setInitialAssetPricesInOracle,
@@ -35,7 +34,7 @@ import {
 } from '../helpers/oracles-helpers';
 import { waitForTx } from '../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../helpers/init-helpers';
-import AaveConfig from '../markets/aave';
+import AaveConfig from '../marketConfig';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import {
   getPool,
@@ -229,11 +228,11 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   console.log('Initialize configuration');
 
-  const config = loadPoolConfig(ConfigNames.Aave);
+  const config = AaveConfig;
 
   const { ATokenNamePrefix, StableDebtTokenNamePrefix, VariableDebtTokenNamePrefix, SymbolPrefix } =
     config;
-  const treasuryAddress = await getTreasuryAddress(config);
+  const treasuryAddress = config.ReserveFactorTreasuryAddress;
 
   await initReservesByHelper(
     reservesParams,

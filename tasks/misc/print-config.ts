@@ -1,25 +1,23 @@
 import { task } from 'hardhat/config';
-import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 import {
   getAaveProtocolDataProvider,
   getPoolAddressesProvider,
   getPoolAddressesProviderRegistry,
 } from '../../helpers/contracts-getters';
-import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
+import AaveConfig from '../../marketConfig';
 
 task('print-config', 'Inits the DRE, to have access to all the plugins')
   .addParam('dataProvider', 'Address of AaveProtocolDataProvider')
-  .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ pool, dataProvider }, localBRE) => {
+  .setAction(async ({ dataProvider }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = process.env.FORK
       ? (process.env.FORK as eNetwork)
       : (localBRE.network.name as eNetwork);
     console.log(network);
-    const poolConfig = loadPoolConfig(pool);
+    const poolConfig = AaveConfig;
 
-    const providerRegistryAddress = getParamPerNetwork(poolConfig.ProviderRegistry, network);
+    const providerRegistryAddress = poolConfig.ProviderRegistry;
 
     const providerRegistry = await getPoolAddressesProviderRegistry(providerRegistryAddress);
 
@@ -52,19 +50,20 @@ task('print-config', 'Inits the DRE, to have access to all the plugins')
       'isFrozen',
     ];
     const tokensFields = ['aToken', 'stableDebtToken', 'variableDebtToken'];
-    for (const [symbol, address] of Object.entries(
-      getParamPerNetwork(poolConfig.ReserveAssets, network as eNetwork)
-    )) {
+    for (const [symbol, address] of Object.entries(poolConfig.ReserveAssets)) {
       console.log(`- ${symbol} asset config`);
-      console.log(`  - reserve address: ${address}`);
-
-      const reserveData = await protocolDataProvider.getReserveConfigurationData(address);
-      const tokensAddresses = await protocolDataProvider.getReserveTokensAddresses(address);
-      fields.forEach((field, index) => {
-        console.log(`  - ${field}:`, reserveData[field].toString());
-      });
-      tokensFields.forEach((field, index) => {
-        console.log(`  - ${field}:`, tokensAddresses[index]);
-      });
+      if (typeof address === 'string') {
+        console.log(`  - reserve address: ${address}`);
+        const reserveData = await protocolDataProvider.getReserveConfigurationData(address);
+        const tokensAddresses = await protocolDataProvider.getReserveTokensAddresses(address);
+        fields.forEach((field) => {
+          console.log(`  - ${field}:`, reserveData[field].toString());
+        });
+        tokensFields.forEach((field, index) => {
+          console.log(`  - ${field}:`, tokensAddresses[index]);
+        });
+      } else {
+        console.log(`  - reserve address: ${undefined}`);
+      }
     }
   });
