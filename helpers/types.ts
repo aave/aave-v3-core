@@ -253,34 +253,7 @@ export type iAavePoolAssets<T> = Pick<
   | 'xSUSHI'
 >;
 
-export type iLpPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  | 'DAI'
-  | 'USDC'
-  | 'USDT'
-  | 'WBTC'
-  | 'WETH'
-  | 'UniDAIWETH'
-  | 'UniWBTCWETH'
-  | 'UniAAVEWETH'
-  | 'UniBATWETH'
-  | 'UniDAIUSDC'
-  | 'UniCRVWETH'
-  | 'UniLINKWETH'
-  | 'UniMKRWETH'
-  | 'UniRENWETH'
-  | 'UniSNXWETH'
-  | 'UniUNIWETH'
-  | 'UniUSDCWETH'
-  | 'UniWBTCUSDC'
-  | 'UniYFIWETH'
-  | 'BptWBTCWETH'
-  | 'BptBALWETH'
->;
-
 export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
-
-export type iAavePoolTokens<T> = Omit<iAavePoolAssets<T>, 'ETH'>;
 
 export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
@@ -380,19 +353,10 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.tenderlyMain]: T;
 }
 
-export interface iBasicDistributionParams {
-  receivers: string[];
-  percentages: string[];
-}
-
 export enum RateMode {
   None = '0',
   Stable = '1',
   Variable = '2',
-}
-
-export interface ObjectString {
-  [key: string]: string;
 }
 
 export interface IProtocolGlobalConfig {
@@ -451,10 +415,6 @@ export interface ICommonConfiguration {
 
 export interface IAaveConfiguration extends ICommonConfiguration {
   ReservesConfig: iMultiPoolsAssets<IReserveParams>;
-}
-
-export interface ITokenAddress {
-  [token: string]: tEthereumAddress;
 }
 
 export type PoolConfiguration = ICommonConfiguration | IAaveConfiguration;

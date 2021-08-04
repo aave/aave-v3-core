@@ -13,6 +13,7 @@ import { isZeroAddress } from 'ethereumjs-util';
 export const toWad = (value: string | number) => new BigNumber(value).times(WAD).toFixed();
 
 export const bnToBigNumber = (amount: BN): BigNumber => new BigNumber(<any>amount);
+
 export const stringToBigNumber = (amount: string): BigNumber => new BigNumber(amount);
 
 export const getDb = () => low(new FileSync('./deployed-contracts.json'));
