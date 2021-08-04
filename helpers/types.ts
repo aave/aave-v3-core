@@ -52,7 +52,6 @@ export enum eContractid {
   ATokensAndRatesHelper = 'ATokensAndRatesHelper',
   WETH = 'WETH',
   WETHMocked = 'WETHMocked',
-  SelfdestructTransferMock = 'SelfdestructTransferMock',
   PoolImpl = 'PoolImpl',
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
   PoolCollateralManagerImpl = 'PoolCollateralManagerImpl',
