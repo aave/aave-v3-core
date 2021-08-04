@@ -300,7 +300,7 @@ library ValidationLogic {
     uint256 stableDebt,
     uint256 variableDebt,
     DataTypes.InterestRateMode currentRateMode
-  ) external view {
+  ) internal view {
     (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) =
       reserveCache.reserveConfiguration.getFlagsMemory();
 
@@ -348,7 +348,7 @@ library ValidationLogic {
     IERC20 stableDebtToken,
     IERC20 variableDebtToken,
     address aTokenAddress
-  ) external view {
+  ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
@@ -382,7 +382,7 @@ library ValidationLogic {
   function validateSetUseReserveAsCollateral(
     DataTypes.ReserveCache memory reserveCache,
     uint256 userBalance
-  ) external pure {
+  ) internal pure {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
@@ -524,7 +524,7 @@ library ValidationLogic {
     mapping(uint256 => address) storage reserves,
     uint256 reservesCount,
     address oracle
-  ) external view {
+  ) internal view {
     validateHFAndLtvLocalVars memory vars;
     DataTypes.ReserveData memory reserve = reservesData[asset];
     (, , , , vars.healthFactor, vars.hasZeroLtvCollateral) = GenericLogic.calculateUserAccountData(
@@ -558,7 +558,7 @@ library ValidationLogic {
    * @dev Validates a drop reserve action
    * @param reserve The reserve object
    **/
-  function validateDropReserve(DataTypes.ReserveData storage reserve) external view {
+  function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {
     require(
       IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0,
       Errors.RL_STABLE_DEBT_NOT_ZERO

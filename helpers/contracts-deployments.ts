@@ -39,12 +39,11 @@ import {
   MockVariableDebtTokenFactory,
   MockUniswapV2Router02Factory,
   PriceOracleFactory,
-  ReserveLogicFactory,
   SelfdestructTransferFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
-  PoolConfiguratorLogicFactory
+  PoolConfiguratorLogicFactory,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -101,66 +100,12 @@ export const deployPoolConfigurator = async (verify?: boolean) => {
   return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
 
-export const deployReserveLogicLibrary = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new ReserveLogicFactory(await getFirstSigner()).deploy(),
-    eContractid.ReserveLogic,
-    [],
-    verify
-  );
-
-export const deployGenericLogic = async (reserveLogic: Contract, verify?: boolean) => {
-  const genericLogicArtifact = await readArtifact(eContractid.GenericLogic);
-
-  const linkedGenericLogicByteCode = linkBytecode(genericLogicArtifact, {
-    [eContractid.ReserveLogic]: reserveLogic.address,
-  });
-
-  const genericLogicFactory = await DRE.ethers.getContractFactory(
-    genericLogicArtifact.abi,
-    linkedGenericLogicByteCode
-  );
-
-  const genericLogic = await (
-    await genericLogicFactory.connect(await getFirstSigner()).deploy()
-  ).deployed();
-  return withSaveAndVerify(genericLogic, eContractid.GenericLogic, [], verify);
-};
-
-export const deployValidationLogic = async (
-  reserveLogic: Contract,
-  genericLogic: Contract,
-  verify?: boolean
-) => {
-  const validationLogicArtifact = await readArtifact(eContractid.ValidationLogic);
-
-  const linkedValidationLogicByteCode = linkBytecode(validationLogicArtifact, {
-    [eContractid.ReserveLogic]: reserveLogic.address,
-    [eContractid.GenericLogic]: genericLogic.address,
-  });
-
-  const validationLogicFactory = await DRE.ethers.getContractFactory(
-    validationLogicArtifact.abi,
-    linkedValidationLogicByteCode
-  );
-
-  const validationLogic = await (
-    await validationLogicFactory.connect(await getFirstSigner()).deploy()
-  ).deployed();
-
-  return withSaveAndVerify(validationLogic, eContractid.ValidationLogic, [], verify);
-};
-
 export const deployDepositLogic = async (
-  validationLogic: Contract,
-  reserveLogic: Contract,
   verify?: boolean
 ) => {
   const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
   
   const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {
-    [eContractid.ValidationLogic]: validationLogic.address,
-    [eContractid.ReserveLogic]: reserveLogic.address,
   });
   const depositLogicFactory = await DRE.ethers.getContractFactory(
     depositLogicArtifact.abi,
@@ -175,15 +120,11 @@ export const deployDepositLogic = async (
 
 
 export const deployBorrowLogic = async (
-  validationLogic: Contract,
-  reserveLogic: Contract,
   verify?: boolean
 ) => {
   const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
   
   const linkedBorrowLogicByteCode = linkBytecode(borrowLogicArtifact, {
-    [eContractid.ValidationLogic]: validationLogic.address,
-    [eContractid.ReserveLogic]: reserveLogic.address,
   });
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
     borrowLogicArtifact.abi,
@@ -198,15 +139,10 @@ export const deployBorrowLogic = async (
 
 
 export const deployPoolHelperLogic = async (
-  validationLogic: Contract,
-  reserveLogic: Contract,
   verify?: boolean
 ) => {
   const poolHelperLogicArtifact = await readArtifact(eContractid.PoolHelperLogic);
-  const linkedPoolHelperLogicByteCode = linkBytecode(poolHelperLogicArtifact, {
-    [eContractid.ValidationLogic]: validationLogic.address,
-    [eContractid.ReserveLogic]: reserveLogic.address,
-  });
+  const linkedPoolHelperLogicByteCode = linkBytecode(poolHelperLogicArtifact, {});
   const poolHelperLogicFactory = await DRE.ethers.getContractFactory(
     poolHelperLogicArtifact.abi,
     linkedPoolHelperLogicByteCode
@@ -219,13 +155,9 @@ export const deployPoolHelperLogic = async (
 };
 
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
-  const reserveLogic = await deployReserveLogicLibrary(verify);
-  const genericLogic = await deployGenericLogic(reserveLogic, verify);
-  const validationLogic = await deployValidationLogic(reserveLogic, genericLogic, verify);
-  const depositLogic = await deployDepositLogic(validationLogic, reserveLogic, verify);
-  const borrowLogic = await deployBorrowLogic(validationLogic, reserveLogic, verify);
-
-  const poolHelperLogic = await deployPoolHelperLogic(validationLogic, reserveLogic, verify);
+  const depositLogic = await deployDepositLogic( verify);
+  const borrowLogic = await deployBorrowLogic(verify);
+  const poolHelperLogic = await deployPoolHelperLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -240,8 +172,6 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   return {
     ['__$56265c55042e83ee819cd4de36b013885b$__']: poolHelperLogic.address,
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
-    ['__$22cd43a9dda9ce44e9b92ba393b88fb9ac$__']: reserveLogic.address,
-    ['__$52a8a86ab43135662ff256bbc95497e8e3$__']: genericLogic.address,
     ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address
 

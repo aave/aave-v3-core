@@ -21,7 +21,6 @@ import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {DepositLogic} from '../libraries/logic/DepositLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
-import {UserConfiguration} from '../libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {PoolStorage} from './PoolStorage.sol';
 
@@ -51,7 +50,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   using SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
-  using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   uint256 public constant POOL_REVISION = 0x2;
