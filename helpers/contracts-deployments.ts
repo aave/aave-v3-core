@@ -102,20 +102,10 @@ export const deployPoolConfigurator = async (verify?: boolean) => {
   return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
 
-export const deployReserveLogicLibrary = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new ReserveLogicFactory(await getFirstSigner()).deploy(),
-    eContractid.ReserveLogic,
-    [],
-    verify
-  );
-
-export const deployGenericLogic = async (reserveLogic: Contract, verify?: boolean) => {
+export const deployGenericLogic = async (verify?: boolean) => {
   const genericLogicArtifact = await readArtifact(eContractid.GenericLogic);
 
-  const linkedGenericLogicByteCode = linkBytecode(genericLogicArtifact, {
-    [eContractid.ReserveLogic]: reserveLogic.address,
-  });
+  const linkedGenericLogicByteCode = linkBytecode(genericLogicArtifact, {});
 
   const genericLogicFactory = await DRE.ethers.getContractFactory(
     genericLogicArtifact.abi,
@@ -128,11 +118,9 @@ export const deployGenericLogic = async (reserveLogic: Contract, verify?: boolea
   return withSaveAndVerify(genericLogic, eContractid.GenericLogic, [], verify);
 };
 
-export const deployPoolBaseLogic = async (reserveLogic: Contract, verify?: boolean) => {
+export const deployPoolBaseLogic = async (verify?: boolean) => {
   const poolBaseLogicArtifact = await readArtifact(eContractid.PoolBaseLogic);
-  const linkedPoolBaseLogicByteCode = linkBytecode(poolBaseLogicArtifact, {
-    [eContractid.ReserveLogic]: reserveLogic.address,
-  });
+  const linkedPoolBaseLogicByteCode = linkBytecode(poolBaseLogicArtifact, {});
   const poolBaseLogicFactory = await DRE.ethers.getContractFactory(
     poolBaseLogicArtifact.abi,
     linkedPoolBaseLogicByteCode
@@ -144,11 +132,9 @@ export const deployPoolBaseLogic = async (reserveLogic: Contract, verify?: boole
   return withSaveAndVerify(poolBaseLogic, eContractid.PoolBaseLogic, [], verify);
 };
 
-export const deployPoolHelperLogic = async (reserveLogic: Contract, verify?: boolean) => {
+export const deployPoolHelperLogic = async (verify?: boolean) => {
   const poolHelperLogicArtifact = await readArtifact(eContractid.PoolHelperLogic);
-  const linkedPoolHelperLogicByteCode = linkBytecode(poolHelperLogicArtifact, {
-    [eContractid.ReserveLogic]: reserveLogic.address,
-  });
+  const linkedPoolHelperLogicByteCode = linkBytecode(poolHelperLogicArtifact, {});
   const poolHelperLogicFactory = await DRE.ethers.getContractFactory(
     poolHelperLogicArtifact.abi,
     linkedPoolHelperLogicByteCode
@@ -161,10 +147,9 @@ export const deployPoolHelperLogic = async (reserveLogic: Contract, verify?: boo
 };
 
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
-  const reserveLogic = await deployReserveLogicLibrary(verify);
-  const genericLogic = await deployGenericLogic(reserveLogic, verify);
-  const poolBaseLogic = await deployPoolBaseLogic(reserveLogic, verify);
-  const poolHelperLogic = await deployPoolHelperLogic(reserveLogic, verify);
+  const genericLogic = await deployGenericLogic(verify);
+  const poolBaseLogic = await deployPoolBaseLogic(verify);
+  const poolHelperLogic = await deployPoolHelperLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -179,7 +164,7 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   return {
     ['__$56265c55042e83ee819cd4de36b013885b$__']: poolHelperLogic.address,
     ['__$f5cc2bc164fcad054d46ecbbc8bf13ff3e$__']: poolBaseLogic.address,
-    ['__$22cd43a9dda9ce44e9b92ba393b88fb9ac$__']: reserveLogic.address,
+    //['__$22cd43a9dda9ce44e9b92ba393b88fb9ac$__']: reserveLogic.address,
     ['__$52a8a86ab43135662ff256bbc95497e8e3$__']: genericLogic.address,
   };
 };
