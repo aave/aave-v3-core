@@ -7,16 +7,10 @@ import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
-import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
-import {IFlashLoanReceiver} from '../../flashloan/interfaces/IFlashLoanReceiver.sol';
-import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
-import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
-import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {DepositLogic} from '../libraries/logic/DepositLogic.sol';
@@ -46,9 +40,7 @@ import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
-  using PercentageMath for uint256;
   using SafeERC20 for IERC20;
-  using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -165,7 +157,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reserves,
       _usersConfig[onBehalfOf],
       _reservesList,
-       DataTypes.ExecuteBorrowParams(
+      DataTypes.ExecuteBorrowParams(
         asset,
         msg.sender,
         onBehalfOf,
@@ -182,7 +174,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
     _lastBorrower = msg.sender;
     _lastBorrowTimestamp = uint40(block.timestamp);
-
   }
 
   ///@inheritdoc IPool
