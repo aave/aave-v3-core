@@ -7,6 +7,7 @@ import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IRateOracle} from '../../interfaces/IRateOracle.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {console} from 'hardhat/console.sol';
 
 /**
  * @title DefaultReserveInterestRateStrategy contract
@@ -129,10 +130,19 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     )
   {
     // uint256 availableLiquidity = IERC20(reserve).balanceOf(aToken);
-    uint256 adjustedLiquidity = IERC20(aToken).totalSupply();
-    //avoid stack too deep
-    adjustedLiquidity = adjustedLiquidity + pendingTreasuryMint + liquidityAdded - liquidityTaken;
 
+    uint256 adjustedLiquidity = IERC20(aToken).totalSupply();
+    // console.log("aToken supply:", adjustedLiquidity);
+    adjustedLiquidity = adjustedLiquidity + pendingTreasuryMint;// + liquidityAdded - liquidityTaken;
+
+    //avoid stack too deep
+    // uint256 adjustedLiquidity = totalStableDebt + totalVariableDebt + IERC20(reserve).balanceOf(aToken);
+    // console.log("Adjusted liquidity (after change):", adjustedLiquidity);
+    // console.log("Pending treasury mint:", pendingTreasuryMint);
+    // console.log("Liq add:", liquidityAdded);
+    // console.log("Liq removed:", liquidityTaken);
+    // console.log("Total stable debt:", totalStableDebt);
+    // console.log("Total variable debt:", totalVariableDebt);
     return
       calculateInterestRates(
         reserve,

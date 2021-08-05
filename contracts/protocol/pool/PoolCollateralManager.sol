@@ -171,7 +171,7 @@ contract PoolCollateralManager is
         debtReserveCache.nextVariableBorrowIndex
       );
       debtReserveCache.refreshDebt(0, 0, 0, vars.actualDebtToLiquidate);
-      debtReserve.updateInterestRates(debtReserveCache, debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(debtReserveCache, debtAsset, 0, 0);
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -192,7 +192,7 @@ contract PoolCollateralManager is
         vars.userVariableDebt
       );
 
-      debtReserve.updateInterestRates(debtReserveCache, debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(debtReserveCache, debtAsset, 0, 0);
     }
 
     if (receiveAToken) {
@@ -207,12 +207,14 @@ contract PoolCollateralManager is
     } else {
       DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
       collateralReserve.updateState(collateralReserveCache);
-      collateralReserve.updateInterestRates(
-        collateralReserveCache,
-        collateralAsset,
-        0,
-        vars.maxCollateralToLiquidate
-      );
+
+      // Moving below aToken burn
+      // collateralReserve.updateInterestRates(
+      //   collateralReserveCache,
+      //   collateralAsset,
+      //   0,
+      //   0
+      // );
 
       // Burn the equivalent amount of aToken, sending the underlying to the liquidator
       vars.collateralAtoken.burn(
@@ -220,6 +222,13 @@ contract PoolCollateralManager is
         msg.sender,
         vars.maxCollateralToLiquidate,
         collateralReserveCache.nextLiquidityIndex
+      );
+
+      collateralReserve.updateInterestRates(
+        collateralReserveCache,
+        collateralAsset,
+        0,
+        0
       );
     }
 
