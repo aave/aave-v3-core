@@ -48,7 +48,7 @@ library DepositLogic {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) public {
+  ) internal {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
@@ -75,7 +75,7 @@ library DepositLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
     DataTypes.ExecuteWithdrawParams memory vars
-  ) public returns (uint256) {
+  ) internal returns (uint256) {
     DataTypes.ReserveData storage reserve = reserves[vars.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 

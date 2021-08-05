@@ -92,10 +92,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode
   ) external override {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-
     DepositLogic.executeDeposit(
-      reserve,
+      _reserves[asset],
       _usersConfig[onBehalfOf],
       asset,
       amount,
@@ -124,10 +122,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       permitR,
       permitS
     );
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-
     DepositLogic.executeDeposit(
-      reserve,
+      _reserves[asset],
       _usersConfig[onBehalfOf],
       asset,
       amount,
@@ -142,11 +138,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     address to
   ) external override returns (uint256) {
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
     return
       DepositLogic.executeWithdraw(
         _reserves,
-        userConfig,
+        _usersConfig[msg.sender],
         _reservesList,
         DataTypes.ExecuteWithdrawParams(
           asset,
@@ -397,7 +392,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       currentLiquidationThreshold,
       healthFactor,
 
-    ) = GenericLogic.getUserAccountData(
+    ) = GenericLogic.calculateUserAccountData(
       user,
       _reserves,
       _usersConfig[user],
