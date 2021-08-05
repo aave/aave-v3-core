@@ -78,7 +78,7 @@ const buidlerConfig: HardhatUserConfig = {
     // Docs for the compiler https://docs.soliditylang.org/en/v0.8.6/using-the-compiler.html
     version: '0.8.6',
     settings: {
-      optimizer: { enabled: true, runs: 200 },
+      optimizer: { enabled: true, runs: 1000000 },
       evmVersion: 'berlin',
     },
   },
