@@ -26,41 +26,6 @@ library PoolHelperLogic {
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
 
-  function setUserUseReserveAsCollateral(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    bool useAsCollateral,
-    mapping(uint256 => address) storage reservesList,
-    uint256 reservesCount,
-    address priceOracle
-  ) public {
-    DataTypes.ReserveData storage reserve = reserves[asset];
-    DataTypes.ReserveCache memory reserveCache = reserve.cache();
-
-    uint256 userBalance = IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender);
-
-    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance);
-
-    userConfig.setUsingAsCollateral(reserve.id, useAsCollateral);
-
-    if (useAsCollateral) {
-      emit ReserveUsedAsCollateralEnabled(asset, msg.sender);
-    } else {
-      ValidationLogic.validateHFAndLtv(
-        asset,
-        msg.sender,
-        reserves,
-        userConfig,
-        reservesList,
-        reservesCount,
-        priceOracle
-      );
-
-      emit ReserveUsedAsCollateralDisabled(asset, msg.sender);
-    }
-  }
-
   function dropReserve(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,

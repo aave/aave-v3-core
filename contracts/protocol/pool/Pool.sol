@@ -249,7 +249,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ///@inheritdoc IPool
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
     DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
-    PoolHelperLogic.setUserUseReserveAsCollateral(
+    DepositLogic.setUserUseReserveAsCollateral(
       _reserves,
       userConfig,
       asset,

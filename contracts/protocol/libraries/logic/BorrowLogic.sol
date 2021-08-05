@@ -137,7 +137,7 @@ library BorrowLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory vars
-  ) public returns (uint256) {
+  ) external returns (uint256) {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     (uint256 stableDebt, uint256 variableDebt) =
       Helpers.getUserCurrentDebt(vars.onBehalfOf, reserve);
@@ -213,7 +213,7 @@ library BorrowLogic {
     mapping(address => bool) storage authorizedFlashBorrowers,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory flashParams
-  ) public {
+  ) external {
     FlashLoanLocalVars memory vars;
 
     vars.aTokenAddresses = new address[](flashParams.assets.length);
@@ -322,7 +322,7 @@ library BorrowLogic {
     DataTypes.ReserveData storage reserve,
     address asset,
     address user
-  ) public {
+  ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     IERC20 stableDebtToken = IERC20(reserveCache.stableDebtTokenAddress);
@@ -360,7 +360,7 @@ library BorrowLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
     uint256 rateMode
-  ) public {
+  ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(msg.sender, reserve);
