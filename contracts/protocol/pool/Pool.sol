@@ -399,7 +399,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         reserve.updateInterestRates(
           reserveCache,
           vars.currentAsset,
-          vars.currentAmountPlusPremium,
+          0,//vars.currentAmountPlusPremium, // Because cumulateToLiquidityIndex already increases aToken supply, no need to account for the premium here
           0
         );
 
@@ -773,12 +773,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     if (isFirstBorrowing) {
       userConfig.setBorrowing(reserve.id, true);
     }
-
+    
     reserve.updateInterestRates(
       reserveCache,
       vars.asset,
       0,
-      vars.releaseUnderlying ? vars.amount : 0
+      0 //vars.releaseUnderlying ? vars.amount : 0 // We can get rid of this since we don't care about the underlying (no double counting)
     );
 
     _lastBorrower = vars.user;
@@ -814,12 +814,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
     ValidationLogic.validateDeposit(reserveCache, amount);
 
-    reserve.updateInterestRates(reserveCache, asset, amount, 0);
+    // Moving the call to `updateInterestRates` after the aToken mint since we need the aToken supply incremented before
+    // the update.
+    // reserve.updateInterestRates(reserveCache, asset, amount, 0);
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
 
     bool isFirstDeposit =
       IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     if (isFirstDeposit) {
       _usersConfig[onBehalfOf].setUsingAsCollateral(reserve.id, true);
@@ -852,8 +855,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     }
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
-
-    reserve.updateInterestRates(reserveCache, asset, 0, amountToWithdraw);
+    // Moving the call to `updateInterestRates` after the aToken burn since we need the aToken supply decremented before
+    // the update.
+    // reserve.updateInterestRates(reserveCache, asset, 0, amountToWithdraw);
 
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,
@@ -861,6 +865,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       amountToWithdraw,
       reserveCache.nextLiquidityIndex
     );
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     if (userConfig.isUsingAsCollateral(reserve.id)) {
       if (userConfig.isBorrowingAny()) {
@@ -931,7 +936,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       reserveCache.refreshDebt(0, 0, 0, paybackAmount);
     }
 
-    reserve.updateInterestRates(reserveCache, asset, paybackAmount, 0);
+    // Like in the other cases, we don't need to account for the amount repaid since, at this point,
+    // we've already burned the debt tokens.
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       _usersConfig[onBehalfOf].setBorrowing(reserve.id, false);
