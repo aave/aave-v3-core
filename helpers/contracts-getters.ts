@@ -8,7 +8,6 @@ import {
   InitializableAdminUpgradeabilityProxyFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
-  PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
   PoolFactory,
   RateOracleFactory,
@@ -302,24 +301,6 @@ export const getPoolConfiguratorImpl = async (address?: tEthereumAddress) =>
     address ||
       (
         await getDb().get(`${eContractid.PoolConfiguratorImpl}.${DRE.network.name}`).value()
-      ).address,
-    await getFirstSigner()
-  );
-
-export const getPoolCollateralManagerImpl = async (address?: tEthereumAddress) =>
-  await PoolCollateralManagerFactory.connect(
-    address ||
-      (
-        await getDb().get(`${eContractid.PoolCollateralManagerImpl}.${DRE.network.name}`).value()
-      ).address,
-    await getFirstSigner()
-  );
-
-export const getPoolCollateralManager = async (address?: tEthereumAddress) =>
-  await PoolCollateralManagerFactory.connect(
-    address ||
-      (
-        await getDb().get(`${eContractid.PoolCollateralManager}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );

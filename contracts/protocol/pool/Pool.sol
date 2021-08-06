@@ -14,12 +14,13 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {DepositLogic} from '../libraries/logic/DepositLogic.sol';
+import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
+import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {PoolStorage} from './PoolStorage.sol';
 
 import {PoolHelperLogic} from '../libraries/logic/PoolHelperLogic.sol';
-import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 
 /**
  * @title Pool contract
@@ -164,9 +165,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         amount,
         interestRateMode,
         referralCode,
-        true
-      ),
-      DataTypes.ExecuteBorrowHelperParams(
+        true,
         _maxStableRateBorrowSizePercent,
         _reservesCount,
         _addressesProvider.getPriceOracle()
@@ -235,23 +234,19 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   ///@inheritdoc IPool
   function swapBorrowRateMode(address asset, uint256 rateMode) external override {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
-    BorrowLogic.swapBorrowRateMode(reserve, userConfig, asset, rateMode);
+    BorrowLogic.swapBorrowRateMode(_reserves[asset], _usersConfig[msg.sender], asset, rateMode);
   }
 
   ///@inheritdoc IPool
   function rebalanceStableBorrowRate(address asset, address user) external override {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-    BorrowLogic.rebalanceStableBorrowRate(reserve, asset, user);
+    BorrowLogic.rebalanceStableBorrowRate(_reserves[asset], asset, user);
   }
 
   ///@inheritdoc IPool
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[msg.sender];
     DepositLogic.setUserUseReserveAsCollateral(
       _reserves,
-      userConfig,
+      _usersConfig[msg.sender],
       asset,
       useAsCollateral,
       _reservesList,
@@ -268,26 +263,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 debtToCover,
     bool receiveAToken
   ) external override {
-    address collateralManager = _addressesProvider.getPoolCollateralManager();
-
-    //solium-disable-next-line
-    (bool success, bytes memory result) =
-      collateralManager.delegatecall(
-        abi.encodeWithSignature(
-          'liquidationCall(address,address,address,uint256,bool)',
-          collateralAsset,
-          debtAsset,
-          user,
-          debtToCover,
-          receiveAToken
-        )
-      );
-
-    require(success, Errors.P_LIQUIDATION_CALL_FAILED);
-
-    (uint256 returnCode, string memory returnMessage) = abi.decode(result, (uint256, string));
-
-    require(returnCode == 0, string(abi.encodePacked(returnMessage)));
+    LiquidationLogic.executeLiquidationCall(
+      _reserves,
+      _usersConfig,
+      _reservesList,
+      DataTypes.ExecuteLiquidationCallParams(
+        _reservesCount,
+        debtToCover,
+        collateralAsset,
+        debtAsset,
+        user,
+        receiveAToken,
+        _addressesProvider.getPriceOracle()
+      )
+    );
   }
 
   ///@inheritdoc IPool
@@ -311,11 +300,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         referralCode,
         _flashLoanPremiumToProtocol,
         _flashLoanPremiumTotal,
-        DataTypes.ExecuteBorrowHelperParams(
-          _maxStableRateBorrowSizePercent,
-          _reservesCount,
-          _addressesProvider.getPriceOracle()
-        )
+        _maxStableRateBorrowSizePercent,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
       );
 
     BorrowLogic.executeFlashLoan(

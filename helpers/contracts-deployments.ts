@@ -26,7 +26,6 @@ import {
   InitializableAdminUpgradeabilityProxyFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
-  PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
   PoolFactory,
   RateOracleFactory,
@@ -124,17 +123,33 @@ export const deployBorrowLogic = async (
 ) => {
   const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
   
-  const linkedBorrowLogicByteCode = linkBytecode(borrowLogicArtifact, {
-  });
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
     borrowLogicArtifact.abi,
-    linkedBorrowLogicByteCode
+    borrowLogicArtifact.bytecode
   );
   const borrowLogic = await (
     await borrowLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
   return withSaveAndVerify(borrowLogic, eContractid.BorrowLogic, [], verify);
+};
+
+
+export const deployLiquidationLogic = async (
+  verify?: boolean
+) => {
+
+  const liquidationLogicArtifact = await readArtifact(eContractid.LiquidationLogic);
+    
+  const borrowLogicFactory = await DRE.ethers.getContractFactory(
+    liquidationLogicArtifact.abi,
+    liquidationLogicArtifact.bytecode
+  );
+  const liquidationLogic = await (
+    await borrowLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSaveAndVerify(liquidationLogic, eContractid.LiquidationLogic, [], verify);
 };
 
 
@@ -157,6 +172,7 @@ export const deployPoolHelperLogic = async (
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
   const depositLogic = await deployDepositLogic( verify);
   const borrowLogic = await deployBorrowLogic(verify);
+  const liquidationLogic = await deployLiquidationLogic(verify);
   const poolHelperLogic = await deployPoolHelperLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
@@ -173,7 +189,8 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
     ['__$56265c55042e83ee819cd4de36b013885b$__']: poolHelperLogic.address,
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
     ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
-    ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address
+    ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
+    ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address
 
   };
 };
@@ -219,17 +236,6 @@ export const deployAaveOracle = async (
     args,
     verify
   );
-
-export const deployPoolCollateralManager = async (verify?: boolean) => {
-  const collateralManagerImpl = await new PoolCollateralManagerFactory(
-    await getFirstSigner()
-  ).deploy();
-  await insertContractAddressInDb(
-    eContractid.PoolCollateralManagerImpl,
-    collateralManagerImpl.address
-  );
-  return withSaveAndVerify(collateralManagerImpl, eContractid.PoolCollateralManager, [], verify);
-};
 
 export const deployInitializableAdminUpgradeabilityProxy = async (verify?: boolean) =>
   withSaveAndVerify(

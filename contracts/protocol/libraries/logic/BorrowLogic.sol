@@ -61,48 +61,47 @@ library BorrowLogic {
     mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
-    DataTypes.ExecuteBorrowParams memory vars,
-    DataTypes.ExecuteBorrowHelperParams memory helperVars
+    DataTypes.ExecuteBorrowParams memory params
   ) public {
-    DataTypes.ReserveData storage reserve = reserves[vars.asset];
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
 
     ValidationLogic.validateBorrow(
       reserveCache,
-      vars.asset,
-      vars.onBehalfOf,
-      vars.amount,
-      vars.interestRateMode,
-      helperVars.maxStableRateBorrowSizePercent,
+      params.asset,
+      params.onBehalfOf,
+      params.amount,
+      params.interestRateMode,
+      params.maxStableRateBorrowSizePercent,
       reserves,
       userConfig,
       reservesList,
-      helperVars.reservesCount,
-      helperVars.oracle
+      params.reservesCount,
+      params.oracle
     );
 
     uint256 currentStableRate = 0;
     bool isFirstBorrowing = false;
 
-    if (DataTypes.InterestRateMode(vars.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
+    if (DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
       currentStableRate = reserve.currentStableBorrowRate;
       isFirstBorrowing = IStableDebtToken(reserveCache.stableDebtTokenAddress).mint(
-        vars.user,
-        vars.onBehalfOf,
-        vars.amount,
+        params.user,
+        params.onBehalfOf,
+        params.amount,
         currentStableRate
       );
-      reserveCache.refreshDebt(vars.amount, 0, 0, 0);
+      reserveCache.refreshDebt(params.amount, 0, 0, 0);
     } else {
       isFirstBorrowing = IVariableDebtToken(reserveCache.variableDebtTokenAddress).mint(
-        vars.user,
-        vars.onBehalfOf,
-        vars.amount,
+        params.user,
+        params.onBehalfOf,
+        params.amount,
         reserveCache.nextVariableBorrowIndex
       );
-      reserveCache.refreshDebt(0, 0, vars.amount, 0);
+      reserveCache.refreshDebt(0, 0, params.amount, 0);
     }
 
     if (isFirstBorrowing) {
@@ -111,25 +110,25 @@ library BorrowLogic {
 
     reserve.updateInterestRates(
       reserveCache,
-      vars.asset,
+      params.asset,
       0,
-      vars.releaseUnderlying ? vars.amount : 0
+      params.releaseUnderlying ? params.amount : 0
     );
 
-    if (vars.releaseUnderlying) {
-      IAToken(reserveCache.aTokenAddress).transferUnderlyingTo(vars.user, vars.amount);
+    if (params.releaseUnderlying) {
+      IAToken(reserveCache.aTokenAddress).transferUnderlyingTo(params.user, params.amount);
     }
 
     emit Borrow(
-      vars.asset,
-      vars.user,
-      vars.onBehalfOf,
-      vars.amount,
-      vars.interestRateMode,
-      DataTypes.InterestRateMode(vars.interestRateMode) == DataTypes.InterestRateMode.STABLE
+      params.asset,
+      params.user,
+      params.onBehalfOf,
+      params.amount,
+      params.interestRateMode,
+      DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE
         ? currentStableRate
         : reserve.currentVariableBorrowRate,
-      vars.referralCode
+      params.referralCode
     );
   }
 
@@ -302,9 +301,11 @@ library BorrowLogic {
             vars.currentAmount,
             flashParams.modes[vars.i],
             flashParams.referralCode,
-            false
-          ),
-          flashParams.borrowHelperParams
+            false,
+            flashParams.maxStableRateBorrowSizePercent,
+            flashParams.reservesCount,
+            flashParams.oracle
+          )
         );
       }
       emit FlashLoan(

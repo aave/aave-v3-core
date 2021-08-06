@@ -53,7 +53,7 @@ export enum eContractid {
   GenericLogic = 'GenericLogic',
   DepositLogic = 'DepositLogic',
   BorrowLogic = 'BorrowLogic',
-  PoolBaseLogic = 'PoolBaseLogic',
+  LiquidationLogic = 'LiquidationLogic',
   PoolHelperLogic = 'PoolHelperLogic',
   PoolConfiguratorLogic = 'PoolConfiguratorLogic',
   Pool = 'Pool',
@@ -63,7 +63,6 @@ export enum eContractid {
   RateOracle = 'RateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
-  PoolCollateralManager = 'PoolCollateralManager',
   InitializableAdminUpgradeabilityProxy = 'InitializableAdminUpgradeabilityProxy',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   AToken = 'AToken',
@@ -84,7 +83,6 @@ export enum eContractid {
   SelfdestructTransferMock = 'SelfdestructTransferMock',
   PoolImpl = 'PoolImpl',
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
-  PoolCollateralManagerImpl = 'PoolCollateralManagerImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
 }
 
@@ -97,7 +95,6 @@ export enum eContractid {
  *  - PAPR = PoolAddressesProviderRegistry
  *  - PC = PoolConfiguration
  *  - RL = ReserveLogic
- *  - PCM = PoolCollateralManager
  *  - P = Pausable
  */
 export enum ProtocolErrors {
@@ -145,11 +142,10 @@ export enum ProtocolErrors {
   PC_INVALID_ADDRESSES_PROVIDER_ID = '40', // 'The liquidity of the reserve needs to be 0'
   PC_CALLER_NOT_EMERGENCY_ADMIN = '76', // 'The caller must be the emergencya admin'
   PAPR_PROVIDER_NOT_REGISTERED = '41', // 'Provider is not registered'
-  PCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '42', // 'Health factor is not below the threshold'
-  PCM_COLLATERAL_CANNOT_BE_LIQUIDATED = '43', // 'The collateral chosen cannot be liquidated'
-  PCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '44', // 'User did not borrow the specified currency'
-  PCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE = '45', // "There isn't enough liquidity available to liquidate"
-  PCM_NO_ERRORS = '46', // 'No errors'
+  VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '42', // 'Health factor is not below the threshold'
+  VL_COLLATERAL_CANNOT_BE_LIQUIDATED = '43', // 'The collateral chosen cannot be liquidated'
+  VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '44', // 'User did not borrow the specified currency'
+  VL_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE = '45', // "There isn't enough liquidity available to liquidate"
   P_INVALID_FLASHLOAN_MODE = '47', //Invalid flashloan mode selected
   MATH_MULTIPLICATION_OVERFLOW = '48',
   MATH_ADDITION_OVERFLOW = '49',
@@ -487,7 +483,6 @@ export interface ICommonConfiguration {
   Mocks: IMocksConfig;
   ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
   ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
-  PoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
   PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
   Pool: iParamsPerNetwork<tEthereumAddress>;
   RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;

@@ -450,15 +450,14 @@ library ValidationLogic {
       .reserveConfiguration
       .getFlagsMemory();
 
-    if (!vars.collateralReserveActive || !vars.principalReserveActive) {
-      return (
-        uint256(Errors.CollateralManagerErrors.NO_ACTIVE_RESERVE),
-        Errors.VL_NO_ACTIVE_RESERVE
-      );
-    }
-    if (vars.collateralReservePaused || vars.principalReservePaused) {
-      return (uint256(Errors.CollateralManagerErrors.PAUSED_RESERVE), Errors.VL_RESERVE_PAUSED);
-    }
+    require(
+      vars.collateralReserveActive && vars.principalReserveActive,
+      Errors.VL_NO_ACTIVE_RESERVE
+    );
+    require(
+      !vars.collateralReservePaused && !vars.principalReservePaused,
+      Errors.VL_RESERVE_PAUSED
+    );
 
     (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
       user,
@@ -469,33 +468,18 @@ library ValidationLogic {
       oracle
     );
 
-    if (vars.healthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD) {
-      return (
-        uint256(Errors.CollateralManagerErrors.HEALTH_FACTOR_ABOVE_THRESHOLD),
-        Errors.PCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
-      );
-    }
+    require(
+      vars.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      Errors.VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
+    );
 
     vars.isCollateralEnabled =
       collateralReserve.configuration.getLiquidationThreshold() > 0 &&
       userConfig.isUsingAsCollateral(collateralReserve.id);
 
     //if collateral isn't enabled as collateral by user, it cannot be liquidated
-    if (!vars.isCollateralEnabled) {
-      return (
-        uint256(Errors.CollateralManagerErrors.COLLATERAL_CANNOT_BE_LIQUIDATED),
-        Errors.PCM_COLLATERAL_CANNOT_BE_LIQUIDATED
-      );
-    }
-
-    if (totalDebt == 0) {
-      return (
-        uint256(Errors.CollateralManagerErrors.CURRRENCY_NOT_BORROWED),
-        Errors.PCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER
-      );
-    }
-
-    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.PCM_NO_ERRORS);
+    require(vars.isCollateralEnabled, Errors.VL_COLLATERAL_CANNOT_BE_LIQUIDATED);
+    require(totalDebt > 0, Errors.VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   }
 
   struct validateHFAndLtvLocalVars {

@@ -74,6 +74,16 @@ library DataTypes {
     uint40 stableDebtLastUpdateTimestamp;
   }
 
+  struct ExecuteLiquidationCallParams {
+    uint256 reservesCount;
+    uint256 debtToCover;
+    address collateralAsset;
+    address debtAsset;
+    address user;
+    bool receiveAToken;
+    address priceOracle;
+  }
+
   struct ExecuteBorrowParams {
     address asset;
     address user;
@@ -82,9 +92,6 @@ library DataTypes {
     uint256 interestRateMode;
     uint16 referralCode;
     bool releaseUnderlying;
-  }
-
-  struct ExecuteBorrowHelperParams {
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
     address oracle;
@@ -128,6 +135,8 @@ library DataTypes {
     uint16 referralCode;
     uint256 flashLoanPremiumToProtocol;
     uint256 flashLoanPremiumTotal;
-    ExecuteBorrowHelperParams borrowHelperParams;
+    uint256 maxStableRateBorrowSizePercent;
+    uint256 reservesCount;
+    address oracle;
   }
 }

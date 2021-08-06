@@ -9,8 +9,6 @@ import {
   getPool,
   getPoolAddressesProvider,
   getPoolAddressesProviderRegistry,
-  getPoolCollateralManager,
-  getPoolCollateralManagerImpl,
   getPoolConfiguratorImpl,
   getPoolConfiguratorProxy,
   getPoolImpl,
@@ -32,7 +30,6 @@ task('verify:general', 'Verify contracts at Etherscan')
       ReservesConfig,
       ProviderRegistry,
       MarketId,
-      PoolCollateralManager,
       PoolConfigurator,
       Pool,
     } = poolConfig as ICommonConfiguration;
@@ -45,11 +42,9 @@ task('verify:general', 'Verify contracts at Etherscan')
       : await getPoolAddressesProviderRegistry();
     const poolAddress = await addressesProvider.getPool();
     const poolConfiguratorAddress = await addressesProvider.getPoolConfigurator(); //getPoolConfiguratorProxy();
-    const poolCollateralManagerAddress = await addressesProvider.getPoolCollateralManager();
 
     const poolProxy = await getProxy(poolAddress);
     const poolConfiguratorProxy = await getProxy(poolConfiguratorAddress);
-    const poolCollateralManagerProxy = await getProxy(poolCollateralManagerAddress);
 
     if (all) {
       const poolImplAddress = getParamPerNetwork(Pool, network);
@@ -61,11 +56,6 @@ task('verify:general', 'Verify contracts at Etherscan')
       const poolConfiguratorImpl = notFalsyOrZeroAddress(poolConfiguratorImplAddress)
         ? await getPoolConfiguratorImpl(poolConfiguratorImplAddress)
         : await getPoolConfiguratorImpl();
-
-      const poolCollateralManagerImplAddress = getParamPerNetwork(PoolCollateralManager, network);
-      const poolCollateralManagerImpl = notFalsyOrZeroAddress(poolCollateralManagerImplAddress)
-        ? await getPoolCollateralManagerImpl(poolCollateralManagerImplAddress)
-        : await getPoolCollateralManagerImpl();
 
       const dataProvider = await getAaveProtocolDataProvider();
 
@@ -89,10 +79,6 @@ task('verify:general', 'Verify contracts at Etherscan')
       console.log('\n- Verifying Pool Configurator Implementation...\n');
       await verifyContract(eContractid.PoolConfigurator, poolConfiguratorImpl, []);
 
-      // Pool Collateral Manager implementation
-      console.log('\n- Verifying Pool Collateral Manager Implementation...\n');
-      await verifyContract(eContractid.PoolCollateralManager, poolCollateralManagerImpl, []);
-
       // Test helpers
       console.log('\n- Verifying Aave Provider Helpers...\n');
       await verifyContract(eContractid.AaveProtocolDataProvider, dataProvider, [
@@ -110,14 +96,6 @@ task('verify:general', 'Verify contracts at Etherscan')
     await verifyContract(eContractid.InitializableAdminUpgradeabilityProxy, poolConfiguratorProxy, [
       addressesProvider.address,
     ]);
-
-    // Proxy collateral manager
-    console.log('\n- Verifying Pool Collateral Manager Proxy...\n');
-    await verifyContract(
-      eContractid.InitializableAdminUpgradeabilityProxy,
-      poolCollateralManagerProxy,
-      []
-    );
 
     console.log('Finished verifications.');
   });
