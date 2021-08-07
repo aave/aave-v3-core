@@ -16,13 +16,11 @@ pragma solidity 0.8.6;
  *  - PAPR = PoolAddressesProviderRegistry
  *  - PC = PoolConfiguration
  *  - RL = ReserveLogic
- *  - PCM = PoolCollateralManager
  *  - P = Pausable
  */
 library Errors {
   //common errors
   string public constant CALLER_NOT_POOL_ADMIN = '33'; // 'The caller must be the pool admin'
-  string public constant BORROW_ALLOWANCE_NOT_ENOUGH = '59'; // User borrows on behalf, but allowance are too small
 
   //contract specific errors
   string public constant VL_INVALID_AMOUNT = '1'; // 'Amount must be greater than 0'
@@ -66,11 +64,10 @@ library Errors {
   string public constant PC_INVALID_CONFIGURATION = '75'; // 'Invalid risk parameters for the reserve'
   string public constant PC_CALLER_NOT_EMERGENCY_ADMIN = '76'; // 'The caller must be the emergency admin'
   string public constant PAPR_PROVIDER_NOT_REGISTERED = '41'; // 'Provider is not registered'
-  string public constant PCM_HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '42'; // 'Health factor is not below the threshold'
-  string public constant PCM_COLLATERAL_CANNOT_BE_LIQUIDATED = '43'; // 'The collateral chosen cannot be liquidated'
-  string public constant PCM_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '44'; // 'User did not borrow the specified currency'
-  string public constant PCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE = '45'; // "There isn't enough liquidity available to liquidate"
-  string public constant PCM_NO_ERRORS = '46'; // 'No errors'
+  string public constant VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '42'; // 'Health factor is not below the threshold'
+  string public constant VL_COLLATERAL_CANNOT_BE_LIQUIDATED = '43'; // 'The collateral chosen cannot be liquidated'
+  string public constant VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '44'; // 'User did not borrow the specified currency'
+  string public constant VL_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE = '45'; // "There isn't enough liquidity available to liquidate"
   string public constant P_INVALID_FLASHLOAN_MODE = '47'; //Invalid flashloan mode selected
   string public constant MATH_MULTIPLICATION_OVERFLOW = '48';
   string public constant MATH_ADDITION_OVERFLOW = '49';
@@ -116,18 +113,4 @@ library Errors {
   string public constant VL_SAME_BLOCK_BORROW_REPAY = '94';
   string public constant PC_FLASHLOAN_PREMIUMS_MISMATCH = '95';
   string public constant PC_FLASHLOAN_PREMIUM_INVALID = '96';
-
-  enum CollateralManagerErrors {
-    NO_ERROR,
-    NO_COLLATERAL_AVAILABLE,
-    COLLATERAL_CANNOT_BE_LIQUIDATED,
-    CURRRENCY_NOT_BORROWED,
-    HEALTH_FACTOR_ABOVE_THRESHOLD,
-    NOT_ENOUGH_LIQUIDITY,
-    NO_ACTIVE_RESERVE,
-    HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
-    INVALID_EQUAL_ASSETS_TO_SWAP,
-    FROZEN_RESERVE,
-    PAUSED_RESERVE
-  }
 }

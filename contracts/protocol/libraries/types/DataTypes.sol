@@ -73,4 +73,70 @@ library DataTypes {
     uint40 reserveLastUpdateTimestamp;
     uint40 stableDebtLastUpdateTimestamp;
   }
+
+  struct ExecuteLiquidationCallParams {
+    uint256 reservesCount;
+    uint256 debtToCover;
+    address collateralAsset;
+    address debtAsset;
+    address user;
+    bool receiveAToken;
+    address priceOracle;
+  }
+
+  struct ExecuteBorrowParams {
+    address asset;
+    address user;
+    address onBehalfOf;
+    uint256 amount;
+    uint256 interestRateMode;
+    uint16 referralCode;
+    bool releaseUnderlying;
+    uint256 maxStableRateBorrowSizePercent;
+    uint256 reservesCount;
+    address oracle;
+  }
+
+  struct ExecuteRepayParams {
+    address asset;
+    uint256 amount;
+    uint256 rateMode;
+    address onBehalfOf;
+    address lastBorrower;
+    uint40 lastBorrowTimestamp;
+  }
+
+  struct ExecuteWithdrawParams {
+    address asset;
+    uint256 amount;
+    address to;
+    uint256 reservesCount;
+    address oracle;
+  }
+
+  struct FinalizeTransferParams {
+    address asset;
+    address from;
+    address to;
+    uint256 amount;
+    uint256 balanceFromBefore;
+    uint256 balanceToBefore;
+    uint256 reservesCount;
+    address oracle;
+  }
+
+  struct FlashloanParams {
+    address receiverAddress;
+    address[] assets;
+    uint256[] amounts;
+    uint256[] modes;
+    address onBehalfOf;
+    bytes params;
+    uint16 referralCode;
+    uint256 flashLoanPremiumToProtocol;
+    uint256 flashLoanPremiumTotal;
+    uint256 maxStableRateBorrowSizePercent;
+    uint256 reservesCount;
+    address oracle;
+  }
 }

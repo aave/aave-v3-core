@@ -1,40 +1,52 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {IERC20} from '../../dependencies/openzeppelin/contracts//IERC20.sol';
-import {IAToken} from '../../interfaces/IAToken.sol';
-import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
-import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
-import {IPriceOracleGetter} from '../../interfaces/IPriceOracleGetter.sol';
-import {IPoolCollateralManager} from '../../interfaces/IPoolCollateralManager.sol';
-import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
-import {WadRayMath} from '../libraries/math/WadRayMath.sol';
-import {PercentageMath} from '../libraries/math/PercentageMath.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {Errors} from '../libraries/helpers/Errors.sol';
-import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
-import {DataTypes} from '../libraries/types/DataTypes.sol';
-import {UserConfiguration} from '../libraries/configuration/UserConfiguration.sol';
-import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
-import {PoolStorage} from './PoolStorage.sol';
+import {IERC20} from '../../../dependencies/openzeppelin/contracts//IERC20.sol';
+import {IAToken} from '../../../interfaces/IAToken.sol';
+import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
+import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
+import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
+import {
+  VersionedInitializable
+} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
+import {Helpers} from '../../libraries/helpers/Helpers.sol';
+import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
+import {PercentageMath} from '../../libraries/math/PercentageMath.sol';
+import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {Errors} from '../../libraries/helpers/Errors.sol';
+import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
+import {DataTypes} from '../../libraries/types/DataTypes.sol';
+import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
+import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 
 /**
- * @title PoolCollateralManager contract
+ * @title LiquidationLogic library
  * @author Aave
  * @dev Implements actions involving management of collateral in the protocol, the main one being the liquidations
  * IMPORTANT This contract will run always via DELEGATECALL, through the Pool, so the chain of inheritance
  * is the same as the Pool, to have compatible storage layouts
  **/
-contract PoolCollateralManager is IPoolCollateralManager, VersionedInitializable, PoolStorage {
-  using SafeERC20 for IERC20;
+library LiquidationLogic {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+  using SafeERC20 for IERC20;
+
+  event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
+  event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
+  event LiquidationCall(
+    address indexed collateralAsset,
+    address indexed debtAsset,
+    address indexed user,
+    uint256 debtToCover,
+    uint256 liquidatedCollateralAmount,
+    address liquidator,
+    bool receiveAToken
+  );
 
   uint256 internal constant LIQUIDATION_CLOSE_FACTOR_PERCENT = 5000;
 
@@ -57,81 +69,64 @@ contract PoolCollateralManager is IPoolCollateralManager, VersionedInitializable
     DataTypes.InterestRateMode borrowRateMode;
     uint256 errorCode;
     string errorMsg;
-  }
+    DataTypes.ReserveCache debtReserveCache;
 
-  /**
-   * @dev As thIS contract extends the VersionedInitializable contract to match the state
-   * of the Pool contract, the getRevision() function is needed, but the value is not
-   * important, as the initialize() function will never be called here
-   */
-  function getRevision() internal pure override returns (uint256) {
-    return 0;
   }
 
   /**
    * @dev Function to liquidate a position if its Health Factor drops below 1
    * - The caller (liquidator) covers `debtToCover` amount of debt of the user getting liquidated, and receives
    *   a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
-   * @param collateralAsset The address of the underlying asset used as collateral, to receive as result of the liquidation
-   * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
-   * @param user The address of the borrower getting liquidated
-   * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
-   * @param receiveAToken `true` if the liquidators wants to receive the collateral aTokens, `false` if he wants
-   * to receive the underlying collateral asset directly
    **/
-  function liquidationCall(
-    address collateralAsset,
-    address debtAsset,
-    address user,
-    uint256 debtToCover,
-    bool receiveAToken
-  ) external override returns (uint256, string memory) {
-    DataTypes.ReserveData storage collateralReserve = _reserves[collateralAsset];
-    DataTypes.ReserveData storage debtReserve = _reserves[debtAsset];
-    DataTypes.ReserveCache memory debtReserveCache = debtReserve.cache();
-    DataTypes.UserConfigurationMap storage userConfig = _usersConfig[user];
-
+  function executeLiquidationCall(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
+    mapping(uint256 => address) storage reservesList,
+    DataTypes.ExecuteLiquidationCallParams memory params
+  ) external {
     LiquidationCallLocalVars memory vars;
 
-    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(user, debtReserve);
-    vars.oracle = IPriceOracleGetter(_addressesProvider.getPriceOracle());
+    DataTypes.ReserveData storage collateralReserve = reserves[params.collateralAsset];
+    DataTypes.ReserveData storage debtReserve = reserves[params.debtAsset];
+    DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
+    vars.debtReserveCache = debtReserve.cache();
 
-    (vars.errorCode, vars.errorMsg) = ValidationLogic.validateLiquidationCall(
+
+    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(params.user, debtReserve);
+    vars.oracle = IPriceOracleGetter(params.priceOracle);
+
+    ValidationLogic.validateLiquidationCall(
       collateralReserve,
-      debtReserveCache,
+      vars.debtReserveCache,
       vars.userStableDebt + vars.userVariableDebt,
-      user,
-      _reserves,
+      params.user,
+      reserves,
       userConfig,
-      _reservesList,
-      _reservesCount,
-      address(vars.oracle)
+      reservesList,
+      params.reservesCount,
+      params.priceOracle
     );
-
-    if (Errors.CollateralManagerErrors(vars.errorCode) != Errors.CollateralManagerErrors.NO_ERROR) {
-      return (vars.errorCode, vars.errorMsg);
-    }
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
 
-    vars.userCollateralBalance = vars.collateralAtoken.balanceOf(user);
+    vars.userCollateralBalance = vars.collateralAtoken.balanceOf(params.user);
 
     vars.maxLiquidatableDebt = (vars.userStableDebt + vars.userVariableDebt).percentMul(
       LIQUIDATION_CLOSE_FACTOR_PERCENT
     );
 
-    vars.actualDebtToLiquidate = debtToCover > vars.maxLiquidatableDebt
+    vars.actualDebtToLiquidate = params.debtToCover > vars.maxLiquidatableDebt
       ? vars.maxLiquidatableDebt
-      : debtToCover;
+      : params.debtToCover;
 
     (
       vars.maxCollateralToLiquidate,
       vars.debtAmountNeeded
     ) = _calculateAvailableCollateralToLiquidate(
       collateralReserve,
-      debtReserveCache,
-      collateralAsset,
-      debtAsset,
+      vars.debtReserveCache,
+      params.collateralAsset,
+      params.debtAsset,
       vars.actualDebtToLiquidate,
       vars.userCollateralBalance,
       vars.oracle
@@ -145,74 +140,61 @@ contract PoolCollateralManager is IPoolCollateralManager, VersionedInitializable
       vars.actualDebtToLiquidate = vars.debtAmountNeeded;
     }
 
-    // If the liquidator reclaims the underlying asset, we make sure there is enough available liquidity in the
-    // collateral reserve
-    if (!receiveAToken) {
-      uint256 currentAvailableCollateral =
-        IERC20(collateralAsset).balanceOf(address(vars.collateralAtoken));
-      if (currentAvailableCollateral < vars.maxCollateralToLiquidate) {
-        return (
-          uint256(Errors.CollateralManagerErrors.NOT_ENOUGH_LIQUIDITY),
-          Errors.PCM_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE
-        );
-      }
-    }
-
-    debtReserve.updateState(debtReserveCache);
+    debtReserve.updateState(vars.debtReserveCache);
 
     if (vars.userVariableDebt >= vars.actualDebtToLiquidate) {
-      IVariableDebtToken(debtReserveCache.variableDebtTokenAddress).burn(
-        user,
+      IVariableDebtToken(vars.debtReserveCache.variableDebtTokenAddress).burn(
+        params.user,
         vars.actualDebtToLiquidate,
-        debtReserveCache.nextVariableBorrowIndex
+        vars.debtReserveCache.nextVariableBorrowIndex
       );
-      debtReserveCache.refreshDebt(0, 0, 0, vars.actualDebtToLiquidate);
-      debtReserve.updateInterestRates(debtReserveCache, debtAsset, vars.actualDebtToLiquidate, 0);
+      vars.debtReserveCache.refreshDebt(0, 0, 0, vars.actualDebtToLiquidate);
+      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
-        IVariableDebtToken(debtReserveCache.variableDebtTokenAddress).burn(
-          user,
+        IVariableDebtToken(vars.debtReserveCache.variableDebtTokenAddress).burn(
+          params.user,
           vars.userVariableDebt,
-          debtReserveCache.nextVariableBorrowIndex
+          vars.debtReserveCache.nextVariableBorrowIndex
         );
       }
-      IStableDebtToken(debtReserveCache.stableDebtTokenAddress).burn(
-        user,
+      IStableDebtToken(vars.debtReserveCache.stableDebtTokenAddress).burn(
+        params.user,
         vars.actualDebtToLiquidate - vars.userVariableDebt
       );
-      debtReserveCache.refreshDebt(
+      vars.debtReserveCache.refreshDebt(
         0,
         vars.actualDebtToLiquidate - vars.userVariableDebt,
         0,
         vars.userVariableDebt
       );
 
-      debtReserve.updateInterestRates(debtReserveCache, debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
     }
 
-    if (receiveAToken) {
+    if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
-      vars.collateralAtoken.transferOnLiquidation(user, msg.sender, vars.maxCollateralToLiquidate);
+      vars.collateralAtoken.transferOnLiquidation(params.user, msg.sender, vars.maxCollateralToLiquidate);
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
-        DataTypes.UserConfigurationMap storage liquidatorConfig = _usersConfig[msg.sender];
+        DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
         liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
-        emit ReserveUsedAsCollateralEnabled(collateralAsset, msg.sender);
+        emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
       }
     } else {
       DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
       collateralReserve.updateState(collateralReserveCache);
       collateralReserve.updateInterestRates(
         collateralReserveCache,
-        collateralAsset,
+        params.collateralAsset,
         0,
         vars.maxCollateralToLiquidate
       );
 
       // Burn the equivalent amount of aToken, sending the underlying to the liquidator
       vars.collateralAtoken.burn(
-        user,
+        params.user,
         msg.sender,
         vars.maxCollateralToLiquidate,
         collateralReserveCache.nextLiquidityIndex
@@ -223,27 +205,25 @@ contract PoolCollateralManager is IPoolCollateralManager, VersionedInitializable
     // we set the currency as not being used as collateral anymore
     if (vars.maxCollateralToLiquidate == vars.userCollateralBalance) {
       userConfig.setUsingAsCollateral(collateralReserve.id, false);
-      emit ReserveUsedAsCollateralDisabled(collateralAsset, user);
+      emit ReserveUsedAsCollateralDisabled(params.collateralAsset, params.user);
     }
 
     // Transfers the debt asset being repaid to the aToken, where the liquidity is kept
-    IERC20(debtAsset).safeTransferFrom(
+    IERC20(params.debtAsset).safeTransferFrom(
       msg.sender,
-      debtReserveCache.aTokenAddress,
+      vars.debtReserveCache.aTokenAddress,
       vars.actualDebtToLiquidate
     );
 
     emit LiquidationCall(
-      collateralAsset,
-      debtAsset,
-      user,
+      params.collateralAsset,
+      params.debtAsset,
+      params.user,
       vars.actualDebtToLiquidate,
       vars.maxCollateralToLiquidate,
       msg.sender,
-      receiveAToken
+      params.receiveAToken
     );
-
-    return (uint256(Errors.CollateralManagerErrors.NO_ERROR), Errors.PCM_NO_ERRORS);
   }
 
   struct AvailableCollateralToLiquidateLocalVars {

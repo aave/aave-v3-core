@@ -122,26 +122,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /**
-   * @dev Returns the address of the PoolCollateralManager. Since the manager is used
-   * through delegateCall within the Pool contract, the proxy contract pattern does not work properly hence
-   * the addresses are changed directly
-   * @return The address of the PoolCollateralManager
-   **/
-
-  function getPoolCollateralManager() external view override returns (address) {
-    return getAddress(POOL_COLLATERAL_MANAGER);
-  }
-
-  /**
-   * @dev Updates the address of the PoolCollateralManager
-   * @param manager The new PoolCollateralManager address
-   **/
-  function setPoolCollateralManager(address manager) external override onlyOwner {
-    _addresses[POOL_COLLATERAL_MANAGER] = manager;
-    emit PoolCollateralManagerUpdated(manager);
-  }
-
-  /**
    * @dev The functions below are getters/setters of addresses that are outside the context
    * of the protocol hence the upgradable proxy pattern is not used
    **/

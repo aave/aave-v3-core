@@ -14,7 +14,6 @@ interface IPoolAddressesProvider {
   event ConfigurationAdminUpdated(address indexed newAddress);
   event EmergencyAdminUpdated(address indexed newAddress);
   event PoolConfiguratorUpdated(address indexed newAddress);
-  event PoolCollateralManagerUpdated(address indexed newAddress);
   event PriceOracleUpdated(address indexed newAddress);
   event RateOracleUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
@@ -37,10 +36,6 @@ interface IPoolAddressesProvider {
   function getPoolConfigurator() external view returns (address);
 
   function setPoolConfiguratorImpl(address configurator) external;
-
-  function getPoolCollateralManager() external view returns (address);
-
-  function setPoolCollateralManager(address manager) external;
 
   function getPoolAdmin() external view returns (address);
 
