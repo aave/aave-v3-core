@@ -24,7 +24,6 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
     P_INVALID_FLASHLOAN_MODE,
     SAFEERC20_LOWLEVEL_CALL,
     P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
-    LP_BORROW_ALLOWANCE_NOT_ENOUGH,
   } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
@@ -634,7 +633,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(LP_BORROW_ALLOWANCE_NOT_ENOUGH);
+    ).to.be.reverted;
   });
 
   it('Caller takes a WETH flashloan with mode = 1 onBehalfOf user with allowance. A loan for onBehalfOf is creatd.', async () => {

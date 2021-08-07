@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.6;
 
-import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
@@ -20,7 +18,6 @@ import {DataTypes} from '../types/DataTypes.sol';
  */
 library GenericLogic {
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeMath for uint256;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -82,19 +79,24 @@ library GenericLogic {
       bool
     )
   {
+    if (userConfig.isEmpty()) {
+      return (0, 0, 0, 0, type(uint256).max, false);
+    }
+
     CalculateUserAccountDataVars memory vars;
 
-    if (userConfig.isEmpty()) {
-      return (0, 0, 0, 0, uint256(-1), false);
-    }
-    for (vars.i = 0; vars.i < reservesCount; vars.i++) {
+    while (vars.i < reservesCount) {
       if (!userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
+        unchecked {++vars.i;}
         continue;
       }
 
       vars.currentReserveAddress = reserves[vars.i];
 
-      if (vars.currentReserveAddress == address(0)) continue;
+      if (vars.currentReserveAddress == address(0)) {
+        unchecked {++vars.i;}
+        continue;
+      }
 
       DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
 
@@ -102,7 +104,7 @@ library GenericLogic {
         .configuration
         .getParams();
 
-      vars.assetUnit = 10**vars.decimals;
+      unchecked {vars.assetUnit = 10**vars.decimals;}
       vars.assetPrice = IPriceOracleGetter(oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && userConfig.isUsingAsCollateral(vars.i)) {
@@ -110,17 +112,19 @@ library GenericLogic {
         vars.userBalance = IScaledBalanceToken(currentReserve.aTokenAddress).scaledBalanceOf(user);
         vars.userBalance = vars.userBalance.rayMul(vars.normalizedIncome);
 
-        vars.userBalanceInBaseCurrency = vars.assetPrice.mul(vars.userBalance).div(vars.assetUnit);
-        vars.totalCollateralInBaseCurrency = vars.totalCollateralInBaseCurrency.add(
-          vars.userBalanceInBaseCurrency
-        );
+        vars.userBalanceInBaseCurrency = (vars.assetPrice * vars.userBalance);
+        unchecked {vars.userBalanceInBaseCurrency /= vars.assetUnit;}
+        vars.totalCollateralInBaseCurrency =
+          vars.totalCollateralInBaseCurrency +
+          vars.userBalanceInBaseCurrency;
 
-        vars.avgLtv = vars.avgLtv.add(vars.userBalanceInBaseCurrency.mul(vars.ltv));
+        vars.avgLtv = vars.avgLtv + vars.userBalanceInBaseCurrency * vars.ltv;
         vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
 
-        vars.avgLiquidationThreshold = vars.avgLiquidationThreshold.add(
-          vars.userBalanceInBaseCurrency.mul(vars.liquidationThreshold)
-        );
+        vars.avgLiquidationThreshold =
+          vars.avgLiquidationThreshold +
+          vars.userBalanceInBaseCurrency *
+          vars.liquidationThreshold;
       }
 
       if (userConfig.isBorrowing(vars.i)) {
@@ -132,26 +136,29 @@ library GenericLogic {
           vars.normalizedDebt = currentReserve.getNormalizedDebt();
           vars.userDebt = vars.userDebt.rayMul(vars.normalizedDebt);
         }
-        vars.userDebt = vars.userDebt.add(vars.userStableDebt);
-        vars.userDebtInBaseCurrency = vars.assetPrice.mul(vars.userDebt).div(vars.assetUnit);
-        vars.totalDebtInBaseCurrency = vars.totalDebtInBaseCurrency.add(
-          vars.userDebtInBaseCurrency
-        );
+        vars.userDebt = vars.userDebt + vars.userStableDebt;
+        vars.userDebtInBaseCurrency = (vars.assetPrice * vars.userDebt);
+        unchecked {vars.userDebtInBaseCurrency /= vars.assetUnit;}
+        vars.totalDebtInBaseCurrency = vars.totalDebtInBaseCurrency + vars.userDebtInBaseCurrency;
       }
+
+      unchecked {++vars.i;}
     }
 
-    vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
-      ? vars.avgLtv.div(vars.totalCollateralInBaseCurrency)
-      : 0;
-    vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
-      ? vars.avgLiquidationThreshold.div(vars.totalCollateralInBaseCurrency)
-      : 0;
+    unchecked {
+      vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
+        ? vars.avgLtv / vars.totalCollateralInBaseCurrency
+        : 0;
+      vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
+        ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency
+        : 0;
+    }
 
-    vars.healthFactor = calculateHealthFactorFromBalances(
-      vars.totalCollateralInBaseCurrency,
-      vars.totalDebtInBaseCurrency,
-      vars.avgLiquidationThreshold
-    );
+    vars.healthFactor = (vars.totalDebtInBaseCurrency == 0)
+      ? type(uint256).max
+      : (vars.totalCollateralInBaseCurrency.percentMul(vars.avgLiquidationThreshold)).wadDiv(
+        vars.totalDebtInBaseCurrency
+      );
     return (
       vars.totalCollateralInBaseCurrency,
       vars.totalDebtInBaseCurrency,
@@ -160,26 +167,6 @@ library GenericLogic {
       vars.healthFactor,
       vars.hasZeroLtvCollateral
     );
-  }
-
-  /**
-   * @dev Calculates the health factor from the corresponding balances
-   * @param totalCollateralInBaseCurrency The total collateral in the base currency used by the price feed
-   * @param totalDebtInBaseCurrency The total debt in the base currency used by the price feed
-   * @param liquidationThreshold The avg liquidation threshold
-   * @return The health factor calculated from the balances provided
-   **/
-  function calculateHealthFactorFromBalances(
-    uint256 totalCollateralInBaseCurrency,
-    uint256 totalDebtInBaseCurrency,
-    uint256 liquidationThreshold
-  ) internal pure returns (uint256) {
-    if (totalDebtInBaseCurrency == 0) return uint256(-1);
-
-    return
-      (totalCollateralInBaseCurrency.percentMul(liquidationThreshold)).wadDiv(
-        totalDebtInBaseCurrency
-      );
   }
 
   /**
@@ -202,40 +189,7 @@ library GenericLogic {
       return 0;
     }
 
-    availableBorrowsInBaseCurrency = availableBorrowsInBaseCurrency.sub(totalDebtInBaseCurrency);
+    availableBorrowsInBaseCurrency = availableBorrowsInBaseCurrency - totalDebtInBaseCurrency;
     return availableBorrowsInBaseCurrency;
-  }
-
-  /**
-   * @dev proxy call for calculateUserAccountData as external function.
-   * Used in Pool to work around contract size limit issues
-   * @param user The address of the user
-   * @param reservesData Data of all the reserves
-   * @param userConfig The configuration of the user
-   * @param reserves The list of the available reserves
-   * @param oracle The price oracle address
-   * @return The total collateral and total debt of the user in ETH, the avg ltv, liquidation threshold and the HF
-   **/
-  function getUserAccountData(
-    address user,
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap memory userConfig,
-    mapping(uint256 => address) storage reserves,
-    uint256 reservesCount,
-    address oracle
-  )
-    external
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      bool
-    )
-  {
-    return
-      calculateUserAccountData(user, reservesData, userConfig, reserves, reservesCount, oracle);
   }
 }

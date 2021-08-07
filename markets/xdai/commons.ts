@@ -86,9 +86,6 @@ export const CommonsConfig: ICommonConfiguration = {
   RateOracle: {
     [eXDaiNetwork.xdai]: '',
   },
-  PoolCollateralManager: {
-    [eXDaiNetwork.xdai]: '',
-  },
   TokenDistributor: {
     [eXDaiNetwork.xdai]: '',
   },

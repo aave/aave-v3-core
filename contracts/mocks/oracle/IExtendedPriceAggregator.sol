@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.8.6;
 
 interface IExtendedPriceAggregator {
   event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp);
