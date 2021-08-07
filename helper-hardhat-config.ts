@@ -1,11 +1,6 @@
 // @ts-ignore
 import { HardhatNetworkForkingUserConfig, HardhatUserConfig } from 'hardhat/types';
-import {
-  eEthereumNetwork,
-  ePolygonNetwork,
-  eXDaiNetwork,
-  iParamsPerNetwork,
-} from './helpers/types';
+import { eEthereumNetwork, iParamsPerNetwork } from './helpers/types';
 
 require('dotenv').config();
 
@@ -46,22 +41,6 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
   [eEthereumNetwork.hardhat]: 'http://localhost:8545',
   [eEthereumNetwork.buidlerevm]: 'http://localhost:8545',
   [eEthereumNetwork.tenderlyMain]: `https://rpc.tenderly.co/fork/${TENDERLY_FORK_ID}`,
-  [ePolygonNetwork.mumbai]: 'https://rpc-mumbai.maticvigil.com',
-  [ePolygonNetwork.matic]: 'https://rpc-mainnet.matic.network',
-  [eXDaiNetwork.xdai]: 'https://rpc.xdaichain.com/',
-};
-
-export const NETWORKS_DEFAULT_GAS: iParamsPerNetwork<number> = {
-  [eEthereumNetwork.kovan]: 1 * GWEI,
-  [eEthereumNetwork.ropsten]: 65 * GWEI,
-  [eEthereumNetwork.main]: 65 * GWEI,
-  [eEthereumNetwork.coverage]: 65 * GWEI,
-  [eEthereumNetwork.hardhat]: 65 * GWEI,
-  [eEthereumNetwork.buidlerevm]: 65 * GWEI,
-  [eEthereumNetwork.tenderlyMain]: 0.01 * GWEI,
-  [ePolygonNetwork.mumbai]: 1 * GWEI,
-  [ePolygonNetwork.matic]: 1 * GWEI,
-  [eXDaiNetwork.xdai]: 1 * GWEI,
 };
 
 export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {
@@ -72,7 +51,4 @@ export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {
   [eEthereumNetwork.hardhat]: undefined,
   [eEthereumNetwork.buidlerevm]: undefined,
   [eEthereumNetwork.tenderlyMain]: 12406069,
-  [ePolygonNetwork.mumbai]: undefined,
-  [ePolygonNetwork.matic]: undefined,
-  [eXDaiNetwork.xdai]: undefined,
 };
