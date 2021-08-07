@@ -16,8 +16,7 @@ import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.
 import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IPoolConfigurator} from '../../interfaces/IPoolConfigurator.sol';
-
-import {PoolConfiguratorLogic} from '../libraries/logic/PoolConfiguratorLogic.sol';
+import {ConfiguratorLogic} from '../libraries/logic/ConfiguratorLogic.sol';
 import {ConfiguratorInputTypes} from '../libraries/types/ConfiguratorInputTypes.sol';
 
 /**
@@ -29,7 +28,6 @@ import {ConfiguratorInputTypes} from '../libraries/types/ConfiguratorInputTypes.
 contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
-  using PoolConfiguratorLogic for DataTypes.ReserveConfigurationMap;
 
   IPoolAddressesProvider internal _addressesProvider;
   IPool internal _pool;
@@ -37,32 +35,22 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   mapping(address => bool) private _riskAdmins;
 
   modifier onlyPoolAdmin() {
-    require(_addressesProvider.getPoolAdmin() == msg.sender, Errors.CALLER_NOT_POOL_ADMIN);
+    _onlyPoolAdmin();
     _;
   }
 
   modifier onlyEmergencyAdmin() {
-    require(
-      _addressesProvider.getEmergencyAdmin() == msg.sender,
-      Errors.PC_CALLER_NOT_EMERGENCY_ADMIN
-    );
+    _onlyEmergencyAdmin();
     _;
   }
 
   modifier onlyEmergencyOrPoolAdmin() {
-    require(
-      _addressesProvider.getEmergencyAdmin() == msg.sender ||
-        _addressesProvider.getPoolAdmin() == msg.sender,
-      Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
-    );
+    _onlyPoolOrEmergencyAdmin();
     _;
   }
 
   modifier onlyRiskOrPoolAdmins() {
-    require(
-      _riskAdmins[msg.sender] || _addressesProvider.getPoolAdmin() == msg.sender,
-      Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
-    );
+    _onlyRiskOrPoolAdmins();
     _;
   }
 
@@ -78,20 +66,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function batchInitReserve(ConfiguratorInputTypes.InitReserveInput[] calldata input)
+  function initReserves(ConfiguratorInputTypes.InitReserveInput[] calldata input)
     external
     override
     onlyPoolAdmin
   {
     IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
-      PoolConfiguratorLogic._initReserve(cachedPool, input[i]);
+      ConfiguratorLogic.initReserve(cachedPool, input[i]);
     }
   }
 
   /// @inheritdoc IPoolConfigurator
   function dropReserve(address asset) external override onlyPoolAdmin {
-    PoolConfiguratorLogic.dropReserve(_pool, asset);
+    _pool.dropReserve(asset);
+    emit ReserveDropped(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -100,7 +89,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    PoolConfiguratorLogic.updateAToken(_pool, input);
+    ConfiguratorLogic.updateAToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -109,7 +98,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    PoolConfiguratorLogic.updateStableDebtToken(_pool, input);
+    ConfiguratorLogic.updateStableDebtToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -118,7 +107,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    PoolConfiguratorLogic.updateVariableDebtToken(_pool, input);
+    ConfiguratorLogic.updateVariableDebtToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -128,13 +117,20 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     bool stableBorrowRateEnabled
   ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.enableBorrowingOnReserve(_pool, asset, borrowCap, stableBorrowRateEnabled);
-  }
+    currentConfig.setBorrowingEnabled(true);
+    currentConfig.setBorrowCap(borrowCap);
+    currentConfig.setStableRateBorrowingEnabled(stableBorrowRateEnabled);
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit BorrowingEnabledOnReserve(asset, stableBorrowRateEnabled);
+    }
 
   /// @inheritdoc IPoolConfigurator
   function disableBorrowingOnReserve(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.disableBorrowingOnReserve(_pool, asset);
+    currentConfig.setBorrowingEnabled(false);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit BorrowingDisabledOnReserve(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -170,31 +166,38 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       _checkNoLiquidity(asset);
     }
 
-    currentConfig.configureReserveAsCollateral(
-      _pool,
-      asset,
-      ltv,
-      liquidationThreshold,
-      liquidationBonus
-    );
+    currentConfig.setLtv(ltv);
+    currentConfig.setLiquidationThreshold(liquidationThreshold);
+    currentConfig.setLiquidationBonus(liquidationBonus);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit CollateralConfigurationChanged(asset, ltv, liquidationThreshold, liquidationBonus);
   }
 
   /// @inheritdoc IPoolConfigurator
   function enableReserveStableRate(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.enableReserveStableRate(_pool, asset);
+    currentConfig.setStableRateBorrowingEnabled(true);
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit StableRateEnabledOnReserve(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
   function disableReserveStableRate(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.disableReserveStableRate(_pool, asset);
+    currentConfig.setStableRateBorrowingEnabled(false);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit StableRateDisabledOnReserve(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
   function activateReserve(address asset) external override onlyPoolAdmin {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.activateReserve(_pool, asset);
+    currentConfig.setActive(true);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit ReserveActivated(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -202,25 +205,39 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _checkNoLiquidity(asset);
 
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.deactivateReserve(_pool, asset);
+    currentConfig.setActive(false);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit ReserveDeactivated(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
   function freezeReserve(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.freezeReserve(_pool, asset);
+    currentConfig.setFrozen(true);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit ReserveFrozen(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
   function unfreezeReserve(address asset) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.unfreezeReserve(_pool, asset);
+    currentConfig.setFrozen(false);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit ReserveUnfrozen(asset);
   }
 
   /// @inheritdoc IPoolConfigurator
   function setReservePause(address asset, bool paused) public override onlyEmergencyOrPoolAdmin {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setReservePause(_pool, asset, paused);
+    currentConfig.setPaused(paused);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    if (paused) {
+      emit ReservePaused(asset);
+    } else {
+      emit ReserveUnpaused(asset);
+    }
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -230,19 +247,25 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     onlyRiskOrPoolAdmins
   {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setReserveFactor(_pool, asset, reserveFactor);
+    currentConfig.setReserveFactor(reserveFactor);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit ReserveFactorChanged(asset, reserveFactor);
   }
 
   ///@inheritdoc IPoolConfigurator
   function setBorrowCap(address asset, uint256 borrowCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setBorrowCap(_pool, asset, borrowCap);
+    currentConfig.setBorrowCap(borrowCap);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit BorrowCapChanged(asset, borrowCap);
   }
 
   ///@inheritdoc IPoolConfigurator
   function setSupplyCap(address asset, uint256 supplyCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setSupplyCap(_pool, asset, supplyCap);
+    currentConfig.setSupplyCap(supplyCap);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit SupplyCapChanged(asset, supplyCap);
   }
 
   ///@inheritdoc IPoolConfigurator
@@ -261,7 +284,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
     for (uint256 i = 0; i < reserves.length; i++) {
       if (reserves[i] != address(0)) {
-        //might happen is a reserve was dropped
         setReservePause(reserves[i], paused);
       }
     }
@@ -340,6 +362,32 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(
       availableLiquidity == 0 && reserveData.currentLiquidityRate == 0,
       Errors.PC_RESERVE_LIQUIDITY_NOT_0
+    );
+  }
+
+  function _onlyPoolAdmin() internal view {
+    require(_addressesProvider.getPoolAdmin() == msg.sender, Errors.CALLER_NOT_POOL_ADMIN);
+  }
+
+  function _onlyEmergencyAdmin() internal view {
+    require(
+      _addressesProvider.getEmergencyAdmin() == msg.sender,
+      Errors.PC_CALLER_NOT_EMERGENCY_ADMIN
+    );
+  }
+
+  function _onlyPoolOrEmergencyAdmin() internal view {
+    require(
+      _addressesProvider.getEmergencyAdmin() == msg.sender ||
+        _addressesProvider.getPoolAdmin() == msg.sender,
+      Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
+    );
+  }
+
+  function _onlyRiskOrPoolAdmins() internal view {
+    require(
+      _riskAdmins[msg.sender] || _addressesProvider.getPoolAdmin() == msg.sender,
+      Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
     );
   }
 }

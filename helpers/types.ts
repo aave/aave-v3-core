@@ -54,8 +54,7 @@ export enum eContractid {
   DepositLogic = 'DepositLogic',
   BorrowLogic = 'BorrowLogic',
   LiquidationLogic = 'LiquidationLogic',
-  PoolHelperLogic = 'PoolHelperLogic',
-  PoolConfiguratorLogic = 'PoolConfiguratorLogic',
+  ConfiguratorLogic = 'ConfiguratorLogic',
   Pool = 'Pool',
   PriceOracle = 'PriceOracle',
   Proxy = 'Proxy',
@@ -158,7 +157,6 @@ export enum ProtocolErrors {
   CT_INVALID_MINT_AMOUNT = '56', //invalid amount to mint
   P_FAILED_REPAY_WITH_COLLATERAL = '57',
   CT_INVALID_BURN_AMOUNT = '58', //invalid amount to burn
-  LP_BORROW_ALLOWANCE_NOT_ENOUGH = '59', // User borrows on behalf, but allowance are too small
   P_FAILED_COLLATERAL_SWAP = '60',
   P_INVALID_EQUAL_ASSETS_TO_SWAP = '61',
   P_REENTRANCY_NOT_ALLOWED = '62',

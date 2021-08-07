@@ -42,7 +42,7 @@ import {
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
-  PoolConfiguratorLogicFactory,
+  ConfiguratorLogicFactory,
 } from '../types';
 import {
   withSaveAndVerify,
@@ -81,18 +81,18 @@ export const deployPoolAddressesProviderRegistry = async (verify?: boolean) =>
     verify
   );
 
-export const deployPoolConfiguratorLogicLibrary = async (verify?: boolean) =>
+export const deployConfiguratorLogicLibrary = async (verify?: boolean) =>
   withSaveAndVerify(
-    await new PoolConfiguratorLogicFactory(await getFirstSigner()).deploy(),
-    eContractid.PoolConfiguratorLogic,
+    await new ConfiguratorLogicFactory(await getFirstSigner()).deploy(),
+    eContractid.ConfiguratorLogic,
     [],
     verify
   );
 
 export const deployPoolConfigurator = async (verify?: boolean) => {
-  const poolConfiguratorLogic = await deployPoolConfiguratorLogicLibrary(verify);
+  const configuratorLogic = await deployConfiguratorLogicLibrary(verify);
   const poolConfiguratorImpl = await new PoolConfiguratorFactory(
-    { ['__$4915e286ccea648899157905d465011458$__']: poolConfiguratorLogic.address },
+    { ['__$3ddc574512022f331a6a4c7e4bbb5c67b6$__']: configuratorLogic.address },
     await getFirstSigner()
   ).deploy();
   await insertContractAddressInDb(eContractid.PoolConfiguratorImpl, poolConfiguratorImpl.address);
@@ -153,27 +153,10 @@ export const deployLiquidationLogic = async (
 };
 
 
-export const deployPoolHelperLogic = async (
-  verify?: boolean
-) => {
-  const poolHelperLogicArtifact = await readArtifact(eContractid.PoolHelperLogic);
-  const linkedPoolHelperLogicByteCode = linkBytecode(poolHelperLogicArtifact, {});
-  const poolHelperLogicFactory = await DRE.ethers.getContractFactory(
-    poolHelperLogicArtifact.abi,
-    linkedPoolHelperLogicByteCode
-  );
-  const poolHelperLogic = await (
-    await poolHelperLogicFactory.connect(await getFirstSigner()).deploy()
-  ).deployed();
-
-  return withSaveAndVerify(poolHelperLogic, eContractid.PoolHelperLogic, [], verify);
-};
-
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
   const depositLogic = await deployDepositLogic( verify);
   const borrowLogic = await deployBorrowLogic(verify);
   const liquidationLogic = await deployLiquidationLogic(verify);
-  const poolHelperLogic = await deployPoolHelperLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -186,7 +169,6 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   // libPath example: contracts/libraries/logic/GenericLogic.sol
   // libName example: GenericLogic
   return {
-    ['__$56265c55042e83ee819cd4de36b013885b$__']: poolHelperLogic.address,
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
     ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,

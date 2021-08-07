@@ -21,7 +21,6 @@ pragma solidity 0.8.6;
 library Errors {
   //common errors
   string public constant CALLER_NOT_POOL_ADMIN = '33'; // 'The caller must be the pool admin'
-  string public constant BORROW_ALLOWANCE_NOT_ENOUGH = '59'; // User borrows on behalf, but allowance are too small
 
   //contract specific errors
   string public constant VL_INVALID_AMOUNT = '1'; // 'Amount must be greater than 0'

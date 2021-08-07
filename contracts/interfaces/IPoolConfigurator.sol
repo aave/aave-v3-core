@@ -209,10 +209,10 @@ interface IPoolConfigurator {
   event FlashloanPremiumToProcolUpdated(uint256 flashloanPremiumToProtocol);
 
   /**
-   * @dev Initializes reserves in batch
-   * @param input The array of reserves initialization parameters
+   * @dev Initializes multiple reserves
+   * @param input The array of initialization parameters
    **/
-  function batchInitReserve(ConfiguratorInputTypes.InitReserveInput[] calldata input) external;
+  function initReserves(ConfiguratorInputTypes.InitReserveInput[] calldata input) external;
 
   /**
    * @dev Updates the aToken implementation for the reserve

@@ -13,14 +13,13 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
+import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {DepositLogic} from '../libraries/logic/DepositLogic.sol';
 import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {PoolStorage} from './PoolStorage.sol';
-
-import {PoolHelperLogic} from '../libraries/logic/PoolHelperLogic.sol';
 
 /**
  * @title Pool contract
@@ -528,7 +527,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   ///@inheritdoc IPool
   function dropReserve(address asset) external override onlyPoolConfigurator {
-    PoolHelperLogic.dropReserve(_reserves, _reservesList, asset);
+    DataTypes.ReserveData storage reserve = _reserves[asset]; 
+    ValidationLogic.validateDropReserve(reserve);
+    _reservesList[_reserves[asset].id] = address(0);
+    delete _reserves[asset];
   }
 
   ///@inheritdoc IPool

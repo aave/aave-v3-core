@@ -439,7 +439,7 @@ library ValidationLogic {
     mapping(uint256 => address) storage reserves,
     uint256 reservesCount,
     address oracle
-  ) internal view returns (uint256, string memory) {
+  ) internal view {
     ValidateLiquidationCallLocalVars memory vars;
 
     (vars.collateralReserveActive, , , , vars.collateralReservePaused) = collateralReserve

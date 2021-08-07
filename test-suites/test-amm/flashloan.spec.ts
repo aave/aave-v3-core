@@ -21,11 +21,9 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
   const {
     VL_COLLATERAL_BALANCE_IS_0,
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
-    P_INVALID_FLASHLOAN_MODE,
     VL_STABLE_BORROWING_NOT_ENABLED,
     SAFEERC20_LOWLEVEL_CALL,
     P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
-    LP_BORROW_ALLOWANCE_NOT_ENOUGH,
   } = ProtocolErrors;
 
   before(async () => {
@@ -522,7 +520,7 @@ makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(LP_BORROW_ALLOWANCE_NOT_ENOUGH);
+    ).to.be.reverted();
   });
 
   it('Caller takes a WETH flashloan with mode = 1 onBehalfOf user with allowance. Should revert since stable borrowing is disabled.', async () => {
