@@ -7,6 +7,7 @@
     "artifacts"
   ],
   "scripts": {
+    "run-env": "npm i && tail -f /dev/null",
     "size": "npm run compile && npm run hardhat size-contracts",
     "small:test": "npm run compile && npx hardhat test test-suites/test-aave/__setup.spec.ts test-suites/test-aave/rate-strategy.spec.ts",
     "hardhat": "hardhat",
