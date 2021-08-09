@@ -123,12 +123,12 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       uint256
     )
   {
-    uint256 availableLiquidity = IERC20(aToken).totalSupply() + pendingTreasuryMint;
+    uint256 adjustedLiquidity = IERC20(aToken).totalSupply() + pendingTreasuryMint;
 
     return
       calculateInterestRates(
         reserve,
-        availableLiquidity,
+        adjustedLiquidity,
         totalStableDebt,
         totalVariableDebt,
         averageStableBorrowRate,
@@ -149,7 +149,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * NOTE This function is kept for compatibility with the previous DefaultInterestRateStrategy interface.
    * New protocol implementation uses the new calculateInterestRates() interface
    * @param reserve The address of the reserve
-   * @param availableLiquidity The liquidity available in the corresponding aToken
+   * @param adjustedLiquidity The liquidity available in the corresponding aToken
    * @param totalStableDebt The total borrowed from the reserve a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate loans
@@ -158,7 +158,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    **/
   function calculateInterestRates(
     address reserve,
-    uint256 availableLiquidity,
+    uint256 adjustedLiquidity,
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
@@ -180,16 +180,14 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
 
-    vars.utilizationRate = vars.totalDebt == 0
-      ? 0
-      : vars.totalDebt.rayDiv(
-        availableLiquidity /* + vars.totalDebt*/
-      );
-
-    vars.utilizationRate = vars.utilizationRate > WadRayMath.RAY
-      ? WadRayMath.RAY
-      : vars.utilizationRate;
-
+    if (vars.totalDebt == 0) {
+      vars.utilizationRate = 0;
+    } else if (vars.totalDebt >= adjustedLiquidity) {
+      vars.utilizationRate = WadRayMath.RAY;
+    } else {
+      vars.utilizationRate = vars.totalDebt.rayDiv(adjustedLiquidity);
+    }
+    
     vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
       .getMarketBorrowRate(reserve);
 
