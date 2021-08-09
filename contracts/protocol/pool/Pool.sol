@@ -579,7 +579,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
   }
 
-  function _addReserveToList(address asset) internal returns (uint8) {
+  function _addReserveToList(address asset) internal {
     uint256 reservesCount = _reservesCount;
 
     require(reservesCount < _maxNumberOfReserves, Errors.P_NO_MORE_RESERVES_ALLOWED);
@@ -592,7 +592,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           _reserves[asset].id = i;
           _reservesList[i] = asset;
           _reservesCount = reservesCount + 1;
-          return i;
         }
       }
     }
