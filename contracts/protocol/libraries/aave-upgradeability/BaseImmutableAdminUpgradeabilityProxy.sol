@@ -16,7 +16,7 @@ import '../../../dependencies/openzeppelin/upgradeability/BaseUpgradeabilityProx
 contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
   address immutable ADMIN;
 
-  constructor(address admin) public {
+  constructor(address admin) {
     ADMIN = admin;
   }
 
