@@ -12,6 +12,8 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 import {WadRayMath} from '../protocol/libraries/math/WadRayMath.sol';
 import {MathUtils} from '../protocol/libraries/math/MathUtils.sol';
 
+import 'hardhat/console.sol';
+
 contract AaveProtocolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
@@ -115,6 +117,8 @@ contract AaveProtocolDataProvider {
     external
     view
     returns (
+      uint256 aTokenSupply,
+      uint256 accruedToTreasury,
       uint256 availableLiquidity,
       uint256 totalStableDebt,
       uint256 totalVariableDebt,
@@ -137,12 +141,15 @@ contract AaveProtocolDataProvider {
     uint256 nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(reserve.liquidityIndex);*/
 
     // TODO: We need to update here. The accrued is not computed totally right
+    uint256 treasuryAccrual = reserve.accruedToTreasury.rayMul(reserve.liquidityIndex);
     uint256 aLiq = IERC20Detailed(reserve.aTokenAddress).totalSupply();
-    aLiq = aLiq + reserve.accruedToTreasury.rayMul(reserve.liquidityIndex);
+    aLiq = aLiq + treasuryAccrual;
     aLiq = aLiq - IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply();
     aLiq = aLiq - IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply();
 
     return (
+      IERC20Detailed(reserve.aTokenAddress).totalSupply(),
+      treasuryAccrual,
       aLiq, //IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
       IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply(),
       IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply(),

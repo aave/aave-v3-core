@@ -16,6 +16,8 @@ export interface UserReserveData {
 }
 
 export interface ReserveData {
+  aTokenSupply: BigNumber;
+  accruedToTreasury: BigNumber;
   address: string;
   symbol: string;
   decimals: BigNumber;

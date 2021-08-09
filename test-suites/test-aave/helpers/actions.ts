@@ -44,6 +44,8 @@ const almostEqualOrEqual = function (
   expected: ReserveData | UserReserveData,
   actual: ReserveData | UserReserveData
 ) {
+  console.log(actual);
+  console.log(expected);
   const keys = Object.keys(actual);
 
   keys.forEach((key) => {
@@ -395,6 +397,10 @@ export const borrow = async (
 
     console.log(reserveDataAfter);
     console.log(expectedReserveData);
+
+    console.log(
+      `Data: ${reserveDataAfter.totalLiquidity}. Expected: ${expectedReserveData.totalLiquidity}`
+    );
 
     expectEqual(reserveDataAfter, expectedReserveData);
     expectEqual(userDataAfter, expectedUserData);

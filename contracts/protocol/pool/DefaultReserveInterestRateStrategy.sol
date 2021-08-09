@@ -127,7 +127,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     //avoid stack too deep
     {
       availableLiquidity = availableLiquidity + vars.pendingTreasuryMint + vars.toMint;
-      availableLiquidity = availableLiquidity - vars.toBurn - totalStableDebt - totalVariableDebt;
+      availableLiquidity = availableLiquidity - vars.toBurn; /* - totalStableDebt - totalVariableDebt*/
     }
 
     return
@@ -187,7 +187,13 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
     vars.utilizationRate = vars.totalDebt == 0
       ? 0
-      : vars.totalDebt.rayDiv(availableLiquidity + vars.totalDebt);
+      : vars.totalDebt.rayDiv(
+        availableLiquidity /* + vars.totalDebt*/
+      );
+
+    vars.utilizationRate = vars.utilizationRate > WadRayMath.RAY
+      ? WadRayMath.RAY
+      : vars.utilizationRate;
 
     vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
       .getMarketBorrowRate(reserve);

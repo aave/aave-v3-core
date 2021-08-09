@@ -49,6 +49,8 @@ export const getReserveData = async (
   );
 
   return {
+    aTokenSupply: new BigNumber(reserveData.aTokenSupply.toString()),
+    accruedToTreasury: new BigNumber(reserveData.accruedToTreasury.toString()),
     totalLiquidity,
     utilizationRate,
     availableLiquidity: new BigNumber(reserveData.availableLiquidity.toString()),

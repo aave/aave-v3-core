@@ -165,6 +165,8 @@ export const calcExpectedReserveDataAfterDeposit = (
   const expectedReserveData: ReserveData = <ReserveData>{};
 
   expectedReserveData.address = reserveDataBeforeAction.address;
+  // TODO: What about the pending treasury mint?
+  // TODO: We probably need to compute the atoken supply and check those, only real place where I can see it being fucked up
 
   expectedReserveData.totalLiquidity = new BigNumber(reserveDataBeforeAction.totalLiquidity).plus(
     amountDeposited
@@ -311,6 +313,8 @@ export const calcExpectedReserveDataAfterBorrow = (
     reserveDataBeforeAction,
     txTimestamp
   );
+
+  // TODO:
 
   expectedReserveData.availableLiquidity =
     reserveDataBeforeAction.availableLiquidity.minus(amountBorrowedBN);

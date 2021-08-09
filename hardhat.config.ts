@@ -67,7 +67,7 @@ let forkMode;
 
 const buidlerConfig: HardhatUserConfig = {
   gasReporter: {
-    enabled: true,
+    enabled: false,
   },
   contractSizer: {
     alphaSort: true,
