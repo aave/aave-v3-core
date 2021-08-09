@@ -55,12 +55,11 @@ library DepositLogic {
 
     ValidationLogic.validateDeposit(reserveCache, amount);
 
-    reserve.updateInterestRates(reserveCache, asset, amount, 0);
-
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
 
     bool isFirstDeposit =
       IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
@@ -94,14 +93,13 @@ library DepositLogic {
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
 
-    reserve.updateInterestRates(reserveCache, vars.asset, 0, amountToWithdraw);
-
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,
       vars.to,
       amountToWithdraw,
       reserveCache.nextLiquidityIndex
     );
+    reserve.updateInterestRates(reserveCache, vars.asset, 0, 0);
 
     if (userConfig.isUsingAsCollateral(reserve.id)) {
       if (userConfig.isBorrowingAny()) {

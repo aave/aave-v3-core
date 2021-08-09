@@ -200,12 +200,6 @@ library LiquidationLogic {
     } else {
       DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
       collateralReserve.updateState(collateralReserveCache);
-      collateralReserve.updateInterestRates(
-        collateralReserveCache,
-        params.collateralAsset,
-        0,
-        vars.maxCollateralToLiquidate
-      );
 
       // Burn the equivalent amount of aToken, sending the underlying to the liquidator
       vars.collateralAtoken.burn(
@@ -214,6 +208,7 @@ library LiquidationLogic {
         vars.maxCollateralToLiquidate,
         collateralReserveCache.nextLiquidityIndex
       );
+      collateralReserve.updateInterestRates(collateralReserveCache, params.collateralAsset, 0, 0);
     }
 
     // If the collateral being liquidated is equal to the user balance,

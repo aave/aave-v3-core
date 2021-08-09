@@ -36,7 +36,7 @@ interface IReserveInterestRateStrategy {
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
     uint256 reserveFactor,
-    DataTypes.CalculateInterestParams memory vars
+    uint256 pendingTreasuryMint
   )
     external
     view

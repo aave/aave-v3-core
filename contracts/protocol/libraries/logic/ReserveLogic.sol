@@ -184,9 +184,9 @@ library ReserveLogic {
     vars.totalVariableDebt = reserveCache.nextScaledVariableDebt.rayMul(
       reserveCache.nextVariableBorrowIndex
     );
-    uint256 accruedToTreasury;
+    uint256 pendingTreasuryMint;
     {
-      accruedToTreasury = reserve.accruedToTreasury.rayMul(reserveCache.nextLiquidityIndex);
+      pendingTreasuryMint = reserve.accruedToTreasury.rayMul(reserveCache.nextLiquidityIndex);
     }
     (
       vars.newLiquidityRate,
@@ -199,7 +199,7 @@ library ReserveLogic {
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,
       reserveCache.reserveConfiguration.getReserveFactorMemory(),
-      DataTypes.CalculateInterestParams(accruedToTreasury, toMint, toBurn)
+      pendingTreasuryMint
     );
     require(vars.newLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
     require(vars.newStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);

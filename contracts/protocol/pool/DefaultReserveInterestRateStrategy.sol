@@ -112,7 +112,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
     uint256 reserveFactor,
-    DataTypes.CalculateInterestParams memory vars
+    uint256 pendingTreasuryMint
   )
     external
     view
@@ -123,12 +123,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       uint256
     )
   {
-    uint256 availableLiquidity = IERC20(aToken).totalSupply();
-    //avoid stack too deep
-    {
-      availableLiquidity = availableLiquidity + vars.pendingTreasuryMint + vars.toMint;
-      availableLiquidity = availableLiquidity - vars.toBurn; /* - totalStableDebt - totalVariableDebt*/
-    }
+    uint256 availableLiquidity = IERC20(aToken).totalSupply() + pendingTreasuryMint;
 
     return
       calculateInterestRates(
