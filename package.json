@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
-    "run-env": "npm i && tail -f /dev/null",
+    "small:test": "npm run compile && npx hardhat test test-suites/test-aave/__setup.spec.ts test-suites/test-aave/rate-strategy.spec.ts",
     "hardhat": "hardhat",
     "hardhat:kovan": "hardhat --network kovan",
     "hardhat:tenderly-main": "hardhat --network tenderlyMain",
