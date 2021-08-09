@@ -9,10 +9,13 @@ import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
+import {WadRayMath} from '../protocol/libraries/math/WadRayMath.sol';
+import {MathUtils} from '../protocol/libraries/math/MathUtils.sol';
 
 contract AaveProtocolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using WadRayMath for uint256;
 
   address constant MKR = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
   address constant ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -127,8 +130,20 @@ contract AaveProtocolDataProvider {
     DataTypes.ReserveData memory reserve =
       IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
+    /*    uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
+      reserve.currentLiquidityRate,
+      reserve.lastUpdateTimestamp
+    );
+    uint256 nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(reserve.liquidityIndex);*/
+
+    // TODO: We need to update here. The accrued is not computed totally right
+    uint256 aLiq = IERC20Detailed(reserve.aTokenAddress).totalSupply();
+    aLiq = aLiq + reserve.accruedToTreasury.rayMul(reserve.liquidityIndex);
+    aLiq = aLiq - IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply();
+    aLiq = aLiq - IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply();
+
     return (
-      IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
+      aLiq, //IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
       IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply(),
       IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply(),
       reserve.currentLiquidityRate,

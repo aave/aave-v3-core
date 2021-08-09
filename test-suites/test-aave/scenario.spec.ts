@@ -10,10 +10,11 @@ import { executeStory } from './helpers/scenario-engine';
 
 const scenarioFolder = './test-suites/test-aave/helpers/scenarios/';
 
-const selectedScenarios: string[] = [];
+const selectedScenarios: string[] = ['borrow-repay-stable.json'];
 
 fs.readdirSync(scenarioFolder).forEach((file) => {
   if (selectedScenarios.length > 0 && !selectedScenarios.includes(file)) return;
+  console.log(file);
 
   const scenario = require(`./helpers/scenarios/${file}`);
 
@@ -36,7 +37,7 @@ fs.readdirSync(scenarioFolder).forEach((file) => {
     for (const story of scenario.stories) {
       it(story.description, async function () {
         // Retry the test scenarios up to 4 times in case random HEVM network errors happen
-        this.retries(4);
+        // this.retries(4);
         await executeStory(story, testEnv);
       });
     }

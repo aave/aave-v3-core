@@ -393,6 +393,9 @@ export const borrow = async (
       timestamp
     );
 
+    console.log(reserveDataAfter);
+    console.log(expectedReserveData);
+
     expectEqual(reserveDataAfter, expectedReserveData);
     expectEqual(userDataAfter, expectedUserData);
 
