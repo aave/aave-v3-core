@@ -139,4 +139,10 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
   }
+
+  struct CalculateInterestParams {
+    uint256 pendingTreasuryMint;
+    uint256 toMint;
+    uint256 toBurn;
+  }
 }

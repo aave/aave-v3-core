@@ -169,21 +169,25 @@ library ReserveLogic {
   /**
    * @dev Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
-   * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
-   * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
+   * @param toMint The amount of liquidity added to the protocol (deposit) in the previous action
+   * @param toBurn The amount of liquidity taken from the protocol (redeem)
    **/
   function updateInterestRates(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
     address reserveAddress,
-    uint256 liquidityAdded,
-    uint256 liquidityTaken
+    uint256 toMint,
+    uint256 toBurn
   ) internal {
     UpdateInterestRatesLocalVars memory vars;
 
     vars.totalVariableDebt = reserveCache.nextScaledVariableDebt.rayMul(
       reserveCache.nextVariableBorrowIndex
     );
+    uint256 accruedToTreasury;
+    {
+      accruedToTreasury = reserve.accruedToTreasury.rayMul(reserveCache.nextLiquidityIndex);
+    }
     (
       vars.newLiquidityRate,
       vars.newStableRate,
@@ -191,12 +195,11 @@ library ReserveLogic {
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
-      liquidityAdded,
-      liquidityTaken,
       reserveCache.nextTotalStableDebt,
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,
-      reserveCache.reserveConfiguration.getReserveFactorMemory()
+      reserveCache.reserveConfiguration.getReserveFactorMemory(),
+      DataTypes.CalculateInterestParams(accruedToTreasury, toMint, toBurn)
     );
     require(vars.newLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
     require(vars.newStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);

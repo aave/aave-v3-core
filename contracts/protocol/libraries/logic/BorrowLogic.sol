@@ -112,7 +112,7 @@ library BorrowLogic {
       reserveCache,
       params.asset,
       0,
-      params.releaseUnderlying ? params.amount : 0
+      0 //params.releaseUnderlying ? params.amount : 0
     );
 
     if (params.releaseUnderlying) {
@@ -174,7 +174,12 @@ library BorrowLogic {
       reserveCache.refreshDebt(0, 0, 0, paybackAmount);
     }
 
-    reserve.updateInterestRates(reserveCache, vars.asset, paybackAmount, 0);
+    reserve.updateInterestRates(
+      reserveCache,
+      vars.asset,
+      0, /*paybackAmount*/
+      0
+    );
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
@@ -278,7 +283,7 @@ library BorrowLogic {
         reserve.updateInterestRates(
           reserveCache,
           vars.currentAsset,
-          vars.currentAmountPlusPremium,
+          0, /*vars.currentAmountPlusPremium,*/
           0
         );
 

@@ -7,6 +7,7 @@ import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IRateOracle} from '../../interfaces/IRateOracle.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {DataTypes} from '../libraries/types/DataTypes.sol';
 
 /**
  * @title DefaultReserveInterestRateStrategy contract
@@ -98,8 +99,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   /**
    * @dev Calculates the interest rates depending on the reserve's state and configurations
    * @param reserve The address of the reserve
-   * @param liquidityAdded The liquidity added during the operation
-   * @param liquidityTaken The liquidity taken during the operation
    * @param totalStableDebt The total borrowed from the reserve a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate loans
@@ -109,12 +108,11 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   function calculateInterestRates(
     address reserve,
     address aToken,
-    uint256 liquidityAdded,
-    uint256 liquidityTaken,
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
-    uint256 reserveFactor
+    uint256 reserveFactor,
+    DataTypes.CalculateInterestParams memory vars
   )
     external
     view
@@ -125,9 +123,12 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       uint256
     )
   {
-    uint256 availableLiquidity = IERC20(reserve).balanceOf(aToken);
+    uint256 availableLiquidity = IERC20(aToken).totalSupply();
     //avoid stack too deep
-    availableLiquidity = availableLiquidity + liquidityAdded - liquidityTaken;
+    {
+      availableLiquidity = availableLiquidity + vars.pendingTreasuryMint + vars.toMint;
+      availableLiquidity = availableLiquidity - vars.toBurn - totalStableDebt - totalVariableDebt;
+    }
 
     return
       calculateInterestRates(
