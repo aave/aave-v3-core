@@ -497,18 +497,6 @@ interface IPool {
   function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
-   * @dev Set the _pause state of a reserve
-   * - Only callable by the PoolConfigurator contract
-   * @param val `true` to pause the reserve, `false` to un-pause it
-   */
-  function setPause(bool val) external;
-
-  /**
-   * @dev Returns if the Pool is paused
-   */
-  function paused() external view returns (bool);
-
-  /**
    * @dev Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium.
    * Only callable by the PoolConfigurator contract
    * @param flashBorrower address of the flash borrower
