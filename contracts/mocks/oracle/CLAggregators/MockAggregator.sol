@@ -15,7 +15,7 @@ contract MockAggregator {
     return _latestAnswer;
   }
 
-  function getTokenType() external view returns (uint256) {
+  function getTokenType() external pure returns (uint256) {
     return 1;
   }
 
