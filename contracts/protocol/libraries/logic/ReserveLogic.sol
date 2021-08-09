@@ -168,16 +168,14 @@ library ReserveLogic {
 
   /**
    * @dev Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
-   * @param reserve The address of the reserve to be updated
-   * @param toMint The amount of liquidity added to the protocol (deposit) in the previous action
-   * @param toBurn The amount of liquidity taken from the protocol (redeem)
+   * @param reserve A storage pointer to the reserve to update
+   * @param reserveCache The reserve cache object in the current execution
+   * @param reserveAddress The address of the reserve to update
    **/
   function updateInterestRates(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
-    address reserveAddress,
-    uint256 toMint,
-    uint256 toBurn
+    address reserveAddress
   ) internal {
     UpdateInterestRatesLocalVars memory vars;
 

@@ -19,7 +19,7 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 /**
  * @title DepositLogic library
  * @author Aave
- * @notice Implements the base logic for deposit/withdraw 
+ * @notice Implements the base logic for deposit/withdraw
  */
 library DepositLogic {
   using ReserveLogic for DataTypes.ReserveCache;
@@ -59,7 +59,7 @@ library DepositLogic {
 
     bool isFirstDeposit =
       IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
-    reserve.updateInterestRates(reserveCache, asset, 0, 0);
+    reserve.updateInterestRates(reserveCache, asset);
 
     if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
@@ -99,7 +99,7 @@ library DepositLogic {
       amountToWithdraw,
       reserveCache.nextLiquidityIndex
     );
-    reserve.updateInterestRates(reserveCache, vars.asset, 0, 0);
+    reserve.updateInterestRates(reserveCache, vars.asset);
 
     if (userConfig.isUsingAsCollateral(reserve.id)) {
       if (userConfig.isBorrowingAny()) {
