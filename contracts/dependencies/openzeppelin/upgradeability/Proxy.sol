@@ -11,11 +11,21 @@ pragma solidity 0.8.6;
 abstract contract Proxy {
   /**
    * @dev Fallback function.
+   * Will run if no other function in the contract matches the call data.
    * Implemented entirely in `_fallback`.
    */
   fallback() external payable {
     _fallback();
   }
+
+  /**
+   * @dev Receive function.
+   * Will run if call data is empty.
+   * Implemented entirely in `_fallback`.
+   */
+  receive() external payable {
+    _fallback();
+  }  
 
   /**
    * @return The Address of the implementation.
