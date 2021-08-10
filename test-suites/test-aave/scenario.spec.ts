@@ -10,7 +10,7 @@ import { executeStory } from './helpers/scenario-engine';
 
 const scenarioFolder = './test-suites/test-aave/helpers/scenarios/';
 
-const selectedScenarios: string[] = ['borrow-repay-stable.json'];
+const selectedScenarios: string[] = [];
 
 fs.readdirSync(scenarioFolder).forEach((file) => {
   if (selectedScenarios.length > 0 && !selectedScenarios.includes(file)) return;
