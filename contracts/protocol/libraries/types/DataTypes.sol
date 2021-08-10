@@ -27,6 +27,8 @@ library DataTypes {
     uint8 id;
     //the current treasury balance, scaled
     uint256 accruedToTreasury;
+    //the quicikwithdraw balance waiting for underlying, scaled
+    uint256 unbackedATokensScaled;
   }
 
   struct ReserveConfigurationMap {
@@ -138,5 +140,11 @@ library DataTypes {
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
     address oracle;
+  }
+
+  struct CalculateInterestRatesParams {
+    uint256 liquidityAdded;
+    uint256 liquidityTaken;
+    uint256 unbackedATokens;
   }
 }

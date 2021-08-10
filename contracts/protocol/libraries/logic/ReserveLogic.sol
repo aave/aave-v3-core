@@ -14,6 +14,8 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 
+import 'hardhat/console.sol';
+
 /**
  * @title ReserveLogic library
  * @author Aave
@@ -169,8 +171,8 @@ library ReserveLogic {
   /**
    * @dev Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
-   * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
-   * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
+   * @param liquidityAdded The amount of liquidity added to the protocol (deposit + repay) in the previous action
+   * @param liquidityTaken The amount of liquidity taken from the protocol (redeem + borrow)
    **/
   function updateInterestRates(
     DataTypes.ReserveData storage reserve,
@@ -184,6 +186,14 @@ library ReserveLogic {
     vars.totalVariableDebt = reserveCache.nextScaledVariableDebt.rayMul(
       reserveCache.nextVariableBorrowIndex
     );
+
+    // How to account for this if people withdraw them? Still an amount that was minted and not backed
+    uint256 unbackedATokens = reserve.unbackedATokensScaled;
+    if (unbackedATokens > 0) {
+      console.log('Are we ever entering here');
+      unbackedATokens = unbackedATokens.rayMul(reserveCache.nextLiquidityIndex);
+    }
+
     (
       vars.newLiquidityRate,
       vars.newStableRate,
@@ -191,8 +201,7 @@ library ReserveLogic {
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
-      liquidityAdded,
-      liquidityTaken,
+      DataTypes.CalculateInterestRatesParams(liquidityAdded, liquidityTaken, unbackedATokens),
       reserveCache.nextTotalStableDebt,
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,
