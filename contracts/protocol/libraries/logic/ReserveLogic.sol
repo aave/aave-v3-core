@@ -187,13 +187,6 @@ library ReserveLogic {
       reserveCache.nextVariableBorrowIndex
     );
 
-    // How to account for this if people withdraw them? Still an amount that was minted and not backed
-    uint256 unbackedATokens = reserve.unbackedATokensScaled;
-    if (unbackedATokens > 0) {
-      console.log('Are we ever entering here');
-      unbackedATokens = unbackedATokens.rayMul(reserveCache.nextLiquidityIndex);
-    }
-
     (
       vars.newLiquidityRate,
       vars.newStableRate,
@@ -201,7 +194,11 @@ library ReserveLogic {
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
-      DataTypes.CalculateInterestRatesParams(liquidityAdded, liquidityTaken, unbackedATokens),
+      DataTypes.CalculateInterestRatesParams(
+        liquidityAdded,
+        liquidityTaken,
+        reserve.unbackedUnderlying
+      ),
       reserveCache.nextTotalStableDebt,
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,

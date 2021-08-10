@@ -47,7 +47,7 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     ](
       dai.address,
       aDai.address,
-      { liquidityAdded: 0, liquidityTaken: 0, unbackedATokens: 0 },
+      { liquidityAdded: 0, liquidityTaken: 0, unbackedUnderlying: 0 },
       0,
       0,
       0,
@@ -75,7 +75,7 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     ](
       dai.address,
       aDai.address,
-      { liquidityAdded: '200000000000000000', liquidityTaken: 0, unbackedATokens: 0 },
+      { liquidityAdded: '200000000000000000', liquidityTaken: 0, unbackedUnderlying: 0 },
       0,
       '800000000000000000',
       0,
@@ -115,7 +115,7 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     ](
       dai.address,
       aDai.address,
-      { liquidityAdded: 0, liquidityTaken: 0, unbackedATokens: 0 },
+      { liquidityAdded: 0, liquidityTaken: 0, unbackedUnderlying: 0 },
       0,
       '800000000000000000',
       0,
@@ -158,7 +158,7 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     ](
       dai.address,
       aDai.address,
-      { liquidityAdded: 0, liquidityTaken: 0, unbackedATokens: 0 },
+      { liquidityAdded: 0, liquidityTaken: 0, unbackedUnderlying: 0 },
       '400000000000000000',
       '400000000000000000',
       '100000000000000000000000000',

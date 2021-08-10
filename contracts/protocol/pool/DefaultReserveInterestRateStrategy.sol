@@ -111,9 +111,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     address reserve,
     address aToken,
     DataTypes.CalculateInterestRatesParams memory vars,
-    /*    uint256 liquidityAdded,
-    uint256 liquidityTaken,
-    uint256 unbackedATokens,*/
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
@@ -132,7 +129,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     //avoid stack too deep
     availableLiquidity =
       availableLiquidity +
-      vars.unbackedATokens +
+      vars.unbackedUnderlying +
       vars.liquidityAdded -
       vars.liquidityTaken;
 

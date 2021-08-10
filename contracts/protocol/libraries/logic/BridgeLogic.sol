@@ -45,8 +45,7 @@ library BridgeLogic {
     reserve.updateInterestRates(reserveCache, asset, amount, 0);
     bool isFirstDeposit =
       IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
-    uint256 amountScaled = amount.rayDiv(reserveCache.nextLiquidityIndex);
-    reserve.unbackedATokensScaled = reserve.unbackedATokensScaled + amountScaled;
+    reserve.unbackedUnderlying = reserve.unbackedUnderlying + amount;
     if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
@@ -57,20 +56,22 @@ library BridgeLogic {
   function backUnbacked(
     DataTypes.ReserveData storage reserve,
     address asset,
-    uint256 amount
-  ) public returns (uint256) {
+    uint256 maxAmount
+  ) public {
     // TODO: Increase liquidityIndex and accrue interest from fee
-    // Essentially `executeDeposit` logic but without the mint
+    // TODO: Need to handle fee
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
+
     // Probably dont need to update interest rates, because there is no "real" change in liquidity
     // reserve.updateInterestRates(reserveCache, asset, 0, 0);
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
-    uint256 aTokensBackedScaled = amount.rayDiv(reserveCache.nextLiquidityIndex);
-    reserve.unbackedATokensScaled = reserve.unbackedATokensScaled - aTokensBackedScaled;
-    // What if people are passing in more than expected? e.g., more than it can absorb, that would change the interest rate.
-    // Also just the fact that we would go below 0 so it reverts.
-    emit Backed(asset, msg.sender, amount);
-    return aTokensBackedScaled;
+
+    uint256 backingAmount =
+      reserve.unbackedUnderlying > maxAmount ? maxAmount : reserve.unbackedUnderlying;
+
+    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, backingAmount);
+    reserve.unbackedUnderlying = reserve.unbackedUnderlying - backingAmount;
+
+    emit Backed(asset, msg.sender, backingAmount);
   }
 }
