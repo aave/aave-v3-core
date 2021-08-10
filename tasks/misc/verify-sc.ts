@@ -18,8 +18,8 @@ task('verify-sc', 'Inits the DRE, to have access to all the plugins')
     'arguments for contract constructor',
     []
   )
-  .setAction(async ({ address, constructorArguments = [], libraries }: VerifyParams, localBRE) => {
-    await localBRE.run('set-DRE');
+  .setAction(async ({ address, constructorArguments = [], libraries }: VerifyParams, localHRE) => {
+    await localHRE.run('set-DRE');
 
     checkVerification();
 

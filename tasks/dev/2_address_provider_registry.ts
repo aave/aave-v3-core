@@ -12,8 +12,8 @@ task(
   'Deploy address provider, registry and fee provider for dev enviroment'
 )
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify }, localBRE) => {
-    await localBRE.run('set-DRE');
+  .setAction(async ({ verify }, localHRE) => {
+    await localHRE.run('set-DRE');
 
     const admin = await (await getEthersSigners())[0].getAddress();
 

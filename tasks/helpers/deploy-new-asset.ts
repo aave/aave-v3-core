@@ -26,8 +26,8 @@ const isSymbolValid = (symbol: string, network: eEthereumNetwork) =>
 task('external:deploy-new-asset', 'Deploy A token, Debt Tokens, Risk Parameters')
   .addParam('symbol', `Asset symbol, needs to have configuration ready`)
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify, symbol }, localBRE) => {
-    const network = localBRE.network.name;
+  .setAction(async ({ verify, symbol }, localHRE) => {
+    const network = localHRE.network.name;
     if (!isSymbolValid(symbol, network as eEthereumNetwork)) {
       throw new Error(
         `
@@ -38,10 +38,10 @@ WRONG RESERVE ASSET SETUP:
         `
       );
     }
-    setDRE(localBRE);
+    setDRE(localHRE);
     const strategyParams = reserveConfigs['strategy' + symbol];
     const reserveAssetAddress =
-      marketConfigs.AaveConfig.ReserveAssets[localBRE.network.name][symbol];
+      marketConfigs.AaveConfig.ReserveAssets[localHRE.network.name][symbol];
     const deployCustomAToken = chooseATokenDeployment(strategyParams.aTokenImpl);
     const addressProvider = await getPoolAddressesProvider(POOL_ADDRESS_PROVIDER[network]);
     const poolAddress = await addressProvider.getPool();

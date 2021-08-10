@@ -7,7 +7,7 @@ export interface SymbolMap<T> {
 export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork;
 
 export enum eEthereumNetwork {
-  buidlerevm = 'buidlerevm',
+  hardhatevm = 'hardhatevm',
   kovan = 'kovan',
   ropsten = 'ropsten',
   main = 'main',
@@ -411,7 +411,7 @@ export interface iParamsPerNetworkAll<T>
 
 export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.coverage]: T;
-  [eEthereumNetwork.buidlerevm]: T;
+  [eEthereumNetwork.hardhatevm]: T;
   [eEthereumNetwork.kovan]: T;
   [eEthereumNetwork.ropsten]: T;
   [eEthereumNetwork.main]: T;

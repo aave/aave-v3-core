@@ -5,9 +5,9 @@ import { getPoolAddressesProvider } from '../../helpers/contracts-getters';
 
 task('full:data-provider', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify }, localBRE) => {
+  .setAction(async ({ verify }, localHRE) => {
     try {
-      await localBRE.run('set-DRE');
+      await localHRE.run('set-DRE');
 
       const addressesProvider = await getPoolAddressesProvider();
 

@@ -44,7 +44,7 @@ You can join at the [Discord](http://aave.com/discord) channel or at the [Govern
 
 ## Getting Started
 
-You can install `@aave/protocol-v2` as an NPM package in your Hardhat, Buidler or Truffle project to import the contracts and interfaces:
+You can install `@aave/protocol-v2` as an NPM package in your Hardhat, Hardhat or Truffle project to import the contracts and interfaces:
 
 `npm install @aave/protocol-v2`
 

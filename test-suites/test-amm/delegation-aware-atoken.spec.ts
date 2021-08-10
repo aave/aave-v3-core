@@ -1,5 +1,5 @@
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../../helpers/constants';
-import { BUIDLEREVM_CHAINID } from '../../helpers/buidler-constants';
+import { HARDHATEVM_CHAINID } from '../../helpers/hardhat-constants';
 import { buildPermitParams, getSignatureFromTypedData } from '../../helpers/contracts-helpers';
 import { expect } from 'chai';
 import { ethers } from 'ethers';

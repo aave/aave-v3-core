@@ -12,11 +12,11 @@ import { eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from '../..
 task('print-config', 'Inits the DRE, to have access to all the plugins')
   .addParam('dataProvider', 'Address of AaveProtocolDataProvider')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ pool, dataProvider }, localBRE) => {
-    await localBRE.run('set-DRE');
+  .setAction(async ({ pool, dataProvider }, localHRE) => {
+    await localHRE.run('set-DRE');
     const network = process.env.FORK
       ? (process.env.FORK as eNetwork)
-      : (localBRE.network.name as eNetwork);
+      : (localHRE.network.name as eNetwork);
     console.log(network);
     const poolConfig = loadPoolConfig(pool);
 

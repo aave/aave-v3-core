@@ -23,9 +23,9 @@ import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 task('dev:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ verify, pool }, localBRE) => {
-    await localBRE.run('set-DRE');
-    const network = <eNetwork>localBRE.network.name;
+  .setAction(async ({ verify, pool }, localHRE) => {
+    await localHRE.run('set-DRE');
+    const network = <eNetwork>localHRE.network.name;
     const poolConfig = loadPoolConfig(pool);
     const {
       ATokenNamePrefix,

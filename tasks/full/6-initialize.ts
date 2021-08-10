@@ -19,10 +19,10 @@ import { ZERO_ADDRESS } from '../../helpers/constants';
 task('full:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
   .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ verify, pool }, localBRE) => {
+  .setAction(async ({ verify, pool }, localHRE) => {
     try {
-      await localBRE.run('set-DRE');
-      const network = <eNetwork>localBRE.network.name;
+      await localHRE.run('set-DRE');
+      const network = <eNetwork>localHRE.network.name;
       const poolConfig = loadPoolConfig(pool);
       const {
         ATokenNamePrefix,

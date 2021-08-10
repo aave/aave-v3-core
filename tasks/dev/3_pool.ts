@@ -16,8 +16,8 @@ import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
 
 task('dev:deploy-pool', 'Deploy pool for dev enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify }, localBRE) => {
-    await localBRE.run('set-DRE');
+  .setAction(async ({ verify }, localHRE) => {
+    await localHRE.run('set-DRE');
 
     const addressesProvider = await getPoolAddressesProvider();
 

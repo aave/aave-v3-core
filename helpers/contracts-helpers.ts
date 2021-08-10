@@ -21,7 +21,7 @@ import {
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { Artifact } from 'hardhat/types';
-import { Artifact as BuidlerArtifact } from '@nomiclabs/buidler/types';
+import { Artifact as HardhatArtifact } from 'hardhat/types';
 import { verifyEtherscanContract } from './etherscan-verification';
 import { getFirstSigner, getIErc20Detailed } from './contracts-getters';
 import { usingTenderly, verifyAtTenderly } from './tenderly-utils';
@@ -118,7 +118,7 @@ export const getContract = async <ContractType extends Contract>(
   address: string
 ): Promise<ContractType> => (await DRE.ethers.getContractAt(contractName, address)) as ContractType;
 
-export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: any) => {
+export const linkBytecode = (artifact: HardhatArtifact | Artifact, libraries: any) => {
   let bytecode = artifact.bytecode;
 
   for (const [fileName, fileReferences] of Object.entries(artifact.linkReferences)) {
@@ -142,7 +142,7 @@ export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: an
 };
 
 export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNetwork) => {
-  const { main, ropsten, kovan, coverage, buidlerevm, tenderlyMain } =
+  const { main, ropsten, kovan, coverage, hardhatevm, tenderlyMain } =
     param as iEthereumParamsPerNetwork<T>;
   const { matic, mumbai } = param as iPolygonParamsPerNetwork<T>;
   const { xdai } = param as iXDaiParamsPerNetwork<T>;
@@ -153,10 +153,10 @@ export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNet
   switch (network) {
     case eEthereumNetwork.coverage:
       return coverage;
-    case eEthereumNetwork.buidlerevm:
-      return buidlerevm;
+    case eEthereumNetwork.hardhatevm:
+      return hardhatevm;
     case eEthereumNetwork.hardhat:
-      return buidlerevm;
+      return hardhatevm;
     case eEthereumNetwork.kovan:
       return kovan;
     case eEthereumNetwork.ropsten:

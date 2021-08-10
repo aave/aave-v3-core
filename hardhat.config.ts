@@ -4,7 +4,7 @@ import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
 import { eEthereumNetwork, eNetwork, ePolygonNetwork, eXDaiNetwork } from './helpers/types';
-import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
+import { HARDHATEVM_CHAINID, COVERAGE_CHAINID } from './helpers/hardhat-constants';
 import {
   NETWORKS_RPC_URL,
   NETWORKS_DEFAULT_GAS,
@@ -46,7 +46,7 @@ if (!SKIP_LOAD) {
   );
 }
 
-require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
+require(`${path.join(__dirname, 'tasks/misc')}/set-dre.ts`);
 
 const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
   url: NETWORKS_RPC_URL[networkName],
@@ -65,7 +65,7 @@ const getCommonNetworkConfig = (networkName: eNetwork, networkId: number) => ({
 
 let forkMode;
 
-const buidlerConfig: HardhatUserConfig = {
+const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
     enabled: true,
   },
@@ -114,7 +114,7 @@ const buidlerConfig: HardhatUserConfig = {
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
       gas: DEFAULT_BLOCK_GAS_LIMIT,
       gasPrice: 8000000000,
-      chainId: BUIDLEREVM_CHAINID,
+      chainId: HARDHATEVM_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
@@ -124,12 +124,12 @@ const buidlerConfig: HardhatUserConfig = {
       forking: buildForkConfig(),
       allowUnlimitedContractSize: true,
     },
-    buidlerevm_docker: {
+    hardhatevm_docker: {
       hardfork: 'berlin',
       blockGasLimit: 9500000,
       gas: 9500000,
       gasPrice: 8000000000,
-      chainId: BUIDLEREVM_CHAINID,
+      chainId: HARDHATEVM_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       url: 'http://localhost:8545',
@@ -146,4 +146,4 @@ const buidlerConfig: HardhatUserConfig = {
   },
 };
 
-export default buidlerConfig;
+export default hardhatConfig;

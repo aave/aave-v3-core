@@ -1,4 +1,4 @@
-import rawBRE from 'hardhat';
+import rawHRE from 'hardhat';
 import { MockContract } from 'ethereum-waffle';
 import {
   insertContractAddressInDb,
@@ -260,12 +260,12 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 };
 
 before(async () => {
-  await rawBRE.run('set-DRE');
+  await rawHRE.run('set-DRE');
   const [deployer, secondaryWallet] = await getEthersSigners();
   const FORK = process.env.FORK;
 
   if (FORK) {
-    await rawBRE.run('amm:mainnet');
+    await rawHRE.run('amm:mainnet');
   } else {
     console.log('-> Deploying test environment...');
     await buildTestEnv(deployer, secondaryWallet);
