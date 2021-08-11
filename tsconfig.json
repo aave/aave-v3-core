@@ -12,9 +12,9 @@
   "files": [
     "./hardhat.config.ts",
     "./modules/tenderly/tenderly.d.ts",
-    "node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.d.ts",
-    "node_modules/hardhat-typechain/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/hardhat-etherscan/src/type-extensions.d.ts"
+    "node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.ts",
+    "node_modules/hardhat-typechain/src/type-extensions.ts",
+    "node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.ts",
+    "node_modules/@nomiclabs/hardhat-etherscan/src/type-extensions.ts"
   ]
 }
