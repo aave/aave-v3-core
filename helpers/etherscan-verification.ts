@@ -42,7 +42,7 @@ export const verifyEtherscanContract = async (
     );
     const msDelay = 3000;
     const times = 4;
-    // Write a temporal file to host complex parameters for hardhat-etherscan https://github.com/nomiclabs/hardhat/tree/development/packages/hardhat-etherscan#complex-arguments
+    // Write a temporary file to host complex parameters for hardhat-etherscan
     const { fd, path, cleanup } = await file({
       prefix: 'verify-params-',
       postfix: '.js',

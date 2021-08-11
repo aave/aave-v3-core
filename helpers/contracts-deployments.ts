@@ -54,14 +54,10 @@ import {
 } from './contracts-helpers';
 import { StableAndVariableTokensHelperFactory } from '../types/StableAndVariableTokensHelperFactory';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
-// import { readArtifact as hardhatReadArtifact } from '@nomiclabs/hardhat/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
 
 const readArtifact = async (id: string) => {
-  // if (DRE.network.name === eEthereumNetwork.hardhatevm) {
-  //   return hardhatReadArtifact(DRE.config.paths.artifacts, id);
-  // }
   return (DRE as HardhatRuntimeEnvironment).artifacts.readArtifact(id);
 };
 
