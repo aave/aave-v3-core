@@ -10,7 +10,7 @@ import {IInitializableDebtToken} from '../../../interfaces/IInitializableDebtTok
 import {IAaveIncentivesController} from '../../../interfaces/IAaveIncentivesController.sol';
 import {
   InitializableImmutableAdminUpgradeabilityProxy
-} from '../aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+} from 'aave-proxy/contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 
 /**
  * @title ConfiguratorLogic library

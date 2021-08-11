@@ -8,7 +8,7 @@ import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {
   VersionedInitializable
-} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
+} from 'aave-proxy/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';

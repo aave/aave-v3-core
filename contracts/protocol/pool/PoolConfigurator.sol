@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {VersionedInitializable} from 'aave-proxy/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {
   InitializableImmutableAdminUpgradeabilityProxy
-} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+} from 'aave-proxy/contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IPool} from '../../interfaces/IPool.sol';

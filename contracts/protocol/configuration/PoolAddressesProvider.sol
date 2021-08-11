@@ -5,7 +5,7 @@ import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 
 // Prettier ignore to prevent buidler flatter bug
 // prettier-ignore
-import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+import {InitializableImmutableAdminUpgradeabilityProxy} from 'aave-proxy/contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 

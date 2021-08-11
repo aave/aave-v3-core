@@ -104,6 +104,7 @@
     "@types/lowdb": "1.0.9",
     "@types/mocha": "7.0.2",
     "@types/node": "14.0.5",
+    "aave-proxy": "0.0.0",
     "bignumber.js": "9.0.0",
     "buidler-typechain": "0.1.1",
     "chai": "4.2.0",

@@ -8,7 +8,7 @@ import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
-import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {VersionedInitializable} from 'aave-proxy/contracts/protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
