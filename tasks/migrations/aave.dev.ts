@@ -29,8 +29,8 @@ task('aave:dev', 'Deploy development enviroment')
     console.log('4. Deploy oracles');
     await localHRE.run('dev:deploy-oracles', { verify, pool: POOL_NAME });
 
-    console.log('5. Deploy WETH Gateway');
-    await localHRE.run('full-deploy-weth-gateway', { verify, pool: POOL_NAME });
+    // console.log('5. Deploy WETH Gateway');
+    // await localHRE.run('full-deploy-weth-gateway', { verify, pool: POOL_NAME });
 
     console.log('6. Initialize pool');
     await localHRE.run('dev:initialize-pool', { verify, pool: POOL_NAME });
