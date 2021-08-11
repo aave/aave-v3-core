@@ -10,19 +10,17 @@ import AaveConfig from '../../market-config';
 task(
   'dev:deploy-address-provider',
   'Deploy address provider, registry and fee provider for dev enviroment'
-)
-  .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify }, localBRE) => {
-    await localBRE.run('set-DRE');
+).setAction(async (_, localBRE) => {
+  await localBRE.run('set-DRE');
 
-    const admin = await (await getEthersSigners())[0].getAddress();
+  const admin = await (await getEthersSigners())[0].getAddress();
 
-    const addressesProvider = await deployPoolAddressesProvider(AaveConfig.MarketId, verify);
-    await waitForTx(await addressesProvider.setPoolAdmin(admin));
-    await waitForTx(await addressesProvider.setEmergencyAdmin(admin));
+  const addressesProvider = await deployPoolAddressesProvider(AaveConfig.MarketId);
+  await waitForTx(await addressesProvider.setPoolAdmin(admin));
+  await waitForTx(await addressesProvider.setEmergencyAdmin(admin));
 
-    const addressesProviderRegistry = await deployPoolAddressesProviderRegistry(verify);
-    await waitForTx(
-      await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
-    );
-  });
+  const addressesProviderRegistry = await deployPoolAddressesProviderRegistry();
+  await waitForTx(
+    await addressesProviderRegistry.registerAddressesProvider(addressesProvider.address, 1)
+  );
+});

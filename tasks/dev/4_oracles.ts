@@ -21,77 +21,69 @@ import { deployWETHMocked } from '../../helpers/contracts-deployments';
 import AaveConfig from '../../market-config';
 import { ethers } from 'ethers';
 
-task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')
-  .addFlag('verify', 'Verify contracts at Etherscan')
-  .setAction(async ({ verify }, localBRE) => {
-    await localBRE.run('set-DRE');
-    const poolConfig = AaveConfig;
-    const {
-      Mocks: { AllAssetsInitialPrices },
-      ProtocolGlobalParams: { UsdAddress, MockUsdPriceInWei },
-      RateOracleRatesCommon,
-    } = poolConfig as ICommonConfiguration;
+task('dev:deploy-oracles', 'Deploy oracles for dev enviroment').setAction(async (_, localBRE) => {
+  await localBRE.run('set-DRE');
+  const poolConfig = AaveConfig;
+  const {
+    Mocks: { AllAssetsInitialPrices },
+    ProtocolGlobalParams: { UsdAddress, MockUsdPriceInWei },
+    RateOracleRatesCommon,
+  } = poolConfig as ICommonConfiguration;
 
-    const defaultTokenList = {
-      ...Object.fromEntries(Object.keys(TokenContractId).map((symbol) => [symbol, ''])),
-      USD: UsdAddress,
-    } as iAssetBase<string>;
-    const mockTokens = await getAllMockedTokens();
-    const mockTokensAddress = Object.keys(mockTokens).reduce<iAssetBase<string>>((prev, curr) => {
-      prev[curr as keyof iAssetBase<string>] = mockTokens[curr].address;
-      return prev;
-    }, defaultTokenList);
-    const addressesProvider = await getPoolAddressesProvider();
-    const admin = await addressesProvider.getPoolAdmin();
+  const defaultTokenList = {
+    ...Object.fromEntries(Object.keys(TokenContractId).map((symbol) => [symbol, ''])),
+    USD: UsdAddress,
+  } as iAssetBase<string>;
+  const mockTokens = await getAllMockedTokens();
+  const mockTokensAddress = Object.keys(mockTokens).reduce<iAssetBase<string>>((prev, curr) => {
+    prev[curr as keyof iAssetBase<string>] = mockTokens[curr].address;
+    return prev;
+  }, defaultTokenList);
+  const addressesProvider = await getPoolAddressesProvider();
+  const admin = await addressesProvider.getPoolAdmin();
 
-    const fallbackOracle = await deployPriceOracle(verify);
-    await waitForTx(await fallbackOracle.setEthUsdPrice(MockUsdPriceInWei));
-    await setInitialAssetPricesInOracle(AllAssetsInitialPrices, mockTokensAddress, fallbackOracle);
+  const fallbackOracle = await deployPriceOracle();
+  await waitForTx(await fallbackOracle.setEthUsdPrice(MockUsdPriceInWei));
+  await setInitialAssetPricesInOracle(AllAssetsInitialPrices, mockTokensAddress, fallbackOracle);
 
-    const mockAggregators = await deployAllMockAggregators(AllAssetsInitialPrices, verify);
+  const mockAggregators = await deployAllMockAggregators(AllAssetsInitialPrices);
 
-    const allTokenAddresses = getAllTokenAddresses(mockTokens);
-    const allAggregatorsAddresses = getAllAggregatorsAddresses(mockAggregators);
+  const allTokenAddresses = getAllTokenAddresses(mockTokens);
+  const allAggregatorsAddresses = getAllAggregatorsAddresses(mockAggregators);
 
-    const [tokens, aggregators] = getPairsTokenAggregator(
-      allTokenAddresses,
-      allAggregatorsAddresses
-    );
+  const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
 
-    let wethAddress = poolConfig.WETH;
-    if (!wethAddress) {
-      const currentNetwork = process.env.FORK ? process.env.FORK : localBRE.network.name;
-      if (currentNetwork.includes('main')) {
-        throw new Error('WETH not set at mainnet configuration.');
-      } else {
-        const weth = await deployWETHMocked();
-        wethAddress = weth.address;
-      }
+  let wethAddress = poolConfig.WETH;
+  if (!wethAddress) {
+    const currentNetwork = process.env.FORK ? process.env.FORK : localBRE.network.name;
+    if (currentNetwork.includes('main')) {
+      throw new Error('WETH not set at mainnet configuration.');
+    } else {
+      const weth = await deployWETHMocked();
+      wethAddress = weth.address;
     }
+  }
 
-    await deployAaveOracle(
-      [
-        tokens,
-        aggregators,
-        fallbackOracle.address,
-        wethAddress,
-        ethers.constants.WeiPerEther.toString(),
-      ],
-      verify
-    );
-    await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
+  await deployAaveOracle([
+    tokens,
+    aggregators,
+    fallbackOracle.address,
+    wethAddress,
+    ethers.constants.WeiPerEther.toString(),
+  ]);
+  await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
-    const rateOracle = await deployRateOracle(verify);
-    await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
+  const rateOracle = await deployRateOracle();
+  await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
 
-    const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
-    const allReservesAddresses = {
-      ...tokensAddressesWithoutUsd,
-    };
-    await setInitialMarketRatesInRatesOracleByHelper(
-      RateOracleRatesCommon,
-      allReservesAddresses,
-      rateOracle,
-      admin
-    );
-  });
+  const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
+  const allReservesAddresses = {
+    ...tokensAddressesWithoutUsd,
+  };
+  await setInitialMarketRatesInRatesOracleByHelper(
+    RateOracleRatesCommon,
+    allReservesAddresses,
+    rateOracle,
+    admin
+  );
+});
