@@ -27,7 +27,7 @@ library BridgeLogic {
     uint256 amount,
     uint16 indexed referral
   );
-  event Backed(address indexed reserve, address indexed backer, uint256 amount);
+  event Backed(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   function mintUnbacked(
     DataTypes.ReserveData storage reserve,
@@ -56,22 +56,34 @@ library BridgeLogic {
   function backUnbacked(
     DataTypes.ReserveData storage reserve,
     address asset,
-    uint256 maxAmount
+    uint256 amount,
+    uint256 fee
   ) public {
-    // TODO: Increase liquidityIndex and accrue interest from fee
-    // TODO: Need to handle fee
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
+    // We can give fee and amount as input.
+    // This allow anyone to throw away money without a fee.
+    // But for the bridges, they can compute the correct fee at L2 and simply pass it along.
+    // Gives us a lot of flexibility.
+    // Also allows the safetymodule to back unbacked if necessary, without paying fee.
 
-    // Probably dont need to update interest rates, because there is no "real" change in liquidity
-    // reserve.updateInterestRates(reserveCache, asset, 0, 0);
-
+    // limit backing amount to be min(unbackedUnderlying, amount) to not underflow
     uint256 backingAmount =
-      reserve.unbackedUnderlying > maxAmount ? maxAmount : reserve.unbackedUnderlying;
+      reserve.unbackedUnderlying > amount ? amount : reserve.unbackedUnderlying;
 
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, backingAmount);
+    // Excess backing will be added to the fee
+    uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;
+
+    // He is also paying fee to himself, feels a bit weird. He gets balanceOf(himself) / totalSupply * fee.
+    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
+
+    // Similar to a flashloan. The fee is additional liquidity.
+    // If we flip the order here, we probably don't need to pass totalFee as argument as it is in the underlying already then.
+    reserve.updateInterestRates(reserveCache, asset, totalFee, 0);
+
     reserve.unbackedUnderlying = reserve.unbackedUnderlying - backingAmount;
+    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
 
-    emit Backed(asset, msg.sender, backingAmount);
+    emit Backed(asset, msg.sender, backingAmount, totalFee);
   }
 }

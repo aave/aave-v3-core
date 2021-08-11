@@ -99,13 +99,10 @@ export const deployPoolConfigurator = async (verify?: boolean) => {
   return withSaveAndVerify(poolConfiguratorImpl, eContractid.PoolConfigurator, [], verify);
 };
 
-export const deployDepositLogic = async (
-  verify?: boolean
-) => {
+export const deployDepositLogic = async (verify?: boolean) => {
   const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
-  
-  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {
-  });
+
+  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {});
   const depositLogicFactory = await DRE.ethers.getContractFactory(
     depositLogicArtifact.abi,
     linkedDepositLogicByteCode
@@ -117,12 +114,9 @@ export const deployDepositLogic = async (
   return withSaveAndVerify(depositLogic, eContractid.DepositLogic, [], verify);
 };
 
-
-export const deployBorrowLogic = async (
-  verify?: boolean
-) => {
+export const deployBorrowLogic = async (verify?: boolean) => {
   const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
-  
+
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
     borrowLogicArtifact.abi,
     borrowLogicArtifact.bytecode
@@ -134,13 +128,9 @@ export const deployBorrowLogic = async (
   return withSaveAndVerify(borrowLogic, eContractid.BorrowLogic, [], verify);
 };
 
-
-export const deployLiquidationLogic = async (
-  verify?: boolean
-) => {
-
+export const deployLiquidationLogic = async (verify?: boolean) => {
   const liquidationLogicArtifact = await readArtifact(eContractid.LiquidationLogic);
-    
+
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
     liquidationLogicArtifact.abi,
     liquidationLogicArtifact.bytecode
@@ -152,11 +142,24 @@ export const deployLiquidationLogic = async (
   return withSaveAndVerify(liquidationLogic, eContractid.LiquidationLogic, [], verify);
 };
 
+export const deployBridgeLogic = async (verify?: boolean) => {
+  const bridgeLogicArtifact = await readArtifact(eContractid.BridgeLogic);
+  const bridgeLogicFactory = await DRE.ethers.getContractFactory(
+    bridgeLogicArtifact.abi,
+    bridgeLogicArtifact.bytecode
+  );
+  const bridgeLogic = await (
+    await bridgeLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSaveAndVerify(bridgeLogic, eContractid.BridgeLogic, [], verify);
+};
 
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
-  const depositLogic = await deployDepositLogic( verify);
+  const depositLogic = await deployDepositLogic(verify);
   const borrowLogic = await deployBorrowLogic(verify);
   const liquidationLogic = await deployLiquidationLogic(verify);
+  const bridgeLogic = await deployBridgeLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -170,10 +173,10 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
   // libName example: GenericLogic
   return {
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
+    ['__$b06080f092f400a43662c3f835a4d9baa8$__']: bridgeLogic.address,
     ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
-    ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address
-
+    ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address,
   };
 };
 

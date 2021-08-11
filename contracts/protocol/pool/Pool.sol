@@ -20,6 +20,7 @@ import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {PoolStorage} from './PoolStorage.sol';
+import {BridgeLogic} from './../libraries/logic/BridgeLogic.sol';
 
 /**
  * @title Pool contract
@@ -92,6 +93,33 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       onBehalfOf,
       referralCode
     );
+  }
+
+  ///@inheritdoc IPool
+  function mintUnbacked(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) external override {
+    // TODO: Add access control
+    BridgeLogic.mintUnbacked(
+      _reserves[asset],
+      _usersConfig[onBehalfOf],
+      asset,
+      amount,
+      onBehalfOf,
+      referralCode
+    );
+  }
+
+  ///@inheritdoc IPool
+  function backUnbacked(
+    address asset,
+    uint256 amount,
+    uint256 fee
+  ) external override {
+    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee);
   }
 
   ///@inheritdoc IPool
