@@ -3,14 +3,13 @@ import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { getTreasuryAddress } from '../helpers/configuration';
 import {
   deployDelegationAwareAToken,
   deployMintableDelegationERC20,
 } from '../helpers/contracts-deployments';
 import { DelegationAwareAToken } from '../types/DelegationAwareAToken';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
-import AaveConfig from '../markets/aave';
+import AaveConfig from '../market-config';
 
 const { parseEther } = ethers.utils;
 
@@ -27,7 +26,7 @@ makeSuite('AToken: underlying delegation', (testEnv: TestEnv) => {
       [
         pool.address,
         delegationERC20.address,
-        await getTreasuryAddress(AaveConfig),
+        AaveConfig.ReserveFactorTreasuryAddress,
         ZERO_ADDRESS,
         'aDEL',
         'aDEL',

@@ -5,7 +5,6 @@ import {
   deployAaveProtocolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { eNetwork } from '../../helpers/types';
-import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 
 import { tEthereumAddress, eContractid } from '../../helpers/types';
 import { waitForTx, filterMapBy } from '../../helpers/misc-utils';
@@ -14,14 +13,14 @@ import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
 import { getAllMockedTokens, getPoolAddressesProvider } from '../../helpers/contracts-getters';
 import { insertContractAddressInDb } from '../../helpers/contracts-helpers';
+import AaveConfig from '../../market-config';
 
 task('dev:initialize-pool', 'Initialize pool configuration.')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ verify, pool }, localBRE) => {
+  .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
     const network = <eNetwork>localBRE.network.name;
-    const poolConfig = loadPoolConfig(pool);
+    const poolConfig = AaveConfig;
     const {
       ATokenNamePrefix,
       StableDebtTokenNamePrefix,

@@ -404,7 +404,7 @@ export interface ICommonConfiguration {
   PoolAdminIndex: number;
   EmergencyAdmin: tEthereumAddress | undefined;
   EmergencyAdminIndex: number;
-  ReserveAssets: SymbolMap<tEthereumAddress>;
+  ReserveAssets: SymbolMap<tEthereumAddress> | SymbolMap<undefined>;
   ReservesConfig: iMultiPoolsAssets<IReserveParams>;
   ATokenDomainSeparator: string;
   WETH: tEthereumAddress | undefined;

@@ -12,20 +12,20 @@ import {
 import { ICommonConfiguration, iAssetBase, TokenContractId } from '../../helpers/types';
 import { waitForTx } from '../../helpers/misc-utils';
 import { getAllAggregatorsAddresses, getAllTokenAddresses } from '../../helpers/mock-helpers';
-import { ConfigNames, loadPoolConfig, getWethAddress } from '../../helpers/configuration';
 import {
   getAllMockedTokens,
   getPoolAddressesProvider,
   getPairsTokenAggregator,
 } from '../../helpers/contracts-getters';
+import { deployWETHMocked } from '../../helpers/contracts-deployments';
+import AaveConfig from '../../market-config';
 import { ethers } from 'ethers';
 
 task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')
   .addFlag('verify', 'Verify contracts at Etherscan')
-  .addParam('pool', `Pool name to retrieve configuration, supported: ${Object.values(ConfigNames)}`)
-  .setAction(async ({ verify, pool }, localBRE) => {
+  .setAction(async ({ verify }, localBRE) => {
     await localBRE.run('set-DRE');
-    const poolConfig = loadPoolConfig(pool);
+    const poolConfig = AaveConfig;
     const {
       Mocks: { AllAssetsInitialPrices },
       ProtocolGlobalParams: { UsdAddress, MockUsdPriceInWei },
@@ -58,12 +58,23 @@ task('dev:deploy-oracles', 'Deploy oracles for dev enviroment')
       allAggregatorsAddresses
     );
 
+    let wethAddress = poolConfig.WETH;
+    if (!wethAddress) {
+      const currentNetwork = process.env.FORK ? process.env.FORK : localBRE.network.name;
+      if (currentNetwork.includes('main')) {
+        throw new Error('WETH not set at mainnet configuration.');
+      } else {
+        const weth = await deployWETHMocked();
+        wethAddress = weth.address;
+      }
+    }
+
     await deployAaveOracle(
       [
         tokens,
         aggregators,
         fallbackOracle.address,
-        await getWethAddress(poolConfig),
+        wethAddress,
         ethers.constants.WeiPerEther.toString(),
       ],
       verify
