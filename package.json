@@ -1,13 +1,7 @@
 {
-<<<<<<< HEAD
-  "name": "@aave/aave-v3-core",
-  "version": "1.0.1",
-  "description": "Aave Protocol V3 smart contracts",
-=======
   "name": "@aave/core-v3",
   "version": "0.0.1",
   "description": "Aave Protocol V3 core smart contracts",
->>>>>>> master
   "files": [
     "contracts",
     "artifacts"
