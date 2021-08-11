@@ -13,7 +13,7 @@ import {
   getVariableDebtToken,
   getStableDebtToken,
 } from '../../helpers/contracts-getters';
-import { eNetwork, tEthereumAddress } from '../../helpers/types';
+import { tEthereumAddress } from '../../helpers/types';
 import { Pool } from '../../types/Pool';
 import { AaveProtocolDataProvider } from '../../types/AaveProtocolDataProvider';
 import { MintableERC20 } from '../../types/MintableERC20';
@@ -28,10 +28,8 @@ import { PriceOracle } from '../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../types/PoolAddressesProvider';
 import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProviderRegistry';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
-import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { solidity } from 'ethereum-waffle';
-import { AaveConfig } from '../../markets/aave';
 import { StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
@@ -118,14 +116,8 @@ export async function initializeMakeSuite() {
 
   testEnv.addressesProvider = await getPoolAddressesProvider();
 
-  if (process.env.FORK) {
-    testEnv.registry = await getPoolAddressesProviderRegistry(
-      getParamPerNetwork(AaveConfig.ProviderRegistry, process.env.FORK as eNetwork)
-    );
-  } else {
-    testEnv.registry = await getPoolAddressesProviderRegistry();
-    testEnv.oracle = await getPriceOracle();
-  }
+  testEnv.registry = await getPoolAddressesProviderRegistry();
+  testEnv.oracle = await getPriceOracle();
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 

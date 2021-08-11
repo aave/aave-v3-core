@@ -4,7 +4,6 @@ import {
   tEthereumAddress,
   eContractid,
   tStringTokenSmallUnits,
-  AavePools,
   TokenContractId,
   iMultiPoolsAssets,
   IReserveParams,
@@ -13,7 +12,6 @@ import {
 } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { MockContract } from 'ethereum-waffle';
-import { getReservesConfigByPool } from './configuration';
 import { getFirstSigner } from './contracts-getters';
 import {
   AaveProtocolDataProviderFactory,
@@ -55,6 +53,7 @@ import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
+import AaveConfig from '../markets/aave';
 
 const readArtifact = async (id: string) => {
   if (DRE.network.name === eEthereumNetwork.buidlerevm) {
@@ -211,14 +210,6 @@ export const deployPoolCollateralManager = async (verify?: boolean) => {
   return withSaveAndVerify(collateralManagerImpl, eContractid.PoolCollateralManager, [], verify);
 };
 
-export const deployInitializableAdminUpgradeabilityProxy = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new InitializableAdminUpgradeabilityProxyFactory(await getFirstSigner()).deploy(),
-    eContractid.InitializableAdminUpgradeabilityProxy,
-    [],
-    verify
-  );
-
 export const deployMockFlashLoanReceiver = async (
   addressesProvider: tEthereumAddress,
   verify?: boolean
@@ -273,37 +264,38 @@ export const deployDefaultReserveInterestRateStrategy = async (
     verify
   );
 
-export const deployStableDebtToken = async (
-  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string],
-  verify: boolean
-) => {
-  const instance = await withSaveAndVerify(
-    await new StableDebtTokenFactory(await getFirstSigner()).deploy(),
-    eContractid.StableDebtToken,
-    [],
-    verify
-  );
+//TO-DO remove?
+// export const deployStableDebtToken = async (
+//   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string],
+//   verify: boolean
+// ) => {
+//   const instance = await withSaveAndVerify(
+//     await new StableDebtTokenFactory(await getFirstSigner()).deploy(),
+//     eContractid.StableDebtToken,
+//     [],
+//     verify
+//   );
 
-  await instance.initialize(args[0], args[1], args[2], '18', args[3], args[4], '0x10');
+//   await instance.initialize(args[0], args[1], args[2], '18', args[3], args[4], '0x10');
 
-  return instance;
-};
+//   return instance;
+// };
 
-export const deployVariableDebtToken = async (
-  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string],
-  verify: boolean
-) => {
-  const instance = await withSaveAndVerify(
-    await new VariableDebtTokenFactory(await getFirstSigner()).deploy(),
-    eContractid.VariableDebtToken,
-    [],
-    verify
-  );
+// export const deployVariableDebtToken = async (
+//   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string],
+//   verify: boolean
+// ) => {
+//   const instance = await withSaveAndVerify(
+//     await new VariableDebtTokenFactory(await getFirstSigner()).deploy(),
+//     eContractid.VariableDebtToken,
+//     [],
+//     verify
+//   );
 
-  await instance.initialize(args[0], args[1], args[2], '18', args[3], args[4], '0x10');
+//   await instance.initialize(args[0], args[1], args[2], '18', args[3], args[4], '0x10');
 
-  return instance;
-};
+//   return instance;
+// };
 
 export const deployGenericStableDebtToken = async () =>
   withSaveAndVerify(
@@ -404,7 +396,7 @@ export const deployDelegationAwareATokenImpl = async (verify: boolean) =>
 export const deployAllMockTokens = async (verify?: boolean) => {
   const tokens: { [symbol: string]: MockContract | MintableERC20 } = {};
 
-  const protoConfigData = getReservesConfigByPool(AavePools.proto);
+  const protoConfigData = AaveConfig.ReserveAssets;
 
   for (const tokenSymbol of Object.keys(TokenContractId)) {
     let decimals = '18';
@@ -413,27 +405,6 @@ export const deployAllMockTokens = async (verify?: boolean) => {
 
     tokens[tokenSymbol] = await deployMintableERC20(
       [tokenSymbol, tokenSymbol, configData ? configData.reserveDecimals : decimals],
-      verify
-    );
-    await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
-  }
-  return tokens;
-};
-
-export const deployMockTokens = async (config: PoolConfiguration, verify?: boolean) => {
-  const tokens: { [symbol: string]: MockContract | MintableERC20 } = {};
-  const defaultDecimals = 18;
-
-  const configData = config.ReservesConfig;
-
-  for (const tokenSymbol of Object.keys(configData)) {
-    tokens[tokenSymbol] = await deployMintableERC20(
-      [
-        tokenSymbol,
-        tokenSymbol,
-        configData[tokenSymbol as keyof iMultiPoolsAssets<IReserveParams>].reserveDecimals ||
-          defaultDecimals.toString(),
-      ],
       verify
     );
     await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
@@ -526,14 +497,6 @@ export const deployMockAToken = async (
 
   return instance;
 };
-
-export const deploySelfdestructTransferMock = async (verify?: boolean) =>
-  withSaveAndVerify(
-    await new SelfdestructTransferFactory(await getFirstSigner()).deploy(),
-    eContractid.SelfdestructTransferMock,
-    [],
-    verify
-  );
 
 export const deployMockUniswapRouter = async (verify?: boolean) =>
   withSaveAndVerify(

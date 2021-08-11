@@ -1,26 +1,12 @@
-import { Contract, Signer, utils, ethers, BigNumberish } from 'ethers';
+import { Contract, Signer, ethers } from 'ethers';
 import { signTypedData_v4 } from 'eth-sig-util';
 import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';
-import BigNumber from 'bignumber.js';
 import { getDb, DRE, waitForTx } from './misc-utils';
-import {
-  tEthereumAddress,
-  eContractid,
-  tStringTokenSmallUnits,
-  eEthereumNetwork,
-  AavePools,
-  iParamsPerNetwork,
-  iParamsPerPool,
-  ePolygonNetwork,
-  eNetwork,
-  iEthereumParamsPerNetwork,
-} from './types';
+import { tEthereumAddress, eContractid, tStringTokenSmallUnits } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { Artifact } from 'hardhat/types';
 import { Artifact as BuidlerArtifact } from '@nomiclabs/buidler/types';
-import { verifyEtherscanContract } from './etherscan-verification';
-import { getFirstSigner, getIErc20Detailed } from './contracts-getters';
-import { usingTenderly, verifyAtTenderly } from './tenderly-utils';
+import { getIErc20Detailed } from './contracts-getters';
 import { getDefenderRelaySigner, usingDefender } from './defender-utils';
 
 export type MockTokenMap = { [symbol: string]: MintableERC20 };
@@ -75,25 +61,6 @@ export const getEthersSigners = async (): Promise<Signer[]> => {
 export const getEthersSignersAddresses = async (): Promise<tEthereumAddress[]> =>
   await Promise.all((await getEthersSigners()).map((signer) => signer.getAddress()));
 
-export const getCurrentBlock = async () => {
-  return DRE.ethers.provider.getBlockNumber();
-};
-
-export const decodeAbiNumber = (data: string): number =>
-  parseInt(utils.defaultAbiCoder.decode(['uint256'], data).toString());
-
-export const deployContract = async <ContractType extends Contract>(
-  contractName: string,
-  args: any[]
-): Promise<ContractType> => {
-  const contract = (await (await DRE.ethers.getContractFactory(contractName))
-    .connect(await getFirstSigner())
-    .deploy(...args)) as ContractType;
-  await waitForTx(contract.deployTransaction);
-  await registerContractInJsonDb(<eContractid>contractName, contract);
-  return contract;
-};
-
 export const withSaveAndVerify = async <ContractType extends Contract>(
   instance: ContractType,
   id: string,
@@ -107,11 +74,6 @@ export const withSaveAndVerify = async <ContractType extends Contract>(
   }
   return instance;
 };
-
-export const getContract = async <ContractType extends Contract>(
-  contractName: string,
-  address: string
-): Promise<ContractType> => (await DRE.ethers.getContractAt(contractName, address)) as ContractType;
 
 export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: any) => {
   let bytecode = artifact.bytecode;
@@ -136,53 +98,11 @@ export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: an
   return bytecode;
 };
 
-export const getParamPerNetwork = <T>(param: iParamsPerNetwork<T>, network: eNetwork) => {
-  const { main, ropsten, kovan, coverage, buidlerevm, tenderlyMain } =
-    param as iEthereumParamsPerNetwork<T>;
-  if (process.env.FORK) {
-    return param[process.env.FORK as eNetwork] as T;
-  }
-
-  switch (network) {
-    case eEthereumNetwork.coverage:
-      return coverage;
-    case eEthereumNetwork.buidlerevm:
-      return buidlerevm;
-    case eEthereumNetwork.hardhat:
-      return buidlerevm;
-    case eEthereumNetwork.kovan:
-      return kovan;
-    case eEthereumNetwork.ropsten:
-      return ropsten;
-    case eEthereumNetwork.main:
-      return main;
-    case eEthereumNetwork.tenderlyMain:
-      return tenderlyMain;
-  }
-};
-
-export const getParamPerPool = <T>({ proto }: iParamsPerPool<T>, pool: AavePools) => {
-  switch (pool) {
-    case AavePools.proto:
-      return proto;
-    default:
-      return proto;
-  }
-};
-
 export const convertToCurrencyDecimals = async (tokenAddress: tEthereumAddress, amount: string) => {
   const token = await getIErc20Detailed(tokenAddress);
   let decimals = (await token.decimals()).toString();
 
   return ethers.utils.parseUnits(amount, decimals);
-};
-
-export const convertToCurrencyUnits = async (tokenAddress: string, amount: string) => {
-  const token = await getIErc20Detailed(tokenAddress);
-  let decimals = new BigNumber(await token.decimals());
-  const currencyUnit = new BigNumber(10).pow(decimals);
-  const amountInCurrencyUnits = new BigNumber(amount).div(currencyUnit);
-  return amountInCurrencyUnits.toFixed();
 };
 
 export const buildPermitParams = (
@@ -237,43 +157,6 @@ export const getSignatureFromTypedData = (
   return fromRpcSig(signature);
 };
 
-export const buildLiquiditySwapParams = (
-  assetToSwapToList: tEthereumAddress[],
-  minAmountsToReceive: BigNumberish[],
-  swapAllBalances: BigNumberish[],
-  permitAmounts: BigNumberish[],
-  deadlines: BigNumberish[],
-  v: BigNumberish[],
-  r: (string | Buffer)[],
-  s: (string | Buffer)[],
-  useEthPath: boolean[]
-) => {
-  return ethers.utils.defaultAbiCoder.encode(
-    [
-      'address[]',
-      'uint256[]',
-      'bool[]',
-      'uint256[]',
-      'uint256[]',
-      'uint8[]',
-      'bytes32[]',
-      'bytes32[]',
-      'bool[]',
-    ],
-    [
-      assetToSwapToList,
-      minAmountsToReceive,
-      swapAllBalances,
-      permitAmounts,
-      deadlines,
-      v,
-      r,
-      s,
-      useEthPath,
-    ]
-  );
-};
-
 export const buildPermitDelegationParams = (
   chainId: number,
   token: tEthereumAddress,
@@ -315,15 +198,3 @@ export const buildPermitDelegationParams = (
     deadline,
   },
 });
-
-export const verifyContract = async (
-  id: string,
-  instance: Contract,
-  args: (string | string[])[]
-) => {
-  if (usingTenderly()) {
-    await verifyAtTenderly(id, instance);
-  }
-  await verifyEtherscanContract(instance.address, args);
-  return instance;
-};

@@ -22,16 +22,14 @@ const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 
 // Prevent to load scripts before compilation and typechain
 if (!SKIP_LOAD) {
-  ['misc', 'migrations', 'dev', 'full', 'verifications', 'deployments', 'helpers'].forEach(
-    (folder) => {
-      const tasksPath = path.join(__dirname, 'tasks', folder);
-      fs.readdirSync(tasksPath)
-        .filter((pth) => pth.includes('.ts'))
-        .forEach((task) => {
-          require(`${tasksPath}/${task}`);
-        });
-    }
-  );
+  ['misc', 'dev'].forEach((folder) => {
+    const tasksPath = path.join(__dirname, 'tasks', folder);
+    fs.readdirSync(tasksPath)
+      .filter((pth) => pth.includes('.ts'))
+      .forEach((task) => {
+        require(`${tasksPath}/${task}`);
+      });
+  });
 }
 
 require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);

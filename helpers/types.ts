@@ -16,10 +16,6 @@ export enum eEthereumNetwork {
   tenderlyMain = 'tenderlyMain',
 }
 
-export enum AavePools {
-  proto = 'proto',
-}
-
 export enum eContractid {
   Example = 'Example',
   PoolAddressesProvider = 'PoolAddressesProvider',
@@ -257,34 +253,7 @@ export type iAavePoolAssets<T> = Pick<
   | 'xSUSHI'
 >;
 
-export type iLpPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  | 'DAI'
-  | 'USDC'
-  | 'USDT'
-  | 'WBTC'
-  | 'WETH'
-  | 'UniDAIWETH'
-  | 'UniWBTCWETH'
-  | 'UniAAVEWETH'
-  | 'UniBATWETH'
-  | 'UniDAIUSDC'
-  | 'UniCRVWETH'
-  | 'UniLINKWETH'
-  | 'UniMKRWETH'
-  | 'UniRENWETH'
-  | 'UniSNXWETH'
-  | 'UniUNIWETH'
-  | 'UniUSDCWETH'
-  | 'UniWBTCUSDC'
-  | 'UniYFIWETH'
-  | 'BptWBTCWETH'
-  | 'BptBALWETH'
->;
-
 export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
-
-export type iAavePoolTokens<T> = Omit<iAavePoolAssets<T>, 'ETH'>;
 
 export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
@@ -384,23 +353,10 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.tenderlyMain]: T;
 }
 
-export interface iParamsPerPool<T> {
-  [AavePools.proto]: T;
-}
-
-export interface iBasicDistributionParams {
-  receivers: string[];
-  percentages: string[];
-}
-
 export enum RateMode {
   None = '0',
   Stable = '1',
   Variable = '2',
-}
-
-export interface ObjectString {
-  [key: string]: string;
 }
 
 export interface IProtocolGlobalConfig {
@@ -449,20 +405,16 @@ export interface ICommonConfiguration {
   EmergencyAdmin: tEthereumAddress | undefined;
   EmergencyAdminIndex: number;
   ReserveAssets: SymbolMap<tEthereumAddress>;
-  ReservesConfig: IReserveParams;
+  ReservesConfig: iMultiPoolsAssets<IReserveParams>;
   ATokenDomainSeparator: string;
   WETH: tEthereumAddress | undefined;
   WrappedNativeToken: tEthereumAddress | undefined;
-  ReserveFactorTreasuryAddress: tEthereumAddress | undefined;
+  ReserveFactorTreasuryAddress: tEthereumAddress;
   IncentivesController: tEthereumAddress | undefined;
 }
 
 export interface IAaveConfiguration extends ICommonConfiguration {
-  ReservesConfig: IReserveParams;
-}
-
-export interface ITokenAddress {
-  [token: string]: tEthereumAddress;
+  ReservesConfig: iMultiPoolsAssets<IReserveParams>;
 }
 
 export type PoolConfiguration = ICommonConfiguration | IAaveConfiguration;

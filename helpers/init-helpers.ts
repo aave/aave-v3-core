@@ -1,14 +1,7 @@
-import {
-  eContractid,
-  eNetwork,
-  iMultiPoolsAssets,
-  IReserveParams,
-  tEthereumAddress,
-} from './types';
+import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from './types';
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
-import { chunk, getDb, waitForTx } from './misc-utils';
+import { chunk, waitForTx } from './misc-utils';
 import {
-  getAToken,
   getATokensAndRatesHelper,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
@@ -18,24 +11,11 @@ import { rawInsertContractAddressInDb } from './contracts-helpers';
 import { BigNumber, BigNumberish } from 'ethers';
 import {
   deployDefaultReserveInterestRateStrategy,
-  deployDelegationAwareAToken,
   deployDelegationAwareATokenImpl,
-  deployGenericAToken,
   deployGenericATokenImpl,
   deployGenericStableDebtToken,
   deployGenericVariableDebtToken,
 } from './contracts-deployments';
-
-export const chooseATokenDeployment = (id: eContractid) => {
-  switch (id) {
-    case eContractid.AToken:
-      return deployGenericAToken;
-    case eContractid.DelegationAwareAToken:
-      return deployDelegationAwareAToken;
-    default:
-      throw Error(`Missing aToken deployment script for: ${id}`);
-  }
-};
 
 export const initReservesByHelper = async (
   reservesParams: iMultiPoolsAssets<IReserveParams>,
@@ -353,17 +333,4 @@ export const configureReservesByHelper = async (
     // Set deployer back as admin
     await waitForTx(await addressProvider.setPoolAdmin(admin));
   }
-};
-
-const getAddressById = async (
-  id: string,
-  network: eNetwork
-): Promise<tEthereumAddress | undefined> =>
-  (await getDb().get(`${id}.${network}`).value())?.address || undefined;
-
-// Function deprecated
-const isErc20SymbolCorrect = async (token: tEthereumAddress, symbol: string) => {
-  const erc20 = await getAToken(token); // using aToken for ERC20 interface
-  const erc20Symbol = await erc20.symbol();
-  return symbol === erc20Symbol;
 };

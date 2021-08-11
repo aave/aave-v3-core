@@ -3,9 +3,8 @@ import { configuration as calculationsConfiguration } from './helpers/utils/calc
 
 import BigNumber from 'bignumber.js';
 import { makeSuite } from './helpers/make-suite';
-import { getReservesConfigByPool } from '../helpers/configuration';
-import { AavePools, iAavePoolAssets, IReserveParams } from '../helpers/types';
 import { executeStory } from './helpers/scenario-engine';
+import AaveConfig from '../markets/aave';
 
 makeSuite('Subgraph scenario tests', async (testEnv) => {
   let story: any;
@@ -18,9 +17,7 @@ makeSuite('Subgraph scenario tests', async (testEnv) => {
 
     actionsConfiguration.skipIntegrityCheck = false; //set this to true to execute solidity-coverage
 
-    calculationsConfiguration.reservesParams = <iAavePoolAssets<IReserveParams>>(
-      getReservesConfigByPool(AavePools.proto)
-    );
+    calculationsConfiguration.reservesParams = AaveConfig.ReservesConfig;
   });
   after('Reset', () => {
     // Reset BigNumber

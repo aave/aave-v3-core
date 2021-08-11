@@ -5,14 +5,9 @@ import {
   deployAaveProtocolDataProvider,
 } from '../../helpers/contracts-deployments';
 import { eNetwork } from '../../helpers/types';
-import {
-  ConfigNames,
-  getReservesConfigByPool,
-  getTreasuryAddress,
-  loadPoolConfig,
-} from '../../helpers/configuration';
+import { ConfigNames, loadPoolConfig } from '../../helpers/configuration';
 
-import { tEthereumAddress, AavePools, eContractid } from '../../helpers/types';
+import { tEthereumAddress, eContractid } from '../../helpers/types';
 import { waitForTx, filterMapBy } from '../../helpers/misc-utils';
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
 import { getAllTokenAddresses } from '../../helpers/mock-helpers';
@@ -44,11 +39,11 @@ task('dev:initialize-pool', 'Initialize pool configuration.')
 
     const testHelpers = await deployAaveProtocolDataProvider(addressesProvider.address, verify);
 
-    const reservesParams = getReservesConfigByPool(AavePools.proto);
+    const reservesParams = poolConfig.ReservesConfig;
 
     const admin = await addressesProvider.getPoolAdmin();
 
-    const treasuryAddress = await getTreasuryAddress(poolConfig);
+    const treasuryAddress = poolConfig.ReserveFactorTreasuryAddress;
 
     await initReservesByHelper(
       reservesParams,
