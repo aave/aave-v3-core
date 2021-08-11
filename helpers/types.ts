@@ -4,7 +4,7 @@ export interface SymbolMap<T> {
   [symbol: string]: T;
 }
 
-export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork;
+export type eNetwork = eEthereumNetwork;
 
 export enum eEthereumNetwork {
   buidlerevm = 'buidlerevm',
@@ -16,28 +16,8 @@ export enum eEthereumNetwork {
   tenderlyMain = 'tenderlyMain',
 }
 
-export enum ePolygonNetwork {
-  matic = 'matic',
-  mumbai = 'mumbai',
-}
-
-export enum eXDaiNetwork {
-  xdai = 'xdai',
-}
-
-export enum EthereumNetworkNames {
-  kovan = 'kovan',
-  ropsten = 'ropsten',
-  main = 'main',
-  matic = 'matic',
-  mumbai = 'mumbai',
-  xdai = 'xdai',
-}
-
 export enum AavePools {
   proto = 'proto',
-  matic = 'matic',
-  amm = 'amm',
 }
 
 export enum eContractid {
@@ -302,16 +282,6 @@ export type iLpPoolAssets<T> = Pick<
   | 'BptBALWETH'
 >;
 
-export type iMaticPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'WMATIC' | 'AAVE'
->;
-
-export type iXDAIPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'STAKE'
->;
-
 export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
 
 export type iAavePoolTokens<T> = Omit<iAavePoolAssets<T>, 'ETH'>;
@@ -400,15 +370,9 @@ export interface IMarketRates {
   borrowRate: string;
 }
 
-export type iParamsPerNetwork<T> =
-  | iEthereumParamsPerNetwork<T>
-  | iPolygonParamsPerNetwork<T>
-  | iXDaiParamsPerNetwork<T>;
+export type iParamsPerNetwork<T> = iEthereumParamsPerNetwork<T>;
 
-export interface iParamsPerNetworkAll<T>
-  extends iEthereumParamsPerNetwork<T>,
-    iPolygonParamsPerNetwork<T>,
-    iXDaiParamsPerNetwork<T> {}
+export interface iParamsPerNetworkAll<T> extends iEthereumParamsPerNetwork<T> {}
 
 export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.coverage]: T;
@@ -420,19 +384,8 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.tenderlyMain]: T;
 }
 
-export interface iPolygonParamsPerNetwork<T> {
-  [ePolygonNetwork.matic]: T;
-  [ePolygonNetwork.mumbai]: T;
-}
-
-export interface iXDaiParamsPerNetwork<T> {
-  [eXDaiNetwork.xdai]: T;
-}
-
 export interface iParamsPerPool<T> {
   [AavePools.proto]: T;
-  [AavePools.matic]: T;
-  [AavePools.amm]: T;
 }
 
 export interface iBasicDistributionParams {
@@ -480,44 +433,32 @@ export interface ICommonConfiguration {
   ProviderId: number;
   ProtocolGlobalParams: IProtocolGlobalConfig;
   Mocks: IMocksConfig;
-  ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
-  ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
-  PoolCollateralManager: iParamsPerNetwork<tEthereumAddress>;
-  PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
-  Pool: iParamsPerNetwork<tEthereumAddress>;
+  ProviderRegistry: tEthereumAddress | undefined;
+  ProviderRegistryOwner: tEthereumAddress | undefined;
+  PoolCollateralManager: tEthereumAddress | undefined;
+  PoolConfigurator: tEthereumAddress | undefined;
+  Pool: tEthereumAddress | undefined;
   RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
-  RateOracle: iParamsPerNetwork<tEthereumAddress>;
-  TokenDistributor: iParamsPerNetwork<tEthereumAddress>;
-  AaveOracle: iParamsPerNetwork<tEthereumAddress>;
-  FallbackOracle: iParamsPerNetwork<tEthereumAddress>;
-  ChainlinkAggregator: iParamsPerNetwork<ITokenAddress>;
-  PoolAdmin: iParamsPerNetwork<tEthereumAddress | undefined>;
+  RateOracle: tEthereumAddress | undefined;
+  TokenDistributor: tEthereumAddress | undefined;
+  AaveOracle: tEthereumAddress | undefined;
+  FallbackOracle: tEthereumAddress | undefined;
+  ChainlinkAggregator: tEthereumAddress | undefined;
+  PoolAdmin: tEthereumAddress | undefined;
   PoolAdminIndex: number;
-  EmergencyAdmin: iParamsPerNetwork<tEthereumAddress | undefined>;
+  EmergencyAdmin: tEthereumAddress | undefined;
   EmergencyAdminIndex: number;
-  ReserveAssets: iParamsPerNetwork<SymbolMap<tEthereumAddress>>;
-  ReservesConfig: iMultiPoolsAssets<IReserveParams>;
-  ATokenDomainSeparator: iParamsPerNetwork<string>;
-  WETH: iParamsPerNetwork<tEthereumAddress>;
-  WrappedNativeToken: iParamsPerNetwork<tEthereumAddress>;
-  ReserveFactorTreasuryAddress: iParamsPerNetwork<tEthereumAddress>;
-  IncentivesController: iParamsPerNetwork<tEthereumAddress>;
+  ReserveAssets: SymbolMap<tEthereumAddress>;
+  ReservesConfig: IReserveParams;
+  ATokenDomainSeparator: string;
+  WETH: tEthereumAddress | undefined;
+  WrappedNativeToken: tEthereumAddress | undefined;
+  ReserveFactorTreasuryAddress: tEthereumAddress | undefined;
+  IncentivesController: tEthereumAddress | undefined;
 }
 
 export interface IAaveConfiguration extends ICommonConfiguration {
-  ReservesConfig: iAavePoolAssets<IReserveParams>;
-}
-
-export interface IAmmConfiguration extends ICommonConfiguration {
-  ReservesConfig: iLpPoolAssets<IReserveParams>;
-}
-
-export interface IMaticConfiguration extends ICommonConfiguration {
-  ReservesConfig: iMaticPoolAssets<IReserveParams>;
-}
-
-export interface IXDAIConfiguration extends ICommonConfiguration {
-  ReservesConfig: iXDAIPoolAssets<IReserveParams>;
+  ReservesConfig: IReserveParams;
 }
 
 export interface ITokenAddress {

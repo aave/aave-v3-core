@@ -1,4 +1,4 @@
-import { BigNumberish, Contract } from 'ethers';
+import { Contract } from 'ethers';
 import { DRE } from './misc-utils';
 import {
   tEthereumAddress,
@@ -15,7 +15,6 @@ import { MintableERC20 } from '../types/MintableERC20';
 import { MockContract } from 'ethereum-waffle';
 import { getReservesConfigByPool } from './configuration';
 import { getFirstSigner } from './contracts-getters';
-import { ZERO_ADDRESS } from './constants';
 import {
   AaveProtocolDataProviderFactory,
   ATokenFactory,
@@ -50,8 +49,6 @@ import {
   registerContractInJsonDb,
   linkBytecode,
   insertContractAddressInDb,
-  deployContract,
-  verifyContract,
 } from './contracts-helpers';
 import { StableAndVariableTokensHelperFactory } from '../types/StableAndVariableTokensHelperFactory';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';

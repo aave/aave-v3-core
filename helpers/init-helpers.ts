@@ -1,24 +1,21 @@
 import {
   eContractid,
-  eEthereumNetwork,
   eNetwork,
   iMultiPoolsAssets,
   IReserveParams,
   tEthereumAddress,
 } from './types';
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
-import { chunk, DRE, getDb, waitForTx } from './misc-utils';
+import { chunk, getDb, waitForTx } from './misc-utils';
 import {
-  getAaveProtocolDataProvider,
   getAToken,
   getATokensAndRatesHelper,
-  getFirstSigner,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
   getStableAndVariableTokensHelper,
 } from './contracts-getters';
 import { rawInsertContractAddressInDb } from './contracts-helpers';
-import { BigNumber, BigNumberish, Signer } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 import {
   deployDefaultReserveInterestRateStrategy,
   deployDelegationAwareAToken,
@@ -27,13 +24,7 @@ import {
   deployGenericATokenImpl,
   deployGenericStableDebtToken,
   deployGenericVariableDebtToken,
-  deployStableDebtToken,
-  deployVariableDebtToken,
 } from './contracts-deployments';
-import { ZERO_ADDRESS } from './constants';
-import { isZeroAddress } from 'ethereumjs-util';
-import { DefaultReserveInterestRateStrategy, DelegationAwareAToken } from '../types';
-import { config } from 'process';
 
 export const chooseATokenDeployment = (id: eContractid) => {
   switch (id) {

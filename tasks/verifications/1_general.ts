@@ -1,21 +1,13 @@
-import { error } from 'console';
-import { zeroAddress } from 'ethereumjs-util';
 import { task } from 'hardhat/config';
 import { loadPoolConfig, ConfigNames, getTreasuryAddress } from '../../helpers/configuration';
-import { ZERO_ADDRESS } from '../../helpers/constants';
 import {
   getAaveProtocolDataProvider,
-  getAddressById,
-  getPool,
   getPoolAddressesProvider,
   getPoolAddressesProviderRegistry,
-  getPoolCollateralManager,
   getPoolCollateralManagerImpl,
   getPoolConfiguratorImpl,
-  getPoolConfiguratorProxy,
   getPoolImpl,
   getProxy,
-  getWalletProvider,
 } from '../../helpers/contracts-getters';
 import { verifyContract, getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { notFalsyOrZeroAddress } from '../../helpers/misc-utils';
@@ -28,16 +20,8 @@ task('verify:general', 'Verify contracts at Etherscan')
     await localDRE.run('set-DRE');
     const network = localDRE.network.name as eNetwork;
     const poolConfig = loadPoolConfig(pool);
-    const {
-      ReserveAssets,
-      ReservesConfig,
-      ProviderRegistry,
-      MarketId,
-      PoolCollateralManager,
-      PoolConfigurator,
-      Pool,
-    } = poolConfig as ICommonConfiguration;
-    const treasuryAddress = await getTreasuryAddress(poolConfig);
+    const { ProviderRegistry, MarketId, PoolCollateralManager, PoolConfigurator, Pool } =
+      poolConfig as ICommonConfiguration;
 
     const registryAddress = getParamPerNetwork(ProviderRegistry, network);
     const addressesProvider = await getPoolAddressesProvider();
@@ -69,7 +53,6 @@ task('verify:general', 'Verify contracts at Etherscan')
         : await getPoolCollateralManagerImpl();
 
       const dataProvider = await getAaveProtocolDataProvider();
-      const walletProvider = await getWalletProvider();
 
       // Address Provider
       console.log('\n- Verifying address provider...\n');

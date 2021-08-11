@@ -4,7 +4,6 @@ import {
   deployMockFlashLoanReceiver,
   deployAaveProtocolDataProvider,
 } from '../../helpers/contracts-deployments';
-import { getParamPerNetwork } from '../../helpers/contracts-helpers';
 import { eNetwork } from '../../helpers/types';
 import {
   ConfigNames,
@@ -14,7 +13,7 @@ import {
 } from '../../helpers/configuration';
 
 import { tEthereumAddress, AavePools, eContractid } from '../../helpers/types';
-import { waitForTx, filterMapBy, notFalsyOrZeroAddress } from '../../helpers/misc-utils';
+import { waitForTx, filterMapBy } from '../../helpers/misc-utils';
 import { configureReservesByHelper, initReservesByHelper } from '../../helpers/init-helpers';
 import { getAllTokenAddresses } from '../../helpers/mock-helpers';
 import { ZERO_ADDRESS } from '../../helpers/constants';
