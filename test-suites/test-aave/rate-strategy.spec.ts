@@ -105,6 +105,46 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     );
   });
 
+  it('Checks rates at 80% utilization rate using unbacked underlying', async () => {
+    const {
+      0: currentLiquidityRate,
+      1: currentStableBorrowRate,
+      2: currentVariableBorrowRate,
+    } = await strategyInstance[
+      'calculateInterestRates(address,address,(uint256,uint256,uint256),uint256,uint256,uint256,uint256)'
+    ](
+      dai.address,
+      aDai.address,
+      { liquidityAdded: 0, liquidityTaken: 0, unbackedUnderlying: '200000000000000000' },
+      0,
+      '800000000000000000',
+      0,
+      strategyDAI.reserveFactor
+    );
+
+    const expectedVariableRate = new BigNumber(rateStrategyStableOne.baseVariableBorrowRate).plus(
+      rateStrategyStableOne.variableRateSlope1
+    );
+
+    expect(currentLiquidityRate.toString()).to.be.equal(
+      expectedVariableRate
+        .times(0.8)
+        .percentMul(new BigNumber(PERCENTAGE_FACTOR).minus(strategyDAI.reserveFactor))
+        .toFixed(0),
+      'Invalid liquidity rate'
+    );
+
+    expect(currentVariableBorrowRate.toString()).to.be.equal(
+      expectedVariableRate.toFixed(0),
+      'Invalid variable rate'
+    );
+
+    expect(currentStableBorrowRate.toString()).to.be.equal(
+      new BigNumber(0.039).times(RAY).plus(rateStrategyStableOne.stableRateSlope1).toFixed(0),
+      'Invalid stable rate'
+    );
+  });
+
   it('Checks rates at 100% utilization rate', async () => {
     const {
       0: currentLiquidityRate,
