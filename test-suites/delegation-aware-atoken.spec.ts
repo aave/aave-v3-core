@@ -22,21 +22,14 @@ makeSuite('AToken: underlying delegation', (testEnv: TestEnv) => {
 
     delegationERC20 = await deployMintableDelegationERC20(['DEL', 'DEL', '18']);
 
-    delegationAToken = await deployDelegationAwareAToken(
-      [
-        pool.address,
-        delegationERC20.address,
-        AaveConfig.ReserveFactorTreasuryAddress,
-        ZERO_ADDRESS,
-        'aDEL',
-        'aDEL',
-      ],
-      false
-    );
-
-    //await delegationAToken.initialize(pool.address, ZERO_ADDRESS, delegationERC20.address, ZERO_ADDRESS, '18', 'aDEL', 'aDEL');
-
-    console.log((await delegationAToken.decimals()).toString());
+    delegationAToken = await deployDelegationAwareAToken([
+      pool.address,
+      delegationERC20.address,
+      AaveConfig.ReserveFactorTreasuryAddress,
+      ZERO_ADDRESS,
+      'aDEL',
+      'aDEL',
+    ]);
   });
 
   it('Tries to delegate with the caller not being the Aave admin', async () => {
