@@ -4,7 +4,6 @@ import {
   ATokensAndRatesHelperFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
-  PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
   PoolFactory,
   RateOracleFactory,
@@ -217,15 +216,6 @@ export const getMockStableDebtToken = async (address?: tEthereumAddress) =>
     address ||
       (
         await getDb().get(`${eContractid.MockStableDebtToken}.${DRE.network.name}`).value()
-      ).address,
-    await getFirstSigner()
-  );
-
-export const getPoolCollateralManager = async (address?: tEthereumAddress) =>
-  await PoolCollateralManagerFactory.connect(
-    address ||
-      (
-        await getDb().get(`${eContractid.PoolCollateralManager}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.8.6;
 
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
@@ -204,7 +204,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
         )
       );
     require(delegator == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
-    _nonces[delegator] = currentValidNonce.add(1);
+    _nonces[delegator] = currentValidNonce + 1;
     _approveDelegation(delegator, delegatee, value);
   }
 

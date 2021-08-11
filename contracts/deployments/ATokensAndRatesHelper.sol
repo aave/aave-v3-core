@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.6;
 
 import {Pool} from '../protocol/pool/Pool.sol';
 import {PoolAddressesProvider} from '../protocol/configuration/PoolAddressesProvider.sol';

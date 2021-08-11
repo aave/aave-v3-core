@@ -19,7 +19,6 @@ import {
   DelegationAwareATokenFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
-  PoolCollateralManagerFactory,
   PoolConfiguratorFactory,
   PoolFactory,
   RateOracleFactory,
@@ -32,7 +31,6 @@ import {
   MockVariableDebtTokenFactory,
   MockUniswapV2Router02Factory,
   PriceOracleFactory,
-  ReserveLogicFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
@@ -69,61 +67,80 @@ export const deployPoolAddressesProviderRegistry = async () =>
     eContractid.PoolAddressesProviderRegistry
   );
 
-export const deployPoolConfigurator = async () => {
-  const poolConfiguratorImpl = await new PoolConfiguratorFactory(await getFirstSigner()).deploy();
+export const deployConfiguratorLogicLibrary = async () =>
+  withSave(
+    await new ConfiguratorLogicFactory(await getFirstSigner()).deploy(),
+    eContractid.ConfiguratorLogic
+  );
+
+export const deployPoolConfigurator = async (verify?: boolean) => {
+  const configuratorLogic = await deployConfiguratorLogicLibrary();
+  const poolConfiguratorImpl = await new PoolConfiguratorFactory(
+    { ['__$3ddc574512022f331a6a4c7e4bbb5c67b6$__']: configuratorLogic.address },
+    await getFirstSigner()
+  ).deploy();
   await insertContractAddressInDb(eContractid.PoolConfiguratorImpl, poolConfiguratorImpl.address);
   return withSave(poolConfiguratorImpl, eContractid.PoolConfigurator);
 };
 
-export const deployReserveLogicLibrary = async () =>
-  withSave(
-    await new ReserveLogicFactory(await getFirstSigner()).deploy(),
-    eContractid.ReserveLogic
-  );
-
-export const deployGenericLogic = async (reserveLogic: Contract) => {
-  const genericLogicArtifact = await readArtifact(eContractid.GenericLogic);
-
-  const linkedGenericLogicByteCode = linkBytecode(genericLogicArtifact, {
-    [eContractid.ReserveLogic]: reserveLogic.address,
+export const deployDepositLogic = async (
+  verify?: boolean
+) => {
+  const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
+  
+  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {
   });
-
-  const genericLogicFactory = await DRE.ethers.getContractFactory(
-    genericLogicArtifact.abi,
-    linkedGenericLogicByteCode
+  const depositLogicFactory = await DRE.ethers.getContractFactory(
+    depositLogicArtifact.abi,
+    linkedDepositLogicByteCode
   );
-
-  const genericLogic = await (
-    await genericLogicFactory.connect(await getFirstSigner()).deploy()
-  ).deployed();
-  return withSave(genericLogic, eContractid.GenericLogic);
-};
-
-export const deployValidationLogic = async (reserveLogic: Contract, genericLogic: Contract) => {
-  const validationLogicArtifact = await readArtifact(eContractid.ValidationLogic);
-
-  const linkedValidationLogicByteCode = linkBytecode(validationLogicArtifact, {
-    [eContractid.ReserveLogic]: reserveLogic.address,
-    [eContractid.GenericLogic]: genericLogic.address,
-  });
-
-  const validationLogicFactory = await DRE.ethers.getContractFactory(
-    validationLogicArtifact.abi,
-    linkedValidationLogicByteCode
-  );
-
-  const validationLogic = await (
-    await validationLogicFactory.connect(await getFirstSigner()).deploy()
+  const depositLogic = await (
+    await depositLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
-  return withSave(validationLogic, eContractid.ValidationLogic);
+  return withSave(depositLogic, eContractid.DepositLogic);
 };
 
-export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
-  const reserveLogic = await deployReserveLogicLibrary();
-  const genericLogic = await deployGenericLogic(reserveLogic);
-  const validationLogic = await deployValidationLogic(reserveLogic, genericLogic);
 
+export const deployBorrowLogic = async (
+  verify?: boolean
+) => {
+  const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
+  
+  const borrowLogicFactory = await DRE.ethers.getContractFactory(
+    borrowLogicArtifact.abi,
+    borrowLogicArtifact.bytecode
+  );
+  const borrowLogic = await (
+    await borrowLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(borrowLogic, eContractid.BorrowLogic);
+};
+
+
+export const deployLiquidationLogic = async (
+  verify?: boolean
+) => {
+
+  const liquidationLogicArtifact = await readArtifact(eContractid.LiquidationLogic);
+    
+  const borrowLogicFactory = await DRE.ethers.getContractFactory(
+    liquidationLogicArtifact.abi,
+    liquidationLogicArtifact.bytecode
+  );
+  const liquidationLogic = await (
+    await borrowLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(liquidationLogic, eContractid.LiquidationLogic);
+};
+
+
+export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
+  const depositLogic = await deployDepositLogic( verify);
+  const borrowLogic = await deployBorrowLogic(verify);
+  const liquidationLogic = await deployLiquidationLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -131,14 +148,16 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   //  how-to:
   //  1. PLACEHOLDER = solidityKeccak256(['string'], `${libPath}:${libName}`).slice(2, 36)
   //  2. LIB_PLACEHOLDER = `__$${PLACEHOLDER}$__`
-  // or grab placeholdes from PoolLibraryAddresses at Typechain generation.
+  // or grab placeholders from PoolLibraryAddresses at Typechain generation.
   //
   // libPath example: contracts/libraries/logic/GenericLogic.sol
   // libName example: GenericLogic
   return {
-    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
-    ['__$22cd43a9dda9ce44e9b92ba393b88fb9ac$__']: reserveLogic.address,
-    ['__$52a8a86ab43135662ff256bbc95497e8e3$__']: genericLogic.address,
+    //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
+    ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
+    ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
+    ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address
+
   };
 };
 
@@ -168,17 +187,6 @@ export const deployAaveOracle = async (
     await new AaveOracleFactory(await getFirstSigner()).deploy(...args),
     eContractid.AaveOracle
   );
-
-export const deployPoolCollateralManager = async () => {
-  const collateralManagerImpl = await new PoolCollateralManagerFactory(
-    await getFirstSigner()
-  ).deploy();
-  await insertContractAddressInDb(
-    eContractid.PoolCollateralManagerImpl,
-    collateralManagerImpl.address
-  );
-  return withSave(collateralManagerImpl, eContractid.PoolCollateralManager);
-};
 
 export const deployMockFlashLoanReceiver = async (addressesProvider: tEthereumAddress) =>
   withSave(

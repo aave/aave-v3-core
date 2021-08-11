@@ -1,6 +1,5 @@
 import { task } from 'hardhat/config';
 import {
-  deployPoolCollateralManager,
   deployMockFlashLoanReceiver,
   deployAaveProtocolDataProvider,
 } from '../../helpers/contracts-deployments';
@@ -50,10 +49,7 @@ task('dev:initialize-pool', 'Initialize pool configuration.').setAction(async (_
     ZERO_ADDRESS
   );
   await configureReservesByHelper(reservesParams, protoPoolReservesAddresses, testHelpers, admin);
-
-  const collateralManager = await deployPoolCollateralManager();
-  await waitForTx(await addressesProvider.setPoolCollateralManager(collateralManager.address));
-
+  
   const mockFlashLoanReceiver = await deployMockFlashLoanReceiver(addressesProvider.address);
   await insertContractAddressInDb(eContractid.MockFlashLoanReceiver, mockFlashLoanReceiver.address);
 

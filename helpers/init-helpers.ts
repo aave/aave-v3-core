@@ -199,7 +199,7 @@ export const initReservesByHelper = async (
   console.log(`- Reserves initialization in ${chunkedInitInputParams.length} txs`);
   for (let chunkIndex = 0; chunkIndex < chunkedInitInputParams.length; chunkIndex++) {
     const tx3 = await waitForTx(
-      await configurator.batchInitReserve(chunkedInitInputParams[chunkIndex])
+      await configurator.initReserves(chunkedInitInputParams[chunkIndex])
     );
 
     console.log(`  - Reserve ready for: ${chunkedSymbols[chunkIndex].join(', ')}`);

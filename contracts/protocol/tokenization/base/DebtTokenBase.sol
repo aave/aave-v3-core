@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.8.6;
 
 import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
@@ -132,7 +132,7 @@ abstract contract DebtTokenBase is
     uint256 amount
   ) internal {
     uint256 newAllowance =
-      _borrowAllowances[delegator][delegatee].sub(amount, Errors.BORROW_ALLOWANCE_NOT_ENOUGH);
+      _borrowAllowances[delegator][delegatee] - amount;
 
     _borrowAllowances[delegator][delegatee] = newAllowance;
 

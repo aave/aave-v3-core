@@ -1,4 +1,4 @@
-pragma solidity 0.6.12;
+pragma solidity 0.8.6;
 
 import {IPool} from '../../interfaces/IPool.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';
@@ -8,11 +8,7 @@ contract BorrowRepayTestMock {
   address _weth;
   address _dai;
 
-  constructor(
-    IPool pool,
-    address weth,
-    address dai
-  ) public {
+  constructor(IPool pool, address weth, address dai) {
     _pool = pool;
     _weth = weth;
     _dai = dai;

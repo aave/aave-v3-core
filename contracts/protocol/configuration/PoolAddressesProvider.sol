@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.8.6;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 
@@ -119,26 +119,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   function setPoolConfiguratorImpl(address configurator) external override onlyOwner {
     _updateImpl(POOL_CONFIGURATOR, configurator);
     emit PoolConfiguratorUpdated(configurator);
-  }
-
-  /**
-   * @dev Returns the address of the PoolCollateralManager. Since the manager is used
-   * through delegateCall within the Pool contract, the proxy contract pattern does not work properly hence
-   * the addresses are changed directly
-   * @return The address of the PoolCollateralManager
-   **/
-
-  function getPoolCollateralManager() external view override returns (address) {
-    return getAddress(POOL_COLLATERAL_MANAGER);
-  }
-
-  /**
-   * @dev Updates the address of the PoolCollateralManager
-   * @param manager The new PoolCollateralManager address
-   **/
-  function setPoolCollateralManager(address manager) external override onlyOwner {
-    _addresses[POOL_COLLATERAL_MANAGER] = manager;
-    emit PoolCollateralManagerUpdated(manager);
   }
 
   /**
