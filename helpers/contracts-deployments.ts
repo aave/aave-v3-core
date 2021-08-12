@@ -34,6 +34,7 @@ import {
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
+  ConfiguratorLogicFactory,
 } from '../types';
 import {
   withSave,
@@ -83,13 +84,10 @@ export const deployPoolConfigurator = async (verify?: boolean) => {
   return withSave(poolConfiguratorImpl, eContractid.PoolConfigurator);
 };
 
-export const deployDepositLogic = async (
-  verify?: boolean
-) => {
+export const deployDepositLogic = async (verify?: boolean) => {
   const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
-  
-  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {
-  });
+
+  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {});
   const depositLogicFactory = await DRE.ethers.getContractFactory(
     depositLogicArtifact.abi,
     linkedDepositLogicByteCode
@@ -101,12 +99,9 @@ export const deployDepositLogic = async (
   return withSave(depositLogic, eContractid.DepositLogic);
 };
 
-
-export const deployBorrowLogic = async (
-  verify?: boolean
-) => {
+export const deployBorrowLogic = async (verify?: boolean) => {
   const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
-  
+
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
     borrowLogicArtifact.abi,
     borrowLogicArtifact.bytecode
@@ -118,13 +113,9 @@ export const deployBorrowLogic = async (
   return withSave(borrowLogic, eContractid.BorrowLogic);
 };
 
-
-export const deployLiquidationLogic = async (
-  verify?: boolean
-) => {
-
+export const deployLiquidationLogic = async (verify?: boolean) => {
   const liquidationLogicArtifact = await readArtifact(eContractid.LiquidationLogic);
-    
+
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
     liquidationLogicArtifact.abi,
     liquidationLogicArtifact.bytecode
@@ -136,9 +127,8 @@ export const deployLiquidationLogic = async (
   return withSave(liquidationLogic, eContractid.LiquidationLogic);
 };
 
-
 export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
-  const depositLogic = await deployDepositLogic( verify);
+  const depositLogic = await deployDepositLogic(verify);
   const borrowLogic = await deployBorrowLogic(verify);
   const liquidationLogic = await deployLiquidationLogic(verify);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
@@ -156,8 +146,7 @@ export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibrary
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
     ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
-    ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address
-
+    ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address,
   };
 };
 
