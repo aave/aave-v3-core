@@ -69,7 +69,7 @@ library BridgeLogic {
 
     // limit backing amount to be min(unbackedUnderlying, amount) to not underflow
     uint256 backingAmount =
-      reserve.unbackedUnderlying > amount ? amount : reserve.unbackedUnderlying;
+      (amount < reserve.unbackedUnderlying) ? amount : reserve.unbackedUnderlying;
 
     // Excess backing will be added to the fee
     uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;

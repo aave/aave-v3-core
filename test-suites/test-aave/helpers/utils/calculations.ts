@@ -229,6 +229,8 @@ export const calcExpectedReserveDataAfterMintUnbacked = (
 
   expectedReserveData.unbackedUnderlying =
     reserveDataBeforeAction.unbackedUnderlying.plus(amountMintedBN);
+
+  // Need to be real
   expectedReserveData.availableLiquidity =
     reserveDataBeforeAction.availableLiquidity.plus(amountMintedBN);
 
@@ -249,7 +251,7 @@ export const calcExpectedReserveDataAfterMintUnbacked = (
   expectedReserveData.totalStableDebt = calcExpectedTotalStableDebt(
     reserveDataBeforeAction.principalStableDebt,
     reserveDataBeforeAction.averageStableBorrowRate,
-    reserveDataBeforeAction.lastUpdateTimestamp,
+    reserveDataBeforeAction.totalStableDebtLastUpdated,
     txTimestamp
   );
 
@@ -293,6 +295,7 @@ export const calcExpectedReserveDataAfterMintUnbacked = (
 };
 
 export const calcExpectedReserveDataAfterBackUnbacked = (
+  scaledATokenSupply: string,
   amount: string,
   fee: string,
   reserveDataBeforeAction: ReserveData,
@@ -334,7 +337,7 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
   expectedReserveData.totalStableDebt = calcExpectedTotalStableDebt(
     reserveDataBeforeAction.principalStableDebt,
     reserveDataBeforeAction.averageStableBorrowRate,
-    reserveDataBeforeAction.lastUpdateTimestamp,
+    reserveDataBeforeAction.totalStableDebtLastUpdated,
     txTimestamp
   );
 
@@ -347,12 +350,11 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
   );
 
   // Compute how much is really going to the unbacked and how much is going to fee
-  const backingAmount =
-    amountBN > reserveDataBeforeAction.unbackedUnderlying
-      ? amountBN
-      : reserveDataBeforeAction.unbackedUnderlying;
+  const backingAmount = amountBN.lt(reserveDataBeforeAction.unbackedUnderlying)
+    ? amountBN
+    : reserveDataBeforeAction.unbackedUnderlying;
 
-  const totalFee = backingAmount < amountBN ? feeBN.plus(amountBN.minus(backingAmount)) : feeBN;
+  const totalFee = backingAmount.lt(amountBN) ? feeBN.plus(amountBN.minus(backingAmount)) : feeBN;
 
   expectedReserveData.unbackedUnderlying =
     reserveDataBeforeAction.unbackedUnderlying.minus(backingAmount);
@@ -374,9 +376,10 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
   );
 
   // Accrue the fee
+  const totalSupply = new BigNumber(scaledATokenSupply).rayMul(expectedReserveData.liquidityIndex);
   expectedReserveData.liquidityIndex = cumulateToLiquidityIndex(
     expectedReserveData.liquidityIndex,
-    expectedReserveData.totalLiquidity,
+    totalSupply,
     totalFee
   );
 
