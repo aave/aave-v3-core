@@ -7,7 +7,6 @@ import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constant
 import { buildForkConfig } from './helper-hardhat-config';
 import { fork } from 'child_process';
 
-
 require('dotenv').config();
 
 import '@nomiclabs/hardhat-ethers';
@@ -26,7 +25,7 @@ const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 
 // Prevent to load scripts before compilation and typechain
 if (!SKIP_LOAD) {
-  ['misc', 'dev'].forEach((folder) => {
+  ['misc'].forEach((folder) => {
     const tasksPath = path.join(__dirname, 'tasks', folder);
     fs.readdirSync(tasksPath)
       .filter((pth) => pth.includes('.ts'))
