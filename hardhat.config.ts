@@ -1,43 +1,28 @@
 import path from 'path';
-import fs from 'fs';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
 import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
 import { buildForkConfig } from './helper-hardhat-config';
-import { fork } from 'child_process';
 
 require('dotenv').config();
 
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-waffle';
-import 'temp-hardhat-etherscan';
+import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-gas-reporter';
 import 'hardhat-typechain';
 import '@tenderly/hardhat-tenderly';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 
-const SKIP_LOAD = process.env.SKIP_LOAD === 'true';
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const HARDFORK = 'london';
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 
-// Prevent to load scripts before compilation and typechain
-if (!SKIP_LOAD) {
-  ['misc'].forEach((folder) => {
-    const tasksPath = path.join(__dirname, 'tasks', folder);
-    fs.readdirSync(tasksPath)
-      .filter((pth) => pth.includes('.ts'))
-      .forEach((task) => {
-        require(`${tasksPath}/${task}`);
-      });
-  });
-}
-
 require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
-const buidlerConfig: HardhatUserConfig = {
+const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
     enabled: true,
   },
@@ -101,4 +86,4 @@ const buidlerConfig: HardhatUserConfig = {
   },
 };
 
-export default buidlerConfig;
+export default hardhatConfig;

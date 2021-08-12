@@ -44,15 +44,11 @@ import {
 } from './contracts-helpers';
 import { StableAndVariableTokensHelperFactory } from '../types/StableAndVariableTokensHelperFactory';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
-import { readArtifact as buidlerReadArtifact } from '@nomiclabs/buidler/plugins';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
 import AaveConfig from '../market-config';
 
 const readArtifact = async (id: string) => {
-  if (DRE.network.name === eEthereumNetwork.buidlerevm) {
-    return buidlerReadArtifact(DRE.config.paths.artifacts, id);
-  }
   return (DRE as HardhatRuntimeEnvironment).artifacts.readArtifact(id);
 };
 

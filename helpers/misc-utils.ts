@@ -5,7 +5,6 @@ import FileSync from 'lowdb/adapters/FileSync';
 import { WAD } from './constants';
 import { Wallet, ContractTransaction } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { BuidlerRuntimeEnvironment } from '@nomiclabs/buidler/types';
 import { tEthereumAddress } from './types';
 import { isAddress } from 'ethers/lib/utils';
 import { isZeroAddress } from 'ethereumjs-util';
@@ -18,9 +17,9 @@ export const stringToBigNumber = (amount: string): BigNumber => new BigNumber(am
 
 export const getDb = () => low(new FileSync('./deployed-contracts.json'));
 
-export let DRE: HardhatRuntimeEnvironment | BuidlerRuntimeEnvironment;
+export let DRE: HardhatRuntimeEnvironment;
 
-export const setDRE = (_DRE: HardhatRuntimeEnvironment | BuidlerRuntimeEnvironment) => {
+export const setDRE = (_DRE: HardhatRuntimeEnvironment) => {
   DRE = _DRE;
 };
 
