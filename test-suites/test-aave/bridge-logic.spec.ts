@@ -1,43 +1,43 @@
 import { formatEther, formatUnits, parseEther } from 'ethers/lib/utils';
 import { MAX_UINT_AMOUNT, RAY, WAD_RAY_RATIO } from '../../helpers/constants';
-import { DRE, evmRevert, evmSnapshot, increaseTime, waitForTx } from '../../helpers/misc-utils';
+import {
+  advanceTimeAndBlock,
+  DRE,
+  evmRevert,
+  evmSnapshot,
+  increaseTime,
+  waitForTx,
+} from '../../helpers/misc-utils';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 const { expect } = require('chai');
 
 import {
-  calcExpectedReserveDataAfterBorrow,
+  calcExpectedReserveDataAfterMintUnbacked,
+  calcExpectedReserveDataAfterBackUnbacked,
   configuration as calculationsConfiguration,
 } from './helpers/utils/calculations';
 
 import { BigNumber } from 'bignumber.js';
 import './helpers/utils/math';
-import { borrow, configuration, deposit, getTxCostAndTimestamp, mint } from './helpers/actions';
 import {
-  calcExpectedATokenBalance,
-  calcExpectedReserveDataAfterMintUnbacked,
-  calcExpectedUtilizationRate,
-  calcExpectedVariableBorrowIndex,
-  calcExpectedVariableDebtTokenBalance,
-} from './helpers/utils/calculations';
+  borrow,
+  configuration,
+  deposit,
+  getContractsData,
+  getTxCostAndTimestamp,
+  mint,
+} from './helpers/actions';
 import { AavePools, iAavePoolAssets, IReserveParams, RateMode } from '../../helpers/types';
 import { getReserveData } from './helpers/utils/helpers';
 import { getReservesConfigByPool } from '../../helpers/configuration';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
+import { time } from 'console';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,
   expected: UserReserveData | ReserveData
 ) => {
   expect(actual).to.be.almostEqualOrEqual(expected);
-};
-
-const cumulateToLiquidityIndex = (
-  liquidityIndex: BigNumber,
-  totalLiquidity: BigNumber,
-  amount: BigNumber
-) => {
-  const amountToLiquidityRatio = amount.wadToRay().rayDiv(totalLiquidity.wadToRay());
-  return amountToLiquidityRatio.plus(RAY).rayMul(liquidityIndex);
 };
 
 /*makeSuite('Bridge-logic testing with no borrows', (testEnv: TestEnv) => {
@@ -233,60 +233,49 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
   it('Wait 7 days', async () => {
     const { users, pool, dai, aDai, helpersContract } = testEnv;
 
-    const reserveDataBefore = await getReserveData(helpersContract, dai.address);
+    //const reserveDataBefore = await getReserveData(helpersContract, dai.address);
 
-    await increaseTime(60 * 60 * 24 * 7);
+    await advanceTimeAndBlock(60 * 60 * 24 * 7);
 
-    caclExpected;
-
-    const reserveDataAfter = await getReserveData(helpersContract, dai.address);
-
-    console.log(reserveDataBefore);
-    console.log(reserveDataAfter);
+    //const reserveDataAfter = await getReserveData(helpersContract, dai.address);
+    // TODO: Check that there is more debt
   });
 
-  it.skip('Bridged funds used to back unbacked', async () => {
+  it('Bridged funds used to back unbacked', async () => {
     // Let user 2 be bridge for now
-    const { users, pool, dai, aDai } = testEnv;
+    const { users, pool, dai, aDai, helpersContract } = testEnv;
     await dai.connect(users[2].signer).mint(withdrawAmount.toFixed(0));
     await dai.connect(users[2].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    const liquidityIndexBefore = new BigNumber(
-      (await pool.getReserveData(dai.address)).liquidityIndex.toString()
-    );
-    const totalSupplyBefore = new BigNumber((await aDai.totalSupply()).toString());
+    const reserveDataBefore = await getReserveData(helpersContract, dai.address);
 
-    const user0ScaledBalanceBefore = new BigNumber(
-      (await aDai.scaledBalanceOf(users[0].address)).toString()
-    );
-    const user1ScaledBalanceBefore = new BigNumber(
-      (await aDai.scaledBalanceOf(users[1].address)).toString()
+    const tx = await waitForTx(
+      await pool
+        .connect(users[2].signer)
+        .backUnbacked(dai.address, mintAmount.toFixed(0), feeAmount.toFixed(0))
     );
 
-    await pool
-      .connect(users[2].signer)
-      .backUnbacked(dai.address, mintAmount.toFixed(0), feeAmount.toFixed(0));
+    const { txTimestamp } = await getTxCostAndTimestamp(tx);
 
-    const poolReserveDataAfter = await pool.getReserveData(dai.address);
-    const liqIndex = cumulateToLiquidityIndex(liquidityIndexBefore, totalSupplyBefore, feeAmount);
+    const { reserveData: reserveDataAfter, timestamp } = await getContractsData(
+      dai.address,
+      users[2].address,
+      testEnv
+    );
 
-    expect(poolReserveDataAfter.liquidityIndex.toString()).to.be.eq(liqIndex.toFixed(0));
-    expect((await aDai.balanceOf(users[0].address)).toString()).to.be.eq(
-      user0ScaledBalanceBefore.rayMul(liqIndex).toFixed(0)
+    const expectedReserveDataAfter = calcExpectedReserveDataAfterBackUnbacked(
+      mintAmount.toFixed(0),
+      feeAmount.toFixed(0),
+      reserveDataBefore,
+      txTimestamp
     );
-    expect((await aDai.balanceOf(users[1].address)).toString()).to.be.eq(
-      user1ScaledBalanceBefore.rayMul(liqIndex).toFixed(0)
-    );
-    expect((await aDai.scaledTotalSupply()).toString()).to.be.eq(
-      depositAmount.plus(mintAmount).toFixed(0)
-    );
-    expect((await aDai.totalSupply()).toString()).to.be.eq(
-      depositAmount.plus(mintAmount).rayMul(liqIndex).toFixed(0)
-    );
-    expect((await dai.balanceOf(aDai.address)).toString()).to.be.eq(
-      depositAmount.plus(withdrawAmount).toFixed(0)
-    );
-    expect(poolReserveDataAfter.unbackedUnderlying.toString()).to.be.eq('0');
+
+    // What is not as expected:
+    // liquidityIndex
+    // variableBorrowIndex
+
+    expectEqual(reserveDataAfter, expectedReserveDataAfter);
+    console.log(`Timestamps: ${timestamp} == ${txTimestamp}`);
   });
 
   it.skip('User 3 `backUnbacked` with 0 unbackedUnderlying. 100% in amount and 100% in fee', async () => {

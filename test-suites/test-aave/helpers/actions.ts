@@ -69,6 +69,9 @@ const almostEqualOrEqual = function (
     if (actual[key] instanceof BigNumber) {
       const actualValue = (<BigNumber>actual[key]).decimalPlaces(0, BigNumber.ROUND_DOWN);
       const expectedValue = (<BigNumber>expected[key]).decimalPlaces(0, BigNumber.ROUND_DOWN);
+      console.log(
+        `${key}: ${actualValue} = ${expectedValue} -> diff = ${actualValue.minus(expectedValue)}`
+      );
 
       this.assert(
         actualValue.eq(expectedValue) ||
