@@ -36,6 +36,7 @@ export const getReserveData = async (
   const symbol = await token.symbol();
   const decimals = new BigNumber(await token.decimals());
 
+  // TODO: Updated to take into account the new math
   const totalLiquidity = new BigNumber(reserveData.availableLiquidity.toString())
     .plus(reserveData.totalStableDebt.toString())
     .plus(reserveData.totalVariableDebt.toString());
@@ -49,6 +50,7 @@ export const getReserveData = async (
   );
 
   return {
+    unbackedUnderlying: new BigNumber(reserveData.unbackedUnderlying.toString()),
     totalLiquidity,
     utilizationRate,
     availableLiquidity: new BigNumber(reserveData.availableLiquidity.toString()),

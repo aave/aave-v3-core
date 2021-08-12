@@ -16,6 +16,7 @@ export interface UserReserveData {
 }
 
 export interface ReserveData {
+  unbackedUnderlying: BigNumber;
   address: string;
   symbol: string;
   decimals: BigNumber;

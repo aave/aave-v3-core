@@ -112,6 +112,7 @@ contract AaveProtocolDataProvider {
     external
     view
     returns (
+      uint256 unbackedUnderlying,
       uint256 availableLiquidity,
       uint256 totalStableDebt,
       uint256 totalVariableDebt,
@@ -128,7 +129,8 @@ contract AaveProtocolDataProvider {
       IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
     return (
-      IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
+      reserve.unbackedUnderlying,
+      IERC20Detailed(asset).balanceOf(reserve.aTokenAddress) + reserve.unbackedUnderlying,
       IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply(),
       IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply(),
       reserve.currentLiquidityRate,

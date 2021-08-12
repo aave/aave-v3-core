@@ -163,7 +163,7 @@ export const calcExpectedReserveDataAfterDeposit = (
   txTimestamp: BigNumber
 ): ReserveData => {
   const expectedReserveData: ReserveData = <ReserveData>{};
-
+  expectedReserveData.unbackedUnderlying = reserveDataBeforeAction.unbackedUnderlying;
   expectedReserveData.address = reserveDataBeforeAction.address;
 
   expectedReserveData.totalLiquidity = new BigNumber(reserveDataBeforeAction.totalLiquidity).plus(
@@ -224,7 +224,7 @@ export const calcExpectedReserveDataAfterWithdraw = (
   txTimestamp: BigNumber
 ): ReserveData => {
   const expectedReserveData: ReserveData = <ReserveData>{};
-
+  expectedReserveData.unbackedUnderlying = reserveDataBeforeAction.unbackedUnderlying;
   expectedReserveData.address = reserveDataBeforeAction.address;
 
   if (amountWithdrawn == MAX_UINT_AMOUNT) {
@@ -296,8 +296,8 @@ export const calcExpectedReserveDataAfterBorrow = (
   txTimestamp: BigNumber,
   currentTimestamp: BigNumber
 ): ReserveData => {
-  const expectedReserveData = <ReserveData>{};
-
+  const expectedReserveData: ReserveData = <ReserveData>{};
+  expectedReserveData.unbackedUnderlying = reserveDataBeforeAction.unbackedUnderlying;
   expectedReserveData.address = reserveDataBeforeAction.address;
 
   const amountBorrowedBN = new BigNumber(amountBorrowed);
@@ -472,7 +472,7 @@ export const calcExpectedReserveDataAfterRepay = (
   currentTimestamp: BigNumber
 ): ReserveData => {
   const expectedReserveData: ReserveData = <ReserveData>{};
-
+  expectedReserveData.unbackedUnderlying = reserveDataBeforeAction.unbackedUnderlying;
   expectedReserveData.address = reserveDataBeforeAction.address;
 
   let amountRepaidBN = new BigNumber(amountRepaid);
@@ -780,7 +780,7 @@ export const calcExpectedReserveDataAfterSwapRateMode = (
   txTimestamp: BigNumber
 ): ReserveData => {
   const expectedReserveData: ReserveData = <ReserveData>{};
-
+  expectedReserveData.unbackedUnderlying = reserveDataBeforeAction.unbackedUnderlying;
   expectedReserveData.address = reserveDataBeforeAction.address;
 
   const variableDebt = calcExpectedVariableDebtTokenBalance(
@@ -954,7 +954,7 @@ export const calcExpectedReserveDataAfterStableRateRebalance = (
   txTimestamp: BigNumber
 ): ReserveData => {
   const expectedReserveData: ReserveData = <ReserveData>{};
-
+  expectedReserveData.unbackedUnderlying = reserveDataBeforeAction.unbackedUnderlying;
   expectedReserveData.address = reserveDataBeforeAction.address;
 
   const userStableDebt = calcExpectedStableDebtTokenBalance(
