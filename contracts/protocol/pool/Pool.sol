@@ -52,10 +52,23 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _;
   }
 
+  modifier onlyBridgeAccessControl() {
+    _onlyBridgeAccessControl();
+    _;
+  }
+
   function _onlyPoolConfigurator() internal view {
     require(
       _addressesProvider.getPoolConfigurator() == msg.sender,
       Errors.P_CALLER_NOT_POOL_CONFIGURATOR
+    );
+  }
+
+  function _onlyBridgeAccessControl() internal view {
+    bytes32 BRIDGE_ACCESS_CONTROL = 'BRIDGE_ACCESS_CONTROL';
+    require(
+      _addressesProvider.getAddress(BRIDGE_ACCESS_CONTROL) == msg.sender,
+      'TODO: fix message. Caller not BRIDGE_ACCESS_CONTROL'
     );
   }
 
@@ -101,7 +114,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) external override {
+  ) external override onlyBridgeAccessControl {
     // TODO: Add access control
     BridgeLogic.mintUnbacked(
       _reserves[asset],
