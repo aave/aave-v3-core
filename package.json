@@ -13,6 +13,7 @@
     "hardhat": "hardhat",
     "compile": "SKIP_LOAD=true hardhat compile",
     "compile:clean": "npm run ci:clean && npm run compile",
+    "coverage": "TS_NODE_TRANSPILE_ONLY=1 hardhat coverage --testfiles './test-suites/*.spec.ts'",
     "console:fork": "FORK=main hardhat console",
     "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
     "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",

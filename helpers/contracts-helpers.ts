@@ -5,7 +5,7 @@ import { getDb, DRE, waitForTx } from './misc-utils';
 import { tEthereumAddress, eContractid, tStringTokenSmallUnits } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { Artifact } from 'hardhat/types';
-import { Artifact as BuidlerArtifact } from '@nomiclabs/buidler/types';
+import { Artifact as HardhatArtifact } from 'hardhat/types';
 import { getIErc20Detailed } from './contracts-getters';
 import { getDefenderRelaySigner, usingDefender } from './defender-utils';
 
@@ -70,7 +70,7 @@ export const withSave = async <ContractType extends Contract>(
   return instance;
 };
 
-export const linkBytecode = (artifact: BuidlerArtifact | Artifact, libraries: any) => {
+export const linkBytecode = (artifact: HardhatArtifact | Artifact, libraries: any) => {
   let bytecode = artifact.bytecode;
 
   for (const [fileName, fileReferences] of Object.entries(artifact.linkReferences)) {
