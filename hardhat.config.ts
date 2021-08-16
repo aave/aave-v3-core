@@ -17,7 +17,7 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
-const HARDFORK = 'berlin';
+const HARDFORK = 'london';
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 
 require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);

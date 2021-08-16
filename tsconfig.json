@@ -8,7 +8,7 @@
     "noImplicitAny": false,
     "resolveJsonModule": true
   },
-  "include": ["./scripts", "./test-suites", "./tasks"],
+  "include": ["./scripts", "./test-suites", "./tasks", "./helpers"],
   "files": [
     "./hardhat.config.ts",
     "./modules/tenderly/tenderly.d.ts",
