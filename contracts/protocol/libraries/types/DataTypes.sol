@@ -27,7 +27,7 @@ library DataTypes {
     uint8 id;
     //the current treasury balance, scaled
     uint256 accruedToTreasury;
-    //the quicikwithdraw balance waiting for underlying, scaled
+    //the quicikwithdraw balance waiting for underlying to be backed
     uint256 unbackedUnderlying;
   }
 
