@@ -29,6 +29,16 @@ library BridgeLogic {
   );
   event Backed(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
+  /**
+   * @dev Mint unbacked aTokens to a user and updates the unbackedUnderlying for the reserve. Essentially a deposit without transferring of the underlying.
+   * @param reserve The reserve to mint to
+   * @param userConfig The user configuration to update
+   * @param asset The address of the asset
+   * @param amount The amount to mint
+   * @param onBehalfOf The address that will receive the aTokens
+   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+   *   0 if the action is executed directly by the user, without any middle-man
+   **/
   function mintUnbacked(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
@@ -37,7 +47,6 @@ library BridgeLogic {
     address onBehalfOf,
     uint16 referralCode
   ) public {
-    // Essentially `executeDeposit` logic but without the underlying deposit but instead
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
     ValidationLogic.validateDeposit(reserveCache, amount);
@@ -51,6 +60,15 @@ library BridgeLogic {
     }
     emit Bridged(asset, msg.sender, onBehalfOf, amount, referralCode);
   }
+
+  /**
+   * @dev Back the current unbacked underlying with `amount` and pay `fee`.
+   *   If backing unnecessarily, excess `amount` will be added to `fee`.
+   * @param reserve The reserve to back unbacked underlying for
+   * @param asset The address of the underlying asset to repay
+   * @param amount The amount to back
+   * @param fee The amount paid in fees
+   **/
 
   function backUnbacked(
     DataTypes.ReserveData storage reserve,
