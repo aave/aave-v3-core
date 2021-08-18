@@ -37,7 +37,6 @@ library BridgeLogic {
     address onBehalfOf,
     uint16 referralCode
   ) public {
-    // TODO: Access control must be enforced before this call
     // Essentially `executeDeposit` logic but without the underlying deposit but instead
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
@@ -61,24 +60,13 @@ library BridgeLogic {
   ) public {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
-    // We can give fee and amount as input.
-    // This allow anyone to throw away money without a fee.
-    // But for the bridges, they can compute the correct fee at L2 and simply pass it along.
-    // Gives us a lot of flexibility.
-    // Also allows the safetymodule to back unbacked if necessary, without paying fee.
-
-    // limit backing amount to be min(unbackedUnderlying, amount) to not underflow
     uint256 backingAmount =
       (amount < reserve.unbackedUnderlying) ? amount : reserve.unbackedUnderlying;
 
-    // Excess backing will be added to the fee
     uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;
 
-    // He is also paying fee to himself, feels a bit weird. He gets balanceOf(himself) / totalSupply * fee.
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
 
-    // Similar to a flashloan. The fee is additional liquidity.
-    // If we flip the order here, we probably don't need to pass totalFee as argument as it is in the underlying already then.
     reserve.updateInterestRates(reserveCache, asset, totalFee, 0);
 
     reserve.unbackedUnderlying = reserve.unbackedUnderlying - backingAmount;

@@ -9,8 +9,6 @@ import {IRateOracle} from '../../interfaces/IRateOracle.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 
-import 'hardhat/console.sol';
-
 /**
  * @title DefaultReserveInterestRateStrategy contract
  * @notice Implements the calculation of the interest rates depending on the reserve state

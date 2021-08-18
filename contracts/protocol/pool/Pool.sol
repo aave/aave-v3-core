@@ -115,7 +115,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode
   ) external override onlyBridgeAccessControl {
-    // TODO: Add access control
     BridgeLogic.mintUnbacked(
       _reserves[asset],
       _usersConfig[onBehalfOf],
