@@ -189,4 +189,25 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
       'Invalid stable rate'
     );
   });
+
+  it('Checks getters', async () => {
+    expect((await strategyInstance.OPTIMAL_UTILIZATION_RATE()).toString()).to.be.eq(
+      rateStrategyStableOne.optimalUtilizationRate
+    );
+    expect((await strategyInstance.baseVariableBorrowRate()).toString()).to.be.eq(
+      rateStrategyStableOne.baseVariableBorrowRate
+    );
+    expect((await strategyInstance.variableRateSlope1()).toString()).to.be.eq(
+      rateStrategyStableOne.variableRateSlope1
+    );
+    expect((await strategyInstance.variableRateSlope2()).toString()).to.be.eq(
+      rateStrategyStableOne.variableRateSlope2
+    );
+    expect((await strategyInstance.stableRateSlope1()).toString()).to.be.eq(
+      rateStrategyStableOne.stableRateSlope1
+    );
+    expect((await strategyInstance.stableRateSlope2()).toString()).to.be.eq(
+      rateStrategyStableOne.stableRateSlope2
+    );
+  });
 });
