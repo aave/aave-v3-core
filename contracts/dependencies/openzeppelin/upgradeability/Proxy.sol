@@ -19,15 +19,6 @@ abstract contract Proxy {
   }
 
   /**
-   * @dev Receive function.
-   * Will run if call data is empty.
-   * Implemented entirely in `_fallback`.
-   */
-  receive() external payable {
-    _fallback();
-  }  
-
-  /**
    * @return The Address of the implementation.
    */
   function _implementation() internal view virtual returns (address);
