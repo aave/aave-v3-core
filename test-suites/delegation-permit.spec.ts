@@ -8,7 +8,7 @@ import {
 import { expect } from 'chai';
 import { BigNumber, ethers } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE } from '../helpers/misc-utils';
+import { DRE, evmRevert, evmSnapshot, timeLatest } from '../helpers/misc-utils';
 import { _TypedDataEncoder } from 'ethers/lib/utils';
 
 const { parseEther } = ethers.utils;
@@ -64,6 +64,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     await pool.connect(user2.signer).deposit(weth.address, wethMintedAmount, user2.address, 0);
   });
   it('User 3 borrows variable interest dai on behalf of user 2 via permit', async () => {
+    const snap = await evmSnapshot();
     const {
       pool,
       variableDebtDai,
@@ -112,8 +113,11 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
     ).to.be.equal('0');
+    await evmRevert(snap);
   });
+
   it('User 3 borrows stable interest dai on behalf of user 2 via permit', async () => {
+    const snap = await evmSnapshot();
     const {
       pool,
       variableDebtDai,
@@ -165,5 +169,294 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
     ).to.be.equal(permitAmount.sub(daiMintedAmount.div(10)));
+    await evmRevert(snap);
+  });
+
+  it('Stable debt delegation with delegator == address(0)', async () => {
+    const snap = await evmSnapshot();
+    const {
+      pool,
+      variableDebtDai,
+      stableDebtDai,
+      weth,
+      dai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const expiration = MAX_UINT_AMOUNT;
+    const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildPermitDelegationParams(
+      chainId,
+      stableDebtDai.address,
+      '1',
+      await stableDebtDai.name(),
+      ZERO_ADDRESS,
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = require('../test-wallets.js').accounts[1].secretKey;
+    if (!user2PrivateKey) {
+      throw new Error('INVALID_OWNER_PK');
+    }
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      stableDebtDai
+        .connect(user1.signer)
+        .permitDelegation(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith('INVALID_DELEGATOR');
+
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+    await evmRevert(snap);
+  });
+
+  it('Stable debt delegation with block.timestamp > deadline', async () => {
+    const snap = await evmSnapshot();
+    const {
+      pool,
+      variableDebtDai,
+      stableDebtDai,
+      weth,
+      dai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const expiration = (await timeLatest()).minus(500).toString();
+    const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildPermitDelegationParams(
+      chainId,
+      stableDebtDai.address,
+      '1',
+      await stableDebtDai.name(),
+      user2.address,
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = require('../test-wallets.js').accounts[1].secretKey;
+    if (!user2PrivateKey) {
+      throw new Error('INVALID_OWNER_PK');
+    }
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      stableDebtDai
+        .connect(user1.signer)
+        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith('INVALID_EXPIRATION');
+
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+    await evmRevert(snap);
+  });
+
+  it('Stable debt delegation with invalid delegator signature', async () => {
+    const snap = await evmSnapshot();
+    const {
+      pool,
+      variableDebtDai,
+      stableDebtDai,
+      weth,
+      dai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const expiration = MAX_UINT_AMOUNT;
+    const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildPermitDelegationParams(
+      chainId,
+      stableDebtDai.address,
+      '1',
+      await stableDebtDai.name(),
+      ZERO_ADDRESS,
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = require('../test-wallets.js').accounts[1].secretKey;
+    if (!user2PrivateKey) {
+      throw new Error('INVALID_OWNER_PK');
+    }
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      stableDebtDai
+        .connect(user1.signer)
+        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith('INVALID_SIGNATURE');
+
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+    await evmRevert(snap);
+  });
+
+  it('Variable debt delegation with delegator == address(0)', async () => {
+    const snap = await evmSnapshot();
+    const {
+      variableDebtDai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const expiration = MAX_UINT_AMOUNT;
+    const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildPermitDelegationParams(
+      chainId,
+      variableDebtDai.address,
+      '1',
+      await variableDebtDai.name(),
+      ZERO_ADDRESS,
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = require('../test-wallets.js').accounts[1].secretKey;
+    if (!user2PrivateKey) {
+      throw new Error('INVALID_OWNER_PK');
+    }
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      variableDebtDai
+        .connect(user1.signer)
+        .permitDelegation(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith('INVALID_DELEGATOR');
+
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+    await evmRevert(snap);
+  });
+
+  it('Variable debt delegation with block.timestamp > deadline', async () => {
+    const snap = await evmSnapshot();
+    const {
+      variableDebtDai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const expiration = (await timeLatest()).minus(500).toString();
+    const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildPermitDelegationParams(
+      chainId,
+      variableDebtDai.address,
+      '1',
+      await variableDebtDai.name(),
+      user2.address,
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = require('../test-wallets.js').accounts[1].secretKey;
+    if (!user2PrivateKey) {
+      throw new Error('INVALID_OWNER_PK');
+    }
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      variableDebtDai
+        .connect(user1.signer)
+        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith('INVALID_EXPIRATION');
+
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+    await evmRevert(snap);
+  });
+
+  it('Variable debt delegation with invalid delegator signature', async () => {
+    const snap = await evmSnapshot();
+    const {
+      variableDebtDai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const expiration = MAX_UINT_AMOUNT;
+    const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildPermitDelegationParams(
+      chainId,
+      variableDebtDai.address,
+      '1',
+      await variableDebtDai.name(),
+      ZERO_ADDRESS,
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = require('../test-wallets.js').accounts[1].secretKey;
+    if (!user2PrivateKey) {
+      throw new Error('INVALID_OWNER_PK');
+    }
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      variableDebtDai
+        .connect(user1.signer)
+        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith('INVALID_SIGNATURE');
+
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+    await evmRevert(snap);
   });
 });

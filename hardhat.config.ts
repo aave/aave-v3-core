@@ -17,14 +17,14 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
-const HARDFORK = 'london';
+const HARDFORK = 'berlin';
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 
 require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
 const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
-    enabled: true,
+    enabled: false,
   },
   contractSizer: {
     alphaSort: true,
@@ -58,6 +58,8 @@ const hardhatConfig: HardhatUserConfig = {
     coverage: {
       url: 'http://localhost:8555',
       chainId: COVERAGE_CHAINID,
+      throwOnTransactionFailures: true,
+      throwOnCallFailures: true,
     },
     hardhat: {
       hardfork: HARDFORK,
