@@ -18,7 +18,9 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     expect(await aDai.allowance(users[0].address, users[1].address)).to.be.eq(MAX_UINT_AMOUNT);
   });
 
-  it('approve() owner == address(0)', async () => {});
+  it('approve() owner == address(0)', async () => {
+    expect(false, 'TODO').to.be.eq(true);
+  });
 
   it('approve() spender == address(0)', async () => {
     const { users, aDai } = testEnv;
