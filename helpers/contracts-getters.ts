@@ -16,6 +16,7 @@ import {
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
+  AaveOracleFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -106,6 +107,12 @@ export const getAaveProtocolDataProvider = async (address?: tEthereumAddress) =>
       (
         await getDb().get(`${eContractid.AaveProtocolDataProvider}.${DRE.network.name}`).value()
       ).address,
+    await getFirstSigner()
+  );
+
+export const getAaveOracle = async (address?: tEthereumAddress) =>
+  await AaveOracleFactory.connect(
+    address || (await getDb().get(`${eContractid.AaveOracle}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

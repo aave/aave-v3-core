@@ -12,6 +12,7 @@ import {
   getWETHMocked,
   getVariableDebtToken,
   getStableDebtToken,
+  getAaveOracle,
 } from '../../helpers/contracts-getters';
 import { tEthereumAddress } from '../../helpers/types';
 import { Pool } from '../../types/Pool';
@@ -30,7 +31,7 @@ import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProvider
 import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { solidity } from 'ethereum-waffle';
-import { StableDebtToken, VariableDebtToken } from '../../types';
+import { AaveOracle, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 
@@ -51,6 +52,7 @@ export interface TestEnv {
   pool: Pool;
   configurator: PoolConfigurator;
   oracle: PriceOracle;
+  aaveOracle: AaveOracle;
   helpersContract: AaveProtocolDataProvider;
   weth: WETH9Mocked;
   aWETH: AToken;
@@ -80,6 +82,7 @@ const testEnv: TestEnv = {
   configurator: {} as PoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,
+  aaveOracle: {} as AaveOracle,
   weth: {} as WETH9Mocked,
   aWETH: {} as AToken,
   dai: {} as MintableERC20,
@@ -118,6 +121,7 @@ export async function initializeMakeSuite() {
 
   testEnv.registry = await getPoolAddressesProviderRegistry();
   testEnv.oracle = await getPriceOracle();
+  testEnv.aaveOracle = await getAaveOracle();
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 
