@@ -21,6 +21,7 @@ import {
   deployATokensAndRatesHelper,
   deployWETHMocked,
   deployMockUniswapRouter,
+  deployMockIncentivesController,
 } from '../helpers/contracts-deployments';
 import { ethers, Signer } from 'ethers';
 import { TokenContractId, eContractid, tEthereumAddress } from '../helpers/types';
@@ -233,6 +234,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     config;
   const treasuryAddress = config.ReserveFactorTreasuryAddress;
 
+  // TODO: We are adding an incentives controller
+  const mockIncentivesController = await deployMockIncentivesController();
+
   await initReservesByHelper(
     reservesParams,
     allReservesAddresses,
@@ -242,7 +246,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     SymbolPrefix,
     admin,
     treasuryAddress,
-    ZERO_ADDRESS
+    mockIncentivesController.address // ZERO_ADDRESS
   );
 
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);

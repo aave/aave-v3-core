@@ -35,6 +35,8 @@ import {
   VariableDebtTokenFactory,
   WETH9MockedFactory,
   ConfiguratorLogicFactory,
+  IncentivesControllerMockFactory,
+  MockIncentivesControllerFactory,
 } from '../types';
 import {
   withSave,
@@ -372,4 +374,10 @@ export const deployMockUniswapRouter = async () =>
   withSave(
     await new MockUniswapV2Router02Factory(await getFirstSigner()).deploy(),
     eContractid.MockUniswapV2Router02
+  );
+
+export const deployMockIncentivesController = async () =>
+  withSave(
+    await new MockIncentivesControllerFactory(await getFirstSigner()).deploy(),
+    eContractid.MockIncentivesController
   );

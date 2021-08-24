@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
-    "small:test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-aave/__setup.spec.ts ./test-suites/test-aave/flashloan.spec.ts",
+    "small:test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/__setup.spec.ts ./test-suites/pool-edge.spec.ts ./test-suites/atoken-edge.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "hardhat": "hardhat",
     "compile": "SKIP_LOAD=true hardhat compile",
@@ -46,7 +46,7 @@
     "ethereumjs-util": "7.0.2",
     "ethers": "^5.0.19",
     "globby": "^11.0.1",
-    "hardhat": "^2.5.0",
+    "hardhat": "^2.6.0",
     "hardhat-contract-sizer": "^2.0.3",
     "hardhat-gas-reporter": "^1.0.0",
     "hardhat-typechain": "^0.3.3",

@@ -154,7 +154,7 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     expect(await aDai.decimals()).to.be.eq(await dai.decimals());
     expect(await aDai.UNDERLYING_ASSET_ADDRESS()).to.be.eq(dai.address);
     expect(await aDai.POOL()).to.be.eq(pool.address);
-    expect(await aDai.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+    expect(await aDai.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
 
     const scaledUserBalanceAndSupplyBefore = await aDai.getScaledUserBalanceAndSupply(
       users[0].address

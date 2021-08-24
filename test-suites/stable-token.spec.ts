@@ -46,7 +46,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
 
     expect(await stableDebtContract.UNDERLYING_ASSET_ADDRESS()).to.be.eq(dai.address);
     expect(await stableDebtContract.POOL()).to.be.eq(pool.address);
-    expect(await stableDebtContract.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+    expect(await stableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
 
     const totSupplyAndRateBefore = await stableDebtContract.getTotalSupplyAndAvgRate();
     expect(totSupplyAndRateBefore[0].toString()).to.be.eq('0');

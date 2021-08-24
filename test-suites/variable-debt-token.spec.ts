@@ -49,7 +49,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
 
     expect(await variableDebtContract.UNDERLYING_ASSET_ADDRESS()).to.be.eq(dai.address);
     expect(await variableDebtContract.POOL()).to.be.eq(pool.address);
-    expect(await variableDebtContract.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
 
     const scaledUserBalanceAndSupplyUser0Before =
       await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
