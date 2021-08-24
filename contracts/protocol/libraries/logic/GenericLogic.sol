@@ -58,7 +58,7 @@ library GenericLogic {
    * @param reserves The list of the available reserves
    * @param oracle The price oracle address
    * @return The total collateral and total debt of the user in the base currency used by the price feed,
-   *         the avg ltv, liquidation threshold, the HF and the uncapped avg ltv
+   *         the avg ltv, liquidation threshold, the HF and whether or not the user has 0 LTV collateral
    **/
   function calculateUserAccountData(
     address user,
