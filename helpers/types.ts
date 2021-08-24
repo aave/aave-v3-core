@@ -59,6 +59,7 @@ export enum eContractid {
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
   MockIncentivesController = 'MockIncentivesController',
+  ReserveConfigurationMock = 'ReserveConfigurationMock',
 }
 
 /*
