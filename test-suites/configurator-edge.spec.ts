@@ -5,6 +5,7 @@ import { DRE, evmRevert, evmSnapshot, timeLatest } from '../helpers/misc-utils';
 import { _TypedDataEncoder } from 'ethers/lib/utils';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
+import { configuration } from './helpers/utils/calculations';
 
 makeSuite('Configurator - edge cases', (testEnv: TestEnv) => {
   const {
@@ -17,44 +18,22 @@ makeSuite('Configurator - edge cases', (testEnv: TestEnv) => {
 
   it('ReserveConfiguration setLtv() ltv > MAX_VALID_LTV', async () => {
     expect(false, 'Impossible').to.be.eq(true);
-    // configureReserveAsCollateral
-    const { variableDebtDai, stableDebtDai, poolAdmin, weth, dai, configurator, helpersContract } =
-      testEnv;
-
-    const ltv = 65535 + 1; // We are borrowing a lot here :eyes: Why is it even allowed to have it so large?
-    const liquidationBonus = 10500; // > 10000
-    const liquidationThreshold = ltv; // >= ltv
-
-    // max value = 65535
-    // liquidationThreshold >= ltv
-    // liquidationBonus > 10000
-    // liquidationThreshold * (liquidationBonus / 10000) <= 10000
-    // Not sure that we can satisfy the above. At best, we multiply by ~1, and liquidationThreshold is far beyond
-
-    const config = await helpersContract.getReserveConfigurationData(dai.address);
-
-    await expect(
-      configurator
-        .connect(poolAdmin.signer)
-        .configureReserveAsCollateral(dai.address, ltv, liquidationThreshold, liquidationBonus)
-    ).to.be.revertedWith(RC_INVALID_LTV);
+    /**
+     * `setLtv()` is called only from the `PoolConfigurator`. The pool configurator will only call `setLtv()` if
+     * 1. ltv <= liqudationThreshold. So max ltv = 65535 +1 will also set the liquidationThreshold
+     * 2. liquidationBonus > 10000
+     * 3. liquidationThreshold * liquidationBonus / 10000 <= 10000, which is not possible as liquidationThreshold already is > 10000
+     */
   });
 
   it('ReserveConfiguration setLiquidationThreshold() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
     expect(false, 'Impossible').to.be.eq(true);
-    // configureReserveAsCollateral
-    const { variableDebtDai, stableDebtDai, poolAdmin, weth, dai, configurator, helpersContract } =
-      testEnv;
-
-    const hugeThreshold = 65535 + 1;
-
-    const config = await helpersContract.getReserveConfigurationData(dai.address);
-
-    await expect(
-      configurator
-        .connect(poolAdmin.signer)
-        .configureReserveAsCollateral(dai.address, config.ltv, hugeThreshold, 10001)
-    ).to.be.revertedWith(RC_INVALID_LTV);
+    /**
+     * `setLiquidationThreshold()` is called only from the `PoolConfigurator`. The pool configurator will only call `setLiquidationThreshold()` if
+     * 1. ltv <= liqudationThreshold.
+     * 2. liquidationBonus > 10000
+     * 3. liquidationThreshold * liquidationBonus / 10000 <= 10000, which is not possible as liquidationThreshold already is > 10000 (max = 65535)
+     */
   });
 
   it('ReserveConfiguration setLiquidationBonus() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
@@ -71,9 +50,10 @@ makeSuite('Configurator - edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, dai, helpersContract } = testEnv;
     const daiConfig = await helpersContract.getReserveTokensAddresses(dai.address);
     const config = {};
+    // Should actually be possible for us to just set it direct
   });
 
-  it('PoolConfigurator configureReserveAsCollateral() ltv > MAX', async () => {
+  it('PoolConfigurator configureReserveAsCollateral() ltv > liquidationThreshold', async () => {
     const { poolAdmin, dai, configurator, helpersContract } = testEnv;
 
     const config = await helpersContract.getReserveConfigurationData(dai.address);
@@ -90,7 +70,7 @@ makeSuite('Configurator - edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
   });
 
-  it('PoolConfigurator configureReserveAsCollateral() liquidationBonus > 10000', async () => {
+  it('PoolConfigurator configureReserveAsCollateral() liquidationBonus < 10000', async () => {
     const { poolAdmin, dai, configurator, helpersContract } = testEnv;
 
     const config = await helpersContract.getReserveConfigurationData(dai.address);
@@ -98,7 +78,7 @@ makeSuite('Configurator - edge cases', (testEnv: TestEnv) => {
     await expect(
       configurator
         .connect(poolAdmin.signer)
-        .configureReserveAsCollateral(dai.address, config.ltv, 10001, config.liquidationBonus)
+        .configureReserveAsCollateral(dai.address, config.ltv, config.liquidationThreshold, 10000)
     ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
   });
 
@@ -121,16 +101,19 @@ makeSuite('Configurator - edge cases', (testEnv: TestEnv) => {
   });
 
   it('PoolConfigurator setPoolPause not emergency admin', async () => {
-    const { poolAdmin, users, dai, configurator, helpersContract } = testEnv;
+    const { users, configurator } = testEnv;
 
     await expect(configurator.connect(users[0].signer).setPoolPause(true)).to.be.revertedWith(
       PC_CALLER_NOT_EMERGENCY_ADMIN
     );
   });
 
-  it('PoolConfigurator setPoolPause, reserve[i] == 0', async () => {
-    const { poolAdmin, users, dai, configurator, helpersContract } = testEnv;
-    expect(false, 'TODO').to.be.eq(true);
+  it('PoolConfigurator setPoolPause, reserve[i] == address(0)', async () => {
+    expect(false, 'Impossible').to.be.eq(true);
+    /**
+     * Using the current contracts, it is not possible to enter the rase where reserve[i] == address(0).
+     * This is because the `_pool.getReservesList()` will return only NON address(0) addresses.
+     */
   });
 
   it('PoolConfigurator setReserveInterestRateStrategyAddress()', async () => {
