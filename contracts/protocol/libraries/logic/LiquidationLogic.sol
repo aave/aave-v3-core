@@ -10,6 +10,7 @@ import {
   VersionedInitializable
 } from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
+import {GenericLogic} from '../../libraries/logic/GenericLogic.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../../libraries/math/PercentageMath.sol';
@@ -48,7 +49,13 @@ library LiquidationLogic {
     bool receiveAToken
   );
 
-  uint256 internal constant LIQUIDATION_CLOSE_FACTOR_PERCENT = 5000;
+  uint256 public constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 5000;
+
+  uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 10000;
+
+  uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.98 * 1e18;
+
+  address public constant AAVE_COLLECTOR_ADDRESS = 0x464C71f6c2F760DdA6093dCB91C24c39e5d6e18c;
 
   struct LiquidationCallLocalVars {
     uint256 userCollateralBalance;
@@ -63,6 +70,8 @@ library LiquidationLogic {
     uint256 debtAmountNeeded;
     uint256 healthFactor;
     uint256 liquidatorPreviousATokenBalance;
+    uint256 closeFactor;
+    uint256 protocolFee;
     IAToken collateralAtoken;
     IPriceOracleGetter oracle;
     bool isCollateralEnabled;
@@ -70,7 +79,6 @@ library LiquidationLogic {
     uint256 errorCode;
     string errorMsg;
     DataTypes.ReserveCache debtReserveCache;
-
   }
 
   /**
@@ -91,28 +99,39 @@ library LiquidationLogic {
     DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
     vars.debtReserveCache = debtReserve.cache();
 
-
-    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(params.user, debtReserve);
+    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(
+      params.user,
+      debtReserve
+    );
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
-    ValidationLogic.validateLiquidationCall(
-      collateralReserve,
-      vars.debtReserveCache,
-      vars.userStableDebt + vars.userVariableDebt,
+    (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
       params.user,
       reserves,
       userConfig,
       reservesList,
       params.reservesCount,
-      params.priceOracle
+      address(vars.oracle)
+    );
+
+    ValidationLogic.validateLiquidationCall(
+      collateralReserve,
+      vars.debtReserveCache,
+      vars.userStableDebt + vars.userVariableDebt,
+      userConfig,
+      vars.healthFactor
     );
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
 
     vars.userCollateralBalance = vars.collateralAtoken.balanceOf(params.user);
 
+    vars.closeFactor = vars.healthFactor > CLOSE_FACTOR_HF_THRESHOLD
+      ? DEFAULT_LIQUIDATION_CLOSE_FACTOR
+      : MAX_LIQUIDATION_CLOSE_FACTOR;
+
     vars.maxLiquidatableDebt = (vars.userStableDebt + vars.userVariableDebt).percentMul(
-      LIQUIDATION_CLOSE_FACTOR_PERCENT
+      vars.closeFactor
     );
 
     vars.actualDebtToLiquidate = params.debtToCover > vars.maxLiquidatableDebt
@@ -121,7 +140,8 @@ library LiquidationLogic {
 
     (
       vars.maxCollateralToLiquidate,
-      vars.debtAmountNeeded
+      vars.debtAmountNeeded,
+      vars.protocolFee
     ) = _calculateAvailableCollateralToLiquidate(
       collateralReserve,
       vars.debtReserveCache,
@@ -149,7 +169,12 @@ library LiquidationLogic {
         vars.debtReserveCache.nextVariableBorrowIndex
       );
       vars.debtReserveCache.refreshDebt(0, 0, 0, vars.actualDebtToLiquidate);
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(
+        vars.debtReserveCache,
+        params.debtAsset,
+        vars.actualDebtToLiquidate,
+        0
+      );
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -170,12 +195,21 @@ library LiquidationLogic {
         vars.userVariableDebt
       );
 
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(
+        vars.debtReserveCache,
+        params.debtAsset,
+        vars.actualDebtToLiquidate,
+        0
+      );
     }
 
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
-      vars.collateralAtoken.transferOnLiquidation(params.user, msg.sender, vars.maxCollateralToLiquidate);
+      vars.collateralAtoken.transferOnLiquidation(
+        params.user,
+        msg.sender,
+        vars.maxCollateralToLiquidate - vars.protocolFee
+      );
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
@@ -196,8 +230,17 @@ library LiquidationLogic {
       vars.collateralAtoken.burn(
         params.user,
         msg.sender,
-        vars.maxCollateralToLiquidate,
+        vars.maxCollateralToLiquidate - vars.protocolFee,
         collateralReserveCache.nextLiquidityIndex
+      );
+    }
+
+    // Transfer fee to treasury if it is non-zero
+    if (vars.protocolFee > 0) {
+      vars.collateralAtoken.transferOnLiquidation(
+        params.user,
+        AAVE_COLLECTOR_ADDRESS,
+        vars.maxCollateralToLiquidate - vars.protocolFee
       );
     }
 
@@ -236,6 +279,10 @@ library LiquidationLogic {
     uint256 collateralDecimals;
     uint256 collateralAssetUnit;
     uint256 debtAssetUnit;
+    uint256 collateralAmount;
+    uint256 debtAmountNeeded;
+    uint256 collateralProtocolFee;
+    uint256 collateralProtocolFeeAmount;
   }
 
   /**
@@ -252,6 +299,7 @@ library LiquidationLogic {
    * @return collateralAmount: The maximum amount that is possible to liquidate given all the liquidation constraints
    *                           (user balance, close factor)
    *         debtAmountNeeded: The amount to repay with the liquidation
+   *         collateralProtocolFeeAmount: The amount of collateral to send as a liquidation protocol fee
    **/
   function _calculateAvailableCollateralToLiquidate(
     DataTypes.ReserveData storage collateralReserve,
@@ -261,10 +309,15 @@ library LiquidationLogic {
     uint256 debtToCover,
     uint256 userCollateralBalance,
     IPriceOracleGetter oracle
-  ) internal view returns (uint256, uint256) {
-    uint256 collateralAmount = 0;
-    uint256 debtAmountNeeded = 0;
-
+  )
+    internal
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     AvailableCollateralToLiquidateLocalVars memory vars;
 
     vars.collateralPrice = oracle.getAssetPrice(collateralAsset);
@@ -273,6 +326,8 @@ library LiquidationLogic {
     (, , vars.liquidationBonus, vars.collateralDecimals, ) = collateralReserve
       .configuration
       .getParams();
+
+    vars.collateralProtocolFee = collateralReserve.configuration.getLiquidationProtocolFee();
 
     vars.debtAssetDecimals = debtReserveCache.reserveConfiguration.getDecimalsMemory();
     unchecked {
@@ -291,14 +346,15 @@ library LiquidationLogic {
       (vars.collateralPrice * vars.debtAssetUnit);
 
     if (vars.maxAmountCollateralToLiquidate > userCollateralBalance) {
-      collateralAmount = userCollateralBalance;
-      debtAmountNeeded = ((vars.collateralPrice * collateralAmount * vars.debtAssetUnit) /
+      vars.collateralAmount = userCollateralBalance;
+      vars.debtAmountNeeded = ((vars.collateralPrice * vars.collateralAmount * vars.debtAssetUnit) /
         (vars.debtAssetPrice * vars.collateralAssetUnit))
         .percentDiv(vars.liquidationBonus);
     } else {
-      collateralAmount = vars.maxAmountCollateralToLiquidate;
-      debtAmountNeeded = debtToCover;
+      vars.collateralAmount = vars.maxAmountCollateralToLiquidate;
+      vars.debtAmountNeeded = debtToCover;
     }
-    return (collateralAmount, debtAmountNeeded);
+    vars.collateralProtocolFeeAmount = vars.collateralAmount.percentMul(vars.collateralProtocolFee);
+    return (vars.collateralAmount, vars.debtAmountNeeded, vars.collateralProtocolFeeAmount);
   }
 }

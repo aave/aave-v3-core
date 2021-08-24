@@ -408,7 +408,6 @@ library ValidationLogic {
   }
 
   struct ValidateLiquidationCallLocalVars {
-    uint256 healthFactor;
     bool collateralReserveActive;
     bool collateralReservePaused;
     bool principalReserveActive;
@@ -420,25 +419,16 @@ library ValidationLogic {
    * @dev Validates the liquidation action
    * @param collateralReserve The reserve data of the collateral
    * @param principalReserveCache The cached reserve data of the principal
-   * @param userConfig The user configuration
    * @param totalDebt Total debt balance of the user
-   * @param user The address of the user being liquidated
-   * @param reservesData The mapping of the reserves data
    * @param userConfig The user configuration mapping
-   * @param reserves The list of the reserves
-   * @param reservesCount The number of reserves in the list
-   * @param oracle The address of the price oracle
+   * @param healthFactor The health factor of the loan
    **/
   function validateLiquidationCall(
     DataTypes.ReserveData storage collateralReserve,
     DataTypes.ReserveCache memory principalReserveCache,
     uint256 totalDebt,
-    address user,
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap storage userConfig,
-    mapping(uint256 => address) storage reserves,
-    uint256 reservesCount,
-    address oracle
+    DataTypes.UserConfigurationMap memory userConfig,
+    uint256 healthFactor
   ) internal view {
     ValidateLiquidationCallLocalVars memory vars;
 
@@ -459,17 +449,8 @@ library ValidationLogic {
       Errors.VL_RESERVE_PAUSED
     );
 
-    (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
-      user,
-      reservesData,
-      userConfig,
-      reserves,
-      reservesCount,
-      oracle
-    );
-
     require(
-      vars.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
     );
 
