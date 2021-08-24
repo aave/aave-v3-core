@@ -356,6 +356,13 @@ interface IPoolConfigurator {
   function setSupplyCap(address asset, uint256 supplyCap) external;
 
   /**
+   * @dev Sets the protocol fee on liquidation
+   * @param asset The address of the underlying asset of the reserve
+   * @param fee The fee on liquidaton bonus
+   **/
+  function setReserveLiquidationProtocolFee(address asset, uint256 fee) external;
+
+  /**
    * @dev Registers a new admin with rights on risk related configurations
    * @param admin The address of the admin to register
    **/

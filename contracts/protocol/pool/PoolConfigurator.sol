@@ -268,6 +268,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit SupplyCapChanged(asset, supplyCap);
   }
 
+    /// @inheritdoc IPoolConfigurator
+  function setReserveLiquidationProtocolFee(address asset, uint256 fee)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setLiquidationProtocolFee(fee);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit LiquidationProtocolFeeChanged(asset, fee);
+  }
+
   ///@inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
