@@ -250,7 +250,10 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   );
 
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
-  poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
+  // Todo: Added two reads as the below was messing the coverage up, as we never entered `getReserveList()` without anything being dropped.
+  const reserveListBefore = await poolProxy.getReservesList();
+  await poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
+  const reserveListAfter = await poolProxy.getReservesList();
 
   await deployMockFlashLoanReceiver(addressesProvider.address);
 

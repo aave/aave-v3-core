@@ -14,10 +14,16 @@ import { ZERO_ADDRESS } from '../helpers/constants';
 import { config } from 'hardhat';
 import { configuration } from './helpers/utils/calculations';
 import { SelfdestructTransferFactory, SelfdestructTransfer } from '../types';
+import { zeroAddress } from 'ethereumjs-util';
 
 makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
-  const { P_CALLER_MUST_BE_AN_ATOKEN, P_NOT_CONTRACT, P_CALLER_NOT_POOL_CONFIGURATOR } =
-    ProtocolErrors;
+  const {
+    P_NO_MORE_RESERVES_ALLOWED,
+    P_CALLER_MUST_BE_AN_ATOKEN,
+    P_NOT_CONTRACT,
+    P_CALLER_NOT_POOL_CONFIGURATOR,
+    RL_RESERVE_ALREADY_INITIALIZED,
+  } = ProtocolErrors;
 
   it('_onlyPoolConfigurator called by non PoolConfigurator', async () => {
     // calling initReserve
@@ -42,10 +48,6 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, dai, users, configurator } = testEnv;
     await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
     await pool.connect(users[0].signer).mintToTreasury([dai.address]);
-  });
-
-  it('getReservesList() droppedReservesCount == 0', async () => {
-    expect(false, 'TODO').to.be.eq(true);
   });
 
   it('check getters', async () => {
@@ -118,7 +120,115 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     expect(await pool.paused()).to.be.eq(true);
   });
 
-  it('_addReserveToList()', async () => {
-    expect(false, 'todo').to.be.eq(true);
+  it('ReserveLogic init, aTokenAddress != address(0)', async () => {
+    const { pool, poolAdmin, dai, helpersContract, deployer, configurator } = testEnv;
+
+    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
+    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
+    await sdt.deployed();
+    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await impersonateAccountsHardhat([configurator.address]);
+    const configSigner = await DRE.ethers.getSigner(configurator.address);
+
+    const config = await pool.getReserveData(dai.address);
+
+    await expect(
+      pool.connect(configSigner).initReserve(
+        dai.address,
+        config.aTokenAddress, // just need a non-used reserve token
+        config.stableDebtTokenAddress,
+        config.variableDebtTokenAddress,
+        ZERO_ADDRESS
+      )
+    ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
+  });
+
+  it('GenericLogic calculateUserAccountData, currentReserveAddress ==address(0)', async () => {
+    /**
+     * Unsure how we can get to a state where this is testable.
+     * We need to add a reserve with address(0), but we cannot add a reserve with address(0),
+     * because we are checking for that when we init a reserve.
+     * We can make a drop of the reserve, to get address(0), but this can only be done when
+     * there is no deposit and borrows. And without those, the `isUsingAsCollateralOrBorrowing` will make us ship the case
+     */
+    expect(false, 'IMPOSSIBLE').to.be.eq(true);
+  });
+
+  it('_addReserveToList() already added', async () => {
+    /**
+     * To get into this case, we need to init a reserve with `aTokenAddress = address(0)` twice.
+     * `_addReserveToList()` is called from `initReserve`. However, in `initReserve` we run `init` before the `_addReserveToList()`,
+     * and in `init` we are checking if `aTokenAddress == address(0)`, so to bypass that we need this odd init.
+     */
+    const { pool, poolAdmin, dai, helpersContract, deployer, configurator } = testEnv;
+
+    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
+    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
+    await sdt.deployed();
+    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await impersonateAccountsHardhat([configurator.address]);
+    const configSigner = await DRE.ethers.getSigner(configurator.address);
+
+    const config = await pool.getReserveData(dai.address);
+
+    const poolListBefore = await pool.getReservesList();
+
+    await pool.connect(configSigner).initReserve(
+      config.aTokenAddress, // just need a non-used reserve token
+      ZERO_ADDRESS,
+      config.stableDebtTokenAddress,
+      config.variableDebtTokenAddress,
+      ZERO_ADDRESS
+    );
+    const poolListMid = await pool.getReservesList();
+    expect(poolListBefore.length + 1).to.be.eq(poolListMid.length);
+
+    // Add it again.
+    await pool.connect(configSigner).initReserve(
+      config.aTokenAddress, // just need a non-used reserve token
+      ZERO_ADDRESS,
+      config.stableDebtTokenAddress,
+      config.variableDebtTokenAddress,
+      ZERO_ADDRESS
+    );
+    const poolListAfter = await pool.getReservesList();
+    expect(poolListAfter.length).to.be.eq(poolListMid.length);
+  });
+
+  it('_addReserveToList() reservesCount > _maxNumberOfReserves', async () => {
+    // Really a pain, but practically, we just want to loop until we hit something high?
+    const { pool, dai, deployer, configurator } = testEnv;
+
+    const sdtFactory = new SelfdestructTransferFactory(deployer.signer);
+    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
+    await sdt.deployed();
+    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await impersonateAccountsHardhat([configurator.address]);
+    const configSigner = await DRE.ethers.getSigner(configurator.address);
+
+    const config = await pool.getReserveData(dai.address);
+    const poolListBefore = await pool.getReservesList();
+
+    for (let i = poolListBefore.length; i < 127; i++) {
+      const freshContract = await ((await sdtFactory.deploy()) as SelfdestructTransfer).deployed();
+      await pool.connect(configSigner).initReserve(
+        freshContract.address, // just need a non-used reserve token
+        ZERO_ADDRESS,
+        config.stableDebtTokenAddress,
+        config.variableDebtTokenAddress,
+        ZERO_ADDRESS
+      );
+    }
+
+    const freshContract = await ((await sdtFactory.deploy()) as SelfdestructTransfer).deployed();
+    await expect(
+      pool.connect(configSigner).initReserve(
+        freshContract.address, // just need a non-used reserve token
+        ZERO_ADDRESS,
+        config.stableDebtTokenAddress,
+        config.variableDebtTokenAddress,
+        ZERO_ADDRESS
+      )
+    ).to.be.revertedWith(P_NO_MORE_RESERVES_ALLOWED);
   });
 });
