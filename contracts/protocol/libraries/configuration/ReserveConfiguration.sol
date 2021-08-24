@@ -414,7 +414,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the configuration paramters of the reserve from storage
+   * @dev Gets the configuration parameters of the reserve from storage
    * @param self The reserve configuration
    * @return The state params representing ltv, liquidation threshold, liquidation bonus, reserve decimals, reserve factor
    **/
