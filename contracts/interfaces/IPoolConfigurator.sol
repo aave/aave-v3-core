@@ -358,7 +358,7 @@ interface IPoolConfigurator {
   /**
    * @dev Sets the protocol fee on liquidation
    * @param asset The address of the underlying asset of the reserve
-   * @param fee The fee on liquidaton bonus
+   * @param fee The fee on liquidation bonus
    **/
   function setReserveLiquidationProtocolFee(address asset, uint256 fee) external;
 
