@@ -35,7 +35,6 @@ import {
   VariableDebtTokenFactory,
   WETH9MockedFactory,
   ConfiguratorLogicFactory,
-  IncentivesControllerMockFactory,
   MockIncentivesControllerFactory,
   ReserveConfigurationMockFactory,
 } from '../types';
