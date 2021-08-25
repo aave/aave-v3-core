@@ -23,18 +23,15 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
 
     const { addressesProvider } = testEnv;
 
-    strategyInstance = await deployDefaultReserveInterestRateStrategy(
-      [
-        addressesProvider.address,
-        rateStrategyStableOne.optimalUtilizationRate,
-        rateStrategyStableOne.baseVariableBorrowRate,
-        rateStrategyStableOne.variableRateSlope1,
-        rateStrategyStableOne.variableRateSlope2,
-        rateStrategyStableOne.stableRateSlope1,
-        rateStrategyStableOne.stableRateSlope2,
-      ],
-      false
-    );
+    strategyInstance = await deployDefaultReserveInterestRateStrategy([
+      addressesProvider.address,
+      rateStrategyStableOne.optimalUtilizationRate,
+      rateStrategyStableOne.baseVariableBorrowRate,
+      rateStrategyStableOne.variableRateSlope1,
+      rateStrategyStableOne.variableRateSlope2,
+      rateStrategyStableOne.stableRateSlope1,
+      rateStrategyStableOne.stableRateSlope2,
+    ]);
   });
 
   it('Checks rates at 0% utilization rate, empty reserve', async () => {
