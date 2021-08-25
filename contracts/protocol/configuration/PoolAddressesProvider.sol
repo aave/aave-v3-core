@@ -28,7 +28,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
 
-  constructor(string memory marketId) public {
+  constructor(string memory marketId) {
     _setMarketId(marketId);
   }
 

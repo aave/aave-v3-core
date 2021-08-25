@@ -40,7 +40,7 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
     address fallbackOracle,
     address baseCurrency,
     uint256 baseCurrencyUnit
-  ) public {
+  ) {
     _setFallbackOracle(fallbackOracle);
     _setAssetsSources(assets, sources);
     BASE_CURRENCY = baseCurrency;

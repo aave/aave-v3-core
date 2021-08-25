@@ -23,7 +23,7 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   uint256 _amountToApprove;
   bool _simulateEOA;
 
-  constructor(IPoolAddressesProvider provider) public FlashLoanReceiverBase(provider) {}
+  constructor(IPoolAddressesProvider provider) FlashLoanReceiverBase(provider) {}
 
   function setFailExecutionTransfer(bool fail) public {
     _failExecution = fail;
