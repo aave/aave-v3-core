@@ -427,11 +427,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   ///@inheritdoc IPool
-  function paused() external view override returns (bool) {
-    return _paused;
-  }
-
-  ///@inheritdoc IPool
   function getReservesList() external view override returns (address[] memory) {
     uint256 reserveListCount = _reservesCount;
     uint256 droppedReservesCount = 0;
@@ -549,11 +544,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     _reserves[asset].configuration.data = configuration;
-  }
-
-  ///@inheritdoc IPool
-  function setPause(bool paused) external override onlyPoolConfigurator {
-    _paused = paused;
   }
 
   ///@inheritdoc IPool
