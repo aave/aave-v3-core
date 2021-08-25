@@ -8,7 +8,6 @@ import { buildForkConfig } from './helper-hardhat-config';
 require('dotenv').config();
 
 import '@nomiclabs/hardhat-ethers';
-import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-gas-reporter';
 import 'hardhat-typechain';
