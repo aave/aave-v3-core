@@ -50,7 +50,6 @@ export const AaveConfig: IAaveConfiguration = {
   ProviderRegistry: undefined,
   ProviderRegistryOwner: undefined,
   RateOracle: undefined,
-  PoolCollateralManager: undefined,
   PoolConfigurator: undefined,
   Pool: undefined,
   TokenDistributor: undefined,

@@ -8,14 +8,13 @@
     "noImplicitAny": false,
     "resolveJsonModule": true
   },
-  "include": ["./scripts", "./test", "./tasks", "./helpers", "test-suites/test-aave/upgradeability.spec.ts", "test-suites/test-aave/variable-debt-token.spec.ts", "test-suites/test-aave/weth-gateway.spec.ts"],
+  "include": ["./scripts", "./test-suites", "./tasks", "./helpers"],
   "files": [
     "./hardhat.config.ts",
     "./modules/tenderly/tenderly.d.ts",
-    "node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.ts",
     "node_modules/hardhat-typechain/src/type-extensions.ts",
     "node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.ts",
     "node_modules/@nomiclabs/hardhat-etherscan/src/type-extensions.ts",
-    "node_modules/hardhat-gas-reporter/src/type-extensions.ts"
+    "node_modules/hardhat-gas-reporter/src/type-extensions.ts",
   ]
 }

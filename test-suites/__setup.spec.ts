@@ -242,8 +242,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     SymbolPrefix,
     admin,
     treasuryAddress,
-    ZERO_ADDRESS,
-    false
+    ZERO_ADDRESS
   );
 
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);

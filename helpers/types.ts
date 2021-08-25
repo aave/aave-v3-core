@@ -387,10 +387,10 @@ export interface ICommonConfiguration {
   ProviderId: number;
   ProtocolGlobalParams: IProtocolGlobalConfig;
   Mocks: IMocksConfig;
-  ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
-  ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
-  PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
-  Pool: iParamsPerNetwork<tEthereumAddress>;
+  ProviderRegistry: tEthereumAddress | undefined;
+  ProviderRegistryOwner: tEthereumAddress | undefined;
+  PoolConfigurator: tEthereumAddress | undefined;
+  Pool: tEthereumAddress | undefined;
   RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
   RateOracle: tEthereumAddress | undefined;
   TokenDistributor: tEthereumAddress | undefined;
