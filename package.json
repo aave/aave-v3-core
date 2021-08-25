@@ -9,12 +9,10 @@
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
     "small:test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/__setup.spec.ts ./test-suites/wadraymath.spec.ts",
-    "small:coverage": "TS_NODE_TRANSPILE_ONLY=1 hardhat coverage --testfiles './test-suites/scene-helper/*.spec.ts'",
     "run-env": "npm i && tail -f /dev/null",
     "hardhat": "hardhat",
     "compile": "SKIP_LOAD=true hardhat compile",
     "compile:clean": "npm run ci:clean && npm run compile",
-    "coverage:old": "TS_NODE_TRANSPILE_ONLY=1 hardhat coverage --testfiles './test-suites/*.spec.ts'",
     "coverage": "npm run compile && npx hardhat coverage --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && npx hardhat coverage --testfiles 'test-suites/*.spec.ts'",
     "aave:evm:dev:migration": "npm run compile && hardhat aave:dev",
     "console:fork": "FORK=main hardhat console",
