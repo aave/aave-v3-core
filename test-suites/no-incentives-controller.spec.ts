@@ -1,9 +1,3 @@
-/**
- * TODO:
- * 1. initialize a reserve without an incentives controller
- * 2. use it to deposit and repay
- */
-
 import BigNumber from 'bignumber.js';
 
 import { DRE } from '../helpers/misc-utils';
