@@ -5,11 +5,8 @@ import {Pool} from '../protocol/pool/Pool.sol';
 import {PoolAddressesProvider} from '../protocol/configuration/PoolAddressesProvider.sol';
 import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
-import {
-  DefaultReserveInterestRateStrategy
-} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
+import {DefaultReserveInterestRateStrategy} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {StringLib} from './StringLib.sol';
 
 contract ATokensAndRatesHelper is Ownable {
   address payable private pool;

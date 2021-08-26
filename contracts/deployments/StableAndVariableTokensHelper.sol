@@ -5,7 +5,6 @@ import {StableDebtToken} from '../protocol/tokenization/StableDebtToken.sol';
 import {VariableDebtToken} from '../protocol/tokenization/VariableDebtToken.sol';
 import {RateOracle} from '../mocks/oracle/RateOracle.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {StringLib} from './StringLib.sol';
 
 contract StableAndVariableTokensHelper is Ownable {
   address payable private pool;
