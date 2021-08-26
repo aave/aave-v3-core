@@ -1,8 +1,7 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   it('Checks the addresses provider is added to the registry', async () => {

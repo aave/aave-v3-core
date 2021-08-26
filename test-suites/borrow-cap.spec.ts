@@ -4,8 +4,7 @@ import { ProtocolErrors } from '../helpers/types';
 import { MintableERC20, WETH9Mocked } from '../types';
 import { parseEther } from '@ethersproject/units';
 import { BigNumber } from '@ethersproject/bignumber';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 makeSuite('Borrow Cap', (testEnv: TestEnv) => {
   const { VL_BORROW_CAP_EXCEEDED, RC_INVALID_BORROW_CAP } = ProtocolErrors;

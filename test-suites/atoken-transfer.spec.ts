@@ -5,7 +5,6 @@ import { ethers } from 'ethers';
 import { RateMode, ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import AaveConfig from '../market-config';
-import { zeroAddress } from 'ethereumjs-util';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 
 const AAVE_REFERRAL = AaveConfig.ProtocolGlobalParams.AaveReferral;

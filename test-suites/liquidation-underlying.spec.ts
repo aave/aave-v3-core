@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-
 import { DRE, increaseTime } from '../helpers/misc-utils';
 import { APPROVAL_AMOUNT_POOL, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
@@ -8,11 +7,7 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 import { getUserData } from './helpers/utils/helpers';
 
-import { parseEther } from 'ethers/lib/utils';
-
-const chai = require('chai');
-
-const { expect } = chai;
+import { expect } from 'chai';
 
 makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;

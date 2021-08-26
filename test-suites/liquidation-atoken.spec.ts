@@ -7,9 +7,7 @@ import { makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
 import { getUserData, getReserveData } from './helpers/utils/helpers';
-
-const chai = require('chai');
-const { expect } = chai;
+import { expect } from 'chai';
 
 makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   const {

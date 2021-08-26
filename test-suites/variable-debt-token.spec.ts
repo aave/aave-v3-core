@@ -4,7 +4,7 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getVariableDebtToken } from '../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { parseEther, parseUnits } from 'ethers/lib/utils';
-import { RateOracle, SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
+import { SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
 import BigNumber from 'bignumber.js';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
 

@@ -1,11 +1,8 @@
 import { expect } from 'chai';
-import { BigNumber, ethers } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE, timeLatest } from '../helpers/misc-utils';
 import { _TypedDataEncoder } from 'ethers/lib/utils';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
-import { configuration } from './helpers/utils/calculations';
 
 makeSuite('Configurator - edge cases', (testEnv: TestEnv) => {
   const { PC_INVALID_CONFIGURATION, PC_CALLER_NOT_EMERGENCY_ADMIN, RC_INVALID_LIQ_BONUS } =

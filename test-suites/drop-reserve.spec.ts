@@ -4,8 +4,7 @@ import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { parseEther } from 'ethers/lib/utils';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 makeSuite('Drop Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;

@@ -1,13 +1,8 @@
-import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { expect } from 'chai';
-import { ethers } from 'ethers';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode, ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE, evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils';
-import { deposit } from './helpers/actions';
-import BigNumber from 'bignumber.js';
+import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
+import { parseUnits } from 'ethers/lib/utils';
 
 makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
   const {

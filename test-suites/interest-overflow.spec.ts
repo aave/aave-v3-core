@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-
 import {
   DRE,
   evmRevert,
@@ -8,19 +7,12 @@ import {
   increaseTime,
 } from '../helpers/misc-utils';
 import {
-  APPROVAL_AMOUNT_POOL,
   MAX_UINT_AMOUNT,
-  oneEther,
   ZERO_ADDRESS,
 } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
-import { getUserData, getReserveData } from './helpers/utils/helpers';
-
-const chai = require('chai');
-const { expect } = chai;
+import { expect } from 'chai';
 
 import {
   AToken,

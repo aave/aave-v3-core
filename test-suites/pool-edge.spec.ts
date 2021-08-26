@@ -1,20 +1,13 @@
 import { expect } from 'chai';
-import { BigNumber, ethers } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import {
   DRE,
-  evmRevert,
-  evmSnapshot,
   impersonateAccountsHardhat,
-  timeLatest,
 } from '../helpers/misc-utils';
 import { parseEther, _TypedDataEncoder } from 'ethers/lib/utils';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
-import { config } from 'hardhat';
-import { configuration } from './helpers/utils/calculations';
 import { SelfdestructTransferFactory, SelfdestructTransfer } from '../types';
-import { zeroAddress } from 'ethereumjs-util';
 
 makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
   const {

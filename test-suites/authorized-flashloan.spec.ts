@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js';
-
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { APPROVAL_AMOUNT_POOL, oneRay } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { ProtocolErrors } from '../helpers/types';
@@ -11,8 +11,6 @@ import {
   getStableDebtToken,
   getVariableDebtToken,
 } from '../helpers/contracts-getters';
-
-const { expect } = require('chai');
 
 makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;

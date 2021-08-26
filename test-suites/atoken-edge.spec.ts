@@ -1,13 +1,10 @@
-import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { expect, use } from 'chai';
-import { ethers } from 'ethers';
-import { RateMode, ProtocolErrors } from '../helpers/types';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { expect } from 'chai';
+import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE, evmRevert, evmSnapshot, impersonateAccountsHardhat } from '../helpers/misc-utils';
-import { formatUnits, parseEther, parseUnits } from 'ethers/lib/utils';
-import { deposit } from './helpers/actions';
-import { Pool, SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
+import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { parseEther, parseUnits } from 'ethers/lib/utils';
+import { SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
 
 makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   const { VL_NO_ACTIVE_RESERVE, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;

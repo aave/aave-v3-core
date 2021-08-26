@@ -8,8 +8,7 @@ import {
 } from '../types';
 import { BigNumber } from '@ethersproject/bignumber';
 import { getFirstSigner } from '../helpers/contracts-getters';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 makeSuite('Borrow/repay in the same tx', (testEnv: TestEnv) => {
   const { VL_SAME_BLOCK_BORROW_REPAY } = ProtocolErrors;

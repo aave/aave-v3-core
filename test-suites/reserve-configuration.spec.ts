@@ -1,4 +1,3 @@
-import { oneEther } from '../helpers/constants';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';

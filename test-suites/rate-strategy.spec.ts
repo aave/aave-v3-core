@@ -1,16 +1,12 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { deployDefaultReserveInterestRateStrategy } from '../helpers/contracts-deployments';
-
 import { PERCENTAGE_FACTOR, RAY } from '../helpers/constants';
-
 import { rateStrategyStableOne } from '../market-config/rateStrategies';
-
 import { strategyDAI } from '../market-config/reservesConfigs';
 import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';
 import BigNumber from 'bignumber.js';
 import './helpers/utils/math';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
   let strategyInstance: DefaultReserveInterestRateStrategy;

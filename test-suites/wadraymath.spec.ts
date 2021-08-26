@@ -1,12 +1,10 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { MAX_UINT_AMOUNT, RAY, WAD, HALF_RAY, HALF_WAD } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import BigNumber from 'bignumber.js';
-import { WadRayMathFactory, WadRayMathWrapper, WadRayMathWrapperFactory } from '../types';
+import { WadRayMathWrapper, WadRayMathWrapperFactory } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 import './helpers/utils/math';
 
 makeSuite('LTV validation tests', (testEnv: TestEnv) => {

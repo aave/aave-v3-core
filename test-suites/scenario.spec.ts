@@ -1,6 +1,5 @@
 import { configuration as actionsConfiguration } from './helpers/actions';
 import { configuration as calculationsConfiguration } from './helpers/utils/calculations';
-
 import fs from 'fs';
 import BigNumber from 'bignumber.js';
 import { makeSuite } from './helpers/make-suite';

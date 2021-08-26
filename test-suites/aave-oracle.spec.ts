@@ -2,7 +2,7 @@ import { oneEther, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE, evmRevert, evmSnapshot } from '../helpers/misc-utils';
+import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20, deployMockAggregator } from '../helpers/contracts-deployments';
 import { MintableERC20, MockAggregator } from '../types';
 import { ProtocolErrors } from '../helpers/types';

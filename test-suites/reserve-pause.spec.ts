@@ -6,8 +6,8 @@ import { parseEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'bignumber.js';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
 
 makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;

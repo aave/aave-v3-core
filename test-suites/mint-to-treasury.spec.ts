@@ -5,8 +5,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { BigNumber } from 'bignumber.js';
 import { advanceTimeAndBlock, waitForTx } from '../helpers/misc-utils';
 import './helpers/utils/math';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 makeSuite('Mint to treasury', (testEnv: TestEnv) => {
   it('User 0 deposits 1000 DAI. Borrower borrows 100 DAI. Clock moved forward one year. Calculates and verifies the amount accrued to the treasury', async () => {

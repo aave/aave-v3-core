@@ -3,9 +3,8 @@ import { MAX_UINT_AMOUNT, MAX_SUPPLY_CAP } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { MintableERC20, WETH9Mocked } from '../types';
 import { parseEther } from '@ethersproject/units';
-import { BigNumber } from '@ethersproject/bignumber';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
 
 makeSuite('supply Cap', (testEnv: TestEnv) => {
   const { VL_SUPPLY_CAP_EXCEEDED, RC_INVALID_SUPPLY_CAP } = ProtocolErrors;

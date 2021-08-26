@@ -2,8 +2,8 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { expect } from 'chai';
 
-const { expect } = require('chai');
 makeSuite('LTV validation tests', (testEnv: TestEnv) => {
   const { VL_LTV_VALIDATION_FAILED } = ProtocolErrors;
 

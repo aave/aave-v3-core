@@ -1,7 +1,5 @@
-import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { expect } from 'chai';
-import { ethers } from 'ethers';
 import { RateMode, ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { DRE, evmRevert, evmSnapshot } from '../helpers/misc-utils';

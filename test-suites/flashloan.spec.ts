@@ -11,8 +11,7 @@ import {
   getStableDebtToken,
   getVariableDebtToken,
 } from '../helpers/contracts-getters';
-
-const { expect } = require('chai');
+import { expect } from 'chai';
 
 makeSuite('Pool FlashLoan function', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
