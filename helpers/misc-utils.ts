@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-import BN = require('bn.js');
 import low from 'lowdb';
 import FileSync from 'lowdb/adapters/FileSync';
 import { WAD } from './constants';
@@ -10,8 +9,6 @@ import { isAddress } from 'ethers/lib/utils';
 import { isZeroAddress } from 'ethereumjs-util';
 
 export const toWad = (value: string | number) => new BigNumber(value).times(WAD).toFixed();
-
-export const bnToBigNumber = (amount: BN): BigNumber => new BigNumber(<any>amount);
 
 export const stringToBigNumber = (amount: string): BigNumber => new BigNumber(amount);
 

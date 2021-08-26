@@ -65,9 +65,9 @@ export interface TestEnv {
   registry: PoolAddressesProviderRegistry;
 }
 
-let buidlerevmSnapshotId: string = '0x1';
-const setBuidlerevmSnapshotId = (id: string) => {
-  buidlerevmSnapshotId = id;
+let HardhatSnapshotId: string = '0x1';
+const setHardhatSnapshotId = (id: string) => {
+  HardhatSnapshotId = id;
 };
 
 const testEnv: TestEnv = {
@@ -160,19 +160,19 @@ export async function initializeMakeSuite() {
 const setSnapshot = async () => {
   const hre = DRE as HardhatRuntimeEnvironment;
   if (usingTenderly()) {
-    setBuidlerevmSnapshotId((await hre.tenderlyNetwork.getHead()) || '0x1');
+    setHardhatSnapshotId((await hre.tenderlyNetwork.getHead()) || '0x1');
     return;
   }
-  setBuidlerevmSnapshotId(await evmSnapshot());
+  setHardhatSnapshotId(await evmSnapshot());
 };
 
 const revertHead = async () => {
   const hre = DRE as HardhatRuntimeEnvironment;
   if (usingTenderly()) {
-    await hre.tenderlyNetwork.setHead(buidlerevmSnapshotId);
+    await hre.tenderlyNetwork.setHead(HardhatSnapshotId);
     return;
   }
-  await evmRevert(buidlerevmSnapshotId);
+  await evmRevert(HardhatSnapshotId);
 };
 
 export function makeSuite(name: string, tests: (testEnv: TestEnv) => void) {

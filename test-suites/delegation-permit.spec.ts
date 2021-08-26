@@ -1,5 +1,5 @@
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { BUIDLEREVM_CHAINID } from '../helpers/buidler-constants';
+import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
 import {
   buildPermitDelegationParams,
   convertToCurrencyDecimals,
@@ -74,7 +74,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
@@ -124,7 +124,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);

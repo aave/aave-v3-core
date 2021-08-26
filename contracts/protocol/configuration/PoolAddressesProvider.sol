@@ -3,7 +3,7 @@ pragma solidity 0.8.6;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 
-// Prettier ignore to prevent buidler flatter bug
+// Prettier ignore to prevent hardhat flatter bug
 // prettier-ignore
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 
