@@ -19,7 +19,7 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   });
 
   it('approve() owner == address(0)', async () => {
-    expect(false, 'TODO').to.be.eq(true);
+    expect(false, 'IMPOSSIBLE').to.be.eq(true);
   });
 
   it('approve() spender == address(0)', async () => {
@@ -30,7 +30,6 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   });
 
   it('transferFrom()', async () => {
-    // TODO: Would be good if we had some balances here!
     const { users, aDai } = testEnv;
     await aDai.connect(users[1].signer).transferFrom(users[0].address, users[1].address, 0);
   });
