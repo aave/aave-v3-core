@@ -38,7 +38,7 @@ export enum eContractid {
   RateOracle = 'RateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
-  InitializableAdminUpgradeabilityProxy = 'InitializableAdminUpgradeabilityProxy',
+  InitializableImmutableAdminUpgradeabilityProxy = 'InitializableImmutableAdminUpgradeabilityProxy',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   AToken = 'AToken',
   MockAToken = 'MockAToken',
@@ -61,6 +61,10 @@ export enum eContractid {
   MockIncentivesController = 'MockIncentivesController',
   MockReserveConfiguration = 'MockReserveConfiguration',
   MockPool = 'MockPool',
+  MockInitializableImple = 'MockInitializableImple',
+  MockInitializableImpleV2 = 'MockInitializableImpleV2',
+  MockInitializableFromConstructorImple = 'MockInitializableFromConstructorImple',
+  MockReentrantInitializableImple = 'MockReentrantInitializableImple',
 }
 
 /*

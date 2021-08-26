@@ -38,6 +38,11 @@ import {
   MockIncentivesControllerFactory,
   MockReserveConfigurationFactory,
   MockPoolFactory,
+  MockInitializableImpleFactory,
+  MockInitializableFromConstructorImpleFactory,
+  MockReentrantInitializableImpleFactory,
+  MockInitializableImpleV2Factory,
+  InitializableImmutableAdminUpgradeabilityProxyFactory,
 } from '../types';
 import {
   withSave,
@@ -73,7 +78,7 @@ export const deployConfiguratorLogicLibrary = async () =>
     eContractid.ConfiguratorLogic
   );
 
-export const deployPoolConfigurator = async (verify?: boolean) => {
+export const deployPoolConfigurator = async () => {
   const configuratorLogic = await deployConfiguratorLogicLibrary();
   const poolConfiguratorImpl = await new PoolConfiguratorFactory(
     { ['__$3ddc574512022f331a6a4c7e4bbb5c67b6$__']: configuratorLogic.address },
@@ -83,7 +88,7 @@ export const deployPoolConfigurator = async (verify?: boolean) => {
   return withSave(poolConfiguratorImpl, eContractid.PoolConfigurator);
 };
 
-export const deployDepositLogic = async (verify?: boolean) => {
+export const deployDepositLogic = async () => {
   const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
 
   const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {});
@@ -98,7 +103,7 @@ export const deployDepositLogic = async (verify?: boolean) => {
   return withSave(depositLogic, eContractid.DepositLogic);
 };
 
-export const deployBorrowLogic = async (verify?: boolean) => {
+export const deployBorrowLogic = async () => {
   const borrowLogicArtifact = await readArtifact(eContractid.BorrowLogic);
 
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
@@ -112,7 +117,7 @@ export const deployBorrowLogic = async (verify?: boolean) => {
   return withSave(borrowLogic, eContractid.BorrowLogic);
 };
 
-export const deployLiquidationLogic = async (verify?: boolean) => {
+export const deployLiquidationLogic = async () => {
   const liquidationLogicArtifact = await readArtifact(eContractid.LiquidationLogic);
 
   const borrowLogicFactory = await DRE.ethers.getContractFactory(
@@ -126,10 +131,10 @@ export const deployLiquidationLogic = async (verify?: boolean) => {
   return withSave(liquidationLogic, eContractid.LiquidationLogic);
 };
 
-export const deployAaveLibraries = async (verify?: boolean): Promise<PoolLibraryAddresses> => {
-  const depositLogic = await deployDepositLogic(verify);
-  const borrowLogic = await deployBorrowLogic(verify);
-  const liquidationLogic = await deployLiquidationLogic(verify);
+export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
+  const depositLogic = await deployDepositLogic();
+  const borrowLogic = await deployBorrowLogic();
+  const liquidationLogic = await deployLiquidationLogic();
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -321,6 +326,16 @@ export const deployATokensAndRatesHelper = async (
     eContractid.ATokensAndRatesHelper
   );
 
+export const deployInitializableImmutableAdminUpgradeabilityProxy = async (
+  args: [tEthereumAddress]
+) =>
+  withSave(
+    await new InitializableImmutableAdminUpgradeabilityProxyFactory(await getFirstSigner()).deploy(
+      ...args
+    ),
+    eContractid.InitializableImmutableAdminUpgradeabilityProxy
+  );
+
 export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string]
 ) => {
@@ -391,3 +406,27 @@ export const deployMockReserveConfiguration = async () =>
 
 export const deployMockPool = async () =>
   withSave(await new MockPoolFactory(await getFirstSigner()).deploy(), eContractid.MockPool);
+
+export const deployMockInitializableImple = async () =>
+  withSave(
+    await new MockInitializableImpleFactory(await getFirstSigner()).deploy(),
+    eContractid.MockInitializableImple
+  );
+
+export const deployMockInitializableImpleV2 = async () =>
+  withSave(
+    await new MockInitializableImpleV2Factory(await getFirstSigner()).deploy(),
+    eContractid.MockInitializableImpleV2
+  );
+
+export const deployMockInitializableFromConstructorImple = async (args: [string]) =>
+  withSave(
+    await new MockInitializableFromConstructorImpleFactory(await getFirstSigner()).deploy(...args),
+    eContractid.MockInitializableFromConstructorImple
+  );
+
+export const deployMockReentrantInitializableImple = async () =>
+  withSave(
+    await new MockReentrantInitializableImpleFactory(await getFirstSigner()).deploy(),
+    eContractid.MockReentrantInitializableImple
+  );
