@@ -3,7 +3,7 @@ pragma solidity 0.8.6;
 import {IPool} from '../../interfaces/IPool.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';
 
-contract BorrowRepayTestMock {
+contract MockBorrowRepayTest {
   IPool _pool;
   address _weth;
   address _dai;

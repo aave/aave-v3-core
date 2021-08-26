@@ -1,8 +1,8 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
 import {
-  BorrowRepayTestMock,
-  BorrowRepayTestMockFactory,
+  MockBorrowRepayTest,
+  MockBorrowRepayTestFactory,
   MintableERC20,
   WETH9Mocked,
 } from '../types';
@@ -15,13 +15,13 @@ makeSuite('Borrow/repay in the same tx', (testEnv: TestEnv) => {
   const unitParse = async (token: WETH9Mocked | MintableERC20, nb: string) =>
     BigNumber.from(nb).mul(BigNumber.from('10').pow((await token.decimals()) - 3));
 
-  let testContract: BorrowRepayTestMock;
+  let testContract: MockBorrowRepayTest;
 
   it('Deploys the test contract', async () => {
     const { weth, dai, pool } = testEnv;
 
     testContract = await (
-      await new BorrowRepayTestMockFactory(await getFirstSigner())
+      await new MockBorrowRepayTestFactory(await getFirstSigner())
     ).deploy(pool.address, weth.address, dai.address);
   });
 
