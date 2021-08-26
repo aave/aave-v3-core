@@ -1,11 +1,23 @@
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { APPROVAL_AMOUNT_POOL } from '../helpers/constants';
+import { APPROVAL_AMOUNT_POOL, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { parseEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber } from 'bignumber.js';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
-import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
+import {
+  getFirstSigner,
+  getMockFlashLoanReceiver,
+  getMockPool,
+  getPoolConfiguratorProxy,
+} from '../helpers/contracts-getters';
+import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
+import { deployMockPool } from '../helpers/contracts-deployments';
+import {
+  ConfiguratorLogicFactory,
+  PoolAddressesProviderFactory,
+  PoolConfiguratorFactory,
+} from '../types';
 
 const { expect } = require('chai');
 
@@ -326,5 +338,59 @@ makeSuite('Pausable Pool', (testEnv: TestEnv) => {
 
     // Unpause pool
     await configurator.connect(users[1].signer).setPoolPause(false);
+  });
+
+  it('Configurator pauses Pool with a ZERO_ADDRESS reserve', async () => {
+    const { emergencyAdmin } = testEnv;
+
+    const snapId = await evmSnapshot();
+
+    // Deploy a mock Pool
+    const mockPool = await deployMockPool();
+
+    // Deploy a new PoolConfigurator
+    const configuratorLogic = await (
+      await new ConfiguratorLogicFactory(await getFirstSigner()).deploy()
+    ).deployed();
+    const poolConfigurator = await (
+      await new PoolConfiguratorFactory(
+        { ['__$3ddc574512022f331a6a4c7e4bbb5c67b6$__']: configuratorLogic.address },
+        await getFirstSigner()
+      ).deploy()
+    ).deployed();
+
+    // Deploy a new PoolAddressesProvider
+    const MARKET_ID = '1';
+    const poolAddressesProvider = await (
+      await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(MARKET_ID)
+    ).deployed();
+
+    // Update the Pool impl with a MockPool
+    expect(await poolAddressesProvider.setPoolImpl(mockPool.address))
+      .to.emit(poolAddressesProvider, 'PoolUpdated')
+      .withArgs(mockPool.address);
+
+    // Add ZERO_ADDRESS as a reserve
+    const proxiedMockPoolAddress = await poolAddressesProvider.getPool();
+    const proxiedMockPool = await getMockPool(proxiedMockPoolAddress);
+    expect(await proxiedMockPool.addReserveToReservesList(ZERO_ADDRESS));
+
+    // Update the PoolConfigurator impl with the PoolConfigurator
+    expect(await poolAddressesProvider.setPoolConfiguratorImpl(poolConfigurator.address))
+      .to.emit(poolAddressesProvider, 'PoolConfiguratorUpdated')
+      .withArgs(poolConfigurator.address);
+
+    const proxiedPoolConfiguratorAddress = await poolAddressesProvider.getPoolConfigurator();
+    const proxiedPoolConfigurator = await getPoolConfiguratorProxy(proxiedPoolConfiguratorAddress);
+
+    // Update the EmergencyAdmin
+    expect(await poolAddressesProvider.setEmergencyAdmin(emergencyAdmin.address))
+      .to.emit(poolAddressesProvider, 'EmergencyAdminUpdated')
+      .withArgs(emergencyAdmin.address);
+
+    // Pause reserve
+    expect(await proxiedPoolConfigurator.connect(emergencyAdmin.signer).setPoolPause(true));
+
+    await evmRevert(snapId);
   });
 });
