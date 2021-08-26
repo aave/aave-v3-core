@@ -9,7 +9,7 @@ import AaveConfig from '../market-config';
 
 const scenarioFolder = './test-suites/helpers/scenarios/';
 
-const selectedScenarios: string[] = [];
+const selectedScenarios: string[] = []; //"borrow-repay-stable-edge.json", "borrow-repay-stable.json"];
 
 fs.readdirSync(scenarioFolder).forEach((file) => {
   if (selectedScenarios.length > 0 && !selectedScenarios.includes(file)) return;
