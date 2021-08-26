@@ -1,10 +1,11 @@
 import { expect } from 'chai';
-import { createRandomAddress } from '../helpers/misc-utils';
+import { createRandomAddress, evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
 import { ethers } from 'ethers';
 import { waitForTx } from '../helpers/misc-utils';
-import { deployPool } from '../helpers/contracts-deployments';
+import { deployMockPool, deployPool } from '../helpers/contracts-deployments';
+import { ZERO_ADDRESS } from '../helpers/constants';
 
 const { utils } = ethers;
 
@@ -93,5 +94,54 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       mockNonProxiedAddress
     );
     expect(nonProxiedAddressSetReceipt.events[0].args?.hasProxy).to.be.equal(false);
+  });
+
+  it('Updates the implementation of a proxy which is already initialized', async () => {
+    const snapId = await evmSnapshot();
+    const { addressesProvider, users } = testEnv;
+    const currentAddressesProviderOwner = users[1];
+
+    const mockPool = await deployMockPool();
+
+    // Pool has already a proxy
+    const poolAddress = await addressesProvider.getPool();
+    expect(poolAddress).to.be.not.eq(ZERO_ADDRESS);
+
+    // Update the Pool proxy
+    expect(
+      await addressesProvider
+        .connect(currentAddressesProviderOwner.signer)
+        .setPoolImpl(mockPool.address)
+    );
+
+    // Pool address should not change
+    expect(await addressesProvider.getPool()).to.be.eq(poolAddress);
+
+    await evmRevert(snapId);
+  });
+
+  it('Proxy Admin updates the MarketId', async () => {
+    const snapId = await evmSnapshot();
+    const { addressesProvider, users } = testEnv;
+    const currentAddressesProviderOwner = users[1];
+
+    const NEW_MARKET_ID = 'NEW_MARKET';
+
+    // Current MarketId
+    const oldMarketId = await addressesProvider.getMarketId();
+
+    // Update the MarketId
+    expect(
+      await addressesProvider
+        .connect(currentAddressesProviderOwner.signer)
+        .setMarketId(NEW_MARKET_ID)
+    )
+      .to.emit(addressesProvider, 'MarketIdSet')
+      .withArgs(NEW_MARKET_ID);
+
+    expect(await addressesProvider.getMarketId()).to.be.not.eq(oldMarketId);
+    expect(await addressesProvider.getMarketId()).to.be.eq(NEW_MARKET_ID);
+
+    await evmRevert(snapId);
   });
 });
