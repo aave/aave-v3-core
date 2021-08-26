@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { RateMode, ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { DRE, evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { parseEther, parseUnits } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 
 makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
   const {
@@ -46,10 +46,10 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isActive).to.be.eq(false);
     expect(configAfter.isFrozen).to.be.eq(false);
 
-    await dai.connect(user.signer).mint(parseEther('1000'));
+    await dai.connect(user.signer).mint(utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await expect(
-      pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0)
+      pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0)
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
@@ -67,10 +67,10 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isActive).to.be.eq(true);
     expect(configAfter.isFrozen).to.be.eq(true);
 
-    await dai.connect(user.signer).mint(parseEther('1000'));
+    await dai.connect(user.signer).mint(utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await expect(
-      pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0)
+      pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0)
     ).to.be.revertedWith(VL_RESERVE_FROZEN);
   });
 
@@ -84,9 +84,9 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await usdc.connect(user.signer).mint(parseEther('10000'));
-    await usdc.connect(user.signer).approve(pool.address, parseEther('10000'));
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('10000'), user.address, 0);
+    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('10000'), user.address, 0);
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.isActive).to.be.eq(true);
@@ -99,13 +99,13 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isFrozen).to.be.eq(false);
 
     // Transferring directly into aDai such that we can borrow
-    await dai.connect(user.signer).mint(parseEther('1000'));
-    await dai.connect(user.signer).transfer(aDai.address, parseEther('1000'));
+    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseEther('1000'), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseEther('1000'), RateMode.Variable, 0, user.address)
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
@@ -113,13 +113,13 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(parseEther('1000'));
-    await dai.connect(user.signer).approve(pool.address, parseEther('1000'));
-    await pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0);
+    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
-    await usdc.connect(user.signer).mint(parseEther('10000'));
-    await usdc.connect(user.signer).approve(pool.address, parseEther('10000'));
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('10000'), user.address, 0);
+    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('10000'), user.address, 0);
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.isActive).to.be.eq(true);
@@ -134,7 +134,7 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseEther('1000'), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseEther('1000'), RateMode.Variable, 0, user.address)
     ).to.be.revertedWith(VL_RESERVE_FROZEN);
   });
 
@@ -151,13 +151,13 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(parseEther('1000'));
-    await dai.connect(user.signer).approve(pool.address, parseEther('1000'));
-    await pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0);
+    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
-    await usdc.connect(user.signer).mint(parseEther('10000'));
-    await usdc.connect(user.signer).approve(pool.address, parseEther('10000'));
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('10000'), user.address, 0);
+    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('10000'), user.address, 0);
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.borrowingEnabled).to.be.eq(true);
@@ -171,7 +171,7 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseEther('1000'), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseEther('1000'), RateMode.Variable, 0, user.address)
     ).to.be.revertedWith(VL_BORROWING_NOT_ENABLED);
   });
 
@@ -179,9 +179,9 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(parseEther('1000'));
-    await dai.connect(user.signer).approve(pool.address, parseEther('1000'));
-    await pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0);
+    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.stableBorrowRateEnabled).to.be.eq(true);
@@ -195,7 +195,7 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseEther('500'), RateMode.Stable, 0, user.address)
+        .borrow(dai.address, utils.parseEther('500'), RateMode.Stable, 0, user.address)
     ).to.be.revertedWith(VL_STABLE_BORROWING_NOT_ENABLED);
   });
 
@@ -204,19 +204,19 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const user = users[0];
     const depositor = users[1];
 
-    await dai.connect(depositor.signer).mint(parseUnits('2000', 18));
+    await dai.connect(depositor.signer).mint(utils.parseUnits('2000', 18));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
-      .deposit(dai.address, parseUnits('2000', 18), depositor.address, 0);
+      .deposit(dai.address, utils.parseUnits('2000', 18), depositor.address, 0);
 
-    await usdc.connect(user.signer).mint(parseUnits('2000', 6));
+    await usdc.connect(user.signer).mint(utils.parseUnits('2000', 6));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(usdc.address, parseUnits('2000', 6), user.address, 0);
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseUnits('2000', 6), user.address, 0);
 
     await pool
       .connect(user.signer)
-      .borrow(dai.address, parseUnits('1000', 18), RateMode.Variable, 0, user.address);
+      .borrow(dai.address, utils.parseUnits('1000', 18), RateMode.Variable, 0, user.address);
 
     const daiPrice = await oracle.getAssetPrice(dai.address);
 
@@ -225,7 +225,7 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseUnits('200', 18), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseUnits('200', 18), RateMode.Variable, 0, user.address)
     ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
   });
 
@@ -238,19 +238,19 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(parseEther('2000'));
-    await dai.connect(user.signer).approve(pool.address, parseEther('1000'));
-    await pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0);
-    await dai.connect(user.signer).transfer(aDai.address, parseEther('1000'));
+    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
+    await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
-    await usdc.connect(user.signer).mint(parseEther('10000'));
-    await usdc.connect(user.signer).approve(pool.address, parseEther('10000'));
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('10000'), user.address, 0);
+    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('10000'), user.address, 0);
 
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseEther('500'), RateMode.Stable, 0, user.address)
+        .borrow(dai.address, utils.parseEther('500'), RateMode.Stable, 0, user.address)
     ).to.be.revertedWith(VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY);
   });
 
@@ -258,19 +258,19 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(parseEther('2000'));
-    await dai.connect(user.signer).approve(pool.address, parseEther('1000'));
-    await pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0);
-    await dai.connect(user.signer).transfer(aDai.address, parseEther('1000'));
+    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
+    await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
-    await usdc.connect(user.signer).mint(parseEther('10000'));
-    await usdc.connect(user.signer).approve(pool.address, parseEther('10000'));
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('10000'), user.address, 0);
+    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('10000'), user.address, 0);
 
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseEther('1500'), RateMode.Stable, 0, user.address)
+        .borrow(dai.address, utils.parseEther('1500'), RateMode.Stable, 0, user.address)
     ).to.be.revertedWith(VL_AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
   });
 
@@ -280,20 +280,20 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const depositor = users[0];
     const borrower = users[1];
 
-    await dai.connect(depositor.signer).mint(parseUnits('500', 18));
+    await dai.connect(depositor.signer).mint(utils.parseUnits('500', 18));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
-      .deposit(dai.address, parseUnits('500', 18), depositor.address, 0);
-    await usdc.connect(borrower.signer).mint(parseUnits('500', 6));
+      .deposit(dai.address, utils.parseUnits('500', 18), depositor.address, 0);
+    await usdc.connect(borrower.signer).mint(utils.parseUnits('500', 6));
     await usdc.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
-      .deposit(usdc.address, parseUnits('500', 6), borrower.address, 0);
+      .deposit(usdc.address, utils.parseUnits('500', 6), borrower.address, 0);
 
     await pool
       .connect(borrower.signer)
-      .borrow(dai.address, parseUnits('250', 18), RateMode.Variable, 0, borrower.address);
+      .borrow(dai.address, utils.parseUnits('250', 18), RateMode.Variable, 0, borrower.address);
 
     // Try to liquidate the borrower
     await expect(
@@ -319,7 +319,7 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isFrozen).to.be.eq(false);
 
     await expect(
-      pool.connect(user.signer).repay(dai.address, parseEther('1'), RateMode.Variable, user.address)
+      pool.connect(user.signer).repay(dai.address, utils.parseEther('1'), RateMode.Variable, user.address)
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
@@ -330,11 +330,11 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const user = users[0];
 
     // We need some debt.
-    await usdc.connect(user.signer).mint(parseEther('2000'));
+    await usdc.connect(user.signer).mint(utils.parseEther('2000'));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('2000'), user.address, 0);
-    await dai.connect(user.signer).mint(parseEther('2000'));
-    await dai.connect(user.signer).transfer(aDai.address, parseEther('2000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('2000'), user.address, 0);
+    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('2000'));
 
     // Turn off automining - pretty sure that coverage is getting messed up here.
     await DRE.network.provider.send('evm_setAutomine', [false]);
@@ -342,12 +342,12 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     // Borrow 500 dai
     await pool
       .connect(user.signer)
-      .borrow(dai.address, parseEther('500'), RateMode.Variable, 0, user.address);
+      .borrow(dai.address, utils.parseEther('500'), RateMode.Variable, 0, user.address);
 
     await expect(
       pool
         .connect(user.signer)
-        .repay(dai.address, parseEther('500'), RateMode.Variable, user.address)
+        .repay(dai.address, utils.parseEther('500'), RateMode.Variable, user.address)
     ).to.be.revertedWith(VL_SAME_BLOCK_BORROW_REPAY);
 
     // turn on automining
@@ -365,20 +365,20 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const user = users[0];
 
     // We need some debt
-    await usdc.connect(user.signer).mint(parseEther('2000'));
+    await usdc.connect(user.signer).mint(utils.parseEther('2000'));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('2000'), user.address, 0);
-    await dai.connect(user.signer).mint(parseEther('2000'));
-    await dai.connect(user.signer).transfer(aDai.address, parseEther('2000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('2000'), user.address, 0);
+    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('2000'));
 
     await pool
       .connect(user.signer)
-      .borrow(dai.address, parseEther('250'), RateMode.Stable, 0, user.address);
+      .borrow(dai.address, utils.parseEther('250'), RateMode.Stable, 0, user.address);
 
     await expect(
       pool
         .connect(user.signer)
-        .repay(dai.address, parseEther('250'), RateMode.Variable, user.address)
+        .repay(dai.address, utils.parseEther('250'), RateMode.Variable, user.address)
     ).to.be.revertedWith(VL_NO_DEBT_OF_SELECTED_TYPE);
   });
 
@@ -391,16 +391,16 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const user = users[0];
 
     // We need some debt
-    await dai.connect(user.signer).mint(parseEther('2000'));
+    await dai.connect(user.signer).mint(utils.parseEther('2000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(dai.address, parseEther('2000'), user.address, 0);
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('2000'), user.address, 0);
 
     await pool
       .connect(user.signer)
-      .borrow(dai.address, parseEther('250'), RateMode.Variable, 0, user.address);
+      .borrow(dai.address, utils.parseEther('250'), RateMode.Variable, 0, user.address);
 
     await expect(
-      pool.connect(user.signer).repay(dai.address, parseEther('250'), RateMode.Stable, user.address)
+      pool.connect(user.signer).repay(dai.address, utils.parseEther('250'), RateMode.Stable, user.address)
     ).to.be.revertedWith(VL_NO_DEBT_OF_SELECTED_TYPE);
   });
 
@@ -473,9 +473,9 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(parseEther('1000'));
-    await dai.connect(user.signer).approve(pool.address, parseEther('1000'));
-    await pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0);
+    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.stableBorrowRateEnabled).to.be.eq(true);
@@ -488,13 +488,13 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
 
     // We need some variable debt, and then flip it
 
-    await dai.connect(user.signer).mint(parseUnits('5000', 18));
+    await dai.connect(user.signer).mint(utils.parseUnits('5000', 18));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(dai.address, parseUnits('5000', 18), user.address, 0);
+    await pool.connect(user.signer).deposit(dai.address, utils.parseUnits('5000', 18), user.address, 0);
 
     await pool
       .connect(user.signer)
-      .borrow(dai.address, parseUnits('500', 18), RateMode.Variable, 0, user.address);
+      .borrow(dai.address, utils.parseUnits('500', 18), RateMode.Variable, 0, user.address);
 
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(dai.address, RateMode.Variable)
@@ -505,18 +505,18 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(parseEther('2000'));
-    await dai.connect(user.signer).approve(pool.address, parseEther('1000'));
-    await pool.connect(user.signer).deposit(dai.address, parseEther('1000'), user.address, 0);
-    await dai.connect(user.signer).transfer(aDai.address, parseEther('1000'));
+    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
+    await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
+    await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
-    await usdc.connect(user.signer).mint(parseEther('10000'));
-    await usdc.connect(user.signer).approve(pool.address, parseEther('10000'));
-    await pool.connect(user.signer).deposit(usdc.address, parseEther('10000'), user.address, 0);
+    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
+    await pool.connect(user.signer).deposit(usdc.address, utils.parseEther('10000'), user.address, 0);
 
     await pool
       .connect(user.signer)
-      .borrow(dai.address, parseEther('500'), RateMode.Variable, 0, user.address);
+      .borrow(dai.address, utils.parseEther('500'), RateMode.Variable, 0, user.address);
 
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(dai.address, RateMode.Variable)

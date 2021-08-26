@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
-import { parseEther, parseUnits } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 import { SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
 
 makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
@@ -30,14 +30,14 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   it('increaseAllowance()', async () => {
     const { users, aDai } = testEnv;
     expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(0);
-    await aDai.connect(users[1].signer).increaseAllowance(users[0].address, parseUnits('1', 18));
-    expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(parseUnits('1', 18));
+    await aDai.connect(users[1].signer).increaseAllowance(users[0].address, utils.parseUnits('1', 18));
+    expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(utils.parseUnits('1', 18));
   });
 
   it('decreaseAllowance()', async () => {
     const { users, aDai } = testEnv;
-    expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(parseUnits('1', 18));
-    await aDai.connect(users[1].signer).decreaseAllowance(users[0].address, parseUnits('1', 18));
+    expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(utils.parseUnits('1', 18));
+    await aDai.connect(users[1].signer).decreaseAllowance(users[0].address, utils.parseUnits('1', 18));
     expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(0);
   });
 
@@ -62,13 +62,13 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
 
     await expect(
-      aDai.connect(poolSigner).mint(users[0].address, 0, parseUnits('1', 27))
+      aDai.connect(poolSigner).mint(users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
   });
 
@@ -79,13 +79,13 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
 
     await expect(
-      aDai.connect(poolSigner).mint(ZERO_ADDRESS, parseUnits('100', 18), parseUnits('1', 27))
+      aDai.connect(poolSigner).mint(ZERO_ADDRESS, utils.parseUnits('100', 18), utils.parseUnits('1', 27))
     ).to.be.revertedWith('ERC20: mint to the zero address');
   });
 
@@ -96,13 +96,13 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
 
     await expect(
-      aDai.connect(poolSigner).burn(users[0].address, users[0].address, 0, parseUnits('1', 27))
+      aDai.connect(poolSigner).burn(users[0].address, users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(CT_INVALID_BURN_AMOUNT);
   });
 
@@ -113,7 +113,7 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
@@ -121,7 +121,7 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     await expect(
       aDai
         .connect(poolSigner)
-        .burn(ZERO_ADDRESS, users[0].address, parseUnits('100', 18), parseUnits('1', 27))
+        .burn(ZERO_ADDRESS, users[0].address, utils.parseUnits('100', 18), utils.parseUnits('1', 27))
     ).to.be.revertedWith('ERC20: burn from the zero address');
   });
 
@@ -132,12 +132,12 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
 
-    await aDai.connect(poolSigner).mintToTreasury(0, parseUnits('1', 27));
+    await aDai.connect(poolSigner).mintToTreasury(0, utils.parseUnits('1', 27));
   });
 
   it('Check getters', async () => {
@@ -154,20 +154,20 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
     expect(scaledUserBalanceAndSupplyBefore[0].toString()).to.be.eq('0');
     expect(scaledUserBalanceAndSupplyBefore[1].toString()).to.be.eq('0');
 
-    await dai.connect(users[0].signer).mint(parseUnits('1000', 18));
+    await dai.connect(users[0].signer).mint(utils.parseUnits('1000', 18));
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[0].signer)
-      .deposit(dai.address, parseUnits('1000', 18), users[0].address, 0);
+      .deposit(dai.address, utils.parseUnits('1000', 18), users[0].address, 0);
 
     const scaledUserBalanceAndSupplyAfter = await aDai.getScaledUserBalanceAndSupply(
       users[0].address
     );
     expect(scaledUserBalanceAndSupplyAfter[0].toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+      utils.parseUnits('1000', 18).toString()
     );
     expect(scaledUserBalanceAndSupplyAfter[1].toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+      utils.parseUnits('1000', 18).toString()
     );
   });
 });

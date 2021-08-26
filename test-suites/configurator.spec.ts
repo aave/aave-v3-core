@@ -3,7 +3,7 @@ import { APPROVAL_AMOUNT_POOL, RAY, MAX_BORROW_CAP } from '../helpers/constants'
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { strategyWETH } from '../market-config/reservesConfigs';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from 'ethers';
 import { expect } from 'chai';
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {

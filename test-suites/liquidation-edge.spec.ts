@@ -2,7 +2,7 @@ import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode, ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { parseUnits } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 
 makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
   const {
@@ -38,32 +38,32 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     const borrower = users[1];
 
     // Deposit 1000 dai
-    await dai.connect(depositor.signer).mint(parseUnits('1000000', 18));
+    await dai.connect(depositor.signer).mint(utils.parseUnits('1000000', 18));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
-      .deposit(dai.address, parseUnits('10000', 18), depositor.address, 0);
+      .deposit(dai.address, utils.parseUnits('10000', 18), depositor.address, 0);
 
     // Deposit eth, borrow dai
-    await weth.connect(borrower.signer).mint(parseUnits('1', 18));
+    await weth.connect(borrower.signer).mint(utils.parseUnits('1', 18));
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
-      .deposit(weth.address, parseUnits('1', 18), borrower.address, 0);
+      .deposit(weth.address, utils.parseUnits('1', 18), borrower.address, 0);
 
-    await oracle.setAssetPrice(dai.address, parseUnits('0.001', 18));
+    await oracle.setAssetPrice(dai.address, utils.parseUnits('0.001', 18));
 
     // Borrow 500 dai stable
     await pool
       .connect(borrower.signer)
-      .borrow(dai.address, parseUnits('500', 18), RateMode.Stable, 0, borrower.address);
+      .borrow(dai.address, utils.parseUnits('500', 18), RateMode.Stable, 0, borrower.address);
 
     // Borrow 200 dai variable
     await pool
       .connect(borrower.signer)
-      .borrow(dai.address, parseUnits('200', 18), RateMode.Variable, 0, borrower.address);
+      .borrow(dai.address, utils.parseUnits('200', 18), RateMode.Variable, 0, borrower.address);
 
-    await oracle.setAssetPrice(dai.address, parseUnits('0.002', 18));
+    await oracle.setAssetPrice(dai.address, utils.parseUnits('0.002', 18));
 
     await pool
       .connect(depositor.signer)

@@ -1,7 +1,7 @@
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
-import { parseEther } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
 import { expect } from 'chai';
@@ -27,8 +27,8 @@ makeSuite('Drop Reserve', (testEnv: TestEnv) => {
       configurator,
     } = testEnv;
 
-    const depositedAmount = parseEther('1000');
-    const borrowedAmount = parseEther('100');
+    const depositedAmount = utils.parseEther('1000');
+    const borrowedAmount = utils.parseEther('100');
     // setting reserve factor to 0 to ease tests, no aToken accrued in reserve
     await configurator.setReserveFactor(dai.address, 0);
 

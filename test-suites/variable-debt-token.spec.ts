@@ -3,7 +3,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getVariableDebtToken } from '../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { parseEther, parseUnits } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 import { SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
 import BigNumber from 'bignumber.js';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
@@ -57,19 +57,19 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     expect(scaledUserBalanceAndSupplyUser0Before[1].toString()).to.be.eq('0');
 
     // Need to create some debt to do this good
-    await dai.connect(users[0].signer).mint(parseUnits('1000', 18));
+    await dai.connect(users[0].signer).mint(utils.parseUnits('1000', 18));
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[0].signer)
-      .deposit(dai.address, parseUnits('1000', 18), users[0].address, 0);
-    await weth.connect(users[1].signer).mint(parseUnits('10', 18));
+      .deposit(dai.address, utils.parseUnits('1000', 18), users[0].address, 0);
+    await weth.connect(users[1].signer).mint(utils.parseUnits('10', 18));
     await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[1].signer)
-      .deposit(weth.address, parseUnits('10', 18), users[1].address, 0);
+      .deposit(weth.address, utils.parseUnits('10', 18), users[1].address, 0);
     await pool
       .connect(users[1].signer)
-      .borrow(dai.address, parseUnits('200', 18), RateMode.Variable, 0, users[1].address);
+      .borrow(dai.address, utils.parseUnits('200', 18), RateMode.Variable, 0, users[1].address);
 
     const scaledUserBalanceAndSupplyUser0After =
       await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
@@ -99,7 +99,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -113,7 +113,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     await expect(
       variableDebtContract
         .connect(poolSigner)
-        .mint(users[0].address, users[0].address, 0, parseUnits('1', 27))
+        .mint(users[0].address, users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
   });
 
@@ -124,7 +124,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -136,7 +136,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     const poolSigner = await DRE.ethers.getSigner(pool.address);
 
     await expect(
-      variableDebtContract.connect(poolSigner).burn(users[0].address, 0, parseUnits('1', 27))
+      variableDebtContract.connect(poolSigner).burn(users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(CT_INVALID_BURN_AMOUNT);
   });
 

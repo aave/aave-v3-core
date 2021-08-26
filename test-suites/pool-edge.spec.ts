@@ -4,7 +4,7 @@ import {
   DRE,
   impersonateAccountsHardhat,
 } from '../helpers/misc-utils';
-import { parseEther, _TypedDataEncoder } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { SelfdestructTransferFactory, SelfdestructTransfer } from '../types';
@@ -69,7 +69,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -86,7 +86,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -104,7 +104,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -119,7 +119,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -147,7 +147,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -185,7 +185,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const sdtFactory = new SelfdestructTransferFactory(deployer.signer);
     const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
     await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: parseEther('1') });
+    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 

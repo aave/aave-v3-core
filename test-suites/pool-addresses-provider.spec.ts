@@ -2,12 +2,10 @@ import { expect } from 'chai';
 import { createRandomAddress, evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
-import { ethers } from 'ethers';
+import { utils } from 'ethers';
 import { waitForTx } from '../helpers/misc-utils';
 import { deployMockPool, deployPool } from '../helpers/contracts-deployments';
 import { ZERO_ADDRESS } from '../helpers/constants';
-
-const { utils } = ethers;
 
 makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
   it('Test the accessibility of the PoolAddressesProvider', async () => {

@@ -12,8 +12,7 @@ import {
 } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { BigNumberish } from '@ethersproject/bignumber';
-import { parseUnits } from 'ethers/lib/utils';
+import { BigNumberish, utils } from 'ethers';
 
 makeSuite('Reserve with zero address incentives controller', (testEnv) => {
   let mockToken: MintableERC20;
@@ -152,14 +151,14 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq('0');
 
-    await mockToken.connect(user.signer).mint(parseUnits('10000', 18));
+    await mockToken.connect(user.signer).mint(utils.parseUnits('10000', 18));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .deposit(mockToken.address, parseUnits('1000', 18), user.address, 0);
+      .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0);
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+      utils.parseUnits('1000', 18).toString()
     );
   });
 
@@ -169,18 +168,20 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
     const receiver = users[1];
 
     expect((await aMockToken.balanceOf(sender.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+      utils.parseUnits('1000', 18).toString()
     );
     expect((await aMockToken.balanceOf(receiver.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
 
-    await aMockToken.connect(sender.signer).transfer(receiver.address, parseUnits('1000', 18));
+    await aMockToken
+      .connect(sender.signer)
+      .transfer(receiver.address, utils.parseUnits('1000', 18));
     expect((await aMockToken.balanceOf(sender.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await aMockToken.balanceOf(receiver.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+      utils.parseUnits('1000', 18).toString()
     );
   });
 
@@ -189,36 +190,38 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
     const user = users[2];
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
 
-    await dai.connect(user.signer).mint(parseUnits('10000', 18));
+    await dai.connect(user.signer).mint(utils.parseUnits('10000', 18));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(dai.address, parseUnits('10000', 18), user.address, 0);
     await pool
       .connect(user.signer)
-      .borrow(mockToken.address, parseUnits('100', 18), RateMode.Stable, 0, user.address);
+      .deposit(dai.address, utils.parseUnits('10000', 18), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .borrow(mockToken.address, utils.parseUnits('100', 18), RateMode.Stable, 0, user.address);
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
+      utils.parseUnits('100', 18).toString()
     );
     expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
+      utils.parseUnits('100', 18).toString()
     );
   });
 
@@ -227,34 +230,34 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
     const user = users[2];
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
+      utils.parseUnits('100', 18).toString()
     );
     expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
+      utils.parseUnits('100', 18).toString()
     );
 
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .repay(mockToken.address, parseUnits('100', 18), RateMode.Stable, user.address);
+      .repay(mockToken.address, utils.parseUnits('100', 18), RateMode.Stable, user.address);
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
   });
 
@@ -263,22 +266,22 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
     const user = users[1];
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+      utils.parseUnits('1000', 18).toString()
     );
     expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
 
     await aMockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .withdraw(mockToken.address, parseUnits('1000', 18), user.address);
+      .withdraw(mockToken.address, utils.parseUnits('1000', 18), user.address);
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+      utils.parseUnits('0', 18).toString()
     );
     expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+      utils.parseUnits('1000', 18).toString()
     );
   });
 });

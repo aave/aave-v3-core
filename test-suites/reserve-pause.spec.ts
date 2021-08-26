@@ -2,12 +2,11 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { APPROVAL_AMOUNT_POOL } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { parseEther, parseUnits } from 'ethers/lib/utils';
+import { utils } from 'ethers';
 import { BigNumber } from 'bignumber.js';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
 import { expect } from 'chai';
-
 
 makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
@@ -159,7 +158,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
 
     const caller = users[3];
 
-    const flashAmount = parseEther('0.8');
+    const flashAmount = utils.parseEther('0.8');
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
@@ -268,9 +267,9 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
   it('SwapBorrowRateMode', async () => {
     const { pool, weth, dai, usdc, users, configurator } = testEnv;
     const user = users[1];
-    const amountWETHToDeposit = parseEther('10');
-    const amountDAIToDeposit = parseEther('120');
-    const amountToBorrow = parseUnits('65', 6);
+    const amountWETHToDeposit = utils.parseEther('10');
+    const amountDAIToDeposit = utils.parseEther('120');
+    const amountToBorrow = utils.parseUnits('65', 6);
 
     await weth.connect(user.signer).mint(amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
@@ -312,7 +311,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     const { pool, weth, users, configurator } = testEnv;
     const user = users[1];
 
-    const amountWETHToDeposit = parseEther('1');
+    const amountWETHToDeposit = utils.parseEther('1');
     await weth.connect(user.signer).mint(amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');

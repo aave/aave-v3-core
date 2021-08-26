@@ -6,7 +6,7 @@ import {
   MintableERC20,
   WETH9Mocked,
 } from '../types';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber } from 'ethers';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { expect } from 'chai';
 

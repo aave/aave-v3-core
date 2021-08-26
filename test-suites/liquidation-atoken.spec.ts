@@ -1,5 +1,4 @@
 import BigNumber from 'bignumber.js';
-
 import { DRE } from '../helpers/misc-utils';
 import { APPROVAL_AMOUNT_POOL, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';

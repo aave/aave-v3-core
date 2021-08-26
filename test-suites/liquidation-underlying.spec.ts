@@ -6,7 +6,7 @@ import { makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 import { getUserData } from './helpers/utils/helpers';
-
+import { utils } from 'ethers';
 import { expect } from 'chai';
 
 makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testEnv) => {
@@ -26,7 +26,7 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
     await configurator.deactivateReserve(weth.address);
 
     await expect(
-      pool.liquidationCall(weth.address, dai.address, user.address, parseEther('1000'), false)
+      pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
     ).to.be.revertedWith('2');
 
     await configurator.activateReserve(weth.address);
@@ -34,7 +34,7 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
     await configurator.deactivateReserve(dai.address);
 
     await expect(
-      pool.liquidationCall(weth.address, dai.address, user.address, parseEther('1000'), false)
+      pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
     ).to.be.revertedWith('2');
 
     await configurator.activateReserve(dai.address);

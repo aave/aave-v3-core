@@ -2,9 +2,8 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 import { MAX_UINT_AMOUNT, MAX_SUPPLY_CAP } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { MintableERC20, WETH9Mocked } from '../types';
-import { parseEther } from '@ethersproject/units';
+import { BigNumber, utils } from 'ethers';
 import { expect } from 'chai';
-
 
 makeSuite('supply Cap', (testEnv: TestEnv) => {
   const { VL_SUPPLY_CAP_EXCEEDED, RC_INVALID_SUPPLY_CAP } = ProtocolErrors;
@@ -15,7 +14,7 @@ makeSuite('supply Cap', (testEnv: TestEnv) => {
   it('Reserves should initially have supply cap disabled (supplyCap = 0)', async () => {
     const { weth, pool, dai, usdc, helpersContract } = testEnv;
 
-    const mintedAmount = parseEther('1000000000');
+    const mintedAmount = utils.parseEther('1000000000');
     await dai.mint(mintedAmount);
     await weth.mint(mintedAmount);
     await usdc.mint(mintedAmount);

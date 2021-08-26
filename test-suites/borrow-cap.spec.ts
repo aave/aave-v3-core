@@ -2,8 +2,7 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 import { MAX_UINT_AMOUNT, MAX_BORROW_CAP } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { MintableERC20, WETH9Mocked } from '../types';
-import { parseEther } from '@ethersproject/units';
-import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumber, utils } from 'ethers';
 import { expect } from 'chai';
 
 makeSuite('Borrow Cap', (testEnv: TestEnv) => {
@@ -23,7 +22,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
       users: [user1],
     } = testEnv;
 
-    const mintedAmount = parseEther('1000000000');
+    const mintedAmount = utils.parseEther('1000000000');
     // minting for main user
     await dai.mint(mintedAmount);
     await weth.mint(mintedAmount);

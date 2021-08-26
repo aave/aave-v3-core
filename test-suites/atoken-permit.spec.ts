@@ -2,11 +2,10 @@ import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { BUIDLEREVM_CHAINID } from '../helpers/buidler-constants';
 import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contracts-helpers';
 import { expect } from 'chai';
-import { ethers } from 'ethers';
+import { ethers, utils } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { DRE } from '../helpers/misc-utils';
 import { waitForTx } from '../helpers/misc-utils';
-import { _TypedDataEncoder } from 'ethers/lib/utils';
 
 const { parseEther } = ethers.utils;
 const TEST_WALLET_PATH = '../test-wallets.js';
@@ -22,7 +21,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       chainId: DRE.network.config.chainId,
       verifyingContract: aDai.address,
     };
-    const domainSeparator = _TypedDataEncoder.hashDomain(domain);
+    const domainSeparator = utils._TypedDataEncoder.hashDomain(domain);
 
     expect(separator).to.be.equal(domainSeparator, 'Invalid domain separator');
   });

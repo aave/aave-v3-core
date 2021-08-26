@@ -6,12 +6,10 @@ import {
   getSignatureFromTypedData,
 } from '../helpers/contracts-helpers';
 import { expect } from 'chai';
-import { BigNumber, ethers } from 'ethers';
+import { ethers, BigNumber, utils } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { DRE, evmRevert, evmSnapshot, timeLatest } from '../helpers/misc-utils';
-import { _TypedDataEncoder } from 'ethers/lib/utils';
 
-const { parseEther } = ethers.utils;
 const TEST_WALLET_PATH = '../test-wallets.js';
 
 makeSuite('Permit Delegation', (testEnv: TestEnv) => {
@@ -36,8 +34,8 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
       chainId: DRE.network.config.chainId,
       verifyingContract: stableDebtDai.address,
     };
-    const variableDomainSeparator = _TypedDataEncoder.hashDomain(variableDomain);
-    const stableDomainSeparator = _TypedDataEncoder.hashDomain(stableDomain);
+    const variableDomainSeparator = utils._TypedDataEncoder.hashDomain(variableDomain);
+    const stableDomainSeparator = utils._TypedDataEncoder.hashDomain(stableDomain);
 
     expect(variableSeparator).to.be.equal(
       variableDomainSeparator,
