@@ -28,6 +28,7 @@ import {
   ERC20,
   ERC20Factory,
   MintableERC20,
+  MockFlashLoanReceiverFactory,
   MockIncentivesController,
   MockReserveInterestRateStrategy,
   MockReserveInterestRateStrategyFactory,
@@ -315,5 +316,35 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
         .connect(poolSigner)
         .mint(users[0].address, users[0].address, parseUnits('100', 18), rate.toFixed(0))
     ).to.be.revertedWith(SDT_STABLE_DEBT_OVERFLOW);
+  });
+
+  it('cumulateToLiquidityIndex with liquidityIndex > type(uint128).max', async () => {
+    const { pool, users, dai, aDai, addressesProvider } = testEnv;
+
+    const toBorrow = new BigNumber(2).pow(80);
+
+    await dai.connect(users[0].signer).mint(toBorrow.plus(1).toFixed(0));
+    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.connect(users[0].signer).deposit(dai.address, 1, users[0].address, 0);
+    await dai.connect(users[0].signer).transfer(aDai.address, toBorrow.toFixed(0));
+
+    const mockFlashLoan = await new MockFlashLoanReceiverFactory(await getFirstSigner()).deploy(
+      addressesProvider.address
+    );
+
+    await expect(
+      pool
+        .connect(users[0].signer)
+        .flashLoan(
+          mockFlashLoan.address,
+          [dai.address],
+          [toBorrow.toFixed(0)],
+          [RateMode.None],
+          users[0].address,
+          '0x00',
+          0
+        )
+    ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
   });
 });
