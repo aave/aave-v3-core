@@ -47,12 +47,14 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   it('A non-owner user tries to set a new borrow rate and reverts', async () => {
     const { users } = testEnv;
 
+    const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
+
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
     await expect(
       tokenHelper
         .connect(users[0].signer)
         .setOracleBorrowRates([mockToken.address], [BORROW_RATE], rateOracle.address)
-    ).revertedWith('Ownable: caller is not the owner');
+    ).revertedWith(INVALID_OWNER_REVERT_MSG);
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
   });
 
