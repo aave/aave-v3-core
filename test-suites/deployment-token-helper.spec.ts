@@ -2,14 +2,10 @@ import { oneRay, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { deployMintableERC20, deployRateOracle } from '../helpers/contracts-deployments';
-import {
-  MintableERC20,
-  RateOracle,
-  RateOracleFactory,
-  StableAndVariableTokensHelper,
-} from '../types';
+import { deployMintableERC20 } from '../helpers/contracts-deployments';
+import { MintableERC20, RateOracle, RateOracleFactory, StableAndVariableTokensHelper } from '../types';
 import { getFirstSigner, getStableAndVariableTokensHelper } from '../helpers/contracts-getters';
+import { ProtocolErrors } from '../helpers/types';
 
 makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   let snap: string;
@@ -30,7 +26,6 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   before(async () => {
     tokenHelper = await getStableAndVariableTokensHelper();
     rateOracle = await (await new RateOracleFactory(await getFirstSigner()).deploy()).deployed();
-    //rateOracle = await deployRateOracle();
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
 
     // Transfer ownership to tokenHelper
@@ -52,12 +47,14 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   it('A non-owner user tries to set a new borrow rate and reverts', async () => {
     const { users } = testEnv;
 
+    const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
+
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
     await expect(
       tokenHelper
         .connect(users[0].signer)
         .setOracleBorrowRates([mockToken.address], [BORROW_RATE], rateOracle.address)
-    ).revertedWith('Ownable: caller is not the owner');
+    ).revertedWith(INVALID_OWNER_REVERT_MSG);
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
   });
 

@@ -5,6 +5,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { DRE, evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20, deployMockAggregator } from '../helpers/contracts-deployments';
 import { MintableERC20, MockAggregator } from '../types';
+import { ProtocolErrors } from '../helpers/types';
 
 makeSuite('AaveOracle', (testEnv: TestEnv) => {
   let snap: string;
@@ -92,9 +93,11 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     const { users, aaveOracle } = testEnv;
     const user = users[0];
 
+    const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
+
     await expect(
       aaveOracle.connect(user.signer).setAssetSources([mockToken.address], [mockAggregator.address])
-    ).revertedWith('Ownable: caller is not the owner');
+    ).revertedWith(INVALID_OWNER_REVERT_MSG);
   });
 
   it('Get price of BASE_CURRENCY asset', async () => {

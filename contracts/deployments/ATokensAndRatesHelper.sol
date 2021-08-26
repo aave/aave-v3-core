@@ -44,25 +44,6 @@ contract ATokensAndRatesHelper is Ownable {
     poolConfigurator = _poolConfigurator;
   }
 
-  function initDeployment(InitDeploymentInput[] calldata inputParams) external onlyOwner {
-    for (uint256 i = 0; i < inputParams.length; i++) {
-      emit deployedContracts(
-        address(new AToken()),
-        address(
-          new DefaultReserveInterestRateStrategy(
-            PoolAddressesProvider(addressesProvider),
-            inputParams[i].rates[0],
-            inputParams[i].rates[1],
-            inputParams[i].rates[2],
-            inputParams[i].rates[3],
-            inputParams[i].rates[4],
-            inputParams[i].rates[5]
-          )
-        )
-      );
-    }
-  }
-
   function configureReserves(ConfigureReserveInput[] calldata inputParams) external onlyOwner {
     PoolConfigurator configurator = PoolConfigurator(poolConfigurator);
     for (uint256 i = 0; i < inputParams.length; i++) {

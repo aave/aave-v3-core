@@ -3,7 +3,7 @@ pragma solidity 0.8.6;
 import {ReserveConfiguration} from '../../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
-contract ReserveConfigurationMock {
+contract MockReserveConfiguration {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   DataTypes.ReserveConfigurationMap public configuration;
@@ -26,6 +26,16 @@ contract ReserveConfigurationMock {
 
   function getLiquidationBonus() external view returns (uint256) {
     return configuration.getLiquidationBonus();
+  }
+
+  function setLiquidationThreshold(uint256 threshold) external {
+    DataTypes.ReserveConfigurationMap memory config = configuration;
+    config.setLiquidationThreshold(threshold);
+    configuration = config;
+  }
+
+  function getLiquidationThreshold() external view returns (uint256) {
+    return configuration.getLiquidationThreshold();
   }
 
   function setDecimals(uint256 decimals) external {
