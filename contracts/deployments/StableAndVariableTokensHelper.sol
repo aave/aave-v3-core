@@ -17,14 +17,6 @@ contract StableAndVariableTokensHelper is Ownable {
     addressesProvider = _addressesProvider;
   }
 
-  function initDeployment(address[] calldata tokens, string[] calldata symbols) external onlyOwner {
-    require(tokens.length == symbols.length, 'Arrays not same length');
-    require(pool != address(0), 'Pool can not be zero address');
-    for (uint256 i = 0; i < tokens.length; i++) {
-      emit deployedContracts(address(new StableDebtToken()), address(new VariableDebtToken()));
-    }
-  }
-
   function setOracleBorrowRates(
     address[] calldata assets,
     uint256[] calldata rates,
