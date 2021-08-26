@@ -1,5 +1,5 @@
 .env
-#Buidler files
+#Hardhat files
 cache
 artifacts
 node_modules
@@ -15,4 +15,5 @@ coverage
 .coverage_artifacts
 .coverage_cache
 .coverage_contracts
+coverage.json
 

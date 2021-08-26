@@ -1,25 +1,22 @@
 import BigNumber from 'bignumber.js';
-import BN = require('bn.js');
 import low from 'lowdb';
 import FileSync from 'lowdb/adapters/FileSync';
 import { WAD } from './constants';
 import { Wallet, ContractTransaction } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { BuidlerRuntimeEnvironment } from '@nomiclabs/buidler/types';
 import { tEthereumAddress } from './types';
 import { isAddress } from 'ethers/lib/utils';
 import { isZeroAddress } from 'ethereumjs-util';
 
 export const toWad = (value: string | number) => new BigNumber(value).times(WAD).toFixed();
 
-export const bnToBigNumber = (amount: BN): BigNumber => new BigNumber(<any>amount);
 export const stringToBigNumber = (amount: string): BigNumber => new BigNumber(amount);
 
 export const getDb = () => low(new FileSync('./deployed-contracts.json'));
 
-export let DRE: HardhatRuntimeEnvironment | BuidlerRuntimeEnvironment;
+export let DRE: HardhatRuntimeEnvironment;
 
-export const setDRE = (_DRE: HardhatRuntimeEnvironment | BuidlerRuntimeEnvironment) => {
+export const setDRE = (_DRE: HardhatRuntimeEnvironment) => {
   DRE = _DRE;
 };
 

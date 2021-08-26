@@ -1,50 +1,21 @@
-import {
-  eContractid,
-  eEthereumNetwork,
-  eNetwork,
-  iMultiPoolsAssets,
-  IReserveParams,
-  tEthereumAddress,
-} from './types';
+import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from './types';
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
-import { chunk, DRE, getDb, waitForTx } from './misc-utils';
+import { chunk, getDb, waitForTx } from './misc-utils';
 import {
-  getAaveProtocolDataProvider,
-  getAToken,
   getATokensAndRatesHelper,
-  getFirstSigner,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
   getStableAndVariableTokensHelper,
 } from './contracts-getters';
 import { rawInsertContractAddressInDb } from './contracts-helpers';
-import { BigNumber, BigNumberish, Signer } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 import {
   deployDefaultReserveInterestRateStrategy,
-  deployDelegationAwareAToken,
   deployDelegationAwareATokenImpl,
-  deployGenericAToken,
   deployGenericATokenImpl,
   deployGenericStableDebtToken,
   deployGenericVariableDebtToken,
-  deployStableDebtToken,
-  deployVariableDebtToken,
 } from './contracts-deployments';
-import { ZERO_ADDRESS } from './constants';
-import { isZeroAddress } from 'ethereumjs-util';
-import { DefaultReserveInterestRateStrategy, DelegationAwareAToken } from '../types';
-import { config } from 'process';
-
-export const chooseATokenDeployment = (id: eContractid) => {
-  switch (id) {
-    case eContractid.AToken:
-      return deployGenericAToken;
-    case eContractid.DelegationAwareAToken:
-      return deployDelegationAwareAToken;
-    default:
-      throw Error(`Missing aToken deployment script for: ${id}`);
-  }
-};
 
 export const initReservesByHelper = async (
   reservesParams: iMultiPoolsAssets<IReserveParams>,
@@ -55,8 +26,7 @@ export const initReservesByHelper = async (
   symbolPrefix: string,
   admin: tEthereumAddress,
   treasuryAddress: tEthereumAddress,
-  incentivesController: tEthereumAddress,
-  verify: boolean
+  incentivesController: tEthereumAddress
 ): Promise<BigNumber> => {
   let gasUsage = BigNumber.from('0');
   const stableAndVariableDeployer = await getStableAndVariableTokensHelper();
@@ -123,7 +93,7 @@ export const initReservesByHelper = async (
   stableDebtTokenImplementationAddress = await (await deployGenericStableDebtToken()).address;
   variableDebtTokenImplementationAddress = await (await deployGenericVariableDebtToken()).address;
 
-  const aTokenImplementation = await deployGenericATokenImpl(verify);
+  const aTokenImplementation = await deployGenericATokenImpl();
   aTokenImplementationAddress = aTokenImplementation.address;
   rawInsertContractAddressInDb(`aTokenImpl`, aTokenImplementationAddress);
 
@@ -132,7 +102,7 @@ export const initReservesByHelper = async (
   ) as [string, IReserveParams][];
 
   if (delegatedAwareReserves.length > 0) {
-    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl(verify);
+    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl();
     delegationAwareATokenImplementationAddress = delegationAwareATokenImplementation.address;
     rawInsertContractAddressInDb(
       `delegationAwareATokenImpl`,
@@ -171,7 +141,7 @@ export const initReservesByHelper = async (
         stableRateSlope2,
       ];
       strategyAddresses[strategy.name] = (
-        await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name], verify)
+        await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name])
       ).address;
       // This causes the last strategy to be printed twice, once under "DefaultReserveInterestRateStrategy"
       // and once under the actual `strategyASSET` key.
@@ -362,17 +332,4 @@ export const configureReservesByHelper = async (
     // Set deployer back as admin
     await waitForTx(await addressProvider.setPoolAdmin(admin));
   }
-};
-
-const getAddressById = async (
-  id: string,
-  network: eNetwork
-): Promise<tEthereumAddress | undefined> =>
-  (await getDb().get(`${id}.${network}`).value())?.address || undefined;
-
-// Function deprecated
-const isErc20SymbolCorrect = async (token: tEthereumAddress, symbol: string) => {
-  const erc20 = await getAToken(token); // using aToken for ERC20 interface
-  const erc20Symbol = await erc20.symbol();
-  return symbol === erc20Symbol;
 };
