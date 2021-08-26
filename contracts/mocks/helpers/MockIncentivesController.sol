@@ -3,12 +3,10 @@ pragma solidity 0.8.6;
 
 import {IAaveIncentivesController} from './../../interfaces/IAaveIncentivesController.sol';
 
-import 'hardhat/console.sol';
-
 contract MockIncentivesController is IAaveIncentivesController {
-  function getAssetData(address asset)
+  function getAssetData(address)
     external
-    view
+    pure
     override
     returns (
       uint256,
@@ -19,62 +17,54 @@ contract MockIncentivesController is IAaveIncentivesController {
     return (0, 0, 0);
   }
 
-  function setClaimer(address user, address claimer) external override {}
+  function setClaimer(address, address) external override {}
 
-  function getClaimer(address user) external view override returns (address) {
+  function getClaimer(address) external pure override returns (address) {
     return address(1);
   }
 
-  function configureAssets(address[] calldata assets, uint256[] calldata emissionsPerSecond)
-    external
-    override
-  {}
+  function configureAssets(address[] calldata, uint256[] calldata) external override {}
 
   function handleAction(
-    address asset,
-    uint256 userBalance,
-    uint256 totalSupply
+    address,
+    uint256,
+    uint256
   ) external override {}
 
-  function getRewardsBalance(address[] calldata assets, address user)
-    external
-    view
-    override
-    returns (uint256)
-  {
+  function getRewardsBalance(address[] calldata, address) external pure override returns (uint256) {
     return 0;
   }
 
   function claimRewards(
-    address[] calldata assets,
-    uint256 amount,
-    address user
-  ) external view override returns (uint256) {
+    address[] calldata,
+    uint256,
+    address
+  ) external pure override returns (uint256) {
     return 0;
   }
 
   function claimRewardsOnBehalf(
-    address[] calldata assets,
-    uint256 amount,
-    address user,
-    address to
-  ) external view override returns (uint256) {
+    address[] calldata,
+    uint256,
+    address,
+    address
+  ) external pure override returns (uint256) {
     return 0;
   }
 
-  function getUserUnclaimedRewards(address user) external view override returns (uint256) {
+  function getUserUnclaimedRewards(address) external pure override returns (uint256) {
     return 0;
   }
 
-  function getUserAssetData(address user, address asset) external view override returns (uint256) {
+  function getUserAssetData(address, address) external pure override returns (uint256) {
     return 0;
   }
 
-  function REWARD_TOKEN() external view override returns (address) {
+  function REWARD_TOKEN() external pure override returns (address) {
     return address(0);
   }
 
-  function PRECISION() external view override returns (uint8) {
+  function PRECISION() external pure override returns (uint8) {
     return 0;
   }
 }
