@@ -143,17 +143,6 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
   });
 
-  it('GenericLogic calculateUserAccountData, currentReserveAddress ==address(0)', async () => {
-    /**
-     * Unsure how we can get to a state where this is testable.
-     * We need to add a reserve with address(0), but we cannot add a reserve with address(0),
-     * because we are checking for that when we init a reserve.
-     * We can make a drop of the reserve, to get address(0), but this can only be done when
-     * there is no deposit and borrows. And without those, the `isUsingAsCollateralOrBorrowing` will make us ship the case
-     */
-    expect(false, 'IMPOSSIBLE').to.be.eq(true);
-  });
-
   it('_addReserveToList() already added', async () => {
     /**
      * To get into this case, we need to init a reserve with `aTokenAddress = address(0)` twice.
@@ -196,6 +185,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
   });
 
   it('_addReserveToList() reservesCount > _maxNumberOfReserves', async () => {
+    // TODO: For the love of god, let is make something more nice here.
     // Really a pain, but practically, we just want to loop until we hit something high?
     const { pool, dai, deployer, configurator } = testEnv;
 

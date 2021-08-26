@@ -76,16 +76,6 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_RESERVE_FROZEN);
   });
 
-  it('validateWithdraw() isActive == false', async () => {
-    /**
-     * Unclear how we should ever enter this stage. Only possible to get to `isActive == false` if
-     * `availableLiquidity == 0 && reserveData.currentLiquidityRate == 0`, but this require that there are no funds.
-     * And if there is no funds, we are stopped earlier in the validation.
-     */
-
-    expect(false, 'Impossible to reach').to.be.eq(true);
-  });
-
   it('validateBorrow() vars.isActive == false', async () => {
     /**
      * Unclear how we should enter this stage with normal usage.
