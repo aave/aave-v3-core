@@ -17,6 +17,7 @@ import {
   VariableDebtTokenFactory,
   WETH9MockedFactory,
   AaveOracleFactory,
+  MockPoolFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -224,6 +225,12 @@ export const getMockStableDebtToken = async (address?: tEthereumAddress) =>
       (
         await getDb().get(`${eContractid.MockStableDebtToken}.${DRE.network.name}`).value()
       ).address,
+    await getFirstSigner()
+  );
+
+export const getMockPool = async (address?: tEthereumAddress) =>
+  await MockPoolFactory.connect(
+    address || (await getDb().get(`${eContractid.MockPool}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

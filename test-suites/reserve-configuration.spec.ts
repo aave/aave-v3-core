@@ -2,12 +2,9 @@ import { oneEther } from '../helpers/constants';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import {
-  deployMintableERC20,
-  deployMockAggregator,
-  deployMockReserveConfiguration,
-} from '../helpers/contracts-deployments';
-import { MintableERC20, MockAggregator, ReserveConfigurationMock } from '../types';
+import { deployMockReserveConfiguration } from '../helpers/contracts-deployments';
+import { MockReserveConfiguration } from '../types';
+import { ProtocolErrors } from '../helpers/types';
 
 describe('ReserveConfiguration', async () => {
   let snap: string;
@@ -19,17 +16,7 @@ describe('ReserveConfiguration', async () => {
     await evmRevert(snap);
   });
 
-  let mockToken: MintableERC20;
-  let mockAggregator: MockAggregator;
-  let assetPrice: string;
-
-  before(async () => {
-    mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-    assetPrice = oneEther.multipliedBy('0.00367714136416').toFixed();
-    mockAggregator = await deployMockAggregator(assetPrice);
-  });
-
-  let configMock: ReserveConfigurationMock;
+  let configMock: MockReserveConfiguration;
 
   const ZERO = BigNumber.from(0);
   const LTV = BigNumber.from(8000);
@@ -38,6 +25,10 @@ describe('ReserveConfiguration', async () => {
   const DECIMALS = BigNumber.from(18);
   const BORROW_CAP = BigNumber.from(100);
   const SUPPLY_CAP = BigNumber.from(200);
+
+  const MAX_VALID_LTV = BigNumber.from(65535);
+  const MAX_VALID_LIQUIDATION_THRESHOLD = BigNumber.from(65535);
+  const MAX_VALID_DECIMALS = BigNumber.from(255);
 
   before(async () => {
     configMock = await deployMockReserveConfiguration();
@@ -149,5 +140,81 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.setSupplyCap(ZERO));
     expect(await configMock.getCaps()).to.be.eql([ZERO, ZERO]);
     expect(await configMock.getSupplyCap()).to.be.eq(ZERO);
+  });
+
+  it('setLtv() with ltv = MAX_VALID_LTV', async () => {
+    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(await configMock.getLtv()).to.be.eq(ZERO);
+    expect(await configMock.setLtv(MAX_VALID_LTV));
+    // LTV is the 1st param
+    expect(await configMock.getParams()).to.be.eql([MAX_VALID_LTV, ZERO, ZERO, ZERO, ZERO]);
+    expect(await configMock.getLtv()).to.be.eq(MAX_VALID_LTV);
+    expect(await configMock.setLtv(0));
+    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(await configMock.getLtv()).to.be.eq(ZERO);
+  });
+
+  it('setLtv() with ltv > MAX_VALID_LTV and reverts', async () => {
+    expect(await configMock.getLtv()).to.be.eq(ZERO);
+
+    const { RC_INVALID_LTV } = ProtocolErrors;
+
+    // setLTV to MAX_VALID_LTV + 1
+    await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).revertedWith(RC_INVALID_LTV);
+    expect(await configMock.getLtv()).to.be.eq(ZERO);
+  });
+
+  it('setLiquidationThreshold() with threshold = MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
+    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
+    expect(await configMock.setLiquidationThreshold(MAX_VALID_LIQUIDATION_THRESHOLD));
+    // LIQ_THRESHOLD is the 2nd param
+    expect(await configMock.getParams()).to.be.eql([
+      ZERO,
+      MAX_VALID_LIQUIDATION_THRESHOLD,
+      ZERO,
+      ZERO,
+      ZERO,
+    ]);
+    expect(await configMock.getLiquidationThreshold()).to.be.eq(MAX_VALID_LIQUIDATION_THRESHOLD);
+    expect(await configMock.setLiquidationThreshold(0));
+    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
+  });
+
+  it('setLiquidationThreshold() with threshold > MAX_VALID_LIQUIDATION_THRESHOLD and reverts', async () => {
+    expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
+
+    const { RC_INVALID_LIQ_THRESHOLD } = ProtocolErrors;
+
+    // setLiquidationThreshold to MAX_VALID_LIQUIDATION_THRESHOLD + 1
+    await expect(
+      configMock.setLiquidationThreshold(MAX_VALID_LIQUIDATION_THRESHOLD.add(1))
+    ).revertedWith(RC_INVALID_LIQ_THRESHOLD);
+    expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
+  });
+
+  it('setDecimals() with decimals = MAX_VALID_DECIMALS', async () => {
+    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(await configMock.getDecimals()).to.be.eq(ZERO);
+    expect(await configMock.setDecimals(MAX_VALID_DECIMALS));
+    // Decimals is the 4th param
+    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, MAX_VALID_DECIMALS, ZERO]);
+    expect(await configMock.getDecimals()).to.be.eq(MAX_VALID_DECIMALS);
+    expect(await configMock.setDecimals(0));
+    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(await configMock.getDecimals()).to.be.eq(ZERO);
+  });
+
+  it('setDecimals() with decimals > MAX_VALID_DECIMALS and reverts', async () => {
+    expect(await configMock.getDecimals()).to.be.eq(ZERO);
+
+    const { RC_INVALID_DECIMALS } = ProtocolErrors;
+
+    // setDecimals to MAX_VALID_DECIMALS + 1
+    await expect(configMock.setDecimals(MAX_VALID_DECIMALS.add(1))).revertedWith(
+      RC_INVALID_DECIMALS
+    );
+    expect(await configMock.getDecimals()).to.be.eq(ZERO);
   });
 });

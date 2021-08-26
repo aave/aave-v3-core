@@ -37,7 +37,8 @@ import {
   ConfiguratorLogicFactory,
   IncentivesControllerMockFactory,
   MockIncentivesControllerFactory,
-  ReserveConfigurationMockFactory,
+  MockReserveConfigurationFactory,
+  MockPoolFactory,
 } from '../types';
 import {
   withSave,
@@ -385,6 +386,9 @@ export const deployMockIncentivesController = async () =>
 
 export const deployMockReserveConfiguration = async () =>
   withSave(
-    await new ReserveConfigurationMockFactory(await getFirstSigner()).deploy(),
-    eContractid.ReserveConfigurationMock
+    await new MockReserveConfigurationFactory(await getFirstSigner()).deploy(),
+    eContractid.MockReserveConfiguration
   );
+
+export const deployMockPool = async () =>
+  withSave(await new MockPoolFactory(await getFirstSigner()).deploy(), eContractid.MockPool);
