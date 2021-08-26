@@ -2,9 +2,10 @@ import { oneRay, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { deployMintableERC20, deployRateOracle } from '../helpers/contracts-deployments';
-import { MintableERC20, RateOracle, StableAndVariableTokensHelper } from '../types';
-import { getStableAndVariableTokensHelper } from '../helpers/contracts-getters';
+import { deployMintableERC20 } from '../helpers/contracts-deployments';
+import { MintableERC20, RateOracle, RateOracleFactory, StableAndVariableTokensHelper } from '../types';
+import { getFirstSigner, getStableAndVariableTokensHelper } from '../helpers/contracts-getters';
+import { ProtocolErrors } from '../helpers/types';
 
 makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   let snap: string;
@@ -24,7 +25,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
 
   before(async () => {
     tokenHelper = await getStableAndVariableTokensHelper();
-    rateOracle = await deployRateOracle();
+    rateOracle = await (await new RateOracleFactory(await getFirstSigner()).deploy()).deployed();
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
 
     // Transfer ownership to tokenHelper
