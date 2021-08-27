@@ -24,8 +24,6 @@ import {
   MockIncentivesController,
   MockReserveInterestRateStrategy,
   MockReserveInterestRateStrategyFactory,
-  SelfdestructTransfer,
-  SelfdestructTransferFactory,
   StableDebtToken,
   StableDebtTokenFactory,
   VariableDebtToken,
@@ -34,7 +32,7 @@ import {
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import { BigNumberish, utils } from 'ethers';
-import { parse } from 'path';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
 makeSuite('Interest rate and index overflow', (testEnv) => {
   const {
@@ -291,11 +289,7 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
   it('mint stableDebt with newStableRate > type(uint128).max', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
 
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [ pool.address], utils.parseEther('1'))
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);

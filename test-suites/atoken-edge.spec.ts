@@ -4,7 +4,7 @@ import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { utils } from 'ethers';
-import { SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
 makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   const { VL_NO_ACTIVE_RESERVE, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
@@ -57,12 +57,9 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
 
   it('mint() amountScaled == 0', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
-    // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    // We can impersonate
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
@@ -74,12 +71,9 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
 
   it('mint() account == address(0)', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
-    // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
 
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    // We can impersonate
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
@@ -92,11 +86,7 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   it('burn() amountScaled == 0', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
     // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
@@ -109,11 +99,7 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   it('burn() account == address(0)', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
     // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
@@ -128,11 +114,7 @@ makeSuite('Atoken-logic: edge cases', (testEnv: TestEnv) => {
   it('mintToTreasury() amount == 0', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
     // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
 
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);

@@ -4,9 +4,9 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getVariableDebtToken } from '../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { utils } from 'ethers';
-import { SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
 import BigNumber from 'bignumber.js';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
 makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
@@ -95,11 +95,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
   it('mint() amountScaled == 0', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
     // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -120,11 +116,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
   it('burn() amountScaled == 0', async () => {
     const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
     // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-
-    await sdt.destroyAndTransfer(pool.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)

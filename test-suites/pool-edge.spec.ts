@@ -7,7 +7,8 @@ import {
 import { utils } from 'ethers';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
-import { SelfdestructTransferFactory, SelfdestructTransfer } from '../types';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { deployMintableERC20 } from '../helpers/contracts-deployments';
 
 makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
   const {
@@ -66,10 +67,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
   it('initReserve() asset is EOA', async () => {
     const { pool, deployer, dai, users, configurator } = testEnv;
 
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -83,10 +81,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
   it('setReserveInterestRateStrategyAddress()', async () => {
     const { pool, deployer, dai, configurator } = testEnv;
 
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -101,10 +96,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
 
   it('setPause()', async () => {
     const { pool, deployer, dai, configurator } = testEnv;
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -116,10 +108,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
   it('ReserveLogic init, aTokenAddress != address(0)', async () => {
     const { pool, poolAdmin, dai, helpersContract, deployer, configurator } = testEnv;
 
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -144,10 +133,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
      */
     const { pool, poolAdmin, dai, helpersContract, deployer, configurator } = testEnv;
 
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -182,10 +168,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     // Really a pain, but practically, we just want to loop until we hit something high?
     const { pool, dai, deployer, configurator } = testEnv;
 
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-    await sdt.destroyAndTransfer(configurator.address, { value: utils.parseEther('1') });
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
@@ -193,7 +176,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     const poolListBefore = await pool.getReservesList();
 
     for (let i = poolListBefore.length; i < 127; i++) {
-      const freshContract = await ((await sdtFactory.deploy()) as SelfdestructTransfer).deployed();
+      const freshContract = await deployMintableERC20(['MOCK', 'MOCK', '18']);
       await pool.connect(configSigner).initReserve(
         freshContract.address, // just need a non-used reserve token
         ZERO_ADDRESS,
@@ -203,7 +186,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
       );
     }
 
-    const freshContract = await ((await sdtFactory.deploy()) as SelfdestructTransfer).deployed();
+    const freshContract = await deployMintableERC20(['MOCK', 'MOCK', '18']);
     await expect(
       pool.connect(configSigner).initReserve(
         freshContract.address, // just need a non-used reserve token
