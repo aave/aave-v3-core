@@ -9,9 +9,9 @@ import {
   getVariableDebtToken,
 } from '../../../helpers/contracts-getters';
 import { tEthereumAddress } from '../../../helpers/types';
-import BigNumber from 'bignumber.js';
 import { getDb, DRE } from '../../../helpers/misc-utils';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
+import { BigNumber } from 'ethers';
 
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
@@ -34,41 +34,36 @@ export const getReserveData = async (
 
   const rate = (await rateOracle.getMarketBorrowRate(reserve)).toString();
   const symbol = await token.symbol();
-  const decimals = new BigNumber(await token.decimals());
+  const decimals = BigNumber.from(await token.decimals());
 
-  const totalLiquidity = new BigNumber(reserveData.availableLiquidity.toString())
-    .plus(reserveData.totalStableDebt.toString())
-    .plus(reserveData.totalVariableDebt.toString());
+  const totalLiquidity = reserveData.availableLiquidity
+    .add(reserveData.totalStableDebt)
+    .add(reserveData.totalVariableDebt);
 
-  const utilizationRate = new BigNumber(
-    totalLiquidity.eq(0)
-      ? 0
-      : new BigNumber(reserveData.totalStableDebt.toString())
-          .plus(reserveData.totalVariableDebt.toString())
-          .rayDiv(totalLiquidity)
-  );
-
+  const utilizationRate = totalLiquidity.eq(0)
+    ? BigNumber.from(0)
+    : reserveData.totalStableDebt.add(reserveData.totalVariableDebt).rayDiv(totalLiquidity);
   return {
     totalLiquidity,
     utilizationRate,
-    availableLiquidity: new BigNumber(reserveData.availableLiquidity.toString()),
-    totalStableDebt: new BigNumber(reserveData.totalStableDebt.toString()),
-    totalVariableDebt: new BigNumber(reserveData.totalVariableDebt.toString()),
-    liquidityRate: new BigNumber(reserveData.liquidityRate.toString()),
-    variableBorrowRate: new BigNumber(reserveData.variableBorrowRate.toString()),
-    stableBorrowRate: new BigNumber(reserveData.stableBorrowRate.toString()),
-    averageStableBorrowRate: new BigNumber(reserveData.averageStableBorrowRate.toString()),
-    liquidityIndex: new BigNumber(reserveData.liquidityIndex.toString()),
-    variableBorrowIndex: new BigNumber(reserveData.variableBorrowIndex.toString()),
-    lastUpdateTimestamp: new BigNumber(reserveData.lastUpdateTimestamp),
-    totalStableDebtLastUpdated: new BigNumber(totalStableDebtLastUpdated),
-    principalStableDebt: new BigNumber(principalStableDebt.toString()),
-    scaledVariableDebt: new BigNumber(scaledVariableDebt.toString()),
+    availableLiquidity: reserveData.availableLiquidity,
+    totalStableDebt: reserveData.totalStableDebt,
+    totalVariableDebt: reserveData.totalVariableDebt,
+    liquidityRate: reserveData.liquidityRate,
+    variableBorrowRate: reserveData.variableBorrowRate,
+    stableBorrowRate: reserveData.stableBorrowRate,
+    averageStableBorrowRate: reserveData.averageStableBorrowRate,
+    liquidityIndex: reserveData.liquidityIndex,
+    variableBorrowIndex: reserveData.variableBorrowIndex,
+    lastUpdateTimestamp: BigNumber.from(reserveData.lastUpdateTimestamp),
+    totalStableDebtLastUpdated: BigNumber.from(totalStableDebtLastUpdated),
+    principalStableDebt: principalStableDebt,
+    scaledVariableDebt: scaledVariableDebt,
     address: reserve,
     aTokenAddress: tokenAddresses.aTokenAddress,
     symbol,
     decimals,
-    marketStableRate: new BigNumber(rate),
+    marketStableRate: BigNumber.from(rate),
   };
 };
 
@@ -85,19 +80,19 @@ export const getUserData = async (
   ]);
 
   const token = await getMintableERC20(reserve);
-  const walletBalance = new BigNumber((await token.balanceOf(sender || user)).toString());
+  const walletBalance = await token.balanceOf(sender || user);
 
   return {
-    scaledATokenBalance: new BigNumber(scaledATokenBalance),
-    currentATokenBalance: new BigNumber(userData.currentATokenBalance.toString()),
-    currentStableDebt: new BigNumber(userData.currentStableDebt.toString()),
-    currentVariableDebt: new BigNumber(userData.currentVariableDebt.toString()),
-    principalStableDebt: new BigNumber(userData.principalStableDebt.toString()),
-    scaledVariableDebt: new BigNumber(userData.scaledVariableDebt.toString()),
-    stableBorrowRate: new BigNumber(userData.stableBorrowRate.toString()),
-    liquidityRate: new BigNumber(userData.liquidityRate.toString()),
+    scaledATokenBalance: BigNumber.from(scaledATokenBalance),
+    currentATokenBalance: userData.currentATokenBalance,
+    currentStableDebt: userData.currentStableDebt,
+    currentVariableDebt: userData.currentVariableDebt,
+    principalStableDebt: userData.principalStableDebt,
+    scaledVariableDebt: userData.scaledVariableDebt,
+    stableBorrowRate: userData.stableBorrowRate,
+    liquidityRate: userData.liquidityRate,
     usageAsCollateralEnabled: userData.usageAsCollateralEnabled,
-    stableRateLastUpdated: new BigNumber(userData.stableRateLastUpdated.toString()),
+    stableRateLastUpdated: BigNumber.from(userData.stableRateLastUpdated),
     walletBalance,
   };
 };

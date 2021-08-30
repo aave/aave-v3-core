@@ -28,6 +28,7 @@ declare module '@ethersproject/bignumber' {
     percentDiv: (a: BigNumberish) => BigNumber;
     rayToWad: () => BigNumber;
     wadToRay: () => BigNumber;
+    negated: () => BigNumber;
   }
 }
 
@@ -73,3 +74,7 @@ BigNumber.prototype.rayToWad = function (): BigNumber {
 BigNumber.prototype.wadToRay = function (): BigNumber {
   return this.mul(WAD_RAY_RATIO);
 };
+
+BigNumber.prototype.negated = function (): BigNumber {
+  return this.mul(-1);
+}
