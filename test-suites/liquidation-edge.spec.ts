@@ -1,27 +1,10 @@
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
-import { RateMode, ProtocolErrors } from '../helpers/types';
+import { RateMode } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { utils } from 'ethers';
 
 makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
-  const {
-    VL_NO_ACTIVE_RESERVE,
-    VL_RESERVE_FROZEN,
-    VL_INVALID_AMOUNT,
-    VL_BORROWING_NOT_ENABLED,
-    VL_STABLE_BORROWING_NOT_ENABLED,
-    VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY,
-    VL_AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE,
-    VL_NO_DEBT_OF_SELECTED_TYPE,
-    VL_SAME_BLOCK_BORROW_REPAY,
-    VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD,
-    VL_INVALID_INTEREST_RATE_MODE_SELECTED,
-    VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0,
-    VL_INCONSISTENT_FLASHLOAN_PARAMS,
-    VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
-  } = ProtocolErrors;
-
   let snap: string;
 
   beforeEach(async () => {
@@ -31,7 +14,7 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  it('executeLiquidationCall() 0 < vars.userVariableDebt < vars.actualDebtToLiquidate', async () => {
+  it('`executeLiquidationCall` where user has variable and stable debt, but variable debt is insufficient to cover the full liquidation amount', async () => {
     const { pool, users, dai, weth, oracle } = testEnv;
 
     const depositor = users[0];
