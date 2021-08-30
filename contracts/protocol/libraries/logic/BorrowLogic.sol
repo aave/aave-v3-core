@@ -142,6 +142,8 @@ library BorrowLogic {
       Helpers.getUserCurrentDebt(vars.onBehalfOf, reserve);
     DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(vars.rateMode);
 
+    reserve.updateState(reserveCache);
+
     ValidationLogic.validateRepay(
       vars.lastBorrower,
       vars.lastBorrowTimestamp,
@@ -159,8 +161,6 @@ library BorrowLogic {
     if (vars.amount < paybackAmount) {
       paybackAmount = vars.amount;
     }
-
-    reserve.updateState(reserveCache);
 
     if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
       IStableDebtToken(reserveCache.stableDebtTokenAddress).burn(vars.onBehalfOf, paybackAmount);
@@ -364,6 +364,8 @@ library BorrowLogic {
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
+    reserve.updateState(reserveCache);
+
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(msg.sender, reserve);
 
     DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(rateMode);
@@ -376,8 +378,6 @@ library BorrowLogic {
       variableDebt,
       interestRateMode
     );
-
-    reserve.updateState(reserveCache);
 
     if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
       IStableDebtToken(reserveCache.stableDebtTokenAddress).burn(msg.sender, stableDebt);
