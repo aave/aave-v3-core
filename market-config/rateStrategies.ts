@@ -1,14 +1,14 @@
-import BigNumber from 'bignumber.js';
+import { parseUnits } from 'ethers/lib/utils';
 import { oneRay } from '../helpers/constants';
 import { IInterestRateStrategyParams } from '../helpers/types';
 
 // BUSD SUSD
 export const rateStrategyStableOne: IInterestRateStrategyParams = {
   name: 'rateStrategyStableOne',
-  optimalUtilizationRate: new BigNumber(0.8).multipliedBy(oneRay).toFixed(),
-  baseVariableBorrowRate: new BigNumber(0).multipliedBy(oneRay).toFixed(),
-  variableRateSlope1: new BigNumber(0.04).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(1).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.8', 27).toString(),
+  baseVariableBorrowRate: parseUnits('0', 27).toString(),
+  variableRateSlope1: parseUnits('0.04', 27).toString(),
+  variableRateSlope2: parseUnits('1', 27).toString(),
   stableRateSlope1: '0',
   stableRateSlope2: '0',
 };
@@ -16,40 +16,40 @@ export const rateStrategyStableOne: IInterestRateStrategyParams = {
 // DAI TUSD
 export const rateStrategyStableTwo: IInterestRateStrategyParams = {
   name: 'rateStrategyStableTwo',
-  optimalUtilizationRate: new BigNumber(0.8).multipliedBy(oneRay).toFixed(),
-  baseVariableBorrowRate: new BigNumber(0).multipliedBy(oneRay).toFixed(),
-  variableRateSlope1: new BigNumber(0.04).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(0.75).multipliedBy(oneRay).toFixed(),
-  stableRateSlope1: new BigNumber(0.02).multipliedBy(oneRay).toFixed(),
-  stableRateSlope2: new BigNumber(0.75).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.8', 27).toString(),
+  baseVariableBorrowRate: parseUnits('0', 27).toString(),
+  variableRateSlope1: parseUnits('0.04', 27).toString(),
+  variableRateSlope2: parseUnits('0.75', 27).toString(),
+  stableRateSlope1: parseUnits('0.02', 27).toString(),
+  stableRateSlope2: parseUnits('0.75', 27).toString(),
 };
 
 // USDC USDT
 export const rateStrategyStableThree: IInterestRateStrategyParams = {
   name: 'rateStrategyStableThree',
-  optimalUtilizationRate: new BigNumber(0.9).multipliedBy(oneRay).toFixed(),
-  baseVariableBorrowRate: new BigNumber(0).multipliedBy(oneRay).toFixed(),
-  variableRateSlope1: new BigNumber(0.04).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(0.6).multipliedBy(oneRay).toFixed(),
-  stableRateSlope1: new BigNumber(0.02).multipliedBy(oneRay).toFixed(),
-  stableRateSlope2: new BigNumber(0.6).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.9', 27).toString(),
+  baseVariableBorrowRate: parseUnits('0', 27).toString(),
+  variableRateSlope1: parseUnits('0.04', 27).toString(),
+  variableRateSlope2: parseUnits('0.6', 27).toString(),
+  stableRateSlope1: parseUnits('0.02', 27).toString(),
+  stableRateSlope2: parseUnits('0.6', 27).toString(),
 };
 
 // WETH
 export const rateStrategyWETH: IInterestRateStrategyParams = {
   name: 'rateStrategyWETH',
-  optimalUtilizationRate: new BigNumber(0.65).multipliedBy(oneRay).toFixed(),
-  baseVariableBorrowRate: new BigNumber(0).multipliedBy(oneRay).toFixed(),
-  variableRateSlope1: new BigNumber(0.08).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(1).multipliedBy(oneRay).toFixed(),
-  stableRateSlope1: new BigNumber(0.1).multipliedBy(oneRay).toFixed(),
-  stableRateSlope2: new BigNumber(1).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.65', 27).toString(),
+  baseVariableBorrowRate: parseUnits('0', 27).toString(),
+  variableRateSlope1: parseUnits('0.08', 27).toString(),
+  variableRateSlope2: parseUnits('1', 27).toString(),
+  stableRateSlope1: parseUnits('0.1', 27).toString(),
+  stableRateSlope2: parseUnits('1', 27).toString(),
 };
 
 // AAVE
 export const rateStrategyAAVE: IInterestRateStrategyParams = {
   name: 'rateStrategyAAVE',
-  optimalUtilizationRate: new BigNumber(0.45).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.45', 27).toString(),
   baseVariableBorrowRate: '0',
   variableRateSlope1: '0',
   variableRateSlope2: '0',
@@ -60,42 +60,42 @@ export const rateStrategyAAVE: IInterestRateStrategyParams = {
 // BAT ENJ LINK MANA MKR REN YFI ZRX
 export const rateStrategyVolatileOne: IInterestRateStrategyParams = {
   name: 'rateStrategyVolatileOne',
-  optimalUtilizationRate: new BigNumber(0.45).multipliedBy(oneRay).toFixed(),
-  baseVariableBorrowRate: new BigNumber(0).multipliedBy(oneRay).toFixed(),
-  variableRateSlope1: new BigNumber(0.07).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(3).multipliedBy(oneRay).toFixed(),
-  stableRateSlope1: new BigNumber(0.1).multipliedBy(oneRay).toFixed(),
-  stableRateSlope2: new BigNumber(3).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.45', 27).toString(),
+  baseVariableBorrowRate: parseUnits('0', 27).toString(),
+  variableRateSlope1: parseUnits('0.07', 27).toString(),
+  variableRateSlope2: parseUnits('3', 27).toString(),
+  stableRateSlope1: parseUnits('0.1', 27).toString(),
+  stableRateSlope2: parseUnits('0.3', 27).toString(),
 };
 
 // KNC WBTC
 export const rateStrategyVolatileTwo: IInterestRateStrategyParams = {
   name: 'rateStrategyVolatileTwo',
-  optimalUtilizationRate: new BigNumber(0.65).multipliedBy(oneRay).toFixed(),
-  baseVariableBorrowRate: new BigNumber(0).multipliedBy(oneRay).toFixed(),
-  variableRateSlope1: new BigNumber(0.08).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(3).multipliedBy(oneRay).toFixed(),
-  stableRateSlope1: new BigNumber(0.1).multipliedBy(oneRay).toFixed(),
-  stableRateSlope2: new BigNumber(3).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.65', 27).toString(),
+  baseVariableBorrowRate: parseUnits('0', 27).toString(),
+  variableRateSlope1: parseUnits('0.08', 27).toString(),
+  variableRateSlope2: parseUnits('3', 27).toString(),
+  stableRateSlope1: parseUnits('0.1', 27).toString(),
+  stableRateSlope2: parseUnits('0.3', 27).toString(),
 };
 
 // SNX
 export const rateStrategyVolatileThree: IInterestRateStrategyParams = {
   name: 'rateStrategyVolatileThree',
-  optimalUtilizationRate: new BigNumber(0.65).multipliedBy(oneRay).toFixed(),
-  baseVariableBorrowRate: new BigNumber(0).multipliedBy(oneRay).toFixed(),
-  variableRateSlope1: new BigNumber(0.08).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(3).multipliedBy(oneRay).toFixed(),
-  stableRateSlope1: new BigNumber(0.1).multipliedBy(oneRay).toFixed(),
-  stableRateSlope2: new BigNumber(3).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.65', 27).toString(),
+  baseVariableBorrowRate: parseUnits('0', 27).toString(),
+  variableRateSlope1: parseUnits('0.08', 27).toString(),
+  variableRateSlope2: parseUnits('3', 27).toString(),
+  stableRateSlope1: parseUnits('0.1', 27).toString(),
+  stableRateSlope2: parseUnits('3', 27).toString(),
 };
 
 export const rateStrategyVolatileFour: IInterestRateStrategyParams = {
   name: 'rateStrategyVolatileFour',
-  optimalUtilizationRate: new BigNumber(0.45).multipliedBy(oneRay).toFixed(),
+  optimalUtilizationRate: parseUnits('0.45', 27).toString(),
   baseVariableBorrowRate: '0',
-  variableRateSlope1: new BigNumber(0.07).multipliedBy(oneRay).toFixed(),
-  variableRateSlope2: new BigNumber(3).multipliedBy(oneRay).toFixed(),
+  variableRateSlope1: parseUnits('0.07', 27).toString(),
+  variableRateSlope2: parseUnits('3', 27).toString(),
   stableRateSlope1: '0',
   stableRateSlope2: '0',
 };
