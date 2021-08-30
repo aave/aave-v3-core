@@ -1,4 +1,5 @@
 import { BigNumber } from '@ethersproject/bignumber';
+import { BigNumberish } from 'ethers';
 
 import {
   RAY,
@@ -9,6 +10,7 @@ import {
   HALF_PERCENTAGE,
   PERCENTAGE_FACTOR,
 } from '../../../helpers/constants';
+import { convertToCurrencyDecimals } from '../../../helpers/contracts-helpers';
 
 declare module '@ethersproject/bignumber' {
   interface BigNumber {
@@ -22,8 +24,8 @@ declare module '@ethersproject/bignumber' {
     wadDiv: (a: BigNumber) => BigNumber;
     rayMul: (a: BigNumber) => BigNumber;
     rayDiv: (a: BigNumber) => BigNumber;
-    percentMul: (a: BigNumber) => BigNumber;
-    percentDiv: (a: BigNumber) => BigNumber;
+    percentMul: (a: BigNumberish) => BigNumber;
+    percentDiv: (a: BigNumberish) => BigNumber;
     rayToWad: () => BigNumber;
     wadToRay: () => BigNumber;
   }
@@ -54,13 +56,13 @@ BigNumber.prototype.rayDiv = function (a: BigNumber): BigNumber {
   return halfA.add(this.mul(this.ray())).div(a);
 };
 
-BigNumber.prototype.percentMul = function (b: BigNumber): BigNumber {
-  return this.halfPercentage().add(this.mul(b)).div(this.percentageFactor());
+BigNumber.prototype.percentMul = function (b: BigNumberish): BigNumber {
+  return this.halfPercentage().add(this.mul(b)).div(PERCENTAGE_FACTOR);
 };
 
-BigNumber.prototype.percentDiv = function (a: BigNumber): BigNumber {
-  const halfA = a.div(2);
-  return halfA.add(this.mul(this.percentageFactor())).div(a);
+BigNumber.prototype.percentDiv = function (a: BigNumberish): BigNumber {
+  const halfA = BigNumber.from(a).div(2);
+  return halfA.add(this.mul(PERCENTAGE_FACTOR)).div(a);
 };
 
 BigNumber.prototype.rayToWad = function (): BigNumber {
