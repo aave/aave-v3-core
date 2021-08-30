@@ -288,7 +288,7 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
     ).to.be.revertedWith(RL_VARIABLE_BORROW_INDEX_OVERFLOW);
   });
 
-  it('cumulateToLiquidityIndex with liquidityIndex > type(uint128).max', async () => {
+  it('cumulateToLiquidityIndex with liquidityIndex > type(uint128).max (reverts)', async () => {
     const { pool, users, dai, aDai, addressesProvider } = testEnv;
 
     const toBorrow = BigNumber.from(2).pow(80);
