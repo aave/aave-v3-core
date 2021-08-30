@@ -91,8 +91,6 @@ makeSuite('LTV validation tests', (testEnv: TestEnv) => {
 
     const aDaiBalanceAfter = await aDai.balanceOf(user1.address);
 
-    expect(aDaiBalanceAfter.toString()).to.be.bignumber.equal(
-      aDaiBalanceBefore.sub(withdrawnAmount)
-    );
+    expect(aDaiBalanceAfter).to.be.eq(aDaiBalanceBefore.sub(withdrawnAmount));
   });
 });
