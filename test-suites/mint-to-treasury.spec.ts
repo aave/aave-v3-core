@@ -2,9 +2,8 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { RateMode } from '../helpers/types';
 import { APPROVAL_AMOUNT_POOL, ONE_YEAR } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { BigNumber } from 'bignumber.js';
 import { advanceTimeAndBlock, waitForTx } from '../helpers/misc-utils';
-import './helpers/utils/math';
+import './helpers/utils/wadraymath';
 import { expect } from 'chai';
 
 makeSuite('Mint to treasury', (testEnv: TestEnv) => {
@@ -44,24 +43,15 @@ makeSuite('Mint to treasury', (testEnv: TestEnv) => {
 
     const { liquidityIndex, variableBorrowIndex } = await pool.getReserveData(dai.address);
 
-    const amountBorrowedBN = new BigNumber(amountDAItoBorrow.toString());
-    const liquidityIndexBN = new BigNumber(liquidityIndex.toString());
-    const variableBorrowIndexBN = new BigNumber(variableBorrowIndex.toString());
-
-    const expectedAccruedToTreasury = amountBorrowedBN
-      .rayMul(variableBorrowIndexBN)
-      .minus(amountBorrowedBN)
-      .times(reserveFactor.toString())
-      .div(10000)
-      .rayDiv(liquidityIndexBN)
-      .toFixed(0);
+    const expectedAccruedToTreasury = amountDAItoBorrow
+      .rayMul(variableBorrowIndex)
+      .sub(amountDAItoBorrow)
+      .percentMul(reserveFactor)
+      .rayDiv(liquidityIndex);
 
     const { accruedToTreasury } = await pool.getReserveData(dai.address);
 
-    expect(accruedToTreasury.toString()).to.be.bignumber.almostEqual(
-      expectedAccruedToTreasury,
-      'Invalid amount accrued to the treasury'
-    );
+    expect(accruedToTreasury).to.be.closeTo(expectedAccruedToTreasury, 2);
   });
 
   it('Mints the accrued to the treasury', async () => {
@@ -71,16 +61,15 @@ makeSuite('Mint to treasury', (testEnv: TestEnv) => {
     const { accruedToTreasury } = await pool.getReserveData(dai.address);
 
     await waitForTx(await pool.connect(users[0].signer).mintToTreasury([dai.address]));
-    const normalizedIncome = await pool.getReserveNormalizedIncome(dai.address);
 
+    const normalizedIncome = await pool.getReserveNormalizedIncome(dai.address);
     const treasuryBalance = await aDai.balanceOf(treasuryAddress);
 
-    const expectedTreasuryBalance = new BigNumber(accruedToTreasury.toString()).rayMul(
-      new BigNumber(normalizedIncome.toString())
-    );
+    const expectedTreasuryBalance = accruedToTreasury.rayMul(normalizedIncome);
 
-    expect(treasuryBalance.toString()).to.be.bignumber.almostEqual(
+    expect(treasuryBalance).to.be.closeTo(
       expectedTreasuryBalance,
+      2,
       'Invalid treasury balance after minting'
     );
   });
