@@ -8,12 +8,12 @@ import { parseUnits } from 'ethers/lib/utils';
 export const PERCENTAGE_FACTOR = '10000';
 export const HALF_PERCENTAGE = '5000';
 export const WAD = Math.pow(10, 18).toString();
-export const HALF_WAD = BigNumber.from(WAD).mul(0.5).toString();
+export const HALF_WAD = BigNumber.from(WAD).div(2).toString();
 export const RAY = BigNumber.from(10).pow(27).toString();
 export const HALF_RAY = BigNumber.from(RAY).div(2).toString();
-export const WAD_RAY_RATIO = Math.pow(10, 9).toString();
-export const oneEther = BigNumber.from(Math.pow(10, 18));
-export const oneRay = BigNumber.from(Math.pow(10, 27));
+export const WAD_RAY_RATIO = parseUnits('1', 9).toString(); // Math.pow(10, 9).toString();
+export const oneEther = parseUnits('1', 18); // BigNumber.from(Math.pow(10, 18));
+export const oneRay = parseUnits('1', 27); // BigNumber.from(Math.pow(10, 27));
 export const MAX_UINT_AMOUNT =
   '115792089237316195423570985008687907853269984665640564039457584007913129639935';
 export const MAX_BORROW_CAP = '68719476735';

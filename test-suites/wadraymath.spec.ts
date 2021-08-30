@@ -1,13 +1,13 @@
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { MAX_UINT_AMOUNT, RAY, WAD, HALF_RAY, HALF_WAD } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import BigNumber from 'bignumber.js';
 import { WadRayMathWrapper, WadRayMathWrapperFactory } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { expect } from 'chai';
-import './helpers/utils/math';
+import './helpers/utils/wadraymath';
+import { BigNumber } from 'ethers';
 
-makeSuite('LTV validation tests', (testEnv: TestEnv) => {
+makeSuite('WadRayMath tests', (testEnv: TestEnv) => {
   const { MATH_MULTIPLICATION_OVERFLOW, MATH_ADDITION_OVERFLOW } = ProtocolErrors;
 
   let wrapper: WadRayMathWrapper;
@@ -25,87 +25,69 @@ makeSuite('LTV validation tests', (testEnv: TestEnv) => {
   });
 
   it('wadMul()', async () => {
-    const a = new BigNumber('134534543232342353231234');
-    const b = new BigNumber('13265462389132757665657');
+    const a = BigNumber.from('134534543232342353231234');
+    const b = BigNumber.from('13265462389132757665657');
 
-    expect((await wrapper.wadMul(a.toFixed(0), b.toFixed(0))).toString()).to.be.eq(
-      a.wadMul(b).toFixed(0)
-    );
-    expect((await wrapper.wadMul(0, b.toFixed(0))).toString()).to.be.eq('0');
-    expect((await wrapper.wadMul(a.toFixed(0), 0)).toString()).to.be.eq('0');
+    expect(await wrapper.wadMul(a, b)).to.be.eq(a.wadMul(b));
+    expect(await wrapper.wadMul(0, b)).to.be.eq('0');
+    expect(await wrapper.wadMul(a, 0)).to.be.eq('0');
 
-    const tooLargeA = new BigNumber(MAX_UINT_AMOUNT).minus(HALF_WAD).dividedToIntegerBy(b).plus(1);
-    await expect(wrapper.wadMul(tooLargeA.toFixed(0), b.toFixed(0))).to.be.revertedWith(
-      MATH_MULTIPLICATION_OVERFLOW
-    );
+    const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(HALF_WAD).div(b).add(1);
+    await expect(wrapper.wadMul(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
   });
 
   it('wadDiv()', async () => {
-    const a = new BigNumber('134534543232342353231234');
-    const b = new BigNumber('13265462389132757665657');
+    const a = BigNumber.from('134534543232342353231234');
+    const b = BigNumber.from('13265462389132757665657');
 
-    expect((await wrapper.wadDiv(a.toFixed(0), b.toFixed(0))).toString()).to.be.eq(
-      a.wadDiv(b).toFixed(0)
-    );
+    expect(await wrapper.wadDiv(a, b)).to.be.eq(a.wadDiv(b));
 
-    const halfB = b.dividedToIntegerBy(2);
-    const tooLargeA = new BigNumber(MAX_UINT_AMOUNT).minus(halfB).dividedToIntegerBy(WAD).plus(1);
+    const halfB = b.div(2);
+    const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(halfB).div(WAD).add(1);
 
-    await expect(wrapper.wadDiv(tooLargeA.toFixed(0), b.toFixed(0))).to.be.revertedWith(
-      MATH_MULTIPLICATION_OVERFLOW
-    );
+    await expect(wrapper.wadDiv(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
   });
 
   it('rayMul()', async () => {
-    const a = new BigNumber('134534543232342353231234');
-    const b = new BigNumber('13265462389132757665657');
+    const a = BigNumber.from('134534543232342353231234');
+    const b = BigNumber.from('13265462389132757665657');
 
-    expect((await wrapper.rayMul(a.toFixed(0), b.toFixed(0))).toString()).to.be.eq(
-      a.rayMul(b).toFixed(0)
-    );
-    expect((await wrapper.rayMul(0, b.toFixed(0))).toString()).to.be.eq('0');
-    expect((await wrapper.rayMul(a.toFixed(0), 0)).toString()).to.be.eq('0');
+    expect(await wrapper.rayMul(a, b)).to.be.eq(a.rayMul(b));
+    expect(await wrapper.rayMul(0, b)).to.be.eq('0');
+    expect(await wrapper.rayMul(a, 0)).to.be.eq('0');
 
-    const tooLargeA = new BigNumber(MAX_UINT_AMOUNT).minus(HALF_RAY).dividedToIntegerBy(b).plus(1);
-    await expect(wrapper.rayMul(tooLargeA.toFixed(0), b.toFixed(0))).to.be.revertedWith(
-      MATH_MULTIPLICATION_OVERFLOW
-    );
+    const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(HALF_RAY).div(b).add(1);
+    await expect(wrapper.rayMul(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
   });
 
   it('rayDiv()', async () => {
-    const a = new BigNumber('134534543232342353231234');
-    const b = new BigNumber('13265462389132757665657');
+    const a = BigNumber.from('134534543232342353231234');
+    const b = BigNumber.from('13265462389132757665657');
 
-    expect((await wrapper.rayDiv(a.toFixed(0), b.toFixed(0))).toString()).to.be.eq(
-      a.rayDiv(b).toFixed(0)
-    );
+    expect(await wrapper.rayDiv(a, b)).to.be.eq(a.rayDiv(b));
 
-    const halfB = b.dividedToIntegerBy(2);
-    const tooLargeA = new BigNumber(MAX_UINT_AMOUNT).minus(halfB).dividedToIntegerBy(RAY).plus(1);
+    const halfB = b.div(2);
+    const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(halfB).div(RAY).add(1);
 
-    await expect(wrapper.rayDiv(tooLargeA.toFixed(0), b.toFixed(0))).to.be.revertedWith(
-      MATH_MULTIPLICATION_OVERFLOW
-    );
+    await expect(wrapper.rayDiv(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
   });
 
   it('rayToWad()', async () => {
-    const a = new BigNumber('10').pow(27);
-    expect(await wrapper.rayToWad(a.toFixed(0))).to.be.eq(a.rayToWad().toFixed());
+    const a = BigNumber.from('10').pow(27);
+    expect(await wrapper.rayToWad(a)).to.be.eq(a.rayToWad());
 
-    const halfRatio = new BigNumber(10).pow(9).dividedToIntegerBy(2);
-    const tooLarge = new BigNumber(MAX_UINT_AMOUNT).minus(halfRatio).plus(1);
+    const halfRatio = BigNumber.from(10).pow(9).div(2);
+    const tooLarge = BigNumber.from(MAX_UINT_AMOUNT).sub(halfRatio).add(1);
 
-    await expect(wrapper.rayToWad(tooLarge.toFixed(0))).to.be.revertedWith(MATH_ADDITION_OVERFLOW);
+    await expect(wrapper.rayToWad(tooLarge)).to.be.revertedWith(MATH_ADDITION_OVERFLOW);
   });
 
   it('wadToRay()', async () => {
-    const a = new BigNumber('10').pow(18);
-    expect(await wrapper.wadToRay(a.toFixed(0))).to.be.eq(a.wadToRay().toFixed());
+    const a = BigNumber.from('10').pow(18);
+    expect(await wrapper.wadToRay(a)).to.be.eq(a.wadToRay());
 
-    const ratio = new BigNumber(10).pow(9);
-    const tooLarge = new BigNumber(MAX_UINT_AMOUNT).dividedToIntegerBy(ratio).plus(1);
-    await expect(wrapper.wadToRay(tooLarge.toFixed(0))).to.be.revertedWith(
-      MATH_MULTIPLICATION_OVERFLOW
-    );
+    const ratio = BigNumber.from(10).pow(9);
+    const tooLarge = BigNumber.from(MAX_UINT_AMOUNT).div(ratio).add(1);
+    await expect(wrapper.wadToRay(tooLarge)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
   });
 });

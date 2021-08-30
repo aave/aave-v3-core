@@ -1,7 +1,6 @@
 import { configuration as actionsConfiguration } from './helpers/actions';
 import { configuration as calculationsConfiguration } from './helpers/utils/calculations';
 import fs from 'fs';
-import BigNumber from 'bignumber.js';
 import { makeSuite } from './helpers/make-suite';
 import { executeStory } from './helpers/scenario-engine';
 import AaveConfig from '../market-config';
@@ -17,16 +16,9 @@ fs.readdirSync(scenarioFolder).forEach((file) => {
 
   makeSuite(scenario.title, async (testEnv) => {
     before('Initializing configuration', async () => {
-      // Sets BigNumber for this suite, instead of globally
-      BigNumber.config({ DECIMAL_PLACES: 0, ROUNDING_MODE: BigNumber.ROUND_DOWN });
-
       actionsConfiguration.skipIntegrityCheck = false; //set this to true to execute solidity-coverage
 
       calculationsConfiguration.reservesParams = AaveConfig.ReservesConfig;
-    });
-    after('Reset', () => {
-      // Reset BigNumber
-      BigNumber.config({ DECIMAL_PLACES: 20, ROUNDING_MODE: BigNumber.ROUND_HALF_UP });
     });
 
     for (const story of scenario.stories) {

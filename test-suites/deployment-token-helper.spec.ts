@@ -3,9 +3,15 @@ import { expect } from 'chai';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { MintableERC20, RateOracle, RateOracleFactory, StableAndVariableTokensHelper } from '../types';
+import {
+  MintableERC20,
+  RateOracle,
+  RateOracleFactory,
+  StableAndVariableTokensHelper,
+} from '../types';
 import { getFirstSigner, getStableAndVariableTokensHelper } from '../helpers/contracts-getters';
 import { ProtocolErrors } from '../helpers/types';
+import { parseUnits } from 'ethers/lib/utils';
 
 makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   let snap: string;
@@ -17,7 +23,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  const BORROW_RATE = oneRay.multipliedBy(0.03).toFixed();
+  const BORROW_RATE = parseUnits('0.03', 27).toString();
 
   let tokenHelper: StableAndVariableTokensHelper;
   let rateOracle: RateOracle;

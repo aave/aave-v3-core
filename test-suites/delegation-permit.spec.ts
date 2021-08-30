@@ -233,7 +233,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     } = testEnv;
 
     const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
-    const expiration = (await timeLatest()).minus(500).toString();
+    const expiration = (await timeLatest()).sub(500).toString();
     const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildPermitDelegationParams(
@@ -375,7 +375,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     } = testEnv;
 
     const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
-    const expiration = (await timeLatest()).minus(500).toString();
+    const expiration = (await timeLatest()).sub(500).toString();
     const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildPermitDelegationParams(

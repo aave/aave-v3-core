@@ -4,7 +4,6 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getVariableDebtToken } from '../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { utils } from 'ethers';
-import BigNumber from 'bignumber.js';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
@@ -53,8 +52,8 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
 
     const scaledUserBalanceAndSupplyUser0Before =
       await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
-    expect(scaledUserBalanceAndSupplyUser0Before[0].toString()).to.be.eq('0');
-    expect(scaledUserBalanceAndSupplyUser0Before[1].toString()).to.be.eq('0');
+    expect(scaledUserBalanceAndSupplyUser0Before[0]).to.be.eq(0);
+    expect(scaledUserBalanceAndSupplyUser0Before[1]).to.be.eq(0);
 
     // Need to create some debt to do this good
     await dai.connect(users[0].signer).mint(utils.parseUnits('1000', 18));
@@ -73,22 +72,16 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
 
     const scaledUserBalanceAndSupplyUser0After =
       await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
-    expect(scaledUserBalanceAndSupplyUser0After[0].toString()).to.be.eq('0');
-    expect(
-      new BigNumber(scaledUserBalanceAndSupplyUser0After[1].toString()).gt(new BigNumber(0))
-    ).to.be.eq(true);
+    expect(scaledUserBalanceAndSupplyUser0After[0]).to.be.eq(0);
+    expect(scaledUserBalanceAndSupplyUser0After[1]).to.be.gt(0);
 
     const scaledUserBalanceAndSupplyUser1After =
       await variableDebtContract.getScaledUserBalanceAndSupply(users[1].address);
-    expect(
-      new BigNumber(scaledUserBalanceAndSupplyUser1After[1].toString()).gt(new BigNumber(0))
-    ).to.be.eq(true);
-    expect(
-      new BigNumber(scaledUserBalanceAndSupplyUser1After[1].toString()).gt(new BigNumber(0))
-    ).to.be.eq(true);
+    expect(scaledUserBalanceAndSupplyUser1After[1]).to.be.gt(0);
+    expect(scaledUserBalanceAndSupplyUser1After[1]).to.be.gt(0);
 
-    expect(scaledUserBalanceAndSupplyUser0After[1].toString()).to.be.eq(
-      scaledUserBalanceAndSupplyUser1After[1].toString()
+    expect(scaledUserBalanceAndSupplyUser0After[1]).to.be.eq(
+      scaledUserBalanceAndSupplyUser1After[1]
     );
   });
 

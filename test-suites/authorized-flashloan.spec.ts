@@ -288,7 +288,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(totalLiquidity).to.be.equal(expectedLiquidity, 'Invalid total liquidity');
     expect(currentLiquidityRate).to.be.equal('0', 'Invalid liquidity rate');
     expect(currentLiquidityIndex).to.be.equal(
-      BigNumber.from(1).mul(BigNumber.from(oneRay.toFixed())),
+      BigNumber.from(1).mul(oneRay),
       'Invalid liquidity index'
     );
     expect(currentUserBalance.toString()).to.be.equal(expectedLiquidity, 'Invalid user balance');

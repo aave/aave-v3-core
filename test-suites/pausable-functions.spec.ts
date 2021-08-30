@@ -3,7 +3,6 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { APPROVAL_AMOUNT_POOL, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { utils } from 'ethers';
-import { BigNumber } from 'bignumber.js';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import {
   getFirstSigner,
@@ -235,10 +234,7 @@ makeSuite('Pausable Pool', (testEnv: TestEnv) => {
 
     const amountUSDCToBorrow = await convertToCurrencyDecimals(
       usdc.address,
-      new BigNumber(userGlobalData.availableBorrowsBase.toString())
-        .div(usdcPrice.toString())
-        .multipliedBy(0.9502)
-        .toFixed(0)
+      userGlobalData.availableBorrowsBase.div(usdcPrice).percentMul(9502).toString()
     );
 
     await pool
@@ -246,10 +242,7 @@ makeSuite('Pausable Pool', (testEnv: TestEnv) => {
       .borrow(usdc.address, amountUSDCToBorrow, RateMode.Stable, '0', borrower.address);
 
     // Drops HF below 1
-    await oracle.setAssetPrice(
-      usdc.address,
-      new BigNumber(usdcPrice.toString()).multipliedBy(1.2).toFixed(0)
-    );
+    await oracle.setAssetPrice(usdc.address, usdcPrice.percentMul(12000));
 
     //mints dai to the liquidator
     await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
@@ -260,9 +253,7 @@ makeSuite('Pausable Pool', (testEnv: TestEnv) => {
       borrower.address
     );
 
-    const amountToLiquidate = new BigNumber(userReserveDataBefore.currentStableDebt.toString())
-      .multipliedBy(0.5)
-      .toFixed(0);
+    const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2).toString();
 
     // Pause pool
     await configurator.connect(users[1].signer).setPoolPause(true);
