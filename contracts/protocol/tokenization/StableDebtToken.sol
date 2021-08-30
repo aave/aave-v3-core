@@ -422,20 +422,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
-  }
-
-  /**
-   * @dev For internal usage in the logic of the parent contracts
-   **/
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
-  }
-
-  /**
    * @dev For internal usage in the logic of the parent contracts
    **/
   function _getUnderlyingAssetAddress() internal view override returns (address) {

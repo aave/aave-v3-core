@@ -285,20 +285,6 @@ contract AToken is
   }
 
   /**
-   * @dev For internal usage in the logic of the parent contract IncentivizedERC20
-   **/
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
-  }
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
-  }
-
-  /**
    * @dev Transfers the underlying asset to `target`. Used by the Pool to transfer
    * assets in borrow(), withdraw() and flashLoan()
    * @param target The recipient of the aTokens
