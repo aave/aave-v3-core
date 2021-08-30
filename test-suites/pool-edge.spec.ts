@@ -1,13 +1,11 @@
 import { expect } from 'chai';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import {
-  DRE,
-  impersonateAccountsHardhat,
-} from '../helpers/misc-utils';
-import { utils } from 'ethers';
+import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { _TypedDataEncoder } from 'ethers/lib/utils';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { utils } from 'ethers';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 
 makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
@@ -19,7 +17,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     RL_RESERVE_ALREADY_INITIALIZED,
   } = ProtocolErrors;
 
-  it('_onlyPoolConfigurator called by non PoolConfigurator', async () => {
+  it('Initializing a reserve as non PoolConfigurator (reverts)', async () => {
     // calling initReserve
     const { pool, users, dai, helpersContract } = testEnv;
 
@@ -38,13 +36,13 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(P_CALLER_NOT_POOL_CONFIGURATOR);
   });
 
-  it('mintToTreasury() inactive reserve', async () => {
+  it('Calling `mintToTreasury()` on inactive reserve', async () => {
     const { pool, poolAdmin, dai, users, configurator } = testEnv;
     await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
     await pool.connect(users[0].signer).mintToTreasury([dai.address]);
   });
 
-  it('check getters', async () => {
+  it('Check getters', async () => {
     const { pool } = testEnv;
 
     const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = await pool.MAX_STABLE_RATE_BORROW_SIZE_PERCENT();
@@ -54,7 +52,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     expect(MAX_NUMBER_RESERVES.toString()).to.be.eq('128');
   });
 
-  it('finalizeTransfer() from non-atoken as sender', async () => {
+  it('`finalizeTransfer()` called by non-aToken (reverts)', async () => {
     const { pool, dai, users } = testEnv;
 
     await expect(
@@ -64,8 +62,8 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(P_CALLER_MUST_BE_AN_ATOKEN);
   });
 
-  it('initReserve() asset is EOA', async () => {
-    const { pool, deployer, dai, users, configurator } = testEnv;
+  it('`initReserve()` on EOA as reserve (reverts)', async () => {
+    const { pool, deployer, users, configurator } = testEnv;
 
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
@@ -78,7 +76,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(P_NOT_CONTRACT);
   });
 
-  it('setReserveInterestRateStrategyAddress()', async () => {
+  it('Updating ReserveInterestRateStrategy with `setReserveInterestRateStrategyAddress()`', async () => {
     const { pool, deployer, dai, configurator } = testEnv;
 
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
@@ -105,8 +103,8 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     expect(await pool.paused()).to.be.eq(true);
   });
 
-  it('ReserveLogic init, aTokenAddress != address(0)', async () => {
-    const { pool, poolAdmin, dai, helpersContract, deployer, configurator } = testEnv;
+  it('Initialize an already initialized reserve. ReserveLogic `init` where aTokenAddress != address(0) (reverts)', async () => {
+    const { pool, dai, deployer, configurator } = testEnv;
 
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
@@ -125,13 +123,13 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
   });
 
-  it('_addReserveToList() already added', async () => {
+  it('Init reserve with `address(0)` as aToken twice, to enter `_addReserveToList()` already added', async () => {
     /**
      * To get into this case, we need to init a reserve with `aTokenAddress = address(0)` twice.
      * `_addReserveToList()` is called from `initReserve`. However, in `initReserve` we run `init` before the `_addReserveToList()`,
      * and in `init` we are checking if `aTokenAddress == address(0)`, so to bypass that we need this odd init.
      */
-    const { pool, poolAdmin, dai, helpersContract, deployer, configurator } = testEnv;
+    const { pool, dai, deployer, configurator } = testEnv;
 
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
@@ -163,7 +161,7 @@ makeSuite('Pool - edge cases', (testEnv: TestEnv) => {
     expect(poolListAfter.length).to.be.eq(poolListMid.length);
   });
 
-  it('_addReserveToList() reservesCount > _maxNumberOfReserves', async () => {
+  it('Initialize reserves until max, then add one more (reverts)', async () => {
     // TODO: For the love of god, let is make something more nice here.
     // Really a pain, but practically, we just want to loop until we hit something high?
     const { pool, dai, deployer, configurator } = testEnv;
