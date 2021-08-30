@@ -40,7 +40,6 @@ contract AToken is
   IPool internal _pool;
   address internal _treasury;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
 
   modifier onlyPool {
     require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
