@@ -1,4 +1,7 @@
+import { accounts } from '../../../test-wallets.js';
+
 export const getTestWallets = (): [{ secretKey: string; balance: string }] => {
-  const TEST_WALLET_PATH = '../../../test-wallets.js';
-  return require(TEST_WALLET_PATH).accounts;
+  if (!accounts.every((element) => element.secretKey) || accounts.length === 0)
+    throw new Error('INVALID_TEST_WALLETS');
+  return accounts;
 };

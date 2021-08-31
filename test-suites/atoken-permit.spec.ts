@@ -8,6 +8,12 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getTestWallets } from './helpers/utils/wallets';
 
 makeSuite('AToken: Permit', (testEnv: TestEnv) => {
+  let testWallets;
+
+  before(() => {
+    testWallets = getTestWallets();
+  })
+
   it('Checks the domain separator', async () => {
     const { aDai } = testEnv;
     const separator = await aDai.DOMAIN_SEPARATOR();
@@ -56,10 +62,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       expiration.toFixed()
     );
 
-    const ownerPrivateKey = getTestWallets()[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     expect((await aDai.allowance(owner.address, spender.address)).toString()).to.be.equal(
       '0',
@@ -102,10 +105,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = getTestWallets()[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     expect((await aDai.allowance(owner.address, spender.address)).toString()).to.be.equal(
       '0',
@@ -145,10 +145,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = getTestWallets()[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -192,10 +189,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = getTestWallets()[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -228,10 +222,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = getTestWallets()[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -264,10 +255,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = getTestWallets()[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -300,10 +288,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = getTestWallets()[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
