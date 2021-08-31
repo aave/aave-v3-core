@@ -1,3 +1,5 @@
+import { expect } from 'chai';
+import { BigNumberish, BigNumber, utils } from 'ethers';
 import {
   DRE,
   evmRevert,
@@ -6,12 +8,7 @@ import {
   increaseTime,
 } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-
-const chai = require('chai');
-const { expect } = chai;
-
 import {
   ATokenFactory,
   MintableERC20,
@@ -24,11 +21,10 @@ import {
 } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { BigNumberish, BigNumber } from '@ethersproject/bignumber';
-import { utils } from 'ethers';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { makeSuite } from './helpers/make-suite';
 
-makeSuite('Interest rate and index overflow', (testEnv) => {
+makeSuite('Interest Rate and Index Overflow', (testEnv) => {
   const {
     RL_LIQUIDITY_RATE_OVERFLOW,
     RL_STABLE_BORROW_RATE_OVERFLOW,
