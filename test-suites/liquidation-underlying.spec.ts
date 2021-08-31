@@ -12,8 +12,13 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
   const { INVALID_HF } = ProtocolErrors;
 
   it("It's not possible to liquidate on a non-active collateral or a non active principal", async () => {
-    const { configurator, weth, pool, users, dai } = testEnv;
-    const user = users[1];
+    const {
+      configurator,
+      weth,
+      pool,
+      users: [, user],
+      dai,
+    } = testEnv;
     await configurator.deactivateReserve(weth.address);
 
     await expect(
@@ -32,9 +37,13 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
   });
 
   it('Deposits WETH, borrows DAI', async () => {
-    const { dai, weth, users, pool, oracle } = testEnv;
-    const depositor = users[0];
-    const borrower = users[1];
+    const {
+      dai,
+      weth,
+      users: [depositor, borrower],
+      pool,
+      oracle,
+    } = testEnv;
 
     //mints DAI to depositor
     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
@@ -81,8 +90,12 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
   });
 
   it('Drop the health factor below 1', async () => {
-    const { dai, weth, users, pool, oracle } = testEnv;
-    const borrower = users[1];
+    const {
+      dai,
+      users: [, borrower],
+      pool,
+      oracle,
+    } = testEnv;
 
     const daiPrice = await oracle.getAssetPrice(dai.address);
 
@@ -94,9 +107,14 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
   });
 
   it('Liquidates the borrow', async () => {
-    const { dai, weth, users, pool, oracle, helpersContract } = testEnv;
-    const liquidator = users[3];
-    const borrower = users[1];
+    const {
+      dai,
+      weth,
+      users: [, borrower, , liquidator],
+      pool,
+      oracle,
+      helpersContract,
+    } = testEnv;
 
     //mints dai to the liquidator
     await dai.connect(liquidator.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
@@ -142,10 +160,9 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
 
     const expectedCollateralLiquidated = principalPrice
       .mul(amountToLiquidate)
-      .mul(105)
+      .percentMul(10500)
       .mul(BigNumber.from(10).pow(collateralDecimals))
-      .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)))
-      .div(100);
+      .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
     if (!tx.blockNumber) {
       expect(false, 'Invalid block number');
@@ -194,11 +211,14 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
   });
 
   it('User 3 deposits 1000 USDC, user 4 1 WETH, user 4 borrows - drops HF, liquidates the borrow', async () => {
-    const { usdc, users, pool, oracle, weth, helpersContract } = testEnv;
-
-    const depositor = users[3];
-    const borrower = users[4];
-    const liquidator = users[5];
+    const {
+      usdc,
+      users: [, , , depositor, borrower, liquidator],
+      pool,
+      oracle,
+      weth,
+      helpersContract,
+    } = testEnv;
 
     //mints USDC to depositor
     await usdc
@@ -287,10 +307,10 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
       .decimals;
 
     const expectedCollateralLiquidated = principalPrice
-      .mul(BigNumber.from(amountToLiquidate).mul(105))
+      .mul(BigNumber.from(amountToLiquidate))
+      .percentMul(10500)
       .mul(BigNumber.from(10).pow(collateralDecimals))
-      .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)))
-      .div(100);
+      .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
     expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
@@ -326,11 +346,14 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
   });
 
   it('User 4 deposits 10 AAVE - drops HF, liquidates the AAVE, which results on a lower amount being liquidated', async () => {
-    const { aave, usdc, users, pool, oracle, helpersContract } = testEnv;
-
-    const depositor = users[3];
-    const borrower = users[4];
-    const liquidator = users[5];
+    const {
+      aave,
+      usdc,
+      users: [, , , , borrower, liquidator],
+      pool,
+      oracle,
+      helpersContract,
+    } = testEnv;
 
     //mints AAVE to borrower
     await aave.connect(borrower.signer).mint(await convertToCurrencyDecimals(aave.address, '10'));
@@ -397,8 +420,7 @@ makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testE
       .mul(expectedCollateralLiquidated)
       .mul(BigNumber.from(10).pow(principalDecimals))
       .div(principalPrice.mul(BigNumber.from(10).pow(collateralDecimals)))
-      .mul(10000)
-      .div(liquidationBonus);
+      .percentDiv(liquidationBonus);
 
     expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
