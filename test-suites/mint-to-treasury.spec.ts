@@ -1,29 +1,29 @@
-import { makeSuite, TestEnv } from './helpers/make-suite';
+import { expect } from 'chai';
 import { RateMode } from '../helpers/types';
 import { APPROVAL_AMOUNT_POOL, ONE_YEAR } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { advanceTimeAndBlock, waitForTx } from '../helpers/misc-utils';
+import { advanceTimeAndBlock } from '../helpers/misc-utils';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
-import { expect } from 'chai';
 
-makeSuite('Mint to treasury', (testEnv: TestEnv) => {
+makeSuite('Mint To Treasury', (testEnv: TestEnv) => {
   it('User 0 deposits 1000 DAI. Borrower borrows 100 DAI. Clock moved forward one year. Calculates and verifies the amount accrued to the treasury', async () => {
     const { users, pool, dai, helpersContract } = testEnv;
 
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
     const amountDAItoBorrow = await convertToCurrencyDecimals(dai.address, '100');
 
-    await waitForTx(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
+    await expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
 
     // user 0 deposits 1000 DAI
-    await waitForTx(await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL));
-    await waitForTx(
+    await expect(await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL));
+    await expect(
       await pool
         .connect(users[0].signer)
         .deposit(dai.address, amountDAItoDeposit, users[0].address, '0')
     );
 
-    await waitForTx(
+    await expect(
       await pool
         .connect(users[0].signer)
         .borrow(dai.address, amountDAItoBorrow, RateMode.Variable, '0', users[0].address)
@@ -33,9 +33,9 @@ makeSuite('Mint to treasury', (testEnv: TestEnv) => {
 
     await advanceTimeAndBlock(parseInt(ONE_YEAR));
 
-    await waitForTx(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
+    await expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
 
-    await waitForTx(
+    await expect(
       await pool
         .connect(users[0].signer)
         .deposit(dai.address, amountDAItoDeposit, users[0].address, '0')
@@ -55,12 +55,12 @@ makeSuite('Mint to treasury', (testEnv: TestEnv) => {
   });
 
   it('Mints the accrued to the treasury', async () => {
-    const { users, pool, dai, aDai, helpersContract } = testEnv;
+    const { users, pool, dai, aDai } = testEnv;
 
     const treasuryAddress = await aDai.RESERVE_TREASURY_ADDRESS();
     const { accruedToTreasury } = await pool.getReserveData(dai.address);
 
-    await waitForTx(await pool.connect(users[0].signer).mintToTreasury([dai.address]));
+    await expect(await pool.connect(users[0].signer).mintToTreasury([dai.address]));
 
     const normalizedIncome = await pool.getReserveNormalizedIncome(dai.address);
     const treasuryBalance = await aDai.balanceOf(treasuryAddress);
