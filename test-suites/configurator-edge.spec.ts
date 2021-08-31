@@ -7,6 +7,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
   const {
+    RC_INVALID_RESERVE_FACTOR,
     PC_INVALID_CONFIGURATION,
     RC_INVALID_LIQ_BONUS,
     PC_FLASHLOAN_PREMIUMS_MISMATCH,
@@ -23,6 +24,14 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, 5, 10, 65535 + 1)
     ).to.be.revertedWith(RC_INVALID_LIQ_BONUS);
+  });
+
+  it('ReserveConfiguration setReserveFactor() reserveFactor > MAX_VALID_RESERVE_FACTOR', async () => {
+    const { dai, configurator } = testEnv;
+    const invalidReserveFactor = 65536;
+    await expect(
+      configurator.setReserveFactor(dai.address, invalidReserveFactor)
+    ).to.be.revertedWith(RC_INVALID_RESERVE_FACTOR);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() ltv > liquidationThreshold', async () => {
@@ -74,11 +83,11 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
   it('Tries to update flashloan premium total > PERCENTAGE_FACTOR and reverts', async () => {
     const { configurator } = testEnv;
-    
+
     const newPremiumTotal = 10001;
-    await expect(
-      configurator.updateFlashloanPremiumTotal(newPremiumTotal)
-    ).to.be.revertedWith(PC_FLASHLOAN_PREMIUM_INVALID);
+    await expect(configurator.updateFlashloanPremiumTotal(newPremiumTotal)).to.be.revertedWith(
+      PC_FLASHLOAN_PREMIUM_INVALID
+    );
   });
 
   it('Tries to update flashloan premium total < FLASHLOAN_PREMIUM_TO_PROTOCOL and reverts', async () => {
@@ -90,16 +99,16 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     // Update FLASHLOAN_PREMIUM_TO_PROTOCOL to non-zero
     expect(await configurator.updateFlashloanPremiumTotal(newPremiumTotal))
-    .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
-    .withArgs(newPremiumTotal);
+      .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
+      .withArgs(newPremiumTotal);
 
     expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
       .to.emit(configurator, 'FlashloanPremiumToProcolUpdated')
       .withArgs(newPremiumToProtocol);
 
-    await expect(
-      configurator.updateFlashloanPremiumTotal(wrongPremiumTotal)
-    ).to.be.revertedWith(PC_FLASHLOAN_PREMIUMS_MISMATCH);
+    await expect(configurator.updateFlashloanPremiumTotal(wrongPremiumTotal)).to.be.revertedWith(
+      PC_FLASHLOAN_PREMIUMS_MISMATCH
+    );
   });
 
   it('Tries to update flashloan premium to protocol > PERCENTAGE_FACTOR and reverts', async () => {
