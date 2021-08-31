@@ -17,9 +17,13 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   } = ProtocolErrors;
 
   it('Deposits WETH, borrows DAI/Check liquidation fails because health factor is above 1', async () => {
-    const { dai, weth, users, pool, oracle } = testEnv;
-    const depositor = users[0];
-    const borrower = users[1];
+    const {
+      dai,
+      weth,
+      users: [depositor, borrower],
+      pool,
+      oracle,
+    } = testEnv;
 
     //mints DAI to depositor
     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
@@ -73,8 +77,12 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   });
 
   it('Drop the health factor below 1', async () => {
-    const { dai, users, pool, oracle } = testEnv;
-    const borrower = users[1];
+    const {
+      dai,
+      users: [, borrower],
+      pool,
+      oracle,
+    } = testEnv;
 
     const daiPrice = await oracle.getAssetPrice(dai.address);
 
@@ -86,8 +94,11 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   });
 
   it('Tries to liquidate a different currency than the loan principal', async () => {
-    const { pool, users, weth } = testEnv;
-    const borrower = users[1];
+    const {
+      pool,
+      users: [, borrower],
+      weth,
+    } = testEnv;
     //user 2 tries to borrow
     await expect(
       pool.liquidationCall(weth.address, weth.address, borrower.address, oneEther, true)
@@ -95,8 +106,11 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   });
 
   it('Tries to liquidate a different collateral than the borrower collateral', async () => {
-    const { pool, dai, users } = testEnv;
-    const borrower = users[1];
+    const {
+      pool,
+      dai,
+      users: [, borrower],
+    } = testEnv;
 
     await expect(
       pool.liquidationCall(dai.address, dai.address, borrower.address, oneEther, true)
@@ -104,8 +118,15 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   });
 
   it('Liquidates the borrow', async () => {
-    const { pool, dai, weth, aWETH, aDai, users, oracle, helpersContract, deployer } = testEnv;
-    const borrower = users[1];
+    const {
+      pool,
+      dai,
+      weth,
+      users: [, borrower],
+      oracle,
+      helpersContract,
+      deployer,
+    } = testEnv;
 
     //mints dai to the caller
 
@@ -124,8 +145,16 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
       borrower.address
     );
 
+    const userWethReserveDataBefore = await getUserData(
+      pool,
+      helpersContract,
+      weth.address,
+      borrower.address
+    );
+
     const amountToLiquidate = userReserveDataBefore.currentVariableDebt.div(2);
 
+    // The supply is the same, but there should be a change in who has what. The liquidator should have received what the borrower lost.
     const tx = await pool.liquidationCall(
       weth.address,
       dai.address,
@@ -136,6 +165,11 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
 
     const userReserveDataAfter = await helpersContract.getUserReserveData(
       dai.address,
+      borrower.address
+    );
+
+    const userWethReserveDataAfter = await helpersContract.getUserReserveData(
+      weth.address,
       borrower.address
     );
 
@@ -152,12 +186,18 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
     const principalDecimals = (await helpersContract.getReserveConfigurationData(dai.address))
       .decimals;
 
-    // TODO: Unsused expectedCollateralLiquidated
     const expectedCollateralLiquidated = principalPrice
       .mul(amountToLiquidate)
-      .mul(105)
+      .percentMul(10500)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
+
+    expect(expectedCollateralLiquidated).to.be.eq(
+      userWethReserveDataBefore.currentATokenBalance.sub(
+        userWethReserveDataAfter.currentATokenBalance
+      ),
+      'Invalid collateral amount liquidated'
+    );
 
     if (!tx.blockNumber) {
       expect(false, 'Invalid block number');
@@ -213,9 +253,14 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
   });
 
   it('User 3 deposits 1000 USDC, user 4 1 WETH, user 4 borrows - drops HF, liquidates the borrow', async () => {
-    const { users, pool, usdc, oracle, weth, helpersContract } = testEnv;
-    const depositor = users[3];
-    const borrower = users[4];
+    const {
+      users: [, , , depositor, borrower],
+      pool,
+      usdc,
+      oracle,
+      weth,
+      helpersContract,
+    } = testEnv;
 
     //mints USDC to depositor
     await usdc
@@ -277,6 +322,12 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
 
     const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const userWethReserveDataBefore = await getUserData(
+      pool,
+      helpersContract,
+      weth.address,
+      borrower.address
+    );
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
 
@@ -293,6 +344,11 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
       borrower.address
     );
 
+    const userWethReserveDataAfter = await helpersContract.getUserReserveData(
+      weth.address,
+      borrower.address
+    );
+
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
     const usdcReserveDataAfter = await helpersContract.getReserveData(usdc.address);
@@ -306,11 +362,18 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
     const principalDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
       .decimals;
 
-    // TODO: Unsused expectedCollateralLiquidated
     const expectedCollateralLiquidated = principalPrice
-      .mul(amountToLiquidate.mul(105))
+      .mul(amountToLiquidate)
+      .percentMul(10500)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
+
+    expect(expectedCollateralLiquidated).to.be.eq(
+      userWethReserveDataBefore.currentATokenBalance.sub(
+        userWethReserveDataAfter.currentATokenBalance
+      ),
+      'Invalid collateral amount liquidated'
+    );
 
     expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
