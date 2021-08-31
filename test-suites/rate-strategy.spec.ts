@@ -1,15 +1,14 @@
-import { TestEnv, makeSuite } from './helpers/make-suite';
-import { deployDefaultReserveInterestRateStrategy } from '../helpers/contracts-deployments';
-import { PERCENTAGE_FACTOR, RAY } from '../helpers/constants';
-import { rateStrategyStableOne } from '../market-config/rateStrategies';
-import { strategyDAI } from '../market-config/reservesConfigs';
-import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';
-import './helpers/utils/wadraymath';
 import { expect } from 'chai';
-import { parseUnits } from 'ethers/lib/utils';
-import { BigNumber } from 'ethers';
+import { BigNumber, utils } from 'ethers';
+import { deployDefaultReserveInterestRateStrategy } from '../helpers/contracts-deployments';
+import { PERCENTAGE_FACTOR } from '../helpers/constants';
+import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';
+import { strategyDAI } from '../market-config/reservesConfigs';
+import { rateStrategyStableOne } from '../market-config/rateStrategies';
+import { TestEnv, makeSuite } from './helpers/make-suite';
+import './helpers/utils/wadraymath';
 
-makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
+makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   let strategyInstance: DefaultReserveInterestRateStrategy;
   let dai: MintableERC20;
   let aDai: AToken;
@@ -41,7 +40,10 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     ](dai.address, aDai.address, 0, 0, 0, 0, 0, strategyDAI.reserveFactor);
 
     expect(currentLiquidityRate).to.be.equal(0, 'Invalid liquidity rate');
-    expect(currentStableBorrowRate).to.be.equal(parseUnits('0.039', 27), 'Invalid stable rate');
+    expect(currentStableBorrowRate).to.be.equal(
+      utils.parseUnits('0.039', 27),
+      'Invalid stable rate'
+    );
     expect(currentVariableBorrowRate).to.be.equal(
       rateStrategyStableOne.baseVariableBorrowRate,
       'Invalid variable rate'
@@ -80,7 +82,7 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      parseUnits('0.039', 27).add(rateStrategyStableOne.stableRateSlope1),
+      utils.parseUnits('0.039', 27).add(rateStrategyStableOne.stableRateSlope1),
       'Invalid stable rate'
     );
   });
@@ -117,7 +119,8 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      parseUnits('0.039', 27)
+      utils
+        .parseUnits('0.039', 27)
         .add(rateStrategyStableOne.stableRateSlope1)
         .add(rateStrategyStableOne.stableRateSlope2),
       'Invalid stable rate'
@@ -147,14 +150,15 @@ makeSuite('Interest rate strategy tests', (testEnv: TestEnv) => {
       .add(rateStrategyStableOne.variableRateSlope2);
 
     const expectedLiquidityRate = currentVariableBorrowRate
-      .add(parseUnits('0.1', 27))
+      .add(utils.parseUnits('0.1', 27))
       .div(2)
       .percentMul(BigNumber.from(PERCENTAGE_FACTOR).sub(strategyDAI.reserveFactor));
 
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
     expect(currentLiquidityRate).to.be.equal(expectedLiquidityRate, 'Invalid liquidity rate');
     expect(currentStableBorrowRate).to.be.equal(
-      parseUnits('0.039', 27)
+      utils
+        .parseUnits('0.039', 27)
         .add(rateStrategyStableOne.stableRateSlope1)
         .add(rateStrategyStableOne.stableRateSlope2),
       'Invalid stable rate'
