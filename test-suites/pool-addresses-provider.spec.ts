@@ -1,20 +1,22 @@
 import { expect } from 'chai';
-import { createRandomAddress, evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { makeSuite, TestEnv } from './helpers/make-suite';
-import { ProtocolErrors } from '../helpers/types';
 import { utils } from 'ethers';
-import { waitForTx } from '../helpers/misc-utils';
+import { createRandomAddress, evmRevert, evmSnapshot } from '../helpers/misc-utils';
+import { ProtocolErrors } from '../helpers/types';
 import { deployMockPool, deployPool } from '../helpers/contracts-deployments';
 import { ZERO_ADDRESS } from '../helpers/constants';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
-  it('Test the accessibility of the PoolAddressesProvider', async () => {
+  const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
+
+  it('Test the onlyOwner accessibility of the PoolAddressesProvider', async () => {
     const { addressesProvider, users } = testEnv;
     const mockAddress = createRandomAddress();
-    const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
 
+    // Transfer ownership to user 1
     await addressesProvider.transferOwnership(users[1].address);
 
+    // Test accessibility with user 0
     for (const contractFunction of [
       addressesProvider.setMarketId,
       addressesProvider.setPoolImpl,
@@ -38,64 +40,47 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     ).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
   });
 
-  it('Tests adding  a proxied address with `setAddressAsProxy()`', async () => {
+  it('Owner adds a new address as proxy', async () => {
     const { addressesProvider, users } = testEnv;
-    const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
 
     const currentAddressesProviderOwner = users[1];
 
     const mockPool = await deployPool();
     const proxiedAddressId = utils.keccak256(utils.toUtf8Bytes('RANDOM_PROXIED'));
 
-    const proxiedAddressSetReceipt = await waitForTx(
+    expect(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(proxiedAddressId, mockPool.address)
-    );
-
-    if (!proxiedAddressSetReceipt.events || proxiedAddressSetReceipt.events?.length < 1) {
-      throw new Error('INVALID_EVENT_EMMITED');
-    }
-
-    expect(proxiedAddressSetReceipt.events[0].event).to.be.equal('ProxyCreated');
-    expect(proxiedAddressSetReceipt.events[1].event).to.be.equal('AddressSet');
-    expect(proxiedAddressSetReceipt.events[1].args?.id).to.be.equal(proxiedAddressId);
-    expect(proxiedAddressSetReceipt.events[1].args?.newAddress).to.be.equal(mockPool.address);
-    expect(proxiedAddressSetReceipt.events[1].args?.hasProxy).to.be.equal(true);
+    )
+      .to.emit(addressesProvider, 'AddressSet')
+      .withArgs(proxiedAddressId, mockPool.address, true)
+      .to.emit(addressesProvider, 'ProxyCreated');
   });
 
-  it('Tests adding a non proxied address with `setAddress()`', async () => {
+  it('Owner adds a new address with no proxy', async () => {
     const { addressesProvider, users } = testEnv;
-    const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
 
     const currentAddressesProviderOwner = users[1];
     const mockNonProxiedAddress = createRandomAddress();
     const nonProxiedAddressId = utils.keccak256(utils.toUtf8Bytes('RANDOM_NON_PROXIED'));
 
-    const nonProxiedAddressSetReceipt = await waitForTx(
+    expect(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(nonProxiedAddressId, mockNonProxiedAddress)
-    );
+    )
+      .to.emit(addressesProvider, 'AddressSet')
+      .withArgs(nonProxiedAddressId, mockNonProxiedAddress, false);
 
-    expect(mockNonProxiedAddress.toLowerCase()).to.be.equal(
-      (await addressesProvider.getAddress(nonProxiedAddressId)).toLowerCase()
+    expect((await addressesProvider.getAddress(nonProxiedAddressId)).toLowerCase()).to.be.eq(
+      mockNonProxiedAddress.toLowerCase()
     );
-
-    if (!nonProxiedAddressSetReceipt.events || nonProxiedAddressSetReceipt.events?.length < 1) {
-      throw new Error('INVALID_EVENT_EMMITED');
-    }
-
-    expect(nonProxiedAddressSetReceipt.events[0].event).to.be.equal('AddressSet');
-    expect(nonProxiedAddressSetReceipt.events[0].args?.id).to.be.equal(nonProxiedAddressId);
-    expect(nonProxiedAddressSetReceipt.events[0].args?.newAddress).to.be.equal(
-      mockNonProxiedAddress
-    );
-    expect(nonProxiedAddressSetReceipt.events[0].args?.hasProxy).to.be.equal(false);
   });
 
-  it('Updates the implementation of a proxy which is already initialized', async () => {
+  it('Owner updates the implementation of a proxy which is already initialized', async () => {
     const snapId = await evmSnapshot();
+
     const { addressesProvider, users } = testEnv;
     const currentAddressesProviderOwner = users[1];
 
@@ -110,7 +95,9 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setPoolImpl(mockPool.address)
-    );
+    )
+      .to.emit(addressesProvider, 'PoolUpdated')
+      .withArgs(mockPool.address);
 
     // Pool address should not change
     expect(await addressesProvider.getPool()).to.be.eq(poolAddress);
@@ -118,8 +105,9 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it('Proxy Admin updates the MarketId', async () => {
+  it('Owner updates the MarketId', async () => {
     const snapId = await evmSnapshot();
+
     const { addressesProvider, users } = testEnv;
     const currentAddressesProviderOwner = users[1];
 
