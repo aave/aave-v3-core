@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { makeSuite, TestEnv } from './helpers/make-suite';
+import { BigNumber, utils } from 'ethers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getStableDebtToken } from '../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
@@ -9,16 +9,13 @@ import {
   increaseTime,
   evmSnapshot,
   evmRevert,
+  setAutomine,
 } from '../helpers/misc-utils';
-import {
-  SelfdestructTransferFactory,
-  SelfdestructTransfer,
-  StableDebtTokenFactory,
-} from '../types';
-import { BigNumber, utils } from 'ethers';
+import { StableDebtTokenFactory } from '../types';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
-makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
+makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
   let snap: string;
 
@@ -26,7 +23,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     snap = await evmSnapshot();
   });
 
-  it('Tries to invoke mint not being the Pool', async () => {
+  it('Tries to mint not being the Pool and reverts', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
@@ -39,7 +36,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
   });
 
-  it('Tries to invoke burn not being the Pool', async () => {
+  it('Tries to burn not being the Pool and reverts', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
@@ -55,8 +52,8 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     );
   });
 
-  it('Check getters', async () => {
-    const { deployer, pool, weth, dai, helpersContract, users } = testEnv;
+  it('Check initialization', async () => {
+    const { pool, weth, dai, helpersContract, users } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
     const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
@@ -89,7 +86,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     expect(totSupplyAndRateAfter[1]).to.be.gt(0);
   });
 
-  it('Tries to transfer debt tokens (reverts)', async () => {
+  it('Tries to transfer debt tokens and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -100,7 +97,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
-  it('Tries to approve debt tokens (reverts)', async () => {
+  it('Tries to approve debt tokens and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -114,7 +111,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to increase allowance of debt tokens (reverts)', async () => {
+  it('Tries to increase allowance of debt tokens and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -125,7 +122,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to decrease allowance of debt tokens (reverts)', async () => {
+  it('Tries to decrease allowance of debt tokens and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -136,7 +133,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to transferFrom (reverts)', async () => {
+  it('Tries to transferFrom and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -166,6 +163,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
 
     const { deployer, pool, dai, helpersContract, users } = testEnv;
 
+    // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
@@ -175,8 +173,9 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
       config.stableDebtTokenAddress,
       deployer.signer
     );
-
-    await DRE.network.provider.send('evm_setAutomine', [false]);
+    
+    // Next two txs should be mined in the same block
+    await setAutomine(false);
     await stableDebt
       .connect(poolSigner)
       .mint(users[0].address, users[0].address, amount1, rateGuess1);
@@ -184,8 +183,7 @@ makeSuite('Stable debt token tests', (testEnv: TestEnv) => {
     await stableDebt
       .connect(poolSigner)
       .mint(users[1].address, users[1].address, amount2, rateGuess2);
-    await DRE.network.provider.send('evm_mine', []);
-    await DRE.network.provider.send('evm_setAutomine', [true]);
+    await setAutomine(true);
 
     await increaseTime(60 * 60 * 24 * 365);
     const totalSupplyAfterTime = BigNumber.from(18798191);
