@@ -1,11 +1,11 @@
-import { makeSuite, TestEnv } from './helpers/make-suite';
+import { expect } from 'chai';
+import { utils } from 'ethers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { APPROVAL_AMOUNT_POOL } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { utils } from 'ethers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
-import { expect } from 'chai';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
@@ -130,7 +130,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     // Try to execute liquidation
     await expect(
       pool.connect(user.signer).borrow(dai.address, '1', '1', '0', user.address)
-    ).revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause the pool
     await configurator.connect(users[1].signer).setReservePause(dai.address, false);
@@ -144,7 +144,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     await configurator.connect(users[1].signer).setReservePause(dai.address, true);
 
     // Try to execute liquidation
-    await expect(pool.connect(user.signer).repay(dai.address, '1', '1', user.address)).revertedWith(
+    await expect(pool.connect(user.signer).repay(dai.address, '1', '1', user.address)).to.be.revertedWith(
       VL_RESERVE_PAUSED
     );
 
@@ -176,7 +176,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setReservePause(weth.address, false);
@@ -249,7 +249,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     // Do liquidation
     await expect(
       pool.liquidationCall(weth.address, usdc.address, borrower.address, amountToLiquidate, true)
-    ).revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setReservePause(usdc.address, false);
@@ -278,7 +278,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     // Try to repay
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(usdc.address, RateMode.Stable)
-    ).revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setReservePause(usdc.address, false);
@@ -292,7 +292,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).rebalanceStableBorrowRate(dai.address, user.address)
-    ).revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setReservePause(dai.address, false);
@@ -312,7 +312,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(weth.address, false)
-    ).revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setReservePause(weth.address, false);
