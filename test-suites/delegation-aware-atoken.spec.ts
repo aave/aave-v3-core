@@ -1,7 +1,6 @@
-import { ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
+import { ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import { makeSuite, TestEnv } from './helpers/make-suite';
 import {
   deployDelegationAwareAToken,
   deployMintableDelegationERC20,
@@ -9,8 +8,9 @@ import {
 import { DelegationAwareAToken } from '../types/DelegationAwareAToken';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import AaveConfig from '../market-config';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 
-makeSuite('AToken: underlying delegation', (testEnv: TestEnv) => {
+makeSuite('AToken: DelegationAwareAToken', (testEnv: TestEnv) => {
   let delegationAToken = <DelegationAwareAToken>{};
   let delegationERC20 = <MintableDelegationERC20>{};
 
@@ -29,7 +29,7 @@ makeSuite('AToken: underlying delegation', (testEnv: TestEnv) => {
     ]);
   });
 
-  it('Tries to delegate with the caller not being the Aave admin', async () => {
+  it('Tries to delegate with the caller not being the Aave admin and reverts', async () => {
     const { users } = testEnv;
 
     await expect(
@@ -37,10 +37,10 @@ makeSuite('AToken: underlying delegation', (testEnv: TestEnv) => {
     ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
   });
 
-  it('Tries to delegate to user 2', async () => {
+  it('Delegates to user 2', async () => {
     const { users } = testEnv;
 
-    await delegationAToken.delegateUnderlyingTo(users[2].address);
+    expect(await delegationAToken.delegateUnderlyingTo(users[2].address));
 
     const delegateeAddress = await delegationERC20.delegatee();
 
