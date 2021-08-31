@@ -1,14 +1,14 @@
+import { expect } from 'chai';
+import { BigNumber, utils } from 'ethers';
 import { DRE, increaseTime } from '../helpers/misc-utils';
 import { APPROVAL_AMOUNT_POOL, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 import { getUserData } from './helpers/utils/helpers';
-import { BigNumber, utils } from 'ethers';
-import { expect } from 'chai';
+import { makeSuite } from './helpers/make-suite';
 
-makeSuite('Pool liquidation - liquidator receiving the underlying asset', (testEnv) => {
+makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;
 
   it("It's not possible to liquidate on a non-active collateral or a non active principal", async () => {

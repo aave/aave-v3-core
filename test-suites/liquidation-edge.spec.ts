@@ -1,10 +1,10 @@
+import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode } from '../helpers/types';
-import { makeSuite, TestEnv } from './helpers/make-suite';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { utils } from 'ethers';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 
-makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
+makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
   let snap: string;
 
   beforeEach(async () => {
@@ -14,7 +14,7 @@ makeSuite('Validation-logic: reverting edge cases', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  it('`executeLiquidationCall` where user has variable and stable debt, but variable debt is insufficient to cover the full liquidation amount', async () => {
+  it('ValidationLogic `executeLiquidationCall` where user has variable and stable debt, but variable debt is insufficient to cover the full liquidation amount', async () => {
     const { pool, users, dai, weth, oracle } = testEnv;
 
     const depositor = users[0];

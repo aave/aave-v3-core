@@ -1,14 +1,14 @@
+import { expect } from 'chai';
+import { BigNumber } from 'ethers';
 import { DRE } from '../helpers/misc-utils';
 import { APPROVAL_AMOUNT_POOL, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
 import { getUserData, getReserveData } from './helpers/utils/helpers';
-import { expect } from 'chai';
-import { BigNumber } from 'ethers';
+import { makeSuite } from './helpers/make-suite';
 
-makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
+makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
   const {
     VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD,
     INVALID_HF,
@@ -93,7 +93,7 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
     expect(userGlobalData.healthFactor).to.be.lt(oneEther, INVALID_HF);
   });
 
-  it('Tries to liquidate a different currency than the loan principal', async () => {
+  it('Tries to liquidate a different currency than the loan principal and reverts', async () => {
     const {
       pool,
       users: [, borrower],
@@ -105,7 +105,7 @@ makeSuite('Pool liquidation - liquidator receiving aToken', (testEnv) => {
     ).revertedWith(VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   });
 
-  it('Tries to liquidate a different collateral than the borrower collateral', async () => {
+  it('Tries to liquidate a different collateral than the borrower collateral and reverts', async () => {
     const {
       pool,
       dai,
