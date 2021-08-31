@@ -1,7 +1,7 @@
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { makeSuite } from './helpers/make-suite';
-import { RateMode } from '../helpers/types';
 import { expect } from 'chai';
+import { BigNumberish, utils } from 'ethers';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { RateMode } from '../helpers/types';
 import {
   ATokenFactory,
   ERC20,
@@ -12,25 +12,23 @@ import {
 } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { BigNumberish, utils } from 'ethers';
+import { makeSuite } from './helpers/make-suite';
 
-makeSuite('Reserve with zero address incentives controller', (testEnv) => {
+makeSuite('Reserve Without Incentives Controller', (testEnv) => {
   let mockToken: MintableERC20;
   let aMockToken: ERC20;
   let mockStableDebt: ERC20;
   let mockVariableDebt: ERC20;
 
   before(async () => {
-    const { pool, poolAdmin, configurator, users, dai, aDai, helpersContract } = testEnv;
+    const { pool, poolAdmin, configurator, dai, helpersContract } = testEnv;
 
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-    //const assetPrice = oneEther.multipliedBy('0.001').toFixed();
-    //const mockAggregator = await deployMockAggregator(assetPrice);
 
-    let stableDebtTokenImplementation = await new StableDebtTokenFactory(
+    const stableDebtTokenImplementation = await new StableDebtTokenFactory(
       await getFirstSigner()
     ).deploy();
-    let variableDebtTokenImplementation = await new VariableDebtTokenFactory(
+    const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
       await getFirstSigner()
     ).deploy();
     const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
@@ -40,7 +38,7 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
     const interestRateStrategyAddress = daiData.interestRateStrategyAddress;
 
     // Init the reserve
-    let initInputParams: {
+    const initInputParams: {
       aTokenImpl: string;
       stableDebtTokenImpl: string;
       variableDebtTokenImpl: string;
@@ -78,6 +76,7 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
       },
     ];
 
+    // Add the mock reserve
     await configurator.connect(poolAdmin.signer).initReserves(initInputParams);
 
     // Configuration
@@ -163,7 +162,7 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
   });
 
   it('Transfer aMock tokens', async () => {
-    const { pool, users } = testEnv;
+    const { users } = testEnv;
     const sender = users[0];
     const receiver = users[1];
 
@@ -185,7 +184,7 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
     );
   });
 
-  it('Borrow mock with stable rate', async () => {
+  it('Borrow mock tokens with stable rate', async () => {
     const { pool, users, dai } = testEnv;
     const user = users[2];
 
@@ -226,7 +225,7 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
   });
 
   it('Repay mock tokens', async () => {
-    const { pool, users, dai } = testEnv;
+    const { pool, users } = testEnv;
     const user = users[2];
 
     expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
