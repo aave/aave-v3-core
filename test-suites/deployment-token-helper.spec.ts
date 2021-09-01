@@ -1,6 +1,6 @@
-import { oneRay, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
-import { makeSuite, TestEnv } from './helpers/make-suite';
+import { utils } from 'ethers';
+import { ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import {
@@ -11,7 +11,7 @@ import {
 } from '../types';
 import { getFirstSigner, getStableAndVariableTokensHelper } from '../helpers/contracts-getters';
 import { ProtocolErrors } from '../helpers/types';
-import { parseUnits } from 'ethers/lib/utils';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   let snap: string;
@@ -23,7 +23,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  const BORROW_RATE = parseUnits('0.03', 27).toString();
+  const BORROW_RATE = utils.parseUnits('0.03', 27).toString();
 
   let tokenHelper: StableAndVariableTokensHelper;
   let rateOracle: RateOracle;

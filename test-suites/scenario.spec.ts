@@ -1,9 +1,9 @@
+import fs from 'fs';
+import AaveConfig from '../market-config';
 import { configuration as actionsConfiguration } from './helpers/actions';
 import { configuration as calculationsConfiguration } from './helpers/utils/calculations';
-import fs from 'fs';
 import { makeSuite } from './helpers/make-suite';
 import { executeStory } from './helpers/scenario-engine';
-import AaveConfig from '../market-config';
 
 const scenarioFolder = './test-suites/helpers/scenarios/';
 

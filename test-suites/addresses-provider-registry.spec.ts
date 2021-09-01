@@ -110,6 +110,6 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       addressesProvider.address,
       'Invalid addresses provider added to the list'
     );
-    expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, ' Invalid addresses');
+    expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, 'Invalid addresses');
   });
 });
