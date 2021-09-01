@@ -93,7 +93,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     expect(userGlobalData.healthFactor).to.be.lt(oneEther, INVALID_HF);
   });
 
-  it('Tries to liquidate a different currency than the loan principal and reverts', async () => {
+  it('Tries to liquidate a different currency than the loan principal (revert expected)', async () => {
     const {
       pool,
       users: [, borrower],
@@ -105,7 +105,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     ).to.be.revertedWith(VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   });
 
-  it('Tries to liquidate a different collateral than the borrower collateral and reverts', async () => {
+  it('Tries to liquidate a different collateral than the borrower collateral (revert expected)', async () => {
     const {
       pool,
       dai,

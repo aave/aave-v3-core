@@ -76,7 +76,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     expect(daiSupplyCap).to.be.equal(newCap);
   });
 
-  it('Tries to supply any DAI or USDC (> SUPPLY_CAP) and reverts', async () => {
+  it('Tries to supply any DAI or USDC (> SUPPLY_CAP) (revert expected)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
     const suppliedAmount = '10';
 
@@ -94,7 +94,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_SUPPLY_CAP_EXCEEDED);
   });
 
-  it('Tries to set the supply cap for USDC and DAI to > MAX_SUPPLY_CAP and reverts', async () => {
+  it('Tries to set the supply cap for USDC and DAI to > MAX_SUPPLY_CAP (revert expected)', async () => {
     const { configurator, usdc, dai } = testEnv;
     const newCap = Number(MAX_SUPPLY_CAP) + 1;
 
@@ -143,7 +143,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to supply 100 DAI and 100 USDC (= SUPPLY_CAP) and reverts', async () => {
+  it('Tries to supply 100 DAI and 100 USDC (= SUPPLY_CAP) (revert expected)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
 
     const suppliedAmount = '100';
@@ -243,7 +243,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     expect(daiSupplyCap).to.be.equal(newCap);
   });
 
-  it('Tries to supply 100 DAI and 100 USDC (> SUPPLY_CAP) and reverts', async () => {
+  it('Tries to supply 100 DAI and 100 USDC (> SUPPLY_CAP) (revert expected)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
 
     const suppliedAmount = '100';

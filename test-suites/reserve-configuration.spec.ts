@@ -153,7 +153,7 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getLtv()).to.be.eq(ZERO);
   });
 
-  it('setLtv() with ltv > MAX_VALID_LTV and reverts', async () => {
+  it('setLtv() with ltv > MAX_VALID_LTV (revert expected)', async () => {
     expect(await configMock.getLtv()).to.be.eq(ZERO);
 
     const { RC_INVALID_LTV } = ProtocolErrors;
@@ -181,7 +181,7 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
   });
 
-  it('setLiquidationThreshold() with threshold > MAX_VALID_LIQUIDATION_THRESHOLD and reverts', async () => {
+  it('setLiquidationThreshold() with threshold > MAX_VALID_LIQUIDATION_THRESHOLD (revert expected)', async () => {
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
 
     const { RC_INVALID_LIQ_THRESHOLD } = ProtocolErrors;
@@ -205,7 +205,7 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
   });
 
-  it('setDecimals() with decimals > MAX_VALID_DECIMALS and reverts', async () => {
+  it('setDecimals() with decimals > MAX_VALID_DECIMALS (revert expected)', async () => {
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
 
     const { RC_INVALID_DECIMALS } = ProtocolErrors;

@@ -16,3 +16,18 @@ export const topUpNonPayableWithEther = async (
     });
   }
 };
+
+// const topUpWalletsWithEther = async (
+//     holder: JsonRpcSigner,
+//     wallets: string[],
+//     amount: string
+//   ) => {
+//     for (const wallet of wallets) {
+//      await waitForTx(
+//       await holder.sendTransaction({
+//         to: wallet,
+//         value: amount,
+//       })
+//      )
+//     }
+// };

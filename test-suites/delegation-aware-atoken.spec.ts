@@ -29,7 +29,7 @@ makeSuite('AToken: DelegationAwareAToken', (testEnv: TestEnv) => {
     ]);
   });
 
-  it('Tries to delegate with the caller not being the Aave admin and reverts', async () => {
+  it('Tries to delegate with the caller not being the Aave admin (revert expected)', async () => {
     const { users } = testEnv;
 
     await expect(

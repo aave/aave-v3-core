@@ -131,7 +131,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 
-  it('Tries to pause reserve with non-emergency-admin account and reverts', async () => {
+  it('Tries to pause reserve with non-emergency-admin account (revert expected)', async () => {
     const { configurator, weth, riskAdmin } = testEnv;
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, true),
@@ -139,7 +139,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
   });
 
-  it('Tries to unpause reserve with non-emergency-admin account and reverts', async () => {
+  it('Tries to unpause reserve with non-emergency-admin account (revert expected)', async () => {
     const { configurator, weth, riskAdmin } = testEnv;
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, false),
@@ -147,7 +147,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
   });
 
-  it('Tries to pause pool with not emergency admin and reverts', async () => {
+  it('Tries to pause pool with not emergency admin (revert expected)', async () => {
     const { users, configurator } = testEnv;
     await expect(configurator.connect(users[0].signer).setPoolPause(true)).to.be.revertedWith(
       PC_CALLER_NOT_EMERGENCY_ADMIN

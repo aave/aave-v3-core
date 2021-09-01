@@ -69,7 +69,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     expect(totSupplyAndRateAfter[1]).to.be.gt(0);
   });
 
-  it('Tries to mint not being the Pool and reverts', async () => {
+  it('Tries to mint not being the Pool (revert expected)', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
@@ -82,7 +82,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
   });
 
-  it('Tries to burn not being the Pool and reverts', async () => {
+  it('Tries to burn not being the Pool (revert expected)', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
@@ -98,7 +98,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to transfer debt tokens and reverts', async () => {
+  it('Tries to transfer debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -109,7 +109,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
-  it('Tries to approve debt tokens and reverts', async () => {
+  it('Tries to approve debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -123,7 +123,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to increase allowance of debt tokens and reverts', async () => {
+  it('Tries to increase allowance of debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -134,7 +134,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to decrease allowance of debt tokens and reverts', async () => {
+  it('Tries to decrease allowance of debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -145,7 +145,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to transferFrom and reverts', async () => {
+  it('Tries to transferFrom (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;

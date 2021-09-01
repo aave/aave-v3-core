@@ -81,7 +81,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
   });
 
-  it('Tries to update flashloan premium total > PERCENTAGE_FACTOR and reverts', async () => {
+  it('Tries to update flashloan premium total > PERCENTAGE_FACTOR (revert expected)', async () => {
     const { configurator } = testEnv;
 
     const newPremiumTotal = 10001;
@@ -90,7 +90,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to update flashloan premium total < FLASHLOAN_PREMIUM_TO_PROTOCOL and reverts', async () => {
+  it('Tries to update flashloan premium total < FLASHLOAN_PREMIUM_TO_PROTOCOL (revert expected)', async () => {
     const { configurator } = testEnv;
 
     const newPremiumToProtocol = 40;
@@ -111,7 +111,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to update flashloan premium to protocol > PERCENTAGE_FACTOR and reverts', async () => {
+  it('Tries to update flashloan premium to protocol > PERCENTAGE_FACTOR (revert expected)', async () => {
     const { configurator } = testEnv;
 
     const newPremiumToProtocol = 10001;
@@ -120,7 +120,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PC_FLASHLOAN_PREMIUM_INVALID);
   });
 
-  it('Tries to update flashloan premium to protocol > FLASHLOAN_PREMIUM_TOTAL and reverts', async () => {
+  it('Tries to update flashloan premium to protocol > FLASHLOAN_PREMIUM_TOTAL (revert expected)', async () => {
     const { configurator } = testEnv;
 
     const newPremiumToProtocol = 101;
@@ -129,21 +129,21 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PC_FLASHLOAN_PREMIUMS_MISMATCH);
   });
 
-  it('Tries to update borrowCap > MAX_BORROW_CAP and reverts', async () => {
+  it('Tries to update borrowCap > MAX_BORROW_CAP (revert expected)', async () => {
     const { configurator, weth } = testEnv;
     await expect(
       configurator.setBorrowCap(weth.address, BigNumber.from(MAX_BORROW_CAP).add(1))
     ).to.be.revertedWith(RC_INVALID_BORROW_CAP);
   });
 
-  it('Tries to update supplyCap > MAX_SUPPLY_CAP and reverts', async () => {
+  it('Tries to update supplyCap > MAX_SUPPLY_CAP (revert expected)', async () => {
     const { configurator, weth } = testEnv;
     await expect(
       configurator.setSupplyCap(weth.address, BigNumber.from(MAX_BORROW_CAP).add(1))
     ).to.be.revertedWith(RC_INVALID_SUPPLY_CAP);
   });
 
-  it('Tries to disable the DAI reserve with liquidity on it and reverts', async () => {
+  it('Tries to disable the DAI reserve with liquidity on it (revert expected)', async () => {
     const { dai, pool, configurator } = testEnv;
     const userAddress = await pool.signer.getAddress();
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');

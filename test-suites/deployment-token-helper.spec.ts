@@ -50,7 +50,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(BORROW_RATE);
   });
 
-  it('A non-owner user tries to set a new borrow rate and reverts', async () => {
+  it('A non-owner user tries to set a new borrow rate (revert expected)', async () => {
     const { users } = testEnv;
 
     const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
@@ -64,7 +64,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
   });
 
-  it('Owner tries to set new borrow rates with wrong input and reverts', async () => {
+  it('Owner tries to set new borrow rates with wrong input (revert expected)', async () => {
     const { poolAdmin } = testEnv;
 
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
@@ -90,7 +90,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     expect(await rateOracle.owner()).to.be.eq(users[1].address);
   });
 
-  it('Owner tries to transfer ownership to ZERO address and reverts', async () => {
+  it('Owner tries to transfer ownership to ZERO address (revert expected)', async () => {
     const { poolAdmin } = testEnv;
 
     expect(await rateOracle.owner()).to.be.eq(tokenHelper.address);
@@ -100,7 +100,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     expect(await rateOracle.owner()).to.be.eq(tokenHelper.address);
   });
 
-  it('Owner tries to transfer ownership but helper is not the owner of RateOracle and reverts', async () => {
+  it('Owner tries to transfer ownership but helper is not the owner of RateOracle (revert expected)', async () => {
     const { poolAdmin, users } = testEnv;
 
     // Transfer ownership of RateOracle to another address

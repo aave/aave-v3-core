@@ -100,7 +100,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(currentLiquidityIndex).to.be.equal('1000000000000000000000000000');
   });
 
-  it('Takes WETH flashloan, does not return the funds with mode = 0 and reverts', async () => {
+  it('Takes WETH flashloan, does not return the funds with mode = 0 (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
     expect(await _mockFlashLoanReceiver.setFailExecutionTransfer(true));
@@ -120,7 +120,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
   });
 
-  it('Takes WETH flash loan, simulating a receiver as EOA and reverts', async () => {
+  it('Takes WETH flash loan, simulating a receiver as EOA (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
     expect(await _mockFlashLoanReceiver.setFailExecutionTransfer(true));
@@ -141,7 +141,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ).to.be.revertedWith(P_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
   });
 
-  it('Takes a WETH flashloan with an invalid mode and reverts', async () => {
+  it('Takes a WETH flashloan with an invalid mode (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
     expect(await _mockFlashLoanReceiver.setSimulateEOA(false));
@@ -204,7 +204,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(callerDebt.toString()).to.be.equal('800000000000000000', 'Invalid user debt');
   });
 
-  it('Tries to take a flashloan that is bigger than the available liquidity and reverts', async () => {
+  it('Tries to take a flashloan that is bigger than the available liquidity (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
 
@@ -222,7 +222,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
   });
 
-  it('Tries to take a flashloan using a non contract address as receiver and reverts', async () => {
+  it('Tries to take a flashloan using a non contract address as receiver (revert expected)', async () => {
     const { pool, deployer, weth, users } = testEnv;
     const caller = users[1];
 
@@ -289,7 +289,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(userData.currentATokenBalance).to.be.equal(expectedLiquidity, 'Invalid user balance');
   });
 
-  it('Takes out a 500 USDC flashloan with mode = 0, does not return the funds and reverts', async () => {
+  it('Takes out a 500 USDC flashloan with mode = 0, does not return the funds (revert expected)', async () => {
     const { usdc, pool, users } = testEnv;
     const caller = users[2];
 
@@ -356,7 +356,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(callerDebt.toString()).to.be.equal('500000000', 'Invalid user debt');
   });
 
-  it('Caller deposits 1000 DAI as collateral, Takes a WETH flashloan with mode = 0, does not approve the transfer of the funds and reverts', async () => {
+  it('Caller deposits 1000 DAI as collateral, Takes a WETH flashloan with mode = 0, does not approve the transfer of the funds (revert expected)', async () => {
     const { dai, pool, weth, users } = testEnv;
     const caller = users[3];
 
@@ -425,7 +425,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(callerDebt.toString()).to.be.equal(flashAmount, 'Invalid user debt');
   });
 
-  it('Caller takes a WETH flashloan with mode = 1 onBehalfOf user without allowance and reverts', async () => {
+  it('Caller takes a WETH flashloan with mode = 1 onBehalfOf user without allowance (revert expected)', async () => {
     const { dai, pool, weth, users, helpersContract } = testEnv;
 
     const caller = users[5];

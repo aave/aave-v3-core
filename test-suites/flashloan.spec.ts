@@ -235,7 +235,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       reservesAfter.sub(feesToProtocol).mul(liquidityIndexBefore).div(currentLiquidityIndex)
     ).to.be.equal(reservesBefore);
   });
-  it('Takes WETH flashloan, does not return the funds with mode = 0 and reverts', async () => {
+  it('Takes WETH flashloan, does not return the funds with mode = 0 (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
@@ -255,7 +255,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
   });
 
-  it('Takes WETH flashloan, simulating a receiver as EOA and reverts', async () => {
+  it('Takes WETH flashloan, simulating a receiver as EOA (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
@@ -276,7 +276,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ).to.be.revertedWith(P_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
   });
 
-  it('Takes a WETH flashloan with an invalid mode and reverts', async () => {
+  it('Takes a WETH flashloan with an invalid mode (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
     await _mockFlashLoanReceiver.setSimulateEOA(false);
@@ -349,7 +349,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(caller.signer).repay(weth.address, MAX_UINT_AMOUNT, 2, caller.address);
   });
-  it('Tries to take a flashloan that is bigger than the available liquidity and reverts', async () => {
+  it('Tries to take a flashloan that is bigger than the available liquidity (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
 
@@ -367,7 +367,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
   });
 
-  it('Tries to take a flashloan using a non contract address as receiver and reverts', async () => {
+  it('Tries to take a flashloan using a non contract address as receiver (revert expected)', async () => {
     const { pool, deployer, weth, users } = testEnv;
     const caller = users[1];
 
@@ -449,7 +449,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(reservesAfter).to.be.equal(reservesBefore.add(feesToProtocol));
   });
 
-  it('Takes out a 500 USDC flashloan with mode = 0, does not return the funds and reverts', async () => {
+  it('Takes out a 500 USDC flashloan with mode = 0, does not return the funds (revert expected)', async () => {
     const { usdc, pool, users } = testEnv;
     const caller = users[2];
 

@@ -69,7 +69,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to mint not being the Pool and reverts', async () => {
+  it('Tries to mint not being the Pool (revert expected)', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiVariableDebtTokenAddress = (
@@ -83,7 +83,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
   });
 
-  it('Tries to burn not being the Pool and reverts', async () => {
+  it('Tries to burn not being the Pool (revert expected)', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiVariableDebtTokenAddress = (
@@ -97,7 +97,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to mint with amountScaled == 0 and reverts', async () => {
+  it('Tries to mint with amountScaled == 0 (revert expected)', async () => {
     const { deployer, pool, dai, helpersContract, users } = testEnv;
 
     // Impersonate the Pool
@@ -118,7 +118,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
   });
 
-  it('Tries to burn with amountScaled == 0 and reverts', async () => {
+  it('Tries to burn with amountScaled == 0 (revert expected)', async () => {
     const { deployer, pool, dai, helpersContract, users } = testEnv;
 
     // Impersonate the Pool
@@ -137,7 +137,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_INVALID_BURN_AMOUNT);
   });
 
-  it('Tries to transfer debt tokens and reverts', async () => {
+  it('Tries to transfer debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -149,7 +149,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
-  it('Tries to approve debt tokens and reverts', async () => {
+  it('Tries to approve debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -164,7 +164,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to increaseAllowance and reverts', async () => {
+  it('Tries to increaseAllowance (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -176,7 +176,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to decreaseAllowance and reverts', async () => {
+  it('Tries to decreaseAllowance (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -188,7 +188,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('Tries to transferFrom debt tokens and reverts', async () => {
+  it('Tries to transferFrom debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)

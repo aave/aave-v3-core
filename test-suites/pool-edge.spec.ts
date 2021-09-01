@@ -35,7 +35,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(await pool.MAX_NUMBER_RESERVES()).to.be.eq(MAX_NUMBER_RESERVES);
   });
 
-  it('Tries to initialize a reserve as non PoolConfigurator and reverts', async () => {
+  it('Tries to initialize a reserve as non PoolConfigurator (revert expected)', async () => {
     const { pool, users, dai, helpersContract } = testEnv;
 
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
@@ -63,7 +63,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(await pool.connect(users[0].signer).mintToTreasury([dai.address]));
   });
 
-  it('Tries to call `finalizeTransfer()` by a non-aToken address and reverts', async () => {
+  it('Tries to call `finalizeTransfer()` by a non-aToken address (revert expected)', async () => {
     const { pool, dai, users } = testEnv;
 
     await expect(
@@ -73,7 +73,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(P_CALLER_MUST_BE_AN_ATOKEN);
   });
 
-  it('Tries to call `initReserve()` with an EOA as reserve and reverts', async () => {
+  it('Tries to call `initReserve()` with an EOA as reserve (revert expected)', async () => {
     const { pool, deployer, users, configurator } = testEnv;
 
     // Impersonate PoolConfigurator
@@ -119,7 +119,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(await pool.paused()).to.be.eq(true);
   });
 
-  it('Initialize an already initialized reserve. ReserveLogic `init` where aTokenAddress != ZERO_ADDRESS and reverts', async () => {
+  it('Initialize an already initialized reserve. ReserveLogic `init` where aTokenAddress != ZERO_ADDRESS (revert expected)', async () => {
     const { pool, dai, deployer, configurator } = testEnv;
 
     // Impersonate PoolConfigurator
@@ -183,7 +183,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(poolListAfter.length).to.be.eq(poolListMid.length);
   });
 
-  it('Initialize reserves until max, then add one more (reverts)', async () => {
+  it('Initialize reserves until max, then add one more (revert expected)', async () => {
     // Upgrade the Pool to update the maximum number of reserves
     const { addressesProvider, poolAdmin, pool, dai, deployer, configurator } = testEnv;
 

@@ -40,7 +40,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     await pool.deposit(dai.address, utils.parseEther('20000'), deployer.address, 0);
   });
 
-  it('Tries to submit a permit with 0 expiration and reverts', async () => {
+  it('Tries to submit a permit with 0 expiration (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -166,7 +166,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     expect((await aDai._nonces(owner.address)).toNumber()).to.be.equal(2);
   });
 
-  it('Tries to submit a permit with invalid nonce and reverts', async () => {
+  it('Tries to submit a permit with invalid nonce (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -198,7 +198,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     ).to.be.revertedWith('INVALID_SIGNATURE');
   });
 
-  it('Tries to submit a permit with invalid expiration (previous to the current block) and reverts', async () => {
+  it('Tries to submit a permit with invalid expiration (previous to the current block) (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -230,7 +230,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     ).to.be.revertedWith('INVALID_EXPIRATION');
   });
 
-  it('Tries to submit a permit with invalid signature and reverts', async () => {
+  it('Tries to submit a permit with invalid signature (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -262,7 +262,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     ).to.be.revertedWith('INVALID_SIGNATURE');
   });
 
-  it('Tries to submit a permit with invalid owner and reverts', async () => {
+  it('Tries to submit a permit with invalid owner (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];

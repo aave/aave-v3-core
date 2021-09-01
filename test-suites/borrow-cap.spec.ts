@@ -130,7 +130,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(daiBorrowCap).to.be.equal(10);
   });
 
-  it('Tries to borrow any DAI or USDC, stable or variable, (> BORROW_CAP) and reverts', async () => {
+  it('Tries to borrow any DAI or USDC, stable or variable, (> BORROW_CAP) (revert expected)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
     const borrowedAmount = '10';
 
@@ -155,7 +155,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
   });
 
-  it('Tries to set the borrow cap for USDC and DAI to > MAX_BORROW_CAP and reverts', async () => {
+  it('Tries to set the borrow cap for USDC and DAI to > MAX_BORROW_CAP (revert expected)', async () => {
     const { configurator, usdc, dai } = testEnv;
     const newCap = Number(MAX_BORROW_CAP) + 1;
 
@@ -209,7 +209,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
       )
     );
   });
-  it('Tries to borrow 100 variable DAI and 100 stable USDC (= BORROW_CAP) and reverts', async () => {
+  it('Tries to borrow 100 variable DAI and 100 stable USDC (= BORROW_CAP) (revert expected)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
     const borrowedAmount = '100';
 
@@ -318,7 +318,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(daiBorrowCap).to.be.equal(newCap);
   });
 
-  it('Tries to borrows 100 variable DAI and 100 stable USDC (> BORROW_CAP) and reverts', async () => {
+  it('Tries to borrows 100 variable DAI and 100 stable USDC (> BORROW_CAP) (revert expected)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
 
     const borrowedAmount = '100';

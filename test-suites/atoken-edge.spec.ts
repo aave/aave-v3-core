@@ -16,7 +16,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     expect(await aDai.allowance(users[0].address, users[1].address)).to.be.eq(MAX_UINT_AMOUNT);
   });
 
-  it('approve() with a ZERO_ADDRESS spender and reverts', async () => {
+  it('approve() with a ZERO_ADDRESS spender (revert expected)', async () => {
     const { users, aDai } = testEnv;
     await expect(
       aDai.connect(users[0].signer).approve(ZERO_ADDRESS, MAX_UINT_AMOUNT)
@@ -50,21 +50,21 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(0);
   });
 
-  it('transfer() with a ZERO_ADDRESS recipient and reverts', async () => {
+  it('transfer() with a ZERO_ADDRESS recipient (revert expected)', async () => {
     const { users, aDai } = testEnv;
     await expect(aDai.connect(users[1].signer).transfer(ZERO_ADDRESS, 0)).to.be.revertedWith(
       'ERC20: transfer to the zero address'
     );
   });
 
-  it('transfer() with a ZERO_ADDRESS origin and reverts', async () => {
+  it('transfer() with a ZERO_ADDRESS origin (revert expected)', async () => {
     const { users, aDai } = testEnv;
     await expect(
       aDai.connect(users[1].signer).transferFrom(ZERO_ADDRESS, users[1].address, 0)
     ).to.be.revertedWith('ERC20: transfer from the zero address');
   });
 
-  it('mint() when amountScaled == 0 and reverts', async () => {
+  it('mint() when amountScaled == 0 (revert expected)', async () => {
     const { deployer, pool, aDai, users } = testEnv;
 
     // Impersonate Pool
@@ -77,7 +77,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
   });
 
-  it('mint() with ZERO_ADDRESS account and reverts', async () => {
+  it('mint() with ZERO_ADDRESS account (revert expected)', async () => {
     const { deployer, pool, aDai } = testEnv;
 
     // Impersonate Pool
@@ -96,7 +96,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ERC20: mint to the zero address');
   });
 
-  it('burn() when amountScaled == 0 and reverts', async () => {
+  it('burn() when amountScaled == 0 (revert expected)', async () => {
     const { deployer, pool, aDai, users } = testEnv;
 
     // Impersonate Pool

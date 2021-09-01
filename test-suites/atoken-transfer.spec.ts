@@ -212,7 +212,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
     expect(userReserveData.currentStableDebt.toString()).to.be.eq(amountWETHtoBorrow);
   });
 
-  it('User 1 tries to transfer all the DAI used as collateral back to user 0 and reverts', async () => {
+  it('User 1 tries to transfer all the DAI used as collateral back to user 0 (revert expected)', async () => {
     const { users, aDai, dai } = testEnv;
 
     const amountDAItoTransfer = await convertToCurrencyDecimals(dai.address, DAI_AMOUNT_TO_DEPOSIT);

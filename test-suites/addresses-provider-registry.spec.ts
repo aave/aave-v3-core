@@ -18,7 +18,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to register an addresses provider with id 0 and reverts', async () => {
+  it('Tries to register an addresses provider with id 0 (revert expected)', async () => {
     const { users, registry } = testEnv;
     const { PAPR_INVALID_ADDRESSES_PROVIDER_ID } = ProtocolErrors;
 
@@ -68,7 +68,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, 'Invalid addresses');
   });
 
-  it('Tries to remove a unregistered addressesProvider and reverts', async () => {
+  it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
     const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
 
     const { users, registry } = testEnv;
@@ -78,7 +78,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to remove a unregistered addressesProvider and reverts', async () => {
+  it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
     const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
 
     const { users, registry } = testEnv;

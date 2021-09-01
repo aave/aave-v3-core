@@ -33,7 +33,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  it('validateDeposit() when reserve is not active and reverts', async () => {
+  it('validateDeposit() when reserve is not active (revert expected)', async () => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
@@ -54,7 +54,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
-  it('validateDeposit() when reserve is frozen and reverts', async () => {
+  it('validateDeposit() when reserve is frozen (revert expected)', async () => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
@@ -75,7 +75,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_RESERVE_FROZEN);
   });
 
-  it('validateBorrow() when reserve is not active and reverts', async () => {
+  it('validateBorrow() when reserve is not active (revert expected)', async () => {
     /**
      * Unclear how we should enter this stage with normal usage.
      * Can be done by sending dai directly to aDai contract after it have been deactivated.
@@ -112,7 +112,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
-  it('validateBorrow() when reserve is frozen and reverts', async () => {
+  it('validateBorrow() when reserve is frozen (revert expected)', async () => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, usdc } = testEnv;
     const user = users[0];
 
@@ -143,7 +143,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_RESERVE_FROZEN);
   });
 
-  it('validateBorrow() when amount == 0 and reverts', async () => {
+  it('validateBorrow() when amount == 0 (revert expected)', async () => {
     const { pool, users, dai } = testEnv;
     const user = users[0];
 
@@ -152,7 +152,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_INVALID_AMOUNT);
   });
 
-  it('validateBorrow() when borrowing is not enabled and reverts', async () => {
+  it('validateBorrow() when borrowing is not enabled (revert expected)', async () => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, usdc } = testEnv;
     const user = users[0];
 
@@ -260,7 +260,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
   });
 
-  it('validateBorrow() stable borrowing where collateral is mostly the same currency is borrowing and reverts', async () => {
+  it('validateBorrow() stable borrowing where collateral is mostly the same currency is borrowing (revert expected)', async () => {
     // Stable borrowing
     // isUsingAsCollateral == true
     // ltv != 0
@@ -287,7 +287,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY);
   });
 
-  it('validateBorrow() stable borrowing when amount > maxLoanSizeStable and reverts', async () => {
+  it('validateBorrow() stable borrowing when amount > maxLoanSizeStable (revert expected)', async () => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
@@ -309,7 +309,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
   });
 
-  it('validateLiquidationCall() when healthFactor > threshold and reverts', async () => {
+  it('validateLiquidationCall() when healthFactor > threshold (revert expected)', async () => {
     // Liquidation something that is not liquidatable
     const { pool, users, dai, usdc } = testEnv;
     const depositor = users[0];
@@ -354,7 +354,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD);
   });
 
-  it('validateRepay() when reserve is not active and reverts', async () => {
+  it('validateRepay() when reserve is not active (revert expected)', async () => {
     // Unsure how we can end in this scenario. Would require that it could be deactivated after someone have borrowed
     const { pool, users, dai, helpersContract, configurator, poolAdmin } = testEnv;
     const user = users[0];
@@ -442,7 +442,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     await setAutomine(true);
   });
 
-  it('validateRepay() the variable debt when is 0 (stableDebt > 0) and reverts', async () => {
+  it('validateRepay() the variable debt when is 0 (stableDebt > 0) (revert expected)', async () => {
     // (stableDebt > 0 && DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
     // (variableDebt > 0 &&	DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
 
@@ -469,7 +469,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_NO_DEBT_OF_SELECTED_TYPE);
   });
 
-  it('validateRepay() the stable debt when is 0 (variableDebt > 0) and reverts', async () => {
+  it('validateRepay() the stable debt when is 0 (variableDebt > 0) (revert expected)', async () => {
     // (stableDebt > 0 && DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
     // (variableDebt > 0 &&	DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
 
@@ -544,7 +544,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_RESERVE_FROZEN);
   });
 
-  it('validateSwapRateMode() with currentRateMode not equal to stable or variable, and reverts', async () => {
+  it('validateSwapRateMode() with currentRateMode not equal to stable or variable, (revert expected)', async () => {
     const { pool, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
@@ -557,7 +557,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_INVALID_INTEREST_RATE_MODE_SELECTED);
   });
 
-  it('validateSwapRateMode() from variable to stable with stableBorrowing disabled and reverts', async () => {
+  it('validateSwapRateMode() from variable to stable with stableBorrowing disabled (revert expected)', async () => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
@@ -597,7 +597,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_STABLE_BORROWING_NOT_ENABLED);
   });
 
-  it('validateSwapRateMode() where collateral is mostly the same currency is borrowing and reverts', async () => {
+  it('validateSwapRateMode() where collateral is mostly the same currency is borrowing (revert expected)', async () => {
     // SwapRate from variable to stable
     // isUsingAsCollateral == true
     // ltv != 0
@@ -626,7 +626,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY);
   });
 
-  it('validateRebalanceStableBorrowRate() when reserve is not active and reverts', async () => {
+  it('validateRebalanceStableBorrowRate() when reserve is not active (revert expected)', async () => {
     const { pool, configurator, helpersContract, poolAdmin, users, dai } = testEnv;
     const user = users[0];
 
@@ -645,7 +645,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
-  it('validateSetUseReserveAsCollateral() when reserve is not active and reverts', async () => {
+  it('validateSetUseReserveAsCollateral() when reserve is not active (revert expected)', async () => {
     const { pool, configurator, helpersContract, poolAdmin, users, dai } = testEnv;
     const user = users[0];
 
@@ -668,7 +668,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
-  it('validateSetUseReserveAsCollateral() with userBalance == 0 and reverts', async () => {
+  it('validateSetUseReserveAsCollateral() with userBalance == 0 (revert expected)', async () => {
     const { pool, users, dai } = testEnv;
     const user = users[0];
 
@@ -681,7 +681,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0);
   });
 
-  it('validateFlashloan() with inconsistent params and reverts', async () => {
+  it('validateFlashloan() with inconsistent params (revert expected)', async () => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
