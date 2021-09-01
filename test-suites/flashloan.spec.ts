@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { BigNumber, ethers } from 'ethers';
-import { APPROVAL_AMOUNT_POOL, MAX_UINT_AMOUNT } from '../helpers/constants';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { ProtocolErrors } from '../helpers/types';
@@ -44,18 +44,18 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await weth.mint(amountToDeposit);
 
-    await weth.approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
 
     await aave.mint(amountToDeposit);
 
-    await aave.approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await aave.approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.deposit(aave.address, amountToDeposit, userAddress, '0');
     await dai.mint(amountToDeposit);
 
-    await dai.approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.deposit(dai.address, amountToDeposit, userAddress, '0');
   });
@@ -304,7 +304,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await dai.connect(caller.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
-    await dai.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
@@ -346,7 +346,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(callerDebt.toString()).to.be.equal('800000000000000000', 'Invalid user debt');
     // repays debt for later, so no interest accrue
     await weth.connect(caller.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
-    await weth.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(caller.signer).repay(weth.address, MAX_UINT_AMOUNT, 2, caller.address);
   });
   it('Tries to take a flashloan that is bigger than the available liquidity and reverts', async () => {
@@ -390,7 +390,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
-    await usdc.approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await usdc.approve(pool.address, MAX_UINT_AMOUNT);
 
     const amountToDeposit = await convertToCurrencyDecimals(usdc.address, '1000');
 
@@ -479,7 +479,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await weth.connect(caller.signer).mint(await convertToCurrencyDecimals(weth.address, '5'));
 
-    await weth.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const amountToDeposit = await convertToCurrencyDecimals(weth.address, '5');
 
@@ -517,7 +517,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await dai.connect(caller.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
-    await dai.connect(caller.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
@@ -584,7 +584,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     // Deposit 1000 dai for onBehalfOf user
     await dai.connect(onBehalfOf.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
-    await dai.connect(onBehalfOf.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(onBehalfOf.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 

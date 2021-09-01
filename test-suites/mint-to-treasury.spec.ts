@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { RateMode } from '../helpers/types';
-import { APPROVAL_AMOUNT_POOL, ONE_YEAR } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, ONE_YEAR } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { advanceTimeAndBlock } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
@@ -16,7 +16,7 @@ makeSuite('Mint To Treasury', (testEnv: TestEnv) => {
     await expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
 
     // user 0 deposits 1000 DAI
-    await expect(await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL));
+    await expect(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
     await expect(
       await pool
         .connect(users[0].signer)

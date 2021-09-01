@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { DRE } from '../helpers/misc-utils';
-import { APPROVAL_AMOUNT_POOL, oneEther } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
@@ -29,7 +29,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await dai.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     //user 1 deposits 1000 DAI
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
@@ -43,7 +43,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     await weth.connect(borrower.signer).mint(amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
-    await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     //user 2 deposits 1 WETH
     await pool
@@ -133,7 +133,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await dai.approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
@@ -268,7 +268,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await usdc.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     //user 3 deposits 1000 USDC
     const amountUSDCtoDeposit = await convertToCurrencyDecimals(usdc.address, '1000');
@@ -284,7 +284,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     await weth.connect(borrower.signer).mint(amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
-    await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(borrower.signer)
@@ -313,7 +313,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await usdc.approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await usdc.approve(pool.address, MAX_UINT_AMOUNT);
 
     const userReserveDataBefore = await helpersContract.getUserReserveData(
       usdc.address,

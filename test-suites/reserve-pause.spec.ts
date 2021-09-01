@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { APPROVAL_AMOUNT_POOL } from '../helpers/constants';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
@@ -29,7 +29,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     await dai.connect(users[0].signer).mint(amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
-    await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[0].signer)
       .deposit(dai.address, amountDAItoDeposit, users[0].address, '0');
@@ -84,7 +84,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     await dai.connect(users[0].signer).mint(amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
-    await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     // Configurator pauses the pool
     await configurator.connect(users[1].signer).setReservePause(dai.address, true);
@@ -104,7 +104,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     await dai.connect(users[0].signer).mint(amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
-    await dai.connect(users[0].signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[0].signer)
       .deposit(dai.address, amountDAItoDeposit, users[0].address, '0');
@@ -194,7 +194,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
       .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
-    await usdc.connect(depositor.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     //user 3 deposits 1000 USDC
     const amountUSDCtoDeposit = await convertToCurrencyDecimals(usdc.address, '1000');
@@ -210,7 +210,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     await weth.connect(borrower.signer).mint(amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
-    await weth.connect(borrower.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(borrower.signer)
@@ -235,7 +235,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
 
     //mints dai to the liquidator
     await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
-    await usdc.approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await usdc.approve(pool.address, MAX_UINT_AMOUNT);
 
     const userReserveDataBefore = await helpersContract.getUserReserveData(
       usdc.address,
@@ -264,11 +264,11 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     const amountToBorrow = await convertToCurrencyDecimals(usdc.address, '65');
 
     await weth.connect(user.signer).mint(amountWETHToDeposit);
-    await weth.connect(user.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 
     await dai.connect(user.signer).mint(amountDAIToDeposit);
-    await dai.connect(user.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(dai.address, amountDAIToDeposit, user.address, '0');
 
     await pool.connect(user.signer).borrow(usdc.address, amountToBorrow, 2, 0, user.address);
@@ -305,7 +305,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
 
     const amountWETHToDeposit = utils.parseEther('1');
     await weth.connect(user.signer).mint(amountWETHToDeposit);
-    await weth.connect(user.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
+    await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 
     // Pause pool
