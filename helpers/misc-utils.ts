@@ -1,18 +1,10 @@
-import BN = require('bn.js');
 import low from 'lowdb';
 import FileSync from 'lowdb/adapters/FileSync';
-import { WAD } from './constants';
 import { Wallet, ContractTransaction, BigNumber } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { tEthereumAddress } from './types';
 import { isAddress } from 'ethers/lib/utils';
 import { isZeroAddress } from 'ethereumjs-util';
-
-export const toWad = (value: string | number) => BigNumber.from(value).mul(WAD);
-
-export const bnToBigNumber = (amount: BN): BigNumber => BigNumber.from(<any>amount);
-
-export const stringToBigNumber = (amount: string): BigNumber => BigNumber.from(amount);
 
 export const getDb = () => low(new FileSync('./deployed-contracts.json'));
 
