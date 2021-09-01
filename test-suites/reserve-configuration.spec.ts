@@ -159,7 +159,7 @@ describe('ReserveConfiguration', async () => {
     const { RC_INVALID_LTV } = ProtocolErrors;
 
     // setLTV to MAX_VALID_LTV + 1
-    await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).revertedWith(RC_INVALID_LTV);
+    await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).to.be.revertedWith(RC_INVALID_LTV);
     expect(await configMock.getLtv()).to.be.eq(ZERO);
   });
 
@@ -189,7 +189,7 @@ describe('ReserveConfiguration', async () => {
     // setLiquidationThreshold to MAX_VALID_LIQUIDATION_THRESHOLD + 1
     await expect(
       configMock.setLiquidationThreshold(MAX_VALID_LIQUIDATION_THRESHOLD.add(1))
-    ).revertedWith(RC_INVALID_LIQ_THRESHOLD);
+    ).to.be.revertedWith(RC_INVALID_LIQ_THRESHOLD);
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
   });
 
@@ -211,7 +211,7 @@ describe('ReserveConfiguration', async () => {
     const { RC_INVALID_DECIMALS } = ProtocolErrors;
 
     // setDecimals to MAX_VALID_DECIMALS + 1
-    await expect(configMock.setDecimals(MAX_VALID_DECIMALS.add(1))).revertedWith(
+    await expect(configMock.setDecimals(MAX_VALID_DECIMALS.add(1))).to.be.revertedWith(
       RC_INVALID_DECIMALS
     );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
