@@ -77,14 +77,15 @@ makeSuite('Drop Reserve', (testEnv: TestEnv) => {
     const { deployer, pool, dai, configurator, helpersContract } = testEnv;
 
     await pool.withdraw(dai.address, MAX_UINT_AMOUNT, deployer.address);
-    await configurator.dropReserve(dai.address);
+    const reserveCount = (await pool.getReservesList()).length;
+    expect(await configurator.dropReserve(dai.address));
 
     const tokens = await pool.getReservesList();
 
+    expect(tokens.length).to.be.eq(reserveCount - 1);
     expect(tokens.includes(dai.address)).to.be.false;
 
     const { isActive } = await helpersContract.getReserveConfigurationData(dai.address);
-
     expect(isActive).to.be.false;
   });
 });
