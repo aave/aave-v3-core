@@ -1,14 +1,12 @@
 import rawBRE from 'hardhat';
-import { MockContract } from 'ethereum-waffle';
+import { ethers, Signer } from 'ethers';
 import {
   insertContractAddressInDb,
   getEthersSigners,
-  registerContractInJsonDb,
   getEthersSignersAddresses,
 } from '../helpers/contracts-helpers';
 import {
   deployPoolAddressesProvider,
-  deployMintableERC20,
   deployPoolAddressesProviderRegistry,
   deployPoolConfigurator,
   deployPool,
@@ -19,14 +17,10 @@ import {
   deployRateOracle,
   deployStableAndVariableTokensHelper,
   deployATokensAndRatesHelper,
-  deployWETHMocked,
-  deployMockUniswapRouter,
   deployMockIncentivesController,
+  deployAllMockTokens,
 } from '../helpers/contracts-deployments';
-import { ethers, Signer } from 'ethers';
-import { TokenContractId, eContractid, tEthereumAddress } from '../helpers/types';
-import { MintableERC20 } from '../types/MintableERC20';
-import { initializeMakeSuite } from './helpers/make-suite';
+import { eContractid, tEthereumAddress } from '../helpers/types';
 import {
   setInitialAssetPricesInOracle,
   deployAllMockAggregators,
@@ -35,13 +29,12 @@ import {
 import { waitForTx } from '../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../helpers/init-helpers';
 import AaveConfig from '../market-config';
-import { ZERO_ADDRESS } from '../helpers/constants';
 import {
   getPool,
   getPoolConfiguratorProxy,
   getPairsTokenAggregator,
 } from '../helpers/contracts-getters';
-import { WETH9Mocked } from '../types/WETH9Mocked';
+import { initializeMakeSuite } from './helpers/make-suite';
 
 const MOCK_USD_PRICE_IN_WEI = AaveConfig.ProtocolGlobalParams.MockUsdPriceInWei;
 const ALL_ASSETS_INITIAL_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
@@ -49,41 +42,11 @@ const USD_ADDRESS = AaveConfig.ProtocolGlobalParams.UsdAddress;
 const MOCK_CHAINLINK_AGGREGATORS_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
 const RATE_ORACLE_RATES_COMMON = AaveConfig.RateOracleRatesCommon;
 
-const deployAllMockTokens = async (deployer: Signer) => {
-  const tokens: { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked } = {};
-
-  const protoConfigData = AaveConfig.ReservesConfig;
-
-  for (const tokenSymbol of Object.keys(TokenContractId)) {
-    if (tokenSymbol === 'WETH') {
-      tokens[tokenSymbol] = await deployWETHMocked();
-      await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
-      continue;
-    }
-    let decimals = 18;
-
-    let configData = (<any>protoConfigData)[tokenSymbol];
-
-    if (!configData) {
-      decimals = 18;
-    }
-
-    tokens[tokenSymbol] = await deployMintableERC20([
-      tokenSymbol,
-      tokenSymbol,
-      configData ? configData.reserveDecimals : 18,
-    ]);
-    await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
-  }
-
-  return tokens;
-};
-
 const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   console.time('setup');
   const aaveAdmin = await deployer.getAddress();
 
-  const mockTokens = await deployAllMockTokens(deployer);
+  const mockTokens = await deployAllMockTokens();
   console.log('Deployed mocks');
   const addressesProvider = await deployPoolAddressesProvider(AaveConfig.MarketId);
   await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
@@ -234,7 +197,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     config;
   const treasuryAddress = config.ReserveFactorTreasuryAddress;
 
-  // TODO: We are adding an incentives controller
+  // Add an IncentivesController
   const mockIncentivesController = await deployMockIncentivesController();
 
   await initReservesByHelper(
@@ -250,14 +213,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   );
 
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
-  // Todo: Added two reads as the below was messing the coverage up, as we never entered `getReserveList()` without anything being dropped.
-  const reserveListBefore = await poolProxy.getReservesList();
-  await poolConfiguratorProxy.dropReserve(mockTokens.KNC.address);
-  const reserveListAfter = await poolProxy.getReservesList();
-
+  
   await deployMockFlashLoanReceiver(addressesProvider.address);
-
-  const mockUniswapRouter = await deployMockUniswapRouter();
 
   console.timeEnd('setup');
 };

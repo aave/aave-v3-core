@@ -1,6 +1,5 @@
-import { parseEther, parseUnits } from 'ethers/lib/utils';
-import { parse } from 'path';
-import { oneRay, MOCK_CHAINLINK_AGGREGATORS_PRICES } from '../helpers/constants';
+import { utils } from 'ethers';
+import { MOCK_CHAINLINK_AGGREGATORS_PRICES } from '../helpers/constants';
 import { IAaveConfiguration, eEthereumNetwork } from '../helpers/types';
 
 import {
@@ -34,7 +33,7 @@ export const AaveConfig: IAaveConfiguration = {
   StableDebtTokenNamePrefix: 'Aave stable debt bearing',
   VariableDebtTokenNamePrefix: 'Aave variable debt bearing',
   SymbolPrefix: '',
-  ProviderId: 0, // Overriden in index.ts
+  ProviderId: 0, // Overridden in index.ts
   ProtocolGlobalParams: {
     TokenDistributorPercentageBase: '10000',
     MockUsdPriceInWei: '5848466240000000',
@@ -102,64 +101,64 @@ export const AaveConfig: IAaveConfiguration = {
   },
   RateOracleRatesCommon: {
     AAVE: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     BAT: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     BUSD: {
-      borrowRate: parseUnits('0.05', 27).toString(),
+      borrowRate: utils.parseUnits('0.05', 27).toString(),
     },
     DAI: {
-      borrowRate: parseUnits('0.039', 27).toString(),
+      borrowRate: utils.parseUnits('0.039', 27).toString(),
     },
     ENJ: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     KNC: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     LINK: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     MANA: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     MKR: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     REN: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     SNX: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     SUSD: {
-      borrowRate: parseUnits('0.035', 27).toString(),
+      borrowRate: utils.parseUnits('0.035', 27).toString(),
     },
     TUSD: {
-      borrowRate: parseUnits('0.035', 27).toString(),
+      borrowRate: utils.parseUnits('0.035', 27).toString(),
     },
     UNI: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     USDC: {
-      borrowRate: parseUnits('0.039', 27).toString(),
+      borrowRate: utils.parseUnits('0.039', 27).toString(),
     },
     USDT: {
-      borrowRate: parseUnits('0.035', 27).toString(),
+      borrowRate: utils.parseUnits('0.035', 27).toString(),
     },
     WBTC: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     WETH: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     YFI: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
     ZRX: {
-      borrowRate: parseUnits('0.03', 27).toString(),
+      borrowRate: utils.parseUnits('0.03', 27).toString(),
     },
   },
 };
