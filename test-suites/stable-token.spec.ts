@@ -14,6 +14,7 @@ import {
 import { StableDebtTokenFactory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
@@ -38,19 +39,30 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     expect(totSupplyAndRateBefore[1].toString()).to.be.eq('0');
 
     // Need to create some debt to do this good
-    await dai.connect(users[0].signer).mint(utils.parseUnits('1000', 18));
+    await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[0].signer)
-      .deposit(dai.address, utils.parseUnits('1000', 18), users[0].address, 0);
-    await weth.connect(users[1].signer).mint(utils.parseUnits('10', 18));
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1000'),
+        users[0].address,
+        0
+      );
+    await weth.connect(users[1].signer).mint(utils.parseEther('10'));
     await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[1].signer)
-      .deposit(weth.address, utils.parseUnits('10', 18), users[1].address, 0);
+      .deposit(weth.address, utils.parseEther('10'), users[1].address, 0);
     await pool
       .connect(users[1].signer)
-      .borrow(dai.address, utils.parseUnits('200', 18), RateMode.Stable, 0, users[1].address);
+      .borrow(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '200'),
+        RateMode.Stable,
+        0,
+        users[1].address
+      );
 
     const totSupplyAndRateAfter = await stableDebtContract.getTotalSupplyAndAvgRate();
     expect(totSupplyAndRateAfter[0]).to.be.gt(0);
