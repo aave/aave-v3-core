@@ -6,6 +6,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import './helpers/utils/wadraymath';
 
 makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
@@ -144,9 +145,9 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     await configurator.connect(users[1].signer).setReservePause(dai.address, true);
 
     // Try to execute liquidation
-    await expect(pool.connect(user.signer).repay(dai.address, '1', '1', user.address)).to.be.revertedWith(
-      VL_RESERVE_PAUSED
-    );
+    await expect(
+      pool.connect(user.signer).repay(dai.address, '1', '1', user.address)
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause the pool
     await configurator.connect(users[1].signer).setReservePause(dai.address, false);
@@ -222,7 +223,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
 
     const amountUSDCToBorrow = await convertToCurrencyDecimals(
       usdc.address,
-      userGlobalData.availableBorrowsBase.div(usdcPrice.toString()).percentMul(9502).toString()
+      userGlobalData.availableBorrowsBase.div(usdcPrice).percentMul(9502).toString()
     );
 
     await pool
@@ -260,7 +261,7 @@ makeSuite('Pause One Reserve', (testEnv: TestEnv) => {
     const user = users[1];
     const amountWETHToDeposit = utils.parseEther('10');
     const amountDAIToDeposit = utils.parseEther('120');
-    const amountToBorrow = utils.parseUnits('65', 6);
+    const amountToBorrow = await convertToCurrencyDecimals(usdc.address, '65');
 
     await weth.connect(user.signer).mint(amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, APPROVAL_AMOUNT_POOL);
