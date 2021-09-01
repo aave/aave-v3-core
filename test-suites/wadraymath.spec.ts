@@ -1,13 +1,13 @@
-import { TestEnv, makeSuite } from './helpers/make-suite';
+import { expect } from 'chai';
+import { BigNumber } from 'ethers';
 import { MAX_UINT_AMOUNT, RAY, WAD, HALF_RAY, HALF_WAD } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { WadRayMathWrapper, WadRayMathWrapperFactory } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
-import { expect } from 'chai';
+import { makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
-import { BigNumber } from 'ethers';
 
-makeSuite('WadRayMath tests', (testEnv: TestEnv) => {
+makeSuite('WadRayMath', () => {
   const { MATH_MULTIPLICATION_OVERFLOW, MATH_ADDITION_OVERFLOW } = ProtocolErrors;
 
   let wrapper: WadRayMathWrapper;
