@@ -4,6 +4,7 @@ import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode, ProtocolErrors } from '../helpers/types';
 import { evmRevert, evmSnapshot, setAutomine } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -210,21 +211,37 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const user = users[0];
     const depositor = users[1];
 
-    await dai.connect(depositor.signer).mint(utils.parseUnits('2000', 18));
+    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '2000'));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
-      .deposit(dai.address, utils.parseUnits('2000', 18), depositor.address, 0);
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '2000'),
+        depositor.address,
+        0
+      );
 
-    await usdc.connect(user.signer).mint(utils.parseUnits('2000', 6));
+    await usdc.connect(user.signer).mint(await convertToCurrencyDecimals(usdc.address, '2000'));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .deposit(usdc.address, utils.parseUnits('2000', 6), user.address, 0);
+      .deposit(
+        usdc.address,
+        await convertToCurrencyDecimals(usdc.address, '2000'),
+        user.address,
+        0
+      );
 
     await pool
       .connect(user.signer)
-      .borrow(dai.address, utils.parseUnits('1000', 18), RateMode.Variable, 0, user.address);
+      .borrow(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1000'),
+        RateMode.Variable,
+        0,
+        user.address
+      );
 
     const daiPrice = await oracle.getAssetPrice(dai.address);
 
@@ -233,7 +250,13 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, utils.parseUnits('200', 18), RateMode.Variable, 0, user.address)
+        .borrow(
+          dai.address,
+          await convertToCurrencyDecimals(dai.address, '200'),
+          RateMode.Variable,
+          0,
+          user.address
+        )
     ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
   });
 
@@ -292,20 +315,36 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const depositor = users[0];
     const borrower = users[1];
 
-    await dai.connect(depositor.signer).mint(utils.parseUnits('500', 18));
+    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '500'));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
-      .deposit(dai.address, utils.parseUnits('500', 18), depositor.address, 0);
-    await usdc.connect(borrower.signer).mint(utils.parseUnits('500', 6));
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '500'),
+        depositor.address,
+        0
+      );
+    await usdc.connect(borrower.signer).mint(await convertToCurrencyDecimals(usdc.address, '500'));
     await usdc.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
-      .deposit(usdc.address, utils.parseUnits('500', 6), borrower.address, 0);
+      .deposit(
+        usdc.address,
+        await convertToCurrencyDecimals(usdc.address, '500'),
+        borrower.address,
+        0
+      );
 
     await pool
       .connect(borrower.signer)
-      .borrow(dai.address, utils.parseUnits('250', 18), RateMode.Variable, 0, borrower.address);
+      .borrow(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '250'),
+        RateMode.Variable,
+        0,
+        borrower.address
+      );
 
     // Try to liquidate the borrower
     await expect(
@@ -537,15 +576,21 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     // We need some variable debt, and then flip it
 
-    await dai.connect(user.signer).mint(utils.parseUnits('5000', 18));
+    await dai.connect(user.signer).mint(await convertToCurrencyDecimals(dai.address, '5000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .deposit(dai.address, utils.parseUnits('5000', 18), user.address, 0);
+      .deposit(dai.address, await convertToCurrencyDecimals(dai.address, '5000'), user.address, 0);
 
     await pool
       .connect(user.signer)
-      .borrow(dai.address, utils.parseUnits('500', 18), RateMode.Variable, 0, user.address);
+      .borrow(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '500'),
+        RateMode.Variable,
+        0,
+        user.address
+      );
 
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(dai.address, RateMode.Variable)
