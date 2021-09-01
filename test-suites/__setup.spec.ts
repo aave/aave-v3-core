@@ -17,8 +17,8 @@ import {
   deployMockFlashLoanReceiver,
   deployAaveProtocolDataProvider,
   deployRateOracle,
-  deployStableAndVariableTokensHelper,
-  deployATokensAndRatesHelper,
+  deployRateOracleSetupHelper,
+  deployReservesSetupHelper,
   deployWETHMocked,
   deployMockUniswapRouter,
 } from '../helpers/contracts-deployments';
@@ -115,12 +115,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await insertContractAddressInDb(eContractid.PoolConfigurator, poolConfiguratorProxy.address);
 
   // Deploy deployment helpers
-  await deployStableAndVariableTokensHelper([poolProxy.address, addressesProvider.address]);
-  await deployATokensAndRatesHelper([
-    poolProxy.address,
-    addressesProvider.address,
-    poolConfiguratorProxy.address,
-  ]);
+  await deployRateOracleSetupHelper();
+  await deployReservesSetupHelper();
 
   const fallbackOracle = await deployPriceOracle();
   await waitForTx(await fallbackOracle.setEthUsdPrice(MOCK_USD_PRICE_IN_WEI));

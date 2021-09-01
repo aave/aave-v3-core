@@ -1,7 +1,7 @@
 import {
   AaveProtocolDataProviderFactory,
   ATokenFactory,
-  ATokensAndRatesHelperFactory,
+  ReservesSetupHelperFactory,
   PoolAddressesProviderFactory,
   PoolAddressesProviderRegistryFactory,
   PoolConfiguratorFactory,
@@ -12,7 +12,7 @@ import {
   MockStableDebtTokenFactory,
   MockVariableDebtTokenFactory,
   PriceOracleFactory,
-  StableAndVariableTokensHelperFactory,
+  RateOracleSetupHelperFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
@@ -176,22 +176,20 @@ export const getPoolAddressesProviderRegistry = async (address?: tEthereumAddres
     await getFirstSigner()
   );
 
-export const getStableAndVariableTokensHelper = async (address?: tEthereumAddress) =>
-  await StableAndVariableTokensHelperFactory.connect(
+export const getRateOracleSetupHelper = async (address?: tEthereumAddress) =>
+  await RateOracleSetupHelperFactory.connect(
     address ||
       (
-        await getDb()
-          .get(`${eContractid.StableAndVariableTokensHelper}.${DRE.network.name}`)
-          .value()
+        await getDb().get(`${eContractid.RateOracleSetupHelper}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
 
-export const getATokensAndRatesHelper = async (address?: tEthereumAddress) =>
-  await ATokensAndRatesHelperFactory.connect(
+export const getReservesSetupHelper = async (address?: tEthereumAddress) =>
+  await ReservesSetupHelperFactory.connect(
     address ||
       (
-        await getDb().get(`${eContractid.ATokensAndRatesHelper}.${DRE.network.name}`).value()
+        await getDb().get(`${eContractid.ReservesSetupHelper}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );
