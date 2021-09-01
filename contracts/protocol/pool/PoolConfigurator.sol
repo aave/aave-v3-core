@@ -56,7 +56,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   uint256 internal constant CONFIGURATOR_REVISION = 0x1;
 
-  function getRevision() internal pure override returns (uint256) {
+  function getRevision() internal pure virtual override returns (uint256) {
     return CONFIGURATOR_REVISION;
   }
 
