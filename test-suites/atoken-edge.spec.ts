@@ -5,6 +5,7 @@ import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
   const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
@@ -32,20 +33,20 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(0);
     await aDai
       .connect(users[1].signer)
-      .increaseAllowance(users[0].address, utils.parseUnits('1', 18));
+      .increaseAllowance(users[0].address, await convertToCurrencyDecimals(aDai.address, '1'));
     expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(
-      utils.parseUnits('1', 18)
+      await convertToCurrencyDecimals(aDai.address, '1')
     );
   });
 
   it('decreaseAllowance()', async () => {
     const { users, aDai } = testEnv;
     expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(
-      utils.parseUnits('1', 18)
+      await convertToCurrencyDecimals(aDai.address, '1')
     );
     await aDai
       .connect(users[1].signer)
-      .decreaseAllowance(users[0].address, utils.parseUnits('1', 18));
+      .decreaseAllowance(users[0].address, await convertToCurrencyDecimals(aDai.address, '1'));
     expect(await aDai.allowance(users[1].address, users[0].address)).to.be.eq(0);
   });
 
@@ -87,7 +88,11 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     await expect(
       aDai
         .connect(poolSigner)
-        .mint(ZERO_ADDRESS, utils.parseUnits('100', 18), utils.parseUnits('1', 27))
+        .mint(
+          ZERO_ADDRESS,
+          await convertToCurrencyDecimals(aDai.address, '100'),
+          utils.parseUnits('1', 27)
+        )
     ).to.be.revertedWith('ERC20: mint to the zero address');
   });
 
@@ -120,7 +125,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
         .burn(
           ZERO_ADDRESS,
           users[0].address,
-          utils.parseUnits('100', 18),
+          await convertToCurrencyDecimals(aDai.address, '100'),
           utils.parseUnits('1', 27)
         )
     ).to.be.revertedWith('ERC20: burn from the zero address');
@@ -148,23 +153,28 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const scaledUserBalanceAndSupplyBefore = await aDai.getScaledUserBalanceAndSupply(
       users[0].address
     );
-    expect(scaledUserBalanceAndSupplyBefore[0].toString()).to.be.eq('0');
-    expect(scaledUserBalanceAndSupplyBefore[1].toString()).to.be.eq('0');
+    expect(scaledUserBalanceAndSupplyBefore[0]).to.be.eq(0);
+    expect(scaledUserBalanceAndSupplyBefore[1]).to.be.eq(0);
 
-    await dai.connect(users[0].signer).mint(utils.parseUnits('1000', 18));
+    await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[0].signer)
-      .deposit(dai.address, utils.parseUnits('1000', 18), users[0].address, 0);
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1000'),
+        users[0].address,
+        0
+      );
 
     const scaledUserBalanceAndSupplyAfter = await aDai.getScaledUserBalanceAndSupply(
       users[0].address
     );
-    expect(scaledUserBalanceAndSupplyAfter[0].toString()).to.be.eq(
-      utils.parseUnits('1000', 18).toString()
+    expect(scaledUserBalanceAndSupplyAfter[0]).to.be.eq(
+      await convertToCurrencyDecimals(aDai.address, '1000')
     );
-    expect(scaledUserBalanceAndSupplyAfter[1].toString()).to.be.eq(
-      utils.parseUnits('1000', 18).toString()
+    expect(scaledUserBalanceAndSupplyAfter[1]).to.be.eq(
+      await convertToCurrencyDecimals(aDai.address, '1000')
     );
   });
 });
