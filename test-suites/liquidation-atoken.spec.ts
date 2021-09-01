@@ -102,7 +102,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     //user 2 tries to borrow
     await expect(
       pool.liquidationCall(weth.address, weth.address, borrower.address, oneEther, true)
-    ).revertedWith(VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+    ).to.be.revertedWith(VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   });
 
   it('Tries to liquidate a different collateral than the borrower collateral and reverts', async () => {
@@ -114,7 +114,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
 
     await expect(
       pool.liquidationCall(dai.address, dai.address, borrower.address, oneEther, true)
-    ).revertedWith(VL_COLLATERAL_CANNOT_BE_LIQUIDATED);
+    ).to.be.revertedWith(VL_COLLATERAL_CANNOT_BE_LIQUIDATED);
   });
 
   it('Liquidates the borrow', async () => {

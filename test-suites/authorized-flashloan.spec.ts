@@ -66,9 +66,9 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       .add(reserveData.totalStableDebt)
       .add(reserveData.totalVariableDebt);
 
-    expect(totalLiquidity.toString()).to.be.equal('1000000000000000000');
-    expect(currentLiquidityRate.toString()).to.be.equal('0');
-    expect(currentLiquidityIndex.toString()).to.be.equal('1000000000000000000000000000');
+    expect(totalLiquidity).to.be.equal('1000000000000000000');
+    expect(currentLiquidityRate).to.be.equal('0');
+    expect(currentLiquidityIndex).to.be.equal('1000000000000000000000000000');
   });
 
   it('Takes an ETH flash loan with mode = 0 as big as the available liquidity', async () => {
@@ -95,9 +95,9 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       .add(reserveData.totalStableDebt)
       .add(reserveData.totalVariableDebt);
 
-    expect(totalLiquidity.toString()).to.be.equal('1000000000000000000');
-    expect(currentLiquidityRate.toString()).to.be.equal('0');
-    expect(currentLiquidityIndex.toString()).to.be.equal('1000000000000000000000000000');
+    expect(totalLiquidity).to.be.equal('1000000000000000000');
+    expect(currentLiquidityRate).to.be.equal('0');
+    expect(currentLiquidityIndex).to.be.equal('1000000000000000000000000000');
   });
 
   it('Takes WETH flashloan, does not return the funds with mode = 0 and reverts', async () => {
@@ -277,21 +277,16 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const totalLiquidity = reserveData.availableLiquidity
       .add(reserveData.totalStableDebt)
-      .add(reserveData.totalVariableDebt)
-      .toString();
-    const currentLiquidityRate = reserveData.liquidityRate.toString();
-    const currentLiquidityIndex = reserveData.liquidityIndex.toString();
-    const currentUserBalance = userData.currentATokenBalance.toString();
+      .add(reserveData.totalVariableDebt);
 
     const expectedLiquidity = await convertToCurrencyDecimals(usdc.address, '1000');
 
     expect(totalLiquidity).to.be.equal(expectedLiquidity, 'Invalid total liquidity');
-    expect(currentLiquidityRate).to.be.equal('0', 'Invalid liquidity rate');
-    expect(currentLiquidityIndex).to.be.equal(
-      BigNumber.from(1).mul(oneRay),
+    expect(reserveData.liquidityRate).to.be.equal('0', 'Invalid liquidity rate');
+    expect(reserveData.liquidityIndex).to.be.equal(utils.parseUnits('1', 27),
       'Invalid liquidity index'
     );
-    expect(currentUserBalance.toString()).to.be.equal(expectedLiquidity, 'Invalid user balance');
+    expect(userData.currentATokenBalance).to.be.equal(expectedLiquidity, 'Invalid user balance');
   });
 
   it('Takes out a 500 USDC flashloan with mode = 0, does not return the funds and reverts', async () => {

@@ -1,6 +1,6 @@
-import { oneRay, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
-import { makeSuite, TestEnv } from './helpers/make-suite';
+import { utils } from 'ethers';
+import { ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import {
@@ -11,7 +11,7 @@ import {
 } from '../types';
 import { getFirstSigner, getStableAndVariableTokensHelper } from '../helpers/contracts-getters';
 import { ProtocolErrors } from '../helpers/types';
-import { parseUnits } from 'ethers/lib/utils';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
   let snap: string;
@@ -23,7 +23,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  const BORROW_RATE = parseUnits('0.03', 27).toString();
+  const BORROW_RATE = utils.parseUnits('0.03', 27).toString();
 
   let tokenHelper: StableAndVariableTokensHelper;
   let rateOracle: RateOracle;
@@ -60,7 +60,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
       tokenHelper
         .connect(users[0].signer)
         .setOracleBorrowRates([mockToken.address], [BORROW_RATE], rateOracle.address)
-    ).revertedWith(INVALID_OWNER_REVERT_MSG);
+    ).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
   });
 
@@ -72,7 +72,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
       tokenHelper
         .connect(poolAdmin.signer)
         .setOracleBorrowRates([mockToken.address], [], rateOracle.address)
-    ).revertedWith('Arrays not same length');
+    ).to.be.revertedWith('Arrays not same length');
     expect(await rateOracle.getMarketBorrowRate(mockToken.address)).to.be.eq(0);
   });
 
@@ -96,7 +96,7 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     expect(await rateOracle.owner()).to.be.eq(tokenHelper.address);
     expect(
       tokenHelper.connect(poolAdmin.signer).setOracleOwnership(rateOracle.address, ZERO_ADDRESS)
-    ).revertedWith('owner can not be zero');
+    ).to.be.revertedWith('owner can not be zero');
     expect(await rateOracle.owner()).to.be.eq(tokenHelper.address);
   });
 
@@ -115,6 +115,6 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
     expect(await rateOracle.owner()).to.be.not.eq(tokenHelper.address);
     expect(
       tokenHelper.connect(poolAdmin.signer).setOracleOwnership(rateOracle.address, users[1].address)
-    ).revertedWith('helper is not owner');
+    ).to.be.revertedWith('helper is not owner');
   });
 });

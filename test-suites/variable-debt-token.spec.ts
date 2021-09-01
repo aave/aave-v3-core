@@ -1,45 +1,17 @@
 import { expect } from 'chai';
-import { makeSuite, TestEnv } from './helpers/make-suite';
-import { ProtocolErrors, RateMode } from '../helpers/types';
-import { getVariableDebtToken } from '../helpers/contracts-getters';
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { utils } from 'ethers';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { getVariableDebtToken } from '../helpers/contracts-getters';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { ProtocolErrors, RateMode } from '../helpers/types';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
-makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
+makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
 
-  it('Tries to invoke mint not being the Pool', async () => {
-    const { deployer, dai, helpersContract } = testEnv;
-
-    const daiVariableDebtTokenAddress = (
-      await helpersContract.getReserveTokensAddresses(dai.address)
-    ).variableDebtTokenAddress;
-
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
-
-    await expect(
-      variableDebtContract.mint(deployer.address, deployer.address, '1', '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
-  });
-
-  it('Tries to invoke burn not being the Pool', async () => {
-    const { deployer, dai, helpersContract } = testEnv;
-
-    const daiVariableDebtTokenAddress = (
-      await helpersContract.getReserveTokensAddresses(dai.address)
-    ).variableDebtTokenAddress;
-
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
-
-    await expect(variableDebtContract.burn(deployer.address, '1', '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
-    );
-  });
-
-  it('check getters', async () => {
-    const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
+  it('Check initialization', async () => {
+    const { pool, weth, dai, helpersContract, users } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
@@ -85,10 +57,8 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     );
   });
 
-  it('mint() amountScaled == 0', async () => {
-    const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
-    // We can impersonate
-    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
+  it('Tries to mint not being the Pool and reverts', async () => {
+    const { deployer, dai, helpersContract } = testEnv;
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -96,8 +66,38 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
 
     const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
 
+    await expect(
+      variableDebtContract.mint(deployer.address, deployer.address, '1', '1')
+    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
+  });
+
+  it('Tries to burn not being the Pool and reverts', async () => {
+    const { deployer, dai, helpersContract } = testEnv;
+
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    await expect(variableDebtContract.burn(deployer.address, '1', '1')).to.be.revertedWith(
+      CT_CALLER_MUST_BE_POOL
+    );
+  });
+
+  it('Tries to mint with amountScaled == 0 and reverts', async () => {
+    const { deployer, pool, dai, helpersContract, users } = testEnv;
+
+    // Impersonate the Pool
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
+
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
 
     await expect(
       variableDebtContract
@@ -106,10 +106,13 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
   });
 
-  it('burn() amountScaled == 0', async () => {
-    const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
-    // We can impersonate
+  it('Tries to burn with amountScaled == 0 and reverts', async () => {
+    const { deployer, pool, dai, helpersContract, users } = testEnv;
+
+    // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([pool.address]);
+    const poolSigner = await DRE.ethers.getSigner(pool.address);
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -117,15 +120,12 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
 
     const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
 
-    await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
-
     await expect(
       variableDebtContract.connect(poolSigner).burn(users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(CT_INVALID_BURN_AMOUNT);
   });
 
-  it('transfer()', async () => {
+  it('Tries to transfer debt tokens and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -137,7 +137,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
-  it('approve()', async () => {
+  it('Tries to approve debt tokens and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -152,7 +152,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('increaseAllowance()', async () => {
+  it('Tries to increaseAllowance and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -164,7 +164,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('decreaseAllowance()', async () => {
+  it('Tries to decreaseAllowance and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -176,7 +176,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('transferFrom()', async () => {
+  it('Tries to transferFrom debt tokens and reverts', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)

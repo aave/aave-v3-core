@@ -78,7 +78,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
     await expect(
       aaveOracle.connect(poolAdmin.signer).setAssetSources([mockToken.address], [])
-    ).revertedWith('INCONSISTENT_PARAMS_LENGTH');
+    ).to.be.revertedWith('INCONSISTENT_PARAMS_LENGTH');
   });
 
   it('Get price of BASE_CURRENCY asset', async () => {
@@ -98,7 +98,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
     await expect(
       aaveOracle.connect(user.signer).setAssetSources([mockToken.address], [mockAggregator.address])
-    ).revertedWith(INVALID_OWNER_REVERT_MSG);
+    ).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
   });
 
   it('Get price of BASE_CURRENCY asset', async () => {
