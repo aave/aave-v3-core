@@ -6,6 +6,7 @@ import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
@@ -28,19 +29,30 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     expect(scaledUserBalanceAndSupplyUser0Before[1]).to.be.eq(0);
 
     // Need to create some debt to do this good
-    await dai.connect(users[0].signer).mint(utils.parseUnits('1000', 18));
+    await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[0].signer)
-      .deposit(dai.address, utils.parseUnits('1000', 18), users[0].address, 0);
-    await weth.connect(users[1].signer).mint(utils.parseUnits('10', 18));
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1000'),
+        users[0].address,
+        0
+      );
+    await weth.connect(users[1].signer).mint(utils.parseEther('10'));
     await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[1].signer)
-      .deposit(weth.address, utils.parseUnits('10', 18), users[1].address, 0);
+      .deposit(weth.address, utils.parseEther('10'), users[1].address, 0);
     await pool
       .connect(users[1].signer)
-      .borrow(dai.address, utils.parseUnits('200', 18), RateMode.Variable, 0, users[1].address);
+      .borrow(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '200'),
+        RateMode.Variable,
+        0,
+        users[1].address
+      );
 
     const scaledUserBalanceAndSupplyUser0After =
       await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
