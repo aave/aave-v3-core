@@ -3,10 +3,6 @@
   "description": "Edge test cases for the borrow function, stable mode.",
   "stories": [
     {
-      "description": "TODO: secondTerm >= firstTerm. userStableRate * amount >= _avgStableRate * previousSupply",
-      "actions": []
-    },
-    {
       "description": "repay, burn () balanceIncrease > amount",
       "actions": [
         {

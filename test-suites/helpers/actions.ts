@@ -449,13 +449,11 @@ export const repay = async (
   } else {
     amountToRepay = MAX_UINT_AMOUNT;
   }
-  // TODO:
   amountToRepay = BigNumber.from(amountToRepay).toHexString();
 
   const txOptions: any = {};
 
   if (sendValue) {
-    // TODO:
     const valueToSend = await convertToCurrencyDecimals(reserve, sendValue);
     txOptions.value = valueToSend.toHexString(); // '0x' + BigNumber.from(valueToSend.toString()).toString(16);
   }
@@ -666,7 +664,7 @@ export const repayWithPermit = async (
   } else {
     amountToRepay = MAX_UINT_AMOUNT;
   }
-  amountToRepay = BigNumber.from(amountToRepay).toHexString(); // TODO: '0x' + new BigNumber(amountToRepay).toString(16);
+  amountToRepay = BigNumber.from(amountToRepay).toHexString();
 
   const chainId = await getChainId();
   const token = new MintableERC20Factory(user.signer).attach(reserve);
@@ -688,7 +686,7 @@ export const repayWithPermit = async (
 
   if (sendValue) {
     const valueToSend = await convertToCurrencyDecimals(reserve, sendValue);
-    txOptions.value = valueToSend.toHexString(); // TODO: '0x' + new BigNumber(valueToSend.toString()).toString(16);
+    txOptions.value = valueToSend.toHexString();
   }
 
   if (expectedResult === 'success') {
