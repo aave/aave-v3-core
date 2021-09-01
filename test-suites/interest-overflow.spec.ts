@@ -23,6 +23,7 @@ import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite } from './helpers/make-suite';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('Interest Rate and Index Overflow', (testEnv) => {
   const {
@@ -173,7 +174,9 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
       users: [user],
     } = testEnv;
 
-    await mockToken.connect(user.signer).mint(utils.parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setLiquidityRate(MAX_UINT_AMOUNT);
@@ -181,7 +184,12 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_LIQUIDITY_RATE_OVERFLOW);
   });
 
@@ -191,7 +199,9 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
       users: [user],
     } = testEnv;
 
-    await mockToken.connect(user.signer).mint(utils.parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setStableBorrowRate(MAX_UINT_AMOUNT);
@@ -199,7 +209,12 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_STABLE_BORROW_RATE_OVERFLOW);
   });
 
@@ -209,7 +224,9 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
       users: [user],
     } = testEnv;
 
-    await mockToken.connect(user.signer).mint(utils.parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setVariableBorrowRate(MAX_UINT_AMOUNT);
@@ -217,7 +234,12 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_VARIABLE_BORROW_RATE_OVERFLOW);
   });
 
@@ -228,25 +250,45 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
       dai,
     } = testEnv;
 
-    await dai.connect(user.signer).mint(utils.parseUnits('10000', 18));
+    await dai
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .deposit(dai.address, utils.parseUnits('10000', 18), user.address, 0);
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address,
+        0
+      );
 
-    await mockToken.connect(user.signer).mint(utils.parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '1000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(user.signer)
-      .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0);
+      .deposit(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address,
+        0
+      );
 
     // Set liquidity rate to max
     await mockRateStrategy.setLiquidityRate(BigNumber.from(2).pow(128).sub(1));
     // Borrow funds
     await pool
       .connect(user.signer)
-      .borrow(mockToken.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address);
+      .borrow(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '100'),
+        RateMode.Variable,
+        0,
+        user.address
+      );
 
     // set borrow rate to max
     await mockRateStrategy.setVariableBorrowRate(BigNumber.from(2).pow(128).sub(1));
@@ -257,7 +299,12 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     await expect(
       pool
         .connect(user.signer)
-        .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
   });
 
@@ -268,31 +315,56 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
       dai,
     } = testEnv;
 
-    await dai.connect(user.signer).mint(utils.parseUnits('10000', 18));
+    await dai
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .deposit(dai.address, utils.parseUnits('10000', 18), user.address, 0);
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(mockToken.address, '10000'),
+        user.address,
+        0
+      );
 
-    await mockToken.connect(user.signer).mint(utils.parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(user.signer)
-      .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0);
+      .deposit(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address,
+        0
+      );
 
     await mockRateStrategy.setLiquidityRate(BigNumber.from(10).pow(27));
     await mockRateStrategy.setVariableBorrowRate(BigNumber.from(2).pow(110).sub(1));
     await pool
       .connect(user.signer)
-      .borrow(mockToken.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address);
+      .borrow(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '100'),
+        RateMode.Variable,
+        0,
+        user.address
+      );
 
     await increaseTime(60 * 60 * 24 * 365);
 
     await expect(
       pool
         .connect(user.signer)
-        .deposit(mockToken.address, utils.parseUnits('1000', 18), user.address, 0)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_VARIABLE_BORROW_INDEX_OVERFLOW);
   });
 
@@ -349,7 +421,12 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     await expect(
       mockStableDebtToken
         .connect(poolSigner)
-        .mint(user.address, user.address, utils.parseUnits('100', 18), rate)
+        .mint(
+          user.address,
+          user.address,
+          await convertToCurrencyDecimals(mockStableDebtToken.address, '100'),
+          rate
+        )
     ).to.be.revertedWith(SDT_STABLE_DEBT_OVERFLOW);
   });
 });
