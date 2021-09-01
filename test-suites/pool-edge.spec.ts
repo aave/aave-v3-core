@@ -2,9 +2,16 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { ZERO_ADDRESS } from '../helpers/constants';
-import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import { ProtocolErrors } from '../helpers/types';
+import { MockPoolInheritedFactory } from '../types';
+import {
+  getBorrowLogic,
+  getDepositLogic,
+  getFirstSigner,
+  getLiquidationLogic,
+} from '../helpers/contracts-getters';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
@@ -176,30 +183,46 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(poolListAfter.length).to.be.eq(poolListMid.length);
   });
 
-   it('Initialize reserves until max, then add one more (reverts)', async () => {
-    // TODO: For the love of god, let is make something more nice here.
-    // Really a pain, but practically, we just want to loop until we hit something high?
-    const { pool, dai, deployer, configurator } = testEnv;
+  it('Initialize reserves until max, then add one more (reverts)', async () => {
+    // Upgrade the Pool to update the maximum number of reserves
+    const { addressesProvider, poolAdmin, pool, dai, deployer, configurator } = testEnv;
 
+    // Impersonate the PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
-    const config = await pool.getReserveData(dai.address);
-    const poolListBefore = await pool.getReservesList();
+    // Deploy the mock Pool with a setter of `maxNumberOfReserves`
+    const libraries = {
+      ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: (await getDepositLogic()).address,
+      ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: (await getBorrowLogic()).address,
+      ['__$f598c634f2d943205ac23f707b80075cbb$__']: (await getLiquidationLogic()).address,
+    };
+    const mockPoolImpl = await (
+      await new MockPoolInheritedFactory(libraries, await getFirstSigner()).deploy()
+    ).deployed();
 
-    for (let i = poolListBefore.length; i < 127; i++) {
-      const freshContract = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-      await pool.connect(configSigner).initReserve(
-        freshContract.address, // just need a non-used reserve token
-        ZERO_ADDRESS,
-        config.stableDebtTokenAddress,
-        config.variableDebtTokenAddress,
-        ZERO_ADDRESS
-      );
-    }
+    // Upgrade the Pool
+    expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPoolImpl.address))
+      .to.emit(addressesProvider, 'PoolUpdated')
+      .withArgs(mockPoolImpl.address);
+
+    // Get the Pool instance
+    const mockPoolAddress = await addressesProvider.getPool();
+    const mockPool = await MockPoolInheritedFactory.connect(
+      mockPoolAddress,
+      await getFirstSigner()
+    );
+
+    // Get the current number of reserves
+    let numberOfReserves = (await mockPool.getReservesList()).length;
+
+    // Set the limit
+    expect(await mockPool.setMaxNumberOfReserves(numberOfReserves));
+    expect(await mockPool.MAX_NUMBER_RESERVES()).to.be.eq(numberOfReserves);
 
     const freshContract = await deployMintableERC20(['MOCK', 'MOCK', '18']);
+    const config = await pool.getReserveData(dai.address);
     await expect(
       pool.connect(configSigner).initReserve(
         freshContract.address, // just need a non-used reserve token
