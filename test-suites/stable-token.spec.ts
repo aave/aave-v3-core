@@ -23,35 +23,6 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     snap = await evmSnapshot();
   });
 
-  it('Tries to mint not being the Pool and reverts', async () => {
-    const { deployer, dai, helpersContract } = testEnv;
-
-    const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
-      .stableDebtTokenAddress;
-
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
-
-    await expect(
-      stableDebtContract.mint(deployer.address, deployer.address, '1', '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
-  });
-
-  it('Tries to burn not being the Pool and reverts', async () => {
-    const { deployer, dai, helpersContract } = testEnv;
-
-    const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
-      .stableDebtTokenAddress;
-
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
-
-    const name = await stableDebtContract.name();
-
-    expect(name).to.be.equal('Aave stable debt bearing DAI');
-    await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
-    );
-  });
-
   it('Check initialization', async () => {
     const { pool, weth, dai, helpersContract, users } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
@@ -84,6 +55,35 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const totSupplyAndRateAfter = await stableDebtContract.getTotalSupplyAndAvgRate();
     expect(totSupplyAndRateAfter[0]).to.be.gt(0);
     expect(totSupplyAndRateAfter[1]).to.be.gt(0);
+  });
+
+  it('Tries to mint not being the Pool and reverts', async () => {
+    const { deployer, dai, helpersContract } = testEnv;
+
+    const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
+      .stableDebtTokenAddress;
+
+    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+
+    await expect(
+      stableDebtContract.mint(deployer.address, deployer.address, '1', '1')
+    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
+  });
+
+  it('Tries to burn not being the Pool and reverts', async () => {
+    const { deployer, dai, helpersContract } = testEnv;
+
+    const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
+      .stableDebtTokenAddress;
+
+    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+
+    const name = await stableDebtContract.name();
+
+    expect(name).to.be.equal('Aave stable debt bearing DAI');
+    await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(
+      CT_CALLER_MUST_BE_POOL
+    );
   });
 
   it('Tries to transfer debt tokens and reverts', async () => {
@@ -173,7 +173,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       config.stableDebtTokenAddress,
       deployer.signer
     );
-    
+
     // Next two txs should be mined in the same block
     await setAutomine(false);
     await stableDebt
