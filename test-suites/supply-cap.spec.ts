@@ -1,22 +1,15 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT, MAX_SUPPLY_CAP } from '../helpers/constants';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('Supply Cap', (testEnv: TestEnv) => {
   const { VL_SUPPLY_CAP_EXCEEDED, RC_INVALID_SUPPLY_CAP } = ProtocolErrors;
 
-  let USDC_DECIMALS;
-  let DAI_DECIMALS;
-  let WETH_DECIMALS;
-
   before(async () => {
     const { weth, pool, dai, usdc } = testEnv;
-
-    USDC_DECIMALS = await usdc.decimals();
-    DAI_DECIMALS = await dai.decimals();
-    WETH_DECIMALS = await weth.decimals();
 
     const mintedAmount = utils.parseEther('1000000000');
     await dai.mint(mintedAmount);
@@ -45,20 +38,20 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
 
     await pool.deposit(
       usdc.address,
-      await utils.parseUnits(suppliedAmount, USDC_DECIMALS),
+      await convertToCurrencyDecimals(usdc.address, suppliedAmount),
       deployer.address,
       0
     );
 
     await pool.deposit(
       dai.address,
-      await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+      await convertToCurrencyDecimals(dai.address, suppliedAmount),
       deployer.address,
       0
     );
     await pool.deposit(
       weth.address,
-      await utils.parseUnits(suppliedAmount, WETH_DECIMALS),
+      await convertToCurrencyDecimals(weth.address, suppliedAmount),
       deployer.address,
       0
     );
@@ -94,7 +87,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     await expect(
       pool.deposit(
         dai.address,
-        await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, suppliedAmount),
         deployer.address,
         0
       )
@@ -137,14 +130,14 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     const suppliedAmount = '10';
     await pool.deposit(
       usdc.address,
-      await utils.parseUnits(suppliedAmount, USDC_DECIMALS),
+      await convertToCurrencyDecimals(usdc.address, suppliedAmount),
       deployer.address,
       0
     );
 
     await pool.deposit(
       dai.address,
-      await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+      await convertToCurrencyDecimals(dai.address, suppliedAmount),
       deployer.address,
       0
     );
@@ -158,7 +151,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     await expect(
       pool.deposit(
         usdc.address,
-        await utils.parseUnits(suppliedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, suppliedAmount),
         deployer.address,
         0
       )
@@ -167,7 +160,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     await expect(
       pool.deposit(
         dai.address,
-        await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, suppliedAmount),
         deployer.address,
         0
       )
@@ -180,14 +173,14 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     const suppliedAmount = '99';
     await pool.deposit(
       usdc.address,
-      await utils.parseUnits(suppliedAmount, USDC_DECIMALS),
+      await convertToCurrencyDecimals(usdc.address, suppliedAmount),
       deployer.address,
       0
     );
 
     await pool.deposit(
       dai.address,
-      await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+      await convertToCurrencyDecimals(dai.address, suppliedAmount),
       deployer.address,
       0
     );
@@ -218,14 +211,14 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     const suppliedAmount = '100';
     await pool.deposit(
       usdc.address,
-      await utils.parseUnits(suppliedAmount, USDC_DECIMALS),
+      await convertToCurrencyDecimals(usdc.address, suppliedAmount),
       deployer.address,
       0
     );
 
     await pool.deposit(
       dai.address,
-      await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+      await convertToCurrencyDecimals(dai.address, suppliedAmount),
       deployer.address,
       0
     );
@@ -258,7 +251,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     await expect(
       pool.deposit(
         usdc.address,
-        await utils.parseUnits(suppliedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, suppliedAmount),
         deployer.address,
         0
       )
@@ -267,7 +260,7 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     await expect(
       pool.deposit(
         dai.address,
-        await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, suppliedAmount),
         deployer.address,
         0
       )
@@ -299,14 +292,14 @@ makeSuite('Supply Cap', (testEnv: TestEnv) => {
     const suppliedAmount = '100';
     await pool.deposit(
       usdc.address,
-      await utils.parseUnits(suppliedAmount, USDC_DECIMALS),
+      await convertToCurrencyDecimals(usdc.address, suppliedAmount),
       deployer.address,
       0
     );
 
     await pool.deposit(
       dai.address,
-      await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+      await convertToCurrencyDecimals(dai.address, suppliedAmount),
       deployer.address,
       0
     );

@@ -1,15 +1,12 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT, MAX_BORROW_CAP } from '../helpers/constants';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('Borrow Cap', (testEnv: TestEnv) => {
   const { VL_BORROW_CAP_EXCEEDED, RC_INVALID_BORROW_CAP } = ProtocolErrors;
-
-  let USDC_DECIMALS;
-  let DAI_DECIMALS;
-  let WETH_DECIMALS;
 
   before(async () => {
     const {
@@ -19,10 +16,6 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
       usdc,
       users: [user1],
     } = testEnv;
-
-    USDC_DECIMALS = await usdc.decimals();
-    DAI_DECIMALS = await dai.decimals();
-    WETH_DECIMALS = await weth.decimals();
 
     const mintedAmount = utils.parseEther('1000000000');
     // minting for main user
@@ -70,7 +63,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.deposit(
         weth.address,
-        await utils.parseUnits(suppliedAmount, WETH_DECIMALS),
+        await convertToCurrencyDecimals(weth.address, suppliedAmount),
         deployer.address,
         0
       )
@@ -81,7 +74,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
         .connect(user1.signer)
         .deposit(
           dai.address,
-          await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+          await convertToCurrencyDecimals(dai.address, suppliedAmount),
           user1.address,
           0
         )
@@ -92,7 +85,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
         .connect(user1.signer)
         .deposit(
           usdc.address,
-          await utils.parseUnits(suppliedAmount, DAI_DECIMALS),
+          await convertToCurrencyDecimals(dai.address, suppliedAmount),
           user1.address,
           0
         )
@@ -102,7 +95,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -112,7 +105,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         1,
         0,
         deployer.address
@@ -144,7 +137,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     await expect(
       pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -154,7 +147,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     await expect(
       pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -199,7 +192,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -209,7 +202,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         1,
         0,
         deployer.address
@@ -223,7 +216,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     await expect(
       pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         1,
         0,
         deployer.address
@@ -233,7 +226,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     await expect(
       pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -247,7 +240,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -257,7 +250,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         1,
         0,
         deployer.address
@@ -289,7 +282,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         1,
         0,
         deployer.address
@@ -299,7 +292,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -332,7 +325,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     await expect(
       pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         1,
         0,
         deployer.address
@@ -342,7 +335,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     await expect(
       pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         2,
         0,
         deployer.address
@@ -375,7 +368,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         usdc.address,
-        await utils.parseUnits(borrowedAmount, USDC_DECIMALS),
+        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
         1,
         0,
         deployer.address
@@ -384,7 +377,7 @@ makeSuite('Borrow Cap', (testEnv: TestEnv) => {
     expect(
       await pool.borrow(
         dai.address,
-        await utils.parseUnits(borrowedAmount, DAI_DECIMALS),
+        await convertToCurrencyDecimals(dai.address, borrowedAmount),
         2,
         0,
         deployer.address
