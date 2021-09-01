@@ -9,8 +9,6 @@ import './wadraymath';
 import { ReserveData, UserReserveData } from './interfaces';
 import { BigNumber } from 'ethers';
 
-export const strToBN = (amount: string): BigNumber => BigNumber.from(amount);
-
 interface Configuration {
   reservesParams: iMultiPoolsAssets<IReserveParams>;
 }
@@ -1286,7 +1284,7 @@ export const calcExpectedOverallBorrowRate = (
 ): BigNumber => {
   const totalBorrows = totalStableDebt.add(totalVariableDebt);
 
-  if (totalBorrows.eq(0)) return strToBN('0');
+  if (totalBorrows.eq(0)) return BigNumber.from(0);
 
   const weightedVariableRate = totalVariableDebt.wadToRay().rayMul(currentVariableBorrowRate);
 
@@ -1305,7 +1303,7 @@ export const calcExpectedUtilizationRate = (
   totalLiquidity: BigNumber
 ): BigNumber => {
   if (totalStableDebt.eq('0') && totalVariableDebt.eq('0')) {
-    return strToBN('0');
+    return BigNumber.from(0);
   }
 
   const utilization = totalStableDebt.add(totalVariableDebt).rayDiv(totalLiquidity);
