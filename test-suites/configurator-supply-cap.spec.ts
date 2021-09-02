@@ -5,7 +5,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
-makeSuite('Supply Cap', (testEnv: TestEnv) => {
+makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
   const { VL_SUPPLY_CAP_EXCEEDED, RC_INVALID_SUPPLY_CAP } = ProtocolErrors;
 
   before(async () => {

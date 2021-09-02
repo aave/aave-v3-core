@@ -6,7 +6,7 @@ import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 
-makeSuite('Drop Reserve', (testEnv: TestEnv) => {
+makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const { RL_ATOKEN_SUPPLY_NOT_ZERO, RL_STABLE_DEBT_NOT_ZERO, RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO } =

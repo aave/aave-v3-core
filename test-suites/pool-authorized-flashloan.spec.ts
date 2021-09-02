@@ -11,7 +11,7 @@ import { MAX_UINT_AMOUNT, oneRay } from '../helpers/constants';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
-makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
+makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const {

@@ -5,7 +5,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
-makeSuite('Borrow Cap', (testEnv: TestEnv) => {
+makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
   const { VL_BORROW_CAP_EXCEEDED, RC_INVALID_BORROW_CAP } = ProtocolErrors;
 
   before(async () => {
