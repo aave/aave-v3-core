@@ -31,7 +31,6 @@ import { AavePools, iAavePoolAssets, IReserveParams, RateMode } from '../../help
 import { getReserveData } from './helpers/utils/helpers';
 import { getReservesConfigByPool } from '../../helpers/configuration';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { time } from 'console';
 import { AaveBridgeAccessControl, PoolAddressesProvider } from '../../types';
 
 BigNumber.config({ DECIMAL_PLACES: 0, ROUNDING_MODE: BigNumber.ROUND_DOWN });
@@ -56,7 +55,7 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
   let bridgeAccess: AaveBridgeAccessControl;
 
   before('setup', async () => {
-    // TODO: Taken from `scenario.spec.ts`
+    // Taken from `scenario.spec.ts`
     calculationsConfiguration.reservesParams = <iAavePoolAssets<IReserveParams>>(
       getReservesConfigByPool(AavePools.proto)
     );
@@ -70,12 +69,12 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     bridgeAccess = (await factory.deploy(addressesProvider.address)) as AaveBridgeAccessControl;
     await bridgeAccess.deployed();
 
-    const bridgeId = formatBytes32String('BRIDGE_ACCESS_CONTROL');
-    await addressesProvider.setAddress(bridgeId, bridgeAccess.address);
+    await addressesProvider.setBridgeAccessControl(bridgeAccess.address);
 
-    expect(await addressesProvider.getAddress(bridgeId)).to.be.eq(bridgeAccess.address);
+    expect(await addressesProvider.getBridgeAccessControl()).to.be.eq(bridgeAccess.address);
 
     await bridgeAccess.setAllowedToMint(users[2].address, true);
+    await bridgeAccess.setAllowedToMint(users[3].address, true);
   });
 
   it('User 0 deposit 1000 dai.', async () => {
@@ -166,7 +165,7 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     expectEqual(reserveDataAfter, expectedDataAfter);
   });
 
-  it('User 2 perform unauthorized fast withdraw 100 aDai from L2', async () => {
+  it('User 2 perform unauthorized fast withdraw 100 aDai from L2 (reverts)', async () => {
     const { users, pool, dai } = testEnv;
     await expect(
       pool
@@ -183,12 +182,12 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
     await dai.connect(users[3].signer).mint(withdrawAmount.toFixed(0));
-    await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await dai.connect(users[3].signer).approve(bridgeAccess.address, MAX_UINT_AMOUNT);
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);
 
     const tx = await waitForTx(
-      await pool
+      await bridgeAccess
         .connect(users[3].signer)
         .backUnbacked(dai.address, mintAmount.toFixed(0), feeAmount.toFixed(0))
     );
@@ -208,16 +207,29 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     expectEqual(reserveDataAfter, expectedReserveDataAfter);
   });
 
+  it('user 3 performs unauthorized backing', async () => {
+    // Let user 3 be bridge for now
+    const { users, pool, dai, aDai, helpersContract } = testEnv;
+    await dai.connect(users[3].signer).mint(withdrawAmount.toFixed(0));
+    await dai.connect(users[3].signer).approve(bridgeAccess.address, MAX_UINT_AMOUNT);
+
+    await expect(
+      pool
+        .connect(users[3].signer)
+        .backUnbacked(dai.address, mintAmount.toFixed(0), feeAmount.toFixed(0))
+    ).to.be.revertedWith('TODO: fix message. Caller not BRIDGE_ACCESS_CONTROL');
+  });
+
   it('100 bridged dai used to back unbacked', async () => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
     await dai.connect(users[3].signer).mint(withdrawAmount.toFixed(0));
-    await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await dai.connect(users[3].signer).approve(bridgeAccess.address, MAX_UINT_AMOUNT);
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);
 
     const tx = await waitForTx(
-      await pool
+      await bridgeAccess
         .connect(users[3].signer)
         .backUnbacked(dai.address, mintAmount.toFixed(0), feeAmount.toFixed(0))
     );
@@ -241,12 +253,14 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
     await dai.connect(users[3].signer).mint(withdrawAmount.toFixed(0));
-    await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await dai.connect(users[3].signer).approve(bridgeAccess.address, MAX_UINT_AMOUNT);
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);
 
     const tx = await waitForTx(
-      await pool.connect(users[3].signer).backUnbacked(dai.address, '0', withdrawAmount.toFixed(0))
+      await bridgeAccess
+        .connect(users[3].signer)
+        .backUnbacked(dai.address, '0', withdrawAmount.toFixed(0))
     );
 
     const { txTimestamp } = await getTxCostAndTimestamp(tx);
@@ -270,12 +284,14 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
     await dai.connect(users[3].signer).mint(withdrawAmount.toFixed(0));
-    await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await dai.connect(users[3].signer).approve(bridgeAccess.address, MAX_UINT_AMOUNT);
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);
 
     const tx = await waitForTx(
-      await pool.connect(users[3].signer).backUnbacked(dai.address, mintAmount.toFixed(0), '0')
+      await bridgeAccess
+        .connect(users[3].signer)
+        .backUnbacked(dai.address, mintAmount.toFixed(0), '0')
     );
 
     const { txTimestamp } = await getTxCostAndTimestamp(tx);
