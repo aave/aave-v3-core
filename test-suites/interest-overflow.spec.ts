@@ -368,7 +368,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     ).to.be.revertedWith(RL_VARIABLE_BORROW_INDEX_OVERFLOW);
   });
 
-  it('cumulateToLiquidityIndex with liquidityIndex > type(uint128).max (revert expected)', async () => {
+  it('ReserveLogic `cumulateToLiquidityIndex` with liquidityIndex > type(uint128).max (revert expected)', async () => {
     const {
       pool,
       users: [user],
@@ -404,15 +404,15 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
   });
 
-  it('StableDebtToken, `mint` with newStableRate > type(uint128).max (revert expected)', async () => {
+  it('StableDebtToken `mint` with newStableRate > type(uint128).max (revert expected)', async () => {
     const {
       deployer,
       pool,
       users: [user],
     } = testEnv;
 
+    // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
-
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
 
