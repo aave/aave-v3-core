@@ -24,7 +24,6 @@ import { PoolConfigurator } from '../../types/PoolConfigurator';
 import chai from 'chai';
 // @ts-ignore
 import bignumberChai from 'chai-bignumber';
-import { almostEqual } from './almost-equal';
 import { PriceOracle } from '../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../types/PoolAddressesProvider';
 import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProviderRegistry';
@@ -36,7 +35,6 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 
 chai.use(bignumberChai());
-chai.use(almostEqual());
 chai.use(solidity);
 
 export interface SignerWithAddress {

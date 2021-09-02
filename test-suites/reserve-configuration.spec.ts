@@ -1,4 +1,3 @@
-import { oneEther } from '../helpers/constants';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
@@ -154,13 +153,13 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getLtv()).to.be.eq(ZERO);
   });
 
-  it('setLtv() with ltv > MAX_VALID_LTV and reverts', async () => {
+  it('setLtv() with ltv > MAX_VALID_LTV (revert expected)', async () => {
     expect(await configMock.getLtv()).to.be.eq(ZERO);
 
     const { RC_INVALID_LTV } = ProtocolErrors;
 
     // setLTV to MAX_VALID_LTV + 1
-    await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).revertedWith(RC_INVALID_LTV);
+    await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).to.be.revertedWith(RC_INVALID_LTV);
     expect(await configMock.getLtv()).to.be.eq(ZERO);
   });
 
@@ -182,7 +181,7 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
   });
 
-  it('setLiquidationThreshold() with threshold > MAX_VALID_LIQUIDATION_THRESHOLD and reverts', async () => {
+  it('setLiquidationThreshold() with threshold > MAX_VALID_LIQUIDATION_THRESHOLD (revert expected)', async () => {
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
 
     const { RC_INVALID_LIQ_THRESHOLD } = ProtocolErrors;
@@ -190,7 +189,7 @@ describe('ReserveConfiguration', async () => {
     // setLiquidationThreshold to MAX_VALID_LIQUIDATION_THRESHOLD + 1
     await expect(
       configMock.setLiquidationThreshold(MAX_VALID_LIQUIDATION_THRESHOLD.add(1))
-    ).revertedWith(RC_INVALID_LIQ_THRESHOLD);
+    ).to.be.revertedWith(RC_INVALID_LIQ_THRESHOLD);
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
   });
 
@@ -206,13 +205,13 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
   });
 
-  it('setDecimals() with decimals > MAX_VALID_DECIMALS and reverts', async () => {
+  it('setDecimals() with decimals > MAX_VALID_DECIMALS (revert expected)', async () => {
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
 
     const { RC_INVALID_DECIMALS } = ProtocolErrors;
 
     // setDecimals to MAX_VALID_DECIMALS + 1
-    await expect(configMock.setDecimals(MAX_VALID_DECIMALS.add(1))).revertedWith(
+    await expect(configMock.setDecimals(MAX_VALID_DECIMALS.add(1))).to.be.revertedWith(
       RC_INVALID_DECIMALS
     );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);

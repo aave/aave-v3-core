@@ -1,5 +1,5 @@
-import BigNumber from 'bignumber.js';
-
+import { expect } from 'chai';
+import { BigNumberish, BigNumber, utils } from 'ethers';
 import {
   DRE,
   evmRevert,
@@ -7,45 +7,25 @@ import {
   impersonateAccountsHardhat,
   increaseTime,
 } from '../helpers/misc-utils';
-import {
-  APPROVAL_AMOUNT_POOL,
-  MAX_UINT_AMOUNT,
-  oneEther,
-  ZERO_ADDRESS,
-} from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { makeSuite } from './helpers/make-suite';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
-import { getUserData, getReserveData } from './helpers/utils/helpers';
-
-const chai = require('chai');
-const { expect } = chai;
-
 import {
-  AToken,
   ATokenFactory,
-  ERC20,
-  ERC20Factory,
   MintableERC20,
   MockFlashLoanReceiverFactory,
-  MockIncentivesController,
   MockReserveInterestRateStrategy,
   MockReserveInterestRateStrategyFactory,
-  SelfdestructTransfer,
-  SelfdestructTransferFactory,
   StableDebtToken,
   StableDebtTokenFactory,
-  VariableDebtToken,
   VariableDebtTokenFactory,
 } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { BigNumberish } from '@ethersproject/bignumber';
-import { parseEther, parseUnits } from 'ethers/lib/utils';
-import { parse } from 'path';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { makeSuite } from './helpers/make-suite';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
-makeSuite('Interest rate and index overflow', (testEnv) => {
+makeSuite('Interest Rate and Index Overflow', (testEnv) => {
   const {
     RL_LIQUIDITY_RATE_OVERFLOW,
     RL_STABLE_BORROW_RATE_OVERFLOW,
@@ -56,16 +36,13 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
   } = ProtocolErrors;
 
   let mockToken: MintableERC20;
-  let aMockToken: AToken;
-  let mockStableDebt: StableDebtToken;
-  let mockVariableDebt: VariableDebtToken;
+  let mockStableDebtToken: StableDebtToken;
   let mockRateStrategy: MockReserveInterestRateStrategy;
 
   let snap: string;
 
   before(async () => {
-    const { pool, poolAdmin, configurator, users, dai, aDai, helpersContract, addressesProvider } =
-      testEnv;
+    const { pool, poolAdmin, configurator, dai, helpersContract, addressesProvider } = testEnv;
 
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
 
@@ -76,8 +53,6 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
       await getFirstSigner()
     ).deploy();
     const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
-
-    const daiData = await pool.getReserveData(dai.address);
 
     mockRateStrategy = await new MockReserveInterestRateStrategyFactory(
       await getFirstSigner()
@@ -129,6 +104,7 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
       dai.address
     );
 
+    const maxCap = 68719476735;
     const inputParams: {
       asset: string;
       baseLTV: BigNumberish;
@@ -146,8 +122,8 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
         liquidationThreshold: daiReserveConfigurationData.liquidationThreshold,
         liquidationBonus: daiReserveConfigurationData.liquidationBonus,
         reserveFactor: daiReserveConfigurationData.reserveFactor,
-        borrowCap: 68719476735,
-        supplyCap: 68719476735,
+        borrowCap: maxCap,
+        supplyCap: maxCap,
         stableBorrowingEnabled: true,
         borrowingEnabled: true,
       },
@@ -178,13 +154,8 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
       .setReserveFactor(inputParams[i].asset, inputParams[i].reserveFactor);
 
     const reserveData = await pool.getReserveData(mockToken.address);
-    aMockToken = ATokenFactory.connect(reserveData.aTokenAddress, await getFirstSigner());
-    mockStableDebt = StableDebtTokenFactory.connect(
+    mockStableDebtToken = StableDebtTokenFactory.connect(
       reserveData.stableDebtTokenAddress,
-      await getFirstSigner()
-    );
-    mockVariableDebt = VariableDebtTokenFactory.connect(
-      reserveData.variableDebtTokenAddress,
       await getFirstSigner()
     );
   });
@@ -197,137 +168,222 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
     await evmRevert(snap);
   });
 
-  it('ReserveLogic newLiquidityRate > type(uint128).max', async () => {
-    const { pool, users } = testEnv;
-    const user = users[0];
+  it('ReserveLogic `updateInterestRates` with newLiquidityRate > type(uint128).max (revert expected)', async () => {
+    const {
+      pool,
+      users: [user],
+    } = testEnv;
 
-    await mockToken.connect(user.signer).mint(parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setLiquidityRate(MAX_UINT_AMOUNT);
 
     await expect(
-      pool.connect(user.signer).deposit(mockToken.address, parseUnits('1000', 18), user.address, 0)
+      pool
+        .connect(user.signer)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_LIQUIDITY_RATE_OVERFLOW);
   });
 
-  it('ReserveLogic newStableRate > type(uint128).max', async () => {
-    const { pool, users } = testEnv;
-    const user = users[0];
+  it('ReserveLogic `updateInterestRates` with newStableRate > type(uint128).max (revert expected)', async () => {
+    const {
+      pool,
+      users: [user],
+    } = testEnv;
 
-    await mockToken.connect(user.signer).mint(parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setStableBorrowRate(MAX_UINT_AMOUNT);
 
     await expect(
-      pool.connect(user.signer).deposit(mockToken.address, parseUnits('1000', 18), user.address, 0)
+      pool
+        .connect(user.signer)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_STABLE_BORROW_RATE_OVERFLOW);
   });
 
-  it('ReserveLogic newVariableRate > type(uint128).max', async () => {
-    const { pool, users } = testEnv;
-    const user = users[0];
+  it('ReserveLogic `updateInterestRates` with newVariableRate > type(uint128).max (revert expected)', async () => {
+    const {
+      pool,
+      users: [user],
+    } = testEnv;
 
-    await mockToken.connect(user.signer).mint(parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setVariableBorrowRate(MAX_UINT_AMOUNT);
 
     await expect(
-      pool.connect(user.signer).deposit(mockToken.address, parseUnits('1000', 18), user.address, 0)
+      pool
+        .connect(user.signer)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_VARIABLE_BORROW_RATE_OVERFLOW);
   });
 
-  it('ReserveLogic nextLiquidityIndex > type(uint128).max', async () => {
-    const { pool, users, dai } = testEnv;
-    const user = users[0];
+  it('ReserveLogic `_updateIndexes` with nextLiquidityIndex > type(uint128).max (revert expected)', async () => {
+    const {
+      pool,
+      users: [user],
+      dai,
+    } = testEnv;
 
-    await dai.connect(user.signer).mint(parseUnits('10000', 18));
+    await dai
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(dai.address, parseUnits('10000', 18), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address,
+        0
+      );
 
-    await mockToken.connect(user.signer).mint(parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '1000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(user.signer)
-      .deposit(mockToken.address, parseUnits('1000', 18), user.address, 0);
+      .deposit(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address,
+        0
+      );
 
-    await mockRateStrategy.setLiquidityRate(new BigNumber(2).pow(128).minus(1).toFixed(0));
-
+    // Set liquidity rate to max
+    await mockRateStrategy.setLiquidityRate(BigNumber.from(2).pow(128).sub(1));
+    // Borrow funds
     await pool
       .connect(user.signer)
-      .borrow(mockToken.address, parseUnits('100', 18), RateMode.Variable, 0, user.address);
+      .borrow(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '100'),
+        RateMode.Variable,
+        0,
+        user.address
+      );
 
-    await mockRateStrategy.setVariableBorrowRate(new BigNumber(2).pow(128).minus(1).toFixed(0));
+    // set borrow rate to max
+    await mockRateStrategy.setVariableBorrowRate(BigNumber.from(2).pow(128).sub(1));
 
+    // Increase time such that the next liquidity index overflow because of interest
     await increaseTime(60 * 60 * 24 * 500);
 
     await expect(
-      pool.connect(user.signer).deposit(mockToken.address, parseUnits('1000', 18), user.address, 0)
+      pool
+        .connect(user.signer)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
   });
 
-  it('ReserveLogic nextVariableBorrowIndex > type(uint128).max', async () => {
-    const { pool, users, dai } = testEnv;
-    const user = users[0];
+  it('ReserveLogic `_updateIndexes` with nextVariableBorrowIndex > type(uint128).max (revert expected)', async () => {
+    const {
+      pool,
+      users: [user],
+      dai,
+    } = testEnv;
 
-    await dai.connect(user.signer).mint(parseUnits('10000', 18));
+    await dai
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(dai.address, parseUnits('10000', 18), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(mockToken.address, '10000'),
+        user.address,
+        0
+      );
 
-    await mockToken.connect(user.signer).mint(parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(user.signer)
-      .deposit(mockToken.address, parseUnits('1000', 18), user.address, 0);
+      .deposit(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address,
+        0
+      );
 
-    await mockRateStrategy.setLiquidityRate(new BigNumber(10).pow(27).toFixed(0));
-    await mockRateStrategy.setVariableBorrowRate(new BigNumber(2).pow(110).minus(1).toFixed(0));
+    await mockRateStrategy.setLiquidityRate(BigNumber.from(10).pow(27));
+    await mockRateStrategy.setVariableBorrowRate(BigNumber.from(2).pow(110).sub(1));
     await pool
       .connect(user.signer)
-      .borrow(mockToken.address, parseUnits('100', 18), RateMode.Variable, 0, user.address);
+      .borrow(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '100'),
+        RateMode.Variable,
+        0,
+        user.address
+      );
 
     await increaseTime(60 * 60 * 24 * 365);
 
     await expect(
-      pool.connect(user.signer).deposit(mockToken.address, parseUnits('1000', 18), user.address, 0)
+      pool
+        .connect(user.signer)
+        .deposit(
+          mockToken.address,
+          await convertToCurrencyDecimals(mockToken.address, '1000'),
+          user.address,
+          0
+        )
     ).to.be.revertedWith(RL_VARIABLE_BORROW_INDEX_OVERFLOW);
   });
 
-  it('mint stableDebt with newStableRate > type(uint128).max', async () => {
-    const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
+  it('ReserveLogic `cumulateToLiquidityIndex` with liquidityIndex > type(uint128).max (revert expected)', async () => {
+    const {
+      pool,
+      users: [user],
+      dai,
+      aDai,
+      addressesProvider,
+    } = testEnv;
 
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
+    const toBorrow = BigNumber.from(2).pow(80);
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    await dai.connect(user.signer).mint(toBorrow.add(1));
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
-
-    const rate = new BigNumber(2).pow(128); // Max + 1
-
-    await expect(
-      mockStableDebt
-        .connect(poolSigner)
-        .mint(users[0].address, users[0].address, parseUnits('100', 18), rate.toFixed(0))
-    ).to.be.revertedWith(SDT_STABLE_DEBT_OVERFLOW);
-  });
-
-  it('cumulateToLiquidityIndex with liquidityIndex > type(uint128).max', async () => {
-    const { pool, users, dai, aDai, addressesProvider } = testEnv;
-
-    const toBorrow = new BigNumber(2).pow(80);
-
-    await dai.connect(users[0].signer).mint(toBorrow.plus(1).toFixed(0));
-    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
-
-    await pool.connect(users[0].signer).deposit(dai.address, 1, users[0].address, 0);
-    await dai.connect(users[0].signer).transfer(aDai.address, toBorrow.toFixed(0));
+    await pool.connect(user.signer).deposit(dai.address, 1, user.address, 0);
+    await dai.connect(user.signer).transfer(aDai.address, toBorrow);
 
     const mockFlashLoan = await new MockFlashLoanReceiverFactory(await getFirstSigner()).deploy(
       addressesProvider.address
@@ -335,16 +391,42 @@ makeSuite('Interest rate and index overflow', (testEnv) => {
 
     await expect(
       pool
-        .connect(users[0].signer)
+        .connect(user.signer)
         .flashLoan(
           mockFlashLoan.address,
           [dai.address],
-          [toBorrow.toFixed(0)],
+          [toBorrow],
           [RateMode.None],
-          users[0].address,
+          user.address,
           '0x00',
           0
         )
     ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
+  });
+
+  it('StableDebtToken `mint` with newStableRate > type(uint128).max (revert expected)', async () => {
+    const {
+      deployer,
+      pool,
+      users: [user],
+    } = testEnv;
+
+    // Impersonate the Pool
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([pool.address]);
+    const poolSigner = await DRE.ethers.getSigner(pool.address);
+
+    const rate = BigNumber.from(2).pow(128); // Max + 1
+
+    await expect(
+      mockStableDebtToken
+        .connect(poolSigner)
+        .mint(
+          user.address,
+          user.address,
+          await convertToCurrencyDecimals(mockStableDebtToken.address, '100'),
+          rate
+        )
+    ).to.be.revertedWith(SDT_STABLE_DEBT_OVERFLOW);
   });
 });

@@ -1,17 +1,75 @@
 import { expect } from 'chai';
-import { makeSuite, TestEnv } from './helpers/make-suite';
-import { ProtocolErrors, RateMode } from '../helpers/types';
+import { utils } from 'ethers';
+import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { getVariableDebtToken } from '../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { parseEther, parseUnits } from 'ethers/lib/utils';
-import { RateOracle, SelfdestructTransfer, SelfdestructTransferFactory } from '../types';
-import BigNumber from 'bignumber.js';
-import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { ProtocolErrors, RateMode } from '../helpers/types';
+import { makeSuite, TestEnv } from './helpers/make-suite';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
-makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
+makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
 
-  it('Tries to invoke mint not being the Pool', async () => {
+  it('Check initialization', async () => {
+    const { pool, weth, dai, helpersContract, users } = testEnv;
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    expect(await variableDebtContract.UNDERLYING_ASSET_ADDRESS()).to.be.eq(dai.address);
+    expect(await variableDebtContract.POOL()).to.be.eq(pool.address);
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    const scaledUserBalanceAndSupplyUser0Before =
+      await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
+    expect(scaledUserBalanceAndSupplyUser0Before[0]).to.be.eq(0);
+    expect(scaledUserBalanceAndSupplyUser0Before[1]).to.be.eq(0);
+
+    // Need to create some debt to do this good
+    await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[0].signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1000'),
+        users[0].address,
+        0
+      );
+    await weth.connect(users[1].signer).mint(utils.parseEther('10'));
+    await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[1].signer)
+      .deposit(weth.address, utils.parseEther('10'), users[1].address, 0);
+    await pool
+      .connect(users[1].signer)
+      .borrow(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '200'),
+        RateMode.Variable,
+        0,
+        users[1].address
+      );
+
+    const scaledUserBalanceAndSupplyUser0After =
+      await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
+    expect(scaledUserBalanceAndSupplyUser0After[0]).to.be.eq(0);
+    expect(scaledUserBalanceAndSupplyUser0After[1]).to.be.gt(0);
+
+    const scaledUserBalanceAndSupplyUser1After =
+      await variableDebtContract.getScaledUserBalanceAndSupply(users[1].address);
+    expect(scaledUserBalanceAndSupplyUser1After[1]).to.be.gt(0);
+    expect(scaledUserBalanceAndSupplyUser1After[1]).to.be.gt(0);
+
+    expect(scaledUserBalanceAndSupplyUser0After[1]).to.be.eq(
+      scaledUserBalanceAndSupplyUser1After[1]
+    );
+  });
+
+  it('Tries to mint not being the Pool (revert expected)', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiVariableDebtTokenAddress = (
@@ -25,7 +83,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
   });
 
-  it('Tries to invoke burn not being the Pool', async () => {
+  it('Tries to burn not being the Pool (revert expected)', async () => {
     const { deployer, dai, helpersContract } = testEnv;
 
     const daiVariableDebtTokenAddress = (
@@ -39,92 +97,34 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     );
   });
 
-  it('check getters', async () => {
-    const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
-    const daiVariableDebtTokenAddress = (
-      await helpersContract.getReserveTokensAddresses(dai.address)
-    ).variableDebtTokenAddress;
+  it('Tries to mint with amountScaled == 0 (revert expected)', async () => {
+    const { deployer, pool, dai, helpersContract, users } = testEnv;
 
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
-
-    expect(await variableDebtContract.UNDERLYING_ASSET_ADDRESS()).to.be.eq(dai.address);
-    expect(await variableDebtContract.POOL()).to.be.eq(pool.address);
-    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
-
-    const scaledUserBalanceAndSupplyUser0Before =
-      await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
-    expect(scaledUserBalanceAndSupplyUser0Before[0].toString()).to.be.eq('0');
-    expect(scaledUserBalanceAndSupplyUser0Before[1].toString()).to.be.eq('0');
-
-    // Need to create some debt to do this good
-    await dai.connect(users[0].signer).mint(parseUnits('1000', 18));
-    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool
-      .connect(users[0].signer)
-      .deposit(dai.address, parseUnits('1000', 18), users[0].address, 0);
-    await weth.connect(users[1].signer).mint(parseUnits('10', 18));
-    await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool
-      .connect(users[1].signer)
-      .deposit(weth.address, parseUnits('10', 18), users[1].address, 0);
-    await pool
-      .connect(users[1].signer)
-      .borrow(dai.address, parseUnits('200', 18), RateMode.Variable, 0, users[1].address);
-
-    const scaledUserBalanceAndSupplyUser0After =
-      await variableDebtContract.getScaledUserBalanceAndSupply(users[0].address);
-    expect(scaledUserBalanceAndSupplyUser0After[0].toString()).to.be.eq('0');
-    expect(
-      new BigNumber(scaledUserBalanceAndSupplyUser0After[1].toString()).gt(new BigNumber(0))
-    ).to.be.eq(true);
-
-    const scaledUserBalanceAndSupplyUser1After =
-      await variableDebtContract.getScaledUserBalanceAndSupply(users[1].address);
-    expect(
-      new BigNumber(scaledUserBalanceAndSupplyUser1After[1].toString()).gt(new BigNumber(0))
-    ).to.be.eq(true);
-    expect(
-      new BigNumber(scaledUserBalanceAndSupplyUser1After[1].toString()).gt(new BigNumber(0))
-    ).to.be.eq(true);
-
-    expect(scaledUserBalanceAndSupplyUser0After[1].toString()).to.be.eq(
-      scaledUserBalanceAndSupplyUser1After[1].toString()
-    );
-  });
-
-  it('mint() amountScaled == 0', async () => {
-    const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
-    // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
-
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
-
-    const daiVariableDebtTokenAddress = (
-      await helpersContract.getReserveTokensAddresses(dai.address)
-    ).variableDebtTokenAddress;
-
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
-
+    // Impersonate the Pool
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await DRE.ethers.getSigner(pool.address);
+
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
 
     await expect(
       variableDebtContract
         .connect(poolSigner)
-        .mint(users[0].address, users[0].address, 0, parseUnits('1', 27))
+        .mint(users[0].address, users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
   });
 
-  it('burn() amountScaled == 0', async () => {
-    const { deployer, pool, weth, dai, aDai, helpersContract, users } = testEnv;
-    // We can impersonate
-    const sdtFactory = new SelfdestructTransferFactory(deployer.signer); // DRE.ethers.getContractFactory('SelfDestructTransfer', deployer.signer);
-    const sdt = (await sdtFactory.deploy()) as SelfdestructTransfer;
-    await sdt.deployed();
+  it('Tries to burn with amountScaled == 0 (revert expected)', async () => {
+    const { deployer, pool, dai, helpersContract, users } = testEnv;
 
-    await sdt.destroyAndTransfer(pool.address, { value: parseEther('1') });
+    // Impersonate the Pool
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([pool.address]);
+    const poolSigner = await DRE.ethers.getSigner(pool.address);
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -132,15 +132,12 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
 
     const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
 
-    await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
-
     await expect(
-      variableDebtContract.connect(poolSigner).burn(users[0].address, 0, parseUnits('1', 27))
+      variableDebtContract.connect(poolSigner).burn(users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(CT_INVALID_BURN_AMOUNT);
   });
 
-  it('transfer()', async () => {
+  it('Tries to transfer debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -152,7 +149,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
-  it('approve()', async () => {
+  it('Tries to approve debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -167,7 +164,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('increaseAllowance()', async () => {
+  it('Tries to increaseAllowance (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -179,7 +176,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('decreaseAllowance()', async () => {
+  it('Tries to decreaseAllowance (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -191,7 +188,7 @@ makeSuite('Variable debt token tests', (testEnv: TestEnv) => {
     ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
   });
 
-  it('transferFrom()', async () => {
+  it('Tries to transferFrom debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)

@@ -1,5 +1,3 @@
-import BigNumber from 'bignumber.js';
-
 import {
   calcExpectedReserveDataAfterBorrow,
   calcExpectedReserveDataAfterDeposit,
@@ -32,7 +30,7 @@ import { advanceTimeAndBlock, DRE, timeLatest, waitForTx } from '../../helpers/m
 
 import chai from 'chai';
 import { ReserveData, UserReserveData } from './utils/interfaces';
-import { ContractReceipt, Wallet } from 'ethers';
+import { BigNumber, ContractReceipt, Wallet } from 'ethers';
 import { AToken } from '../../types/AToken';
 import { RateMode, tEthereumAddress } from '../../helpers/types';
 import { MintableERC20Factory } from '../../types';
@@ -67,21 +65,21 @@ const almostEqualOrEqual = function (
     }
 
     if (actual[key] instanceof BigNumber) {
-      const actualValue = (<BigNumber>actual[key]).decimalPlaces(0, BigNumber.ROUND_DOWN);
-      const expectedValue = (<BigNumber>expected[key]).decimalPlaces(0, BigNumber.ROUND_DOWN);
+      const actualValue = <BigNumber>actual[key];
+      const expectedValue = <BigNumber>expected[key];
 
       this.assert(
         actualValue.eq(expectedValue) ||
-          actualValue.plus(1).eq(expectedValue) ||
-          actualValue.eq(expectedValue.plus(1)) ||
-          actualValue.plus(2).eq(expectedValue) ||
-          actualValue.eq(expectedValue.plus(2)) ||
-          actualValue.plus(3).eq(expectedValue) ||
-          actualValue.eq(expectedValue.plus(3)),
+          actualValue.add(1).eq(expectedValue) ||
+          actualValue.eq(expectedValue.add(1)) ||
+          actualValue.add(2).eq(expectedValue) ||
+          actualValue.eq(expectedValue.add(2)) ||
+          actualValue.add(3).eq(expectedValue) ||
+          actualValue.eq(expectedValue.add(3)),
         `expected #{act} to be almost equal or equal #{exp} for property ${key}`,
         `expected #{act} to be almost equal or equal #{exp} for property ${key}`,
-        expectedValue.toFixed(0),
-        actualValue.toFixed(0)
+        expectedValue.toString(),
+        actualValue.toString()
       );
     } else {
       this.assert(
@@ -363,7 +361,7 @@ export const borrow = async (
     const { txCost, txTimestamp } = await getTxCostAndTimestamp(txResult);
 
     if (timeTravel) {
-      const secondsToTravel = new BigNumber(timeTravel).multipliedBy(ONE_YEAR).div(365).toNumber();
+      const secondsToTravel = BigNumber.from(timeTravel).mul(ONE_YEAR).div(365).toNumber();
 
       await advanceTimeAndBlock(secondsToTravel);
     }
@@ -451,13 +449,13 @@ export const repay = async (
   } else {
     amountToRepay = MAX_UINT_AMOUNT;
   }
-  amountToRepay = '0x' + new BigNumber(amountToRepay).toString(16);
+  amountToRepay = BigNumber.from(amountToRepay).toHexString();
 
   const txOptions: any = {};
 
   if (sendValue) {
     const valueToSend = await convertToCurrencyDecimals(reserve, sendValue);
-    txOptions.value = '0x' + new BigNumber(valueToSend.toString()).toString(16);
+    txOptions.value = valueToSend.toHexString(); // '0x' + BigNumber.from(valueToSend.toString()).toString(16);
   }
 
   if (expectedResult === 'success') {
@@ -666,7 +664,7 @@ export const repayWithPermit = async (
   } else {
     amountToRepay = MAX_UINT_AMOUNT;
   }
-  amountToRepay = '0x' + new BigNumber(amountToRepay).toString(16);
+  amountToRepay = BigNumber.from(amountToRepay).toHexString();
 
   const chainId = await getChainId();
   const token = new MintableERC20Factory(user.signer).attach(reserve);
@@ -688,7 +686,7 @@ export const repayWithPermit = async (
 
   if (sendValue) {
     const valueToSend = await convertToCurrencyDecimals(reserve, sendValue);
-    txOptions.value = '0x' + new BigNumber(valueToSend.toString()).toString(16);
+    txOptions.value = valueToSend.toHexString();
   }
 
   if (expectedResult === 'success') {
@@ -992,11 +990,13 @@ export const getTxCostAndTimestamp = async (tx: ContractReceipt) => {
   if (!tx.blockNumber || !tx.transactionHash || !tx.cumulativeGasUsed) {
     throw new Error('No tx blocknumber');
   }
-  const txTimestamp = new BigNumber((await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp);
+  const txTimestamp = BigNumber.from(
+    (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+  );
 
   const txInfo = await DRE.ethers.provider.getTransaction(tx.transactionHash);
   const gasPrice = txInfo.gasPrice ? txInfo.gasPrice : tx.effectiveGasPrice;
-  const txCost = new BigNumber(tx.cumulativeGasUsed.toString()).multipliedBy(gasPrice.toString());
+  const txCost = BigNumber.from(tx.cumulativeGasUsed).mul(gasPrice);
 
   return { txCost, txTimestamp };
 };
@@ -1018,6 +1018,6 @@ export const getContractsData = async (
   return {
     reserveData,
     userData,
-    timestamp: new BigNumber(timestamp),
+    timestamp,
   };
 };

@@ -13,7 +13,7 @@ contract MockPool {
   }
 
   function addReserveToReservesList(address _reserve) external {
-      _reserveList.push(_reserve);
+    _reserveList.push(_reserve);
   }
 
   function getReservesList() external view returns (address[] memory) {
@@ -23,5 +23,16 @@ contract MockPool {
     }
     return reservesList;
   }
+}
 
+import {Pool} from '../../protocol/pool/Pool.sol';
+
+contract MockPoolInherited is Pool {
+  function getRevision() internal pure override returns (uint256) {
+    return 0x3;
+  }
+
+  function setMaxNumberOfReserves(uint256 newMaxNumberOfReserves) public {
+    _maxNumberOfReserves = newMaxNumberOfReserves;
+  }
 }

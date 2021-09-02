@@ -23,7 +23,7 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   uint256 _amountToApprove;
   bool _simulateEOA;
 
-  constructor(IPoolAddressesProvider provider) public FlashLoanReceiverBase(provider) {}
+  constructor(IPoolAddressesProvider provider) FlashLoanReceiverBase(provider) {}
 
   function setFailExecutionTransfer(bool fail) public {
     _failExecution = fail;
@@ -70,8 +70,9 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
         'Invalid balance for the contract'
       );
 
-      uint256 amountToReturn =
-        (_amountToApprove != 0) ? _amountToApprove : amounts[i].add(premiums[i]);
+      uint256 amountToReturn = (_amountToApprove != 0)
+        ? _amountToApprove
+        : amounts[i].add(premiums[i]);
       //execution does not fail - mint tokens and return them to the _destination
 
       token.mint(premiums[i]);

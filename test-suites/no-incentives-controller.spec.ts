@@ -1,21 +1,7 @@
-import BigNumber from 'bignumber.js';
-
-import { DRE } from '../helpers/misc-utils';
-import {
-  APPROVAL_AMOUNT_POOL,
-  MAX_UINT_AMOUNT,
-  oneEther,
-  ZERO_ADDRESS,
-} from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { makeSuite } from './helpers/make-suite';
-import { ProtocolErrors, RateMode } from '../helpers/types';
-import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
-import { getUserData, getReserveData } from './helpers/utils/helpers';
-
-const chai = require('chai');
-const { expect } = chai;
-
+import { expect } from 'chai';
+import { BigNumberish } from 'ethers';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { RateMode } from '../helpers/types';
 import {
   ATokenFactory,
   ERC20,
@@ -26,26 +12,24 @@ import {
 } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { BigNumberish } from '@ethersproject/bignumber';
-import { parseUnits } from 'ethers/lib/utils';
+import { makeSuite } from './helpers/make-suite';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
-makeSuite('Reserve with zero address incentives controller', (testEnv) => {
+makeSuite('Reserve Without Incentives Controller', (testEnv) => {
   let mockToken: MintableERC20;
   let aMockToken: ERC20;
   let mockStableDebt: ERC20;
   let mockVariableDebt: ERC20;
 
   before(async () => {
-    const { pool, poolAdmin, configurator, users, dai, aDai, helpersContract } = testEnv;
+    const { pool, poolAdmin, configurator, dai, helpersContract } = testEnv;
 
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-    //const assetPrice = oneEther.multipliedBy('0.001').toFixed();
-    //const mockAggregator = await deployMockAggregator(assetPrice);
 
-    let stableDebtTokenImplementation = await new StableDebtTokenFactory(
+    const stableDebtTokenImplementation = await new StableDebtTokenFactory(
       await getFirstSigner()
     ).deploy();
-    let variableDebtTokenImplementation = await new VariableDebtTokenFactory(
+    const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
       await getFirstSigner()
     ).deploy();
     const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
@@ -55,7 +39,7 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
     const interestRateStrategyAddress = daiData.interestRateStrategyAddress;
 
     // Init the reserve
-    let initInputParams: {
+    const initInputParams: {
       aTokenImpl: string;
       stableDebtTokenImpl: string;
       variableDebtTokenImpl: string;
@@ -93,6 +77,7 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
       },
     ];
 
+    // Add the mock reserve
     await configurator.connect(poolAdmin.signer).initReserves(initInputParams);
 
     // Configuration
@@ -161,138 +146,141 @@ makeSuite('Reserve with zero address incentives controller', (testEnv) => {
   });
 
   it('Deposit mock tokens into aave', async () => {
-    const { pool, users } = testEnv;
-    const user = users[0];
+    const {
+      pool,
+      users: [user],
+    } = testEnv;
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq('0');
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
 
-    await mockToken.connect(user.signer).mint(parseUnits('10000', 18));
+    await mockToken
+      .connect(user.signer)
+      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .deposit(mockToken.address, parseUnits('1000', 18), user.address, 0);
+      .deposit(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address,
+        0
+      );
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(
+      await convertToCurrencyDecimals(aMockToken.address, '1000')
     );
   });
 
   it('Transfer aMock tokens', async () => {
-    const { pool, users } = testEnv;
-    const sender = users[0];
-    const receiver = users[1];
+    const {
+      users: [sender, receiver],
+    } = testEnv;
 
-    expect((await aMockToken.balanceOf(sender.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+    expect(await aMockToken.balanceOf(sender.address)).to.be.eq(
+      await convertToCurrencyDecimals(aMockToken.address, '1000')
     );
-    expect((await aMockToken.balanceOf(receiver.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
+    expect(await aMockToken.balanceOf(receiver.address)).to.be.eq(0);
 
-    await aMockToken.connect(sender.signer).transfer(receiver.address, parseUnits('1000', 18));
-    expect((await aMockToken.balanceOf(sender.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await aMockToken.balanceOf(receiver.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+    await aMockToken
+      .connect(sender.signer)
+      .transfer(receiver.address, await convertToCurrencyDecimals(aMockToken.address, '1000'));
+    expect(await aMockToken.balanceOf(sender.address)).to.be.eq(0);
+    expect(await aMockToken.balanceOf(receiver.address)).to.be.eq(
+      await convertToCurrencyDecimals(aMockToken.address, '1000')
     );
   });
 
-  it('Borrow mock with stable rate', async () => {
-    const { pool, users, dai } = testEnv;
-    const user = users[2];
+  it('Borrow mock tokens with stable rate', async () => {
+    const {
+      pool,
+      users: [, , user],
+      dai,
+    } = testEnv;
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockStableDebt.balanceOf(user.address)).to.be.eq(0);
 
-    await dai.connect(user.signer).mint(parseUnits('10000', 18));
+    await dai.connect(user.signer).mint(await convertToCurrencyDecimals(dai.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).deposit(dai.address, parseUnits('10000', 18), user.address, 0);
     await pool
       .connect(user.signer)
-      .borrow(mockToken.address, parseUnits('100', 18), RateMode.Stable, 0, user.address);
+      .deposit(dai.address, await convertToCurrencyDecimals(dai.address, '10000'), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .borrow(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '100'),
+        RateMode.Stable,
+        0,
+        user.address
+      );
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(
+      await convertToCurrencyDecimals(mockToken.address, '100')
     );
-    expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
-    );
-    expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
+    expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockStableDebt.balanceOf(user.address)).to.be.eq(
+      await convertToCurrencyDecimals(mockStableDebt.address, '100')
     );
   });
 
   it('Repay mock tokens', async () => {
-    const { pool, users, dai } = testEnv;
-    const user = users[2];
+    const {
+      pool,
+      users: [, , user],
+    } = testEnv;
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(
+      await convertToCurrencyDecimals(mockToken.address, '100')
     );
-    expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
-    );
-    expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('100', 18).toString()
+    expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockStableDebt.balanceOf(user.address)).to.be.eq(
+      await convertToCurrencyDecimals(mockStableDebt.address, '100')
     );
 
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .repay(mockToken.address, parseUnits('100', 18), RateMode.Stable, user.address);
+      .repay(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '100'),
+        RateMode.Stable,
+        user.address
+      );
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockVariableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockStableDebt.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockStableDebt.balanceOf(user.address)).to.be.eq(0);
   });
 
   it('Withdraw aMock tokens', async () => {
-    const { pool, users } = testEnv;
-    const user = users[1];
+    const {
+      pool,
+      users: [, user],
+    } = testEnv;
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(
+      await convertToCurrencyDecimals(aMockToken.address, '1000')
     );
-    expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(0);
 
     await aMockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .withdraw(mockToken.address, parseUnits('1000', 18), user.address);
+      .withdraw(
+        mockToken.address,
+        await convertToCurrencyDecimals(mockToken.address, '1000'),
+        user.address
+      );
 
-    expect((await aMockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('0', 18).toString()
-    );
-    expect((await mockToken.balanceOf(user.address)).toString()).to.be.eq(
-      parseUnits('1000', 18).toString()
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(
+      await convertToCurrencyDecimals(mockToken.address, '1000')
     );
   });
 });

@@ -20,6 +20,9 @@ import {
   MockPoolFactory,
   MockInitializableImpleFactory,
   MockInitializableImpleV2Factory,
+  DepositLogicFactory,
+  BorrowLogicFactory,
+  LiquidationLogicFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -46,6 +49,24 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
     await getFirstSigner()
   );
 };
+
+export const getDepositLogic = async (address?: tEthereumAddress) =>
+  await DepositLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getBorrowLogic = async (address?: tEthereumAddress) =>
+  await BorrowLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getLiquidationLogic = async (address?: tEthereumAddress) =>
+  await LiquidationLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
 
 export const getPool = async (address?: tEthereumAddress) =>
   await PoolFactory.connect(

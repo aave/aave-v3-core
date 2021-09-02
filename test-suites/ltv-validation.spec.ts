@@ -1,10 +1,10 @@
-import { TestEnv, makeSuite } from './helpers/make-suite';
-import { MAX_UINT_AMOUNT } from '../helpers/constants';
-import { ProtocolErrors } from '../helpers/types';
+import { expect } from 'chai';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { ProtocolErrors } from '../helpers/types';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { TestEnv, makeSuite } from './helpers/make-suite';
 
-const { expect } = require('chai');
-makeSuite('LTV validation tests', (testEnv: TestEnv) => {
+makeSuite('LTV validation', (testEnv: TestEnv) => {
   const { VL_LTV_VALIDATION_FAILED } = ProtocolErrors;
 
   it('User 1 deposits 10 Dai, 10 USDC, user 2 deposits 1 WETH', async () => {
@@ -35,7 +35,7 @@ makeSuite('LTV validation tests', (testEnv: TestEnv) => {
     await pool.connect(user2.signer).deposit(weth.address, wethAmount, user2.address, 0);
   });
 
-  it('Sets the ltv of DAI to 0', async () => {
+  it('Sets the LTV of DAI to 0', async () => {
     const {
       configurator,
       dai,
@@ -43,14 +43,16 @@ makeSuite('LTV validation tests', (testEnv: TestEnv) => {
       users: [],
     } = testEnv;
 
-    await configurator.configureReserveAsCollateral(dai.address, 0, 8000, 10500);
+    expect(await configurator.configureReserveAsCollateral(dai.address, 0, 8000, 10500))
+      .to.emit(configurator, 'CollateralConfigurationChanged')
+      .withArgs(dai.address, 0, 8000, 10500);
 
     const ltv = (await helpersContract.getReserveConfigurationData(dai.address)).ltv;
 
     expect(ltv).to.be.equal(0);
   });
 
-  it('Borrows 0.01 weth', async () => {
+  it('Borrows 0.01 WETH', async () => {
     const {
       pool,
       weth,
@@ -58,7 +60,9 @@ makeSuite('LTV validation tests', (testEnv: TestEnv) => {
     } = testEnv;
     const borrowedAmount = await convertToCurrencyDecimals(weth.address, '0.01');
 
-    pool.connect(user1.signer).borrow(weth.address, borrowedAmount, 1, 0, user1.address);
+    expect(
+      await pool.connect(user1.signer).borrow(weth.address, borrowedAmount, 1, 0, user1.address)
+    );
   });
 
   it('Tries to withdraw USDC (revert expected)', async () => {
@@ -87,12 +91,10 @@ makeSuite('LTV validation tests', (testEnv: TestEnv) => {
 
     const withdrawnAmount = await convertToCurrencyDecimals(dai.address, '1');
 
-    await pool.connect(user1.signer).withdraw(dai.address, withdrawnAmount, user1.address);
+    expect(await pool.connect(user1.signer).withdraw(dai.address, withdrawnAmount, user1.address));
 
     const aDaiBalanceAfter = await aDai.balanceOf(user1.address);
 
-    expect(aDaiBalanceAfter.toString()).to.be.bignumber.equal(
-      aDaiBalanceBefore.sub(withdrawnAmount)
-    );
+    expect(aDaiBalanceAfter).to.be.eq(aDaiBalanceBefore.sub(withdrawnAmount));
   });
 });

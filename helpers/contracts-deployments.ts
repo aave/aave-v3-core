@@ -43,6 +43,7 @@ import {
   MockReentrantInitializableImpleFactory,
   MockInitializableImpleV2Factory,
   InitializableImmutableAdminUpgradeabilityProxyFactory,
+  WETH9Mocked,
 } from '../types';
 import {
   withSave,
@@ -291,22 +292,32 @@ export const deployDelegationAwareATokenImpl = async () =>
   );
 
 export const deployAllMockTokens = async () => {
-  const tokens: { [symbol: string]: MockContract | MintableERC20 } = {};
+  const tokens: { [symbol: string]: MockContract | MintableERC20 | WETH9Mocked } = {};
 
-  const protoConfigData = AaveConfig.ReserveAssets;
+  const protoConfigData = AaveConfig.ReservesConfig;
 
   for (const tokenSymbol of Object.keys(TokenContractId)) {
-    let decimals = '18';
+    if (tokenSymbol === 'WETH') {
+      tokens[tokenSymbol] = await deployWETHMocked();
+      await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
+      continue;
+    }
+    let decimals = 18;
 
     let configData = (<any>protoConfigData)[tokenSymbol];
+
+    if (!configData) {
+      decimals = 18;
+    }
 
     tokens[tokenSymbol] = await deployMintableERC20([
       tokenSymbol,
       tokenSymbol,
-      configData ? configData.reserveDecimals : decimals,
+      configData ? configData.reserveDecimals : 18,
     ]);
     await registerContractInJsonDb(tokenSymbol.toUpperCase(), tokens[tokenSymbol]);
   }
+
   return tokens;
 };
 

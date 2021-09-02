@@ -1,5 +1,5 @@
 {
-  "title": "Pool: Borrow negatives (reverts)",
+  "title": "Pool: Borrow negatives (revert expected)",
   "description": "Test cases for the deposit function.",
   "stories": [
     {

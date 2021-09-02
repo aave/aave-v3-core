@@ -27,7 +27,7 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 variableRateSlope2,
     uint256 stableRateSlope1,
     uint256 stableRateSlope2
-  ) public {
+  ) {
     OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
     EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
     addressesProvider = provider;
@@ -51,12 +51,12 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   function calculateInterestRates(
-    address reserve,
-    uint256 availableLiquidity,
-    uint256 totalStableDebt,
-    uint256 totalVariableDebt,
-    uint256 averageStableBorrowRate,
-    uint256 reserveFactor
+    address,
+    uint256,
+    uint256,
+    uint256,
+    uint256,
+    uint256
   )
     external
     view
@@ -71,14 +71,14 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   function calculateInterestRates(
-    address reserve,
-    address aToken,
-    uint256 liquidityAdded,
-    uint256 liquidityTaken,
-    uint256 totalStableDebt,
-    uint256 totalVariableDebt,
-    uint256 averageStableBorrowRate,
-    uint256 reserveFactor
+    address,
+    address,
+    uint256,
+    uint256,
+    uint256,
+    uint256,
+    uint256,
+    uint256
   )
     external
     view

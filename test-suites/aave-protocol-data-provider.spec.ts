@@ -3,7 +3,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { deployMockPool } from '../helpers/contracts-deployments';
 import { getMockPool } from '../helpers/contracts-getters';
 
-makeSuite('AaveProtocolDataProvider', (testEnv: TestEnv) => {
+makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
   const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
   const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
 

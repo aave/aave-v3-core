@@ -58,7 +58,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  function getRevision() internal pure override returns (uint256) {
+  function getRevision() internal pure virtual override returns (uint256) {
     return POOL_REVISION;
   }
 

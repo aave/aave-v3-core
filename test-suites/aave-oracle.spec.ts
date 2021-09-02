@@ -2,10 +2,11 @@ import { oneEther, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
 import { ethers } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE, evmRevert, evmSnapshot } from '../helpers/misc-utils';
+import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20, deployMockAggregator } from '../helpers/contracts-deployments';
 import { MintableERC20, MockAggregator } from '../types';
 import { ProtocolErrors } from '../helpers/types';
+import { parseUnits } from 'ethers/lib/utils';
 
 makeSuite('AaveOracle', (testEnv: TestEnv) => {
   let snap: string;
@@ -23,7 +24,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
   before(async () => {
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-    assetPrice = oneEther.multipliedBy('0.00367714136416').toFixed();
+    assetPrice = parseUnits('0.00367714136416', 18).toString();
     mockAggregator = await deployMockAggregator(assetPrice);
   });
 
@@ -77,7 +78,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
     await expect(
       aaveOracle.connect(poolAdmin.signer).setAssetSources([mockToken.address], [])
-    ).revertedWith('INCONSISTENT_PARAMS_LENGTH');
+    ).to.be.revertedWith('INCONSISTENT_PARAMS_LENGTH');
   });
 
   it('Get price of BASE_CURRENCY asset', async () => {
@@ -97,7 +98,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
     await expect(
       aaveOracle.connect(user.signer).setAssetSources([mockToken.address], [mockAggregator.address])
-    ).revertedWith(INVALID_OWNER_REVERT_MSG);
+    ).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
   });
 
   it('Get price of BASE_CURRENCY asset', async () => {
@@ -129,7 +130,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
   it('Get price of asset with no asset source', async () => {
     const { poolAdmin, aaveOracle, oracle } = testEnv;
-    const fallbackPrice = oneEther.toFixed();
+    const fallbackPrice = oneEther;
 
     // Register price on FallbackOracle
     expect(await oracle.setAssetPrice(mockToken.address, fallbackPrice));
@@ -164,7 +165,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
   it('Get price of asset with 0 price but non-zero fallback price', async () => {
     const { poolAdmin, aaveOracle, oracle } = testEnv;
     const zeroPriceMockAgg = await deployMockAggregator('0');
-    const fallbackPrice = oneEther.toFixed();
+    const fallbackPrice = oneEther;
 
     // Register price on FallbackOracle
     expect(await oracle.setAssetPrice(mockToken.address, fallbackPrice));
