@@ -36,8 +36,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   IPool internal _pool;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
-
   mapping(address => uint256) public _nonces;
   bytes32 public DOMAIN_SEPARATOR;
 

@@ -74,9 +74,4 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
     uint256 amount,
     uint256 index
   ) external;
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view returns (IAaveIncentivesController);
 }

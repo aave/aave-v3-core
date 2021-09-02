@@ -16,11 +16,11 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   mapping(address => mapping(address => uint256)) private _allowances;
   uint256 internal _totalSupply;
-  IAaveIncentivesController internal _incentivesController;
   string private _name;
   string private _symbol;
   uint8 private _decimals;
-
+  IAaveIncentivesController internal _incentivesController;
+  
   constructor(
     string memory name,
     string memory symbol,
@@ -69,7 +69,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   /**
    * @dev Returns the address of the incentives controller contract
    **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
+  function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
     return _incentivesController;
   }
 

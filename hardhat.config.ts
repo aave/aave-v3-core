@@ -42,9 +42,6 @@ const hardhatConfig: HardhatUserConfig = {
     outDir: 'types',
     target: 'ethers-v5',
   },
-  etherscan: {
-    apiKey: ETHERSCAN_KEY,
-  },
   mocha: {
     timeout: 0,
   },
