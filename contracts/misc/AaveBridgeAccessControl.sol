@@ -5,14 +5,18 @@ import {IAaveBridgeAccessControl} from './../interfaces/IAaveBridgeAccessControl
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IPool} from './../interfaces/IPool.sol';
 import {IPoolAddressesProvider} from './../interfaces/IPoolAddressesProvider.sol';
+import {IERC20} from './../dependencies/openzeppelin/contracts/IERC20.sol';
+import {SafeERC20} from './../dependencies/openzeppelin/contracts/SafeERC20.sol';
 
 contract AaveBridgeAccessControl is IAaveBridgeAccessControl, Ownable {
+  using SafeERC20 for IERC20;
+
   mapping(address => bool) internal _allowedToMint;
 
-  IPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
+  IPool public immutable override POOL;
 
   constructor(IPoolAddressesProvider provider) public {
-    ADDRESSES_PROVIDER = provider;
+    POOL = IPool(provider.getPool());
   }
 
   modifier onlyMinter() {
@@ -29,12 +33,24 @@ contract AaveBridgeAccessControl is IAaveBridgeAccessControl, Ownable {
     return _allowedToMint[user];
   }
 
+  ///@inheritdoc IAaveBridgeAccessControl
   function mintUnbacked(
     address asset,
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
   ) external override onlyMinter {
-    IPool(ADDRESSES_PROVIDER.getPool()).mintUnbacked(asset, amount, onBehalfOf, referralCode);
+    POOL.mintUnbacked(asset, amount, onBehalfOf, referralCode);
+  }
+
+  ///@inheritdoc IAaveBridgeAccessControl
+  function backUnbacked(
+    address asset,
+    uint256 amount,
+    uint256 fee
+  ) external override onlyMinter {
+    IERC20(asset).safeTransferFrom(msg.sender, address(this), amount + fee);
+    IERC20(asset).safeApprove(address(POOL), amount + fee);
+    POOL.backUnbacked(asset, amount, fee);
   }
 }
