@@ -40,7 +40,6 @@ contract AToken is
   IPool internal _pool;
   address internal _treasury;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
 
   modifier onlyPool {
     require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
@@ -282,20 +281,6 @@ contract AToken is
    **/
   function POOL() public view returns (IPool) {
     return _pool;
-  }
-
-  /**
-   * @dev For internal usage in the logic of the parent contract IncentivizedERC20
-   **/
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
-  }
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
   }
 
   /**

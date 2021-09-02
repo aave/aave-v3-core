@@ -145,9 +145,4 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @return The debt balance of the user since the last burn/mint action
    **/
   function principalBalanceOf(address user) external view returns (uint256);
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view returns (IAaveIncentivesController);
 }

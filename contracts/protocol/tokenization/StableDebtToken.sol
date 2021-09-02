@@ -36,8 +36,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   IPool internal _pool;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
-
   mapping(address => uint256) public _nonces;
   bytes32 public DOMAIN_SEPARATOR;
 
@@ -419,20 +417,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    **/
   function POOL() public view returns (IPool) {
     return _pool;
-  }
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
-  }
-
-  /**
-   * @dev For internal usage in the logic of the parent contracts
-   **/
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
   }
 
   /**

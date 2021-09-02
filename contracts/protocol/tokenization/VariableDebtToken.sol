@@ -29,7 +29,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   IPool internal _pool;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
 
   mapping(address => uint256) public _nonces;
   bytes32 public DOMAIN_SEPARATOR;
@@ -255,21 +254,10 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   }
 
   /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
-  }
-
-  /**
    * @dev Returns the address of the pool where this aToken is used
    **/
   function POOL() public view returns (IPool) {
     return _pool;
-  }
-
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
   }
 
   function _getUnderlyingAssetAddress() internal view override returns (address) {

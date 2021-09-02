@@ -19,7 +19,8 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   string private _name;
   string private _symbol;
   uint8 private _decimals;
-
+  IAaveIncentivesController internal _incentivesController;
+  
   constructor(
     string memory name,
     string memory symbol,
@@ -66,10 +67,11 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @return Abstract function implemented by the child aToken/debtToken.
-   * Done this way in order to not break compatibility with previous versions of aTokens/debtTokens
+   * @dev Returns the address of the incentives controller contract
    **/
-  function _getIncentivesController() internal view virtual returns (IAaveIncentivesController);
+  function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
+    return _incentivesController;
+  }
 
   /**
    * @dev Executes a transfer of tokens from _msgSender() to recipient
@@ -158,54 +160,45 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address recipient,
     uint256 amount
   ) internal virtual {
-    require(sender != address(0), 'ERC20: transfer from the zero address');
-    require(recipient != address(0), 'ERC20: transfer to the zero address');
-
-    _beforeTokenTransfer(sender, recipient, amount);
-
     uint256 oldSenderBalance = _balances[sender];
     _balances[sender] = oldSenderBalance - amount;
     uint256 oldRecipientBalance = _balances[recipient];
     _balances[recipient] = _balances[recipient] + amount;
 
-    if (address(_getIncentivesController()) != address(0)) {
+    IAaveIncentivesController incentivesControllerLocal = _incentivesController;
+    if (address(incentivesControllerLocal) != address(0)) {
       uint256 currentTotalSupply = _totalSupply;
-      _getIncentivesController().handleAction(sender, currentTotalSupply, oldSenderBalance);
+      incentivesControllerLocal.handleAction(sender, currentTotalSupply, oldSenderBalance);
       if (sender != recipient) {
-        _getIncentivesController().handleAction(recipient, currentTotalSupply, oldRecipientBalance);
+        incentivesControllerLocal.handleAction(recipient, currentTotalSupply, oldRecipientBalance);
       }
     }
   }
 
   function _mint(address account, uint256 amount) internal virtual {
-    require(account != address(0), 'ERC20: mint to the zero address');
-
-    _beforeTokenTransfer(address(0), account, amount);
-
     uint256 oldTotalSupply = _totalSupply;
     _totalSupply = oldTotalSupply + amount;
 
     uint256 oldAccountBalance = _balances[account];
     _balances[account] = oldAccountBalance + amount;
 
-    if (address(_getIncentivesController()) != address(0)) {
-      _getIncentivesController().handleAction(account, oldTotalSupply, oldAccountBalance);
+    IAaveIncentivesController incentivesControllerLocal = _incentivesController;
+    if (address(incentivesControllerLocal) != address(0)) {
+      incentivesControllerLocal.handleAction(account, oldTotalSupply, oldAccountBalance);
     }
   }
 
   function _burn(address account, uint256 amount) internal virtual {
-    require(account != address(0), 'ERC20: burn from the zero address');
-
-    _beforeTokenTransfer(account, address(0), amount);
-
     uint256 oldTotalSupply = _totalSupply;
     _totalSupply = oldTotalSupply - amount;
 
     uint256 oldAccountBalance = _balances[account];
     _balances[account] = oldAccountBalance - amount;
 
-    if (address(_getIncentivesController()) != address(0)) {
-      _getIncentivesController().handleAction(account, oldTotalSupply, oldAccountBalance);
+    IAaveIncentivesController incentivesControllerLocal = _incentivesController;
+
+    if (address(incentivesControllerLocal) != address(0)) {
+      incentivesControllerLocal.handleAction(account, oldTotalSupply, oldAccountBalance);
     }
   }
 
@@ -214,9 +207,6 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address spender,
     uint256 amount
   ) internal virtual {
-    require(owner != address(0), 'ERC20: approve from the zero address');
-    require(spender != address(0), 'ERC20: approve to the zero address');
-
     _allowances[owner][spender] = amount;
     emit Approval(owner, spender, amount);
   }
@@ -232,10 +222,4 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   function _setDecimals(uint8 newDecimals) internal {
     _decimals = newDecimals;
   }
-
-  function _beforeTokenTransfer(
-    address from,
-    address to,
-    uint256 amount
-  ) internal virtual {}
 }
