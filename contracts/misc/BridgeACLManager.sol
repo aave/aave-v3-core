@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {IAaveBridgeAccessControl} from './../interfaces/IAaveBridgeAccessControl.sol';
+import {IBridgeACLManager} from './../interfaces/IBridgeACLManager.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IPool} from './../interfaces/IPool.sol';
 import {IPoolAddressesProvider} from './../interfaces/IPoolAddressesProvider.sol';
 import {IERC20} from './../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from './../dependencies/openzeppelin/contracts/SafeERC20.sol';
 
-contract AaveBridgeAccessControl is IAaveBridgeAccessControl, Ownable {
+contract BridgeACLManager is IBridgeACLManager, Ownable {
   using SafeERC20 for IERC20;
 
   mapping(address => bool) internal _allowedToMint;
@@ -20,7 +20,7 @@ contract AaveBridgeAccessControl is IAaveBridgeAccessControl, Ownable {
   }
 
   modifier onlyMinter() {
-    require(_allowedToMint[msg.sender], 'AaveBridgeAccessControl: caller is not a minter');
+    require(_allowedToMint[msg.sender], 'BridgeACLManager: caller is not a minter');
     _;
   }
 
@@ -33,7 +33,7 @@ contract AaveBridgeAccessControl is IAaveBridgeAccessControl, Ownable {
     return _allowedToMint[user];
   }
 
-  ///@inheritdoc IAaveBridgeAccessControl
+  ///@inheritdoc IBridgeACLManager
   function mintUnbacked(
     address asset,
     uint256 amount,
@@ -43,7 +43,7 @@ contract AaveBridgeAccessControl is IAaveBridgeAccessControl, Ownable {
     POOL.mintUnbacked(asset, amount, onBehalfOf, referralCode);
   }
 
-  ///@inheritdoc IAaveBridgeAccessControl
+  ///@inheritdoc IBridgeACLManager
   function backUnbacked(
     address asset,
     uint256 amount,

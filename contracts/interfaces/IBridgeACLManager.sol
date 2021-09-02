@@ -4,14 +4,14 @@ pragma solidity 0.8.6;
 import {IPool} from './IPool.sol';
 
 /**
- * @title IAaveBridgeAccessControl contract
+ * @title IBridgeACLManager contract
  * @dev Main registry of bridges that are authorized to mint unbacked tokens and later back them with received funds.
  * - Acting also as whitelist for fast withdrawal bridges
  * - Owned by the Aave Governance
  * @author Aave
  **/
 
-interface IAaveBridgeAccessControl {
+interface IBridgeACLManager {
   event SetAllowedToMint(address indexed user, bool value);
 
   function isAllowedToMint(address user) external view returns (bool);

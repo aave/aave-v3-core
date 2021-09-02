@@ -31,7 +31,7 @@ import { AavePools, iAavePoolAssets, IReserveParams, RateMode } from '../../help
 import { getReserveData } from './helpers/utils/helpers';
 import { getReservesConfigByPool } from '../../helpers/configuration';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { AaveBridgeAccessControl, PoolAddressesProvider } from '../../types';
+import { BridgeACLManager, PoolAddressesProvider } from '../../types';
 
 BigNumber.config({ DECIMAL_PLACES: 0, ROUNDING_MODE: BigNumber.ROUND_DOWN });
 
@@ -52,7 +52,7 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
   const mintAmount = withdrawAmount.multipliedBy(denominatorBP.minus(feeBP)).div(denominatorBP);
   const feeAmount = withdrawAmount.multipliedBy(feeBP).div(denominatorBP);
 
-  let bridgeAccess: AaveBridgeAccessControl;
+  let bridgeAccess: BridgeACLManager;
 
   before('setup', async () => {
     // Taken from `scenario.spec.ts`
@@ -64,9 +64,9 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     // deploy bridge access control
     const { deployer, users, addressesProvider, poolAdmin } = testEnv;
 
-    const factory = await DRE.ethers.getContractFactory('AaveBridgeAccessControl');
+    const factory = await DRE.ethers.getContractFactory('BridgeACLManager');
 
-    bridgeAccess = (await factory.deploy(addressesProvider.address)) as AaveBridgeAccessControl;
+    bridgeAccess = (await factory.deploy(addressesProvider.address)) as BridgeACLManager;
     await bridgeAccess.deployed();
 
     await addressesProvider.setBridgeAccessControl(bridgeAccess.address);
