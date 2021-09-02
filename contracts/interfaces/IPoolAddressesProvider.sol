@@ -17,6 +17,7 @@ interface IPoolAddressesProvider {
   event PriceOracleUpdated(address indexed newAddress);
   event RateOracleUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
+  event BridgeAccessControlUpdated(address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
   function getMarketId() external view returns (string memory);
@@ -52,4 +53,8 @@ interface IPoolAddressesProvider {
   function getRateOracle() external view returns (address);
 
   function setRateOracle(address rateOracle) external;
+
+  function getBridgeAccessControl() external view returns (address);
+
+  function setBridgeAccessControl(address bridgeAccessControl) external;
 }
