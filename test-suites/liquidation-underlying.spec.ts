@@ -11,7 +11,7 @@ import { makeSuite } from './helpers/make-suite';
 makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;
 
-  it('It\'s not possible to liquidate on a non-active collateral or a non active principal', async () => {
+  it("It's not possible to liquidate on a non-active collateral or a non active principal", async () => {
     const {
       configurator,
       weth,

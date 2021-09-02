@@ -2,10 +2,10 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
   const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
