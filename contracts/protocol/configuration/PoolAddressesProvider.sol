@@ -27,7 +27,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
-  bytes32 private constant BRIDGE_ACCESS_CONTROL = 'BRIDGE_ACCESS_CONTROL';
+  bytes32 private constant BRIDGE_ACL_MANAGER = 'BRIDGE_ACL_MANAGER';
 
   constructor(string memory marketId) public {
     _setMarketId(marketId);
@@ -164,11 +164,11 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   function getBridgeAccessControl() external view override returns (address) {
-    return getAddress(BRIDGE_ACCESS_CONTROL);
+    return getAddress(BRIDGE_ACL_MANAGER);
   }
 
   function setBridgeAccessControl(address bridgeAccessControl) external override onlyOwner {
-    _addresses[BRIDGE_ACCESS_CONTROL] = bridgeAccessControl;
+    _addresses[BRIDGE_ACL_MANAGER] = bridgeAccessControl;
     emit BridgeAccessControlUpdated(bridgeAccessControl);
   }
 
