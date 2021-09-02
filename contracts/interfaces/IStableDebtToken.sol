@@ -68,27 +68,7 @@ interface IStableDebtToken is IInitializableDebtToken {
     uint256 amount,
     uint256 rate
   ) external returns (bool);
-
-  /**
-   * @dev implements the credit delegation with ERC712 signature
-   * @param delegator The delegator of the credit
-   * @param delegatee The delegatee that can use the credit
-   * @param value The amount to be delegated
-   * @param deadline The deadline timestamp, type(uint256).max for max deadline
-   * @param v Signature param
-   * @param s Signature param
-   * @param r Signature param
-   */
-  function permitDelegation(
-    address delegator,
-    address delegatee,
-    uint256 value,
-    uint256 deadline,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
+  
   /**
    * @dev Burns debt of `user`
    * - The resulting rate is the weighted average between the rate of the new debt

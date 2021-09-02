@@ -1,7 +1,7 @@
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
 import {
-  buildPermitDelegationParams,
+  buildDelegationWithSigParams,
   convertToCurrencyDecimals,
   getSignatureFromTypedData,
 } from '../helpers/contracts-helpers';
@@ -14,7 +14,7 @@ import { _TypedDataEncoder } from 'ethers/lib/utils';
 const { parseEther } = ethers.utils;
 const TEST_WALLET_PATH = '../test-wallets.js';
 
-makeSuite('Permit Delegation', (testEnv: TestEnv) => {
+makeSuite('Delegation with signature', (testEnv: TestEnv) => {
   const mintedAmount = '1000';
   let daiMintedAmount: BigNumber;
   let wethMintedAmount: BigNumber;
@@ -78,7 +78,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       variableDebtDai.address,
       '1',
@@ -102,7 +102,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
 
     await variableDebtDai
       .connect(user1.signer)
-      .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s);
+      .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s);
 
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -128,7 +128,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       stableDebtDai.address,
       '1',
@@ -152,7 +152,7 @@ makeSuite('Permit Delegation', (testEnv: TestEnv) => {
 
     await stableDebtDai
       .connect(user1.signer)
-      .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s);
+      .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s);
 
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
