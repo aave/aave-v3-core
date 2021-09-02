@@ -20,14 +20,14 @@ library BridgeLogic {
   using SafeERC20 for IERC20;
 
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
-  event Bridged(
+  event MintUnbacked(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
     uint256 amount,
     uint16 indexed referral
   );
-  event Backed(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
+  event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   /**
    * @dev Mint unbacked aTokens to a user and updates the unbackedUnderlying for the reserve. Essentially a deposit without transferring of the underlying.
@@ -58,7 +58,7 @@ library BridgeLogic {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
     }
-    emit Bridged(asset, msg.sender, onBehalfOf, amount, referralCode);
+    emit MintUnbacked(asset, msg.sender, onBehalfOf, amount, referralCode);
   }
 
   /**
@@ -69,7 +69,6 @@ library BridgeLogic {
    * @param amount The amount to back
    * @param fee The amount paid in fees
    **/
-
   function backUnbacked(
     DataTypes.ReserveData storage reserve,
     address asset,
@@ -90,6 +89,6 @@ library BridgeLogic {
     reserve.unbackedUnderlying = reserve.unbackedUnderlying - backingAmount;
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
 
-    emit Backed(asset, msg.sender, backingAmount, totalFee);
+    emit BackUnbacked(asset, msg.sender, backingAmount, totalFee);
   }
 }

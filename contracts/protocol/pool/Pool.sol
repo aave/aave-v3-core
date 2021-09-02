@@ -65,9 +65,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   function _onlyBridgeAccessControl() internal view {
-    bytes32 BRIDGE_ACCESS_CONTROL = 'BRIDGE_ACCESS_CONTROL';
     require(
-      _addressesProvider.getAddress(BRIDGE_ACCESS_CONTROL) == msg.sender,
+      _addressesProvider.getBridgeAccessControl() == msg.sender,
       'TODO: fix message. Caller not BRIDGE_ACCESS_CONTROL'
     );
   }
@@ -130,7 +129,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     uint256 fee
-  ) external override {
+  ) external override onlyBridgeAccessControl {
     BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee);
   }
 

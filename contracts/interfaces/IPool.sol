@@ -13,7 +13,7 @@ interface IPool {
    * @param amount The amount deposited
    * @param referral The referral code used
    **/
-  event Bridged(
+  event MintUnbacked(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
@@ -27,7 +27,7 @@ interface IPool {
    * @param backer The address paying for the backing
    * @param amount The amount added as backing
    **/
-  event Backed(address indexed reserve, address indexed backer, uint256 amount);
+  event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   /**
    * @dev Emitted on deposit()
