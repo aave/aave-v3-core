@@ -4,9 +4,7 @@ import {
   IMarketRates,
   iAssetBase,
   iAssetAggregatorBase,
-  SymbolMap,
 } from './types';
-
 import { RateOracle } from '../types/RateOracle';
 import { PriceOracle } from '../types/PriceOracle';
 import { MockAggregator } from '../types/MockAggregator';

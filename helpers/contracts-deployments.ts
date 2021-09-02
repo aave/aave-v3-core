@@ -1,12 +1,5 @@
-import { Contract } from 'ethers';
 import { DRE } from './misc-utils';
-import {
-  tEthereumAddress,
-  eContractid,
-  tStringTokenSmallUnits,
-  TokenContractId,
-  eEthereumNetwork,
-} from './types';
+import { tEthereumAddress, eContractid, tStringTokenSmallUnits, TokenContractId } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { MockContract } from 'ethereum-waffle';
 import { getFirstSigner } from './contracts-getters';
