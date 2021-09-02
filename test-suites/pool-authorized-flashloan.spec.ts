@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ethers, utils, BigNumber } from 'ethers';
+import { utils } from 'ethers';
 import {
   getMockFlashLoanReceiver,
   getStableDebtToken,
@@ -7,7 +7,7 @@ import {
 } from '../helpers/contracts-getters';
 import { ProtocolErrors } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { MAX_UINT_AMOUNT, oneRay } from '../helpers/constants';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
@@ -283,7 +283,8 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
 
     expect(totalLiquidity).to.be.equal(expectedLiquidity, 'Invalid total liquidity');
     expect(reserveData.liquidityRate).to.be.equal('0', 'Invalid liquidity rate');
-    expect(reserveData.liquidityIndex).to.be.equal(utils.parseUnits('1', 27),
+    expect(reserveData.liquidityIndex).to.be.equal(
+      utils.parseUnits('1', 27),
       'Invalid liquidity index'
     );
     expect(userData.currentATokenBalance).to.be.equal(expectedLiquidity, 'Invalid user balance');
