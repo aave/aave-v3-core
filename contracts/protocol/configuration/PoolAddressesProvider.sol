@@ -3,7 +3,7 @@ pragma solidity 0.8.6;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 
-// Prettier ignore to prevent buidler flatter bug
+// Prettier ignore to prevent hardhat flatter bug
 // prettier-ignore
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 
@@ -28,7 +28,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
 
-  constructor(string memory marketId) public {
+  constructor(string memory marketId) {
     _setMarketId(marketId);
   }
 

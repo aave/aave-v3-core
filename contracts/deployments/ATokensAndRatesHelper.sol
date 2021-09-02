@@ -35,7 +35,7 @@ contract ATokensAndRatesHelper is Ownable {
     address payable _pool,
     address _addressesProvider,
     address _poolConfigurator
-  ) public {
+  ) {
     pool = _pool;
     addressesProvider = _addressesProvider;
     poolConfigurator = _poolConfigurator;

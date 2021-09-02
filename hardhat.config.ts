@@ -2,13 +2,12 @@ import path from 'path';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
-import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
+import { HARDHAT_CHAINID, COVERAGE_CHAINID } from './helpers/hardhat-constants';
 import { buildForkConfig } from './helper-hardhat-config';
 
 require('dotenv').config();
 
 import '@nomiclabs/hardhat-ethers';
-import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-gas-reporter';
 import 'hardhat-typechain';
@@ -43,9 +42,6 @@ const hardhatConfig: HardhatUserConfig = {
     outDir: 'types',
     target: 'ethers-v5',
   },
-  etherscan: {
-    apiKey: ETHERSCAN_KEY,
-  },
   mocha: {
     timeout: 0,
   },
@@ -66,7 +62,7 @@ const hardhatConfig: HardhatUserConfig = {
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
       gas: DEFAULT_BLOCK_GAS_LIMIT,
       gasPrice: 8000000000,
-      chainId: BUIDLEREVM_CHAINID,
+      chainId: HARDHAT_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({

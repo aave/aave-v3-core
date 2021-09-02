@@ -106,19 +106,6 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(config.interestRateStrategyAddress).to.be.eq(ZERO_ADDRESS);
   });
 
-  it('Owner pauses the Pool', async () => {
-    const { pool, deployer, configurator } = testEnv;
-
-    // Impersonate PoolConfigurator
-    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
-    await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
-
-    expect(await pool.paused()).to.be.eq(false);
-    expect(await pool.connect(configSigner).setPause(true));
-    expect(await pool.paused()).to.be.eq(true);
-  });
-
   it('Initialize an already initialized reserve. ReserveLogic `init` where aTokenAddress != ZERO_ADDRESS (revert expected)', async () => {
     const { pool, dai, deployer, configurator } = testEnv;
 
