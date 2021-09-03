@@ -18,7 +18,7 @@ import {Errors} from '../libraries/helpers/Errors.sol';
  **/
 contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   using WadRayMath for uint256;
-  
+
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
     keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
@@ -138,8 +138,10 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     if (accountBalance == 0) {
       return 0;
     }
-    uint256 cumulatedInterest =
-      MathUtils.calculateCompoundedInterest(stableRate, _timestamps[account]);
+    uint256 cumulatedInterest = MathUtils.calculateCompoundedInterest(
+      stableRate,
+      _timestamps[account]
+    );
     return accountBalance.rayMul(cumulatedInterest);
   }
 
@@ -167,7 +169,16 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     address onBehalfOf,
     uint256 amount,
     uint256 rate
-  ) external override onlyPool returns (bool) {
+  )
+    external
+    override
+    onlyPool
+    returns (
+      bool,
+      uint256,
+      uint256
+    )
+  {
     MintLocalVars memory vars;
 
     if (user != onBehalfOf) {
@@ -183,8 +194,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     vars.amountInRay = amount.wadToRay();
 
     vars.newStableRate = (_usersStableRate[onBehalfOf].rayMul(currentBalance.wadToRay()) +
-      vars.amountInRay.rayMul(rate))
-      .rayDiv((currentBalance + amount).wadToRay());
+      vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
     require(vars.newStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
     _usersStableRate[onBehalfOf] = vars.newStableRate;
@@ -195,8 +205,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     // Calculates the updated average stable rate
     vars.currentAvgStableRate = _avgStableRate = (vars.currentAvgStableRate.rayMul(
       vars.previousSupply.wadToRay()
-    ) + rate.rayMul(vars.amountInRay))
-      .rayDiv(vars.nextSupply.wadToRay());
+    ) + rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay());
 
     _mint(onBehalfOf, amount + balanceIncrease, vars.previousSupply);
 
@@ -213,7 +222,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       vars.nextSupply
     );
 
-    return currentBalance == 0;
+    return (currentBalance == 0, vars.nextSupply, vars.currentAvgStableRate);
   }
 
   /**
@@ -221,7 +230,12 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @param user The address of the user getting his debt burned
    * @param amount The amount of debt tokens getting burned
    **/
-  function burn(address user, uint256 amount) external override onlyPool {
+  function burn(address user, uint256 amount)
+    external
+    override
+    onlyPool
+    returns (uint256, uint256)
+  {
     (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(user);
 
     uint256 previousSupply = totalSupply();
@@ -281,6 +295,8 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     }
 
     emit Transfer(user, address(0), amount);
+
+    return (nextSupply, newAvgStableRate);
   }
 
   /**
@@ -306,23 +322,22 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     //solium-disable-next-line
     require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
     uint256 currentValidNonce = _nonces[delegator];
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked(
-          '\x19\x01',
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              PERMIT_DELEGATION_TYPEHASH,
-              delegator,
-              delegatee,
-              value,
-              currentValidNonce,
-              deadline
-            )
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        '\x19\x01',
+        DOMAIN_SEPARATOR,
+        keccak256(
+          abi.encode(
+            PERMIT_DELEGATION_TYPEHASH,
+            delegator,
+            delegatee,
+            value,
+            currentValidNonce,
+            deadline
           )
         )
-      );
+      )
+    );
     require(delegator == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
     _nonces[delegator] = currentValidNonce + 1;
     _approveDelegation(delegator, delegatee, value);
@@ -351,11 +366,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     // Calculation of the accrued interest since the last accumulation
     uint256 balanceIncrease = balanceOf(user) - previousPrincipalBalance;
 
-    return (
-      previousPrincipalBalance,
-      previousPrincipalBalance + balanceIncrease,
-      balanceIncrease
-    );
+    return (previousPrincipalBalance, previousPrincipalBalance + balanceIncrease, balanceIncrease);
   }
 
   /**
@@ -461,8 +472,10 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       return 0;
     }
 
-    uint256 cumulatedInterest =
-      MathUtils.calculateCompoundedInterest(avgRate, _totalSupplyTimestamp);
+    uint256 cumulatedInterest = MathUtils.calculateCompoundedInterest(
+      avgRate,
+      _totalSupplyTimestamp
+    );
 
     return principalSupply.rayMul(cumulatedInterest);
   }

@@ -61,13 +61,20 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param onBehalfOf The address receiving the debt tokens
    * @param amount The amount of debt tokens to mint
    * @param rate The rate of the debt being minted
+   * @return returns isFirstBorrow, totalStableDebt and avgStableBorrowRate
    **/
   function mint(
     address user,
     address onBehalfOf,
     uint256 amount,
     uint256 rate
-  ) external returns (bool);
+  )
+    external
+    returns (
+      bool,
+      uint256,
+      uint256
+    );
 
   /**
    * @dev implements the credit delegation with ERC712 signature
@@ -95,8 +102,9 @@ interface IStableDebtToken is IInitializableDebtToken {
    * and the rate of the previous debt
    * @param user The address of the user getting his debt burned
    * @param amount The amount of debt tokens getting burned
+   * @return totalStableDebt and avgStableBorrowRate
    **/
-  function burn(address user, uint256 amount) external;
+  function burn(address user, uint256 amount) external returns (uint256, uint256);
 
   /**
    * @dev Returns the average rate of all the stable rate loans.

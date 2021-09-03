@@ -27,14 +27,14 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
    * @param onBehalfOf The address receiving the debt tokens
    * @param amount The amount of debt being minted
    * @param index The variable debt index of the reserve
-   * @return `true` if the the previous balance of the user is 0
+   * @return if the the previous balance of the user is 0 and the scaled total debt of the reserve
    **/
   function mint(
     address user,
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) external returns (bool);
+  ) external returns (bool, uint256);
 
   /**
    * @dev implements the credit delegation with ERC712 signature
@@ -68,12 +68,13 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
    * @dev Burns user variable debt
    * @param user The user which debt is burnt
    * @param index The variable debt index of the reserve
+   * @return The scaled total debt of the reserve
    **/
   function burn(
     address user,
     uint256 amount,
     uint256 index
-  ) external;
+  ) external returns (uint256);
 
   /**
    * @dev Returns the address of the incentives controller contract

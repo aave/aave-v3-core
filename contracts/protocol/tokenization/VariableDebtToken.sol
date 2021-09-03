@@ -118,14 +118,14 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
    * @param onBehalfOf The address receiving the debt tokens
    * @param amount The amount of debt being minted
    * @param index The variable debt index of the reserve
-   * @return `true` if the the previous balance of the user is 0
+   * @return if the the previous balance of the user is 0 and the scaled total debt of the reserve
    **/
   function mint(
     address user,
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) external override onlyPool returns (bool) {
+  ) external override onlyPool returns (bool, uint256) {
     if (user != onBehalfOf) {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
@@ -139,7 +139,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     emit Transfer(address(0), onBehalfOf, amount);
     emit Mint(user, onBehalfOf, amount, index);
 
-    return previousBalance == 0;
+    return (previousBalance == 0, scaledTotalSupply());
   }
 
   /**
@@ -148,12 +148,13 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
    * @param user The user whose debt is getting burned
    * @param amount The amount getting burned
    * @param index The variable debt index of the reserve
+   * @return The scaled total debt of the reserve
    **/
   function burn(
     address user,
     uint256 amount,
     uint256 index
-  ) external override onlyPool {
+  ) external override onlyPool returns (uint256) {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
@@ -161,6 +162,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     emit Transfer(user, address(0), amount);
     emit Burn(user, amount, index);
+    return scaledTotalSupply();
   }
 
   /**
@@ -186,23 +188,22 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     //solium-disable-next-line
     require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
     uint256 currentValidNonce = _nonces[delegator];
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked(
-          '\x19\x01',
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              PERMIT_DELEGATION_TYPEHASH,
-              delegator,
-              delegatee,
-              value,
-              currentValidNonce,
-              deadline
-            )
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        '\x19\x01',
+        DOMAIN_SEPARATOR,
+        keccak256(
+          abi.encode(
+            PERMIT_DELEGATION_TYPEHASH,
+            delegator,
+            delegatee,
+            value,
+            currentValidNonce,
+            deadline
           )
         )
-      );
+      )
+    );
     require(delegator == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
     _nonces[delegator] = currentValidNonce + 1;
     _approveDelegation(delegator, delegatee, value);
