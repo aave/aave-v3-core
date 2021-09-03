@@ -182,6 +182,31 @@ interface IPool {
   ) external;
 
   /**
+   * @notice Deposit with transfer approval of asset to be deposited done via permit function
+   * see: https://eips.ethereum.org/EIPS/eip-2612 and https://eips.ethereum.org/EIPS/eip-713
+   * @param asset The address of the underlying asset to deposit
+   * @param amount The amount to be deposited
+   * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
+   *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
+   *   is a different wallet
+   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+   *   0 if the action is executed directly by the user, without any middle-man
+   * @param permitV V parameter of ERC712 permit sig
+   * @param permitR R parameter of ERC712 permit sig
+   * @param permitS S parameter of ERC712 permit sig
+   **/
+  function depositWithPermit(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode,
+    uint256 deadline,
+    uint8 permitV,
+    bytes32 permitR,
+    bytes32 permitS
+  ) external;
+
+  /**
    * @dev Withdraws an `amount` of underlying asset from the reserve, burning the equivalent aTokens owned
    * E.g. User has 100 aUSDC, calls withdraw() and receives 100 USDC, burning the 100 aUSDC
    * @param asset The address of the underlying asset to withdraw
@@ -241,31 +266,6 @@ interface IPool {
   ) external returns (uint256);
 
   /**
-   * @notice Deposit with transfer approval of asset to be deposited done via permit function
-   * see: https://eips.ethereum.org/EIPS/eip-2612 and https://eips.ethereum.org/EIPS/eip-713
-   * @param asset The address of the underlying asset to deposit
-   * @param amount The amount to be deposited
-   * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
-   *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
-   *   is a different wallet
-   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
-   *   0 if the action is executed directly by the user, without any middle-man
-   * @param permitV V parameter of ERC712 permit sig
-   * @param permitR R parameter of ERC712 permit sig
-   * @param permitS S parameter of ERC712 permit sig
-   **/
-  function depositWithPermit(
-    address asset,
-    uint256 amount,
-    address onBehalfOf,
-    uint16 referralCode,
-    uint256 deadline,
-    uint8 permitV,
-    bytes32 permitR,
-    bytes32 permitS
-  ) external;
-
-  /**
    * @notice Repay with transfer approval of asset to be repaid done via permit function
    * see: https://eips.ethereum.org/EIPS/eip-2612 and https://eips.ethereum.org/EIPS/eip-713
    * @param asset The address of the borrowed underlying asset previously borrowed
@@ -291,6 +291,24 @@ interface IPool {
     bytes32 permitS
   ) external returns (uint256);
 
+  /**
+   * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens held by the repayer, burning the equivalent debt tokens
+   * - E.g. User repays 100 USDC using 100 aUSDC, burning 100 variable/stable debt tokens of the `onBehalfOf` address
+   * @param asset The address of the borrowed underlying asset previously borrowed
+   * @param amount The amount to repay
+   * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
+   * @param rateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
+   * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
+   * user calling the function if he wants to reduce/remove his own debt, or the address of any other
+   * other borrower whose debt should be removed
+   * @return The final amount repaid
+   **/
+  function repayWithATokens(
+    address asset,
+    uint256 amount,
+    uint256 rateMode,
+    address onBehalfOf
+  ) external returns (uint256);
   /**
    * @dev Allows a borrower to swap his debt between stable and variable mode, or viceversa
    * @param asset The address of the underlying asset borrowed
