@@ -65,10 +65,9 @@ library ReserveLogic {
       return reserve.liquidityIndex;
     }
 
-    uint256 cumulated =
-      MathUtils.calculateLinearInterest(reserve.currentLiquidityRate, timestamp).rayMul(
-        reserve.liquidityIndex
-      );
+    uint256 cumulated = MathUtils
+      .calculateLinearInterest(reserve.currentLiquidityRate, timestamp)
+      .rayMul(reserve.liquidityIndex);
 
     return cumulated;
   }
@@ -93,10 +92,9 @@ library ReserveLogic {
       return reserve.variableBorrowIndex;
     }
 
-    uint256 cumulated =
-      MathUtils.calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp).rayMul(
-        reserve.variableBorrowIndex
-      );
+    uint256 cumulated = MathUtils
+      .calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp)
+      .rayMul(reserve.variableBorrowIndex);
 
     return cumulated;
   }
@@ -297,11 +295,10 @@ library ReserveLogic {
 
     //only cumulating if there is any income being produced
     if (reserveCache.currLiquidityRate > 0) {
-      uint256 cumulatedLiquidityInterest =
-        MathUtils.calculateLinearInterest(
-          reserveCache.currLiquidityRate,
-          reserveCache.reserveLastUpdateTimestamp
-        );
+      uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
+        reserveCache.currLiquidityRate,
+        reserveCache.reserveLastUpdateTimestamp
+      );
       reserveCache.nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(
         reserveCache.currLiquidityIndex
       );
@@ -314,11 +311,10 @@ library ReserveLogic {
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
       if (reserveCache.currScaledVariableDebt != 0) {
-        uint256 cumulatedVariableBorrowInterest =
-          MathUtils.calculateCompoundedInterest(
-            reserveCache.currVariableBorrowRate,
-            reserveCache.reserveLastUpdateTimestamp
-          );
+        uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+          reserveCache.currVariableBorrowRate,
+          reserveCache.reserveLastUpdateTimestamp
+        );
         reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
           reserveCache.currVariableBorrowIndex
         );
@@ -359,10 +355,8 @@ library ReserveLogic {
     reserveCache.reserveLastUpdateTimestamp = reserve.lastUpdateTimestamp;
 
     reserveCache.currScaledVariableDebt = reserveCache.nextScaledVariableDebt = IVariableDebtToken(
-      reserveCache
-        .variableDebtTokenAddress
-    )
-      .scaledTotalSupply();
+      reserveCache.variableDebtTokenAddress
+    ).scaledTotalSupply();
 
     (
       reserveCache.currPrincipalStableDebt,
@@ -377,41 +371,5 @@ library ReserveLogic {
     reserveCache.nextAvgStableBorrowRate = reserveCache.currAvgStableBorrowRate;
 
     return reserveCache;
-  }
-
-  /**
-   * @dev Updates the debt data in the cache object. MUST be invoked before updateInterestRates() when a protocol interaction
-   * causes minting or burning of debt.
-   * @param cache The cache object
-   * @param stableDebtMinted The stable debt minted as a consequence of the interaction
-   * @param stableDebtBurned The stable debt burned as a consequence of the interaction
-   * @param variableDebtMinted The variable debt minted as a consequence of the interaction
-   * @param variableDebtBurned The variable debt burned as a consequence of the interaction
-   */
-  function refreshDebt(
-    DataTypes.ReserveCache memory cache,
-    uint256 stableDebtMinted,
-    uint256 stableDebtBurned,
-    uint256 variableDebtMinted,
-    uint256 variableDebtBurned
-  ) internal view {
-    if (stableDebtMinted != 0 || stableDebtBurned != 0) {
-      if (cache.currTotalStableDebt + stableDebtMinted > stableDebtBurned) {
-        cache.nextTotalStableDebt = cache.currTotalStableDebt + stableDebtMinted - stableDebtBurned;
-        cache.nextAvgStableBorrowRate = IStableDebtToken(cache.stableDebtTokenAddress)
-          .getAverageStableRate();
-      } else {
-        cache.nextTotalStableDebt = cache.nextAvgStableBorrowRate = 0;
-      }
-    }
-
-    if (variableDebtMinted != 0 || variableDebtBurned != 0) {
-      uint256 scaledVariableDebtMinted = variableDebtMinted.rayDiv(cache.nextVariableBorrowIndex);
-      uint256 scaledVariableDebtBurned = variableDebtBurned.rayDiv(cache.nextVariableBorrowIndex);
-      cache.nextScaledVariableDebt =
-        cache.currScaledVariableDebt +
-        scaledVariableDebtMinted -
-        scaledVariableDebtBurned;
-    }
   }
 }
