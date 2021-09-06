@@ -61,6 +61,7 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param onBehalfOf The address receiving the debt tokens
    * @param amount The amount of debt tokens to mint
    * @param rate The rate of the debt being minted
+   * @return true if balance before mint was 0.
    **/
   function mint(
     address user,
@@ -68,7 +69,7 @@ interface IStableDebtToken is IInitializableDebtToken {
     uint256 amount,
     uint256 rate
   ) external returns (bool);
-  
+
   /**
    * @dev Burns debt of `user`
    * - The resulting rate is the weighted average between the rate of the new debt
@@ -86,12 +87,14 @@ interface IStableDebtToken is IInitializableDebtToken {
 
   /**
    * @dev Returns the stable rate of the user debt
+   * @param user The address of the user
    * @return The stable rate of the user
    **/
   function getUserStableRate(address user) external view returns (uint256);
 
   /**
    * @dev Returns the timestamp of the last update of the user
+   * @param user The address of the user
    * @return The timestamp
    **/
   function getUserLastUpdated(address user) external view returns (uint40);
