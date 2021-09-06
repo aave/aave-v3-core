@@ -11,7 +11,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @dev Emitted after the mint action
    * @param from The address performing the mint
    * @param value The amount being
-   * @param index The new liquidity index of the reserve
+   * @param index The next liquidity index of the reserve
    **/
   event Mint(address indexed from, uint256 value, uint256 index);
 
@@ -19,7 +19,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @dev Mints `amount` aTokens to `user`
    * @param user The address receiving the minted tokens
    * @param amount The amount of tokens getting minted
-   * @param index The new liquidity index of the reserve
+   * @param index The next liquidity index of the reserve
    * @return `true` if the the previous balance of the user was 0
    */
   function mint(
@@ -33,7 +33,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param from The owner of the aTokens, getting them burned
    * @param target The address that will receive the underlying
    * @param value The amount being burned
-   * @param index The new liquidity index of the reserve
+   * @param index The next liquidity index of the reserve
    **/
   event Burn(address indexed from, address indexed target, uint256 value, uint256 index);
 
@@ -42,7 +42,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param from The user whose tokens are being transferred
    * @param to The recipient
    * @param value The amount being transferred
-   * @param index The new liquidity index of the reserve
+   * @param index The next liquidity index of the reserve
    **/
   event BalanceTransfer(address indexed from, address indexed to, uint256 value, uint256 index);
 
@@ -51,7 +51,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param user The owner of the aTokens, getting them burned
    * @param receiverOfUnderlying The address that will receive the underlying
    * @param amount The amount being burned
-   * @param index The new liquidity index of the reserve
+   * @param index The next liquidity index of the reserve
    **/
   function burn(
     address user,
@@ -63,7 +63,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
    * @dev Mints aTokens to the reserve treasury
    * @param amount The amount of tokens getting minted
-   * @param index The new liquidity index of the reserve
+   * @param index The next liquidity index of the reserve
    */
   function mintToTreasury(uint256 amount, uint256 index) external;
 
