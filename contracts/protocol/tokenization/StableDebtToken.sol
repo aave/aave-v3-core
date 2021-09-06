@@ -149,7 +149,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 previousSupply;
     uint256 nextSupply;
     uint256 amountInRay;
-    uint256 newStableRate;
+    uint256 nextStableRate;
     uint256 currentAvgStableRate;
   }
 
@@ -193,11 +193,11 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     vars.amountInRay = amount.wadToRay();
 
-    vars.newStableRate = (_usersStableRate[onBehalfOf].rayMul(currentBalance.wadToRay()) +
+    vars.nextStableRate = (_usersStableRate[onBehalfOf].rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
-    require(vars.newStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
-    _usersStableRate[onBehalfOf] = vars.newStableRate;
+    require(vars.nextStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
+    _usersStableRate[onBehalfOf] = vars.nextStableRate;
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
@@ -217,7 +217,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       amount,
       currentBalance,
       balanceIncrease,
-      vars.newStableRate,
+      vars.nextStableRate,
       vars.currentAvgStableRate,
       vars.nextSupply
     );
@@ -239,7 +239,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(user);
 
     uint256 previousSupply = totalSupply();
-    uint256 newAvgStableRate = 0;
+    uint256 nextAvgStableRate = 0;
     uint256 nextSupply = 0;
     uint256 userStableRate = _usersStableRate[user];
 
@@ -259,9 +259,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       // happen that user rate * user balance > avg rate * total supply. In that case,
       // we simply set the avg rate to 0
       if (secondTerm >= firstTerm) {
-        newAvgStableRate = _avgStableRate = _totalSupply = 0;
+        nextAvgStableRate = _avgStableRate = _totalSupply = 0;
       } else {
-        newAvgStableRate = _avgStableRate = (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay());
+        nextAvgStableRate = _avgStableRate = (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay());
       }
     }
 
@@ -285,18 +285,18 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
         currentBalance,
         balanceIncrease,
         userStableRate,
-        newAvgStableRate,
+        nextAvgStableRate,
         nextSupply
       );
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
       _burn(user, amountToBurn, previousSupply);
-      emit Burn(user, amountToBurn, currentBalance, balanceIncrease, newAvgStableRate, nextSupply);
+      emit Burn(user, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
     }
 
     emit Transfer(user, address(0), amount);
 
-    return (nextSupply, newAvgStableRate);
+    return (nextSupply, nextAvgStableRate);
   }
 
   /**
