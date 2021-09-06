@@ -152,7 +152,7 @@ export const getSignatureFromTypedData = (
   return fromRpcSig(signature);
 };
 
-export const buildPermitDelegationParams = (
+export const buildDelegationWithSigParams = (
   chainId: number,
   token: tEthereumAddress,
   revision: string,
@@ -170,7 +170,7 @@ export const buildPermitDelegationParams = (
       { name: 'chainId', type: 'uint256' },
       { name: 'verifyingContract', type: 'address' },
     ],
-    PermitDelegation: [
+    DelegationWithSig: [
       { name: 'delegator', type: 'address' },
       { name: 'delegatee', type: 'address' },
       { name: 'value', type: 'uint256' },
@@ -178,7 +178,7 @@ export const buildPermitDelegationParams = (
       { name: 'deadline', type: 'uint256' },
     ],
   },
-  primaryType: 'PermitDelegation' as const,
+  primaryType: 'DelegationWithSig' as const,
   domain: {
     name: tokenName,
     version: revision,

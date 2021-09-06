@@ -156,9 +156,9 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     await configurator.connect(users[1].signer).setPoolPause(true);
 
     // Try to execute liquidation
-    await expect(pool.connect(user.signer).repay(dai.address, '1', '1', user.address)).to.be.revertedWith(
-      VL_RESERVE_PAUSED
-    );
+    await expect(
+      pool.connect(user.signer).repay(dai.address, '1', '1', user.address)
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
 
     // Unpause the pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -380,7 +380,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     // Pause reserve
     expect(await proxiedPoolConfigurator.connect(emergencyAdmin.signer).setPoolPause(true));
-    
+
     await evmRevert(snapId);
   });
 });

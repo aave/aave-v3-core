@@ -2,13 +2,12 @@ import path from 'path';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
-import { BUIDLEREVM_CHAINID, COVERAGE_CHAINID } from './helpers/buidler-constants';
+import { HARDHAT_CHAINID, COVERAGE_CHAINID } from './helpers/hardhat-constants';
 import { buildForkConfig } from './helper-hardhat-config';
 
 require('dotenv').config();
 
 import '@nomiclabs/hardhat-ethers';
-import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-gas-reporter';
 import 'hardhat-typechain';
@@ -17,14 +16,14 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
-const HARDFORK = 'berlin';
+const HARDFORK = 'london';
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 
 require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
 const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
-    enabled: false,
+    enabled: true,
   },
   contractSizer: {
     alphaSort: true,
@@ -42,9 +41,6 @@ const hardhatConfig: HardhatUserConfig = {
   typechain: {
     outDir: 'types',
     target: 'ethers-v5',
-  },
-  etherscan: {
-    apiKey: ETHERSCAN_KEY,
   },
   mocha: {
     timeout: 0,
@@ -66,7 +62,7 @@ const hardhatConfig: HardhatUserConfig = {
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
       gas: DEFAULT_BLOCK_GAS_LIMIT,
       gasPrice: 8000000000,
-      chainId: BUIDLEREVM_CHAINID,
+      chainId: HARDHAT_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({

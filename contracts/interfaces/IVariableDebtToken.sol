@@ -37,26 +37,6 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
   ) external returns (bool, uint256);
 
   /**
-   * @dev implements the credit delegation with ERC712 signature
-   * @param delegator The delegator of the credit
-   * @param delegatee The delegatee that can use the credit
-   * @param value The amount to be delegated
-   * @param deadline The deadline timestamp, type(uint256).max for max deadline
-   * @param v Signature param
-   * @param s Signature param
-   * @param r Signature param
-   */
-  function permitDelegation(
-    address delegator,
-    address delegatee,
-    uint256 value,
-    uint256 deadline,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external;
-
-  /**
    * @dev Emitted when variable debt is burnt
    * @param user The user which debt has been burned
    * @param amount The amount of debt being burned
@@ -75,9 +55,4 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
     uint256 amount,
     uint256 index
   ) external returns (uint256);
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view returns (IAaveIncentivesController);
 }

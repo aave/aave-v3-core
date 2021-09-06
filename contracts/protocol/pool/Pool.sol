@@ -191,7 +191,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           rateMode,
           onBehalfOf,
           _lastBorrower,
-          _lastBorrowTimestamp
+          _lastBorrowTimestamp,
+          false
         )
       );
   }
@@ -226,7 +227,31 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           rateMode,
           onBehalfOf,
           _lastBorrower,
-          _lastBorrowTimestamp
+          _lastBorrowTimestamp,
+          false
+        )
+      );
+  }
+
+  ///@inheritdoc IPool
+  function repayWithATokens(
+    address asset,
+    uint256 amount,
+    uint256 rateMode,
+    address onBehalfOf
+  ) external override returns (uint256) {
+    return
+      BorrowLogic.executeRepay(
+        _reserves[asset],
+        _usersConfig[onBehalfOf],
+        DataTypes.ExecuteRepayParams(
+          asset,
+          amount,
+          rateMode,
+          onBehalfOf,
+          _lastBorrower,
+          _lastBorrowTimestamp,
+          true
         )
       );
   }
@@ -427,11 +452,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   ///@inheritdoc IPool
-  function paused() external view override returns (bool) {
-    return _paused;
-  }
-
-  ///@inheritdoc IPool
   function getReservesList() external view override returns (address[] memory) {
     uint256 reserveListCount = _reservesCount;
     uint256 droppedReservesCount = 0;
@@ -552,11 +572,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   ///@inheritdoc IPool
-  function setPause(bool paused) external override onlyPoolConfigurator {
-    _paused = paused;
-  }
-
-  ///@inheritdoc IPool
   function updateFlashBorrowerAuthorization(address flashBorrower, bool authorized)
     external
     override
@@ -579,7 +594,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
   }
 
-  function _addReserveToList(address asset) internal returns (uint8) {
+  function _addReserveToList(address asset) internal {
     uint256 reservesCount = _reservesCount;
 
     require(reservesCount < _maxNumberOfReserves, Errors.P_NO_MORE_RESERVES_ALLOWED);
@@ -592,7 +607,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           _reserves[asset].id = i;
           _reservesList[i] = asset;
           _reservesCount = reservesCount + 1;
-          return i;
         }
       }
     }

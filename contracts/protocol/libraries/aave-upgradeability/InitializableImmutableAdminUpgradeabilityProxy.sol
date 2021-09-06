@@ -12,7 +12,7 @@ contract InitializableImmutableAdminUpgradeabilityProxy is
   BaseImmutableAdminUpgradeabilityProxy,
   InitializableUpgradeabilityProxy
 {
-  constructor(address admin) public BaseImmutableAdminUpgradeabilityProxy(admin) {}
+  constructor(address admin) BaseImmutableAdminUpgradeabilityProxy(admin) {}
 
   /**
    * @dev Only fall back when the sender is not the admin.

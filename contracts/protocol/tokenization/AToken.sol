@@ -40,9 +40,8 @@ contract AToken is
   IPool internal _pool;
   address internal _treasury;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
 
-  modifier onlyPool {
+  modifier onlyPool() {
     require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
     _;
   }
@@ -127,7 +126,9 @@ contract AToken is
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
     _burn(user, amountScaled);
 
-    IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
+    if (receiverOfUnderlying != address(this)) {
+      IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
+    }
 
     emit Transfer(user, address(0), amount);
     emit Burn(user, receiverOfUnderlying, amount, index);
@@ -285,20 +286,6 @@ contract AToken is
   }
 
   /**
-   * @dev For internal usage in the logic of the parent contract IncentivizedERC20
-   **/
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
-  }
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
-  }
-
-  /**
    * @dev Transfers the underlying asset to `target`. Used by the Pool to transfer
    * assets in borrow(), withdraw() and flashLoan()
    * @param target The recipient of the aTokens
@@ -346,14 +333,13 @@ contract AToken is
     //solium-disable-next-line
     require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
     uint256 currentValidNonce = _nonces[owner];
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked(
-          '\x19\x01',
-          DOMAIN_SEPARATOR,
-          keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, currentValidNonce, deadline))
-        )
-      );
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        '\x19\x01',
+        DOMAIN_SEPARATOR,
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, currentValidNonce, deadline))
+      )
+    );
     require(owner == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
     _nonces[owner] = currentValidNonce + 1;
     _approve(owner, spender, value);
