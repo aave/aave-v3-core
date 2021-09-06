@@ -20,8 +20,8 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param currentBalance The current balance of the user
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param newRate The rate of the debt after the minting
-   * @param avgStableRate The new average stable rate after the minting
-   * @param newTotalSupply The new total supply of the stable debt token after the action
+   * @param avgStableRate The next average stable rate after the minting
+   * @param newTotalSupply The next total supply of the stable debt token after the action
    **/
   event Mint(
     address indexed user,
@@ -40,8 +40,8 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param amount The amount being burned
    * @param currentBalance The current balance of the user
    * @param balanceIncrease The the increase in balance since the last action of the user
-   * @param avgStableRate The new average stable rate after the burning
-   * @param newTotalSupply The new total supply of the stable debt token after the action
+   * @param avgStableRate The next average stable rate after the burning
+   * @param newTotalSupply The next total supply of the stable debt token after the action
    **/
   event Burn(
     address indexed user,
