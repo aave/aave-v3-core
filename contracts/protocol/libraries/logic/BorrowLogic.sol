@@ -87,20 +87,21 @@ library BorrowLogic {
 
     if (DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
       currentStableRate = reserve.currentStableBorrowRate;
-      uint256 nextTotalStableDebt;
-      uint256 nextAvgStableBorrowRate;
 
-      (isFirstBorrowing, nextTotalStableDebt, nextAvgStableBorrowRate) = IStableDebtToken(
-        reserveCache.stableDebtTokenAddress
-      ).mint(params.user, params.onBehalfOf, params.amount, currentStableRate);
-      reserveCache.nextTotalStableDebt = nextTotalStableDebt;
-      reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
+      (
+        isFirstBorrowing,
+        reserveCache.nextTotalStableDebt,
+        reserveCache.nextAvgStableBorrowRate
+      ) = IStableDebtToken(reserveCache.stableDebtTokenAddress).mint(
+        params.user,
+        params.onBehalfOf,
+        params.amount,
+        currentStableRate
+      );
     } else {
-      uint256 nextScaledVariableDebt;
-      (isFirstBorrowing, nextScaledVariableDebt) = IVariableDebtToken(
+      (isFirstBorrowing, reserveCache.nextScaledVariableDebt) = IVariableDebtToken(
         reserveCache.variableDebtTokenAddress
       ).mint(params.user, params.onBehalfOf, params.amount, reserveCache.nextVariableBorrowIndex);
-      reserveCache.nextScaledVariableDebt = nextScaledVariableDebt;
     }
 
     if (isFirstBorrowing) {
@@ -165,15 +166,13 @@ library BorrowLogic {
     reserve.updateState(reserveCache);
 
     if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
-      (uint256 nextTotalStableDebt, uint256 nextAvgStableBorrowRate) = IStableDebtToken(
+      (reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
         reserveCache.stableDebtTokenAddress
       ).burn(vars.onBehalfOf, paybackAmount);
-      reserveCache.nextTotalStableDebt = nextTotalStableDebt;
-      reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
     } else {
-      uint256 nextScaledVariableDebt = IVariableDebtToken(reserveCache.variableDebtTokenAddress)
-        .burn(vars.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
-      reserveCache.nextScaledVariableDebt = nextScaledVariableDebt;
+      reserveCache.nextScaledVariableDebt = IVariableDebtToken(
+        reserveCache.variableDebtTokenAddress
+      ).burn(vars.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
     }
 
     reserve.updateInterestRates(reserveCache, vars.asset, paybackAmount, 0);
@@ -345,11 +344,11 @@ library BorrowLogic {
 
     IStableDebtToken(address(stableDebtToken)).burn(user, stableDebt);
 
-    (, uint256 nextTotalStableDebt, uint256 nextAvgStableBorrowRate) = IStableDebtToken(
+    (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
       address(stableDebtToken)
     ).mint(user, user, stableDebt, reserve.currentStableBorrowRate);
-    reserveCache.nextTotalStableDebt = nextTotalStableDebt;
-    reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
+    //reserveCache.nextTotalStableDebt = nextTotalStableDebt;
+    //reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
@@ -380,26 +379,21 @@ library BorrowLogic {
     reserve.updateState(reserveCache);
 
     if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
-      (uint256 nextTotalStableDebt, uint256 nextAvgStableBorrowRate) = IStableDebtToken(
+      (reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
         reserveCache.stableDebtTokenAddress
       ).burn(msg.sender, stableDebt);
-      reserveCache.nextTotalStableDebt = nextTotalStableDebt;
-      reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
 
-      (, uint256 nextScaledVariableSupply) = IVariableDebtToken(
+      (, reserveCache.nextScaledVariableDebt) = IVariableDebtToken(
         reserveCache.variableDebtTokenAddress
       ).mint(msg.sender, msg.sender, stableDebt, reserveCache.nextVariableBorrowIndex);
-      reserveCache.nextScaledVariableDebt = nextScaledVariableSupply;
     } else {
-      uint256 nextScaledVariableSupply = IVariableDebtToken(reserveCache.variableDebtTokenAddress)
-        .burn(msg.sender, variableDebt, reserveCache.nextVariableBorrowIndex);
-      reserveCache.nextScaledVariableDebt = nextScaledVariableSupply;
+      reserveCache.nextScaledVariableDebt = IVariableDebtToken(
+        reserveCache.variableDebtTokenAddress
+      ).burn(msg.sender, variableDebt, reserveCache.nextVariableBorrowIndex);
 
-      (, uint256 nextTotalStableDebt, uint256 nextAvgStableBorrowRate) = IStableDebtToken(
+      (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
         reserveCache.stableDebtTokenAddress
       ).mint(msg.sender, msg.sender, variableDebt, reserve.currentStableBorrowRate);
-      reserveCache.nextTotalStableDebt = nextTotalStableDebt;
-      reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
     }
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
