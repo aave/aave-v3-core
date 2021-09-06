@@ -325,10 +325,7 @@ export const configureReservesByHelper = async (
       await waitForTx(
         await reservesSetupHelper.configureReserves(
           poolConfiguratorAddress,
-          chunkedInputParams[chunkIndex],
-          {
-            gasLimit: 12000000,
-          }
+          chunkedInputParams[chunkIndex]
         )
       );
       console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
