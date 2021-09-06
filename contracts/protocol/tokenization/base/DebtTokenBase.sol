@@ -3,9 +3,7 @@ pragma solidity 0.8.6;
 
 import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
-import {
-  VersionedInitializable
-} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IncentivizedERC20} from '../IncentivizedERC20.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 
@@ -34,18 +32,12 @@ abstract contract DebtTokenBase is
   /**
    * @dev Only pool can call functions marked by this modifier
    **/
-  modifier onlyPool {
+  modifier onlyPool() {
     require(_msgSender() == address(_getPool()), Errors.CT_CALLER_MUST_BE_POOL);
     _;
   }
 
-  /**
-   * @dev delegates borrowing power to a user on the specific debt token
-   * @param delegatee the address receiving the delegated borrowing power
-   * @param amount the maximum amount being delegated. Delegation will still
-   * respect the liquidation constraints (even if delegated, a delegatee cannot
-   * force a delegator HF to go below 1)
-   **/
+  ///@inheritdoc ICreditDelegationToken
   function approveDelegation(address delegatee, uint256 amount) external override {
     _approveDelegation(_msgSender(), delegatee, amount);
   }
@@ -73,34 +65,28 @@ abstract contract DebtTokenBase is
     //solium-disable-next-line
     require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
     uint256 currentValidNonce = _nonces[delegator];
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked(
-          '\x19\x01',
-          DOMAIN_SEPARATOR,
-          keccak256(
-            abi.encode(
-              DELEGATION_WITH_SIG_TYPEHASH,
-              delegator,
-              delegatee,
-              value,
-              currentValidNonce,
-              deadline
-            )
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        '\x19\x01',
+        DOMAIN_SEPARATOR,
+        keccak256(
+          abi.encode(
+            DELEGATION_WITH_SIG_TYPEHASH,
+            delegator,
+            delegatee,
+            value,
+            currentValidNonce,
+            deadline
           )
         )
-      );
+      )
+    );
     require(delegator == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
     _nonces[delegator] = currentValidNonce + 1;
     _approveDelegation(delegator, delegatee, value);
   }
 
-  /**
-   * @dev returns the borrow allowance of the user
-   * @param fromUser The user to giving allowance
-   * @param toUser The user to give allowance to
-   * @return the current allowance of toUser
-   **/
+  ///@inheritdoc ICreditDelegationToken
   function borrowAllowance(address fromUser, address toUser)
     external
     view
