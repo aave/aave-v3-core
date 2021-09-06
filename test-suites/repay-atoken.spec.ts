@@ -10,7 +10,7 @@ import { zeroPad } from '@ethersproject/bytes';
 const { expect } = require('chai');
 
 makeSuite('Repay with aTokens', (testEnv: TestEnv) => {
-  before('User 1 deposits 100 DAI, user 2 deposits 1 WETH, borrows 50 DAI', async () => {
+  before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
     const {
       weth,
       pool,
@@ -78,8 +78,12 @@ makeSuite('Repay with aTokens', (testEnv: TestEnv) => {
     const balanceAfter = await aDai.balanceOf(user1.address);
     const debtAfter = await variableDebtDai.balanceOf(user1.address);
 
-    expect(balanceAfter.toString()).to.be.bignumber.almostEqual(balanceBefore.sub(repayAmount).toString());
-    expect(debtAfter.toString()).to.be.bignumber.almostEqual(debtBefore.sub(repayAmount).toString());
+    expect(balanceAfter.toString()).to.be.bignumber.almostEqual(
+      balanceBefore.sub(repayAmount).toString()
+    );
+    expect(debtAfter.toString()).to.be.bignumber.almostEqual(
+      debtBefore.sub(repayAmount).toString()
+    );
   });
 
   it('User 0 repays the rest of the debt on behalf of user 1 using aTokens', async () => {
@@ -105,7 +109,9 @@ makeSuite('Repay with aTokens', (testEnv: TestEnv) => {
     const balanceAfter = await aDai.balanceOf(user0.address);
     const debtAfter = await variableDebtDai.balanceOf(user1.address);
 
-    expect(balanceAfter.toString()).to.be.bignumber.almostEqual(balanceBefore.sub(debtBefore).toString());
+    expect(balanceAfter.toString()).to.be.bignumber.almostEqual(
+      balanceBefore.sub(debtBefore).toString()
+    );
     expect(debtAfter).to.be.equal(0);
   });
 });
