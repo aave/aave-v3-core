@@ -5,7 +5,6 @@ import {StableDebtToken} from '../protocol/tokenization/StableDebtToken.sol';
 import {VariableDebtToken} from '../protocol/tokenization/VariableDebtToken.sol';
 import {RateOracle} from '../mocks/oracle/RateOracle.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {StringLib} from './StringLib.sol';
 
 contract StableAndVariableTokensHelper is Ownable {
   address payable private pool;
@@ -15,14 +14,6 @@ contract StableAndVariableTokensHelper is Ownable {
   constructor(address payable _pool, address _addressesProvider) {
     pool = _pool;
     addressesProvider = _addressesProvider;
-  }
-
-  function initDeployment(address[] calldata tokens, string[] calldata symbols) external onlyOwner {
-    require(tokens.length == symbols.length, 'Arrays not same length');
-    require(pool != address(0), 'Pool can not be zero address');
-    for (uint256 i = 0; i < tokens.length; i++) {
-      emit deployedContracts(address(new StableDebtToken()), address(new VariableDebtToken()));
-    }
   }
 
   function setOracleBorrowRates(

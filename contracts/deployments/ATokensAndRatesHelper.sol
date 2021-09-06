@@ -5,11 +5,8 @@ import {Pool} from '../protocol/pool/Pool.sol';
 import {PoolAddressesProvider} from '../protocol/configuration/PoolAddressesProvider.sol';
 import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
-import {
-  DefaultReserveInterestRateStrategy
-} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
+import {DefaultReserveInterestRateStrategy} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {StringLib} from './StringLib.sol';
 
 contract ATokensAndRatesHelper is Ownable {
   address payable private pool;
@@ -42,25 +39,6 @@ contract ATokensAndRatesHelper is Ownable {
     pool = _pool;
     addressesProvider = _addressesProvider;
     poolConfigurator = _poolConfigurator;
-  }
-
-  function initDeployment(InitDeploymentInput[] calldata inputParams) external onlyOwner {
-    for (uint256 i = 0; i < inputParams.length; i++) {
-      emit deployedContracts(
-        address(new AToken()),
-        address(
-          new DefaultReserveInterestRateStrategy(
-            PoolAddressesProvider(addressesProvider),
-            inputParams[i].rates[0],
-            inputParams[i].rates[1],
-            inputParams[i].rates[2],
-            inputParams[i].rates[3],
-            inputParams[i].rates[4],
-            inputParams[i].rates[5]
-          )
-        )
-      );
-    }
   }
 
   function configureReserves(ConfigureReserveInput[] calldata inputParams) external onlyOwner {
