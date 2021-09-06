@@ -366,7 +366,7 @@ library ReserveLogic {
     ) = IStableDebtToken(reserveCache.stableDebtTokenAddress).getSupplyData();
 
     // by default the actions are considered as not affecting the debt balances.
-    // if the action involves mint/burn of debt, the cache needs to be updated through refreshDebt()
+    // if the action involves mint/burn of debt, the cache needs to be updated
     reserveCache.nextTotalStableDebt = reserveCache.currTotalStableDebt;
     reserveCache.nextAvgStableBorrowRate = reserveCache.currAvgStableBorrowRate;
 
