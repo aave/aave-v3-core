@@ -191,7 +191,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           rateMode,
           onBehalfOf,
           _lastBorrower,
-          _lastBorrowTimestamp
+          _lastBorrowTimestamp,
+          false
         )
       );
   }
@@ -226,7 +227,31 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           rateMode,
           onBehalfOf,
           _lastBorrower,
-          _lastBorrowTimestamp
+          _lastBorrowTimestamp,
+          false
+        )
+      );
+  }
+
+  ///@inheritdoc IPool
+  function repayWithATokens(
+    address asset,
+    uint256 amount,
+    uint256 rateMode,
+    address onBehalfOf
+  ) external override returns (uint256) {
+    return
+      BorrowLogic.executeRepay(
+        _reserves[asset],
+        _usersConfig[onBehalfOf],
+        DataTypes.ExecuteRepayParams(
+          asset,
+          amount,
+          rateMode,
+          onBehalfOf,
+          _lastBorrower,
+          _lastBorrowTimestamp,
+          true
         )
       );
   }
