@@ -27,11 +27,11 @@ library ReserveLogic {
   /**
    * @dev Emitted when the state of a reserve is updated
    * @param asset The address of the underlying asset of the reserve
-   * @param liquidityRate The new liquidity rate
-   * @param stableBorrowRate The new stable borrow rate
-   * @param variableBorrowRate The new variable borrow rate
-   * @param liquidityIndex The new liquidity index
-   * @param variableBorrowIndex The new variable borrow index
+   * @param liquidityRate The next liquidity rate
+   * @param stableBorrowRate The next stable borrow rate
+   * @param variableBorrowRate The next variable borrow rate
+   * @param liquidityIndex The next liquidity index
+   * @param variableBorrowIndex The next variable borrow index
    **/
   event ReserveDataUpdated(
     address indexed asset,
@@ -157,9 +157,9 @@ library ReserveLogic {
   }
 
   struct UpdateInterestRatesLocalVars {
-    uint256 newLiquidityRate;
-    uint256 newStableRate;
-    uint256 newVariableRate;
+    uint256 nextLiquidityRate;
+    uint256 nextStableRate;
+    uint256 nextVariableRate;
     uint256 avgStableRate;
     uint256 totalVariableDebt;
   }
@@ -183,9 +183,9 @@ library ReserveLogic {
       reserveCache.nextVariableBorrowIndex
     );
     (
-      vars.newLiquidityRate,
-      vars.newStableRate,
-      vars.newVariableRate
+      vars.nextLiquidityRate,
+      vars.nextStableRate,
+      vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
@@ -196,19 +196,19 @@ library ReserveLogic {
       reserveCache.nextAvgStableBorrowRate,
       reserveCache.reserveConfiguration.getReserveFactorMemory()
     );
-    require(vars.newLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
-    require(vars.newStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);
-    require(vars.newVariableRate <= type(uint128).max, Errors.RL_VARIABLE_BORROW_RATE_OVERFLOW);
+    require(vars.nextLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
+    require(vars.nextStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);
+    require(vars.nextVariableRate <= type(uint128).max, Errors.RL_VARIABLE_BORROW_RATE_OVERFLOW);
 
-    reserve.currentLiquidityRate = uint128(vars.newLiquidityRate);
-    reserve.currentStableBorrowRate = uint128(vars.newStableRate);
-    reserve.currentVariableBorrowRate = uint128(vars.newVariableRate);
+    reserve.currentLiquidityRate = uint128(vars.nextLiquidityRate);
+    reserve.currentStableBorrowRate = uint128(vars.nextStableRate);
+    reserve.currentVariableBorrowRate = uint128(vars.nextVariableRate);
 
     emit ReserveDataUpdated(
       reserveAddress,
-      vars.newLiquidityRate,
-      vars.newStableRate,
-      vars.newVariableRate,
+      vars.nextLiquidityRate,
+      vars.nextStableRate,
+      vars.nextVariableRate,
       reserveCache.nextLiquidityIndex,
       reserveCache.nextVariableBorrowIndex
     );
