@@ -2,6 +2,13 @@
 pragma solidity 0.8.6;
 
 interface ICreditDelegationToken {
+  /**
+   * @dev Emitted on `approveDelegation` and `borrowAllowance
+   * @param fromUser The address of the delegator
+   * @param toUser The address of the delegatee
+   * @param asset The address of the delegated asset
+   * @param amount The amount being delegated
+   */
   event BorrowAllowanceDelegated(
     address indexed fromUser,
     address indexed toUser,
