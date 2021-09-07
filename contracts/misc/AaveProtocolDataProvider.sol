@@ -10,6 +10,11 @@ import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveC
 import {UserConfiguration} from '../protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 
+/**
+ * @title AaveProtocolDataProvider
+ * @author Aave
+ * @notice Peripherial contract to gather and extract information from the Pool.
+ */
 contract AaveProtocolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
@@ -28,6 +33,11 @@ contract AaveProtocolDataProvider {
     ADDRESSES_PROVIDER = addressesProvider;
   }
 
+  /**
+   * @notice Returns the list of the existing reserves in the pool.
+   * @dev Handling MKR and ETH in a different way since do not have a `symbol` function.
+   * @return The list of reserves, pairs of symbols and addresses
+   */
   function getAllReservesTokens() external view returns (TokenData[] memory) {
     IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
@@ -49,6 +59,10 @@ contract AaveProtocolDataProvider {
     return reservesTokens;
   }
 
+  /**
+   * @notice Returns the list of the existing ATokens in the pool.
+   * @return The list of ATokens, pairs of symbols and addresses
+   */
   function getAllATokens() external view returns (TokenData[] memory) {
     IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
@@ -63,7 +77,21 @@ contract AaveProtocolDataProvider {
     return aTokens;
   }
 
-  // not returning borrow and supply caps for compatibility, nor pause flag
+  /**
+   * @notice Returns the configuration data of the reserve
+   * @dev Not returning borrow and supply caps for compatibility, nor pause flag
+   * @param asset The address of the underlying asset of the reserve
+   * @return decimals The number of decimals of the reserve
+   * @return ltv The ltv of the reserve
+   * @return liquidationThreshold The liquidationThreshold of the reserve
+   * @return liquidationBonus The liquidationBonus of the reserve
+   * @return reserveFactor The reserveFactor of the reserve
+   * @return usageAsCollateralEnabled True if the usage as collateral is enabled, false otherwise
+   * @return borrowingEnabled True if borrowing is enabled, false otherwise
+   * @return stableBorrowRateEnabled True if stable rate borrowing is enabled, false otherwise
+   * @return isActive True if it is active, false otherwise
+   * @return isFrozen True if it is frozen, false otherwise
+   **/
   function getReserveConfigurationData(address asset)
     external
     view
@@ -80,8 +108,8 @@ contract AaveProtocolDataProvider {
       bool isFrozen
     )
   {
-    DataTypes.ReserveConfigurationMap memory configuration =
-      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
+      .getConfiguration(asset);
 
     (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
       .getParamsMemory();
@@ -92,6 +120,12 @@ contract AaveProtocolDataProvider {
     usageAsCollateralEnabled = liquidationThreshold > 0;
   }
 
+  /**
+   * @dev Returns the caps paramters of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return borrowCap The borrow cap of the reserve
+   * @return supplyCap The supply cap of the reserve
+   **/
   function getReserveCaps(address asset)
     external
     view
@@ -102,12 +136,31 @@ contract AaveProtocolDataProvider {
       .getCapsMemory();
   }
 
+  /**
+   * @dev Returns if the pool is paused
+   * @param asset The address of the underlying asset of the reserve
+   * @return isPaused True if the pool is paused, false otherwise
+   **/
   function getPaused(address asset) external view returns (bool isPaused) {
     (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset)
       .getFlagsMemory();
   }
 
+  /**
+   * @dev Returns the reserve data
+   * @param asset The address of the underlying asset of the reserve
+   * @return availableLiquidity The available liquidity of the reserve
+   * @return totalStableDebt The total stable debt of the reserve
+   * @return totalVariableDebt The total variable debt of the reserve
+   * @return liquidityRate The liquidity rate of the reserve
+   * @return variableBorrowRate The variable borrow rate of the reserve
+   * @return stableBorrowRate The stable borrow rate of the reserve
+   * @return averageStableBorrowRate The average stable borrow rate of the reserve
+   * @return liquidityIndex The liquidity index of the reserve
+   * @return variableBorrowIndex The variable borrow index of the reserve
+   * @return lastUpdateTimestamp The timestamp of the last update of the reserve
+   **/
   function getReserveData(address asset)
     external
     view
@@ -124,8 +177,9 @@ contract AaveProtocolDataProvider {
       uint40 lastUpdateTimestamp
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
     return (
       IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
@@ -141,6 +195,21 @@ contract AaveProtocolDataProvider {
     );
   }
 
+  /**
+   * @dev Returns the user data in a reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @param user The address of the user
+   * @return currentATokenBalance The current AToken balance of the user
+   * @return currentStableDebt The current stable debt of the user
+   * @return currentVariableDebt The current variable debt of the user
+   * @return principalStableDebt The principal stable debt of the user
+   * @return scaledVariableDebt The scaled variable debt of the user
+   * @return stableBorrowRate The stable borrow rate of the user
+   * @return liquidityRate The liquidity rate of the reserve
+   * @return stableRateLastUpdated The timestamp of the last update of the user stable rate
+   * @return usageAsCollateralEnabled True if the user is using the asset as collateral, false
+   *         otherwise
+   **/
   function getUserReserveData(address asset, address user)
     external
     view
@@ -156,11 +225,12 @@ contract AaveProtocolDataProvider {
       bool usageAsCollateralEnabled
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
-    DataTypes.UserConfigurationMap memory userConfig =
-      IPool(ADDRESSES_PROVIDER.getPool()).getUserConfiguration(user);
+    DataTypes.UserConfigurationMap memory userConfig = IPool(ADDRESSES_PROVIDER.getPool())
+      .getUserConfiguration(user);
 
     currentATokenBalance = IERC20Detailed(reserve.aTokenAddress).balanceOf(user);
     currentVariableDebt = IERC20Detailed(reserve.variableDebtTokenAddress).balanceOf(user);
@@ -175,6 +245,13 @@ contract AaveProtocolDataProvider {
     usageAsCollateralEnabled = userConfig.isUsingAsCollateral(reserve.id);
   }
 
+  /**
+   * Returns the token addresses of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return aTokenAddress The AToken address of the reserve
+   * @return stableDebtTokenAddress The StableDebtToken address of the reserve
+   * @return variableDebtTokenAddress The VariableDebtToken address of the reserve
+   */
   function getReserveTokensAddresses(address asset)
     external
     view
@@ -184,8 +261,9 @@ contract AaveProtocolDataProvider {
       address variableDebtTokenAddress
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
     return (
       reserve.aTokenAddress,
