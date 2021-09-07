@@ -66,15 +66,18 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
 
     const factory = await DRE.ethers.getContractFactory('BridgeACLManager');
 
-    bridgeAccess = (await factory.deploy(addressesProvider.address)) as BridgeACLManager;
+    bridgeAccess = (await factory.deploy(
+      addressesProvider.address,
+      deployer.address
+    )) as BridgeACLManager;
     await bridgeAccess.deployed();
 
     await addressesProvider.setBridgeAccessControl(bridgeAccess.address);
 
     expect(await addressesProvider.getBridgeAccessControl()).to.be.eq(bridgeAccess.address);
 
-    await bridgeAccess.setAllowedToMint(users[2].address, true);
-    await bridgeAccess.setAllowedToMint(users[3].address, true);
+    await bridgeAccess.grantRole(await bridgeAccess.MINTER_ROLE(), users[2].address);
+    await bridgeAccess.grantRole(await bridgeAccess.MINTER_ROLE(), users[3].address);
   });
 
   it('User 0 deposit 1000 dai.', async () => {
@@ -105,6 +108,18 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     await pool
       .connect(users[1].signer)
       .borrow(dai.address, borrowAmount.toFixed(0), RateMode.Stable, 0, users[1].address);
+  });
+
+  it('User 1 tries to perform was withdraw 100 aDai from L2 (reverts)', async () => {
+    const { users, pool, dai, aDai, helpersContract } = testEnv;
+    const reserveDataBefore = await getReserveData(helpersContract, dai.address);
+    await expect(
+      bridgeAccess
+        .connect(users[1].signer)
+        .mintUnbacked(dai.address, mintAmount.toFixed(0), users[1].address, 0)
+    ).to.be.revertedWith(
+      `AccessControl: account ${users[1].address.toLowerCase()} is missing role ${await bridgeAccess.MINTER_ROLE()}`
+    );
   });
 
   it('User 2 perform fast withdraw 100 aDAi from L2', async () => {
