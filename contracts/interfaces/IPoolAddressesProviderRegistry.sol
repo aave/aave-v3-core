@@ -13,14 +13,31 @@ interface IPoolAddressesProviderRegistry {
   event AddressesProviderRegistered(address indexed newAddress);
   event AddressesProviderUnregistered(address indexed newAddress);
 
+  /**
+   * @dev Returns the list of registered addresses provider
+   * @return The list of addresses provider, potentially containing address(0) elements
+   **/
   function getAddressesProvidersList() external view returns (address[] memory);
 
+  /**
+   * @dev Returns the id on a registered PoolAddressesProvider
+   * @return The id or 0 if the PoolAddressesProvider is not registered
+   */
   function getAddressesProviderIdByAddress(address addressesProvider)
     external
     view
     returns (uint256);
 
+  /**
+   * @dev Registers an addresses provider
+   * @param provider The address of the new PoolAddressesProvider
+   * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
+   **/
   function registerAddressesProvider(address provider, uint256 id) external;
 
+  /**
+   * @dev Removes a PoolAddressesProvider from the list of registered addresses provider
+   * @param provider The PoolAddressesProvider address
+   **/
   function unregisterAddressesProvider(address provider) external;
 }

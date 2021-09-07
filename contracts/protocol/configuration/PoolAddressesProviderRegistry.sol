@@ -17,10 +17,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   mapping(address => uint256) private _addressesProviders;
   address[] private _addressesProvidersList;
 
-  /**
-   * @dev Returns the list of registered addresses provider
-   * @return The list of addresses provider, potentially containing address(0) elements
-   **/
+  ///@inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
     address[] memory addressesProvidersList = _addressesProvidersList;
 
@@ -37,11 +34,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     return activeProviders;
   }
 
-  /**
-   * @dev Registers an addresses provider
-   * @param provider The address of the new PoolAddressesProvider
-   * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
-   **/
+  ///@inheritdoc IPoolAddressesProviderRegistry
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
     require(id != 0, Errors.PAPR_INVALID_ADDRESSES_PROVIDER_ID);
 
@@ -50,20 +43,14 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     emit AddressesProviderRegistered(provider);
   }
 
-  /**
-   * @dev Removes a PoolAddressesProvider from the list of registered addresses provider
-   * @param provider The PoolAddressesProvider address
-   **/
+  ///@inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
     require(_addressesProviders[provider] > 0, Errors.PAPR_PROVIDER_NOT_REGISTERED);
     _addressesProviders[provider] = 0;
     emit AddressesProviderUnregistered(provider);
   }
 
-  /**
-   * @dev Returns the id on a registered PoolAddressesProvider
-   * @return The id or 0 if the PoolAddressesProvider is not registered
-   */
+  ///@inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProviderIdByAddress(address addressesProvider)
     external
     view
