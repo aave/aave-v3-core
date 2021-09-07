@@ -50,9 +50,9 @@ interface IReserveInterestRateStrategy {
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate loans
    * @param reserveFactor The reserve portion of the interest that goes to the treasury of the market
-   * @return liquidityRate The liquidity rate
-   * @return stableBorrowRate The stable borrow rate
-   * @return variableBorrowRate The variable borrow rate
+   * @return The liquidity rate
+   * @return The stable borrow rate
+   * @return The variable borrow rate
    **/
   function calculateInterestRates(
     address reserve,
@@ -67,8 +67,8 @@ interface IReserveInterestRateStrategy {
     external
     view
     returns (
-      uint256 liquidityRate,
-      uint256 stableBorrowRate,
-      uint256 variableBorrowRate
+      uint256,
+      uint256,
+      uint256
     );
 }
