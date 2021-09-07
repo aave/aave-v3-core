@@ -6,9 +6,7 @@ import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
-import {
-  VersionedInitializable
-} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
@@ -36,6 +34,7 @@ library LiquidationLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using SafeERC20 for IERC20;
 
+  // See `IPool` for descriptions
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
   event LiquidationCall(
@@ -70,7 +69,6 @@ library LiquidationLogic {
     uint256 errorCode;
     string errorMsg;
     DataTypes.ReserveCache debtReserveCache;
-
   }
 
   /**
@@ -91,8 +89,10 @@ library LiquidationLogic {
     DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
     vars.debtReserveCache = debtReserve.cache();
 
-
-    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(params.user, debtReserve);
+    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(
+      params.user,
+      debtReserve
+    );
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
     ValidationLogic.validateLiquidationCall(
@@ -149,7 +149,12 @@ library LiquidationLogic {
         vars.debtReserveCache.nextVariableBorrowIndex
       );
       vars.debtReserveCache.refreshDebt(0, 0, 0, vars.actualDebtToLiquidate);
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(
+        vars.debtReserveCache,
+        params.debtAsset,
+        vars.actualDebtToLiquidate,
+        0
+      );
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -170,12 +175,21 @@ library LiquidationLogic {
         vars.userVariableDebt
       );
 
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(
+        vars.debtReserveCache,
+        params.debtAsset,
+        vars.actualDebtToLiquidate,
+        0
+      );
     }
 
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
-      vars.collateralAtoken.transferOnLiquidation(params.user, msg.sender, vars.maxCollateralToLiquidate);
+      vars.collateralAtoken.transferOnLiquidation(
+        params.user,
+        msg.sender,
+        vars.maxCollateralToLiquidate
+      );
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
@@ -249,9 +263,8 @@ library LiquidationLogic {
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
    * @param userCollateralBalance The collateral balance for the specific `collateralAsset` of the user being liquidated
-   * @return collateralAmount: The maximum amount that is possible to liquidate given all the liquidation constraints
-   *                           (user balance, close factor)
-   *         debtAmountNeeded: The amount to repay with the liquidation
+   * @return The maximum amount that is possible to liquidate given all the liquidation constraints (user balance, close factor)
+   * @return The amount to repay with the liquidation
    **/
   function _calculateAvailableCollateralToLiquidate(
     DataTypes.ReserveData storage collateralReserve,
@@ -293,8 +306,7 @@ library LiquidationLogic {
     if (vars.maxAmountCollateralToLiquidate > userCollateralBalance) {
       collateralAmount = userCollateralBalance;
       debtAmountNeeded = ((vars.collateralPrice * collateralAmount * vars.debtAssetUnit) /
-        (vars.debtAssetPrice * vars.collateralAssetUnit))
-        .percentDiv(vars.liquidationBonus);
+        (vars.debtAssetPrice * vars.collateralAssetUnit)).percentDiv(vars.liquidationBonus);
     } else {
       collateralAmount = vars.maxAmountCollateralToLiquidate;
       debtAmountNeeded = debtToCover;

@@ -87,14 +87,18 @@ library GenericLogic {
 
     while (vars.i < reservesCount) {
       if (!userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
-        unchecked {++vars.i;}
+        unchecked {
+          ++vars.i;
+        }
         continue;
       }
 
       vars.currentReserveAddress = reserves[vars.i];
 
       if (vars.currentReserveAddress == address(0)) {
-        unchecked {++vars.i;}
+        unchecked {
+          ++vars.i;
+        }
         continue;
       }
 
@@ -104,7 +108,9 @@ library GenericLogic {
         .configuration
         .getParams();
 
-      unchecked {vars.assetUnit = 10**vars.decimals;}
+      unchecked {
+        vars.assetUnit = 10**vars.decimals;
+      }
       vars.assetPrice = IPriceOracleGetter(oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && userConfig.isUsingAsCollateral(vars.i)) {
@@ -113,7 +119,9 @@ library GenericLogic {
         vars.userBalance = vars.userBalance.rayMul(vars.normalizedIncome);
 
         vars.userBalanceInBaseCurrency = (vars.assetPrice * vars.userBalance);
-        unchecked {vars.userBalanceInBaseCurrency /= vars.assetUnit;}
+        unchecked {
+          vars.userBalanceInBaseCurrency /= vars.assetUnit;
+        }
         vars.totalCollateralInBaseCurrency =
           vars.totalCollateralInBaseCurrency +
           vars.userBalanceInBaseCurrency;
@@ -138,11 +146,15 @@ library GenericLogic {
         }
         vars.userDebt = vars.userDebt + vars.userStableDebt;
         vars.userDebtInBaseCurrency = (vars.assetPrice * vars.userDebt);
-        unchecked {vars.userDebtInBaseCurrency /= vars.assetUnit;}
+        unchecked {
+          vars.userDebtInBaseCurrency /= vars.assetUnit;
+        }
         vars.totalDebtInBaseCurrency = vars.totalDebtInBaseCurrency + vars.userDebtInBaseCurrency;
       }
 
-      unchecked {++vars.i;}
+      unchecked {
+        ++vars.i;
+      }
     }
 
     unchecked {
@@ -177,7 +189,6 @@ library GenericLogic {
    * @param ltv The average loan to value
    * @return the amount available to borrow in the base currency of the used by the price feed
    **/
-
   function calculateAvailableBorrows(
     uint256 totalCollateralInBaseCurrency,
     uint256 totalDebtInBaseCurrency,
