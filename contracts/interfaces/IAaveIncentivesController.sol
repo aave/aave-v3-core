@@ -2,10 +2,22 @@
 pragma solidity 0.8.6;
 
 interface IAaveIncentivesController {
+  /**
+   * @dev Emitted during `handleAction`, `claimRewards` and `claimRewardsOnBehalf`
+   * @param user The user that accrued rewards
+   * @param amount The amount of accrued rewards
+   */
   event RewardsAccrued(address indexed user, uint256 amount);
 
   event RewardsClaimed(address indexed user, address indexed to, uint256 amount);
 
+  /**
+   * @dev Emitted during `claimRewards` and `claimRewardsOnBehalf`
+   * @param user The address that accrued rewards
+   * @param to The address that will be receiving the rewards
+   * @param claimer The address that performed the claim
+   * @param amount The amount of rewards
+   */
   event RewardsClaimed(
     address indexed user,
     address indexed to,
@@ -13,12 +25,19 @@ interface IAaveIncentivesController {
     uint256 amount
   );
 
+  /**
+   * @dev Emitted during `setClaimer`
+   * @param user The address of the user
+   * @param claimer The address of the claimer
+   */
   event ClaimerSet(address indexed user, address indexed claimer);
 
-  /*
+  /**
    * @dev Returns the configuration of the distribution for a certain asset
    * @param asset The address of the reference asset of the distribution
-   * @return The asset index, the emission per second and the last updated timestamp
+   * @return The asset index
+   * @return The emission per second
+   * @return The last updated timestamp
    **/
   function getAssetData(address asset)
     external
@@ -65,6 +84,7 @@ interface IAaveIncentivesController {
 
   /**
    * @dev Returns the total of rewards of an user, already accrued + not yet accrued
+   * @param assets The assets to accumulate rewards for
    * @param user The address of the user
    * @return The rewards
    **/
@@ -74,7 +94,8 @@ interface IAaveIncentivesController {
     returns (uint256);
 
   /**
-   * @dev Claims reward for an user, on all the assets of the pool, accumulating the pending rewards
+   * @dev Claims reward for an user, on the assets of the pool, accumulating the pending rewards
+   * @param assets The assets to accumulate rewards for
    * @param amount Amount of rewards to claim
    * @param to Address that will be receiving the rewards
    * @return Rewards claimed
@@ -86,8 +107,9 @@ interface IAaveIncentivesController {
   ) external returns (uint256);
 
   /**
-   * @dev Claims reward for an user on behalf, on all the assets of the pool, accumulating the pending rewards. The caller must
+   * @dev Claims reward for an user on behalf, on the assets of the pool, accumulating the pending rewards. The caller must
    * be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
+   * @param assets The assets to accumulate rewards for
    * @param amount Amount of rewards to claim
    * @param user Address to check and claim rewards
    * @param to Address that will be receiving the rewards
