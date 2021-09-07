@@ -14,7 +14,7 @@ interface IScaledBalanceToken {
    * @dev Returns the scaled balance of the user and the scaled total supply.
    * @param user The address of the user
    * @return The scaled balance of the user
-   * @return The scaled balance and the scaled total supply
+   * @return The scaled total supply
    **/
   function getScaledUserBalanceAndSupply(address user) external view returns (uint256, uint256);
 
