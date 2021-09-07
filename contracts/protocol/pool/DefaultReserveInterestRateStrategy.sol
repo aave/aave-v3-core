@@ -95,17 +95,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     return _baseVariableBorrowRate + _variableRateSlope1 + _variableRateSlope2;
   }
 
-  /**
-   * @dev Calculates the interest rates depending on the reserve's state and configurations
-   * @param reserve The address of the reserve
-   * @param liquidityAdded The liquidity added during the operation
-   * @param liquidityTaken The liquidity taken during the operation
-   * @param totalStableDebt The total borrowed from the reserve a stable rate
-   * @param totalVariableDebt The total borrowed from the reserve at a variable rate
-   * @param averageStableBorrowRate The weighted average of all the stable rate loans
-   * @param reserveFactor The reserve portion of the interest that goes to the treasury of the market
-   * @return The liquidity rate, the stable borrow rate and the variable borrow rate
-   **/
+  ///@inheritdoc IReserveInterestRateStrategy
   function calculateInterestRates(
     address reserve,
     address aToken,
@@ -148,18 +138,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 utilizationRate;
   }
 
-  /**
-   * @dev Calculates the interest rates depending on the reserve's state and configurations.
-   * NOTE This function is kept for compatibility with the previous DefaultInterestRateStrategy interface.
-   * New protocol implementation uses the new calculateInterestRates() interface
-   * @param reserve The address of the reserve
-   * @param availableLiquidity The liquidity available in the corresponding aToken
-   * @param totalStableDebt The total borrowed from the reserve a stable rate
-   * @param totalVariableDebt The total borrowed from the reserve at a variable rate
-   * @param averageStableBorrowRate The weighted average of all the stable rate loans
-   * @param reserveFactor The reserve portion of the interest that goes to the treasury of the market
-   * @return The liquidity rate, the stable borrow rate and the variable borrow rate
-   **/
+  ///@inheritdoc IReserveInterestRateStrategy
   function calculateInterestRates(
     address reserve,
     uint256 availableLiquidity,
@@ -192,8 +171,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       .getMarketBorrowRate(reserve);
 
     if (vars.utilizationRate > OPTIMAL_UTILIZATION_RATE) {
-      uint256 excessUtilizationRateRatio =
-        (vars.utilizationRate - OPTIMAL_UTILIZATION_RATE).rayDiv(EXCESS_UTILIZATION_RATE);
+      uint256 excessUtilizationRateRatio = (vars.utilizationRate - OPTIMAL_UTILIZATION_RATE).rayDiv(
+        EXCESS_UTILIZATION_RATE
+      );
 
       vars.currentStableBorrowRate =
         vars.currentStableBorrowRate +
@@ -217,12 +197,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentLiquidityRate = _getOverallBorrowRate(
       totalStableDebt,
       totalVariableDebt,
-      vars
-        .currentVariableBorrowRate,
+      vars.currentVariableBorrowRate,
       averageStableBorrowRate
-    )
-      .rayMul(vars.utilizationRate)
-      .percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveFactor);
+    ).rayMul(vars.utilizationRate).percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveFactor);
 
     return (
       vars.currentLiquidityRate,
@@ -253,8 +230,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
     uint256 weightedStableRate = totalStableDebt.wadToRay().rayMul(currentAverageStableBorrowRate);
 
-    uint256 overallBorrowRate =
-      (weightedVariableRate + weightedStableRate).rayDiv(totalDebt.wadToRay());
+    uint256 overallBorrowRate = (weightedVariableRate + weightedStableRate).rayDiv(
+      totalDebt.wadToRay()
+    );
 
     return overallBorrowRate;
   }
