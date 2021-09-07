@@ -14,9 +14,7 @@ contract InitializableImmutableAdminUpgradeabilityProxy is
 {
   constructor(address admin) BaseImmutableAdminUpgradeabilityProxy(admin) {}
 
-  /**
-   * @dev Only fall back when the sender is not the admin.
-   */
+  ///@inheritdoc BaseImmutableAdminUpgradeabilityProxy
   function _willFallback() internal override(BaseImmutableAdminUpgradeabilityProxy, Proxy) {
     BaseImmutableAdminUpgradeabilityProxy._willFallback();
   }
