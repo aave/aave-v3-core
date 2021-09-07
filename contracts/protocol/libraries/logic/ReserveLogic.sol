@@ -24,15 +24,7 @@ library ReserveLogic {
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
 
-  /**
-   * @dev Emitted when the state of a reserve is updated
-   * @param asset The address of the underlying asset of the reserve
-   * @param liquidityRate The new liquidity rate
-   * @param stableBorrowRate The new stable borrow rate
-   * @param variableBorrowRate The new variable borrow rate
-   * @param liquidityIndex The new liquidity index
-   * @param variableBorrowIndex The new variable borrow index
-   **/
+  // See `IPool` for descriptions
   event ReserveDataUpdated(
     address indexed asset,
     uint256 liquidityRate,
@@ -41,7 +33,6 @@ library ReserveLogic {
     uint256 liquidityIndex,
     uint256 variableBorrowIndex
   );
-
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -65,10 +56,9 @@ library ReserveLogic {
       return reserve.liquidityIndex;
     }
 
-    uint256 cumulated =
-      MathUtils.calculateLinearInterest(reserve.currentLiquidityRate, timestamp).rayMul(
-        reserve.liquidityIndex
-      );
+    uint256 cumulated = MathUtils
+      .calculateLinearInterest(reserve.currentLiquidityRate, timestamp)
+      .rayMul(reserve.liquidityIndex);
 
     return cumulated;
   }
@@ -93,17 +83,17 @@ library ReserveLogic {
       return reserve.variableBorrowIndex;
     }
 
-    uint256 cumulated =
-      MathUtils.calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp).rayMul(
-        reserve.variableBorrowIndex
-      );
+    uint256 cumulated = MathUtils
+      .calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp)
+      .rayMul(reserve.variableBorrowIndex);
 
     return cumulated;
   }
 
   /**
    * @dev Updates the liquidity cumulative index and the variable borrow index.
-   * @param reserve the reserve object
+   * @param reserve The reserve object
+   * @param reserveCache The caching layer for the reserve data
    **/
   function updateState(
     DataTypes.ReserveData storage reserve,
@@ -297,11 +287,10 @@ library ReserveLogic {
 
     //only cumulating if there is any income being produced
     if (reserveCache.currLiquidityRate > 0) {
-      uint256 cumulatedLiquidityInterest =
-        MathUtils.calculateLinearInterest(
-          reserveCache.currLiquidityRate,
-          reserveCache.reserveLastUpdateTimestamp
-        );
+      uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
+        reserveCache.currLiquidityRate,
+        reserveCache.reserveLastUpdateTimestamp
+      );
       reserveCache.nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(
         reserveCache.currLiquidityIndex
       );
@@ -314,11 +303,10 @@ library ReserveLogic {
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
       if (reserveCache.currScaledVariableDebt != 0) {
-        uint256 cumulatedVariableBorrowInterest =
-          MathUtils.calculateCompoundedInterest(
-            reserveCache.currVariableBorrowRate,
-            reserveCache.reserveLastUpdateTimestamp
-          );
+        uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+          reserveCache.currVariableBorrowRate,
+          reserveCache.reserveLastUpdateTimestamp
+        );
         reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
           reserveCache.currVariableBorrowIndex
         );
@@ -359,10 +347,8 @@ library ReserveLogic {
     reserveCache.reserveLastUpdateTimestamp = reserve.lastUpdateTimestamp;
 
     reserveCache.currScaledVariableDebt = reserveCache.nextScaledVariableDebt = IVariableDebtToken(
-      reserveCache
-        .variableDebtTokenAddress
-    )
-      .scaledTotalSupply();
+      reserveCache.variableDebtTokenAddress
+    ).scaledTotalSupply();
 
     (
       reserveCache.currPrincipalStableDebt,
