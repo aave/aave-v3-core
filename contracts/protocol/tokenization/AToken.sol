@@ -11,6 +11,9 @@ import {VersionedInitializable} from '../libraries/aave-upgradeability/Versioned
 import {IncentivizedERC20} from './IncentivizedERC20.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
+import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
+import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
+
 /**
  * @title Aave ERC20 AToken
  * @dev Implementation of the interest bearing token for the Aave protocol
@@ -46,6 +49,7 @@ contract AToken is
     _;
   }
 
+  ///@inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
     return ATOKEN_REVISION;
   }

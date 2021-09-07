@@ -9,6 +9,8 @@ import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 
 /**
  * @title StableDebtToken

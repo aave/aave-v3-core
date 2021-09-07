@@ -7,6 +7,10 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
+import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
+import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 
 /**
  * @title VariableDebtToken
