@@ -103,7 +103,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       .withArgs(newPremiumTotal);
 
     expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
-      .to.emit(configurator, 'FlashloanPremiumToProcolUpdated')
+      .to.emit(configurator, 'FlashloanPremiumToProtocolUpdated')
       .withArgs(newPremiumToProtocol);
 
     await expect(configurator.updateFlashloanPremiumTotal(wrongPremiumTotal)).to.be.revertedWith(
