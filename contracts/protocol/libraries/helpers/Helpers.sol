@@ -27,6 +27,13 @@ library Helpers {
     );
   }
 
+  /**
+   * @dev Fetches the user current stable and variable debt balances
+   * @param user The user address
+   * @param reserve The reserve data object
+   * @return The stable debt balance
+   * @return The variable debt balance
+   **/
   function getUserCurrentDebtMemory(address user, DataTypes.ReserveData memory reserve)
     internal
     view
