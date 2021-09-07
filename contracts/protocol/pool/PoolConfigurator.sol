@@ -2,9 +2,7 @@
 pragma solidity 0.8.6;
 
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {
-  InitializableImmutableAdminUpgradeabilityProxy
-} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IPool} from '../../interfaces/IPool.sol';
@@ -123,7 +121,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _pool.setConfiguration(asset, currentConfig.data);
 
     emit BorrowingEnabledOnReserve(asset, stableBorrowRateEnabled);
-    }
+  }
 
   /// @inheritdoc IPoolConfigurator
   function disableBorrowingOnReserve(address asset) external override onlyRiskOrPoolAdmins {
@@ -266,6 +264,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     currentConfig.setSupplyCap(supplyCap);
     _pool.setConfiguration(asset, currentConfig.data);
     emit SupplyCapChanged(asset, supplyCap);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setLiquidationProtocolFee(address asset, uint256 fee)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setLiquidationProtocolFee(fee);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
   ///@inheritdoc IPoolConfigurator

@@ -80,8 +80,8 @@ contract AaveProtocolDataProvider {
       bool isFrozen
     )
   {
-    DataTypes.ReserveConfigurationMap memory configuration =
-      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
+      .getConfiguration(asset);
 
     (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
       .getParamsMemory();
@@ -108,6 +108,11 @@ contract AaveProtocolDataProvider {
       .getFlagsMemory();
   }
 
+  function getLiquidationProtocolFee(address asset) external view returns (uint256 fee) {
+    return
+      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFeeMemory();
+  }
+
   function getReserveData(address asset)
     external
     view
@@ -124,8 +129,9 @@ contract AaveProtocolDataProvider {
       uint40 lastUpdateTimestamp
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
     return (
       IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
@@ -156,11 +162,12 @@ contract AaveProtocolDataProvider {
       bool usageAsCollateralEnabled
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
-    DataTypes.UserConfigurationMap memory userConfig =
-      IPool(ADDRESSES_PROVIDER.getPool()).getUserConfiguration(user);
+    DataTypes.UserConfigurationMap memory userConfig = IPool(ADDRESSES_PROVIDER.getPool())
+      .getUserConfiguration(user);
 
     currentATokenBalance = IERC20Detailed(reserve.aTokenAddress).balanceOf(user);
     currentVariableDebt = IERC20Detailed(reserve.variableDebtTokenAddress).balanceOf(user);
@@ -184,8 +191,9 @@ contract AaveProtocolDataProvider {
       address variableDebtTokenAddress
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
     return (
       reserve.aTokenAddress,

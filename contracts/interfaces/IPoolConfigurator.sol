@@ -123,6 +123,13 @@ interface IPoolConfigurator {
   event SupplyCapChanged(address indexed asset, uint256 supplyCap);
 
   /**
+   * @dev Emitted when the liquidation protocol fee of a reserve is updated
+   * @param asset The address of the underlying asset of the reserve
+   * @param fee The new supply cap
+   **/
+  event LiquidationProtocolFeeChanged(address indexed asset, uint256 fee);
+
+  /**
    * @dev Emitted when the reserve decimals are updated
    * @param asset The address of the underlying asset of the reserve
    * @param decimals The new decimals
@@ -347,6 +354,13 @@ interface IPoolConfigurator {
    * @param supplyCap The new supply of the reserve
    **/
   function setSupplyCap(address asset, uint256 supplyCap) external;
+
+  /**
+   * @dev Updates the liquidation protocol fee of reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @param fee The new supply of the reserve
+   **/
+  function setLiquidationProtocolFee(address asset, uint256 fee) external;
 
   /**
    * @dev Registers a new admin with rights on risk related configurations
