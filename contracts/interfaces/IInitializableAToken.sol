@@ -41,6 +41,7 @@ interface IInitializableAToken {
    * @param aTokenDecimals The decimals of the aToken, same as the underlying asset's
    * @param aTokenName The name of the aToken
    * @param aTokenSymbol The symbol of the aToken
+   * @param params A set of encoded parameters for additional initialization
    */
   function initialize(
     IPool pool,
