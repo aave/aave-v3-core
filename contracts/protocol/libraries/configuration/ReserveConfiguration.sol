@@ -389,7 +389,11 @@ library ReserveConfiguration {
   /**
    * @dev Gets the configuration flags of the reserve
    * @param self The reserve configuration
-   * @return The state flags representing active, frozen, borrowing enabled, stableRateBorrowing enabled
+   * @return The state flag representing active
+   * @return The state flag representing frozen
+   * @return The state flag representing borrowing enabled
+   * @return The state flag representing stabelRateBorrowing enabled
+   * @return The state flag representing paused
    **/
   function getFlags(DataTypes.ReserveConfigurationMap storage self)
     internal
@@ -416,7 +420,11 @@ library ReserveConfiguration {
   /**
    * @dev Gets the configuration paramters of the reserve from storage
    * @param self The reserve configuration
-   * @return The state params representing ltv, liquidation threshold, liquidation bonus, reserve decimals, reserve factor
+   * @return The state param representing ltv
+   * @return The state param representing liquidation threshold
+   * @return The state param representing liquidation bonus
+   * @return The state param representing reserve decimals
+   * @return The state param representing reserve factor
    **/
   function getParams(DataTypes.ReserveConfigurationMap storage self)
     internal
@@ -443,7 +451,8 @@ library ReserveConfiguration {
   /**
    * @dev Gets the caps  paramters of the reserve from storage
    * @param self The reserve configuration
-   * @return The state params representing  borrow cap and supply cap.
+   * @return The state param representing borrow cap
+   * @return The state param representing supply cap.
    **/
   function getCaps(DataTypes.ReserveConfigurationMap storage self)
     internal
@@ -461,7 +470,11 @@ library ReserveConfiguration {
   /**
    * @dev Gets the configuration paramters of the reserve from a memory object
    * @param self The reserve configuration
-   * @return The state params representing ltv, liquidation threshold, liquidation bonus, reserve decimals, reserve factor
+   * @return The state param representing ltv
+   * @return The state param representing liquidation threshold
+   * @return The state param representing liquidation bonus
+   * @return The state param representing reserve decimals
+   * @return The state param representing reserve factor
    **/
   function getParamsMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
@@ -486,7 +499,8 @@ library ReserveConfiguration {
   /**
    * @dev Gets the caps paramters of the reserve from a memory object
    * @param self The reserve configuration
-   * @return The state params borrow cap and supply cap
+   * @return The state param representing borrow cap
+   * @return The state param representing supply cap.
    **/
   function getCapsMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
@@ -502,7 +516,11 @@ library ReserveConfiguration {
   /**
    * @dev Gets the configuration flags of the reserve from a memory object
    * @param self The reserve configuration
-   * @return The state flags representing active, frozen, borrowing enabled, stableRateBorrowing enabled
+   * @return The state flag representing active
+   * @return The state flag representing frozen
+   * @return The state flag representing borrowing enabled
+   * @return The state flag representing stabelRateBorrowing enabled
+   * @return The state flag representing paused
    **/
   function getFlagsMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
