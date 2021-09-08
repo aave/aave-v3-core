@@ -121,7 +121,7 @@ contract AaveProtocolDataProvider {
   }
 
   /**
-   * @dev Returns the caps paramters of the reserve
+   * @notice Returns the caps paramters of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return borrowCap The borrow cap of the reserve
    * @return supplyCap The supply cap of the reserve
@@ -137,7 +137,7 @@ contract AaveProtocolDataProvider {
   }
 
   /**
-   * @dev Returns if the pool is paused
+   * @notice Returns if the pool is paused
    * @param asset The address of the underlying asset of the reserve
    * @return isPaused True if the pool is paused, false otherwise
    **/
@@ -148,7 +148,7 @@ contract AaveProtocolDataProvider {
   }
 
   /**
-   * @dev Returns the reserve data
+   * @notice Returns the reserve data
    * @param asset The address of the underlying asset of the reserve
    * @return availableLiquidity The available liquidity of the reserve
    * @return totalStableDebt The total stable debt of the reserve
@@ -196,7 +196,7 @@ contract AaveProtocolDataProvider {
   }
 
   /**
-   * @dev Returns the user data in a reserve
+   * @notice Returns the user data in a reserve
    * @param asset The address of the underlying asset of the reserve
    * @param user The address of the user
    * @return currentATokenBalance The current AToken balance of the user
@@ -246,7 +246,7 @@ contract AaveProtocolDataProvider {
   }
 
   /**
-   * Returns the token addresses of the reserve
+   * @notice Returns the token addresses of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return aTokenAddress The AToken address of the reserve
    * @return stableDebtTokenAddress The StableDebtToken address of the reserve
