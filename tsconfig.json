@@ -9,5 +9,11 @@
     "resolveJsonModule": true
   },
   "include": ["./scripts", "./test-suites", "./tasks", "./helpers"],
-  "files": ["./hardhat.config.ts"]
+  "files": [
+    "./hardhat.config.ts",
+    "node_modules/hardhat-typechain/src/type-extensions.ts",
+    "node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.ts",
+    "node_modules/@nomiclabs/hardhat-etherscan/src/type-extensions.ts",
+    "node_modules/hardhat-gas-reporter/src/type-extensions.ts"
+  ]
 }

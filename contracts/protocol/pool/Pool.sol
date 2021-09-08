@@ -71,7 +71,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  function getRevision() internal pure override returns (uint256) {
+  function getRevision() internal pure virtual override returns (uint256) {
     return POOL_REVISION;
   }
 
@@ -352,21 +352,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    DataTypes.FlashloanParams memory flashParams =
-      DataTypes.FlashloanParams(
-        receiverAddress,
-        assets,
-        amounts,
-        modes,
-        onBehalfOf,
-        params,
-        referralCode,
-        _flashLoanPremiumToProtocol,
-        _flashLoanPremiumTotal,
-        _maxStableRateBorrowSizePercent,
-        _reservesCount,
-        _addressesProvider.getPriceOracle()
-      );
+    DataTypes.FlashloanParams memory flashParams = DataTypes.FlashloanParams(
+      receiverAddress,
+      assets,
+      amounts,
+      modes,
+      onBehalfOf,
+      params,
+      referralCode,
+      _flashLoanPremiumToProtocol,
+      _flashLoanPremiumTotal,
+      _maxStableRateBorrowSizePercent,
+      _reservesCount,
+      _addressesProvider.getPriceOracle()
+    );
 
     BorrowLogic.executeFlashLoan(
       _reserves,

@@ -4,6 +4,7 @@ pragma solidity 0.8.6;
 import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {WadRayMath} from '../../protocol/libraries/math/WadRayMath.sol';
+import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
 contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   uint256 public immutable OPTIMAL_UTILIZATION_RATE;
@@ -73,8 +74,7 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   function calculateInterestRates(
     address,
     address,
-    uint256,
-    uint256,
+    DataTypes.CalculateInterestRatesParams memory vars,
     uint256,
     uint256,
     uint256,

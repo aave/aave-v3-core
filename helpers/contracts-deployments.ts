@@ -28,15 +28,15 @@ import {
   VariableDebtTokenFactory,
   WETH9MockedFactory,
   ConfiguratorLogicFactory,
-  MockIncentivesControllerFactory,
-  MockReserveConfigurationFactory,
-  MockPoolFactory,
-  MockInitializableImpleFactory,
-  MockInitializableFromConstructorImpleFactory,
-  MockReentrantInitializableImpleFactory,
-  MockInitializableImpleV2Factory,
   InitializableImmutableAdminUpgradeabilityProxyFactory,
   WETH9Mocked,
+  MockIncentivesControllerFactory,
+  MockInitializableFromConstructorImpleFactory,
+  MockInitializableImpleFactory,
+  MockInitializableImpleV2Factory,
+  MockPoolFactory,
+  MockReentrantInitializableImpleFactory,
+  MockReserveConfigurationFactory,
 } from '../types';
 import {
   withSave,
@@ -125,10 +125,24 @@ export const deployLiquidationLogic = async () => {
   return withSave(liquidationLogic, eContractid.LiquidationLogic);
 };
 
+export const deployBridgeLogic = async () => {
+  const bridgeLogicArtifact = await readArtifact(eContractid.BridgeLogic);
+  const bridgeLogicFactory = await DRE.ethers.getContractFactory(
+    bridgeLogicArtifact.abi,
+    bridgeLogicArtifact.bytecode
+  );
+  const bridgeLogic = await (
+    await bridgeLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(bridgeLogic, eContractid.BridgeLogic);
+};
+
 export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   const depositLogic = await deployDepositLogic();
   const borrowLogic = await deployBorrowLogic();
   const liquidationLogic = await deployLiquidationLogic();
+  const bridgeLogic = await deployBridgeLogic();
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
