@@ -9,10 +9,12 @@ import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
+import {WadRayMath} from '../protocol/libraries/math/WadRayMath.sol';
 
 contract AaveProtocolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using WadRayMath for uint256;
 
   address constant MKR = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
   address constant ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -112,8 +114,8 @@ contract AaveProtocolDataProvider {
     external
     view
     returns (
-      uint256 unbackedUnderlying,
-      uint256 availableLiquidity,
+      uint256 unbacked,
+      uint256 totalAToken,
       uint256 totalStableDebt,
       uint256 totalVariableDebt,
       uint256 liquidityRate,
@@ -128,9 +130,11 @@ contract AaveProtocolDataProvider {
     DataTypes.ReserveData memory reserve =
       IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
 
+    uint256 accruedToTreasury = reserve.accruedToTreasury.rayMul(reserve.liquidityIndex);
+
     return (
-      reserve.unbackedUnderlying,
-      IERC20Detailed(asset).balanceOf(reserve.aTokenAddress) + reserve.unbackedUnderlying,
+      reserve.unbacked,
+      IERC20Detailed(reserve.aTokenAddress).totalSupply(),
       IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply(),
       IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply(),
       reserve.currentLiquidityRate,

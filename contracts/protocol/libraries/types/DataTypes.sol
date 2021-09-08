@@ -28,7 +28,7 @@ library DataTypes {
     //the current treasury balance, scaled
     uint256 accruedToTreasury;
     //the quicikwithdraw balance waiting for underlying to be backed
-    uint256 unbackedUnderlying;
+    uint256 unbacked;
   }
 
   struct ReserveConfigurationMap {
@@ -143,8 +143,8 @@ library DataTypes {
   }
 
   struct CalculateInterestRatesParams {
-    uint256 liquidityAdded;
-    uint256 liquidityTaken;
-    uint256 unbackedUnderlying;
+    uint256 pendingTreasuryMint;
+    uint256 toMint;
+    uint256 toBurn;
   }
 }

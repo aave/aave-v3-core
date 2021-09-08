@@ -169,21 +169,26 @@ library ReserveLogic {
   /**
    * @dev Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
-   * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
-   * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
+   * @param toMint The amount of aTokens created (deposit) in the previous action
+   * @param toBurn The amount of aTokens destroyed (withdraw)
    **/
   function updateInterestRates(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
     address reserveAddress,
-    uint256 liquidityAdded,
-    uint256 liquidityTaken
+    uint256 toMint,
+    uint256 toBurn
   ) internal {
     UpdateInterestRatesLocalVars memory vars;
 
     vars.totalVariableDebt = reserveCache.nextScaledVariableDebt.rayMul(
       reserveCache.nextVariableBorrowIndex
     );
+
+    uint256 accruedToTreasury;
+    {
+      accruedToTreasury = reserve.accruedToTreasury.rayMul(reserveCache.nextLiquidityIndex);
+    }
 
     (
       vars.newLiquidityRate,
@@ -192,11 +197,7 @@ library ReserveLogic {
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
-      DataTypes.CalculateInterestRatesParams(
-        liquidityAdded,
-        liquidityTaken,
-        reserve.unbackedUnderlying
-      ),
+      DataTypes.CalculateInterestRatesParams(accruedToTreasury, toMint, toBurn),
       reserveCache.nextTotalStableDebt,
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,

@@ -108,12 +108,7 @@ library BorrowLogic {
       userConfig.setBorrowing(reserve.id, true);
     }
 
-    reserve.updateInterestRates(
-      reserveCache,
-      params.asset,
-      0,
-      params.releaseUnderlying ? params.amount : 0
-    );
+    reserve.updateInterestRates(reserveCache, params.asset, 0, 0);
 
     if (params.releaseUnderlying) {
       IAToken(reserveCache.aTokenAddress).transferUnderlyingTo(params.user, params.amount);
@@ -174,7 +169,7 @@ library BorrowLogic {
       reserveCache.refreshDebt(0, 0, 0, paybackAmount);
     }
 
-    reserve.updateInterestRates(reserveCache, vars.asset, paybackAmount, 0);
+    reserve.updateInterestRates(reserveCache, vars.asset, 0, 0);
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
@@ -275,12 +270,7 @@ library BorrowLogic {
           reserve.accruedToTreasury +
           vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex);
 
-        reserve.updateInterestRates(
-          reserveCache,
-          vars.currentAsset,
-          vars.currentAmountPlusPremium,
-          0
-        );
+        reserve.updateInterestRates(reserveCache, vars.currentAsset, 0, 0);
 
         IERC20(vars.currentAsset).safeTransferFrom(
           flashParams.receiverAddress,

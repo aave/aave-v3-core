@@ -70,7 +70,6 @@ library LiquidationLogic {
     uint256 errorCode;
     string errorMsg;
     DataTypes.ReserveCache debtReserveCache;
-
   }
 
   /**
@@ -91,8 +90,10 @@ library LiquidationLogic {
     DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
     vars.debtReserveCache = debtReserve.cache();
 
-
-    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(params.user, debtReserve);
+    (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(
+      params.user,
+      debtReserve
+    );
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
     ValidationLogic.validateLiquidationCall(
@@ -149,7 +150,7 @@ library LiquidationLogic {
         vars.debtReserveCache.nextVariableBorrowIndex
       );
       vars.debtReserveCache.refreshDebt(0, 0, 0, vars.actualDebtToLiquidate);
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, 0, 0);
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -170,12 +171,16 @@ library LiquidationLogic {
         vars.userVariableDebt
       );
 
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, vars.actualDebtToLiquidate, 0);
+      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, 0, 0);
     }
 
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
-      vars.collateralAtoken.transferOnLiquidation(params.user, msg.sender, vars.maxCollateralToLiquidate);
+      vars.collateralAtoken.transferOnLiquidation(
+        params.user,
+        msg.sender,
+        vars.maxCollateralToLiquidate
+      );
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];

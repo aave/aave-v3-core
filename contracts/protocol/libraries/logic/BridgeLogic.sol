@@ -30,7 +30,7 @@ library BridgeLogic {
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   /**
-   * @dev Mint unbacked aTokens to a user and updates the unbackedUnderlying for the reserve. Essentially a deposit without transferring of the underlying.
+   * @dev Mint unbacked aTokens to a user and updates the unbacked for the reserve. Essentially a deposit without transferring of the underlying.
    * @param reserve The reserve to mint to
    * @param userConfig The user configuration to update
    * @param asset The address of the asset
@@ -53,7 +53,7 @@ library BridgeLogic {
     reserve.updateInterestRates(reserveCache, asset, amount, 0);
     bool isFirstDeposit =
       IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
-    reserve.unbackedUnderlying = reserve.unbackedUnderlying + amount;
+    reserve.unbacked = reserve.unbacked + amount;
     if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
@@ -62,9 +62,9 @@ library BridgeLogic {
   }
 
   /**
-   * @dev Back the current unbacked underlying with `amount` and pay `fee`.
+   * @dev Back the current unbacked with `amount` and pay `fee`.
    *   If backing unnecessarily, excess `amount` will be added to `fee`.
-   * @param reserve The reserve to back unbacked underlying for
+   * @param reserve The reserve to back unbacked for
    * @param asset The address of the underlying asset to repay
    * @param amount The amount to back
    * @param fee The amount paid in fees
@@ -77,8 +77,7 @@ library BridgeLogic {
   ) public {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
-    uint256 backingAmount =
-      (amount < reserve.unbackedUnderlying) ? amount : reserve.unbackedUnderlying;
+    uint256 backingAmount = (amount < reserve.unbacked) ? amount : reserve.unbacked;
 
     uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;
 
@@ -86,7 +85,7 @@ library BridgeLogic {
 
     reserve.updateInterestRates(reserveCache, asset, totalFee, 0);
 
-    reserve.unbackedUnderlying = reserve.unbackedUnderlying - backingAmount;
+    reserve.unbacked = reserve.unbacked - backingAmount;
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
 
     emit BackUnbacked(asset, msg.sender, backingAmount, totalFee);
