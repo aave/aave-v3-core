@@ -6,6 +6,7 @@ import '../../../dependencies/openzeppelin/upgradeability/InitializableUpgradeab
 
 /**
  * @title InitializableAdminUpgradeabilityProxy
+ * @author Aave
  * @dev Extends BaseAdminUpgradeabilityProxy with an initializer function
  */
 contract InitializableImmutableAdminUpgradeabilityProxy is
