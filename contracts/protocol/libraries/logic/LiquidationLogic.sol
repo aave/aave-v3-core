@@ -62,7 +62,6 @@ library LiquidationLogic {
     uint256 healthFactor;
     uint256 liquidatorPreviousATokenBalance;
     IAToken collateralAtoken;
-    ITokenWithTreasury tokenWithTreasury;
     IPriceOracleGetter oracle;
     bool isCollateralEnabled;
     DataTypes.InterestRateMode borrowRateMode;
@@ -218,10 +217,9 @@ library LiquidationLogic {
 
     // Transfer fee to treasury if it is non-zero
     if (vars.liquidationProtocolFeeAmount > 0) {
-      vars.tokenWithTreasury = ITokenWithTreasury(collateralReserve.aTokenAddress);
       vars.collateralAtoken.transferOnLiquidation(
         params.user,
-        vars.tokenWithTreasury.RESERVE_TREASURY_ADDRESS(),
+        vars.collateralAtoken.RESERVE_TREASURY_ADDRESS(),
         vars.liquidationProtocolFeeAmount
       );
     }
@@ -348,8 +346,4 @@ library LiquidationLogic {
     }
     return (vars.collateralAmount, vars.debtAmountNeeded, 0);
   }
-}
-
-interface ITokenWithTreasury {
-  function RESERVE_TREASURY_ADDRESS() external view returns (address);
 }
