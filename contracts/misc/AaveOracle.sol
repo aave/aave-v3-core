@@ -10,10 +10,10 @@ import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 /**
  * @title AaveOracle
  * @author Aave
- * @notice Proxy smart contract to get the price of an asset from a price source, with Chainlink Aggregator
- *         smart contracts as primary option
+ * @notice Contract to get asset prices, manage price sources and update the fallback oracle
+ * - Use of Chainlink Aggregators as first source of price
  * - If the returned price by a Chainlink aggregator is <= 0, the call is forwarded to a fallback oracle
- * - Owned by the Aave governance system, allowed to manage sources of assets and change the fallback oracle
+ * - Owned by the Aave governance
  */
 contract AaveOracle is IPriceOracleGetter, Ownable {
   using SafeERC20 for IERC20;
@@ -151,7 +151,7 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
 
   /**
    * @notice Returns the address of the fallback oracle
-   * @return address The addres of the fallback oracle
+   * @return The address of the fallback oracle
    */
   function getFallbackOracle() external view returns (address) {
     return address(_fallbackOracle);
