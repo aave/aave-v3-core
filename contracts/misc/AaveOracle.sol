@@ -19,21 +19,21 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
   using SafeERC20 for IERC20;
 
   /**
-   * @dev Emitted after the base currency is set
+   * @notice Emitted after the base currency is set
    * @param baseCurrency The base currency of used for price quotes
    * @param baseCurrencyUnit The unit of the base currency
    */
   event BaseCurrencySet(address indexed baseCurrency, uint256 baseCurrencyUnit);
 
   /**
-   * @dev Emitted after the price source of an asset is updated
+   * @notice Emitted after the price source of an asset is updated
    * @param asset The address of the asset
    * @param source The price source of the asset
    */
   event AssetSourceUpdated(address indexed asset, address indexed source);
 
   /**
-   * @dev Emitted after the address of fallback oracle is updated
+   * @notice Emitted after the address of fallback oracle is updated
    * @param fallbackOracle The address of the fallback oracle
    */
   event FallbackOracleUpdated(address indexed fallbackOracle);
