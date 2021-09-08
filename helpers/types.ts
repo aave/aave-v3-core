@@ -1,43 +1,18 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'ethers';
 
 export interface SymbolMap<T> {
   [symbol: string]: T;
 }
 
-export type eNetwork = eEthereumNetwork | ePolygonNetwork | eXDaiNetwork;
+export type eNetwork = eEthereumNetwork;
 
 export enum eEthereumNetwork {
-  buidlerevm = 'buidlerevm',
   kovan = 'kovan',
   ropsten = 'ropsten',
   main = 'main',
   coverage = 'coverage',
   hardhat = 'hardhat',
   tenderlyMain = 'tenderlyMain',
-}
-
-export enum ePolygonNetwork {
-  matic = 'matic',
-  mumbai = 'mumbai',
-}
-
-export enum eXDaiNetwork {
-  xdai = 'xdai',
-}
-
-export enum EthereumNetworkNames {
-  kovan = 'kovan',
-  ropsten = 'ropsten',
-  main = 'main',
-  matic = 'matic',
-  mumbai = 'mumbai',
-  xdai = 'xdai',
-}
-
-export enum AavePools {
-  proto = 'proto',
-  matic = 'matic',
-  amm = 'amm',
 }
 
 export enum eContractid {
@@ -63,7 +38,7 @@ export enum eContractid {
   RateOracle = 'RateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
-  InitializableAdminUpgradeabilityProxy = 'InitializableAdminUpgradeabilityProxy',
+  InitializableImmutableAdminUpgradeabilityProxy = 'InitializableImmutableAdminUpgradeabilityProxy',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   AToken = 'AToken',
   MockAToken = 'MockAToken',
@@ -80,10 +55,16 @@ export enum eContractid {
   ATokensAndRatesHelper = 'ATokensAndRatesHelper',
   WETH = 'WETH',
   WETHMocked = 'WETHMocked',
-  SelfdestructTransferMock = 'SelfdestructTransferMock',
   PoolImpl = 'PoolImpl',
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
   MockUniswapV2Router02 = 'MockUniswapV2Router02',
+  MockIncentivesController = 'MockIncentivesController',
+  MockReserveConfiguration = 'MockReserveConfiguration',
+  MockPool = 'MockPool',
+  MockInitializableImple = 'MockInitializableImple',
+  MockInitializableImpleV2 = 'MockInitializableImpleV2',
+  MockInitializableFromConstructorImple = 'MockInitializableFromConstructorImple',
+  MockReentrantInitializableImple = 'MockReentrantInitializableImple',
 }
 
 /*
@@ -165,16 +146,20 @@ export enum ProtocolErrors {
   P_IS_PAUSED = '64', // 'Pool is paused'
   P_NO_MORE_RESERVES_ALLOWED = '65',
   P_INVALID_FLASH_LOAN_EXECUTOR_RETURN = '66',
+  P_NOT_CONTRACT = '78',
   RC_INVALID_LTV = '67',
   RC_INVALID_LIQ_THRESHOLD = '68',
   RC_INVALID_LIQ_BONUS = '69',
   RC_INVALID_DECIMALS = '70',
   RC_INVALID_RESERVE_FACTOR = '71',
   PAPR_INVALID_ADDRESSES_PROVIDER_ID = '72',
+  VL_INCONSISTENT_FLASHLOAN_PARAMS = '73',
+  SDT_STABLE_DEBT_OVERFLOW = '79',
   VL_BORROW_CAP_EXCEEDED = '81',
   RC_INVALID_BORROW_CAP = '82',
   VL_SUPPLY_CAP_EXCEEDED = '83',
   RC_INVALID_SUPPLY_CAP = '84',
+  PC_INVALID_CONFIGURATION = '75',
   PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN = '85',
   VL_RESERVE_PAUSED = '86',
   PC_CALLER_NOT_RISK_OR_POOL_ADMIN = '87',
@@ -277,44 +262,7 @@ export type iAavePoolAssets<T> = Pick<
   | 'xSUSHI'
 >;
 
-export type iLpPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  | 'DAI'
-  | 'USDC'
-  | 'USDT'
-  | 'WBTC'
-  | 'WETH'
-  | 'UniDAIWETH'
-  | 'UniWBTCWETH'
-  | 'UniAAVEWETH'
-  | 'UniBATWETH'
-  | 'UniDAIUSDC'
-  | 'UniCRVWETH'
-  | 'UniLINKWETH'
-  | 'UniMKRWETH'
-  | 'UniRENWETH'
-  | 'UniSNXWETH'
-  | 'UniUNIWETH'
-  | 'UniUSDCWETH'
-  | 'UniWBTCUSDC'
-  | 'UniYFIWETH'
-  | 'BptWBTCWETH'
-  | 'BptBALWETH'
->;
-
-export type iMaticPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'WMATIC' | 'AAVE'
->;
-
-export type iXDAIPoolAssets<T> = Pick<
-  iAssetsWithoutUSD<T>,
-  'DAI' | 'USDC' | 'USDT' | 'WBTC' | 'WETH' | 'STAKE'
->;
-
 export type iMultiPoolsAssets<T> = iAssetCommon<T> | iAavePoolAssets<T>;
-
-export type iAavePoolTokens<T> = Omit<iAavePoolAssets<T>, 'ETH'>;
 
 export type iAssetAggregatorBase<T> = iAssetsWithoutETH<T>;
 
@@ -400,19 +348,12 @@ export interface IMarketRates {
   borrowRate: string;
 }
 
-export type iParamsPerNetwork<T> =
-  | iEthereumParamsPerNetwork<T>
-  | iPolygonParamsPerNetwork<T>
-  | iXDaiParamsPerNetwork<T>;
+export type iParamsPerNetwork<T> = iEthereumParamsPerNetwork<T>;
 
-export interface iParamsPerNetworkAll<T>
-  extends iEthereumParamsPerNetwork<T>,
-    iPolygonParamsPerNetwork<T>,
-    iXDaiParamsPerNetwork<T> {}
+export interface iParamsPerNetworkAll<T> extends iEthereumParamsPerNetwork<T> {}
 
 export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.coverage]: T;
-  [eEthereumNetwork.buidlerevm]: T;
   [eEthereumNetwork.kovan]: T;
   [eEthereumNetwork.ropsten]: T;
   [eEthereumNetwork.main]: T;
@@ -420,34 +361,10 @@ export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.tenderlyMain]: T;
 }
 
-export interface iPolygonParamsPerNetwork<T> {
-  [ePolygonNetwork.matic]: T;
-  [ePolygonNetwork.mumbai]: T;
-}
-
-export interface iXDaiParamsPerNetwork<T> {
-  [eXDaiNetwork.xdai]: T;
-}
-
-export interface iParamsPerPool<T> {
-  [AavePools.proto]: T;
-  [AavePools.matic]: T;
-  [AavePools.amm]: T;
-}
-
-export interface iBasicDistributionParams {
-  receivers: string[];
-  percentages: string[];
-}
-
 export enum RateMode {
   None = '0',
   Stable = '1',
   Variable = '2',
-}
-
-export interface ObjectString {
-  [key: string]: string;
 }
 
 export interface IProtocolGlobalConfig {
@@ -480,47 +397,31 @@ export interface ICommonConfiguration {
   ProviderId: number;
   ProtocolGlobalParams: IProtocolGlobalConfig;
   Mocks: IMocksConfig;
-  ProviderRegistry: iParamsPerNetwork<tEthereumAddress | undefined>;
-  ProviderRegistryOwner: iParamsPerNetwork<tEthereumAddress | undefined>;
-  PoolConfigurator: iParamsPerNetwork<tEthereumAddress>;
-  Pool: iParamsPerNetwork<tEthereumAddress>;
+  ProviderRegistry: tEthereumAddress | undefined;
+  ProviderRegistryOwner: tEthereumAddress | undefined;
+  PoolConfigurator: tEthereumAddress | undefined;
+  Pool: tEthereumAddress | undefined;
   RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
-  RateOracle: iParamsPerNetwork<tEthereumAddress>;
-  TokenDistributor: iParamsPerNetwork<tEthereumAddress>;
-  AaveOracle: iParamsPerNetwork<tEthereumAddress>;
-  FallbackOracle: iParamsPerNetwork<tEthereumAddress>;
-  ChainlinkAggregator: iParamsPerNetwork<ITokenAddress>;
-  PoolAdmin: iParamsPerNetwork<tEthereumAddress | undefined>;
+  RateOracle: tEthereumAddress | undefined;
+  TokenDistributor: tEthereumAddress | undefined;
+  AaveOracle: tEthereumAddress | undefined;
+  FallbackOracle: tEthereumAddress | undefined;
+  ChainlinkAggregator: tEthereumAddress | undefined;
+  PoolAdmin: tEthereumAddress | undefined;
   PoolAdminIndex: number;
-  EmergencyAdmin: iParamsPerNetwork<tEthereumAddress | undefined>;
+  EmergencyAdmin: tEthereumAddress | undefined;
   EmergencyAdminIndex: number;
-  ReserveAssets: iParamsPerNetwork<SymbolMap<tEthereumAddress>>;
+  ReserveAssets: SymbolMap<tEthereumAddress> | SymbolMap<undefined>;
   ReservesConfig: iMultiPoolsAssets<IReserveParams>;
-  ATokenDomainSeparator: iParamsPerNetwork<string>;
-  WETH: iParamsPerNetwork<tEthereumAddress>;
-  WrappedNativeToken: iParamsPerNetwork<tEthereumAddress>;
-  ReserveFactorTreasuryAddress: iParamsPerNetwork<tEthereumAddress>;
-  IncentivesController: iParamsPerNetwork<tEthereumAddress>;
+  ATokenDomainSeparator: string;
+  WETH: tEthereumAddress | undefined;
+  WrappedNativeToken: tEthereumAddress | undefined;
+  ReserveFactorTreasuryAddress: tEthereumAddress;
+  IncentivesController: tEthereumAddress | undefined;
 }
 
 export interface IAaveConfiguration extends ICommonConfiguration {
-  ReservesConfig: iAavePoolAssets<IReserveParams>;
-}
-
-export interface IAmmConfiguration extends ICommonConfiguration {
-  ReservesConfig: iLpPoolAssets<IReserveParams>;
-}
-
-export interface IMaticConfiguration extends ICommonConfiguration {
-  ReservesConfig: iMaticPoolAssets<IReserveParams>;
-}
-
-export interface IXDAIConfiguration extends ICommonConfiguration {
-  ReservesConfig: iXDAIPoolAssets<IReserveParams>;
-}
-
-export interface ITokenAddress {
-  [token: string]: tEthereumAddress;
+  ReservesConfig: iMultiPoolsAssets<IReserveParams>;
 }
 
 export type PoolConfiguration = ICommonConfiguration | IAaveConfiguration;

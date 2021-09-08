@@ -10,6 +10,7 @@ export const getAllTokenAddresses = (mockTokens: MockTokenMap) =>
     }),
     {}
   );
+
 export const getAllAggregatorsAddresses = (mockAggregators: {
   [tokenSymbol: string]: MockAggregator;
 }) =>

@@ -106,6 +106,7 @@ library DataTypes {
     address onBehalfOf;
     address lastBorrower;
     uint40 lastBorrowTimestamp;
+    bool useATokens;
   }
 
   struct ExecuteWithdrawParams {

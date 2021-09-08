@@ -206,7 +206,7 @@ interface IPoolConfigurator {
    * @dev Emitted when a the part of the premium that goes to protoco lis updated
    * @param flashloanPremiumToProtocol the new premium
    **/
-  event FlashloanPremiumToProcolUpdated(uint256 flashloanPremiumToProtocol);
+  event FlashloanPremiumToProtocolUpdated(uint256 flashloanPremiumToProtocol);
 
   /**
    * @dev Initializes multiple reserves

@@ -19,7 +19,7 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 /**
  * @title DepositLogic library
  * @author Aave
- * @notice Implements the base logic for deposit/withdraw 
+ * @notice Implements the base logic for deposit/withdraw
  */
 library DepositLogic {
   using ReserveLogic for DataTypes.ReserveCache;

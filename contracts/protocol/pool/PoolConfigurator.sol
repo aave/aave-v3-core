@@ -56,7 +56,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   uint256 internal constant CONFIGURATOR_REVISION = 0x1;
 
-  function getRevision() internal pure override returns (uint256) {
+  function getRevision() internal pure virtual override returns (uint256) {
     return CONFIGURATOR_REVISION;
   }
 
@@ -123,7 +123,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _pool.setConfiguration(asset, currentConfig.data);
 
     emit BorrowingEnabledOnReserve(asset, stableBorrowRateEnabled);
-    }
+  }
 
   /// @inheritdoc IPoolConfigurator
   function disableBorrowingOnReserve(address asset) external override onlyRiskOrPoolAdmins {
@@ -351,7 +351,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       Errors.PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), flashloanPremiumToProtocol);
-    emit FlashloanPremiumToProcolUpdated(flashloanPremiumToProtocol);
+    emit FlashloanPremiumToProtocolUpdated(flashloanPremiumToProtocol);
   }
 
   function _checkNoLiquidity(address asset) internal view {

@@ -26,7 +26,7 @@ contract AaveProtocolDataProvider {
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
-  constructor(IPoolAddressesProvider addressesProvider) public {
+  constructor(IPoolAddressesProvider addressesProvider) {
     ADDRESSES_PROVIDER = addressesProvider;
   }
 
