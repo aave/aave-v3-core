@@ -8,9 +8,21 @@ import {IPool} from '../../interfaces/IPool.sol';
  * @title IFlashLoanReceiver interface
  * @notice Interface for the Aave fee IFlashLoanReceiver.
  * @author Aave
- * @dev implement this interface to develop a flashloan-compatible flashLoanReceiver contract
+ * @dev Implement this interface to develop a flashloan-compatible flashLoanReceiver contract
  **/
 interface IFlashLoanReceiver {
+  /**
+   * @notice Executes an operation after receiving the flash-borrowed assets
+   * @dev Ensure the contract is able to return the debt + premium, so has
+   *      enough funds to repay and approve the Pool to pull the total amount
+   * @dev Should return True if the operation is executed successfully
+   * @param assets The addresses of the flash-borrowed assets
+   * @param amounts The amounts of the flash-borrowed assets
+   * @param premiums The fee of each flash-borrowed asset
+   * @param initiator The address of the flashloan initiator
+   * @param params The byte-encoded params passed when initiating the flashloan
+   * @return True if the execution succeds, false otherwise
+   */
   function executeOperation(
     address[] calldata assets,
     uint256[] calldata amounts,
