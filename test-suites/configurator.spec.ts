@@ -617,7 +617,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
       .withArgs(newPremiumTotal);
     expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
-      .to.emit(configurator, 'FlashloanPremiumToProcolUpdated')
+      .to.emit(configurator, 'FlashloanPremiumToProtocolUpdated')
       .withArgs(newPremiumToProtocol);
 
     expect(await pool.FLASHLOAN_PREMIUM_TOTAL()).to.be.eq(newPremiumTotal);
