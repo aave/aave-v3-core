@@ -2,18 +2,26 @@
 pragma solidity 0.8.6;
 
 /**
- * @title IReserveInterestRateStrategyInterface interface
- * @dev Interface for the calculation of the interest rates
+ * @title IReserveInterestRateStrategyInterface
  * @author Aave
+ * @notice Interface for the calculation of the interest rates
  */
 interface IReserveInterestRateStrategy {
+  /**
+   * @notice Returns the base variable borrow rate
+   * @return The base variable borrow rate
+   **/
   function baseVariableBorrowRate() external view returns (uint256);
 
+  /**
+   * @notice Returns the maximum variable borrow rate
+   * @return The maximum variable borrow rate
+   **/
   function getMaxVariableBorrowRate() external view returns (uint256);
 
   /**
-   * @dev Calculates the interest rates depending on the reserve's state and configurations.
-   * NOTE This function is kept for compatibility with the previous DefaultInterestRateStrategy interface.
+   * @notice Calculates the interest rates depending on the reserve's state and configurations.
+   * @dev This function is kept for compatibility with the previous DefaultInterestRateStrategy interface.
    * New protocol implementation uses the new calculateInterestRates() interface
    * @param reserve The address of the reserve
    * @param availableLiquidity The liquidity available in the corresponding aToken
@@ -42,7 +50,7 @@ interface IReserveInterestRateStrategy {
     );
 
   /**
-   * @dev Calculates the interest rates depending on the reserve's state and configurations
+   * @notice Calculates the interest rates depending on the reserve's state and configurations
    * @param reserve The address of the reserve
    * @param liquidityAdded The liquidity added during the operation
    * @param liquidityTaken The liquidity taken during the operation
