@@ -2,12 +2,9 @@
 pragma solidity 0.8.6;
 
 /**
- * @title PoolAddressesProviderRegistry contract
+ * @title IPoolAddressesProviderRegistry
  * @author Aave
- * @notice Main registry of PoolAddressesProvider of multiple Aave protocol's markets
- * - Used for indexing purposes of Aave protocol's markets
- * - The id assigned to a PoolAddressesProvider refers to the market it is connected with,
- *   for example with `0` for the Aave main market and `1` for the next created
+ * @notice Defines the basic interface for an Aave Pool Addresses Provider Registry.
  **/
 interface IPoolAddressesProviderRegistry {
   event AddressesProviderRegistered(address indexed newAddress);
@@ -21,7 +18,8 @@ interface IPoolAddressesProviderRegistry {
 
   /**
    * @notice Returns the id on a registered PoolAddressesProvider
-   * @return The id or 0 if the PoolAddressesProvider is not registered
+   * @param addressesProvider the address of the PoolAddressesProvider
+   * @return The id of the PoolAddressesProvider or 0 if is not registered
    */
   function getAddressesProviderIdByAddress(address addressesProvider)
     external
@@ -36,7 +34,7 @@ interface IPoolAddressesProviderRegistry {
   function registerAddressesProvider(address provider, uint256 id) external;
 
   /**
-   * @notice Removes a PoolAddressesProvider from the list of registered addresses provider
+   * @notice Removes a PoolAddressesProvider from the list of registered addresses providers
    * @param provider The PoolAddressesProvider address
    **/
   function unregisterAddressesProvider(address provider) external;

@@ -2,18 +2,14 @@
 pragma solidity 0.8.6;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
-
-// Prettier ignore to prevent hardhat flatter bug
-// prettier-ignore
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
-
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 
 /**
  * @title PoolAddressesProvider contract
  * @author Aave
  * @notice Main registry of addresses part of or connected to the protocol, including permissioned roles
- * - Acting also as factory of proxies and admin of those, so with right to change its implementations
+ * @dev Acts as factory of proxies and admin of those, so with right to change its implementations
  * - Owned by the Aave Governance
  **/
 contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
@@ -123,7 +119,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
   /**
    * @notice Internal function to update the implementation of a specific proxied component of the protocol
-   * @dev - If there is no proxy registered in the given `id`, it creates the proxy setting `newAdress`
+   * @dev If there is no proxy registered in the given `id`, it creates the proxy setting `newAdress`
    *   as implementation and calls the initialize() function on the proxy
    * - If there is already a proxy registered, it just updates the implementation to `newAddress` and
    *   calls the initialize() function via upgradeToAndCall() in the proxy
@@ -148,6 +144,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     }
   }
 
+  ///@inheritdoc IPoolAddressesProvider
   function _setMarketId(string memory marketId) internal {
     _marketId = marketId;
     emit MarketIdSet(marketId);

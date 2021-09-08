@@ -1,12 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-/**
- * @title PoolAddressesProvider contract
+ /**
+ * @title IPoolAddressesProvider
  * @author Aave
- * @notice Main registry of addresses part of or connected to the protocol, including permissioned roles
- * @dev Acting also as factory of proxies and admin of those, so with right to change its implementations
- *      Owned by the Aave Governance
+ * @notice Defines the basic interface for a Pool Addresses Provider.
  **/
 interface IPoolAddressesProvider {
   event MarketIdSet(string newMarketId);
@@ -20,7 +18,7 @@ interface IPoolAddressesProvider {
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
   /**
-   * @notice Returns the id of the Aave market to which this contracts points to
+   * @notice Returns the id of the Aave market to which this contract points to
    * @return The market id
    **/
   function getMarketId() external view returns (string memory);
