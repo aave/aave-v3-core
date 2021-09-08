@@ -7,11 +7,11 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
  * @title PoolAddressesProviderRegistry contract
- * @dev Main registry of PoolAddressesProvider of multiple Aave protocol's markets
+ * @author Aave
+ * @notice Main registry of PoolAddressesProvider of multiple Aave protocol's markets
  * - Used for indexing purposes of Aave protocol's markets
  * - The id assigned to a PoolAddressesProvider refers to the market it is connected with,
  *   for example with `0` for the Aave main market and `1` for the next created
- * @author Aave
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
   mapping(address => uint256) private _addressesProviders;

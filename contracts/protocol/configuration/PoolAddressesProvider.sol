@@ -11,10 +11,10 @@ import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.so
 
 /**
  * @title PoolAddressesProvider contract
- * @dev Main registry of addresses part of or connected to the protocol, including permissioned roles
+ * @author Aave
+ * @notice Main registry of addresses part of or connected to the protocol, including permissioned roles
  * - Acting also as factory of proxies and admin of those, so with right to change its implementations
  * - Owned by the Aave Governance
- * @author Aave
  **/
 contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   string private _marketId;
@@ -122,8 +122,8 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /**
-   * @dev Internal function to update the implementation of a specific proxied component of the protocol
-   * - If there is no proxy registered in the given `id`, it creates the proxy setting `newAdress`
+   * @notice Internal function to update the implementation of a specific proxied component of the protocol
+   * @dev - If there is no proxy registered in the given `id`, it creates the proxy setting `newAdress`
    *   as implementation and calls the initialize() function on the proxy
    * - If there is already a proxy registered, it just updates the implementation to `newAddress` and
    *   calls the initialize() function via upgradeToAndCall() in the proxy
