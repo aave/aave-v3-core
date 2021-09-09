@@ -186,7 +186,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
 
-    vars.utilizationRate = vars.totalDebt == 0 ? 0 : vars.totalDebt.rayDiv(totalLiquidity);
+    vars.utilizationRate = totalLiquidity == 0 ? 0 : vars.totalDebt.rayDiv(totalLiquidity);
 
     // Cap utilization at 1
     vars.utilizationRate = vars.utilizationRate > WadRayMath.RAY
