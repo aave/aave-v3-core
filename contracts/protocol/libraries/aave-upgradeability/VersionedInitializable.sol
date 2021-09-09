@@ -3,6 +3,7 @@ pragma solidity 0.8.6;
 
 /**
  * @title VersionedInitializable
+ * @author Aave, inspired by the OpenZeppelin Initializable contract
  * @notice Helper contract to implement initializer functions. To use it, replace
  * the constructor with a function that has the `initializer` modifier.
  * @dev WARNING: Unlike constructors, initializer functions must be manually
@@ -11,7 +12,6 @@ pragma solidity 0.8.6;
  * WARNING: When used with inheritance, manual care must be taken to not invoke
  * a parent initializer twice, or ensure that all initializers are idempotent,
  * because this is not dealt with automatically as with constructors.
- * @author Aave, inspired by the OpenZeppelin Initializable contract
  */
 abstract contract VersionedInitializable {
   /**

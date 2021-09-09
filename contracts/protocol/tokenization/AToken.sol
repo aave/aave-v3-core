@@ -212,7 +212,7 @@ contract AToken is
   }
 
   /**
-   * @dev Returns the address of the Aave treasury, receiving the fees on this aToken
+   * @notice Returns the address of the Aave treasury, receiving the fees on this aToken
    * @return Address of the Aave treasury
    **/
   function RESERVE_TREASURY_ADDRESS() public view returns (address) {
@@ -225,7 +225,7 @@ contract AToken is
   }
 
   /**
-   * @dev Returns the address of the pool where this aToken is used
+   * @notice Returns the address of the pool where this aToken is used
    * @return Address of the pool
    **/
   function POOL() public view returns (IPool) {
@@ -304,7 +304,7 @@ contract AToken is
   }
 
   /**
-   * @dev Overrides the parent _transfer to force validated transfer() and transferFrom()
+   * @notice Overrides the parent _transfer to force validated transfer() and transferFrom()
    * @param from The source address
    * @param to The destination address
    * @param amount The amount getting transferred

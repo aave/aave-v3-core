@@ -70,9 +70,9 @@ library LiquidationLogic {
   }
 
   /**
-   * @dev Function to liquidate a position if its Health Factor drops below 1
-   * - The caller (liquidator) covers `debtToCover` amount of debt of the user getting liquidated, and receives
-   *   a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
+   * @dev Function to liquidate a position if its Health Factor drops below 1. The caller (liquidator)
+   * covers `debtToCover` amount of debt of the user getting liquidated, and receives
+   * a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
    **/
   function executeLiquidationCall(
     mapping(address => DataTypes.ReserveData) storage reserves,

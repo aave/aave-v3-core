@@ -19,7 +19,7 @@ contract MintableDelegationERC20 is ERC20 {
   }
 
   /**
-   * @dev Function to mint tokensp
+   * @dev Function to mint tokens
    * @param value The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
    */

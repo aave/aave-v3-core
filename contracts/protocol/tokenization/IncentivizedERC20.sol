@@ -8,8 +8,8 @@ import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesControl
 
 /**
  * @title IncentivizedERC20
- * @notice Basic ERC20 implementation
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
+ * @notice Basic ERC20 implementation
  **/
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   mapping(address => uint256) internal _balances;
@@ -57,7 +57,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @dev Returns the address of the incentives controller contract
+   * @notice Returns the address of the incentives controller contract
    * @return Incentivescontroller
    **/
   function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
@@ -99,7 +99,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @dev Increases the allowance of spender to spend _msgSender() tokens
+   * @notice Increases the allowance of spender to spend _msgSender() tokens
    * @param spender The user allowed to spend on behalf of _msgSender()
    * @param addedValue The amount being added to the allowance
    * @return `true`
@@ -110,7 +110,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @dev Decreases the allowance of spender to spend _msgSender() tokens
+   * @notice Decreases the allowance of spender to spend _msgSender() tokens
    * @param spender The user allowed to spend on behalf of _msgSender()
    * @param subtractedValue The amount being subtracted to the allowance
    * @return `true`

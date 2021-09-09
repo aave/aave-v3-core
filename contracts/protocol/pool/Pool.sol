@@ -23,6 +23,7 @@ import {PoolStorage} from './PoolStorage.sol';
 
 /**
  * @title Pool contract
+ * @author Aave
  * @notice Main point of interaction with an Aave protocol's market
  * - Users can:
  *   # Deposit
@@ -33,10 +34,9 @@ import {PoolStorage} from './PoolStorage.sol';
  *   # Enable/disable their deposits as collateral rebalance stable rate borrow positions
  *   # Liquidate positions
  *   # Execute Flash Loans
- * @dev - To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
- * - All admin functions are callable by the PoolConfigurator contract defined also in the
+ * @dev To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
+ * @dev All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
- * @author Aave
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
@@ -67,7 +67,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @notice Initializes the Pool.
    * @dev Function is invoked by the proxy contract when the Pool contract is added to the
    * PoolAddressesProvider of the market.
-   * - Caching the address of the PoolAddressesProvider in order to reduce gas consumption
+   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
    * @param provider The address of the PoolAddressesProvider
    **/

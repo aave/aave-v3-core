@@ -237,7 +237,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /**
-   * @dev Calculates the increase in balance since the last user interaction
+   * @notice Calculates the increase in balance since the last user interaction
    * @param user The address of the user for which the interest is being accumulated
    * @return The previous principal balance
    * @return The new principal balance
@@ -367,7 +367,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /**
-   * @dev Burns stable debt tokens of a user
+   * @notice Burns stable debt tokens of a user
    * @param account The user getting his debt burned
    * @param amount The amount being burned
    * @param oldTotalSupply The total supply before the burning event

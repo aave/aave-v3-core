@@ -119,8 +119,6 @@ interface IPool {
 
   /**
    * @notice Emitted when a borrower is liquidated.
-   * @dev This event is emitted by the Pool via PoolCollateral manager using a DELEGATECALL. 
-          This allows to have the events in the generated ABI for Pool.
    * @param collateralAsset The address of the underlying asset used as collateral, to receive as result of the liquidation
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param user The address of the borrower getting liquidated
@@ -142,9 +140,6 @@ interface IPool {
 
   /**
    * @notice Emitted when the state of a reserve is updated.
-   * @dev This event is actually declared in the ReserveLogic library and emitted in the updateInterestRates() function.
-   *      Since the function is internal, the event will actually be fired by the Pool contract.
-   *      The event is therefore replicated here so it gets added to the Pool ABI
    * @param reserve The address of the underlying asset of the reserve
    * @param liquidityRate The new liquidity rate
    * @param stableBorrowRate The new stable borrow rate
