@@ -2,23 +2,23 @@
 pragma solidity 0.8.6;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {ReserveLogic} from './ReserveLogic.sol';
-import {GenericLogic} from './GenericLogic.sol';
-import {WadRayMath} from '../math/WadRayMath.sol';
-import {PercentageMath} from '../math/PercentageMath.sol';
+import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
-import {UserConfiguration} from '../configuration/UserConfiguration.sol';
-import {Errors} from '../helpers/Errors.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
-import {IAToken} from '../../../interfaces/IAToken.sol';
-import {DataTypes} from '../types/DataTypes.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
-import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
+import {IAToken} from '../../../interfaces/IAToken.sol';
+import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
+import {UserConfiguration} from '../configuration/UserConfiguration.sol';
+import {Errors} from '../helpers/Errors.sol';
+import {Helpers} from '../helpers/Helpers.sol';
+import {WadRayMath} from '../math/WadRayMath.sol';
+import {PercentageMath} from '../math/PercentageMath.sol';
+import {DataTypes} from '../types/DataTypes.sol';
+import {ReserveLogic} from './ReserveLogic.sol';
+import {GenericLogic} from './GenericLogic.sol';
 
 /**
  * @title ReserveLogic library
@@ -38,7 +38,7 @@ library ValidationLogic {
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
 
   /**
-   * @dev Validates a deposit action
+   * @notice Validates a deposit action
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be deposited
    */
@@ -68,7 +68,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a withdraw action
+   * @notice Validates a withdraw action
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be withdrawn
    * @param userBalance The balance of the user
@@ -108,7 +108,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a borrow action
+   * @notice Validates a borrow action
    * @param reserveCache the cached data of the reserve
    * @param asset The address of the asset to borrow
    * @param userAddress The address of the user
@@ -119,7 +119,7 @@ library ValidationLogic {
    * @param userConfig The state of the specific user
    * @param reserves The addresses of all the active reserves
    * @param reservesCount The number of available reserve
-   * @param oracle The price oracle
+   * @param oracle The address of the price oracle
    */
   function validateBorrow(
     DataTypes.ReserveCache memory reserveCache,
@@ -246,12 +246,12 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a repay action
+   * @notice Validates a repay action
    * @param lastBorrower The address of the last borrower
    * @param lastBorrowTimestamp The timestamp for last borrow
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
-   * @param rateMode the interest rate mode of the debt being repaid
+   * @param rateMode The interest rate mode of the debt being repaid
    * @param onBehalfOf The address of the user msg.sender is repaying for
    * @param stableDebt The borrow balance of the user
    * @param variableDebt The borrow balance of the user
@@ -292,7 +292,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a swap of borrow rate mode.
+   * @notice Validates a swap of borrow rate mode.
    * @param reserve The reserve state on which the user is swapping the rate
    * @param reserveCache The cached data of the reserve
    * @param userConfig The user reserves configuration
@@ -341,7 +341,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a stable borrow rate rebalance action
+   * @notice Validates a stable borrow rate rebalance action
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
@@ -385,7 +385,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates the action of setting an asset as collateral
+   * @notice Validates the action of setting an asset as collateral
    * @param reserveCache The cached data of the reserve
    * @param userBalance The baalnce of the user
    */
@@ -402,7 +402,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a flashloan action
+   * @notice Validates a flashloan action
    * @param assets The assets being flashborrowed
    * @param amounts The amounts for each asset being borrowed
    * @param reservesData The state of all the reserves
@@ -428,10 +428,10 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates the liquidation action
+   * @notice Validates the liquidation action
    * @param collateralReserve The reserve data of the collateral
    * @param principalReserveCache The cached reserve data of the principal
-   * @param totalDebt Total debt balance of the user
+   * @param totalDebt The total debt balance of the user
    * @param user The address of the user being liquidated
    * @param reservesData The mapping of the reserves data
    * @param userConfig The user configuration mapping
@@ -501,7 +501,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates the health factor of a user and the ltv of the asset being withdrawn
+   * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred
    * @param reservesData The state of all the reserves
@@ -541,7 +541,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a transfer action
+   * @notice Validates a transfer action
    * @param reserve The reserve object
    */
   function validateTransfer(DataTypes.ReserveData storage reserve) internal view {
@@ -549,7 +549,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a drop reserve action
+   * @notice Validates a drop reserve action
    * @param reserve The reserve object
    **/
   function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {

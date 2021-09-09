@@ -2,28 +2,26 @@
 pragma solidity 0.8.6;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts//IERC20.sol';
+import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {PercentageMath} from '../../libraries/math/PercentageMath.sol';
+import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
+import {Helpers} from '../../libraries/helpers/Helpers.sol';
+import {Errors} from '../../libraries/helpers/Errors.sol';
+import {DataTypes} from '../../libraries/types/DataTypes.sol';
+import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
+import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
+import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
+import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
-import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
-import {Helpers} from '../../libraries/helpers/Helpers.sol';
-import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
-import {PercentageMath} from '../../libraries/math/PercentageMath.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {Errors} from '../../libraries/helpers/Errors.sol';
-import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
-import {DataTypes} from '../../libraries/types/DataTypes.sol';
-import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
-import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 
 /**
  * @title LiquidationLogic library
  * @author Aave
- * @dev Implements actions involving management of collateral in the protocol, the main one being the liquidations
- * IMPORTANT This contract will run always via DELEGATECALL, through the Pool, so the chain of inheritance
- * is the same as the Pool, to have compatible storage layouts
+ * @notice Implements actions involving management of collateral in the protocol, the main one being the liquidations
  **/
 library LiquidationLogic {
   using WadRayMath for uint256;
@@ -253,9 +251,9 @@ library LiquidationLogic {
   }
 
   /**
-   * @dev Calculates how much of a specific collateral can be liquidated, given
+   * @notice Calculates how much of a specific collateral can be liquidated, given
    * a certain amount of debt asset.
-   * - This function needs to be called after all the checks to validate the liquidation have been performed,
+   * @dev This function needs to be called after all the checks to validate the liquidation have been performed,
    *   otherwise it might fail.
    * @param collateralReserve The data of the collateral reserve
    * @param debtReserveCache The cached data of the debt reserve

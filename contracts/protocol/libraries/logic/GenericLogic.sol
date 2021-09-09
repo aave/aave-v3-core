@@ -3,18 +3,18 @@ pragma solidity 0.8.6;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
-import {ReserveLogic} from './ReserveLogic.sol';
+import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
-import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
-import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
+import {WadRayMath} from '../math/WadRayMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
+import {ReserveLogic} from './ReserveLogic.sol';
 
 /**
  * @title GenericLogic library
  * @author Aave
- * @title Implements protocol-level logic to calculate and validate the state of a user
+ * @notice Implements protocol-level logic to calculate and validate the state of a user
  */
 library GenericLogic {
   using ReserveLogic for DataTypes.ReserveData;
@@ -49,16 +49,21 @@ library GenericLogic {
   }
 
   /**
-   * @dev Calculates the user data across the reserves.
-   * this includes the total liquidity/collateral/borrow balances in the base currency used by the price feed,
+   * @notice Calculates the user data across the reserves.
+   * @dev It includes the total liquidity/collateral/borrow balances in the base currency used by the price feed,
    * the average Loan To Value, the average Liquidation Ratio, and the Health factor.
    * @param user The address of the user
-   * @param reservesData Data of all the reserves
+   * @param reservesData The data of all the reserves
    * @param userConfig The configuration of the user
    * @param reserves The list of the available reserves
+   * @param reservesCount The number of the available reserves
    * @param oracle The price oracle address
-   * @return The total collateral and total debt of the user in the base currency used by the price feed,
-   *         the avg ltv, liquidation threshold, the HF and the uncapped avg ltv
+   * @return The total collateral of the user in the base currency used by the price feed
+   * @return The total debt of the user in the base currency used by the price feed
+   * @return The average ltv of the user
+   * @return The average liquidation threshold of the user
+   * @return The health factor of the user
+   * @return True if the ltv is zero, false otherwise
    **/
   function calculateUserAccountData(
     address user,
@@ -182,12 +187,12 @@ library GenericLogic {
   }
 
   /**
-   * @dev Calculates the maximum amount that can be borrowed depending on the available collateral, the total debt and the
+   * @notice Calculates the maximum amount that can be borrowed depending on the available collateral, the total debt and the
    * average Loan To Value
    * @param totalCollateralInBaseCurrency The total collateral in the base currency used by the price feed
    * @param totalDebtInBaseCurrency The total borrow balance in the base currency used by the price feed
    * @param ltv The average loan to value
-   * @return the amount available to borrow in the base currency of the used by the price feed
+   * @return The amount available to borrow in the base currency of the used by the price feed
    **/
   function calculateAvailableBorrows(
     uint256 totalCollateralInBaseCurrency,
