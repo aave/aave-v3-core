@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
+import {Errors} from '../../libraries/helpers/Errors.sol';
+import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
-import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IncentivizedERC20} from '../IncentivizedERC20.sol';
-import {Errors} from '../../libraries/helpers/Errors.sol';
 
 /**
  * @title DebtTokenBase
- * @notice Base contract for different types of debt tokens, like StableDebtToken or VariableDebtToken
  * @author Aave
+ * @notice Base contract for different types of debt tokens, like StableDebtToken or VariableDebtToken
+ * @dev Transfer and approve functionalities are disabled since its a non-transferable token.
  */
-
 abstract contract DebtTokenBase is
   IncentivizedERC20('DEBTTOKEN_IMPL', 'DEBTTOKEN_IMPL', 0),
   VersionedInitializable,
@@ -37,20 +37,20 @@ abstract contract DebtTokenBase is
     _;
   }
 
-  ///@inheritdoc ICreditDelegationToken
+  /// @inheritdoc ICreditDelegationToken
   function approveDelegation(address delegatee, uint256 amount) external override {
     _approveDelegation(_msgSender(), delegatee, amount);
   }
 
   /**
-   * @dev implements the credit delegation with ERC712 signature
+   * @notice Implements the credit delegation with ERC712 signature
    * @param delegator The delegator of the credit
    * @param delegatee The delegatee that can use the credit
    * @param value The amount to be delegated
    * @param deadline The deadline timestamp, type(uint256).max for max deadline
-   * @param v Signature param
-   * @param s Signature param
-   * @param r Signature param
+   * @param v The V signature param
+   * @param s The S signature param
+   * @param r The R signature param
    */
   function delegationWithSig(
     address delegator,
@@ -86,7 +86,7 @@ abstract contract DebtTokenBase is
     _approveDelegation(delegator, delegatee, value);
   }
 
-  ///@inheritdoc ICreditDelegationToken
+  /// @inheritdoc ICreditDelegationToken
   function borrowAllowance(address fromUser, address toUser)
     external
     view
@@ -178,7 +178,17 @@ abstract contract DebtTokenBase is
     emit BorrowAllowanceDelegated(delegator, delegatee, _getUnderlyingAssetAddress(), newAllowance);
   }
 
+  /**
+   * @notice Returns the address of the underlying asset of this debt token
+   * @dev For internal usage in the logic of the parent contracts
+   * @return The address of the underlying asset
+   **/
   function _getUnderlyingAssetAddress() internal view virtual returns (address);
 
+  /**
+   * @notice Returns the address of the pool where this debt token is used
+   * @dev For internal usage in the logic of the parent contracts
+   * @return The address of the Pool
+   **/
   function _getPool() internal view virtual returns (IPool);
 }

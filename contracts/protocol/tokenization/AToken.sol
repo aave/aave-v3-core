@@ -3,21 +3,20 @@ pragma solidity 0.8.6;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
+import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
-import {WadRayMath} from '../libraries/math/WadRayMath.sol';
-import {Errors} from '../libraries/helpers/Errors.sol';
-import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {IncentivizedERC20} from './IncentivizedERC20.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
-
 import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
 import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
+import {IncentivizedERC20} from './IncentivizedERC20.sol';
 
 /**
  * @title Aave ERC20 AToken
- * @dev Implementation of the interest bearing token for the Aave protocol
  * @author Aave
+ * @notice Implementation of the interest bearing token for the Aave protocol
  */
 contract AToken is
   VersionedInitializable,
@@ -49,12 +48,12 @@ contract AToken is
     _;
   }
 
-  ///@inheritdoc VersionedInitializable
+  /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
     return ATOKEN_REVISION;
   }
 
-  ///@inheritdoc IInitializableAToken
+  /// @inheritdoc IInitializableAToken
   function initialize(
     IPool pool,
     address treasury,
@@ -103,7 +102,7 @@ contract AToken is
     );
   }
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function burn(
     address user,
     address receiverOfUnderlying,
@@ -122,7 +121,7 @@ contract AToken is
     emit Burn(user, receiverOfUnderlying, amount, index);
   }
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function mint(
     address user,
     uint256 amount,
@@ -140,7 +139,7 @@ contract AToken is
     return previousBalance == 0;
   }
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function mintToTreasury(uint256 amount, uint256 index) external override onlyPool {
     if (amount == 0) {
       return;
@@ -158,7 +157,7 @@ contract AToken is
     emit Mint(treasury, amount, index);
   }
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function transferOnLiquidation(
     address from,
     address to,
@@ -171,7 +170,7 @@ contract AToken is
     emit Transfer(from, to, value);
   }
 
-  ///@inheritdoc IncentivizedERC20
+  /// @inheritdoc IncentivizedERC20
   function balanceOf(address user)
     public
     view
@@ -181,12 +180,12 @@ contract AToken is
     return super.balanceOf(user).rayMul(_pool.getReserveNormalizedIncome(_underlyingAsset));
   }
 
-  ///@inheritdoc IScaledBalanceToken
+  /// @inheritdoc IScaledBalanceToken
   function scaledBalanceOf(address user) external view override returns (uint256) {
     return super.balanceOf(user);
   }
 
-  ///@inheritdoc IScaledBalanceToken
+  /// @inheritdoc IScaledBalanceToken
   function getScaledUserBalanceAndSupply(address user)
     external
     view
@@ -196,7 +195,7 @@ contract AToken is
     return (super.balanceOf(user), super.totalSupply());
   }
 
-  ///@inheritdoc IncentivizedERC20
+  /// @inheritdoc IncentivizedERC20
   function totalSupply() public view override(IncentivizedERC20, IERC20) returns (uint256) {
     uint256 currentSupplyScaled = super.totalSupply();
 
@@ -207,7 +206,7 @@ contract AToken is
     return currentSupplyScaled.rayMul(_pool.getReserveNormalizedIncome(_underlyingAsset));
   }
 
-  ///@inheritdoc IScaledBalanceToken
+  /// @inheritdoc IScaledBalanceToken
   function scaledTotalSupply() public view virtual override returns (uint256) {
     return super.totalSupply();
   }
@@ -220,7 +219,7 @@ contract AToken is
     return _treasury;
   }
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function UNDERLYING_ASSET_ADDRESS() public view override returns (address) {
     return _underlyingAsset;
   }
@@ -233,7 +232,7 @@ contract AToken is
     return _pool;
   }
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function transferUnderlyingTo(address target, uint256 amount)
     external
     override
@@ -244,10 +243,10 @@ contract AToken is
     return amount;
   }
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function handleRepayment(address user, uint256 amount) external override onlyPool {}
 
-  ///@inheritdoc IAToken
+  /// @inheritdoc IAToken
   function permit(
     address owner,
     address spender,
@@ -274,12 +273,12 @@ contract AToken is
   }
 
   /**
-   * @dev Transfers the aTokens between two users. Validates the transfer
+   * @notice Transfers the aTokens between two users. Validates the transfer
    * (ie checks for valid HF after the transfer) if required
    * @param from The source address
    * @param to The destination address
    * @param amount The amount getting transferred
-   * @param validate `true` if the transfer needs to be validated
+   * @param validate True if the transfer needs to be validated, false otherwise
    **/
   function _transfer(
     address from,

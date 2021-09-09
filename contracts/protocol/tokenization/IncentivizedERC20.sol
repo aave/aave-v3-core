@@ -7,7 +7,7 @@ import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20De
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
 /**
- * @title ERC20
+ * @title IncentivizedERC20
  * @notice Basic ERC20 implementation
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
  **/
@@ -31,27 +31,27 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     _decimals = decimals;
   }
 
-  ///@inheritdoc IERC20Detailed
+  /// @inheritdoc IERC20Detailed
   function name() public view override returns (string memory) {
     return _name;
   }
 
-  ///@inheritdoc IERC20Detailed
+  /// @inheritdoc IERC20Detailed
   function symbol() public view override returns (string memory) {
     return _symbol;
   }
 
-  ///@inheritdoc IERC20Detailed
+  /// @inheritdoc IERC20Detailed
   function decimals() public view override returns (uint8) {
     return _decimals;
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function totalSupply() public view virtual override returns (uint256) {
     return _totalSupply;
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function balanceOf(address account) public view virtual override returns (uint256) {
     return _balances[account];
   }
@@ -64,14 +64,13 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     return _incentivesController;
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
     _transfer(_msgSender(), recipient, amount);
-    emit Transfer(_msgSender(), recipient, amount);
     return true;
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function allowance(address owner, address spender)
     public
     view
@@ -82,13 +81,13 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     return _allowances[owner][spender];
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function approve(address spender, uint256 amount) public virtual override returns (bool) {
     _approve(_msgSender(), spender, amount);
     return true;
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function transferFrom(
     address sender,
     address recipient,
@@ -96,7 +95,6 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   ) public virtual override returns (bool) {
     _transfer(sender, recipient, amount);
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - amount);
-    emit Transfer(sender, recipient, amount);
     return true;
   }
 
@@ -144,6 +142,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
         incentivesControllerLocal.handleAction(recipient, currentTotalSupply, oldRecipientBalance);
       }
     }
+    emit Transfer(sender, recipient, amount);
   }
 
   function _mint(address account, uint256 amount) internal virtual {

@@ -1,22 +1,22 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
-import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
-import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
+import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
-import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {DebtTokenBase} from './base/DebtTokenBase.sol';
 
 /**
  * @title VariableDebtToken
+ * @author Aave
  * @notice Implements a variable debt token to track the borrowing positions of users
  * at variable rate mode
- * @author Aave
  **/
 contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
@@ -26,7 +26,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   IPool internal _pool;
   address internal _underlyingAsset;
 
-  ///@inheritdoc IInitializableDebtToken
+  /// @inheritdoc IInitializableDebtToken
   function initialize(
     IPool pool,
     address underlyingAsset,
@@ -72,12 +72,12 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     );
   }
 
-  ///@inheritdoc VersionedInitializable
+  /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
     return DEBT_TOKEN_REVISION;
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function balanceOf(address user) public view virtual override returns (uint256) {
     uint256 scaledBalance = super.balanceOf(user);
 
@@ -88,7 +88,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return scaledBalance.rayMul(_pool.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
-  ///@inheritdoc IVariableDebtToken
+  /// @inheritdoc IVariableDebtToken
   function mint(
     address user,
     address onBehalfOf,
@@ -111,7 +111,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return previousBalance == 0;
   }
 
-  ///@inheritdoc IVariableDebtToken
+  /// @inheritdoc IVariableDebtToken
   function burn(
     address user,
     uint256 amount,
@@ -126,22 +126,22 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     emit Burn(user, amount, index);
   }
 
-  ///@inheritdoc IScaledBalanceToken
+  /// @inheritdoc IScaledBalanceToken
   function scaledBalanceOf(address user) public view virtual override returns (uint256) {
     return super.balanceOf(user);
   }
 
-  ///@inheritdoc IERC20
+  /// @inheritdoc IERC20
   function totalSupply() public view virtual override returns (uint256) {
     return super.totalSupply().rayMul(_pool.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
-  ///@inheritdoc IScaledBalanceToken
+  /// @inheritdoc IScaledBalanceToken
   function scaledTotalSupply() public view virtual override returns (uint256) {
     return super.totalSupply();
   }
 
-  ///@inheritdoc IScaledBalanceToken
+  /// @inheritdoc IScaledBalanceToken
   function getScaledUserBalanceAndSupply(address user)
     external
     view
@@ -152,23 +152,27 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   }
 
   /**
-   * @dev Returns the address of the underlying asset of this aToken (E.g. WETH for aWETH)
+   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
+   * @return The address of the underlying asset
    **/
   function UNDERLYING_ASSET_ADDRESS() public view returns (address) {
     return _underlyingAsset;
   }
 
   /**
-   * @dev Returns the address of the pool where this aToken is used
+   * @notice Returns the address of the pool where this debtToken is used
+   * @return The address of the Pool
    **/
   function POOL() public view returns (IPool) {
     return _pool;
   }
 
+  /// @inheritdoc DebtTokenBase
   function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;
   }
 
+  /// @inheritdoc DebtTokenBase
   function _getPool() internal view override returns (IPool) {
     return _pool;
   }
