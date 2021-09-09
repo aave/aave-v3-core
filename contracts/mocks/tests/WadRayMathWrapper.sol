@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {WadRayMath} from './../../protocol/libraries/math/WadRayMath.sol';
+import {WadRayMath} from '../../protocol/libraries/math/WadRayMath.sol';
 
 contract WadRayMathWrapper {
   function wad() public pure returns (uint256) {
