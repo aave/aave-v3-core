@@ -123,7 +123,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       uint256
     )
   {
-    // Probably better to say total liquidity or something if we are not subtracting the debt?
     uint256 totalLiquidity = IERC20(aToken).totalSupply();
     //avoid stack too deep
     {

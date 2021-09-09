@@ -30,7 +30,8 @@ library BridgeLogic {
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   /**
-   * @dev Mint unbacked aTokens to a user and updates the unbacked for the reserve. Essentially a deposit without transferring of the underlying.
+   * @notice Mint unbacked aTokens to a user and updates the unbacked for the reserve.
+   *   Essentially a deposit without transferring of the underlying.
    * @param reserve The reserve to mint to
    * @param userConfig The user configuration to update
    * @param asset The address of the asset
@@ -81,14 +82,12 @@ library BridgeLogic {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
     uint256 backingAmount = (amount < reserve.unbacked) ? amount : reserve.unbacked;
-
     uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;
 
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
-
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
-
     reserve.unbacked = reserve.unbacked - backingAmount;
+
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
 
     emit BackUnbacked(asset, msg.sender, backingAmount, totalFee);

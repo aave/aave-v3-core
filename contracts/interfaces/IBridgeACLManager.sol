@@ -5,7 +5,7 @@ import {IPool} from './IPool.sol';
 
 /**
  * @title IBridgeACLManager contract
- * @dev Main registry of bridges that are authorized to mint unbacked tokens and later back them with received funds.
+ * @notice Main registry of bridges that are authorized to mint unbacked tokens and later back them with received funds.
  * - Acting also as whitelist for fast withdrawal bridges
  * - Controlled by the Aave Governance
  * @author Aave
@@ -15,8 +15,8 @@ interface IBridgeACLManager {
   function POOL() external view returns (IPool);
 
   /**
-   * @dev Mints an `amount` of aTokens to the `onBehalfOf`
-   * @param asset The address of the underlying asset to mint
+   * @notice Mints an `amount` of aTokens to the `onBehalfOf`
+   * @param asset The address of the underlying asset that we are to mint atokens for
    * @param amount The amount to mint
    * @param onBehalfOf The address that will receive the aTokens
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
@@ -30,7 +30,7 @@ interface IBridgeACLManager {
   ) external;
 
   /**
-   * @dev Back the current unbacked underlying with `amount` and pay `fee`.
+   * @notice Back the current unbacked underlying with `amount` and pay `fee`.
    *   If backing unnecessarily, excess `amount` will be added to `fee`.
    * @param asset The address of the underlying asset to repay
    * @param amount The amount to back
