@@ -128,14 +128,14 @@ interface IAaveIncentivesController {
   ) external returns (uint256);
 
   /**
-   * @notice returns the unclaimed rewards of the user
+   * @notice Returns the unclaimed rewards of the user
    * @param user The address of the user
    * @return The unclaimed user rewards
    */
   function getUserUnclaimedRewards(address user) external view returns (uint256);
 
   /**
-   * @notice returns the user index for a specific asset
+   * @notice Returns the user index for a specific asset
    * @param user The address of the user
    * @param asset The asset to incentivize
    * @return The user index for the asset

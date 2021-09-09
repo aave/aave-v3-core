@@ -48,7 +48,7 @@ abstract contract VersionedInitializable {
   }
 
   /**
-   * @notice returns the revision number of the contract
+   * @notice Returns the revision number of the contract
    * @dev Needs to be defined in the inherited class as a constant.
    * @return The revision number
    **/
