@@ -3,9 +3,9 @@ pragma solidity 0.8.6;
 
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
+import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
 import {IChainlinkAggregator} from '../interfaces/IChainlinkAggregator.sol';
-import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 
 /**
  * @title AaveOracle
@@ -49,8 +49,8 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
    * @param sources The address of the source of each asset
    * @param fallbackOracle The address of the fallback oracle to use if the data of an
    *        aggregator is not consistent
-   * @param baseCurrency the base currency used for the price quotes. If USD is used, base currency is 0x0
-   * @param baseCurrencyUnit the unit of the base currency
+   * @param baseCurrency The base currency used for the price quotes. If USD is used, base currency is 0x0
+   * @param baseCurrencyUnit The unit of the base currency
    */
   constructor(
     address[] memory assets,

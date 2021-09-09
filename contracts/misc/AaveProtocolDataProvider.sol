@@ -2,13 +2,13 @@
 pragma solidity 0.8.6;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
-import {IPool} from '../interfaces/IPool.sol';
-import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
-import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
+import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
+import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
+import {IPool} from '../interfaces/IPool.sol';
 
 /**
  * @title AaveProtocolDataProvider
