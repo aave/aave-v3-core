@@ -112,7 +112,7 @@ interface IAaveIncentivesController {
   ) external returns (uint256);
 
   /**
-   * @notice Claims reward for a user on behalf, on the assets of the pool, accumulating the pending rewards.
+   * @notice Claims reward for a user on its behalf, on the assets of the pool, accumulating the pending rewards.
    * @dev The caller must be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
    * @param assets The assets to accumulate rewards for
    * @param amount The amount of rewards to claim
@@ -135,7 +135,7 @@ interface IAaveIncentivesController {
   function getUserUnclaimedRewards(address user) external view returns (uint256);
 
   /**
-   * @notice returns the unclaimed rewards of the user
+   * @notice returns the user index for a specific asset
    * @param user The address of the user
    * @param asset The asset to incentivize
    * @return The user index for the asset

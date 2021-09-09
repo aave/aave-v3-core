@@ -35,7 +35,7 @@ contract AaveProtocolDataProvider {
 
   /**
    * @notice Returns the list of the existing reserves in the pool.
-   * @dev Handling MKR and ETH in a different way since do not have a `symbol` function.
+   * @dev Handling MKR and ETH in a different way since they do not have standard `symbol` functions.
    * @return The list of reserves, pairs of symbols and addresses
    */
   function getAllReservesTokens() external view returns (TokenData[] memory) {

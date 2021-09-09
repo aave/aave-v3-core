@@ -38,6 +38,7 @@ interface IInitializableDebtToken {
    * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
    * @param debtTokenName The name of the token
    * @param debtTokenSymbol The symbol of the token
+   * @param params A set of encoded parameters for additional initialization
    */
   function initialize(
     IPool pool,

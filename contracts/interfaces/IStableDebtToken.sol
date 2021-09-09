@@ -99,7 +99,7 @@ interface IStableDebtToken is IInitializableDebtToken {
   function getUserLastUpdated(address user) external view returns (uint40);
 
   /**
-   * @notice Returns the principal, the total supply, the average stable rate and the
+   * @notice Returns the principal, the total supply, the average stable rate and the timestamp for the last update
    * @return The principal
    * @return The total supply
    * @return The average stable rate

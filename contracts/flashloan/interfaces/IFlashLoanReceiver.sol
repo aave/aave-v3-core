@@ -13,8 +13,8 @@ import {IPool} from '../../interfaces/IPool.sol';
 interface IFlashLoanReceiver {
   /**
    * @notice Executes an operation after receiving the flash-borrowed assets
-   * @dev Ensure the contract is able to return the debt + premium, so has
-   *      enough funds to repay and approve the Pool to pull the total amount
+   * @dev Ensure that the contract can return the debt + premium, e.g., has
+   *      enough funds to repay and has approved the Pool to pull the total amount
    * @param assets The addresses of the flash-borrowed assets
    * @param amounts The amounts of the flash-borrowed assets
    * @param premiums The fee of each flash-borrowed asset

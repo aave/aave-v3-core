@@ -406,7 +406,7 @@ interface IPool {
   /**
    * @notice Initializes a reserve, activating it, assigning an aToken and debt tokens and an
    * interest rate strategy
-   * - Only callable by the PoolConfigurator contract
+   * @dev Only callable by the PoolConfigurator contract
    * @param asset The address of the underlying asset of the reserve
    * @param aTokenAddress The address of the aToken that will be assigned to the reserve
    * @param stableDebtAddress The address of the StableDebtToken that will be assigned to the reserve
