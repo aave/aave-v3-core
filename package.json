@@ -8,7 +8,6 @@
   ],
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
-    "small:test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/__setup.spec.ts ./test-suites/bridge-logic.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "hardhat": "hardhat",
     "compile": "SKIP_LOAD=true hardhat compile",
