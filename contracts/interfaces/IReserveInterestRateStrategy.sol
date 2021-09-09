@@ -2,7 +2,7 @@
 pragma solidity 0.8.6;
 
 /**
- * @title IReserveInterestRateStrategyInterface
+ * @title IReserveInterestRateStrategy
  * @author Aave
  * @notice Interface for the calculation of the interest rates
  */
@@ -21,13 +21,12 @@ interface IReserveInterestRateStrategy {
 
   /**
    * @notice Calculates the interest rates depending on the reserve's state and configurations.
-   * @dev This function is kept for compatibility with the previous DefaultInterestRateStrategy interface.
-   * New protocol implementation uses the new calculateInterestRates() interface
+   * @dev Deprecated: This function is kept for compatibility with previous DefaultInterestRateStrategy interfaces.
    * @param reserve The address of the reserve
    * @param availableLiquidity The liquidity available in the corresponding aToken
-   * @param totalStableDebt The total borrowed from the reserve a stable rate
+   * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
-   * @param averageStableBorrowRate The weighted average of all the stable rate loans
+   * @param averageStableBorrowRate The weighted average of all the stable rate borrowings
    * @param reserveFactor The reserve portion of the interest that goes to the treasury of the market
    * @return The liquidity rate
    * @return The stable borrow rate
@@ -54,9 +53,9 @@ interface IReserveInterestRateStrategy {
    * @param reserve The address of the reserve
    * @param liquidityAdded The liquidity added during the operation
    * @param liquidityTaken The liquidity taken during the operation
-   * @param totalStableDebt The total borrowed from the reserve a stable rate
+   * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
-   * @param averageStableBorrowRate The weighted average of all the stable rate loans
+   * @param averageStableBorrowRate The weighted average of all the stable rate borrowings
    * @param reserveFactor The reserve portion of the interest that goes to the treasury of the market
    * @return The liquidity rate
    * @return The stable borrow rate

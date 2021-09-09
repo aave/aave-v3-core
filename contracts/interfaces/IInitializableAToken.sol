@@ -16,9 +16,9 @@ interface IInitializableAToken {
    * @param pool The address of the associated pool
    * @param treasury The address of the treasury
    * @param incentivesController The address of the incentives controller for this aToken
-   * @param aTokenDecimals the decimals of the underlying
-   * @param aTokenName the name of the aToken
-   * @param aTokenSymbol the symbol of the aToken
+   * @param aTokenDecimals The decimals of the underlying
+   * @param aTokenName The name of the aToken
+   * @param aTokenSymbol The symbol of the aToken
    * @param params A set of encoded parameters for additional initialization
    **/
   event Initialized(

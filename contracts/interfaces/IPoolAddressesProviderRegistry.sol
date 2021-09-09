@@ -18,7 +18,7 @@ interface IPoolAddressesProviderRegistry {
 
   /**
    * @notice Returns the id on a registered PoolAddressesProvider
-   * @param addressesProvider the address of the PoolAddressesProvider
+   * @param addressesProvider The address of the PoolAddressesProvider
    * @return The id of the PoolAddressesProvider or 0 if is not registered
    */
   function getAddressesProviderIdByAddress(address addressesProvider)

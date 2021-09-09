@@ -15,9 +15,9 @@ interface IInitializableDebtToken {
    * @param underlyingAsset The address of the underlying asset
    * @param pool The address of the associated pool
    * @param incentivesController The address of the incentives controller for this aToken
-   * @param debtTokenDecimals the decimals of the debt token
-   * @param debtTokenName the name of the debt token
-   * @param debtTokenSymbol the symbol of the debt token
+   * @param debtTokenDecimals The decimals of the debt token
+   * @param debtTokenName The name of the debt token
+   * @param debtTokenSymbol The symbol of the debt token
    * @param params A set of encoded parameters for additional initialization
    **/
   event Initialized(

@@ -88,7 +88,7 @@ interface IAaveIncentivesController {
   ) external;
 
   /**
-   * @notice Returns the total of rewards of an user, already accrued + not yet accrued
+   * @notice Returns the total of rewards of a user, already accrued + not yet accrued
    * @param assets The assets to accumulate rewards for
    * @param user The address of the user
    * @return The rewards
@@ -99,7 +99,7 @@ interface IAaveIncentivesController {
     returns (uint256);
 
   /**
-   * @notice Claims reward for an user, on the assets of the pool, accumulating the pending rewards
+   * @notice Claims reward for a user, on the assets of the pool, accumulating the pending rewards
    * @param assets The assets to accumulate rewards for
    * @param amount Amount of rewards to claim
    * @param to Address that will be receiving the rewards
@@ -112,13 +112,13 @@ interface IAaveIncentivesController {
   ) external returns (uint256);
 
   /**
-   * @notice Claims reward for an user on behalf, on the assets of the pool, accumulating the pending rewards.
+   * @notice Claims reward for a user on behalf, on the assets of the pool, accumulating the pending rewards.
    * @dev The caller must be whitelisted via "allowClaimOnBehalf" function by the RewardsAdmin role manager
    * @param assets The assets to accumulate rewards for
-   * @param amount Amount of rewards to claim
-   * @param user Address to check and claim rewards
-   * @param to Address that will be receiving the rewards
-   * @return Rewards claimed
+   * @param amount The amount of rewards to claim
+   * @param user The address to check and claim rewards
+   * @param to The address that will be receiving the rewards
+   * @return The amount of rewards claimed
    **/
   function claimRewardsOnBehalf(
     address[] calldata assets,
@@ -129,16 +129,16 @@ interface IAaveIncentivesController {
 
   /**
    * @notice returns the unclaimed rewards of the user
-   * @param user the address of the user
-   * @return the unclaimed user rewards
+   * @param user The address of the user
+   * @return The unclaimed user rewards
    */
   function getUserUnclaimedRewards(address user) external view returns (uint256);
 
   /**
    * @notice returns the unclaimed rewards of the user
-   * @param user the address of the user
+   * @param user The address of the user
    * @param asset The asset to incentivize
-   * @return the user index for the asset
+   * @return The user index for the asset
    */
   function getUserAssetData(address user, address asset) external view returns (uint256);
 

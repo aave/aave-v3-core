@@ -30,7 +30,7 @@ interface IPool {
    * @notice Emitted on withdraw()
    * @param reserve The address of the underlyng asset being withdrawn
    * @param user The address initiating the withdrawal, owner of aTokens
-   * @param to Address that will receive the underlying
+   * @param to The address that will receive the underlying
    * @param amount The amount to be withdrawn
    **/
   event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
@@ -127,7 +127,7 @@ interface IPool {
    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
    * @param liquidatedCollateralAmount The amount of collateral received by the liiquidator
    * @param liquidator The address of the liquidator
-   * @param receiveAToken `true` if the liquidators wants to receive the collateral aTokens, `false` if he wants
+   * @param receiveAToken True if the liquidators wants to receive the collateral aTokens, `false` if he wants
    * to receive the underlying collateral asset directly
    **/
   event LiquidationCall(
@@ -163,8 +163,8 @@ interface IPool {
 
   /**
    * @notice Emitted when the protocol treasury receives minted aTokens from the accrued interest.
-   * @param reserve the address of the reserve
-   * @param amountMinted the amount minted to the treasury
+   * @param reserve The address of the reserve
+   * @param amountMinted The amount minted to the treasury
    **/
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
 
@@ -196,9 +196,9 @@ interface IPool {
    *   is a different wallet
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
-   * @param permitV V parameter of ERC712 permit sig
-   * @param permitR R parameter of ERC712 permit sig
-   * @param permitS S parameter of ERC712 permit sig
+   * @param permitV The V parameter of ERC712 permit sig
+   * @param permitR The R parameter of ERC712 permit sig
+   * @param permitS The S parameter of ERC712 permit sig
    **/
   function depositWithPermit(
     address asset,
@@ -217,7 +217,7 @@ interface IPool {
    * @param asset The address of the underlying asset to withdraw
    * @param amount The underlying amount to be withdrawn
    *   - Send the value type(uint256).max in order to withdraw the whole aToken balance
-   * @param to Address that will receive the underlying, same as msg.sender if the user
+   * @param to The address that will receive the underlying, same as msg.sender if the user
    *   wants to receive it on his own wallet, or a different address if the beneficiary is a
    *   different wallet
    * @return The final amount withdrawn
@@ -237,9 +237,9 @@ interface IPool {
    * @param asset The address of the underlying asset to borrow
    * @param amount The amount to be borrowed
    * @param interestRateMode The interest rate mode at which the user wants to borrow: 1 for Stable, 2 for Variable
-   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+   * @param referralCode The code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
-   * @param onBehalfOf Address of the user who will receive the debt. Should be the address of the borrower itself
+   * @param onBehalfOf The address of the user who will receive the debt. Should be the address of the borrower itself
    * calling the function if he wants to borrow against his own collateral, or the address of the credit delegator
    * if he has been given credit delegation allowance
    **/
@@ -258,7 +258,7 @@ interface IPool {
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
    * @param rateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
-   * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
+   * @param onBehalfOf The address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
    * @return The final amount repaid
@@ -280,9 +280,9 @@ interface IPool {
    * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
-   * @param permitV V parameter of ERC712 permit sig
-   * @param permitR R parameter of ERC712 permit sig
-   * @param permitS S parameter of ERC712 permit sig
+   * @param permitV The V parameter of ERC712 permit sig
+   * @param permitR The R parameter of ERC712 permit sig
+   * @param permitS The S parameter of ERC712 permit sig
    * @return The final amount repaid
    **/
   function repayWithPermit(
@@ -303,7 +303,7 @@ interface IPool {
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
    * @param rateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
-   * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
+   * @param onBehalfOf The address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
    * @return The final amount repaid
@@ -336,7 +336,7 @@ interface IPool {
   /**
    * @notice Allows depositors to enable/disable a specific deposited asset as collateral
    * @param asset The address of the underlying asset deposited
-   * @param useAsCollateral `true` if the user wants to use the deposit as collateral, `false` otherwise
+   * @param useAsCollateral True if the user wants to use the deposit as collateral, false otherwise
    **/
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external;
 
@@ -348,7 +348,7 @@ interface IPool {
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param user The address of the borrower getting liquidated
    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
-   * @param receiveAToken `true` if the liquidators wants to receive the collateral aTokens, `false` if he wants
+   * @param receiveAToken True if the liquidators wants to receive the collateral aTokens, `false` if he wants
    * to receive the underlying collateral asset directly
    **/
   function liquidationCall(
@@ -366,14 +366,14 @@ interface IPool {
    * For further details please visit https://developers.aave.com
    * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanReceiver interface
    * @param assets The addresses of the assets being flash-borrowed
-   * @param amounts The amounts amounts being flash-borrowed
+   * @param amounts The amounts of the assets being flash-borrowed
    * @param modes Types of the debt to open if the flash loan is not returned:
    *   0 -> Don't open any debt, just revert if funds can't be transferred from the receiver
    *   1 -> Open debt at stable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
    *   2 -> Open debt at variable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
    * @param onBehalfOf The address  that will receive the debt in the case of using on `modes` 1 or 2
    * @param params Variadic packed params to pass to the receiver as extra information
-   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+   * @param referralCode The code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    **/
   function flashLoan(
@@ -389,12 +389,12 @@ interface IPool {
   /**
    * @notice Returns the user account data across all the reserves
    * @param user The address of the user
-   * @return totalCollateralBase the total collateral of the user in the base currency used by the price feed
-   * @return totalDebtBase the total debt of the user in the base currency used by the price feed
-   * @return availableBorrowsBase the borrowing power left of the user in the base currency used by the price feed
-   * @return currentLiquidationThreshold the liquidation threshold of the user
-   * @return ltv the loan to value of the user
-   * @return healthFactor the current health factor of the user
+   * @return totalCollateralBase The total collateral of the user in the base currency used by the price feed
+   * @return totalDebtBase The total debt of the user in the base currency used by the price feed
+   * @return availableBorrowsBase The borrowing power left of the user in the base currency used by the price feed
+   * @return currentLiquidationThreshold The liquidation threshold of the user
+   * @return ltv The loan to value of The user
+   * @return healthFactor The current health factor of the user
    **/
   function getUserAccountData(address user)
     external
@@ -511,29 +511,30 @@ interface IPool {
   ) external;
 
   /**
-   * @notice Returns the list of the initialized reserves, does not contain dropped reserves
+   * @notice Returns the list of the initialized reserves
+   * @dev It does not include dropped reserves
    * @return The addresses of the reserves
    **/
   function getReservesList() external view returns (address[] memory);
 
   /**
    * @notice Returns the cached PoolAddressesProvider connected to this contract
-   * @return The AddressesProvider
+   * @return The address of the PoolAddressesProvider
    **/
   function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
    * @notice Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium.
    * @dev Only callable by the PoolConfigurator contract
-   * @param flashBorrower address of the flash borrower
+   * @param flashBorrower The address of the flash borrower
    * @param authorized `true` to authorize, `false` to unauthorize
    */
   function updateFlashBorrowerAuthorization(address flashBorrower, bool authorized) external;
 
   /**
    * @notice Returns whether a flashborrower is authorized (pays no premium)
-   * @param flashBorrower address of the flash borrower
-   * @return `true` if authorized, `false` if not
+   * @param flashBorrower The address of the flash borrower
+   * @return True if authorized, `false` if not
    */
   function isFlashBorrowerAuthorized(address flashBorrower) external view returns (bool);
 
@@ -542,8 +543,8 @@ interface IPool {
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
    * @dev Only callable by the PoolConfigurator contract
-   * @param flashLoanPremiumTotal total premium in bps
-   * @param flashLoanPremiumToProtocol part of the premium sent to protocol
+   * @param flashLoanPremiumTotal The total premium in bps
+   * @param flashLoanPremiumToProtocol The part of the premium sent to protocol
    */
   function updateFlashloanPremiums(
     uint256 flashLoanPremiumTotal,
@@ -552,21 +553,25 @@ interface IPool {
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate
+   * @return The percentage of available liquidity to borrow
    */
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() external view returns (uint256);
 
   /**
    * @notice Returns the total fee on flash loans
+   * @return The total fee on flashloans
    */
   function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint256);
 
   /**
    * @notice Returns the part of the flashloan fees sent to protocol
+   * @return The flashloan fee sent to the protocol
    */
   function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint256);
 
   /**
    * @notice Returns the maximum number of reserves supported to be listed in this Pool
+   * @return The maximum number of reserves supported
    */
   function MAX_NUMBER_RESERVES() external view returns (uint256);
 

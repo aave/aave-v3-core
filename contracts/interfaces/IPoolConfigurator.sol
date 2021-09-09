@@ -191,25 +191,25 @@ interface IPoolConfigurator {
 
   /**
    * @notice Emitted when a new risk admin is registered
-   * @param admin the newly registered admin
+   * @param admin The newly registered admin
    **/
   event RiskAdminRegistered(address indexed admin);
 
   /**
    * @notice Emitted when a risk admin is unregistered
-   * @param admin the unregistered admin
+   * @param admin The unregistered admin
    **/
   event RiskAdminUnregistered(address indexed admin);
 
   /**
    * @notice Emitted when a the total premium on flashloans is updated
-   * @param flashloanPremiumTotal the new premium
+   * @param flashloanPremiumTotal The new premium
    **/
   event FlashloanPremiumTotalUpdated(uint256 flashloanPremiumTotal);
 
   /**
    * @notice Emitted when a the part of the premium that goes to protocol is updated
-   * @param flashloanPremiumToProtocol the new premium
+   * @param flashloanPremiumToProtocol The new premium
    **/
   event FlashloanPremiumToProcolUpdated(uint256 flashloanPremiumToProtocol);
 
@@ -313,7 +313,7 @@ interface IPoolConfigurator {
   /**
    * @notice Pauses a reserve. A paused reserve does not allow any interaction (deposit, borrow, repay, swap interestrate, liquidate, atoken transfers)
    * @param asset The address of the underlying asset of the reserve
-   * @param val true = pausing, false = unpausing
+   * @param val True if pausing the reserve, false if unpausing
    **/
   function setReservePause(address asset, bool val) external;
 
@@ -333,9 +333,9 @@ interface IPoolConfigurator {
     external;
 
   /**
-   * @notice pauses or unpauses all the actions of the protocol, including aToken transfers
+   * @notice Pauses or unpauses all the actions of the protocol, including aToken transfers
    * Effectively it pauses every reserve
-   * @param val true if protocol needs to be paused, false otherwise
+   * @param val True if protocol needs to be paused, false otherwise
    **/
   function setPoolPause(bool val) external;
 
@@ -385,7 +385,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Drops a reserve entirely
-   * @param asset the address of the reserve to drop
+   * @param asset The address of the reserve to drop
    **/
   function dropReserve(address asset) external;
 
@@ -394,13 +394,13 @@ interface IPoolConfigurator {
    * flash loan premium consist in 2 parts
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
-   * @param flashloanPremiumTotal total premium in bps
+   * @param flashloanPremiumTotal The total premium in bps
    */
   function updateFlashloanPremiumTotal(uint256 flashloanPremiumTotal) external;
 
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
-   * @param flashloanPremiumToProtocol part of the premium sent to protocol
+   * @param flashloanPremiumToProtocol The part of the premium sent to protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 flashloanPremiumToProtocol) external;
 }
