@@ -1,28 +1,28 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
+import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IRateOracle} from '../../interfaces/IRateOracle.sol';
-import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 
 /**
  * @title DefaultReserveInterestRateStrategy contract
+ * @author Aave
  * @notice Implements the calculation of the interest rates depending on the reserve state
  * @dev The model of interest rate is based on 2 slopes, one before the `OPTIMAL_UTILIZATION_RATE`
- * point of utilization and another from that one to 100%
+ * point of utilization and another from that one to 100%.
  * - An instance of this same contract, can't be used across different Aave markets, due to the caching
  *   of the PoolAddressesProvider
- * @author Aave
  **/
 contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
 
   /**
-   * @dev this constant represents the utilization rate at which the pool aims to obtain most competitive borrow rates.
+   * @dev This constant represents the utilization rate at which the pool aims to obtain most competitive borrow rates.
    * Expressed in ray
    **/
   uint256 public immutable OPTIMAL_UTILIZATION_RATE;
@@ -87,15 +87,17 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     return _stableRateSlope2;
   }
 
+  /// @inheritdoc IReserveInterestRateStrategy
   function baseVariableBorrowRate() external view override returns (uint256) {
     return _baseVariableBorrowRate;
   }
 
+  /// @inheritdoc IReserveInterestRateStrategy
   function getMaxVariableBorrowRate() external view override returns (uint256) {
     return _baseVariableBorrowRate + _variableRateSlope1 + _variableRateSlope2;
   }
 
-  ///@inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IReserveInterestRateStrategy
   function calculateInterestRates(
     address reserve,
     address aToken,
@@ -138,7 +140,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 utilizationRate;
   }
 
-  ///@inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IReserveInterestRateStrategy
   function calculateInterestRates(
     address reserve,
     uint256 availableLiquidity,
@@ -210,7 +212,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   /**
    * @dev Calculates the overall borrow rate as the weighted average between the total variable debt and total stable debt
-   * @param totalStableDebt The total borrowed from the reserve a stable rate
+   * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param currentVariableBorrowRate The current variable borrow rate of the reserve
    * @param currentAverageStableBorrowRate The current weighted average of all the stable rate loans
