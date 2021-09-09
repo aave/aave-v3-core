@@ -6,7 +6,7 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
 import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
- * @title PoolAddressesProviderRegistry contract
+ * @title PoolAddressesProviderRegistry
  * @author Aave
  * @notice Main registry of PoolAddressesProvider of multiple Aave protocol's markets
  * @dev Used for indexing purposes of Aave protocol's markets. The id assigned
@@ -17,7 +17,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   mapping(address => uint256) private _addressesProviders;
   address[] private _addressesProvidersList;
 
-  ///@inheritdoc IPoolAddressesProviderRegistry
+  /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
     address[] memory addressesProvidersList = _addressesProvidersList;
 
@@ -34,7 +34,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     return activeProviders;
   }
 
-  ///@inheritdoc IPoolAddressesProviderRegistry
+  /// @inheritdoc IPoolAddressesProviderRegistry
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
     require(id != 0, Errors.PAPR_INVALID_ADDRESSES_PROVIDER_ID);
 
@@ -43,14 +43,14 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     emit AddressesProviderRegistered(provider);
   }
 
-  ///@inheritdoc IPoolAddressesProviderRegistry
+  /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
     require(_addressesProviders[provider] > 0, Errors.PAPR_PROVIDER_NOT_REGISTERED);
     _addressesProviders[provider] = 0;
     emit AddressesProviderUnregistered(provider);
   }
 
-  ///@inheritdoc IPoolAddressesProviderRegistry
+  /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProviderIdByAddress(address addressesProvider)
     external
     view

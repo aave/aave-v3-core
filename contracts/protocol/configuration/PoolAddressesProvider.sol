@@ -6,11 +6,11 @@ import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 
 /**
- * @title PoolAddressesProvider contract
+ * @title PoolAddressesProvider
  * @author Aave
  * @notice Main registry of addresses part of or connected to the protocol, including permissioned roles
  * @dev Acts as factory of proxies and admin of those, so with right to change its implementations
- * - Owned by the Aave Governance
+ * @dev Owned by the Aave Governance
  **/
 contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   string private _marketId;
@@ -28,17 +28,17 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     _setMarketId(marketId);
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function getMarketId() external view override returns (string memory) {
     return _marketId;
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function setMarketId(string memory marketId) external override onlyOwner {
     _setMarketId(marketId);
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function setAddressAsProxy(bytes32 id, address implementationAddress)
     external
     override
@@ -48,34 +48,34 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     emit AddressSet(id, implementationAddress, true);
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function setAddress(bytes32 id, address newAddress) external override onlyOwner {
     _addresses[id] = newAddress;
     emit AddressSet(id, newAddress, false);
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function getAddress(bytes32 id) public view override returns (address) {
     return _addresses[id];
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function getPool() external view override returns (address) {
     return getAddress(POOL);
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function setPoolImpl(address pool) external override onlyOwner {
     _updateImpl(POOL, pool);
     emit PoolUpdated(pool);
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function getPoolConfigurator() external view override returns (address) {
     return getAddress(POOL_CONFIGURATOR);
   }
 
-  ///@inheritdoc IPoolAddressesProvider
+  /// @inheritdoc IPoolAddressesProvider
   function setPoolConfiguratorImpl(address configurator) external override onlyOwner {
     _updateImpl(POOL_CONFIGURATOR, configurator);
     emit PoolConfiguratorUpdated(configurator);
@@ -121,7 +121,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @notice Internal function to update the implementation of a specific proxied component of the protocol
    * @dev If there is no proxy registered in the given `id`, it creates the proxy setting `newAdress`
    *   as implementation and calls the initialize() function on the proxy
-   * - If there is already a proxy registered, it just updates the implementation to `newAddress` and
+   * @dev If there is already a proxy registered, it just updates the implementation to `newAddress` and
    *   calls the initialize() function via upgradeToAndCall() in the proxy
    * @param id The id of the proxy to be updated
    * @param newAddress The address of the new implementation
@@ -144,7 +144,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     }
   }
 
-  ///@inheritdoc IPoolAddressesProvider
   function _setMarketId(string memory marketId) internal {
     _marketId = marketId;
     emit MarketIdSet(marketId);
