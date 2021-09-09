@@ -184,15 +184,14 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const principalDecimals = (await helpersContract.getReserveConfigurationData(dai.address))
       .decimals;
 
-    const totalCollateralLiquidated = principalPrice
+    const principalCollateral = principalPrice
       .mul(amountToLiquidate)
-      .percentMul(10500)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
-    const liquidationProtocolFees = totalCollateralLiquidated.percentMul(
-      wethLiquidationProtocolFee
-    );
+    const bonusAmount = principalCollateral.percentMul(10500).sub(principalCollateral);
+    const totalCollateralLiquidated = principalCollateral.add(bonusAmount);
+    const liquidationProtocolFees = bonusAmount.percentMul(wethLiquidationProtocolFee);
     const expectedLiquidationReward = totalCollateralLiquidated.sub(liquidationProtocolFees);
 
     if (!tx.blockNumber) {
@@ -369,16 +368,15 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const principalDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
       .decimals;
 
-    const expectedCollateralLiquidated = principalPrice
-      .mul(BigNumber.from(amountToLiquidate))
-      .percentMul(10500)
+    const principalCollateral = principalPrice
+      .mul(amountToLiquidate)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
-    const liquidationProtocolFees = expectedCollateralLiquidated.percentMul(
-      wethLiquidationProtocolFee
-    );
-    const expectedLiquidationReward = expectedCollateralLiquidated.sub(liquidationProtocolFees);
+    const bonusAmount = principalCollateral.percentMul(10500).sub(principalCollateral);
+    const totalCollateralLiquidated = principalCollateral.add(bonusAmount);
+    const liquidationProtocolFees = bonusAmount.percentMul(wethLiquidationProtocolFee);
+    const expectedLiquidationReward = totalCollateralLiquidated.sub(liquidationProtocolFees);
 
     expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
@@ -477,6 +475,7 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const aAaveTokenAddress = await aaveTokenAddresses.aTokenAddress;
     const aAaveTokenContract = await ATokenFactory.connect(aAaveTokenAddress, DRE.ethers.provider);
     const aAaveTokenBalanceBefore = await aAaveTokenContract.balanceOf(liquidator.address);
+    const borrowerATokenBalance = await aAaveTokenContract.balanceOf(borrower.address);
 
     const treasuryAddress = await aAaveTokenContract.RESERVE_TREASURY_ADDRESS();
     const treasuryDataBefore = await helpersContract.getUserReserveData(
@@ -512,14 +511,15 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       aave.address
     );
 
-    const protocolFeeAmount = expectedCollateralLiquidated.percentMul(aaveLiquidationProtocolFee);
-    const liquidationReward = expectedCollateralLiquidated.sub(protocolFeeAmount);
-
     const expectedPrincipal = collateralPrice
       .mul(expectedCollateralLiquidated)
       .mul(BigNumber.from(10).pow(principalDecimals))
       .div(principalPrice.mul(BigNumber.from(10).pow(collateralDecimals)))
       .percentDiv(liquidationBonus);
+
+    const bonusCollateral = borrowerATokenBalance.percentDiv(liquidationBonus);
+    const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee);
+    const expectedLiquidationReward = borrowerATokenBalance.sub(liquidationProtocolFee);
 
     const aAaveTokenBalanceAfter = await aAaveTokenContract.balanceOf(liquidator.address);
 
@@ -550,12 +550,12 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     );
 
     expect(aAaveTokenBalanceBefore).to.be.equal(
-      aAaveTokenBalanceAfter.sub(liquidationReward),
+      aAaveTokenBalanceAfter.sub(expectedLiquidationReward),
       'Liquidator aToken balance incorrect'
     );
 
     expect(treasuryBalanceBefore).to.be.equal(
-      treasuryBalanceAfter.sub(protocolFeeAmount),
+      treasuryBalanceAfter.sub(liquidationProtocolFee),
       'Treasury aToken balance incorrect'
     );
   });
