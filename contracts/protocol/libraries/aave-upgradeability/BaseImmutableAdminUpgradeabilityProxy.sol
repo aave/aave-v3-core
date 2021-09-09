@@ -47,7 +47,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
   /**
    * @notice Upgrade the backing implementation of the proxy.
    * @dev Only the admin can call this function.
-   * @param newImplementation Address of the new implementation.
+   * @param newImplementation The address of the new implementation.
    */
   function upgradeTo(address newImplementation) external ifAdmin {
     _upgradeTo(newImplementation);
@@ -57,7 +57,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
    * @notice Upgrade the backing implementation of the proxy and call a function
    * on the new implementation.
    * @dev This is useful to initialize the proxied contract.
-   * @param newImplementation Address of the new implementation.
+   * @param newImplementation The address of the new implementation.
    * @param data Data to send as msg.data in the low level call.
    * It should include the signature and the parameters of the function to be called, as described in
    * https://solidity.readthedocs.io/en/v0.4.24/abi-spec.html#function-selector-and-argument-encoding.
