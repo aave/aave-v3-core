@@ -82,8 +82,8 @@ contract AaveProtocolDataProvider {
       bool isFrozen
     )
   {
-    DataTypes.ReserveConfigurationMap memory configuration =
-      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset);
+    DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
+      .getConfiguration(asset);
 
     (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
       .getParamsMemory();
@@ -115,6 +115,7 @@ contract AaveProtocolDataProvider {
     view
     returns (
       uint256 unbacked,
+      uint256 accruedToTreasuryScaled,
       uint256 totalAToken,
       uint256 totalStableDebt,
       uint256 totalVariableDebt,
@@ -127,13 +128,13 @@ contract AaveProtocolDataProvider {
       uint40 lastUpdateTimestamp
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
-
-    uint256 accruedToTreasury = reserve.accruedToTreasury.rayMul(reserve.liquidityIndex);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
     return (
       reserve.unbacked,
+      reserve.accruedToTreasury,
       IERC20Detailed(reserve.aTokenAddress).totalSupply(),
       IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply(),
       IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply(),
@@ -162,11 +163,12 @@ contract AaveProtocolDataProvider {
       bool usageAsCollateralEnabled
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
-    DataTypes.UserConfigurationMap memory userConfig =
-      IPool(ADDRESSES_PROVIDER.getPool()).getUserConfiguration(user);
+    DataTypes.UserConfigurationMap memory userConfig = IPool(ADDRESSES_PROVIDER.getPool())
+      .getUserConfiguration(user);
 
     currentATokenBalance = IERC20Detailed(reserve.aTokenAddress).balanceOf(user);
     currentVariableDebt = IERC20Detailed(reserve.variableDebtTokenAddress).balanceOf(user);
@@ -190,8 +192,9 @@ contract AaveProtocolDataProvider {
       address variableDebtTokenAddress
     )
   {
-    DataTypes.ReserveData memory reserve =
-      IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(asset);
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
 
     return (
       reserve.aTokenAddress,

@@ -37,6 +37,7 @@ export interface Scenario {
 export const executeStory = async (story: Story, testEnv: TestEnv) => {
   for (const action of story.actions) {
     const { users } = testEnv;
+    //console.log(`Executing: ${action.name}`);
     await executeAction(action, users, testEnv);
   }
 };

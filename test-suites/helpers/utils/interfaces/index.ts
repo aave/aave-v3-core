@@ -19,8 +19,9 @@ export interface ReserveData {
   address: string;
   symbol: string;
   decimals: BigNumber;
+  reserveFactor: BigNumber;
   totalLiquidity: BigNumber;
-  availableLiquidity: BigNumber;
+  scaledATokenSupply: BigNumber;
   totalStableDebt: BigNumber;
   totalVariableDebt: BigNumber;
   principalStableDebt: BigNumber;
@@ -36,5 +37,7 @@ export interface ReserveData {
   lastUpdateTimestamp: BigNumber;
   totalStableDebtLastUpdated: BigNumber;
   liquidityRate: BigNumber;
+  unbacked: BigNumber;
+  accruedToTreasuryScaled: BigNumber;
   [key: string]: BigNumber | string;
 }

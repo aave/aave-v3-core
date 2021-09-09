@@ -124,17 +124,17 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     )
   {
     // Probably better to say total liquidity or something if we are not subtracting the debt?
-    uint256 totalAToken = IERC20(aToken).totalSupply();
+    uint256 totalLiquidity = IERC20(aToken).totalSupply();
     //avoid stack too deep
     {
-      totalAToken = totalAToken + vars.pendingTreasuryMint + vars.toMint;
-      totalAToken = totalAToken - vars.toBurn;
+      totalLiquidity = totalLiquidity + vars.pendingTreasuryMint + vars.toMint;
+      totalLiquidity = totalLiquidity - vars.toBurn;
     }
 
     return
       calculateInterestRates(
         reserve,
-        totalAToken,
+        totalLiquidity,
         totalStableDebt,
         totalVariableDebt,
         averageStableBorrowRate,
@@ -155,7 +155,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * NOTE This function is kept for compatibility with the previous DefaultInterestRateStrategy interface.
    * New protocol implementation uses the new calculateInterestRates() interface
    * @param reserve The address of the reserve
-   * @param totalAToken The total supply of the corresponding aToken including to be minted/burned and pending to treasury
+   * @param totalLiquidity The total supply of the corresponding aToken including to be minted/burned and pending to treasury
    * @param totalStableDebt The total borrowed from the reserve a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate loans
@@ -164,7 +164,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    **/
   function calculateInterestRates(
     address reserve,
-    uint256 totalAToken,
+    uint256 totalLiquidity,
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
@@ -186,7 +186,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
 
-    vars.utilizationRate = vars.totalDebt == 0 ? 0 : vars.totalDebt.rayDiv(totalAToken);
+    vars.utilizationRate = vars.totalDebt == 0 ? 0 : vars.totalDebt.rayDiv(totalLiquidity);
 
     // Cap utilization at 1
     vars.utilizationRate = vars.utilizationRate > WadRayMath.RAY
@@ -197,8 +197,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       .getMarketBorrowRate(reserve);
 
     if (vars.utilizationRate > OPTIMAL_UTILIZATION_RATE) {
-      uint256 excessUtilizationRateRatio =
-        (vars.utilizationRate - OPTIMAL_UTILIZATION_RATE).rayDiv(EXCESS_UTILIZATION_RATE);
+      uint256 excessUtilizationRateRatio = (vars.utilizationRate - OPTIMAL_UTILIZATION_RATE).rayDiv(
+        EXCESS_UTILIZATION_RATE
+      );
 
       vars.currentStableBorrowRate =
         vars.currentStableBorrowRate +
@@ -222,12 +223,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentLiquidityRate = _getOverallBorrowRate(
       totalStableDebt,
       totalVariableDebt,
-      vars
-        .currentVariableBorrowRate,
+      vars.currentVariableBorrowRate,
       averageStableBorrowRate
-    )
-      .rayMul(vars.utilizationRate)
-      .percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveFactor);
+    ).rayMul(vars.utilizationRate).percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveFactor);
 
     return (
       vars.currentLiquidityRate,
@@ -258,8 +256,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
     uint256 weightedStableRate = totalStableDebt.wadToRay().rayMul(currentAverageStableBorrowRate);
 
-    uint256 overallBorrowRate =
-      (weightedVariableRate + weightedStableRate).rayDiv(totalDebt.wadToRay());
+    uint256 overallBorrowRate = (weightedVariableRate + weightedStableRate).rayDiv(
+      totalDebt.wadToRay()
+    );
 
     return overallBorrowRate;
   }

@@ -44,6 +44,10 @@ const almostEqualOrEqual = function (
 ) {
   const keys = Object.keys(actual);
 
+  /*if (actual.reserveFactor) {
+    console.log('\nAction performed, comparing:');
+  }*/
+
   keys.forEach((key) => {
     if (
       key === 'lastUpdateTimestamp' ||
@@ -67,6 +71,14 @@ const almostEqualOrEqual = function (
     if (actual[key] instanceof BigNumber) {
       const actualValue = <BigNumber>actual[key];
       const expectedValue = <BigNumber>expected[key];
+
+      /*if (actual.reserveFactor) {
+        console.log(
+          `Key: ${key}, ${actualValue.eq(
+            expectedValue
+          )} ${actualValue} expect to be ${expectedValue}`
+        );
+      }*/
 
       this.assert(
         actualValue.eq(expectedValue) ||

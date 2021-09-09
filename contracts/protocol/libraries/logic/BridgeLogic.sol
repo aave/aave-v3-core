@@ -51,8 +51,11 @@ library BridgeLogic {
     reserve.updateState(reserveCache);
     ValidationLogic.validateDeposit(reserveCache, amount);
     reserve.updateInterestRates(reserveCache, asset, amount, 0);
-    bool isFirstDeposit =
-      IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
+    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
+      onBehalfOf,
+      amount,
+      reserveCache.nextLiquidityIndex
+    );
     reserve.unbacked = reserve.unbacked + amount;
     if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
@@ -83,7 +86,7 @@ library BridgeLogic {
 
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
 
-    reserve.updateInterestRates(reserveCache, asset, totalFee, 0);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     reserve.unbacked = reserve.unbacked - backingAmount;
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
