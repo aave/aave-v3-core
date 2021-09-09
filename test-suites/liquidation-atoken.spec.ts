@@ -222,10 +222,22 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid user borrow balance after liquidation'
     );
 
-    expect(daiReserveDataAfter.availableLiquidity).to.be.closeTo(
-      daiReserveDataBefore.availableLiquidity.add(amountToLiquidate),
+    const expectedLiquidityAfter = daiReserveDataBefore.scaledATokenSupply
+      .rayMul(daiReserveDataAfter.liquidityIndex)
+      .add(
+        daiReserveDataAfter.accruedToTreasuryScaled
+          .sub(daiReserveDataBefore.accruedToTreasuryScaled)
+          .rayMul(daiReserveDataAfter.liquidityIndex)
+      );
+
+    const daiTotalLiquidityAfter = daiReserveDataAfter.totalAToken.add(
+      daiReserveDataAfter.accruedToTreasuryScaled.rayMul(daiReserveDataAfter.liquidityIndex)
+    );
+
+    expect(daiTotalLiquidityAfter).to.be.closeTo(
+      expectedLiquidityAfter,
       2,
-      'Invalid principal available liquidity'
+      'Invalid principal total liquidity'
     );
 
     //the liquidity index of the principal reserve needs to be bigger than the index before
@@ -240,10 +252,11 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid liquidity APY'
     );
 
-    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
-      ethReserveDataBefore.availableLiquidity,
+    // We need the scaled balances here
+    expect(ethReserveDataAfter.totalAToken).to.be.closeTo(
+      ethReserveDataBefore.totalAToken,
       2,
-      'Invalid collateral available liquidity'
+      'Invalid collateral total liquidity'
     );
 
     expect(
@@ -320,7 +333,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
     const userWethReserveDataBefore = await getUserData(
       pool,
@@ -383,10 +396,22 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid user borrow balance after liquidation'
     );
 
-    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
-      usdcReserveDataBefore.availableLiquidity.add(amountToLiquidate),
+    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
+      .rayMul(usdcReserveDataAfter.liquidityIndex)
+      .add(
+        usdcReserveDataAfter.accruedToTreasuryScaled
+          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
+          .rayMul(usdcReserveDataAfter.liquidityIndex)
+      );
+
+    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalAToken.add(
+      usdcReserveDataAfter.accruedToTreasuryScaled.rayMul(usdcReserveDataAfter.liquidityIndex)
+    );
+
+    expect(usdcExpectedLiquidityAfter).to.be.closeTo(
+      usdcTotalLiquidityAfter,
       2,
-      'Invalid principal available liquidity'
+      'Invalid principal total liquidity'
     );
 
     //the liquidity index of the principal reserve needs to be bigger than the index before
@@ -401,10 +426,10 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid liquidity APY'
     );
 
-    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
-      ethReserveDataBefore.availableLiquidity,
+    expect(ethReserveDataAfter.totalAToken).to.be.closeTo(
+      ethReserveDataBefore.totalAToken,
       2,
-      'Invalid collateral available liquidity'
+      'Invalid collateral total liquidity'
     );
   });
 });

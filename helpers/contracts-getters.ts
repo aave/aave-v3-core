@@ -23,6 +23,7 @@ import {
   DepositLogicFactory,
   BorrowLogicFactory,
   LiquidationLogicFactory,
+  BridgeLogicFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -52,6 +53,12 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
 
 export const getDepositLogic = async (address?: tEthereumAddress) =>
   await DepositLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getBridgeLogic = async (address?: tEthereumAddress) =>
+  await BridgeLogicFactory.connect(
     address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );

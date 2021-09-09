@@ -5,7 +5,7 @@ import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
-import { getUserData } from './helpers/utils/helpers';
+import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
 
 makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
@@ -122,7 +122,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //approve protocol to access the liquidator wallet
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    const daiReserveDataBefore = await helpersContract.getReserveData(dai.address);
+    const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
 
     const userReserveDataBefore = await getUserData(
@@ -197,16 +197,28 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid liquidity APY'
     );
 
-    expect(daiReserveDataAfter.availableLiquidity).to.be.closeTo(
-      daiReserveDataBefore.availableLiquidity.add(amountToLiquidate),
-      2,
-      'Invalid principal available liquidity'
+    // We also need to account for the interest and accrued
+    const daiExpectedLiquidityAfter = daiReserveDataBefore.scaledATokenSupply
+      .rayMul(daiReserveDataAfter.liquidityIndex)
+      .add(
+        daiReserveDataAfter.accruedToTreasuryScaled
+          .sub(daiReserveDataBefore.accruedToTreasuryScaled)
+          .rayMul(daiReserveDataAfter.liquidityIndex)
+      );
+    const daiTotalLiquidityAfter = daiReserveDataAfter.totalAToken.add(
+      daiReserveDataAfter.accruedToTreasuryScaled.rayMul(daiReserveDataAfter.liquidityIndex)
     );
 
-    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
-      ethReserveDataBefore.availableLiquidity.sub(expectedCollateralLiquidated),
+    expect(daiTotalLiquidityAfter).to.be.closeTo(
+      daiExpectedLiquidityAfter,
       2,
-      'Invalid collateral available liquidity'
+      'Invalid principal total liquidity'
+    );
+
+    expect(ethReserveDataAfter.totalAToken).to.be.closeTo(
+      ethReserveDataBefore.totalAToken.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral total liquidity'
     );
   });
 
@@ -279,7 +291,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
@@ -332,16 +344,27 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid liquidity APY'
     );
 
-    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
-      usdcReserveDataBefore.availableLiquidity.add(amountToLiquidate),
-      2,
-      'Invalid principal available liquidity'
+    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
+      .rayMul(usdcReserveDataAfter.liquidityIndex)
+      .add(
+        usdcReserveDataAfter.accruedToTreasuryScaled
+          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
+          .rayMul(usdcReserveDataAfter.liquidityIndex)
+      );
+    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalAToken.add(
+      usdcReserveDataAfter.accruedToTreasuryScaled.rayMul(usdcReserveDataAfter.liquidityIndex)
     );
 
-    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
-      ethReserveDataBefore.availableLiquidity.sub(expectedCollateralLiquidated),
+    expect(usdcTotalLiquidityAfter).to.be.closeTo(
+      usdcExpectedLiquidityAfter,
       2,
-      'Invalid collateral available liquidity'
+      'Invalid principal total liquidity'
+    );
+
+    expect(ethReserveDataAfter.totalAToken).to.be.closeTo(
+      ethReserveDataBefore.totalAToken.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral total liquidity'
     );
   });
 
@@ -385,7 +408,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
     const aaveReserveDataBefore = await helpersContract.getReserveData(aave.address);
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
@@ -430,16 +453,27 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid user borrow balance after liquidation'
     );
 
-    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
-      usdcReserveDataBefore.availableLiquidity.add(expectedPrincipal),
-      2,
-      'Invalid principal available liquidity'
+    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
+      .rayMul(usdcReserveDataAfter.liquidityIndex)
+      .add(
+        usdcReserveDataAfter.accruedToTreasuryScaled
+          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
+          .rayMul(usdcReserveDataAfter.liquidityIndex)
+      );
+    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalAToken.add(
+      usdcReserveDataAfter.accruedToTreasuryScaled.rayMul(usdcReserveDataAfter.liquidityIndex)
     );
 
-    expect(aaveReserveDataAfter.availableLiquidity).to.be.closeTo(
-      aaveReserveDataBefore.availableLiquidity.sub(expectedCollateralLiquidated),
+    expect(usdcTotalLiquidityAfter).to.be.closeTo(
+      usdcExpectedLiquidityAfter,
       2,
-      'Invalid collateral available liquidity'
+      'Invalid principal total liquidity'
+    );
+
+    expect(aaveReserveDataAfter.totalAToken).to.be.closeTo(
+      aaveReserveDataBefore.totalAToken.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral total liquidity'
     );
   });
 });
