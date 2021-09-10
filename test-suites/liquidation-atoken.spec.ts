@@ -192,10 +192,11 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
-    expect(expectedCollateralLiquidated).to.be.eq(
+    expect(expectedCollateralLiquidated).to.be.closeTo(
       userWethReserveDataBefore.currentATokenBalance.sub(
         userWethReserveDataAfter.currentATokenBalance
       ),
+      2,
       'Invalid collateral amount liquidated'
     );
 

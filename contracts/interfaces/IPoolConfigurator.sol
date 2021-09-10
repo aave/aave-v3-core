@@ -128,6 +128,13 @@ interface IPoolConfigurator {
   event SupplyCapChanged(address indexed asset, uint256 supplyCap);
 
   /**
+   * @notice Emitted when the liquidation protocol fee of a reserve is updated
+   * @param asset The address of the underlying asset of the reserve
+   * @param fee The new supply cap
+   **/
+  event LiquidationProtocolFeeChanged(address indexed asset, uint256 fee);
+
+  /**
    * @notice Emitted when the reserve decimals are updated
    * @param asset The address of the underlying asset of the reserve
    * @param decimals The new decimals
@@ -211,7 +218,7 @@ interface IPoolConfigurator {
    * @notice Emitted when a the part of the premium that goes to protocol is updated
    * @param flashloanPremiumToProtocol The new premium
    **/
-  event FlashloanPremiumToProcolUpdated(uint256 flashloanPremiumToProtocol);
+  event FlashloanPremiumToProtocolUpdated(uint256 flashloanPremiumToProtocol);
 
   /**
    * @notice Initializes multiple reserves
@@ -352,6 +359,13 @@ interface IPoolConfigurator {
    * @param supplyCap The new supply of the reserve
    **/
   function setSupplyCap(address asset, uint256 supplyCap) external;
+
+  /**
+   * @notice Updates the liquidation protocol fee of reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @param fee The new supply of the reserve
+   **/
+  function setLiquidationProtocolFee(address asset, uint256 fee) external;
 
   /**
    * @notice Registers a new admin with rights on risk related configurations

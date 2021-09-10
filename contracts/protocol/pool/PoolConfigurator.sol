@@ -267,6 +267,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setLiquidationProtocolFee(address asset, uint256 fee)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setLiquidationProtocolFee(fee);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit LiquidationProtocolFeeChanged(asset, fee);
+  }
+
+  ///@inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override
@@ -349,7 +364,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       Errors.PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), flashloanPremiumToProtocol);
-    emit FlashloanPremiumToProcolUpdated(flashloanPremiumToProtocol);
+    emit FlashloanPremiumToProtocolUpdated(flashloanPremiumToProtocol);
   }
 
   function _checkNoLiquidity(address asset) internal view {

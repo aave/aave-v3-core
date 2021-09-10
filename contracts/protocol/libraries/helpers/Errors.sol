@@ -113,4 +113,5 @@ library Errors {
   string public constant VL_SAME_BLOCK_BORROW_REPAY = '94';
   string public constant PC_FLASHLOAN_PREMIUMS_MISMATCH = '95';
   string public constant PC_FLASHLOAN_PREMIUM_INVALID = '96';
+  string public constant RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97';
 }

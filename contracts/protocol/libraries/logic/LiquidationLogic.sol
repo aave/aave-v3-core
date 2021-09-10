@@ -54,7 +54,6 @@ library LiquidationLogic {
     uint256 maxLiquidatableDebt;
     uint256 actualDebtToLiquidate;
     uint256 liquidationRatio;
-    uint256 maxAmountCollateralToLiquidate;
     uint256 userStableRate;
     uint256 maxCollateralToLiquidate;
     uint256 debtAmountNeeded;
@@ -67,6 +66,7 @@ library LiquidationLogic {
     uint256 errorCode;
     string errorMsg;
     DataTypes.ReserveCache debtReserveCache;
+    uint256 liquidationProtocolFeeAmount;
   }
 
   /**
@@ -106,7 +106,6 @@ library LiquidationLogic {
     );
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
-
     vars.userCollateralBalance = vars.collateralAtoken.balanceOf(params.user);
 
     vars.maxLiquidatableDebt = (vars.userStableDebt + vars.userVariableDebt).percentMul(
@@ -119,7 +118,8 @@ library LiquidationLogic {
 
     (
       vars.maxCollateralToLiquidate,
-      vars.debtAmountNeeded
+      vars.debtAmountNeeded,
+      vars.liquidationProtocolFeeAmount
     ) = _calculateAvailableCollateralToLiquidate(
       collateralReserve,
       vars.debtReserveCache,
@@ -213,6 +213,15 @@ library LiquidationLogic {
       );
     }
 
+    // Transfer fee to treasury if it is non-zero
+    if (vars.liquidationProtocolFeeAmount > 0) {
+      vars.collateralAtoken.transferOnLiquidation(
+        params.user,
+        vars.collateralAtoken.RESERVE_TREASURY_ADDRESS(),
+        vars.liquidationProtocolFeeAmount
+      );
+    }
+
     // If the collateral being liquidated is equal to the user balance,
     // we set the currency as not being used as collateral anymore
     if (vars.maxCollateralToLiquidate == vars.userCollateralBalance) {
@@ -243,11 +252,17 @@ library LiquidationLogic {
     uint256 liquidationBonus;
     uint256 collateralPrice;
     uint256 debtAssetPrice;
-    uint256 maxAmountCollateralToLiquidate;
+    uint256 maxCollateralToLiquidate;
+    uint256 baseCollateral;
+    uint256 bonusCollateral;
     uint256 debtAssetDecimals;
     uint256 collateralDecimals;
     uint256 collateralAssetUnit;
     uint256 debtAssetUnit;
+    uint256 collateralAmount;
+    uint256 debtAmountNeeded;
+    uint256 liquidationProtocolFeePercentage;
+    uint256 liquidationProtocolFee;
   }
 
   /**
@@ -272,10 +287,15 @@ library LiquidationLogic {
     uint256 debtToCover,
     uint256 userCollateralBalance,
     IPriceOracleGetter oracle
-  ) internal view returns (uint256, uint256) {
-    uint256 collateralAmount = 0;
-    uint256 debtAmountNeeded = 0;
-
+  )
+    internal
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
     AvailableCollateralToLiquidateLocalVars memory vars;
 
     vars.collateralPrice = oracle.getAssetPrice(collateralAsset);
@@ -284,31 +304,50 @@ library LiquidationLogic {
     (, , vars.liquidationBonus, vars.collateralDecimals, ) = collateralReserve
       .configuration
       .getParams();
-
     vars.debtAssetDecimals = debtReserveCache.reserveConfiguration.getDecimalsMemory();
     unchecked {
       vars.collateralAssetUnit = 10**vars.collateralDecimals;
       vars.debtAssetUnit = 10**vars.debtAssetDecimals;
     }
 
-    // This is the maximum possible amount of the selected collateral that can be liquidated, given the
-    // max amount of liquidatable debt
-    vars.maxAmountCollateralToLiquidate =
-      (
-        (vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit).percentMul(
-          vars.liquidationBonus
-        )
-      ) /
+    vars.liquidationProtocolFeePercentage = collateralReserve
+      .configuration
+      .getLiquidationProtocolFee();
+
+    // This is the base collateral to liqudate based on the given debt to cover
+    vars.baseCollateral =
+      ((vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit)) /
       (vars.collateralPrice * vars.debtAssetUnit);
 
-    if (vars.maxAmountCollateralToLiquidate > userCollateralBalance) {
-      collateralAmount = userCollateralBalance;
-      debtAmountNeeded = ((vars.collateralPrice * collateralAmount * vars.debtAssetUnit) /
+    vars.bonusCollateral =
+      vars.baseCollateral.percentMul(vars.liquidationBonus) -
+      vars.baseCollateral;
+
+    vars.maxCollateralToLiquidate = vars.baseCollateral + vars.bonusCollateral;
+
+    if (vars.maxCollateralToLiquidate > userCollateralBalance) {
+      vars.collateralAmount = userCollateralBalance;
+      vars.debtAmountNeeded = ((vars.collateralPrice * vars.collateralAmount * vars.debtAssetUnit) /
         (vars.debtAssetPrice * vars.collateralAssetUnit)).percentDiv(vars.liquidationBonus);
+
+      if (vars.liquidationProtocolFeePercentage > 0) {
+        vars.bonusCollateral = vars.collateralAmount.percentDiv(vars.liquidationBonus);
+      }
     } else {
-      collateralAmount = vars.maxAmountCollateralToLiquidate;
-      debtAmountNeeded = debtToCover;
+      vars.collateralAmount = vars.maxCollateralToLiquidate;
+      vars.debtAmountNeeded = debtToCover;
     }
-    return (collateralAmount, debtAmountNeeded);
+
+    if (vars.liquidationProtocolFeePercentage > 0) {
+      vars.liquidationProtocolFee = vars.bonusCollateral.percentMul(
+        vars.liquidationProtocolFeePercentage
+      );
+      return (
+        vars.collateralAmount - vars.liquidationProtocolFee,
+        vars.debtAmountNeeded,
+        vars.liquidationProtocolFee
+      );
+    }
+    return (vars.collateralAmount, vars.debtAmountNeeded, 0);
   }
 }

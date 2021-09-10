@@ -148,6 +148,16 @@ contract AaveProtocolDataProvider {
   }
 
   /**
+   * @notice Returns the protocol fee on the liquidation bonus
+   * @param asset The address of the underlying asset of the reserve
+   * @return The protocol fee on liquidation
+   **/
+  function getLiquidationProtocolFee(address asset) external view returns (uint256) {
+    return
+      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFeeMemory();
+  }
+
+  /**
    * @notice Returns the reserve data
    * @param asset The address of the underlying asset of the reserve
    * @return availableLiquidity The available liquidity of the reserve
