@@ -81,7 +81,6 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
    **/
   function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
     _transfer(_msgSender(), recipient, amount);
-    emit Transfer(_msgSender(), recipient, amount);
     return true;
   }
 
@@ -125,7 +124,6 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   ) public virtual override returns (bool) {
     _transfer(sender, recipient, amount);
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - amount);
-    emit Transfer(sender, recipient, amount);
     return true;
   }
 
@@ -173,6 +171,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
         incentivesControllerLocal.handleAction(recipient, currentTotalSupply, oldRecipientBalance);
       }
     }
+    emit Transfer(sender, recipient, amount);
   }
 
   function _mint(address account, uint256 amount) internal virtual {
