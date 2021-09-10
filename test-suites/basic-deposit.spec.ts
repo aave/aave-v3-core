@@ -1,14 +1,24 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { DRE, increaseTime } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { ProtocolErrors, RateMode } from '../helpers/types';
-import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
-import { getUserData } from './helpers/utils/helpers';
+import { RateMode } from '../helpers/types';
 import { makeSuite } from './helpers/make-suite';
 
-makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
+makeSuite('Basic Deposit Test', (testEnv) => {
+  let firstDaiDeposit;
+  let secondDaiDeposit;
+  let thirdDaiDeposit;
+  let accruedInterest: BigNumber = BigNumber.from(0);
+
+  before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
+    const { dai } = testEnv;
+    firstDaiDeposit = await convertToCurrencyDecimals(dai.address, '10000');
+    secondDaiDeposit = await convertToCurrencyDecimals(dai.address, '20000');
+    thirdDaiDeposit = await convertToCurrencyDecimals(dai.address, '50000');
+  });
+
   it('User 1 Deposit dai', async () => {
     const {
       dai,
@@ -18,31 +28,23 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       helpersContract,
     } = testEnv;
 
-    //mints DAI to depositor
+    // mints DAI to depositor
     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '10000'));
 
-    //approve protocol to access depositor wallet
+    // approve protocol to access depositor wallet
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
-
-    //user 1 deposits 1000 DAI
-    const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '10000');
 
     const daiReserveData = await helpersContract.getReserveData(dai.address);
 
     await expect(
-      pool
-        .connect(depositor.signer)
-        .deposit(dai.address, amountDAItoDeposit, depositor.address, '0')
+      pool.connect(depositor.signer).deposit(dai.address, firstDaiDeposit, depositor.address, '0')
     )
       .to.emit(aDai, 'Mint')
-      .withArgs(depositor.address, amountDAItoDeposit, daiReserveData.liquidityIndex);
+      .withArgs(depositor.address, firstDaiDeposit, daiReserveData.liquidityIndex);
 
     const aDaiBalance = await aDai.balanceOf(depositor.address);
-    const scaledADaiBalance = await aDai.scaledBalanceOf(depositor.address);
 
-    console.log(aDaiBalance.toString());
-    console.log(scaledADaiBalance.toString());
-    expect(aDaiBalance).to.be.equal(scaledADaiBalance);
+    expect(aDaiBalance).to.be.equal(firstDaiDeposit);
   });
 
   it('User 2 - deposit ETH, borrow Dai', async () => {
@@ -51,7 +53,6 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       weth,
       users: [borrower],
       pool,
-      oracle,
       helpersContract,
     } = testEnv;
 
@@ -90,11 +91,9 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
   it('User 1 - deposit more Dai', async () => {
     const {
       dai,
-      weth,
       aDai,
       users: [depositor],
       pool,
-      oracle,
       helpersContract,
     } = testEnv;
 
@@ -104,13 +103,13 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '20000'));
 
     //user 1 deposits 2000 DAI
-    const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '20000');
-
     const depositTx = await pool
       .connect(depositor.signer)
-      .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
+      .deposit(dai.address, secondDaiDeposit, depositor.address, '0');
 
     const depositReceipt = await depositTx.wait();
+
+    const aDaiBalance = await aDai.balanceOf(depositor.address);
 
     const mintEventSignature = utils.keccak256(utils.toUtf8Bytes('Mint(address,uint256,uint256)'));
     const rawMintEvents = depositReceipt.logs.filter((log) => log.topics[0] === mintEventSignature);
@@ -119,7 +118,46 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
 
     expect(parsedMintEvent.args.from).to.equal(depositor.address);
-    expect(parsedMintEvent.args.value).to.equal(amountDAItoDeposit);
+    expect(parsedMintEvent.args.value).to.equal(aDaiBalance.sub(firstDaiDeposit));
+    accruedInterest = aDaiBalance.sub(firstDaiDeposit).sub(secondDaiDeposit);
+
+    const daiReserveData = await helpersContract.getReserveData(dai.address);
+    expect(parsedMintEvent.args.index).to.equal(daiReserveData.liquidityIndex);
+  });
+
+  it('User 1 - deposit more Dai again', async () => {
+    const {
+      dai,
+      aDai,
+      users: [depositor],
+      pool,
+      helpersContract,
+    } = testEnv;
+
+    await increaseTime(86400);
+
+    //mints DAI to depositor
+    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '50000'));
+
+    //user 1 deposits 2000 DAI
+    const depositTx = await pool
+      .connect(depositor.signer)
+      .deposit(dai.address, thirdDaiDeposit, depositor.address, '0');
+
+    const depositReceipt = await depositTx.wait();
+
+    const aDaiBalance = await aDai.balanceOf(depositor.address);
+
+    const mintEventSignature = utils.keccak256(utils.toUtf8Bytes('Mint(address,uint256,uint256)'));
+    const rawMintEvents = depositReceipt.logs.filter((log) => log.topics[0] === mintEventSignature);
+
+    expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
+    const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
+
+    expect(parsedMintEvent.args.from).to.equal(depositor.address);
+    expect(parsedMintEvent.args.value).to.equal(
+      aDaiBalance.sub(firstDaiDeposit).sub(secondDaiDeposit).sub(accruedInterest)
+    );
 
     const daiReserveData = await helpersContract.getReserveData(dai.address);
     expect(parsedMintEvent.args.index).to.equal(daiReserveData.liquidityIndex);

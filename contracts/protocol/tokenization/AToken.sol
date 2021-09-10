@@ -10,6 +10,7 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IncentivizedERC20} from './IncentivizedERC20.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
+import 'hardhat/console.sol';
 
 /**
  * @title Aave ERC20 AToken
@@ -151,10 +152,17 @@ contract AToken is
 
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
+
+    uint256 currentBalance = balanceOf(user);
+    uint256 previousIndex = _previousIndex[user];
+    uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
+    uint256 accumulatedInterest = currentBalance - previousBalanceWithInterest;
+    _previousIndex[user] = index;
+
     _mint(user, amountScaled);
 
     emit Transfer(address(0), user, amount);
-    emit Mint(user, amount, index);
+    emit Mint(user, amount + accumulatedInterest, index);
 
     return previousBalance == 0;
   }

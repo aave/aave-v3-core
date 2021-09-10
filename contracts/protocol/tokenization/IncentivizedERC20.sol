@@ -13,6 +13,7 @@ import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesControl
  **/
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   mapping(address => uint256) internal _balances;
+  mapping(address => uint256) internal _previousIndex;
 
   mapping(address => mapping(address => uint256)) private _allowances;
   uint256 internal _totalSupply;
@@ -20,7 +21,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   string private _symbol;
   uint8 private _decimals;
   IAaveIncentivesController internal _incentivesController;
-  
+
   constructor(
     string memory name,
     string memory symbol,
