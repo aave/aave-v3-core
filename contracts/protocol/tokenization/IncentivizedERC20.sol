@@ -171,7 +171,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
         incentivesControllerLocal.handleAction(recipient, currentTotalSupply, oldRecipientBalance);
       }
     }
-    emit Transfer(_msgSender(), recipient, amount);
+    emit Transfer(sender, recipient, amount);
   }
 
   function _mint(address account, uint256 amount) internal virtual {
