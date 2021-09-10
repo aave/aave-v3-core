@@ -55,7 +55,6 @@ library LiquidationLogic {
     uint256 maxLiquidatableDebt;
     uint256 actualDebtToLiquidate;
     uint256 liquidationRatio;
-    uint256 maxAmountCollateralToLiquidate;
     uint256 userStableRate;
     uint256 maxCollateralToLiquidate;
     uint256 debtAmountNeeded;
@@ -254,7 +253,7 @@ library LiquidationLogic {
     uint256 liquidationBonus;
     uint256 collateralPrice;
     uint256 debtAssetPrice;
-    uint256 maxAmountCollateralToLiquidate;
+    uint256 maxCollateralToLiquidate;
     uint256 baseCollateral;
     uint256 bonusCollateral;
     uint256 debtAssetDecimals;
@@ -326,9 +325,9 @@ library LiquidationLogic {
       vars.baseCollateral.percentMul(vars.liquidationBonus) -
       vars.baseCollateral;
 
-    vars.maxAmountCollateralToLiquidate = vars.baseCollateral + vars.bonusCollateral;
+    vars.maxCollateralToLiquidate = vars.baseCollateral + vars.bonusCollateral;
 
-    if (vars.maxAmountCollateralToLiquidate > userCollateralBalance) {
+    if (vars.maxCollateralToLiquidate > userCollateralBalance) {
       vars.collateralAmount = userCollateralBalance;
       vars.debtAmountNeeded = ((vars.collateralPrice * vars.collateralAmount * vars.debtAssetUnit) /
         (vars.debtAssetPrice * vars.collateralAssetUnit)).percentDiv(vars.liquidationBonus);
@@ -337,7 +336,7 @@ library LiquidationLogic {
         vars.bonusCollateral = vars.collateralAmount.percentDiv(vars.liquidationBonus);
       }
     } else {
-      vars.collateralAmount = vars.maxAmountCollateralToLiquidate;
+      vars.collateralAmount = vars.maxCollateralToLiquidate;
       vars.debtAmountNeeded = debtToCover;
     }
 
