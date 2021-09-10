@@ -120,4 +120,9 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @dev Returns the address of the underlying asset of this aToken (E.g. WETH for aWETH)
    **/
   function UNDERLYING_ASSET_ADDRESS() external view returns (address);
+
+  /**
+   * @dev Returns the address of the Aave treasury, receiving the fees on this aToken
+   **/
+  function RESERVE_TREASURY_ADDRESS() external view returns (address);
 }
