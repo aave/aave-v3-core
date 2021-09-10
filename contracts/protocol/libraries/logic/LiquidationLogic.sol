@@ -255,7 +255,7 @@ library LiquidationLogic {
     uint256 collateralPrice;
     uint256 debtAssetPrice;
     uint256 maxAmountCollateralToLiquidate;
-    uint256 principleCollateral;
+    uint256 baseCollateral;
     uint256 bonusCollateral;
     uint256 debtAssetDecimals;
     uint256 collateralDecimals;
@@ -264,7 +264,7 @@ library LiquidationLogic {
     uint256 collateralAmount;
     uint256 debtAmountNeeded;
     uint256 liquidationProtocolFeePercentage;
-    uint256 liquidationProtocolFeeCollateral;
+    uint256 liquidationProtocolFee;
   }
 
   /**
@@ -317,16 +317,16 @@ library LiquidationLogic {
       .configuration
       .getLiquidationProtocolFee();
 
-    // This is the principle collateral to liqudate based on the given debt to cover
-    vars.principleCollateral =
+    // This is the base collateral to liqudate based on the given debt to cover
+    vars.baseCollateral =
       ((vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit)) /
       (vars.collateralPrice * vars.debtAssetUnit);
 
     vars.bonusCollateral =
-      vars.principleCollateral.percentMul(vars.liquidationBonus) -
-      vars.principleCollateral;
+      vars.baseCollateral.percentMul(vars.liquidationBonus) -
+      vars.baseCollateral;
 
-    vars.maxAmountCollateralToLiquidate = vars.principleCollateral + vars.bonusCollateral;
+    vars.maxAmountCollateralToLiquidate = vars.baseCollateral + vars.bonusCollateral;
 
     if (vars.maxAmountCollateralToLiquidate > userCollateralBalance) {
       vars.collateralAmount = userCollateralBalance;
@@ -342,13 +342,13 @@ library LiquidationLogic {
     }
 
     if (vars.liquidationProtocolFeePercentage > 0) {
-      vars.liquidationProtocolFeeCollateral = vars.bonusCollateral.percentMul(
+      vars.liquidationProtocolFee = vars.bonusCollateral.percentMul(
         vars.liquidationProtocolFeePercentage
       );
       return (
-        vars.collateralAmount - vars.liquidationProtocolFeeCollateral,
+        vars.collateralAmount - vars.liquidationProtocolFee,
         vars.debtAmountNeeded,
-        vars.liquidationProtocolFeeCollateral
+        vars.liquidationProtocolFee
       );
     }
     return (vars.collateralAmount, vars.debtAmountNeeded, 0);

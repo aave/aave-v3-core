@@ -184,14 +184,14 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const principalDecimals = (await helpersContract.getReserveConfigurationData(dai.address))
       .decimals;
 
-    const principalCollateral = principalPrice
+    const baseCollateral = principalPrice
       .mul(amountToLiquidate)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
-    const bonusAmount = principalCollateral.percentMul(10500).sub(principalCollateral);
-    const totalCollateralLiquidated = principalCollateral.add(bonusAmount);
-    const liquidationProtocolFees = bonusAmount.percentMul(wethLiquidationProtocolFee);
+    const bonusCollateral = baseCollateral.percentMul(10500).sub(baseCollateral);
+    const totalCollateralLiquidated = baseCollateral.add(bonusCollateral);
+    const liquidationProtocolFees = bonusCollateral.percentMul(wethLiquidationProtocolFee);
     const expectedLiquidationReward = totalCollateralLiquidated.sub(liquidationProtocolFees);
 
     if (!tx.blockNumber) {
@@ -368,14 +368,14 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const principalDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
       .decimals;
 
-    const principalCollateral = principalPrice
+    const baseCollateral = principalPrice
       .mul(amountToLiquidate)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
-    const bonusAmount = principalCollateral.percentMul(10500).sub(principalCollateral);
-    const totalCollateralLiquidated = principalCollateral.add(bonusAmount);
-    const liquidationProtocolFees = bonusAmount.percentMul(wethLiquidationProtocolFee);
+    const bonusCollateral = baseCollateral.percentMul(10500).sub(baseCollateral);
+    const totalCollateralLiquidated = baseCollateral.add(bonusCollateral);
+    const liquidationProtocolFees = bonusCollateral.percentMul(wethLiquidationProtocolFee);
     const expectedLiquidationReward = totalCollateralLiquidated.sub(liquidationProtocolFees);
 
     expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
