@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {IAaveIncentivesController} from './../../interfaces/IAaveIncentivesController.sol';
+import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
 contract MockIncentivesController is IAaveIncentivesController {
   function getAssetData(address)

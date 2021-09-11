@@ -33,7 +33,7 @@ library ReserveConfiguration {
   uint256 constant BORROWING_ENABLED_START_BIT_POSITION = 58;
   uint256 constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
   uint256 constant IS_PAUSED_START_BIT_POSITION = 60;
-  // bits 61 62 63 unused yet
+  /// @dev bits 61 62 63 unused yet
   uint256 constant RESERVE_FACTOR_START_BIT_POSITION = 64;
   uint256 constant BORROW_CAP_START_BIT_POSITION = 80;
   uint256 constant SUPPLY_CAP_START_BIT_POSITION = 116;
@@ -49,9 +49,9 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 10000;
 
   /**
-   * @dev Sets the Loan to Value of the reserve
+   * @notice Sets the Loan to Value of the reserve
    * @param self The reserve configuration
-   * @param ltv the new ltv
+   * @param ltv The new ltv
    **/
   function setLtv(DataTypes.ReserveConfigurationMap memory self, uint256 ltv) internal pure {
     require(ltv <= MAX_VALID_LTV, Errors.RC_INVALID_LTV);
@@ -60,7 +60,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the Loan to Value of the reserve
+   * @notice Gets the Loan to Value of the reserve
    * @param self The reserve configuration
    * @return The loan to value
    **/
@@ -69,7 +69,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the Loan to Value of the reserve
+   * @notice Gets the Loan to Value of the reserve
    * @param self The reserve configuration
    * @return The loan to value
    **/
@@ -82,7 +82,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the liquidation threshold of the reserve
+   * @notice Sets the liquidation threshold of the reserve
    * @param self The reserve configuration
    * @param threshold The new liquidation threshold
    **/
@@ -98,7 +98,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the liquidation threshold of the reserve
+   * @notice Gets the liquidation threshold of the reserve
    * @param self The reserve configuration
    * @return The liquidation threshold
    **/
@@ -111,7 +111,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the liquidation bonus of the reserve
+   * @notice Sets the liquidation bonus of the reserve
    * @param self The reserve configuration
    * @param bonus The new liquidation bonus
    **/
@@ -127,7 +127,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the liquidation bonus of the reserve
+   * @notice Gets the liquidation bonus of the reserve
    * @param self The reserve configuration
    * @return The liquidation bonus
    **/
@@ -140,7 +140,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the decimals of the underlying asset of the reserve
+   * @notice Sets the decimals of the underlying asset of the reserve
    * @param self The reserve configuration
    * @param decimals The decimals
    **/
@@ -154,7 +154,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the decimals of the underlying asset of the reserve
+   * @notice Gets the decimals of the underlying asset of the reserve
    * @param self The reserve configuration
    * @return The decimals of the asset
    **/
@@ -167,7 +167,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the decimals of the underlying asset of the reserve
+   * @notice Gets the decimals of the underlying asset of the reserve
    * @param self The reserve configuration
    * @return The decimals of the asset
    **/
@@ -180,7 +180,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the active state of the reserve
+   * @notice Sets the active state of the reserve
    * @param self The reserve configuration
    * @param active The active state
    **/
@@ -191,7 +191,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the active state of the reserve
+   * @notice Gets the active state of the reserve
    * @param self The reserve configuration
    * @return The active state
    **/
@@ -200,7 +200,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the frozen state of the reserve
+   * @notice Sets the frozen state of the reserve
    * @param self The reserve configuration
    * @param frozen The frozen state
    **/
@@ -211,7 +211,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the frozen state of the reserve
+   * @notice Gets the frozen state of the reserve
    * @param self The reserve configuration
    * @return The frozen state
    **/
@@ -220,7 +220,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the paused state of the reserve
+   * @notice Sets the paused state of the reserve
    * @param self The reserve configuration
    * @param paused The paused state
    **/
@@ -231,7 +231,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the paused state of the reserve
+   * @notice Gets the paused state of the reserve
    * @param self The reserve configuration
    * @return The paused state
    **/
@@ -240,7 +240,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Enables or disables borrowing on the reserve
+   * @notice Enables or disables borrowing on the reserve
    * @param self The reserve configuration
    * @param enabled True if the borrowing needs to be enabled, false otherwise
    **/
@@ -254,7 +254,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the borrowing state of the reserve
+   * @notice Gets the borrowing state of the reserve
    * @param self The reserve configuration
    * @return The borrowing state
    **/
@@ -267,7 +267,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Enables or disables stable rate borrowing on the reserve
+   * @notice Enables or disables stable rate borrowing on the reserve
    * @param self The reserve configuration
    * @param enabled True if the stable rate borrowing needs to be enabled, false otherwise
    **/
@@ -281,7 +281,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the stable rate borrowing state of the reserve
+   * @notice Gets the stable rate borrowing state of the reserve
    * @param self The reserve configuration
    * @return The stable rate borrowing state
    **/
@@ -294,7 +294,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the reserve factor of the reserve
+   * @notice Sets the reserve factor of the reserve
    * @param self The reserve configuration
    * @param reserveFactor The reserve factor
    **/
@@ -310,7 +310,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the reserve factor of the reserve
+   * @notice Gets the reserve factor of the reserve
    * @param self The reserve configuration
    * @return The reserve factor
    **/
@@ -323,7 +323,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the reserve factor of the reserve
+   * @notice Gets the reserve factor of the reserve
    * @param self The reserve configuration
    * @return The reserve factor
    **/
@@ -336,7 +336,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the borrow cap of the reserve
+   * @notice Sets the borrow cap of the reserve
    * @param self The reserve configuration
    * @param borrowCap The borrow cap
    **/
@@ -350,7 +350,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the borrow cap of the reserve
+   * @notice Gets the borrow cap of the reserve
    * @param self The reserve configuration
    * @return The borrow cap
    **/
@@ -363,7 +363,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the supply cap of the reserve
+   * @notice Sets the supply cap of the reserve
    * @param self The reserve configuration
    * @param supplyCap The supply cap
    **/
@@ -377,7 +377,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the supply cap of the reserve
+   * @notice Gets the supply cap of the reserve
    * @param self The reserve configuration
    * @return The supply cap
    **/
@@ -390,7 +390,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Sets the liquidation protocol fee of the reserve
+   * @notice Sets the liquidation protocol fee of the reserve
    * @param self The reserve configuration
    * @param liquidationProtocolFee The liquidation protocol fee
    **/
@@ -423,9 +423,13 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the configuration flags of the reserve
+   * @notice Gets the configuration flags of the reserve
    * @param self The reserve configuration
-   * @return The state flags representing active, frozen, borrowing enabled, stableRateBorrowing enabled
+   * @return The state flag representing active
+   * @return The state flag representing frozen
+   * @return The state flag representing borrowing enabled
+   * @return The state flag representing stabelRateBorrowing enabled
+   * @return The state flag representing paused
    **/
   function getFlags(DataTypes.ReserveConfigurationMap storage self)
     internal
@@ -450,9 +454,13 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the configuration paramters of the reserve from storage
+   * @notice Gets the configuration paramters of the reserve from storage
    * @param self The reserve configuration
-   * @return The state params representing ltv, liquidation threshold, liquidation bonus, reserve decimals, reserve factor
+   * @return The state param representing ltv
+   * @return The state param representing liquidation threshold
+   * @return The state param representing liquidation bonus
+   * @return The state param representing reserve decimals
+   * @return The state param representing reserve factor
    **/
   function getParams(DataTypes.ReserveConfigurationMap storage self)
     internal
@@ -477,9 +485,10 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the caps  paramters of the reserve from storage
+   * @notice Gets the caps  paramters of the reserve from storage
    * @param self The reserve configuration
-   * @return The state params representing  borrow cap and supply cap.
+   * @return The state param representing borrow cap
+   * @return The state param representing supply cap.
    **/
   function getCaps(DataTypes.ReserveConfigurationMap storage self)
     internal
@@ -495,9 +504,13 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the configuration paramters of the reserve from a memory object
+   * @notice Gets the configuration paramters of the reserve from a memory object
    * @param self The reserve configuration
-   * @return The state params representing ltv, liquidation threshold, liquidation bonus, reserve decimals, reserve factor
+   * @return The state param representing ltv
+   * @return The state param representing liquidation threshold
+   * @return The state param representing liquidation bonus
+   * @return The state param representing reserve decimals
+   * @return The state param representing reserve factor
    **/
   function getParamsMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
@@ -520,9 +533,10 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the caps paramters of the reserve from a memory object
+   * @notice Gets the caps paramters of the reserve from a memory object
    * @param self The reserve configuration
-   * @return The state params borrow cap and supply cap
+   * @return The state param representing borrow cap
+   * @return The state param representing supply cap.
    **/
   function getCapsMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
@@ -536,9 +550,13 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the configuration flags of the reserve from a memory object
+   * @notice Gets the configuration flags of the reserve from a memory object
    * @param self The reserve configuration
-   * @return The state flags representing active, frozen, borrowing enabled, stableRateBorrowing enabled
+   * @return The state flag representing active
+   * @return The state flag representing frozen
+   * @return The state flag representing borrowing enabled
+   * @return The state flag representing stabelRateBorrowing enabled
+   * @return The state flag representing paused
    **/
   function getFlagsMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
@@ -561,7 +579,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the supply cap of the reserve from a memory objet
+   * @notice Gets the supply cap of the reserve from a memory objet
    * @param self The reserve configuration
    * @return The supply cap
    **/
@@ -574,7 +592,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @dev Gets the borrow cap of the reserve from a memory object
+   * @notice Gets the borrow cap of the reserve from a memory object
    * @param self The reserve configuration
    * @return The borrow cap
    **/

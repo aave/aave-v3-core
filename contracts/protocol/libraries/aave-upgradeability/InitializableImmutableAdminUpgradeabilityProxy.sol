@@ -6,6 +6,7 @@ import '../../../dependencies/openzeppelin/upgradeability/InitializableUpgradeab
 
 /**
  * @title InitializableAdminUpgradeabilityProxy
+ * @author Aave
  * @dev Extends BaseAdminUpgradeabilityProxy with an initializer function
  */
 contract InitializableImmutableAdminUpgradeabilityProxy is
@@ -14,9 +15,7 @@ contract InitializableImmutableAdminUpgradeabilityProxy is
 {
   constructor(address admin) BaseImmutableAdminUpgradeabilityProxy(admin) {}
 
-  /**
-   * @dev Only fall back when the sender is not the admin.
-   */
+  /// @inheritdoc BaseImmutableAdminUpgradeabilityProxy
   function _willFallback() internal override(BaseImmutableAdminUpgradeabilityProxy, Proxy) {
     BaseImmutableAdminUpgradeabilityProxy._willFallback();
   }
