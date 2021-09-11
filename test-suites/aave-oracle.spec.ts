@@ -1,12 +1,11 @@
-import { oneEther, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { expect } from 'chai';
-import { ethers } from 'ethers';
-import { makeSuite, TestEnv } from './helpers/make-suite';
+import { ethers, utils } from 'ethers';
+import { oneEther, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20, deployMockAggregator } from '../helpers/contracts-deployments';
 import { MintableERC20, MockAggregator } from '../types';
 import { ProtocolErrors } from '../helpers/types';
-import { parseUnits } from 'ethers/lib/utils';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('AaveOracle', (testEnv: TestEnv) => {
   let snap: string;
@@ -24,7 +23,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
   before(async () => {
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-    assetPrice = parseUnits('0.00367714136416', 18).toString();
+    assetPrice = utils.parseUnits('0.00367714136416', 18).toString();
     mockAggregator = await deployMockAggregator(assetPrice);
   });
 
@@ -73,7 +72,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     expect(await aaveOracle.getAssetPrice(dai.address)).to.be.eq(assetPrice);
   });
 
-  it('Owner tries to set a new asset source with wrong input params an reverts', async () => {
+  it('Owner tries to set a new asset source with wrong input params (revert expected)', async () => {
     const { poolAdmin, aaveOracle } = testEnv;
 
     await expect(
@@ -90,7 +89,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     );
   });
 
-  it('A non-owner user tries to set a new asset source an reverts', async () => {
+  it('A non-owner user tries to set a new asset source (revert expected)', async () => {
     const { users, aaveOracle } = testEnv;
     const user = users[0];
 

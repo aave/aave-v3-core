@@ -1,3 +1,4 @@
+import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode } from '../helpers/types';
@@ -68,8 +69,10 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
 
     await oracle.setAssetPrice(dai.address, utils.parseUnits('0.002', 18));
 
-    await pool
-      .connect(depositor.signer)
-      .liquidationCall(weth.address, dai.address, borrower.address, MAX_UINT_AMOUNT, false);
+    expect(
+      await pool
+        .connect(depositor.signer)
+        .liquidationCall(weth.address, dai.address, borrower.address, MAX_UINT_AMOUNT, false)
+    );
   });
 });

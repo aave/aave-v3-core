@@ -24,15 +24,7 @@ library ReserveLogic {
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
 
-  /**
-   * @dev Emitted when the state of a reserve is updated
-   * @param asset The address of the underlying asset of the reserve
-   * @param liquidityRate The next liquidity rate
-   * @param stableBorrowRate The next stable borrow rate
-   * @param variableBorrowRate The next variable borrow rate
-   * @param liquidityIndex The next liquidity index
-   * @param variableBorrowIndex The next variable borrow index
-   **/
+  // See `IPool` for descriptions
   event ReserveDataUpdated(
     address indexed asset,
     uint256 liquidityRate,
@@ -41,16 +33,15 @@ library ReserveLogic {
     uint256 liquidityIndex,
     uint256 variableBorrowIndex
   );
-
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   /**
-   * @dev Returns the ongoing normalized income for the reserve
-   * A value of 1e27 means there is no income. As time passes, the income is accrued
-   * A value of 2*1e27 means for each unit of asset one unit of income has been accrued
+   * @notice Returns the ongoing normalized income for the reserve
+   * @dev A value of 1e27 means there is no income. As time passes, the income is accrued
+   * @dev A value of 2*1e27 means for each unit of asset one unit of income has been accrued
    * @param reserve The reserve object
-   * @return the normalized income. expressed in ray
+   * @return The normalized income. expressed in ray
    **/
   function getNormalizedIncome(DataTypes.ReserveData storage reserve)
     internal
@@ -73,9 +64,9 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Returns the ongoing normalized variable debt for the reserve
-   * A value of 1e27 means there is no debt. As time passes, the income is accrued
-   * A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
+   * @notice Returns the ongoing normalized variable debt for the reserve
+   * @dev A value of 1e27 means there is no debt. As time passes, the income is accrued
+   * @dev A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
    * @param reserve The reserve object
    * @return The normalized variable debt. expressed in ray
    **/
@@ -100,8 +91,9 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Updates the liquidity cumulative index and the variable borrow index.
-   * @param reserve the reserve object
+   * @notice Updates the liquidity cumulative index and the variable borrow index.
+   * @param reserve The reserve object
+   * @param reserveCache The caching layer for the reserve data
    **/
   function updateState(
     DataTypes.ReserveData storage reserve,
@@ -112,7 +104,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
+   * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
    * the flashloan fee to the reserve, and spread it between all the depositors
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
@@ -134,9 +126,11 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Initializes a reserve
+   * @notice Initializes a reserve
    * @param reserve The reserve object
    * @param aTokenAddress The address of the overlying atoken contract
+   * @param stableDebtTokenAddress The address of the overlying stable debt token contract
+   * @param variableDebtTokenAddress The address of the overlying variable debt token contract
    * @param interestRateStrategyAddress The address of the interest rate strategy contract
    **/
   function init(
@@ -165,7 +159,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
+   * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
    * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
    * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
@@ -227,7 +221,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Mints part of the repaid interest to the reserve treasury as a function of the reserveFactor for the
+   * @notice Mints part of the repaid interest to the reserve treasury as a function of the reserveFactor for the
    * specific asset.
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The caching layer for the reserve data
@@ -282,7 +276,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Updates the reserve indexes and the timestamp of the update
+   * @notice Updates the reserve indexes and the timestamp of the update
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The cache layer holding the cached protocol data
    **/
@@ -331,7 +325,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Creates a cache object to avoid repeated storage reads and external contract calls when updating state and interest rates.
+   * @notice Creates a cache object to avoid repeated storage reads and external contract calls when updating state and interest rates.
    * @param reserve The reserve object for which the cache will be filled
    * @return The cache object
    */

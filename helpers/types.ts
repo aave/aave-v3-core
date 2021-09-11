@@ -7,7 +7,6 @@ export interface SymbolMap<T> {
 export type eNetwork = eEthereumNetwork;
 
 export enum eEthereumNetwork {
-  buidlerevm = 'buidlerevm',
   kovan = 'kovan',
   ropsten = 'ropsten',
   main = 'main',
@@ -170,6 +169,7 @@ export enum ProtocolErrors {
   VL_SAME_BLOCK_BORROW_REPAY = '94',
   PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
   PC_FLASHLOAN_PREMIUM_INVALID = '96',
+  RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
 
   // old
 
@@ -354,7 +354,6 @@ export interface iParamsPerNetworkAll<T> extends iEthereumParamsPerNetwork<T> {}
 
 export interface iEthereumParamsPerNetwork<T> {
   [eEthereumNetwork.coverage]: T;
-  [eEthereumNetwork.buidlerevm]: T;
   [eEthereumNetwork.kovan]: T;
   [eEthereumNetwork.ropsten]: T;
   [eEthereumNetwork.main]: T;

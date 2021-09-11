@@ -376,7 +376,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
-  it('validateRepay() line 268 revert with variable', async () => {
+  it('validateRepay() when variable borrowing and repaying in same block (revert expected)', async () => {
     // Same block repay
 
     const { pool, users, dai, aDai, usdc } = testEnv;
@@ -409,10 +409,10 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     await setAutomine(true);
   });
 
-  it('validateRepay() line 268 revert with stable', async () => {
+  it('validateRepay() when stable borrowing and repaying in same block (revert expected)', async () => {
     // Same block repay
 
-    const { pool, users, dai, aDai, usdc, helpersContract, configurator, poolAdmin } = testEnv;
+    const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     // We need some debt.

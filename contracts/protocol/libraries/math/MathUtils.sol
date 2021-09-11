@@ -4,6 +4,11 @@ pragma solidity 0.8.6;
 import {SafeMath} from '../../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {WadRayMath} from './WadRayMath.sol';
 
+/**
+ * @title MathUtils library
+ * @author Aave
+ * @notice Provides functions to perform linear and compounded interest calculations
+ */
 library MathUtils {
   using WadRayMath for uint256;
 
@@ -16,7 +21,6 @@ library MathUtils {
    * @param lastUpdateTimestamp The timestamp of the last update of the interest
    * @return The interest rate linearly accumulated during the timeDelta, in ray
    **/
-
   function calculateLinearInterest(uint256 rate, uint40 lastUpdateTimestamp)
     internal
     view
@@ -24,7 +28,9 @@ library MathUtils {
   {
     //solium-disable-next-line
     uint256 result = rate * (block.timestamp - uint256(lastUpdateTimestamp));
-    unchecked {result = result / SECONDS_PER_YEAR;}
+    unchecked {
+      result = result / SECONDS_PER_YEAR;
+    }
 
     return WadRayMath.RAY + result;
   }
@@ -71,9 +77,13 @@ library MathUtils {
     }
 
     uint256 secondTerm = exp * expMinusOne * basePowerTwo;
-    unchecked {secondTerm /= 2;}
+    unchecked {
+      secondTerm /= 2;
+    }
     uint256 thirdTerm = exp * expMinusOne * expMinusTwo * basePowerThree;
-    unchecked {thirdTerm /= 6;}
+    unchecked {
+      thirdTerm /= 6;
+    }
 
     return WadRayMath.RAY + ratePerSecond * exp + secondTerm + thirdTerm;
   }
@@ -82,6 +92,7 @@ library MathUtils {
    * @dev Calculates the compounded interest between the timestamp of the last update and the current block timestamp
    * @param rate The interest rate (in ray)
    * @param lastUpdateTimestamp The timestamp from which the interest accumulation needs to be calculated
+   * @return The interest rate compounded between lastUpdateTimestamp and current block timestamp, in ray
    **/
   function calculateCompoundedInterest(uint256 rate, uint40 lastUpdateTimestamp)
     internal

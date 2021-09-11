@@ -3,18 +3,20 @@ pragma solidity 0.8.6;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
+import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
-import {WadRayMath} from '../libraries/math/WadRayMath.sol';
-import {Errors} from '../libraries/helpers/Errors.sol';
-import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {IncentivizedERC20} from './IncentivizedERC20.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
+import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
+import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
+import {IncentivizedERC20} from './IncentivizedERC20.sol';
 
 /**
  * @title Aave ERC20 AToken
- * @dev Implementation of the interest bearing token for the Aave protocol
  * @author Aave
+ * @notice Implementation of the interest bearing token for the Aave protocol
  */
 contract AToken is
   VersionedInitializable,
@@ -40,27 +42,18 @@ contract AToken is
   IPool internal _pool;
   address internal _treasury;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
 
   modifier onlyPool() {
     require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
     _;
   }
 
+  /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
     return ATOKEN_REVISION;
   }
 
-  /**
-   * @dev Initializes the aToken
-   * @param pool The address of the pool where this aToken will be used
-   * @param treasury The address of the Aave treasury, receiving the fees on this aToken
-   * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
-   * @param incentivesController The smart contract managing potential incentives distribution
-   * @param aTokenDecimals The decimals of the aToken, same as the underlying asset's
-   * @param aTokenName The name of the aToken
-   * @param aTokenSymbol The symbol of the aToken
-   */
+  /// @inheritdoc IInitializableAToken
   function initialize(
     IPool pool,
     address treasury,
@@ -109,14 +102,7 @@ contract AToken is
     );
   }
 
-  /**
-   * @dev Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
-   * - Only callable by the Pool, as extra state updates there need to be managed
-   * @param user The owner of the aTokens, getting them burned
-   * @param receiverOfUnderlying The address that will receive the underlying
-   * @param amount The amount being burned
-   * @param index The next liquidity index of the reserve
-   **/
+  /// @inheritdoc IAToken
   function burn(
     address user,
     address receiverOfUnderlying,
@@ -127,20 +113,15 @@ contract AToken is
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
     _burn(user, amountScaled);
 
-    IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
+    if (receiverOfUnderlying != address(this)) {
+      IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
+    }
 
     emit Transfer(user, address(0), amount);
     emit Burn(user, receiverOfUnderlying, amount, index);
   }
 
-  /**
-   * @dev Mints `amount` aTokens to `user`
-   * - Only callable by the Pool, as extra state updates there need to be managed
-   * @param user The address receiving the minted tokens
-   * @param amount The amount of tokens getting minted
-   * @param index The next liquidity index of the reserve
-   * @return `true` if the the previous balance of the user was 0
-   */
+  /// @inheritdoc IAToken
   function mint(
     address user,
     uint256 amount,
@@ -158,12 +139,7 @@ contract AToken is
     return previousBalance == 0;
   }
 
-  /**
-   * @dev Mints aTokens to the reserve treasury
-   * - Only callable by the Pool
-   * @param amount The amount of tokens getting minted
-   * @param index The next liquidity index of the reserve
-   */
+  /// @inheritdoc IAToken
   function mintToTreasury(uint256 amount, uint256 index) external override onlyPool {
     if (amount == 0) {
       return;
@@ -181,13 +157,7 @@ contract AToken is
     emit Mint(treasury, amount, index);
   }
 
-  /**
-   * @dev Transfers aTokens in the event of a borrow being liquidated, in case the liquidators reclaims the aToken
-   * - Only callable by the Pool
-   * @param from The address getting liquidated, current owner of the aTokens
-   * @param to The recipient
-   * @param value The amount of tokens getting transferred
-   **/
+  /// @inheritdoc IAToken
   function transferOnLiquidation(
     address from,
     address to,
@@ -200,11 +170,7 @@ contract AToken is
     emit Transfer(from, to, value);
   }
 
-  /**
-   * @dev Calculates the balance of the user: principal balance + interest generated by the principal
-   * @param user The user whose balance is calculated
-   * @return The balance of the user
-   **/
+  /// @inheritdoc IncentivizedERC20
   function balanceOf(address user)
     public
     view
@@ -214,22 +180,12 @@ contract AToken is
     return super.balanceOf(user).rayMul(_pool.getReserveNormalizedIncome(_underlyingAsset));
   }
 
-  /**
-   * @dev Returns the scaled balance of the user. The scaled balance is the sum of all the
-   * updated stored balance divided by the reserve's liquidity index at the moment of the update
-   * @param user The user whose balance is calculated
-   * @return The scaled balance of the user
-   **/
+  /// @inheritdoc IScaledBalanceToken
   function scaledBalanceOf(address user) external view override returns (uint256) {
     return super.balanceOf(user);
   }
 
-  /**
-   * @dev Returns the scaled balance of the user and the scaled total supply.
-   * @param user The address of the user
-   * @return The scaled balance of the user
-   * @return The scaled balance and the scaled total supply
-   **/
+  /// @inheritdoc IScaledBalanceToken
   function getScaledUserBalanceAndSupply(address user)
     external
     view
@@ -239,12 +195,7 @@ contract AToken is
     return (super.balanceOf(user), super.totalSupply());
   }
 
-  /**
-   * @dev calculates the total supply of the specific aToken
-   * since the balance of every single user increases over time, the total supply
-   * does that too.
-   * @return the current total supply
-   **/
+  /// @inheritdoc IncentivizedERC20
   function totalSupply() public view override(IncentivizedERC20, IERC20) returns (uint256) {
     uint256 currentSupplyScaled = super.totalSupply();
 
@@ -255,56 +206,33 @@ contract AToken is
     return currentSupplyScaled.rayMul(_pool.getReserveNormalizedIncome(_underlyingAsset));
   }
 
-  /**
-   * @dev Returns the scaled total supply of the variable debt token. Represents sum(debt/index)
-   * @return the scaled total supply
-   **/
+  /// @inheritdoc IScaledBalanceToken
   function scaledTotalSupply() public view virtual override returns (uint256) {
     return super.totalSupply();
   }
 
   /**
-   * @dev Returns the address of the Aave treasury, receiving the fees on this aToken
+   * @notice Returns the address of the Aave treasury, receiving the fees on this aToken
+   * @return Address of the Aave treasury
    **/
-  function RESERVE_TREASURY_ADDRESS() public view returns (address) {
+  function RESERVE_TREASURY_ADDRESS() public view override returns (address) {
     return _treasury;
   }
 
-  /**
-   * @dev Returns the address of the underlying asset of this aToken (E.g. WETH for aWETH)
-   **/
+  /// @inheritdoc IAToken
   function UNDERLYING_ASSET_ADDRESS() public view override returns (address) {
     return _underlyingAsset;
   }
 
   /**
-   * @dev Returns the address of the pool where this aToken is used
+   * @notice Returns the address of the pool where this aToken is used
+   * @return Address of the pool
    **/
   function POOL() public view returns (IPool) {
     return _pool;
   }
 
-  /**
-   * @dev For internal usage in the logic of the parent contract IncentivizedERC20
-   **/
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
-  }
-
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
-  }
-
-  /**
-   * @dev Transfers the underlying asset to `target`. Used by the Pool to transfer
-   * assets in borrow(), withdraw() and flashLoan()
-   * @param target The recipient of the aTokens
-   * @param amount The amount getting transferred
-   * @return The amount transferred
-   **/
+  /// @inheritdoc IAToken
   function transferUnderlyingTo(address target, uint256 amount)
     external
     override
@@ -315,24 +243,10 @@ contract AToken is
     return amount;
   }
 
-  /**
-   * @dev Invoked to execute actions on the aToken side after a repayment.
-   * @param user The user executing the repayment
-   * @param amount The amount getting repaid
-   **/
+  /// @inheritdoc IAToken
   function handleRepayment(address user, uint256 amount) external override onlyPool {}
 
-  /**
-   * @dev implements the permit function as for
-   * https://github.com/ethereum/EIPs/blob/8a34d644aacf0f9f8f00815307fd7dd5da07655f/EIPS/eip-2612.md
-   * @param owner The owner of the funds
-   * @param spender The spender
-   * @param value The amount
-   * @param deadline The deadline timestamp, type(uint256).max for max deadline
-   * @param v Signature param
-   * @param s Signature param
-   * @param r Signature param
-   */
+  /// @inheritdoc IAToken
   function permit(
     address owner,
     address spender,
@@ -359,12 +273,12 @@ contract AToken is
   }
 
   /**
-   * @dev Transfers the aTokens between two users. Validates the transfer
+   * @notice Transfers the aTokens between two users. Validates the transfer
    * (ie checks for valid HF after the transfer) if required
    * @param from The source address
    * @param to The destination address
    * @param amount The amount getting transferred
-   * @param validate `true` if the transfer needs to be validated
+   * @param validate True if the transfer needs to be validated, false otherwise
    **/
   function _transfer(
     address from,
@@ -390,7 +304,7 @@ contract AToken is
   }
 
   /**
-   * @dev Overrides the parent _transfer to force validated transfer() and transferFrom()
+   * @notice Overrides the parent _transfer to force validated transfer() and transferFrom()
    * @param from The source address
    * @param to The destination address
    * @param amount The amount getting transferred

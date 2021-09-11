@@ -1,7 +1,7 @@
-import { TestEnv, makeSuite } from './helpers/make-suite';
+import { expect } from 'chai';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import { expect } from 'chai';
+import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   const NEW_ADDRESSES_PROVIDER_ID = 2;

@@ -1,6 +1,5 @@
-import { formatEther } from '@ethersproject/units';
 import { DefenderRelaySigner, DefenderRelayProvider } from 'defender-relay-client/lib/ethers';
-import { Signer } from 'ethers';
+import { Signer, utils } from 'ethers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { DRE, impersonateAccountsHardhat } from './misc-utils';
 import { usingTenderly } from './tenderly-utils';
@@ -35,7 +34,7 @@ export const getDefenderRelaySigner = async () => {
     console.log('  - Impersonating Defender Relay via Tenderly');
     defenderSigner = await (DRE as HardhatRuntimeEnvironment).ethers.getSigner(defenderAddress);
   }
-  console.log('  - Balance: ', formatEther(await defenderSigner.getBalance()));
+  console.log('  - Balance: ', utils.formatEther(await defenderSigner.getBalance()));
 
   return defenderSigner;
 };

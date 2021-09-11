@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { BUIDLEREVM_CHAINID } from '../helpers/buidler-constants';
+import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
 import {
-  buildPermitDelegationParams,
+  buildDelegationWithSigParams,
   convertToCurrencyDecimals,
   getSignatureFromTypedData,
 } from '../helpers/contracts-helpers';
@@ -88,11 +88,11 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       variableDebtDai.address,
       EIP712_REVISION,
@@ -114,7 +114,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     expect(
       await variableDebtDai
         .connect(user1.signer)
-        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
     );
 
     expect(
@@ -136,11 +136,11 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       stableDebtDai.address,
       EIP712_REVISION,
@@ -162,7 +162,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     expect(
       await stableDebtDai
         .connect(user1.signer)
-        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
     );
 
     expect(
@@ -185,12 +185,12 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
     const EIP712_REVISION = await stableDebtDai.EIP712_REVISION();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       stableDebtDai.address,
       EIP712_REVISION,
@@ -212,7 +212,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     await expect(
       stableDebtDai
         .connect(user1.signer)
-        .permitDelegation(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
     ).to.be.revertedWith('INVALID_DELEGATOR');
 
     expect(
@@ -227,11 +227,11 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = (await timeLatest()).sub(500).toString();
     const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       stableDebtDai.address,
       EIP712_REVISION,
@@ -253,7 +253,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     await expect(
       stableDebtDai
         .connect(user1.signer)
-        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
     ).to.be.revertedWith('INVALID_EXPIRATION');
 
     expect(
@@ -268,11 +268,11 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       stableDebtDai.address,
       EIP712_REVISION,
@@ -294,7 +294,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     await expect(
       stableDebtDai
         .connect(user1.signer)
-        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
     ).to.be.revertedWith('INVALID_SIGNATURE');
 
     expect(
@@ -309,11 +309,11 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       variableDebtDai.address,
       EIP712_REVISION,
@@ -335,7 +335,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     await expect(
       variableDebtDai
         .connect(user1.signer)
-        .permitDelegation(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
     ).to.be.revertedWith('INVALID_DELEGATOR');
 
     expect(
@@ -350,11 +350,11 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = (await timeLatest()).sub(500).toString();
     const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       variableDebtDai.address,
       EIP712_REVISION,
@@ -376,7 +376,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     await expect(
       variableDebtDai
         .connect(user1.signer)
-        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
     ).to.be.revertedWith('INVALID_EXPIRATION');
 
     expect(
@@ -391,11 +391,11 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || BUIDLEREVM_CHAINID;
+    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
-    const msgParams = buildPermitDelegationParams(
+    const msgParams = buildDelegationWithSigParams(
       chainId,
       variableDebtDai.address,
       EIP712_REVISION,
@@ -417,7 +417,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     await expect(
       variableDebtDai
         .connect(user1.signer)
-        .permitDelegation(user2.address, user3.address, permitAmount, expiration, v, r, s)
+        .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
     ).to.be.revertedWith('INVALID_SIGNATURE');
 
     expect(

@@ -1,31 +1,26 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {DebtTokenBase} from './base/DebtTokenBase.sol';
+import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {MathUtils} from '../libraries/math/MathUtils.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
+import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
+import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
-import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
-import {Errors} from '../libraries/helpers/Errors.sol';
+import {DebtTokenBase} from './base/DebtTokenBase.sol';
 
 /**
  * @title StableDebtToken
+ * @author Aave
  * @notice Implements a stable debt token to track the borrowing positions of users
  * at stable rate mode
- * @author Aave
  **/
 contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   using WadRayMath for uint256;
-
-  bytes public constant EIP712_REVISION = bytes('1');
-  bytes32 internal constant EIP712_DOMAIN =
-    keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
-  bytes32 public constant PERMIT_DELEGATION_TYPEHASH =
-    keccak256(
-      'PermitDelegation(address delegator,address delegatee,uint256 value,uint256 nonce,uint256 deadline)'
-    );
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
@@ -36,20 +31,8 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   IPool internal _pool;
   address internal _underlyingAsset;
-  IAaveIncentivesController internal _incentivesController;
 
-  mapping(address => uint256) public _nonces;
-  bytes32 public DOMAIN_SEPARATOR;
-
-  /**
-   * @dev Initializes the debt token.
-   * @param pool The address of the pool where this aToken will be used
-   * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
-   * @param incentivesController The smart contract managing potential incentives distribution
-   * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
-   * @param debtTokenName The name of the token
-   * @param debtTokenSymbol The symbol of the token
-   */
+  /// @inheritdoc IInitializableDebtToken
   function initialize(
     IPool pool,
     address underlyingAsset,
@@ -95,43 +78,27 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     );
   }
 
-  /**
-   * @dev Gets the revision of the stable debt token implementation
-   * @return The debt token implementation revision
-   **/
+  /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
     return DEBT_TOKEN_REVISION;
   }
 
-  /**
-   * @dev Returns the average stable rate across all the stable rate debt
-   * @return the average stable rate
-   **/
+  /// @inheritdoc IStableDebtToken
   function getAverageStableRate() external view virtual override returns (uint256) {
     return _avgStableRate;
   }
 
-  /**
-   * @dev Returns the timestamp of the last user action
-   * @return The last update timestamp
-   **/
+  /// @inheritdoc IStableDebtToken
   function getUserLastUpdated(address user) external view virtual override returns (uint40) {
     return _timestamps[user];
   }
 
-  /**
-   * @dev Returns the stable rate of the user
-   * @param user The address of the user
-   * @return The stable rate of user
-   **/
+  /// @inheritdoc IStableDebtToken
   function getUserStableRate(address user) external view virtual override returns (uint256) {
     return _usersStableRate[user];
   }
 
-  /**
-   * @dev Calculates the current user debt balance
-   * @return The accumulated debt of the user
-   **/
+  /// @inheritdoc IERC20
   function balanceOf(address account) public view virtual override returns (uint256) {
     uint256 accountBalance = super.balanceOf(account);
     uint256 stableRate = _usersStableRate[account];
@@ -153,17 +120,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 currentAvgStableRate;
   }
 
-  /**
-   * @dev Mints debt token to the `onBehalfOf` address.
-   * -  Only callable by the Pool
-   * - The resulting rate is the weighted average between the rate of the new debt
-   * and the rate of the previous debt
-   * @param user The address receiving the borrowed underlying, being the delegatee in case
-   * of credit delegate, or same as `onBehalfOf` otherwise
-   * @param onBehalfOf The address receiving the debt tokens
-   * @param amount The amount of debt tokens to mint
-   * @param rate The rate of the debt being minted
-   **/
+  /// @inheritdoc IStableDebtToken
   function mint(
     address user,
     address onBehalfOf,
@@ -300,53 +257,11 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /**
-   * @dev implements the credit delegation with ERC712 signature
-   * @param delegator The delegator of the credit
-   * @param delegatee The delegatee that can use the credit
-   * @param value The amount to be delegated
-   * @param deadline The deadline timestamp, type(uint256).max for max deadline
-   * @param v Signature param
-   * @param s Signature param
-   * @param r Signature param
-   */
-  function permitDelegation(
-    address delegator,
-    address delegatee,
-    uint256 value,
-    uint256 deadline,
-    uint8 v,
-    bytes32 r,
-    bytes32 s
-  ) external override {
-    require(delegator != address(0), 'INVALID_DELEGATOR');
-    //solium-disable-next-line
-    require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
-    uint256 currentValidNonce = _nonces[delegator];
-    bytes32 digest = keccak256(
-      abi.encodePacked(
-        '\x19\x01',
-        DOMAIN_SEPARATOR,
-        keccak256(
-          abi.encode(
-            PERMIT_DELEGATION_TYPEHASH,
-            delegator,
-            delegatee,
-            value,
-            currentValidNonce,
-            deadline
-          )
-        )
-      )
-    );
-    require(delegator == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
-    _nonces[delegator] = currentValidNonce + 1;
-    _approveDelegation(delegator, delegatee, value);
-  }
-
-  /**
-   * @dev Calculates the increase in balance since the last user interaction
+   * @notice Calculates the increase in balance since the last user interaction
    * @param user The address of the user for which the interest is being accumulated
-   * @return The previous principal balance, the new principal balance and the balance increase
+   * @return The previous principal balance
+   * @return The new principal balance
+   * @return The balance increase
    **/
   function _calculateBalanceIncrease(address user)
     internal
@@ -369,9 +284,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     return (previousPrincipalBalance, previousPrincipalBalance + balanceIncrease, balanceIncrease);
   }
 
-  /**
-   * @dev Returns the principal and total supply, the average borrow rate and the last supply update timestamp
-   **/
+  /// @inheritdoc IStableDebtToken
   function getSupplyData()
     public
     view
@@ -387,81 +300,55 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     return (super.totalSupply(), _calcTotalSupply(avgRate), avgRate, _totalSupplyTimestamp);
   }
 
-  /**
-   * @dev Returns the the total supply and the average stable rate
-   **/
+  /// @inheritdoc IStableDebtToken
   function getTotalSupplyAndAvgRate() public view override returns (uint256, uint256) {
     uint256 avgRate = _avgStableRate;
     return (_calcTotalSupply(avgRate), avgRate);
   }
 
-  /**
-   * @dev Returns the total supply
-   **/
+  /// @inheritdoc IERC20
   function totalSupply() public view override returns (uint256) {
     return _calcTotalSupply(_avgStableRate);
   }
 
-  /**
-   * @dev Returns the timestamp at which the total supply was updated
-   **/
+  /// @inheritdoc IStableDebtToken
   function getTotalSupplyLastUpdated() public view override returns (uint40) {
     return _totalSupplyTimestamp;
   }
 
-  /**
-   * @dev Returns the principal debt balance of the user from
-   * @param user The user's address
-   * @return The debt balance of the user since the last burn/mint action
-   **/
+  /// @inheritdoc IStableDebtToken
   function principalBalanceOf(address user) external view virtual override returns (uint256) {
     return super.balanceOf(user);
   }
 
   /**
-   * @dev Returns the address of the underlying asset of this aToken (E.g. WETH for aWETH)
+   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
+   * @return The address of the underlying asset
    **/
   function UNDERLYING_ASSET_ADDRESS() public view returns (address) {
     return _underlyingAsset;
   }
 
   /**
-   * @dev Returns the address of the pool where this aToken is used
+   * @notice Returns the address of the pool where this debtToken is used
+   * @return The address of the Pool
    **/
   function POOL() public view returns (IPool) {
     return _pool;
   }
 
-  /**
-   * @dev Returns the address of the incentives controller contract
-   **/
-  function getIncentivesController() external view override returns (IAaveIncentivesController) {
-    return _getIncentivesController();
-  }
-
-  /**
-   * @dev For internal usage in the logic of the parent contracts
-   **/
-  function _getIncentivesController() internal view override returns (IAaveIncentivesController) {
-    return _incentivesController;
-  }
-
-  /**
-   * @dev For internal usage in the logic of the parent contracts
-   **/
+  /// @inheritdoc DebtTokenBase
   function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;
   }
 
-  /**
-   * @dev For internal usage in the logic of the parent contracts
-   **/
+  /// @inheritdoc DebtTokenBase
   function _getPool() internal view override returns (IPool) {
     return _pool;
   }
 
   /**
-   * @dev Calculates the total supply
+   * @notice Calculates the total supply
    * @param avgRate The average rate at which the total supply increases
    * @return The debt balance of the user since the last burn/mint action
    **/
@@ -481,10 +368,10 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /**
-   * @dev Mints stable debt tokens to an user
+   * @notice Mints stable debt tokens to a user
    * @param account The account receiving the debt tokens
    * @param amount The amount being minted
-   * @param oldTotalSupply the total supply before the minting event
+   * @param oldTotalSupply The total supply before the minting event
    **/
   function _mint(
     address account,
@@ -500,7 +387,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /**
-   * @dev Burns stable debt tokens of an user
+   * @notice Burns stable debt tokens of a user
    * @param account The user getting his debt burned
    * @param amount The amount being burned
    * @param oldTotalSupply The total supply before the burning event
