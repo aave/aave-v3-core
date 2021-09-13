@@ -4,6 +4,7 @@ pragma solidity 0.8.6;
 /**
  * @title IACLManager
  * @author Aave
+ * @notice Defines the basic interface for the ACL Manager
  **/
 interface IACLManager {
   function POOL_ADMIN_ROLE() external view returns (bytes32);
@@ -15,6 +16,14 @@ interface IACLManager {
   function FLASH_BORROWER_ROLE() external view returns (bytes32);
 
   function BRIDGE_ROLE() external view returns (bytes32);
+
+  /**
+   * @notice Set the role as admin of a specific role.
+   * @dev By default the admin role for all roles is `DEFAULT_ADMIN_ROLE`.
+   * @param role The role to be managed by the admin role
+   * @param adminRole The admin role
+   */
+  function setRoleAdmin(bytes32 role, bytes32 adminRole) external;
 
   function addPoolAdmin(address admin) external;
 

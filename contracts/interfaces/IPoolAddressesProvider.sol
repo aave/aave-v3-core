@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
- /**
+/**
  * @title IPoolAddressesProvider
  * @author Aave
  * @notice Defines the basic interface for a Pool Addresses Provider.
@@ -88,11 +88,28 @@ interface IPoolAddressesProvider {
 
   function setRateOracle(address rateOracle) external;
 
+  /**
+   * @notice Returns the address of the ACL manager proxy
+   * @return The ACLManager proxy address
+   */
   function getACLManager() external view returns (address);
 
+  /**
+   * @notice Updates the implementation of the ACLManager, or creates the proxy
+   * setting the new `aclmanager` implementation on the first time calling it
+   * @param aclManager The new ACLManager implementation
+   **/
   function setACLManagerImpl(address aclManager) external;
 
+  /**
+   * @notice Returns the address of the ACL admin
+   * @return The address of the ACL admin
+   */
   function getACLAdmin() external view returns (address);
 
+  /**
+   * @notice Updates the address of the ACL admin
+   * @param aclAdmin The address of the new ACL admin
+   */
   function setACLAdmin(address aclAdmin) external;
 }

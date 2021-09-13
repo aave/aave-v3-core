@@ -7,6 +7,11 @@ import {VersionedInitializable} from '../libraries/aave-upgradeability/Versioned
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 
+/**
+ * @title ACLManager
+ * @author Aave
+ * @notice Access Control List Manager. Main registry of system roles and permissions.
+ */
 contract ACLManager is VersionedInitializable, AccessControl, IACLManager {
   bytes32 public constant override POOL_ADMIN_ROLE = keccak256('POOL_ADMIN');
   bytes32 public constant override EMERGENCY_ADMIN_ROLE = keccak256('EMERGENCY_ADMIN');
@@ -18,10 +23,16 @@ contract ACLManager is VersionedInitializable, AccessControl, IACLManager {
 
   IPoolAddressesProvider public _addressesProvider;
 
+  /**
+   * @notice Initializes the ACL manager
+   * @param provider The address of the PoolAddressesProvider
+   * @dev The ACL admin should be initialized at the addressesProvider beforehand
+   */
   function initialize(IPoolAddressesProvider provider) public initializer {
     _addressesProvider = provider;
-    // TODO: require
-    _setupRole(DEFAULT_ADMIN_ROLE, provider.getACLAdmin());
+    address aclAdmin = provider.getACLAdmin();
+    require(aclAdmin != address(0), 'ACL admin cannot be the zero address');
+    _setupRole(DEFAULT_ADMIN_ROLE, aclAdmin);
   }
 
   /// @inheritdoc VersionedInitializable
@@ -29,16 +40,13 @@ contract ACLManager is VersionedInitializable, AccessControl, IACLManager {
     return REVISION;
   }
 
-  function setRoleAdmin(bytes32 role, bytes32 adminRole) public onlyRole(DEFAULT_ADMIN_ROLE) {
+  /// @inheritdoc IACLManager
+  function setRoleAdmin(bytes32 role, bytes32 adminRole) external override onlyRole(DEFAULT_ADMIN_ROLE) {
     _setRoleAdmin(role, adminRole);
-    // event ?
   }
-
-  // Roles
 
   function addPoolAdmin(address admin) external override {
     grantRole(POOL_ADMIN_ROLE, admin);
-    // emit ConfigurationAdminUpdated(admin);
   }
 
   function removePoolAdmin(address admin) external override {
@@ -51,7 +59,6 @@ contract ACLManager is VersionedInitializable, AccessControl, IACLManager {
 
   function addEmergencyAdmin(address admin) external override {
     grantRole(EMERGENCY_ADMIN_ROLE, admin);
-    // emit ConfigurationAdminUpdated(admin);
   }
 
   function removeEmergencyAdmin(address admin) external override {
@@ -64,7 +71,6 @@ contract ACLManager is VersionedInitializable, AccessControl, IACLManager {
 
   function addRiskAdmin(address admin) external override {
     grantRole(RISK_ADMIN_ROLE, admin);
-    // emit ConfigurationAdminUpdated(admin);
   }
 
   function removeRiskAdmin(address admin) external override {
@@ -77,7 +83,6 @@ contract ACLManager is VersionedInitializable, AccessControl, IACLManager {
 
   function addFlashBorrower(address borrower) external override {
     grantRole(FLASH_BORROWER_ROLE, borrower);
-    // emit ConfigurationAdminUpdated(admin);
   }
 
   function removeFlashBorrower(address borrower) external override {

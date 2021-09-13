@@ -106,19 +106,23 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     emit RateOracleUpdated(rateOracle);
   }
 
+  /// @inheritdoc IPoolAddressesProvider
   function getACLManager() external view override returns (address) {
     return getAddress(ACL_MANAGER);
   }
 
+  /// @inheritdoc IPoolAddressesProvider
   function setACLManagerImpl(address aclManager) external override onlyOwner {
     _updateImpl(ACL_MANAGER, aclManager);
     emit ACLManagerUpdated(aclManager);
   }
 
+  /// @inheritdoc IPoolAddressesProvider
   function getACLAdmin() external view override returns (address) {
     return getAddress(ACL_ADMIN);
   }
 
+  /// @inheritdoc IPoolAddressesProvider
   function setACLAdmin(address aclAdmin) external override onlyOwner {
     _addresses[ACL_ADMIN] = aclAdmin;
     emit ACLAdminUpdated(aclAdmin);
