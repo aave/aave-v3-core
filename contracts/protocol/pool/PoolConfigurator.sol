@@ -281,6 +281,22 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
+    /// @inheritdoc IPoolConfigurator
+  function setEModeAssetCategory(address asset, uint256 category)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setEModeCategory(category);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit EModeAssetCategoryChanged(asset, category);
+  }
+
+
   ///@inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external

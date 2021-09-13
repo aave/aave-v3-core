@@ -135,6 +135,13 @@ interface IPoolConfigurator {
   event LiquidationProtocolFeeChanged(address indexed asset, uint256 fee);
 
   /**
+   * @notice Emitted when the category of an asset in eMode is changed
+   * @param asset The address of the underlying asset of the reserve
+   * @param category The new eMode asset category
+   **/
+  event EModeAssetCategoryChanged(address indexed asset, uint256 category);
+
+  /**
    * @notice Emitted when the reserve decimals are updated
    * @param asset The address of the underlying asset of the reserve
    * @param decimals The new decimals
@@ -366,6 +373,13 @@ interface IPoolConfigurator {
    * @param fee The new supply of the reserve
    **/
   function setLiquidationProtocolFee(address asset, uint256 fee) external;
+
+  /**
+   * @notice Updates the asset category in eMode
+   * @param asset The address of the underlying asset of the reserve
+   * @param category The new category of the asset
+   **/
+  function setEModeAssetCategory(address asset, uint256 category) external;
 
   /**
    * @notice Registers a new admin with rights on risk related configurations
