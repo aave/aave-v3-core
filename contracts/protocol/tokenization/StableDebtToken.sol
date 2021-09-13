@@ -126,7 +126,16 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     address onBehalfOf,
     uint256 amount,
     uint256 rate
-  ) external override onlyPool returns (bool) {
+  )
+    external
+    override
+    onlyPool
+    returns (
+      bool,
+      uint256,
+      uint256
+    )
+  {
     MintLocalVars memory vars;
 
     if (user != onBehalfOf) {
@@ -141,12 +150,20 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     vars.amountInRay = amount.wadToRay();
 
+<<<<<<< HEAD
     vars.currentStableRate = _userData[onBehalfOf].previousIndexOrStableRate;
     vars.newStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
     require(vars.newStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
     _userData[onBehalfOf].previousIndexOrStableRate = uint128(vars.newStableRate);
+=======
+    vars.nextStableRate = (_usersStableRate[onBehalfOf].rayMul(currentBalance.wadToRay()) +
+      vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
+
+    require(vars.nextStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
+    _usersStableRate[onBehalfOf] = vars.nextStableRate;
+>>>>>>> master
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
@@ -166,20 +183,29 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       amount,
       currentBalance,
       balanceIncrease,
-      vars.newStableRate,
+      vars.nextStableRate,
       vars.currentAvgStableRate,
       vars.nextSupply
     );
 
-    return currentBalance == 0;
+    return (currentBalance == 0, vars.nextSupply, vars.currentAvgStableRate);
   }
 
-  /// @inheritdoc IStableDebtToken
-  function burn(address user, uint256 amount) external override onlyPool {
+  /**
+   * @dev Burns debt of `user`
+   * @param user The address of the user getting his debt burned
+   * @param amount The amount of debt tokens getting burned
+   **/
+  function burn(address user, uint256 amount)
+    external
+    override
+    onlyPool
+    returns (uint256, uint256)
+  {
     (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(user);
 
     uint256 previousSupply = totalSupply();
-    uint256 newAvgStableRate = 0;
+    uint256 nextAvgStableRate = 0;
     uint256 nextSupply = 0;
     uint256 userStableRate = _userData[user].previousIndexOrStableRate;
 
@@ -199,9 +225,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       // happen that user rate * user balance > avg rate * total supply. In that case,
       // we simply set the avg rate to 0
       if (secondTerm >= firstTerm) {
-        newAvgStableRate = _avgStableRate = _totalSupply = 0;
+        nextAvgStableRate = _avgStableRate = _totalSupply = 0;
       } else {
-        newAvgStableRate = _avgStableRate = (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay());
+        nextAvgStableRate = _avgStableRate = (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay());
       }
     }
 
@@ -225,16 +251,18 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
         currentBalance,
         balanceIncrease,
         userStableRate,
-        newAvgStableRate,
+        nextAvgStableRate,
         nextSupply
       );
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
       _burn(user, amountToBurn, previousSupply);
-      emit Burn(user, amountToBurn, currentBalance, balanceIncrease, newAvgStableRate, nextSupply);
+      emit Burn(user, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
     }
 
     emit Transfer(user, address(0), amount);
+
+    return (nextSupply, nextAvgStableRate);
   }
 
   /**

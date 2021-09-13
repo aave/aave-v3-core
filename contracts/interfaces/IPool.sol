@@ -141,11 +141,11 @@ interface IPool {
   /**
    * @notice Emitted when the state of a reserve is updated.
    * @param reserve The address of the underlying asset of the reserve
-   * @param liquidityRate The new liquidity rate
-   * @param stableBorrowRate The new stable borrow rate
-   * @param variableBorrowRate The new variable borrow rate
-   * @param liquidityIndex The new liquidity index
-   * @param variableBorrowIndex The new variable borrow index
+   * @param liquidityRate The next liquidity rate
+   * @param stableBorrowRate The next stable borrow rate
+   * @param variableBorrowRate The next variable borrow rate
+   * @param liquidityIndex The next liquidity index
+   * @param variableBorrowIndex The next variable borrow index
    **/
   event ReserveDataUpdated(
     address indexed reserve,

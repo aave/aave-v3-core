@@ -141,12 +141,14 @@ library LiquidationLogic {
     debtReserve.updateState(vars.debtReserveCache);
 
     if (vars.userVariableDebt >= vars.actualDebtToLiquidate) {
-      IVariableDebtToken(vars.debtReserveCache.variableDebtTokenAddress).burn(
-        params.user,
-        vars.actualDebtToLiquidate,
-        vars.debtReserveCache.nextVariableBorrowIndex
-      );
-      vars.debtReserveCache.refreshDebt(0, 0, 0, vars.actualDebtToLiquidate);
+      vars.debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(
+        vars.debtReserveCache.variableDebtTokenAddress
+      ).burn(
+          params.user,
+          vars.actualDebtToLiquidate,
+          vars.debtReserveCache.nextVariableBorrowIndex
+        );
+
       debtReserve.updateInterestRates(
         vars.debtReserveCache,
         params.debtAsset,
@@ -156,21 +158,16 @@ library LiquidationLogic {
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
-        IVariableDebtToken(vars.debtReserveCache.variableDebtTokenAddress).burn(
-          params.user,
-          vars.userVariableDebt,
-          vars.debtReserveCache.nextVariableBorrowIndex
-        );
+        vars.debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(
+          vars.debtReserveCache.variableDebtTokenAddress
+        ).burn(params.user, vars.userVariableDebt, vars.debtReserveCache.nextVariableBorrowIndex);
       }
-      IStableDebtToken(vars.debtReserveCache.stableDebtTokenAddress).burn(
+      (
+        vars.debtReserveCache.nextTotalStableDebt,
+        vars.debtReserveCache.nextAvgStableBorrowRate
+      ) = IStableDebtToken(vars.debtReserveCache.stableDebtTokenAddress).burn(
         params.user,
         vars.actualDebtToLiquidate - vars.userVariableDebt
-      );
-      vars.debtReserveCache.refreshDebt(
-        0,
-        vars.actualDebtToLiquidate - vars.userVariableDebt,
-        0,
-        vars.userVariableDebt
       );
 
       debtReserve.updateInterestRates(

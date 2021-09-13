@@ -168,7 +168,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     await evmRevert(snap);
   });
 
-  it('ReserveLogic `updateInterestRates` with newLiquidityRate > type(uint128).max (revert expected)', async () => {
+  it('ReserveLogic `updateInterestRates` with nextLiquidityRate > type(uint128).max (revert expected)', async () => {
     const {
       pool,
       users: [user],
@@ -193,7 +193,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     ).to.be.revertedWith(RL_LIQUIDITY_RATE_OVERFLOW);
   });
 
-  it('ReserveLogic `updateInterestRates` with newStableRate > type(uint128).max (revert expected)', async () => {
+  it('ReserveLogic `updateInterestRates` with nextStableRate > type(uint128).max (revert expected)', async () => {
     const {
       pool,
       users: [user],
@@ -218,7 +218,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     ).to.be.revertedWith(RL_STABLE_BORROW_RATE_OVERFLOW);
   });
 
-  it('ReserveLogic `updateInterestRates` with newVariableRate > type(uint128).max (revert expected)', async () => {
+  it('ReserveLogic `updateInterestRates` with nextVariableRate > type(uint128).max (revert expected)', async () => {
     const {
       pool,
       users: [user],
@@ -404,7 +404,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
   });
 
-  it('StableDebtToken `mint` with newStableRate > type(uint128).max (revert expected)', async () => {
+  it('StableDebtToken `mint` with nextStableRate > type(uint128).max (revert expected)', async () => {
     const {
       deployer,
       pool,

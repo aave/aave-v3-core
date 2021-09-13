@@ -94,7 +94,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) external override onlyPool returns (bool) {
+  ) external override onlyPool returns (bool, uint256) {
     if (user != onBehalfOf) {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
@@ -108,7 +108,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     emit Transfer(address(0), onBehalfOf, amount);
     emit Mint(user, onBehalfOf, amount, index);
 
-    return previousBalance == 0;
+    return (previousBalance == 0, scaledTotalSupply());
   }
 
   /// @inheritdoc IVariableDebtToken
@@ -116,7 +116,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     address user,
     uint256 amount,
     uint256 index
-  ) external override onlyPool {
+  ) external override onlyPool returns (uint256) {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
@@ -124,6 +124,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     emit Transfer(user, address(0), amount);
     emit Burn(user, amount, index);
+    return scaledTotalSupply();
   }
 
   /// @inheritdoc IScaledBalanceToken
