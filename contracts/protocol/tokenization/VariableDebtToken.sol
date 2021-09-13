@@ -99,14 +99,21 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
 
-    uint256 previousBalance = super.balanceOf(onBehalfOf);
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    _mint(onBehalfOf, _castUint128(amountScaled));
+    uint128 castAmount = _castUint128(amountScaled);
+    uint128 castIndex = _castUint128(index);
+
+    uint256 previousBalance = super.balanceOf(onBehalfOf);
+    uint256 accumulatedDebt = _calculateAccruedInterest(previousBalance, onBehalfOf);
+
+    _mint(onBehalfOf, castAmount);
+
+    _userData[user].previousIndexOrStableRate = castIndex;
 
     emit Transfer(address(0), onBehalfOf, amount);
-    emit Mint(user, onBehalfOf, amount, index);
+    emit Mint(user, onBehalfOf, amount + accumulatedDebt, index);
 
     return (previousBalance == 0, scaledTotalSupply());
   }
@@ -120,9 +127,17 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    _burn(user, _castUint128(amountScaled));
+    uint128 castAmount = _castUint128(amountScaled);
+    uint128 castIndex = _castUint128(index);
+
+    uint256 accumulatedInterest = _calculateAccruedInterest(super.balanceOf(user), user);
+
+    _burn(user, castAmount);
+
+    _userData[user].previousIndexOrStableRate = castIndex;
 
     emit Transfer(user, address(0), amount);
+    emit Mint(user, user, accumulatedInterest, index);
     emit Burn(user, amount, index);
     return scaledTotalSupply();
   }

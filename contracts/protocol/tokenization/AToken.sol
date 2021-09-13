@@ -332,15 +332,4 @@ contract AToken is
   ) internal override {
     _transfer(from, to, amount, true);
   }
-
-  function _calculateAccruedInterest(uint256 previousBalance, address user)
-    internal
-    view
-    returns (uint256)
-  {
-    uint256 currentBalance = balanceOf(user);
-    uint256 previousIndex = _userData[user].previousIndexOrStableRate;
-    uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
-    return currentBalance - previousBalanceWithInterest;
-  }
 }

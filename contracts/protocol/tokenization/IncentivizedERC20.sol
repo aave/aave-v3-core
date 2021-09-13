@@ -6,6 +6,7 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 
 /**
  * @title IncentivizedERC20
@@ -13,6 +14,8 @@ import {Errors} from '../libraries/helpers/Errors.sol';
  * @notice Basic ERC20 implementation
  **/
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
+  using WadRayMath for uint256;
+
   struct UserData {
     uint128 balance;
     uint128 previousIndexOrStableRate;
@@ -203,5 +206,16 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   function _castUint128(uint256 input) internal pure returns (uint128) {
     require(input <= type(uint128).max, Errors.MATH_UINT128_OVERFLOW);
     return uint128(input);
+  }
+
+  function _calculateAccruedInterest(uint256 previousBalance, address user)
+    internal
+    view
+    returns (uint256)
+  {
+    uint256 currentBalance = balanceOf(user);
+    uint256 previousIndex = _userData[user].previousIndexOrStableRate;
+    uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
+    return currentBalance - previousBalanceWithInterest;
   }
 }
