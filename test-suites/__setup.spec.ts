@@ -19,6 +19,7 @@ import {
   deployATokensAndRatesHelper,
   deployMockIncentivesController,
   deployAllMockTokens,
+  deployACLManager,
 } from '../helpers/contracts-deployments';
 import { eContractid, tEthereumAddress } from '../helpers/types';
 import {
@@ -33,6 +34,7 @@ import {
   getPool,
   getPoolConfiguratorProxy,
   getPairsTokenAggregator,
+  getACLManager,
 } from '../helpers/contracts-getters';
 import { initializeMakeSuite } from './helpers/make-suite';
 
@@ -49,12 +51,26 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const mockTokens = await deployAllMockTokens();
   console.log('Deployed mocks');
   const addressesProvider = await deployPoolAddressesProvider(AaveConfig.MarketId);
-  await waitForTx(await addressesProvider.setPoolAdmin(aaveAdmin));
+
+  // Set ACL configuration
+  // TODO: add a note here
+  await waitForTx(await addressesProvider.setACLAdmin(aaveAdmin));
+  const aclManagerImpl = await deployACLManager();
+  await waitForTx(await addressesProvider.setACLManagerImpl(aclManagerImpl.address));
+  const aclManagerProxy = await addressesProvider.getACLManager();
+
+  await insertContractAddressInDb(eContractid.ACLManager, aclManagerProxy);
+
+  const aclManager = await getACLManager(aclManagerProxy);
+  const poolAdminRole = await aclManager.POOL_ADMIN_ROLE();
+  await waitForTx(await aclManager.grantRole(poolAdminRole, aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
   const addressList = await getEthersSignersAddresses();
 
-  await waitForTx(await addressesProvider.setEmergencyAdmin(addressList[2]));
+  const emergencyAdminRole = await aclManager.EMERGENCY_ADMIN_ROLE();
+  await waitForTx(await aclManager.grantRole(emergencyAdminRole, addressList[2]));
+  // await waitForTx(await addressesProvider.setEmergencyAdmin(addressList[2]));
 
   const addressesProviderRegistry = await deployPoolAddressesProviderRegistry();
   await waitForTx(
@@ -75,7 +91,9 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getPoolConfigurator()
   );
-  await waitForTx(await poolConfiguratorProxy.registerRiskAdmin(addressList[3]));
+  const riskAdminRole = await aclManager.RISK_ADMIN_ROLE();
+  await waitForTx(await aclManager.grantRole(riskAdminRole, addressList[3]));
+  // await waitForTx(await poolConfiguratorProxy.registerRiskAdmin(addressList[3]));
   await insertContractAddressInDb(eContractid.PoolConfigurator, poolConfiguratorProxy.address);
 
   // Deploy deployment helpers
@@ -213,7 +231,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   );
 
   await configureReservesByHelper(reservesParams, allReservesAddresses, testHelpers, admin);
-  
+
   await deployMockFlashLoanReceiver(addressesProvider.address);
 
   console.timeEnd('setup');

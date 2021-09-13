@@ -21,7 +21,6 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       addressesProvider.setMarketId,
       addressesProvider.setPoolImpl,
       addressesProvider.setPoolConfiguratorImpl,
-      addressesProvider.setPoolAdmin,
       addressesProvider.setPriceOracle,
       addressesProvider.setRateOracle,
     ]) {

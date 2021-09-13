@@ -63,11 +63,6 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
       { fn: 'updateVariableDebtToken', args: [randomUpdateDebtToken] },
       { fn: 'activateReserve', args: [randomAddress] },
       { fn: 'deactivateReserve', args: [randomAddress] },
-      { fn: 'registerRiskAdmin', args: [randomAddress] },
-      { fn: 'unregisterRiskAdmin', args: [randomAddress] },
-      { fn: 'authorizeFlashBorrower', args: [randomAddress] },
-      { fn: 'unauthorizeFlashBorrower', args: [randomAddress] },
-      { fn: 'isRiskAdmin', args: [randomAddress] },
       { fn: 'updateFlashloanPremiumTotal', args: [randomNumber] },
       { fn: 'updateFlashloanPremiumToProtocol', args: [randomNumber] },
     ];
@@ -108,28 +103,29 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     }
   });
 
-  it('Checks only pool admin can register/unregister a risk Admins', async () => {
-    const { configurator, users, riskAdmin, emergencyAdmin } = testEnv;
+  // TODO
+  // it('Checks only pool admin can register/unregister a risk Admins', async () => {
+  //   const { configurator, users, riskAdmin, emergencyAdmin } = testEnv;
 
-    await expect(
-      configurator.connect(riskAdmin.signer).registerRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  //   await expect(
+  //     configurator.connect(riskAdmin.signer).registerRiskAdmin(users[3].address),
+  //     CALLER_NOT_POOL_ADMIN
+  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
 
-    await expect(
-      configurator.connect(riskAdmin.signer).unregisterRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  //   await expect(
+  //     configurator.connect(riskAdmin.signer).unregisterRiskAdmin(users[3].address),
+  //     CALLER_NOT_POOL_ADMIN
+  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
 
-    await expect(
-      configurator.connect(emergencyAdmin.signer).registerRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-    await expect(
-      configurator.connect(emergencyAdmin.signer).unregisterRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-  });
+  //   await expect(
+  //     configurator.connect(emergencyAdmin.signer).registerRiskAdmin(users[3].address),
+  //     CALLER_NOT_POOL_ADMIN
+  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  //   await expect(
+  //     configurator.connect(emergencyAdmin.signer).unregisterRiskAdmin(users[3].address),
+  //     CALLER_NOT_POOL_ADMIN
+  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  // });
 
   it('Tries to pause reserve with non-emergency-admin account (revert expected)', async () => {
     const { configurator, weth, riskAdmin } = testEnv;

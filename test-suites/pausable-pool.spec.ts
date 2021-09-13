@@ -331,7 +331,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
   });
 
   it('Configurator pauses Pool with a ZERO_ADDRESS reserve', async () => {
-    const { emergencyAdmin } = testEnv;
+    const { emergencyAdmin, aclManager } = testEnv;
 
     const snapId = await evmSnapshot();
 
@@ -355,6 +355,11 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
       await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(MARKET_ID)
     ).deployed();
 
+    // Set the ACL manager
+    expect(await poolAddressesProvider.setACLManager(aclManager.address))
+      .to.emit(poolAddressesProvider, 'ACLManagerUpdated')
+      .withArgs(aclManager.address);
+
     // Update the Pool impl with a MockPool
     expect(await poolAddressesProvider.setPoolImpl(mockPool.address))
       .to.emit(poolAddressesProvider, 'PoolUpdated')
@@ -372,11 +377,6 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     const proxiedPoolConfiguratorAddress = await poolAddressesProvider.getPoolConfigurator();
     const proxiedPoolConfigurator = await getPoolConfiguratorProxy(proxiedPoolConfiguratorAddress);
-
-    // Update the EmergencyAdmin
-    expect(await poolAddressesProvider.setEmergencyAdmin(emergencyAdmin.address))
-      .to.emit(poolAddressesProvider, 'EmergencyAdminUpdated')
-      .withArgs(emergencyAdmin.address);
 
     // Pause reserve
     expect(await proxiedPoolConfigurator.connect(emergencyAdmin.signer).setPoolPause(true));
