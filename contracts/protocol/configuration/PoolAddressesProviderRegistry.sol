@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesProviderRegistry.sol';
@@ -10,7 +10,7 @@ import {Errors} from '../libraries/helpers/Errors.sol';
  * @author Aave
  * @notice Main registry of PoolAddressesProvider of multiple Aave protocol's markets
  * @dev Used for indexing purposes of Aave protocol's markets. The id assigned
- *   to a PoolAddressesProvider refers to the market it is connected with, for 
+ *   to a PoolAddressesProvider refers to the market it is connected with, for
  *   example with `0` for the Aave main market and `1` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
