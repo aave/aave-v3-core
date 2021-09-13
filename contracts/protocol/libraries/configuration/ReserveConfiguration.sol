@@ -23,6 +23,7 @@ library ReserveConfiguration {
   uint256 constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant LIQUIDATION_PROTOCOL_FEE_MASK =  0xFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant EMODE_CATEGORY_MASK =            0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
 
   /// @dev For the LTV, the start bit is 0 (up to 15), hence no bitshifting is needed
   uint256 constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -38,6 +39,7 @@ library ReserveConfiguration {
   uint256 constant BORROW_CAP_START_BIT_POSITION = 80;
   uint256 constant SUPPLY_CAP_START_BIT_POSITION = 116;
   uint256 constant LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION = 152;
+  uint256 constant EMODE_CATEGORY_START_BIT_POSITION = 168;
 
   uint256 constant MAX_VALID_LTV = 65535;
   uint256 constant MAX_VALID_LIQUIDATION_THRESHOLD = 65535;
@@ -47,6 +49,7 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_BORROW_CAP = 68719476735;
   uint256 constant MAX_VALID_SUPPLY_CAP = 68719476735;
   uint256 constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 10000;
+  uint256 constant MAX_VALID_EMODE_CATEGORY = 255;
 
   /**
    * @notice Sets the Loan to Value of the reserve
@@ -420,6 +423,39 @@ library ReserveConfiguration {
   {
     return
       (self.data & ~LIQUIDATION_PROTOCOL_FEE_MASK) >> LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION;
+  }
+
+    /**
+   * @notice Sets the eMode asset category
+   * @param self The reserve configuration
+   * @param category The asset category when the user selects the eMode
+   **/
+  function setEModeCategory(
+    DataTypes.ReserveConfigurationMap memory self,
+    uint256 category
+  ) internal pure {
+    require(
+      category <= MAX_VALID_EMODE_CATEGORY,
+      Errors.RC_INVALID_EMODE_CATEGORY
+    );
+
+    self.data =
+      (self.data & EMODE_CATEGORY_MASK) |
+      (category << EMODE_CATEGORY_START_BIT_POSITION);
+  }
+
+  /**
+   * @dev Gets the eMode asset category
+   * @param self The reserve configuration
+   * @return The eMode category for the asset
+   **/
+  function getEModeCategory(DataTypes.ReserveConfigurationMap storage self)
+    internal
+    view
+    returns (uint256)
+  {
+    return
+      (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
   }
 
   /**
