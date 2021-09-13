@@ -558,41 +558,35 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(after.interestRateStrategyAddress).to.be.eq(ONE_ADDRESS);
   });
 
-  // TODO
   it('Register a new risk Admin', async () => {
     const { aclManager, poolAdmin, users, riskAdmin } = testEnv;
 
     const riskAdminRole = await aclManager.RISK_ADMIN_ROLE();
 
     const newRiskAdmin = users[3].address;
-    expect(await aclManager.grantRole(riskAdminRole, newRiskAdmin))
+    expect(await aclManager.addRiskAdmin(newRiskAdmin))
       .to.emit(aclManager, 'RoleGranted')
       .withArgs(riskAdminRole, newRiskAdmin, poolAdmin.address);
 
-    const isRiskAdminRegistered = await aclManager.hasRole(riskAdminRole, riskAdmin.address);
-    expect(isRiskAdminRegistered).to.be.true;
-    const isNewRiskAdminRegistered = await aclManager.hasRole(riskAdminRole, newRiskAdmin);
-    expect(isNewRiskAdminRegistered).to.be.true;
+    expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.true;
+    expect(await aclManager.isRiskAdmin(newRiskAdmin)).to.be.true;
   });
-
-  // TODO
+  
   it('Unregister risk admins', async () => {
     const { aclManager, poolAdmin, users, riskAdmin } = testEnv;
 
     const riskAdminRole = await aclManager.RISK_ADMIN_ROLE();
 
     const newRiskAdmin = users[3].address;
-    expect(await aclManager.revokeRole(riskAdminRole, newRiskAdmin))
+    expect(await aclManager.removeRiskAdmin(newRiskAdmin))
       .to.emit(aclManager, 'RoleRevoked')
       .withArgs(riskAdminRole, newRiskAdmin, poolAdmin.address);
-    expect(await aclManager.revokeRole(riskAdminRole, riskAdmin.address))
+    expect(await aclManager.removeRiskAdmin(riskAdmin.address))
       .to.emit(aclManager, 'RoleRevoked')
       .withArgs(riskAdminRole, riskAdmin.address, poolAdmin.address);
 
-    const isRiskAdminRegistered = await aclManager.hasRole(riskAdminRole, riskAdmin.address);
-    expect(isRiskAdminRegistered).to.be.false;
-    const isNewRiskAdminRegistered = await aclManager.hasRole(riskAdminRole, newRiskAdmin);
-    expect(isNewRiskAdminRegistered).to.be.false;
+    expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.false;
+    expect(await aclManager.isRiskAdmin(newRiskAdmin)).to.be.false;
   });
 
   it('Authorized a new flash borrower', async () => {
@@ -601,15 +595,11 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const authorizedFlashBorrowerRole = await aclManager.FLASH_BORROWER_ROLE();
 
     const authorizedFlashBorrower = users[4].address;
-    expect(await aclManager.grantRole(authorizedFlashBorrowerRole, authorizedFlashBorrower))
+    expect(await aclManager.addFlashBorrower(authorizedFlashBorrower))
       .to.emit(aclManager, 'RoleGranted')
       .withArgs(authorizedFlashBorrowerRole, authorizedFlashBorrower, poolAdmin.address);
 
-    const isFlashBorrowerAuthorized = await aclManager.hasRole(
-      authorizedFlashBorrowerRole,
-      authorizedFlashBorrower
-    );
-    expect(isFlashBorrowerAuthorized).to.be.true;
+    expect(await aclManager.isFlashBorrower(authorizedFlashBorrower)).to.be.true;
   });
 
   it('Unauthorized flash borrower', async () => {
@@ -618,15 +608,11 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const authorizedFlashBorrowerRole = await aclManager.FLASH_BORROWER_ROLE();
 
     const authorizedFlashBorrower = users[4].address;
-    expect(await aclManager.revokeRole(authorizedFlashBorrowerRole, authorizedFlashBorrower))
+    expect(await aclManager.removeFlashBorrower(authorizedFlashBorrower))
       .to.emit(aclManager, 'RoleRevoked')
       .withArgs(authorizedFlashBorrowerRole, authorizedFlashBorrower, poolAdmin.address);
 
-    const isFlashBorrowerAuthorized = await aclManager.hasRole(
-      authorizedFlashBorrowerRole,
-      authorizedFlashBorrower
-    );
-    expect(isFlashBorrowerAuthorized).to.be.false;
+    expect(await aclManager.isFlashBorrower(authorizedFlashBorrower)).to.be.false;
   });
 
   it('Updates flash loan premiums: 10 toProtocol, 40 total', async () => {

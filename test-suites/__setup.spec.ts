@@ -52,25 +52,23 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   console.log('Deployed mocks');
   const addressesProvider = await deployPoolAddressesProvider(AaveConfig.MarketId);
 
-  // Set ACL configuration
-  // TODO: add a note here
+  // Set ACL Admin
   await waitForTx(await addressesProvider.setACLAdmin(aaveAdmin));
+  
+  // Set ACL configuration
+  // ACL Admin should be fixed beforehand
   const aclManagerImpl = await deployACLManager();
   await waitForTx(await addressesProvider.setACLManagerImpl(aclManagerImpl.address));
   const aclManagerProxy = await addressesProvider.getACLManager();
-
   await insertContractAddressInDb(eContractid.ACLManager, aclManagerProxy);
-
   const aclManager = await getACLManager(aclManagerProxy);
-  const poolAdminRole = await aclManager.POOL_ADMIN_ROLE();
-  await waitForTx(await aclManager.grantRole(poolAdminRole, aaveAdmin));
+
+  await waitForTx(await aclManager.addPoolAdmin(aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
   const addressList = await getEthersSignersAddresses();
 
-  const emergencyAdminRole = await aclManager.EMERGENCY_ADMIN_ROLE();
-  await waitForTx(await aclManager.grantRole(emergencyAdminRole, addressList[2]));
-  // await waitForTx(await addressesProvider.setEmergencyAdmin(addressList[2]));
+  await waitForTx(await aclManager.addEmergencyAdmin(addressList[2]));
 
   const addressesProviderRegistry = await deployPoolAddressesProviderRegistry();
   await waitForTx(
@@ -91,10 +89,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const poolConfiguratorProxy = await getPoolConfiguratorProxy(
     await addressesProvider.getPoolConfigurator()
   );
-  const riskAdminRole = await aclManager.RISK_ADMIN_ROLE();
-  await waitForTx(await aclManager.grantRole(riskAdminRole, addressList[3]));
-  // await waitForTx(await poolConfiguratorProxy.registerRiskAdmin(addressList[3]));
   await insertContractAddressInDb(eContractid.PoolConfigurator, poolConfiguratorProxy.address);
+  await waitForTx(await aclManager.addRiskAdmin(addressList[3]));
 
   // Deploy deployment helpers
   await deployStableAndVariableTokensHelper([poolProxy.address, addressesProvider.address]);

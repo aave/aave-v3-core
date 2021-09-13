@@ -26,8 +26,11 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
   });
 
   it('Authorize a flash borrower', async () => {
-    const { deployer, configurator } = testEnv;
-    expect(await configurator.authorizeFlashBorrower(deployer.address));
+    const { deployer, aclManager } = testEnv;
+    const flashBorrowerRole = await aclManager.FLASH_BORROWER_ROLE();
+    expect(await aclManager.addFlashBorrower(deployer.address))
+      .to.emit(aclManager, 'RoleGranted')
+      .withArgs(flashBorrowerRole, deployer.address, deployer.address);
   });
 
   it('Deposits WETH into the reserve', async () => {

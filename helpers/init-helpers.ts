@@ -315,10 +315,7 @@ export const configureReservesByHelper = async (
   }
   if (tokens.length) {
     // Set aTokenAndRatesDeployer as temporal admin
-    const poolAdminRole = await aclManager.POOL_ADMIN_ROLE();
-    // TODO: Not needed to revoke
-    await waitForTx(await aclManager.revokeRole(poolAdminRole, admin));
-    await waitForTx(await aclManager.grantRole(poolAdminRole, atokenAndRatesDeployer.address));
+    await waitForTx(await aclManager.addPoolAdmin(atokenAndRatesDeployer.address));
     
     // Deploy init per chunks
     const enableChunks = 20;
@@ -335,8 +332,6 @@ export const configureReservesByHelper = async (
         console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
       }
       // Set deployer back as admin
-      // await waitForTx(await addressProvider.setPoolAdmin(admin));
-      await waitForTx(await aclManager.revokeRole(poolAdminRole, atokenAndRatesDeployer.address));
-      await waitForTx(await aclManager.grantRole(poolAdminRole, admin));
+      await waitForTx(await aclManager.removePoolAdmin(atokenAndRatesDeployer.address));
   }
 };

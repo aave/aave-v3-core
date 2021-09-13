@@ -103,30 +103,6 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     }
   });
 
-  // TODO
-  // it('Checks only pool admin can register/unregister a risk Admins', async () => {
-  //   const { configurator, users, riskAdmin, emergencyAdmin } = testEnv;
-
-  //   await expect(
-  //     configurator.connect(riskAdmin.signer).registerRiskAdmin(users[3].address),
-  //     CALLER_NOT_POOL_ADMIN
-  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-
-  //   await expect(
-  //     configurator.connect(riskAdmin.signer).unregisterRiskAdmin(users[3].address),
-  //     CALLER_NOT_POOL_ADMIN
-  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-
-  //   await expect(
-  //     configurator.connect(emergencyAdmin.signer).registerRiskAdmin(users[3].address),
-  //     CALLER_NOT_POOL_ADMIN
-  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-  //   await expect(
-  //     configurator.connect(emergencyAdmin.signer).unregisterRiskAdmin(users[3].address),
-  //     CALLER_NOT_POOL_ADMIN
-  //   ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-  // });
-
   it('Tries to pause reserve with non-emergency-admin account (revert expected)', async () => {
     const { configurator, weth, riskAdmin } = testEnv;
     await expect(

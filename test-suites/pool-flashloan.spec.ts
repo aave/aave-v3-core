@@ -142,15 +142,17 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     );
     expect(daiReservesAfter).to.be.equal(daiReservesBefore.add(daiFeesToProtocol));
   });
+  
   it('Takes an authorized AAVE flash loan with mode = 0, returns the funds correctly', async () => {
     const {
       pool,
       helpersContract,
       aave,
-      configurator,
+      aclManager,
       users: [, , , authorizedUser],
     } = testEnv;
-    await configurator.authorizeFlashBorrower(authorizedUser.address);
+
+    expect(await aclManager.addFlashBorrower(authorizedUser.address));
 
     const flashBorrowedAmount = ethers.utils.parseEther('0.8');
     const totalFees = BigNumber.from(0);
