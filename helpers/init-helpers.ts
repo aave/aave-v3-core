@@ -2,6 +2,7 @@ import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
 import { chunk, waitForTx } from './misc-utils';
 import {
+  getACLManager,
   getATokensAndRatesHelper,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
@@ -244,6 +245,7 @@ export const configureReservesByHelper = async (
 ) => {
   const addressProvider = await getPoolAddressesProvider();
   const atokenAndRatesDeployer = await getATokensAndRatesHelper();
+  const aclManager = await getACLManager();
   const tokens: string[] = [];
   const symbols: string[] = [];
 
@@ -313,23 +315,28 @@ export const configureReservesByHelper = async (
   }
   if (tokens.length) {
     // Set aTokenAndRatesDeployer as temporal admin
-    await waitForTx(await addressProvider.setPoolAdmin(atokenAndRatesDeployer.address));
-
+    const poolAdminRole = await aclManager.POOL_ADMIN_ROLE();
+    // TODO: Not needed to revoke
+    await waitForTx(await aclManager.revokeRole(poolAdminRole, admin));
+    await waitForTx(await aclManager.grantRole(poolAdminRole, atokenAndRatesDeployer.address));
+    
     // Deploy init per chunks
     const enableChunks = 20;
     const chunkedSymbols = chunk(symbols, enableChunks);
     const chunkedInputParams = chunk(inputParams, enableChunks);
-
+    
     console.log(`- Configure reserves in ${chunkedInputParams.length} txs`);
     for (let chunkIndex = 0; chunkIndex < chunkedInputParams.length; chunkIndex++) {
       await waitForTx(
         await atokenAndRatesDeployer.configureReserves(chunkedInputParams[chunkIndex], {
           gasLimit: 12000000,
         })
-      );
-      console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
-    }
-    // Set deployer back as admin
-    await waitForTx(await addressProvider.setPoolAdmin(admin));
+        );
+        console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
+      }
+      // Set deployer back as admin
+      // await waitForTx(await addressProvider.setPoolAdmin(admin));
+      await waitForTx(await aclManager.revokeRole(poolAdminRole, atokenAndRatesDeployer.address));
+      await waitForTx(await aclManager.grantRole(poolAdminRole, admin));
   }
 };

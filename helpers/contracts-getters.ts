@@ -23,6 +23,7 @@ import {
   DepositLogicFactory,
   BorrowLogicFactory,
   LiquidationLogicFactory,
+  ACLManagerFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -40,6 +41,14 @@ export const getPoolAddressesProvider = async (address?: tEthereumAddress) => {
     await getFirstSigner()
   );
 };
+
+export const getACLManager = async (address?: tEthereumAddress) => {
+  return await ACLManagerFactory.connect(
+    address || (await getDb().get(`${eContractid.ACLManager}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+};
+
 export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
   return await PoolConfiguratorFactory.connect(
     address ||
