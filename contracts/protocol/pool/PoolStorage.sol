@@ -47,4 +47,6 @@ contract PoolStorage {
   uint40 internal _lastBorrowTimestamp;
 
   mapping(uint8 => DataTypes.EModeAssetCategory) _eModeCategories;
+
+  mapping(address => uint8) _userEModeCategories;
 }

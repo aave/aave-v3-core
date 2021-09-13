@@ -616,6 +616,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _eModeCategories[id];
   }
 
+  /// @inheritdoc IPool
+  function setUserEMode(uint8 categoryId) external virtual override {
+    ValidationLogic.validateSetUserEMode(
+      categoryId,
+      _reserves,
+      _usersConfig[msg.sender],
+      _reservesList,
+      _reservesCount,
+      _addressesProvider.getPriceOracle()
+    );
+    _userEModeCategories[msg.sender] = categoryId;
+    emit UserEModeSet(msg.sender, categoryId);
+  }
+
   function _addReserveToList(address asset) internal {
     uint256 reservesCount = _reservesCount;
 

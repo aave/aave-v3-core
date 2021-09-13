@@ -552,7 +552,7 @@ library ValidationLogic {
    * @notice Validates a drop reserve action
    * @param reserve The reserve object
    **/
-  function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {
+  function validateDropReserve(DataTypes.ReserveData storage reserve) external view {
     require(
       IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0,
       Errors.RL_STABLE_DEBT_NOT_ZERO
@@ -562,5 +562,39 @@ library ValidationLogic {
       Errors.RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO
     );
     require(IERC20(reserve.aTokenAddress).totalSupply() == 0, Errors.RL_ATOKEN_SUPPLY_NOT_ZERO);
+  }
+
+  function validateSetUserEMode(
+    uint8 categoryId,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    DataTypes.UserConfigurationMap memory userConfig,
+    mapping(uint256 => address) storage reserves,
+    uint256 reservesCount,
+    address oracle
+  ) external view {
+    //eMode can always be enabled if the user hasn't deposited anything
+    if (userConfig.isEmpty()) {
+      return;
+    }
+
+    // if user is trying to set another category than default we require that
+    // 1. either the user has no deposited assets, or the deposited assets are all of categoryId
+    // 2. either the user is not borrowing, or it's borrowing assets of categoryId
+    if (categoryId > 0) {
+      unchecked {
+        for (uint256 i = 0; i < reservesCount; i++) {
+          if (userConfig.isUsingAsCollateralOrBorrowing(i)) {
+            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reserves[i]]
+              .configuration;
+            require(
+              configuration.getEModeCategoryMemory() == categoryId,
+              Errors.RC_INVALID_EMODE_CATEGORY
+            );
+          }
+        }
+      }
+    }
+    // if categoryId is 0, setUserEModeCategory() will need to validate the HF after disabling eMode
+    // to ensure that the HF does not drop below 1
   }
 }

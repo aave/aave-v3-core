@@ -164,6 +164,13 @@ interface IPool {
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
 
   /**
+   * @notice Emitted when the user selects a certain asset category for eMode
+   * @param user The address of the user
+   * @param categoryId The category id
+   **/
+  event UserEModeSet(address indexed user, uint8 categoryId);
+
+  /**
    * @notice Deposits an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
    * - E.g. User deposits 100 USDC and gets in return 100 aUSDC
    * @param asset The address of the underlying asset to deposit
@@ -561,6 +568,12 @@ interface IPool {
    * @return The configuration data of the category
    */
   function getEModeCategoryConfig(uint8 id) external returns (DataTypes.EModeAssetCategory memory);
+
+  /**
+   * @notice Allows a user to use the protocol in eMode
+   * @param categoryId The id of the category
+   */
+  function setUserEMode(uint8 categoryId) external;
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate

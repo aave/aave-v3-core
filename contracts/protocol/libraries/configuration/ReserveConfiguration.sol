@@ -653,4 +653,18 @@ library ReserveConfiguration {
     return
       (self.data & ~LIQUIDATION_PROTOCOL_FEE_MASK) >> LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION;
   }
+
+  /**
+   * @dev Gets the eMode asset category
+   * @param self The reserve configuration
+   * @return The eMode category for the asset
+   **/
+  function getEModeCategoryMemory(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    view
+    returns (uint256)
+  {
+    return
+      (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
+  }
 }
