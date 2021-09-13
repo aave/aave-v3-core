@@ -126,8 +126,11 @@ contract AToken is
     _userData[user].previousIndexOrStableRate = castIndex;
 
     emit Transfer(user, address(0), amount);
-    emit Mint(user, accumulatedInterest, castIndex);
-    emit Burn(user, receiverOfUnderlying, amount, index);
+    if (accumulatedInterest > amount) {
+      emit Mint(user, accumulatedInterest - amount, castIndex);
+    } else {
+      emit Burn(user, receiverOfUnderlying, amount - accumulatedInterest, index);
+    }
   }
 
   /// @inheritdoc IAToken

@@ -137,8 +137,12 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     _userData[user].previousIndexOrStableRate = castIndex;
 
     emit Transfer(user, address(0), amount);
-    emit Mint(user, user, accumulatedInterest, index);
-    emit Burn(user, amount, index);
+
+    if (accumulatedInterest > amount) {
+      emit Mint(user, user, accumulatedInterest - amount, index);
+    } else {
+      emit Burn(user, amount - accumulatedInterest, index);
+    }
     return scaledTotalSupply();
   }
 
