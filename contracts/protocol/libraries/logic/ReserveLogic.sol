@@ -151,9 +151,9 @@ library ReserveLogic {
   }
 
   struct UpdateInterestRatesLocalVars {
-    uint256 newLiquidityRate;
-    uint256 newStableRate;
-    uint256 newVariableRate;
+    uint256 nextLiquidityRate;
+    uint256 nextStableRate;
+    uint256 nextVariableRate;
     uint256 avgStableRate;
     uint256 totalVariableDebt;
   }
@@ -177,9 +177,9 @@ library ReserveLogic {
       reserveCache.nextVariableBorrowIndex
     );
     (
-      vars.newLiquidityRate,
-      vars.newStableRate,
-      vars.newVariableRate
+      vars.nextLiquidityRate,
+      vars.nextStableRate,
+      vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
@@ -190,19 +190,19 @@ library ReserveLogic {
       reserveCache.nextAvgStableBorrowRate,
       reserveCache.reserveConfiguration.getReserveFactorMemory()
     );
-    require(vars.newLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
-    require(vars.newStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);
-    require(vars.newVariableRate <= type(uint128).max, Errors.RL_VARIABLE_BORROW_RATE_OVERFLOW);
+    require(vars.nextLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
+    require(vars.nextStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);
+    require(vars.nextVariableRate <= type(uint128).max, Errors.RL_VARIABLE_BORROW_RATE_OVERFLOW);
 
-    reserve.currentLiquidityRate = uint128(vars.newLiquidityRate);
-    reserve.currentStableBorrowRate = uint128(vars.newStableRate);
-    reserve.currentVariableBorrowRate = uint128(vars.newVariableRate);
+    reserve.currentLiquidityRate = uint128(vars.nextLiquidityRate);
+    reserve.currentStableBorrowRate = uint128(vars.nextStableRate);
+    reserve.currentVariableBorrowRate = uint128(vars.nextVariableRate);
 
     emit ReserveDataUpdated(
       reserveAddress,
-      vars.newLiquidityRate,
-      vars.newStableRate,
-      vars.newVariableRate,
+      vars.nextLiquidityRate,
+      vars.nextStableRate,
+      vars.nextVariableRate,
       reserveCache.nextLiquidityIndex,
       reserveCache.nextVariableBorrowIndex
     );
@@ -360,47 +360,10 @@ library ReserveLogic {
     ) = IStableDebtToken(reserveCache.stableDebtTokenAddress).getSupplyData();
 
     // by default the actions are considered as not affecting the debt balances.
-    // if the action involves mint/burn of debt, the cache needs to be updated through refreshDebt()
+    // if the action involves mint/burn of debt, the cache needs to be updated
     reserveCache.nextTotalStableDebt = reserveCache.currTotalStableDebt;
     reserveCache.nextAvgStableBorrowRate = reserveCache.currAvgStableBorrowRate;
 
     return reserveCache;
-  }
-
-  /**
-   * @notice Updates the debt data in the cache object.
-   * @dev Must be invoked before updateInterestRates() when a protocol interaction
-   * causes minting or burning of debt.
-   * @param cache The cache object
-   * @param stableDebtMinted The stable debt minted as a consequence of the interaction
-   * @param stableDebtBurned The stable debt burned as a consequence of the interaction
-   * @param variableDebtMinted The variable debt minted as a consequence of the interaction
-   * @param variableDebtBurned The variable debt burned as a consequence of the interaction
-   */
-  function refreshDebt(
-    DataTypes.ReserveCache memory cache,
-    uint256 stableDebtMinted,
-    uint256 stableDebtBurned,
-    uint256 variableDebtMinted,
-    uint256 variableDebtBurned
-  ) internal view {
-    if (stableDebtMinted != 0 || stableDebtBurned != 0) {
-      if (cache.currTotalStableDebt + stableDebtMinted > stableDebtBurned) {
-        cache.nextTotalStableDebt = cache.currTotalStableDebt + stableDebtMinted - stableDebtBurned;
-        cache.nextAvgStableBorrowRate = IStableDebtToken(cache.stableDebtTokenAddress)
-          .getAverageStableRate();
-      } else {
-        cache.nextTotalStableDebt = cache.nextAvgStableBorrowRate = 0;
-      }
-    }
-
-    if (variableDebtMinted != 0 || variableDebtBurned != 0) {
-      uint256 scaledVariableDebtMinted = variableDebtMinted.rayDiv(cache.nextVariableBorrowIndex);
-      uint256 scaledVariableDebtBurned = variableDebtBurned.rayDiv(cache.nextVariableBorrowIndex);
-      cache.nextScaledVariableDebt =
-        cache.currScaledVariableDebt +
-        scaledVariableDebtMinted -
-        scaledVariableDebtBurned;
-    }
   }
 }
