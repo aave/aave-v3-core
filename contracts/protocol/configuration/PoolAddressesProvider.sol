@@ -28,7 +28,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
-  bytes32 private constant BRIDGE_ACL_MANAGER = 'BRIDGE_ACL_MANAGER';
   bytes32 private constant ACL_MANAGER = 'ACL_MANAGER';
   bytes32 private constant ACL_ADMIN = 'ACL_ADMIN';
 
