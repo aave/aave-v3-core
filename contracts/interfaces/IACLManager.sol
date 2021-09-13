@@ -14,7 +14,7 @@ interface IACLManager {
 
   function FLASH_BORROWER_ROLE() external view returns (bytes32);
 
-  function BRIDGE_MANAGER_ROLE() external view returns (bytes32);
+  function BRIDGE_ROLE() external view returns (bytes32);
 
   function addPoolAdmin(address admin) external;
 
@@ -39,4 +39,10 @@ interface IACLManager {
   function removeFlashBorrower(address borrower) external;
 
   function isFlashBorrower(address borrower) external view returns (bool);
+
+  function addBridge(address bridge) external;
+
+  function removeBridge(address bridge) external;
+
+  function isBridge(address bridge) external view returns (bool);
 }
