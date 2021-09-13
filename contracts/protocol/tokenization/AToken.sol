@@ -148,15 +148,11 @@ contract AToken is
     uint256 amount,
     uint256 index
   ) external override onlyPool returns (bool) {
-    uint256 previousBalance = super.balanceOf(user);
-
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint256 currentBalance = balanceOf(user);
-    uint256 previousIndex = _previousIndex[user];
-    uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
-    uint256 accumulatedInterest = currentBalance - previousBalanceWithInterest;
+    uint256 previousBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = _calculateAccruedInterest(previousBalance, user);
     _previousIndex[user] = index;
 
     _mint(user, amountScaled);
@@ -396,5 +392,15 @@ contract AToken is
     uint256 amount
   ) internal override {
     _transfer(from, to, amount, true);
+  }
+
+  function _calculateAccruedInterest(uint256 previousBalance, address user)
+    internal
+    returns (uint256)
+  {
+    uint256 currentBalance = balanceOf(user);
+    uint256 previousIndex = _previousIndex[user];
+    uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
+    return currentBalance - previousBalanceWithInterest;
   }
 }
