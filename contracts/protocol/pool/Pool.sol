@@ -595,6 +595,27 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
   }
 
+  /// @inheritdoc IPool
+  function configureEModeCategory(uint8 id, DataTypes.EModeAssetCategory memory category)
+    external
+    override
+    onlyPoolConfigurator
+  {
+    // category 0 is reserved for volatile heterogeneous assets and it's always disabled
+    require(id != 0, Errors.RC_INVALID_EMODE_CATEGORY);
+    _eModeCategories[id] = category;
+  }
+
+  /// @inheritdoc IPool
+  function getEModeCategoryConfig(uint8 id)
+    external
+    view
+    override
+    returns (DataTypes.EModeAssetCategory memory)
+  {
+    return _eModeCategories[id];
+  }
+
   function _addReserveToList(address asset) internal {
     uint256 reservesCount = _reservesCount;
 

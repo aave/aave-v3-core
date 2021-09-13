@@ -547,6 +547,22 @@ interface IPool {
   ) external;
 
   /**
+   * @notice Configures a new category for the eMode.
+   * @dev In eMode, the protocol allows very high borrowing power to borrow assets of the same category.
+   * The category 0 is reserved as it's the default for volatile assets
+   * @param id The id of the category
+   * @param config The configuration of the category
+   */
+  function configureEModeCategory(uint8 id, DataTypes.EModeAssetCategory memory config) external;
+
+  /**
+   * @notice Returns the configuration of an eMode asset category
+   * @param id The id of the category
+   * @return The configuration data of the category
+   */
+  function getEModeCategoryConfig(uint8 id) external returns (DataTypes.EModeAssetCategory memory);
+
+  /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate
    * @return The percentage of available liquidity to borrow
    */

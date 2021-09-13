@@ -134,7 +134,7 @@ library DepositLogic {
     mapping(uint256 => address) storage reservesList,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
     DataTypes.FinalizeTransferParams memory vars
-  ) public {
+  ) external {
     ValidationLogic.validateTransfer(reserves[vars.asset]);
 
     uint256 reserveId = reserves[vars.asset].id;

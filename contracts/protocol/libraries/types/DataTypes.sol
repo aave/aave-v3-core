@@ -50,6 +50,12 @@ library DataTypes {
     uint256 data;
   }
 
+  struct EModeAssetCategory {
+    address oracle;
+    string label;
+    bool active;
+  }
+
   enum InterestRateMode {NONE, STABLE, VARIABLE}
 
   struct ReserveCache {
