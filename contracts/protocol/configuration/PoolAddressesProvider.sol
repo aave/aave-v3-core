@@ -18,11 +18,19 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
   bytes32 private constant POOL = 'POOL';
   bytes32 private constant POOL_CONFIGURATOR = 'POOL_CONFIGURATOR';
+
+  /// @dev Deprecated: poolAdmin managed via ACLManager
   bytes32 private constant POOL_ADMIN = 'POOL_ADMIN';
+  /// @dev Deprecated: emergencyAdmin managed via ACLManager
   bytes32 private constant EMERGENCY_ADMIN = 'EMERGENCY_ADMIN';
+  /// @dev Deprecated: collateralManager no longer used
   bytes32 private constant POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
+
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
+  bytes32 private constant BRIDGE_ACL_MANAGER = 'BRIDGE_ACL_MANAGER';
+  bytes32 private constant ACL_MANAGER = 'ACL_MANAGER';
+  bytes32 private constant ACL_ADMIN = 'ACL_ADMIN';
 
   constructor(string memory marketId) {
     _setMarketId(marketId);
@@ -81,24 +89,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     emit PoolConfiguratorUpdated(configurator);
   }
 
-  function getPoolAdmin() external view override returns (address) {
-    return getAddress(POOL_ADMIN);
-  }
-
-  function setPoolAdmin(address admin) external override onlyOwner {
-    _addresses[POOL_ADMIN] = admin;
-    emit ConfigurationAdminUpdated(admin);
-  }
-
-  function getEmergencyAdmin() external view override returns (address) {
-    return getAddress(EMERGENCY_ADMIN);
-  }
-
-  function setEmergencyAdmin(address emergencyAdmin) external override onlyOwner {
-    _addresses[EMERGENCY_ADMIN] = emergencyAdmin;
-    emit EmergencyAdminUpdated(emergencyAdmin);
-  }
-
   function getPriceOracle() external view override returns (address) {
     return getAddress(PRICE_ORACLE);
   }
@@ -115,6 +105,24 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   function setRateOracle(address rateOracle) external override onlyOwner {
     _addresses[RATE_ORACLE] = rateOracle;
     emit RateOracleUpdated(rateOracle);
+  }
+
+  function getACLManager() external view override returns (address) {
+    return getAddress(ACL_MANAGER);
+  }
+
+  function setACLManagerImpl(address aclManager) external override onlyOwner {
+    _updateImpl(ACL_MANAGER, aclManager);
+    emit ACLManagerUpdated(aclManager);
+  }
+
+  function getACLAdmin() external view override returns (address) {
+    return getAddress(ACL_ADMIN);
+  }
+
+  function setACLAdmin(address aclAdmin) external override onlyOwner {
+    _addresses[ACL_ADMIN] = aclAdmin;
+    emit ACLAdminUpdated(aclAdmin);
   }
 
   /**

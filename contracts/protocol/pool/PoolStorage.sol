@@ -38,6 +38,7 @@ contract PoolStorage {
 
   uint256 internal _maxNumberOfReserves;
 
+  /// @dev Deprecated: authorizedFlashBorrowers managed via ACLManager
   mapping(address => bool) _authorizedFlashBorrowers;
 
   uint256 internal _flashLoanPremiumToProtocol;

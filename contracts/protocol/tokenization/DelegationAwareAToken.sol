@@ -4,6 +4,7 @@ pragma solidity 0.8.6;
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IDelegationToken} from '../../interfaces/IDelegationToken.sol';
+import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {AToken} from './AToken.sol';
 
 /**
@@ -13,11 +14,9 @@ import {AToken} from './AToken.sol';
  * @dev The underlying asset needs to be compatible with the COMP delegation interface
  */
 contract DelegationAwareAToken is AToken {
-  modifier onlyPoolAdmin {
-    require(
-      _msgSender() == IPool(_pool).getAddressesProvider().getPoolAdmin(),
-      Errors.CALLER_NOT_POOL_ADMIN
-    );
+  modifier onlyPoolAdmin() {
+    IACLManager aclManager = IACLManager(IPool(_pool).getAddressesProvider().getACLManager());
+    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
     _;
   }
 

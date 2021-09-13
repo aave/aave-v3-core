@@ -218,7 +218,7 @@ library BorrowLogic {
   function executeFlashLoan(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    mapping(address => bool) storage authorizedFlashBorrowers,
+    bool isAuthorizedFlashBorrower,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory flashParams
   ) external {
@@ -230,9 +230,7 @@ library BorrowLogic {
     ValidationLogic.validateFlashloan(flashParams.assets, flashParams.amounts, reserves);
 
     vars.receiver = IFlashLoanReceiver(flashParams.receiverAddress);
-    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = authorizedFlashBorrowers[
-      msg.sender
-    ]
+    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = isAuthorizedFlashBorrower
       ? (0, 0)
       : (flashParams.flashLoanPremiumTotal, flashParams.flashLoanPremiumToProtocol);
 
