@@ -37,7 +37,7 @@ library Errors {
   string public constant VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY = '13'; // collateral is (mostly) the same currency that is being borrowed
   string public constant VL_AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE = '14'; // 'The requested amount is greater than the max loan size in stable rate mode
   string public constant VL_NO_DEBT_OF_SELECTED_TYPE = '15'; // 'for repayment of stable debt, the user needs to have stable debt, otherwise, he needs to have variable debt'
-  string public constant VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF = '16'; // 'To repay on behalf of an user an explicit amount to repay is needed'
+  string public constant VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF = '16'; // 'To repay on behalf of a user an explicit amount to repay is needed'
   string public constant VL_NO_STABLE_RATE_LOAN_IN_RESERVE = '17'; // 'User does not have a stable rate loan in progress on this reserve'
   string public constant VL_NO_VARIABLE_RATE_LOAN_IN_RESERVE = '18'; // 'User does not have a variable rate loan in progress on this reserve'
   string public constant VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0 = '19'; // 'The underlying balance needs to be greater than 0'
@@ -113,5 +113,6 @@ library Errors {
   string public constant VL_SAME_BLOCK_BORROW_REPAY = '94';
   string public constant PC_FLASHLOAN_PREMIUMS_MISMATCH = '95';
   string public constant PC_FLASHLOAN_PREMIUM_INVALID = '96';
-  string public constant MATH_UINT128_OVERFLOW = '97';
+  string public constant RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97';
+  string public constant MATH_UINT128_OVERFLOW = '98';
 }

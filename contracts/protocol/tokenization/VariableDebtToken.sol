@@ -1,18 +1,22 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
-import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
-import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
+import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
+import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
+import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
+import {DebtTokenBase} from './base/DebtTokenBase.sol';
 
 /**
  * @title VariableDebtToken
+ * @author Aave
  * @notice Implements a variable debt token to track the borrowing positions of users
  * at variable rate mode
- * @author Aave
  **/
 contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
@@ -22,15 +26,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   IPool internal _pool;
   address internal _underlyingAsset;
 
-  /**
-   * @dev Initializes the debt token.
-   * @param pool The address of the pool where this aToken will be used
-   * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
-   * @param incentivesController The smart contract managing potential incentives distribution
-   * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
-   * @param debtTokenName The name of the token
-   * @param debtTokenSymbol The symbol of the token
-   */
+  /// @inheritdoc IInitializableDebtToken
   function initialize(
     IPool pool,
     address underlyingAsset,
@@ -76,18 +72,12 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     );
   }
 
-  /**
-   * @dev Gets the revision of the stable debt token implementation
-   * @return The debt token implementation revision
-   **/
+  /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
     return DEBT_TOKEN_REVISION;
   }
 
-  /**
-   * @dev Calculates the accumulated debt balance of the user
-   * @return The debt balance of the user
-   **/
+  /// @inheritdoc IERC20
   function balanceOf(address user) public view virtual override returns (uint256) {
     uint256 scaledBalance = super.balanceOf(user);
 
@@ -98,16 +88,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return scaledBalance.rayMul(_pool.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
-  /**
-   * @dev Mints debt token to the `onBehalfOf` address
-   * -  Only callable by the Pool
-   * @param user The address receiving the borrowed underlying, being the delegatee in case
-   * of credit delegate, or same as `onBehalfOf` otherwise
-   * @param onBehalfOf The address receiving the debt tokens
-   * @param amount The amount of debt being minted
-   * @param index The variable debt index of the reserve
-   * @return `true` if the the previous balance of the user is 0
-   **/
+  /// @inheritdoc IVariableDebtToken
   function mint(
     address user,
     address onBehalfOf,
@@ -130,13 +111,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return previousBalance == 0;
   }
 
-  /**
-   * @dev Burns user variable debt
-   * - Only callable by the Pool
-   * @param user The user whose debt is getting burned
-   * @param amount The amount getting burned
-   * @param index The variable debt index of the reserve
-   **/
+  /// @inheritdoc IVariableDebtToken
   function burn(
     address user,
     uint256 amount,
@@ -151,36 +126,22 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     emit Burn(user, amount, index);
   }
 
-  /**
-   * @dev Returns the principal debt balance of the user from
-   * @return The debt balance of the user since the last burn/mint action
-   **/
+  /// @inheritdoc IScaledBalanceToken
   function scaledBalanceOf(address user) public view virtual override returns (uint256) {
     return super.balanceOf(user);
   }
 
-  /**
-   * @dev Returns the total supply of the variable debt token. Represents the total debt accrued by the users
-   * @return The total supply
-   **/
+  /// @inheritdoc IERC20
   function totalSupply() public view virtual override returns (uint256) {
     return super.totalSupply().rayMul(_pool.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
-  /**
-   * @dev Returns the scaled total supply of the variable debt token. Represents sum(debt/index)
-   * @return the scaled total supply
-   **/
+  /// @inheritdoc IScaledBalanceToken
   function scaledTotalSupply() public view virtual override returns (uint256) {
     return super.totalSupply();
   }
 
-  /**
-   * @dev Returns the principal balance of the user and principal total supply.
-   * @param user The address of the user
-   * @return The principal balance of the user
-   * @return The principal total supply
-   **/
+  /// @inheritdoc IScaledBalanceToken
   function getScaledUserBalanceAndSupply(address user)
     external
     view
@@ -191,23 +152,27 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   }
 
   /**
-   * @dev Returns the address of the underlying asset of this aToken (E.g. WETH for aWETH)
+   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
+   * @return The address of the underlying asset
    **/
   function UNDERLYING_ASSET_ADDRESS() public view returns (address) {
     return _underlyingAsset;
   }
 
   /**
-   * @dev Returns the address of the pool where this aToken is used
+   * @notice Returns the address of the pool where this debtToken is used
+   * @return The address of the Pool
    **/
   function POOL() public view returns (IPool) {
     return _pool;
   }
 
+  /// @inheritdoc DebtTokenBase
   function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;
   }
 
+  /// @inheritdoc DebtTokenBase
   function _getPool() internal view override returns (IPool) {
     return _pool;
   }

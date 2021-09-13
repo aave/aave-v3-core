@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
+import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
-import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {Helpers} from '../helpers/Helpers.sol';
-import {UserConfiguration} from './../configuration/UserConfiguration.sol';
+import {Errors} from '../helpers/Errors.sol';
+import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {DataTypes} from '../types/DataTypes.sol';
+import {WadRayMath} from '../math/WadRayMath.sol';
+import {PercentageMath} from '../math/PercentageMath.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
-import {WadRayMath} from '../math/WadRayMath.sol';
-import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
-import {Errors} from '../helpers/Errors.sol';
-import {PercentageMath} from '../math/PercentageMath.sol';
 
 /**
  * @title DepositLogic library
@@ -59,8 +59,11 @@ library DepositLogic {
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
 
-    bool isFirstDeposit =
-      IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
+    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
+      onBehalfOf,
+      amount,
+      reserveCache.nextLiquidityIndex
+    );
 
     if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
@@ -81,10 +84,9 @@ library DepositLogic {
 
     reserve.updateState(reserveCache);
 
-    uint256 userBalance =
-      IAToken(reserveCache.aTokenAddress).scaledBalanceOf(msg.sender).rayMul(
-        reserveCache.nextLiquidityIndex
-      );
+    uint256 userBalance = IAToken(reserveCache.aTokenAddress).scaledBalanceOf(msg.sender).rayMul(
+      reserveCache.nextLiquidityIndex
+    );
 
     uint256 amountToWithdraw = vars.amount;
 
