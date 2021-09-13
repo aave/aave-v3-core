@@ -1,22 +1,23 @@
 import { expect } from 'chai';
-import { ethers, utils } from 'ethers';
-import { waitForTx } from '../helpers/misc-utils';
+import { constants, utils } from 'ethers';
+import { ZERO_ADDRESS } from '../helpers/constants';
 import { ACLManager, ACLManagerFactory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { keccak256 } from '@ethersproject/keccak256';
 
 makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
   let aclManager: ACLManager;
 
-  const FLASH_BORROW_ADMIN = keccak256(ethers.utils.formatBytes32String('FLASH_BORROWER_ADMIN'));
+  const FLASH_BORROW_ADMIN_ROLE = utils.keccak256(
+    utils.formatBytes32String('FLASH_BORROWER_ADMIN')
+  );
 
   before(async () => {
     const { deployer, addressesProvider } = testEnv;
     aclManager = await new ACLManagerFactory(deployer.signer).deploy();
-    await waitForTx(await aclManager.initialize(addressesProvider.address));
+    expect(await aclManager.initialize(addressesProvider.address));
   });
 
-  it('check DEFAULT_ADMIN_ROLE', async () => {
+  it('Check DEFAULT_ADMIN_ROLE', async () => {
     const { deployer, users } = testEnv;
 
     const DEFAULT_ADMIN_ROLE = await aclManager.DEFAULT_ADMIN_ROLE();
@@ -30,38 +31,49 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
       users: [flashBorrowAdmin],
     } = testEnv;
 
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(false);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      false
+    );
     await aclManager
       .connect(deployer.signer)
-      .grantRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+      .grantRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
   });
 
-  it('FLASH_BORROW_ADMIN grant FLASH_BORROW_ROLE (reverts)', async () => {
+  it('FLASH_BORROW_ADMIN grant FLASH_BORROW_ROLE (revert expected)', async () => {
     const {
-      deployer,
       users: [flashBorrowAdmin, flashBorrower],
     } = testEnv;
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(false);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
 
     await expect(
       aclManager.connect(flashBorrowAdmin.signer).addFlashBorrower(flashBorrower.address)
     ).to.be.revertedWith(
-      "'AccessControl: account 0xead9c93b79ae7c1591b1fb5323bd777e86e150d4 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000'"
+      `'AccessControl: account ${flashBorrowAdmin.address.toLowerCase()} is missing role ${
+        constants.HashZero
+      }'`
     );
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(false);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
   });
 
-  it('Make FLASH_BORROW_ADMIN admin of FLASH_BORROWER_ROLE', async () => {
+  it('Make FLASH_BORROW_ADMIN_ROLE admin of FLASH_BORROWER_ROLE', async () => {
     const { deployer } = testEnv;
     const FLASH_BORROW_ROLE = await aclManager.FLASH_BORROWER_ROLE();
-    expect(await aclManager.getRoleAdmin(FLASH_BORROW_ROLE)).to.not.be.eq(FLASH_BORROW_ADMIN);
-    await aclManager.connect(deployer.signer).setRoleAdmin(FLASH_BORROW_ROLE, FLASH_BORROW_ADMIN);
-    expect(await aclManager.getRoleAdmin(FLASH_BORROW_ROLE)).to.be.eq(FLASH_BORROW_ADMIN);
+    expect(await aclManager.getRoleAdmin(FLASH_BORROW_ROLE)).to.not.be.eq(FLASH_BORROW_ADMIN_ROLE);
+    await aclManager
+      .connect(deployer.signer)
+      .setRoleAdmin(FLASH_BORROW_ROLE, FLASH_BORROW_ADMIN_ROLE);
+    expect(await aclManager.getRoleAdmin(FLASH_BORROW_ROLE)).to.be.eq(FLASH_BORROW_ADMIN_ROLE);
   });
 
   it('FLASH_BORROW_ADMIN grant FLASH_BORROW_ROLE', async () => {
@@ -70,31 +82,39 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     } = testEnv;
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(false);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
 
     await aclManager.connect(flashBorrowAdmin.signer).addFlashBorrower(flashBorrower.address);
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(true);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
   });
 
-  it('DEFAULT_ADMIN tries to revoke FLASH_BORROW_ROLE (reverts)', async () => {
+  it('DEFAULT_ADMIN tries to revoke FLASH_BORROW_ROLE (revert expected)', async () => {
     const {
       deployer,
       users: [flashBorrowAdmin, flashBorrower],
     } = testEnv;
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(true);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
 
     await expect(
       aclManager.connect(deployer.signer).removeFlashBorrower(flashBorrower.address)
     ).to.be.revertedWith(
-      "'AccessControl: account 0xc783df8a850f42e7f7e57013759c285caa701eb6 is missing role 0x6c5bc89d7aa00c69db4203bce22f266582988cf8f1523176c3be85c4067d639c'"
+      `'AccessControl: account ${deployer.address.toLowerCase()} is missing role ${FLASH_BORROW_ADMIN_ROLE}'`
     );
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(true);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
   });
 
   it('Grant POOL_ADMIN role', async () => {
@@ -147,12 +167,16 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     } = testEnv;
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(true);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
 
     await aclManager.connect(flashBorrowAdmin.signer).removeFlashBorrower(flashBorrower.address);
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(false);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
   });
 
   it('Revoke FLASH_BORROWER_ADMIN', async () => {
@@ -161,11 +185,15 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
       users: [flashBorrowAdmin],
     } = testEnv;
 
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(true);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      true
+    );
     await aclManager
       .connect(deployer.signer)
-      .revokeRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address);
-    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN, flashBorrowAdmin.address)).to.be.eq(false);
+      .revokeRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address);
+    expect(await aclManager.hasRole(FLASH_BORROW_ADMIN_ROLE, flashBorrowAdmin.address)).to.be.eq(
+      false
+    );
   });
 
   it('Revoke POOL_ADMIN', async () => {
@@ -210,5 +238,15 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.eq(true);
     await aclManager.connect(deployer.signer).removeRiskAdmin(riskAdmin.address);
     expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.eq(false);
+  });
+
+  it('Tries to initialize ACLManager when ACLAdmin is ZERO_ADDRESS (revert expected)', async () => {
+    const { deployer, addressesProvider } = testEnv;
+
+    expect(await addressesProvider.setACLAdmin(ZERO_ADDRESS));
+    aclManager = await new ACLManagerFactory(deployer.signer).deploy();
+    await expect(aclManager.initialize(addressesProvider.address)).to.be.revertedWith(
+      'ACL admin cannot be the zero address'
+    );
   });
 });
