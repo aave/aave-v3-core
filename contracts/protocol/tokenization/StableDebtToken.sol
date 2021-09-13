@@ -18,7 +18,7 @@ import {Errors} from '../libraries/helpers/Errors.sol';
  **/
 contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   using WadRayMath for uint256;
-  
+
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
   uint256 internal _avgStableRate;
@@ -126,8 +126,10 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     if (accountBalance == 0) {
       return 0;
     }
-    uint256 cumulatedInterest =
-      MathUtils.calculateCompoundedInterest(stableRate, _timestamps[account]);
+    uint256 cumulatedInterest = MathUtils.calculateCompoundedInterest(
+      stableRate,
+      _timestamps[account]
+    );
     return accountBalance.rayMul(cumulatedInterest);
   }
 
@@ -171,8 +173,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     vars.amountInRay = amount.wadToRay();
 
     vars.newStableRate = (_usersStableRate[onBehalfOf].rayMul(currentBalance.wadToRay()) +
-      vars.amountInRay.rayMul(rate))
-      .rayDiv((currentBalance + amount).wadToRay());
+      vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
     require(vars.newStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
     _usersStableRate[onBehalfOf] = vars.newStableRate;
@@ -183,8 +184,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     // Calculates the updated average stable rate
     vars.currentAvgStableRate = _avgStableRate = (vars.currentAvgStableRate.rayMul(
       vars.previousSupply.wadToRay()
-    ) + rate.rayMul(vars.amountInRay))
-      .rayDiv(vars.nextSupply.wadToRay());
+    ) + rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay());
 
     _mint(onBehalfOf, amount + balanceIncrease, vars.previousSupply);
 
@@ -294,11 +294,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     // Calculation of the accrued interest since the last accumulation
     uint256 balanceIncrease = balanceOf(user) - previousPrincipalBalance;
 
-    return (
-      previousPrincipalBalance,
-      previousPrincipalBalance + balanceIncrease,
-      balanceIncrease
-    );
+    return (previousPrincipalBalance, previousPrincipalBalance + balanceIncrease, balanceIncrease);
   }
 
   /**
@@ -390,8 +386,10 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       return 0;
     }
 
-    uint256 cumulatedInterest =
-      MathUtils.calculateCompoundedInterest(avgRate, _totalSupplyTimestamp);
+    uint256 cumulatedInterest = MathUtils.calculateCompoundedInterest(
+      avgRate,
+      _totalSupplyTimestamp
+    );
 
     return principalSupply.rayMul(cumulatedInterest);
   }
@@ -407,8 +405,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint256 oldAccountBalance = _balances[account];
-    _balances[account] = oldAccountBalance + amount;
+    uint128 castAmount = _castUint128(amount);
+    uint128 oldAccountBalance = _userData[account].balance;
+    _userData[account].balance = oldAccountBalance + castAmount;
 
     if (address(_incentivesController) != address(0)) {
       _incentivesController.handleAction(account, oldTotalSupply, oldAccountBalance);
@@ -426,8 +425,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint256 oldAccountBalance = _balances[account];
-    _balances[account] = oldAccountBalance - amount;
+    uint128 castAmount = _castUint128(amount);
+    uint128 oldAccountBalance = _userData[account].balance;
+    _userData[account].balance = oldAccountBalance - castAmount;
 
     if (address(_incentivesController) != address(0)) {
       _incentivesController.handleAction(account, oldTotalSupply, oldAccountBalance);

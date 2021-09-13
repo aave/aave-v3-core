@@ -6,11 +6,13 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode } from '../helpers/types';
 import { makeSuite } from './helpers/make-suite';
 
-makeSuite('Basic Deposit Test', (testEnv) => {
+makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
   let firstDaiDeposit;
   let secondDaiDeposit;
   let thirdDaiDeposit;
-  let accruedInterest: BigNumber = BigNumber.from(0);
+  let accruedInterest1: BigNumber = BigNumber.from(0);
+  let accruedInterest2: BigNumber = BigNumber.from(0);
+  let accruedInterest3: BigNumber = BigNumber.from(0);
 
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
     const { dai } = testEnv;
@@ -51,7 +53,7 @@ makeSuite('Basic Deposit Test', (testEnv) => {
     const {
       dai,
       weth,
-      users: [borrower],
+      users: [, borrower],
       pool,
       helpersContract,
     } = testEnv;
@@ -83,7 +85,6 @@ makeSuite('Basic Deposit Test', (testEnv) => {
       borrower.address
     );
     const borrowerDaiData = await helpersContract.getUserReserveData(dai.address, borrower.address);
-
     expect(borrowerWethData.currentATokenBalance).to.be.equal(amountETHtoDeposit);
     expect(borrowerDaiData.currentVariableDebt).to.be.equal(amountDAIToBorrow);
   });
@@ -118,8 +119,8 @@ makeSuite('Basic Deposit Test', (testEnv) => {
     const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
 
     expect(parsedMintEvent.args.from).to.equal(depositor.address);
-    expect(parsedMintEvent.args.value).to.equal(aDaiBalance.sub(firstDaiDeposit));
-    accruedInterest = aDaiBalance.sub(firstDaiDeposit).sub(secondDaiDeposit);
+    accruedInterest1 = aDaiBalance.sub(firstDaiDeposit).sub(secondDaiDeposit);
+    expect(parsedMintEvent.args.value).to.be.closeTo(secondDaiDeposit.add(accruedInterest1), 2);
 
     const daiReserveData = await helpersContract.getReserveData(dai.address);
     expect(parsedMintEvent.args.index).to.equal(daiReserveData.liquidityIndex);
@@ -155,9 +156,80 @@ makeSuite('Basic Deposit Test', (testEnv) => {
     const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
 
     expect(parsedMintEvent.args.from).to.equal(depositor.address);
-    expect(parsedMintEvent.args.value).to.equal(
-      aDaiBalance.sub(firstDaiDeposit).sub(secondDaiDeposit).sub(accruedInterest)
-    );
+    accruedInterest2 = aDaiBalance
+      .sub(firstDaiDeposit)
+      .sub(secondDaiDeposit)
+      .sub(thirdDaiDeposit)
+      .sub(accruedInterest1);
+    expect(parsedMintEvent.args.value).to.be.closeTo(thirdDaiDeposit.add(accruedInterest2), 2);
+
+    const daiReserveData = await helpersContract.getReserveData(dai.address);
+    expect(parsedMintEvent.args.index).to.equal(daiReserveData.liquidityIndex);
+  });
+
+  it('User 2 - deposit ETH, borrow Dai', async () => {
+    const {
+      dai,
+      users: [, borrower],
+      pool,
+      helpersContract,
+    } = testEnv;
+
+    await increaseTime(86400);
+
+    //mints DAI to borrower
+    await dai.connect(borrower.signer).mint(await convertToCurrencyDecimals(dai.address, '50000'));
+
+    // approve protocol to access depositor wallet
+    await dai.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    // repay dai loan
+    await pool
+      .connect(borrower.signer)
+      .repay(dai.address, MAX_UINT_AMOUNT, RateMode.Variable, borrower.address);
+
+    const borrowerDaiData = await helpersContract.getUserReserveData(dai.address, borrower.address);
+    expect(borrowerDaiData.currentVariableDebt).to.be.equal(0);
+  });
+
+  it('User 1 - withdraws all deposited funds and interest', async () => {
+    const {
+      dai,
+      aDai,
+      users: [depositor],
+      pool,
+      helpersContract,
+    } = testEnv;
+
+    const daiBalanceBefore = await dai.balanceOf(depositor.address);
+
+    const withdrawTx = await pool
+      .connect(depositor.signer)
+      .withdraw(dai.address, MAX_UINT_AMOUNT, depositor.address);
+
+    const depositReceipt = await withdrawTx.wait();
+
+    const mintEventSignature = utils.keccak256(utils.toUtf8Bytes('Mint(address,uint256,uint256)'));
+    const rawMintEvents = depositReceipt.logs.filter((log) => log.topics[0] === mintEventSignature);
+
+    const aDaiBalance = await aDai.balanceOf(depositor.address);
+    expect(aDaiBalance).to.be.equal(0);
+
+    const daiBalanceAfter = await dai.balanceOf(depositor.address);
+    const daiWithdrawn = daiBalanceAfter.sub(daiBalanceBefore);
+
+    accruedInterest3 = daiWithdrawn
+      .sub(firstDaiDeposit)
+      .sub(secondDaiDeposit)
+      .sub(thirdDaiDeposit)
+      .sub(accruedInterest1)
+      .sub(accruedInterest2);
+
+    expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
+    const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
+
+    expect(parsedMintEvent.args.from).to.equal(depositor.address);
+    expect(parsedMintEvent.args.value).to.be.closeTo(accruedInterest3, 2);
 
     const daiReserveData = await helpersContract.getReserveData(dai.address);
     expect(parsedMintEvent.args.index).to.equal(daiReserveData.liquidityIndex);

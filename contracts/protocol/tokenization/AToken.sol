@@ -125,13 +125,22 @@ contract AToken is
   ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
-    _burn(user, amountScaled);
+
+    uint128 castAmount = _castUint128(amountScaled);
+    uint128 castIndex = _castUint128(index);
+
+    uint256 accumulatedInterest = _calculateAccruedInterest(super.balanceOf(user), user);
+
+    _burn(user, castAmount);
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
 
+    _userData[user].previousIndexOrStableRate = castIndex;
+
     emit Transfer(user, address(0), amount);
+    emit Mint(user, accumulatedInterest, castIndex);
     emit Burn(user, receiverOfUnderlying, amount, index);
   }
 
@@ -151,14 +160,18 @@ contract AToken is
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
+    uint128 castAmount = _castUint128(amountScaled);
+    uint128 castIndex = _castUint128(index);
+
     uint256 previousBalance = super.balanceOf(user);
     uint256 accumulatedInterest = _calculateAccruedInterest(previousBalance, user);
-    _previousIndex[user] = index;
 
-    _mint(user, amountScaled);
+    _mint(user, castAmount);
+
+    _userData[user].previousIndexOrStableRate = castIndex;
 
     emit Transfer(address(0), user, amount);
-    emit Mint(user, amount + accumulatedInterest, index);
+    emit Mint(user, amount + accumulatedInterest, castIndex);
 
     return previousBalance == 0;
   }
@@ -180,7 +193,7 @@ contract AToken is
     // The amount to mint can easily be very small since it is a fraction of the interest ccrued.
     // In that case, the treasury will experience a (very small) loss, but it
     // wont cause potentially valid transactions to fail.
-    _mint(treasury, amount.rayDiv(index));
+    _mint(treasury, _castUint128(amount.rayDiv(index)));
 
     emit Transfer(address(0), treasury, amount);
     emit Mint(treasury, amount, index);
@@ -371,7 +384,7 @@ contract AToken is
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
 
-    super._transfer(from, to, amount.rayDiv(index));
+    super._transfer(from, to, _castUint128(amount.rayDiv(index)));
 
     if (validate) {
       pool.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
@@ -389,17 +402,18 @@ contract AToken is
   function _transfer(
     address from,
     address to,
-    uint256 amount
+    uint128 amount
   ) internal override {
     _transfer(from, to, amount, true);
   }
 
   function _calculateAccruedInterest(uint256 previousBalance, address user)
     internal
+    view
     returns (uint256)
   {
     uint256 currentBalance = balanceOf(user);
-    uint256 previousIndex = _previousIndex[user];
+    uint256 previousIndex = _userData[user].previousIndexOrStableRate;
     uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
     return currentBalance - previousBalanceWithInterest;
   }

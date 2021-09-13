@@ -122,7 +122,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    _mint(onBehalfOf, amountScaled);
+    _mint(onBehalfOf, _castUint128(amountScaled));
 
     emit Transfer(address(0), onBehalfOf, amount);
     emit Mint(user, onBehalfOf, amount, index);
@@ -145,7 +145,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    _burn(user, amountScaled);
+    _burn(user, _castUint128(amountScaled));
 
     emit Transfer(user, address(0), amount);
     emit Burn(user, amount, index);
