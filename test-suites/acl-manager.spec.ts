@@ -1,9 +1,7 @@
 import { expect } from 'chai';
 import { ethers, utils } from 'ethers';
-import { oneEther, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
-import { evmRevert, evmSnapshot, waitForTx } from '../helpers/misc-utils';
-import { deployMintableERC20, deployMockAggregator } from '../helpers/contracts-deployments';
-import { ACLManager, ACLManagerFactory, MintableERC20, MockAggregator } from '../types';
+import { waitForTx } from '../helpers/misc-utils';
+import { ACLManager, ACLManagerFactory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { keccak256 } from '@ethersproject/keccak256';
 
