@@ -23,7 +23,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   uint256 internal _avgStableRate;
   mapping(address => uint40) internal _timestamps;
-  mapping(address => uint256) internal _usersStableRate;
   uint40 internal _totalSupplyTimestamp;
 
   IPool internal _pool;
@@ -113,7 +112,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @return The stable rate of user
    **/
   function getUserStableRate(address user) external view virtual override returns (uint256) {
-    return _usersStableRate[user];
+    return _userData[user].previousIndexOrStableRate;
   }
 
   /**
@@ -122,7 +121,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    **/
   function balanceOf(address account) public view virtual override returns (uint256) {
     uint256 accountBalance = super.balanceOf(account);
-    uint256 stableRate = _usersStableRate[account];
+    uint256 stableRate = _userData[account].previousIndexOrStableRate;
     if (accountBalance == 0) {
       return 0;
     }
@@ -137,6 +136,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 previousSupply;
     uint256 nextSupply;
     uint256 amountInRay;
+    uint256 currentStableRate;
     uint256 newStableRate;
     uint256 currentAvgStableRate;
   }
@@ -172,11 +172,12 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     vars.amountInRay = amount.wadToRay();
 
-    vars.newStableRate = (_usersStableRate[onBehalfOf].rayMul(currentBalance.wadToRay()) +
+    vars.currentStableRate = _userData[onBehalfOf].previousIndexOrStableRate;
+    vars.newStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
     require(vars.newStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
-    _usersStableRate[onBehalfOf] = vars.newStableRate;
+    _userData[onBehalfOf].previousIndexOrStableRate = uint128(vars.newStableRate);
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
@@ -215,7 +216,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 previousSupply = totalSupply();
     uint256 newAvgStableRate = 0;
     uint256 nextSupply = 0;
-    uint256 userStableRate = _usersStableRate[user];
+    uint256 userStableRate = _userData[user].previousIndexOrStableRate;
 
     // Since the total supply and each single user debt accrue separately,
     // there might be accumulation errors so that the last borrower repaying
@@ -240,7 +241,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     }
 
     if (amount == currentBalance) {
-      _usersStableRate[user] = 0;
+      _userData[user].previousIndexOrStableRate = 0;
       _timestamps[user] = 0;
     } else {
       //solium-disable-next-line
