@@ -116,7 +116,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 nextSupply;
     uint256 amountInRay;
     uint256 currentStableRate;
-    uint256 newStableRate;
+    uint256 nextStableRate;
     uint256 currentAvgStableRate;
   }
 
@@ -150,20 +150,12 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     vars.amountInRay = amount.wadToRay();
 
-<<<<<<< HEAD
     vars.currentStableRate = _userData[onBehalfOf].previousIndexOrStableRate;
-    vars.newStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
-      vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
-
-    require(vars.newStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
-    _userData[onBehalfOf].previousIndexOrStableRate = uint128(vars.newStableRate);
-=======
-    vars.nextStableRate = (_usersStableRate[onBehalfOf].rayMul(currentBalance.wadToRay()) +
+    vars.nextStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
     require(vars.nextStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
-    _usersStableRate[onBehalfOf] = vars.nextStableRate;
->>>>>>> master
+    _userData[onBehalfOf].previousIndexOrStableRate = uint128(vars.nextStableRate);
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
