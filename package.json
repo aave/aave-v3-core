@@ -4,7 +4,8 @@
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
-    "artifacts"
+    "artifacts",
+    "types"
   ],
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
@@ -21,7 +22,8 @@
     "test-scenarios": "npm run compile && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
     "test-subgraph:scenarios": "npm run compile && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
     "ci:test": "npm run compile && npm run test",
-    "ci:clean": "rm -rf ./artifacts ./cache ./types"
+    "ci:clean": "rm -rf ./artifacts ./cache ./types",
+    "prepublish": "npm run compile"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
@@ -29,12 +31,12 @@
     "@openzeppelin/contracts": "4.2.0",
     "@tenderly/hardhat-tenderly": "1.1.0-beta.5",
     "@typechain/ethers-v5": "^2.0.0",
-    "@types/chai": "4.2.11",
+    "@types/chai": "^4.2.11",
     "@types/lowdb": "1.0.9",
     "@types/mocha": "7.0.2",
     "@types/node": "14.0.5",
     "bignumber.js": "9.0.0",
-    "chai": "4.2.0",
+    "chai": "^4.2.0",
     "chai-bignumber": "3.0.0",
     "defender-relay-client": "^1.7.0",
     "dotenv": "^8.2.0",
@@ -87,5 +89,8 @@
     "protocol-v2",
     "ethereum",
     "solidity"
-  ]
+  ],
+  "publishConfig": {
+    "@aave:registry": "https://npm.pkg.github.com"
+  }
 }
