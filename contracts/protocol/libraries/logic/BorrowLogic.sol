@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
+import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
-import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
+import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
-import {UserConfiguration} from './../configuration/UserConfiguration.sol';
+import {Errors} from '../helpers/Errors.sol';
+import {WadRayMath} from '../math/WadRayMath.sol';
+import {PercentageMath} from '../math/PercentageMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
-import {WadRayMath} from '../math/WadRayMath.sol';
-import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
-import {Errors} from '../helpers/Errors.sol';
-import {PercentageMath} from '../math/PercentageMath.sol';
 
 /**
  * @title BorrowLogic library
@@ -87,21 +87,21 @@ library BorrowLogic {
 
     if (DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
       currentStableRate = reserve.currentStableBorrowRate;
-      isFirstBorrowing = IStableDebtToken(reserveCache.stableDebtTokenAddress).mint(
+
+      (
+        isFirstBorrowing,
+        reserveCache.nextTotalStableDebt,
+        reserveCache.nextAvgStableBorrowRate
+      ) = IStableDebtToken(reserveCache.stableDebtTokenAddress).mint(
         params.user,
         params.onBehalfOf,
         params.amount,
         currentStableRate
       );
-      reserveCache.refreshDebt(params.amount, 0, 0, 0);
     } else {
-      isFirstBorrowing = IVariableDebtToken(reserveCache.variableDebtTokenAddress).mint(
-        params.user,
-        params.onBehalfOf,
-        params.amount,
-        reserveCache.nextVariableBorrowIndex
-      );
-      reserveCache.refreshDebt(0, 0, params.amount, 0);
+      (isFirstBorrowing, reserveCache.nextScaledVariableDebt) = IVariableDebtToken(
+        reserveCache.variableDebtTokenAddress
+      ).mint(params.user, params.onBehalfOf, params.amount, reserveCache.nextVariableBorrowIndex);
     }
 
     if (isFirstBorrowing) {
@@ -161,15 +161,13 @@ library BorrowLogic {
     }
 
     if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
-      IStableDebtToken(reserveCache.stableDebtTokenAddress).burn(params.onBehalfOf, paybackAmount);
-      reserveCache.refreshDebt(0, paybackAmount, 0, 0);
+      (reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
+        reserveCache.stableDebtTokenAddress
+      ).burn(params.onBehalfOf, paybackAmount);
     } else {
-      IVariableDebtToken(reserveCache.variableDebtTokenAddress).burn(
-        params.onBehalfOf,
-        paybackAmount,
-        reserveCache.nextVariableBorrowIndex
-      );
-      reserveCache.refreshDebt(0, 0, 0, paybackAmount);
+      reserveCache.nextScaledVariableDebt = IVariableDebtToken(
+        reserveCache.variableDebtTokenAddress
+      ).burn(params.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
     }
 
     reserve.updateInterestRates(reserveCache, params.asset, 0, 0);
@@ -215,7 +213,7 @@ library BorrowLogic {
   function executeFlashLoan(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    mapping(address => bool) storage authorizedFlashBorrowers,
+    bool isAuthorizedFlashBorrower,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory flashParams
   ) external {
@@ -227,9 +225,7 @@ library BorrowLogic {
     ValidationLogic.validateFlashloan(flashParams.assets, flashParams.amounts, reserves);
 
     vars.receiver = IFlashLoanReceiver(flashParams.receiverAddress);
-    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = authorizedFlashBorrowers[
-      msg.sender
-    ]
+    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = isAuthorizedFlashBorrower
       ? (0, 0)
       : (flashParams.flashLoanPremiumTotal, flashParams.flashLoanPremiumToProtocol);
 
@@ -343,14 +339,12 @@ library BorrowLogic {
     reserve.updateState(reserveCache);
 
     IStableDebtToken(address(stableDebtToken)).burn(user, stableDebt);
-    IStableDebtToken(address(stableDebtToken)).mint(
-      user,
-      user,
-      stableDebt,
-      reserve.currentStableBorrowRate
-    );
 
-    reserveCache.refreshDebt(stableDebt, stableDebt, 0, 0);
+    (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
+      address(stableDebtToken)
+    ).mint(user, user, stableDebt, reserve.currentStableBorrowRate);
+    //reserveCache.nextTotalStableDebt = nextTotalStableDebt;
+    //reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
@@ -381,27 +375,21 @@ library BorrowLogic {
     );
 
     if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
-      IStableDebtToken(reserveCache.stableDebtTokenAddress).burn(msg.sender, stableDebt);
-      IVariableDebtToken(reserveCache.variableDebtTokenAddress).mint(
-        msg.sender,
-        msg.sender,
-        stableDebt,
-        reserveCache.nextVariableBorrowIndex
-      );
-      reserveCache.refreshDebt(0, stableDebt, stableDebt, 0);
+      (reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
+        reserveCache.stableDebtTokenAddress
+      ).burn(msg.sender, stableDebt);
+
+      (, reserveCache.nextScaledVariableDebt) = IVariableDebtToken(
+        reserveCache.variableDebtTokenAddress
+      ).mint(msg.sender, msg.sender, stableDebt, reserveCache.nextVariableBorrowIndex);
     } else {
-      IVariableDebtToken(reserveCache.variableDebtTokenAddress).burn(
-        msg.sender,
-        variableDebt,
-        reserveCache.nextVariableBorrowIndex
-      );
-      IStableDebtToken(reserveCache.stableDebtTokenAddress).mint(
-        msg.sender,
-        msg.sender,
-        variableDebt,
-        reserve.currentStableBorrowRate
-      );
-      reserveCache.refreshDebt(variableDebt, 0, 0, variableDebt);
+      reserveCache.nextScaledVariableDebt = IVariableDebtToken(
+        reserveCache.variableDebtTokenAddress
+      ).burn(msg.sender, variableDebt, reserveCache.nextVariableBorrowIndex);
+
+      (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
+        reserveCache.stableDebtTokenAddress
+      ).mint(msg.sender, msg.sender, variableDebt, reserve.currentStableBorrowRate);
     }
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);

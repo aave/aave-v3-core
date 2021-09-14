@@ -6,6 +6,11 @@ import {VariableDebtToken} from '../protocol/tokenization/VariableDebtToken.sol'
 import {RateOracle} from '../mocks/oracle/RateOracle.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 
+/**
+ * @title StableAndVariableTokensHelper
+ * @notice Implements a helper to update rate oracles for debt tokens
+ * @author Aave
+ **/
 contract StableAndVariableTokensHelper is Ownable {
   address payable private pool;
   address private addressesProvider;
@@ -16,6 +21,12 @@ contract StableAndVariableTokensHelper is Ownable {
     addressesProvider = _addressesProvider;
   }
 
+  /**
+   * @notice Updates the borrow rates for the reserves
+   * @param assets The assets to update rates for
+   * @param rates The new rates for the assets
+   * @param oracle The address of the rate oracle
+   */
   function setOracleBorrowRates(
     address[] calldata assets,
     uint256[] calldata rates,
@@ -29,6 +40,12 @@ contract StableAndVariableTokensHelper is Ownable {
     }
   }
 
+  /**
+   * @notice Transfers ownership of rates oracle
+   * @dev Only callable by owner and when this contract is the owner of the oracle
+   * @param oracle The address of the oracle
+   * @param admin The address of the new admin
+   */
   function setOracleOwnership(address oracle, address admin) external onlyOwner {
     require(admin != address(0), 'owner can not be zero');
     require(RateOracle(oracle).owner() == address(this), 'helper is not owner');

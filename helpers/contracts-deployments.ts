@@ -22,21 +22,21 @@ import {
   MockFlashLoanReceiverFactory,
   MockStableDebtTokenFactory,
   MockVariableDebtTokenFactory,
-  MockUniswapV2Router02Factory,
   PriceOracleFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
   ConfiguratorLogicFactory,
-  InitializableImmutableAdminUpgradeabilityProxyFactory,
-  WETH9Mocked,
   MockIncentivesControllerFactory,
   MockInitializableFromConstructorImpleFactory,
   MockInitializableImpleFactory,
   MockInitializableImpleV2Factory,
+  InitializableImmutableAdminUpgradeabilityProxyFactory,
+  WETH9Mocked,
+  ACLManagerFactory,
+  MockReserveConfigurationFactory,
   MockPoolFactory,
   MockReentrantInitializableImpleFactory,
-  MockReserveConfigurationFactory,
 } from '../types';
 import {
   withSave,
@@ -65,6 +65,9 @@ export const deployPoolAddressesProviderRegistry = async () =>
     await new PoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
     eContractid.PoolAddressesProviderRegistry
   );
+
+export const deployACLManager = async () =>
+  withSave(await new ACLManagerFactory(await getFirstSigner()).deploy(), eContractid.ACLManager);
 
 export const deployConfiguratorLogicLibrary = async () =>
   withSave(

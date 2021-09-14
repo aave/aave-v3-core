@@ -7,9 +7,9 @@ import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20De
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
 /**
- * @title ERC20
- * @notice Basic ERC20 implementation
+ * @title IncentivizedERC20
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
+ * @notice Basic ERC20 implementation
  **/
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   mapping(address => uint256) internal _balances;
@@ -31,66 +31,46 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     _decimals = decimals;
   }
 
-  /**
-   * @return The name of the token
-   **/
+  /// @inheritdoc IERC20Detailed
   function name() public view override returns (string memory) {
     return _name;
   }
 
-  /**
-   * @return The symbol of the token
-   **/
+  /// @inheritdoc IERC20Detailed
   function symbol() public view override returns (string memory) {
     return _symbol;
   }
 
-  /**
-   * @return The decimals of the token
-   **/
+  /// @inheritdoc IERC20Detailed
   function decimals() public view override returns (uint8) {
     return _decimals;
   }
 
-  /**
-   * @return The total supply of the token
-   **/
+  /// @inheritdoc IERC20
   function totalSupply() public view virtual override returns (uint256) {
     return _totalSupply;
   }
 
-  /**
-   * @return The balance of the token
-   **/
+  /// @inheritdoc IERC20
   function balanceOf(address account) public view virtual override returns (uint256) {
     return _balances[account];
   }
 
   /**
-   * @dev Returns the address of the incentives controller contract
+   * @notice Returns the address of the incentives controller contract
+   * @return Incentivescontroller
    **/
   function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
     return _incentivesController;
   }
 
-  /**
-   * @dev Executes a transfer of tokens from _msgSender() to recipient
-   * @param recipient The recipient of the tokens
-   * @param amount The amount of tokens being transferred
-   * @return `true` if the transfer succeeds, `false` otherwise
-   **/
+  /// @inheritdoc IERC20
   function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
     _transfer(_msgSender(), recipient, amount);
-    emit Transfer(_msgSender(), recipient, amount);
     return true;
   }
 
-  /**
-   * @dev Returns the allowance of spender on the tokens owned by owner
-   * @param owner The owner of the tokens
-   * @param spender The user allowed to spend the owner's tokens
-   * @return The amount of owner's tokens spender is allowed to spend
-   **/
+  /// @inheritdoc IERC20
   function allowance(address owner, address spender)
     public
     view
@@ -101,23 +81,13 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     return _allowances[owner][spender];
   }
 
-  /**
-   * @dev Allows `spender` to spend the tokens owned by _msgSender()
-   * @param spender The user allowed to spend _msgSender() tokens
-   * @return `true`
-   **/
+  /// @inheritdoc IERC20
   function approve(address spender, uint256 amount) public virtual override returns (bool) {
     _approve(_msgSender(), spender, amount);
     return true;
   }
 
-  /**
-   * @dev Executes a transfer of token from sender to recipient, if _msgSender() is allowed to do so
-   * @param sender The owner of the tokens
-   * @param recipient The recipient of the tokens
-   * @param amount The amount of tokens being transferred
-   * @return `true` if the transfer succeeds, `false` otherwise
-   **/
+  /// @inheritdoc IERC20
   function transferFrom(
     address sender,
     address recipient,
@@ -125,12 +95,11 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   ) public virtual override returns (bool) {
     _transfer(sender, recipient, amount);
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - amount);
-    emit Transfer(sender, recipient, amount);
     return true;
   }
 
   /**
-   * @dev Increases the allowance of spender to spend _msgSender() tokens
+   * @notice Increases the allowance of spender to spend _msgSender() tokens
    * @param spender The user allowed to spend on behalf of _msgSender()
    * @param addedValue The amount being added to the allowance
    * @return `true`
@@ -141,7 +110,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @dev Decreases the allowance of spender to spend _msgSender() tokens
+   * @notice Decreases the allowance of spender to spend _msgSender() tokens
    * @param spender The user allowed to spend on behalf of _msgSender()
    * @param subtractedValue The amount being subtracted to the allowance
    * @return `true`
@@ -173,6 +142,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
         incentivesControllerLocal.handleAction(recipient, currentTotalSupply, oldRecipientBalance);
       }
     }
+    emit Transfer(sender, recipient, amount);
   }
 
   function _mint(address account, uint256 amount) internal virtual {

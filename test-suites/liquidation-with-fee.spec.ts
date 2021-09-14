@@ -4,36 +4,40 @@ import { DRE, increaseTime } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
+import { ATokenFactory } from '../types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
-import { getReserveData, getUserData } from './helpers/utils/helpers';
+import { getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
 
-makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
+makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;
 
-  it("It's not possible to liquidate on a non-active collateral or a non active principal", async () => {
-    const {
-      configurator,
-      weth,
-      pool,
-      users: [, user],
-      dai,
-    } = testEnv;
-    await configurator.deactivateReserve(weth.address);
+  it('Sets the WETH protocol liquidation fee to 1000 (10.00%)', async () => {
+    const { configurator, weth, aave, helpersContract } = testEnv;
 
-    await expect(
-      pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
-    ).to.be.revertedWith('2');
+    const wethLiquidationProtocolFeeInput = 1000;
+    const aaveLiquidationProtocolFeeInput = 500;
 
-    await configurator.activateReserve(weth.address);
+    expect(
+      await configurator.setLiquidationProtocolFee(weth.address, wethLiquidationProtocolFeeInput)
+    )
+      .to.emit(configurator, 'LiquidationProtocolFeeChanged')
+      .withArgs(weth.address, wethLiquidationProtocolFeeInput);
+    expect(
+      await configurator.setLiquidationProtocolFee(aave.address, aaveLiquidationProtocolFeeInput)
+    )
+      .to.emit(configurator, 'LiquidationProtocolFeeChanged')
+      .withArgs(aave.address, aaveLiquidationProtocolFeeInput);
 
-    await configurator.deactivateReserve(dai.address);
+    const wethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      weth.address
+    );
+    const aaveLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      aave.address
+    );
 
-    await expect(
-      pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
-    ).to.be.revertedWith('2');
-
-    await configurator.activateReserve(dai.address);
+    expect(wethLiquidationProtocolFee).to.be.equal(wethLiquidationProtocolFeeInput);
+    expect(aaveLiquidationProtocolFee).to.be.equal(aaveLiquidationProtocolFeeInput);
   });
 
   it('Deposits WETH, borrows DAI', async () => {
@@ -110,6 +114,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const {
       dai,
       weth,
+      aWETH,
       users: [, borrower, , liquidator],
       pool,
       oracle,
@@ -122,8 +127,17 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //approve protocol to access the liquidator wallet
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
+    const daiReserveDataBefore = await helpersContract.getReserveData(dai.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+
+    const liquidatorBalanceBefore = await weth.balanceOf(liquidator.address);
+
+    const treasuryAddress = await aWETH.RESERVE_TREASURY_ADDRESS();
+    const treasuryDataBefore = await helpersContract.getUserReserveData(
+      weth.address,
+      treasuryAddress
+    );
+    const treasuryBalanceBefore = treasuryDataBefore.currentATokenBalance;
 
     const userReserveDataBefore = await getUserData(
       pool,
@@ -133,6 +147,10 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     );
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
+
+    const wethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      weth.address
+    );
 
     await increaseTime(100);
 
@@ -150,6 +168,14 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const daiReserveDataAfter = await helpersContract.getReserveData(dai.address);
     const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
 
+    const liquidatorBalanceAfter = await weth.balanceOf(liquidator.address);
+
+    const treasuryDataAfter = await helpersContract.getUserReserveData(
+      weth.address,
+      treasuryAddress
+    );
+    const treasuryBalanceAfter = treasuryDataAfter.currentATokenBalance;
+
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(dai.address);
 
@@ -158,11 +184,15 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const principalDecimals = (await helpersContract.getReserveConfigurationData(dai.address))
       .decimals;
 
-    const expectedCollateralLiquidated = principalPrice
+    const baseCollateral = principalPrice
       .mul(amountToLiquidate)
-      .percentMul(10500)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
+
+    const bonusCollateral = baseCollateral.percentMul(10500).sub(baseCollateral);
+    const totalCollateralLiquidated = baseCollateral.add(bonusCollateral);
+    const liquidationProtocolFees = bonusCollateral.percentMul(wethLiquidationProtocolFee);
+    const expectedLiquidationReward = totalCollateralLiquidated.sub(liquidationProtocolFees);
 
     if (!tx.blockNumber) {
       expect(false, 'Invalid block number');
@@ -197,28 +227,28 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid liquidity APY'
     );
 
-    // We also need to account for the interest and accrued
-    const daiExpectedLiquidityAfter = daiReserveDataBefore.scaledATokenSupply
-      .rayMul(daiReserveDataAfter.liquidityIndex)
-      .add(
-        daiReserveDataAfter.accruedToTreasuryScaled
-          .sub(daiReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(daiReserveDataAfter.liquidityIndex)
-      );
-    const daiTotalLiquidityAfter = daiReserveDataAfter.totalAToken.add(
-      daiReserveDataAfter.accruedToTreasuryScaled.rayMul(daiReserveDataAfter.liquidityIndex)
+    expect(daiReserveDataAfter.availableLiquidity).to.be.closeTo(
+      daiReserveDataBefore.availableLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal available liquidity'
     );
 
-    expect(daiTotalLiquidityAfter).to.be.closeTo(
-      daiExpectedLiquidityAfter,
+    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
+      ethReserveDataBefore.availableLiquidity.sub(expectedLiquidationReward),
       2,
-      'Invalid principal total liquidity'
+      'Invalid collateral available liquidity'
     );
 
-    expect(ethReserveDataAfter.totalAToken).to.be.closeTo(
-      ethReserveDataBefore.totalAToken.sub(expectedCollateralLiquidated),
+    expect(treasuryBalanceAfter).to.be.closeTo(
+      treasuryBalanceBefore.add(liquidationProtocolFees),
       2,
-      'Invalid collateral total liquidity'
+      'Invalid treasury increase'
+    );
+
+    expect(liquidatorBalanceAfter).to.be.closeTo(
+      liquidatorBalanceBefore.add(expectedLiquidationReward),
+      2,
+      'Invalid liquidator balance'
     );
   });
 
@@ -229,6 +259,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       pool,
       oracle,
       weth,
+      aWETH,
       helpersContract,
     } = testEnv;
 
@@ -277,13 +308,12 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //drops HF below 1
     await oracle.setAssetPrice(usdc.address, usdcPrice.percentMul(11200));
 
-    //mints dai to the liquidator
-
+    //mints usdc to the liquidator
     await usdc
       .connect(liquidator.signer)
       .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
 
-    //approve protocol to access depositor wallet
+    //approve protocol to access liquidator wallet
     await usdc.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const userReserveDataBefore = await helpersContract.getUserReserveData(
@@ -291,10 +321,23 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       borrower.address
     );
 
-    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
     const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
 
+    const liquidatorBalanceBefore = await weth.balanceOf(liquidator.address);
+
+    const treasuryAddress = await aWETH.RESERVE_TREASURY_ADDRESS();
+    const treasuryDataBefore = await helpersContract.getUserReserveData(
+      weth.address,
+      treasuryAddress
+    );
+    const treasuryBalanceBefore = treasuryDataBefore.currentATokenBalance;
+
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
+
+    const wethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      weth.address
+    );
 
     await pool
       .connect(liquidator.signer)
@@ -310,6 +353,13 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const usdcReserveDataAfter = await helpersContract.getReserveData(usdc.address);
     const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
 
+    const liquidatorBalanceAfter = await weth.balanceOf(liquidator.address);
+    const treasuryDataAfter = await helpersContract.getUserReserveData(
+      weth.address,
+      treasuryAddress
+    );
+    const treasuryBalanceAfter = treasuryDataAfter.currentATokenBalance;
+
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(usdc.address);
 
@@ -318,11 +368,15 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const principalDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
       .decimals;
 
-    const expectedCollateralLiquidated = principalPrice
-      .mul(BigNumber.from(amountToLiquidate))
-      .percentMul(10500)
+    const baseCollateral = principalPrice
+      .mul(amountToLiquidate)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
+
+    const bonusCollateral = baseCollateral.percentMul(10500).sub(baseCollateral);
+    const totalCollateralLiquidated = baseCollateral.add(bonusCollateral);
+    const liquidationProtocolFees = bonusCollateral.percentMul(wethLiquidationProtocolFee);
+    const expectedLiquidationReward = totalCollateralLiquidated.sub(liquidationProtocolFees);
 
     expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
@@ -344,27 +398,28 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid liquidity APY'
     );
 
-    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
-      .rayMul(usdcReserveDataAfter.liquidityIndex)
-      .add(
-        usdcReserveDataAfter.accruedToTreasuryScaled
-          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(usdcReserveDataAfter.liquidityIndex)
-      );
-    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalAToken.add(
-      usdcReserveDataAfter.accruedToTreasuryScaled.rayMul(usdcReserveDataAfter.liquidityIndex)
+    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.availableLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal available liquidity'
     );
 
-    expect(usdcTotalLiquidityAfter).to.be.closeTo(
-      usdcExpectedLiquidityAfter,
+    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
+      ethReserveDataBefore.availableLiquidity.sub(expectedLiquidationReward),
       2,
-      'Invalid principal total liquidity'
+      'Invalid collateral available liquidity'
     );
 
-    expect(ethReserveDataAfter.totalAToken).to.be.closeTo(
-      ethReserveDataBefore.totalAToken.sub(expectedCollateralLiquidated),
+    expect(treasuryBalanceAfter).to.be.closeTo(
+      treasuryBalanceBefore.add(liquidationProtocolFees),
       2,
-      'Invalid collateral total liquidity'
+      'Invalid treasury increase'
+    );
+
+    expect(liquidatorBalanceAfter).to.be.closeTo(
+      liquidatorBalanceBefore.add(expectedLiquidationReward),
+      2,
+      'Invalid liquidator balance'
     );
   });
 
@@ -408,7 +463,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       borrower.address
     );
 
-    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
     const aaveReserveDataBefore = await helpersContract.getReserveData(aave.address);
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
@@ -416,9 +471,22 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const collateralPrice = await oracle.getAssetPrice(aave.address);
     const principalPrice = await oracle.getAssetPrice(usdc.address);
 
+    const aaveTokenAddresses = await helpersContract.getReserveTokensAddresses(aave.address);
+    const aAaveTokenAddress = await aaveTokenAddresses.aTokenAddress;
+    const aAaveTokenContract = await ATokenFactory.connect(aAaveTokenAddress, DRE.ethers.provider);
+    const aAaveTokenBalanceBefore = await aAaveTokenContract.balanceOf(liquidator.address);
+    const borrowerATokenBalance = await aAaveTokenContract.balanceOf(borrower.address);
+
+    const treasuryAddress = await aAaveTokenContract.RESERVE_TREASURY_ADDRESS();
+    const treasuryDataBefore = await helpersContract.getUserReserveData(
+      aave.address,
+      treasuryAddress
+    );
+    const treasuryBalanceBefore = treasuryDataBefore.currentATokenBalance;
+
     await pool
       .connect(liquidator.signer)
-      .liquidationCall(aave.address, usdc.address, borrower.address, amountToLiquidate, false);
+      .liquidationCall(aave.address, usdc.address, borrower.address, amountToLiquidate, true);
 
     const userReserveDataAfter = await helpersContract.getUserReserveData(
       usdc.address,
@@ -439,11 +507,27 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
 
     const expectedCollateralLiquidated = oneEther.mul(10);
 
+    const aaveLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      aave.address
+    );
+
     const expectedPrincipal = collateralPrice
       .mul(expectedCollateralLiquidated)
       .mul(BigNumber.from(10).pow(principalDecimals))
       .div(principalPrice.mul(BigNumber.from(10).pow(collateralDecimals)))
       .percentDiv(liquidationBonus);
+
+    const bonusCollateral = borrowerATokenBalance.percentDiv(liquidationBonus);
+    const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee);
+    const expectedLiquidationReward = borrowerATokenBalance.sub(liquidationProtocolFee);
+
+    const aAaveTokenBalanceAfter = await aAaveTokenContract.balanceOf(liquidator.address);
+
+    const treasuryDataAfter = await helpersContract.getUserReserveData(
+      aave.address,
+      treasuryAddress
+    );
+    const treasuryBalanceAfter = treasuryDataAfter.currentATokenBalance;
 
     expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
@@ -453,27 +537,26 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid user borrow balance after liquidation'
     );
 
-    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
-      .rayMul(usdcReserveDataAfter.liquidityIndex)
-      .add(
-        usdcReserveDataAfter.accruedToTreasuryScaled
-          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(usdcReserveDataAfter.liquidityIndex)
-      );
-    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalAToken.add(
-      usdcReserveDataAfter.accruedToTreasuryScaled.rayMul(usdcReserveDataAfter.liquidityIndex)
+    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.availableLiquidity.add(expectedPrincipal),
+      2,
+      'Invalid principal available liquidity'
     );
 
-    expect(usdcTotalLiquidityAfter).to.be.closeTo(
-      usdcExpectedLiquidityAfter,
+    expect(aaveReserveDataAfter.availableLiquidity).to.be.closeTo(
+      aaveReserveDataBefore.availableLiquidity,
       2,
-      'Invalid principal total liquidity'
+      'Invalid collateral available liquidity'
     );
 
-    expect(aaveReserveDataAfter.totalAToken).to.be.closeTo(
-      aaveReserveDataBefore.totalAToken.sub(expectedCollateralLiquidated),
-      2,
-      'Invalid collateral total liquidity'
+    expect(aAaveTokenBalanceBefore).to.be.equal(
+      aAaveTokenBalanceAfter.sub(expectedLiquidationReward),
+      'Liquidator aToken balance incorrect'
+    );
+
+    expect(treasuryBalanceBefore).to.be.equal(
+      treasuryBalanceAfter.sub(liquidationProtocolFee),
+      'Treasury aToken balance incorrect'
     );
   });
 });

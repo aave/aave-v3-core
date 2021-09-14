@@ -7,6 +7,12 @@ import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 
+/**
+ * @title PoolStorage
+ * @author Aave
+ * @notice Contract used as storage of the Pool contract.
+ * @dev It defines the storage layout of the Pool contract.
+ */
 contract PoolStorage {
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -32,6 +38,7 @@ contract PoolStorage {
 
   uint256 internal _maxNumberOfReserves;
 
+  /// @dev Deprecated: authorizedFlashBorrowers managed via ACLManager
   mapping(address => bool) _authorizedFlashBorrowers;
 
   uint256 internal _flashLoanPremiumToProtocol;

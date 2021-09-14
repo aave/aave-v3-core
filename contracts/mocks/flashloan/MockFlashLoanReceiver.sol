@@ -3,12 +3,11 @@ pragma solidity 0.8.6;
 
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-
-import {FlashLoanReceiverBase} from '../../flashloan/base/FlashLoanReceiverBase.sol';
-import {MintableERC20} from '../tokens/MintableERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {FlashLoanReceiverBase} from '../../flashloan/base/FlashLoanReceiverBase.sol';
+import {MintableERC20} from '../tokens/MintableERC20.sol';
 
 contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   using SafeERC20 for IERC20;
@@ -70,8 +69,9 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
         'Invalid balance for the contract'
       );
 
-      uint256 amountToReturn =
-        (_amountToApprove != 0) ? _amountToApprove : amounts[i].add(premiums[i]);
+      uint256 amountToReturn = (_amountToApprove != 0)
+        ? _amountToApprove
+        : amounts[i].add(premiums[i]);
       //execution does not fail - mint tokens and return them to the _destination
 
       token.mint(premiums[i]);

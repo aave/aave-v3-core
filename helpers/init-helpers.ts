@@ -2,6 +2,7 @@ import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
 import { chunk, waitForTx } from './misc-utils';
 import {
+  getACLManager,
   getATokensAndRatesHelper,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
@@ -244,6 +245,7 @@ export const configureReservesByHelper = async (
 ) => {
   const addressProvider = await getPoolAddressesProvider();
   const atokenAndRatesDeployer = await getATokensAndRatesHelper();
+  const aclManager = await getACLManager();
   const tokens: string[] = [];
   const symbols: string[] = [];
 
@@ -313,7 +315,7 @@ export const configureReservesByHelper = async (
   }
   if (tokens.length) {
     // Set aTokenAndRatesDeployer as temporal admin
-    await waitForTx(await addressProvider.setPoolAdmin(atokenAndRatesDeployer.address));
+    await waitForTx(await aclManager.addPoolAdmin(atokenAndRatesDeployer.address));
 
     // Deploy init per chunks
     const enableChunks = 20;
@@ -330,6 +332,6 @@ export const configureReservesByHelper = async (
       console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
     }
     // Set deployer back as admin
-    await waitForTx(await addressProvider.setPoolAdmin(admin));
+    await waitForTx(await aclManager.removePoolAdmin(atokenAndRatesDeployer.address));
   }
 };

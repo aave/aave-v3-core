@@ -2,12 +2,8 @@
 pragma solidity 0.8.6;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
-import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {IAToken} from '../../interfaces/IAToken.sol';
-import {IPool} from '../../interfaces/IPool.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
@@ -19,12 +15,18 @@ import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
+import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {IAToken} from '../../interfaces/IAToken.sol';
+import {IPool} from '../../interfaces/IPool.sol';
+import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
 import {BridgeLogic} from './../libraries/logic/BridgeLogic.sol';
 
 /**
  * @title Pool contract
- * @dev Main point of interaction with an Aave protocol's market
+ * @author Aave
+ * @notice Main point of interaction with an Aave protocol's market
  * - Users can:
  *   # Deposit
  *   # Withdraw
@@ -34,10 +36,9 @@ import {BridgeLogic} from './../libraries/logic/BridgeLogic.sol';
  *   # Enable/disable their deposits as collateral rebalance stable rate borrow positions
  *   # Liquidate positions
  *   # Execute Flash Loans
- * - To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
- * - All admin functions are callable by the PoolConfigurator contract defined also in the
+ * @dev To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
+ * @dev All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
- * @author Aave
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
@@ -52,8 +53,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _;
   }
 
-  modifier onlyBridgeAccessControl() {
-    _onlyBridgeAccessControl();
+  modifier onlyBridge() {
+    _onlyBridge();
     _;
   }
 
@@ -64,9 +65,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  function _onlyBridgeAccessControl() internal view {
+  function _onlyBridge() internal view {
     require(
-      _addressesProvider.getBridgeAccessControl() == msg.sender,
+      IACLManager(_addressesProvider.getACLManager()).isBridge(msg.sender),
       'TODO: fix message. Caller not BRIDGE_ACCESS_CONTROL'
     );
   }
@@ -76,9 +77,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /**
+   * @notice Initializes the Pool.
    * @dev Function is invoked by the proxy contract when the Pool contract is added to the
    * PoolAddressesProvider of the market.
-   * - Caching the address of the PoolAddressesProvider in order to reduce gas consumption
+   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
    * @param provider The address of the PoolAddressesProvider
    **/
@@ -90,7 +92,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _flashLoanPremiumToProtocol = 0;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function deposit(
     address asset,
     uint256 amount,
@@ -113,7 +115,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) external override onlyBridgeAccessControl {
+  ) external override onlyBridge {
     BridgeLogic.mintUnbacked(
       _reserves[asset],
       _usersConfig[onBehalfOf],
@@ -129,7 +131,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     uint256 fee
-  ) external override onlyBridgeAccessControl {
+  ) external override onlyBridge {
     BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee);
   }
 
@@ -163,7 +165,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function withdraw(
     address asset,
     uint256 amount,
@@ -184,7 +186,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function borrow(
     address asset,
     uint256 amount,
@@ -213,7 +215,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _lastBorrowTimestamp = uint40(block.timestamp);
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function repay(
     address asset,
     uint256 amount,
@@ -236,7 +238,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function repayWithPermit(
     address asset,
     uint256 amount,
@@ -272,7 +274,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function repayWithATokens(
     address asset,
     uint256 amount,
@@ -295,17 +297,17 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function swapBorrowRateMode(address asset, uint256 rateMode) external override {
     BorrowLogic.swapBorrowRateMode(_reserves[asset], _usersConfig[msg.sender], asset, rateMode);
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function rebalanceStableBorrowRate(address asset, address user) external override {
     BorrowLogic.rebalanceStableBorrowRate(_reserves[asset], asset, user);
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
     DepositLogic.setUserUseReserveAsCollateral(
       _reserves,
@@ -318,7 +320,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function liquidationCall(
     address collateralAsset,
     address debtAsset,
@@ -342,7 +344,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function flashLoan(
     address receiverAddress,
     address[] calldata assets,
@@ -370,13 +372,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     BorrowLogic.executeFlashLoan(
       _reserves,
       _reservesList,
-      _authorizedFlashBorrowers,
+      IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender),
       _usersConfig[onBehalfOf],
       flashParams
     );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function mintToTreasury(address[] calldata assets) external override {
     for (uint256 i = 0; i < assets.length; i++) {
       address assetAddress = assets[i];
@@ -401,7 +403,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     }
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getReserveData(address asset)
     external
     view
@@ -411,7 +413,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _reserves[asset];
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getUserAccountData(address user)
     external
     view
@@ -448,7 +450,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getConfiguration(address asset)
     external
     view
@@ -458,7 +460,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _reserves[asset].configuration;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getUserConfiguration(address user)
     external
     view
@@ -468,7 +470,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersConfig[user];
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getReserveNormalizedIncome(address asset)
     external
     view
@@ -479,7 +481,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _reserves[asset].getNormalizedIncome();
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getReserveNormalizedVariableDebt(address asset)
     external
     view
@@ -489,7 +491,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _reserves[asset].getNormalizedDebt();
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getReservesList() external view override returns (address[] memory) {
     uint256 reserveListCount = _reservesCount;
     uint256 droppedReservesCount = 0;
@@ -513,32 +515,32 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return undroppedReserves;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function getAddressesProvider() external view override returns (IPoolAddressesProvider) {
     return _addressesProvider;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() public view override returns (uint256) {
     return _maxStableRateBorrowSizePercent;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function FLASHLOAN_PREMIUM_TOTAL() public view override returns (uint256) {
     return _flashLoanPremiumTotal;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function FLASHLOAN_PREMIUM_TO_PROTOCOL() public view override returns (uint256) {
     return _flashLoanPremiumToProtocol;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function MAX_NUMBER_RESERVES() public view override returns (uint256) {
     return _maxNumberOfReserves;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function finalizeTransfer(
     address asset,
     address from,
@@ -565,7 +567,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function initReserve(
     address asset,
     address aTokenAddress,
@@ -583,7 +585,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _addReserveToList(asset);
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function dropReserve(address asset) external override onlyPoolConfigurator {
     DataTypes.ReserveData storage reserve = _reserves[asset];
     ValidationLogic.validateDropReserve(reserve);
@@ -591,7 +593,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     delete _reserves[asset];
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override
@@ -600,7 +602,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function setConfiguration(address asset, uint256 configuration)
     external
     override
@@ -609,21 +611,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _reserves[asset].configuration.data = configuration;
   }
 
-  ///@inheritdoc IPool
-  function updateFlashBorrowerAuthorization(address flashBorrower, bool authorized)
-    external
-    override
-    onlyPoolConfigurator
-  {
-    _authorizedFlashBorrowers[flashBorrower] = authorized;
-  }
-
-  ///@inheritdoc IPool
-  function isFlashBorrowerAuthorized(address flashBorrower) external view override returns (bool) {
-    return _authorizedFlashBorrowers[flashBorrower];
-  }
-
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function updateFlashloanPremiums(
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol

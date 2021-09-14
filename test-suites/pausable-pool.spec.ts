@@ -5,6 +5,7 @@ import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import {
+  getACLManager,
   getFirstSigner,
   getMockFlashLoanReceiver,
   getMockPool,
@@ -13,6 +14,7 @@ import {
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMockPool } from '../helpers/contracts-deployments';
 import {
+  ACLManagerFactory,
   ConfiguratorLogicFactory,
   PoolAddressesProviderFactory,
   PoolConfiguratorFactory,
@@ -331,7 +333,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
   });
 
   it('Configurator pauses Pool with a ZERO_ADDRESS reserve', async () => {
-    const { emergencyAdmin } = testEnv;
+    const { poolAdmin, emergencyAdmin } = testEnv;
 
     const snapId = await evmSnapshot();
 
@@ -355,6 +357,27 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
       await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(MARKET_ID)
     ).deployed();
 
+    // Set the ACL admin
+    expect(await poolAddressesProvider.setACLAdmin(poolAdmin.address));
+
+    // Update the ACLManager impl
+    const aclManagerImpl = await (
+      await new ACLManagerFactory(await getFirstSigner()).deploy()
+    ).deployed();
+    expect(await poolAddressesProvider.setACLManagerImpl(aclManagerImpl.address))
+      .to.emit(poolAddressesProvider, 'ACLManagerUpdated')
+      .withArgs(aclManagerImpl.address);
+
+    // Get the ACLManager
+    const aclManagerProxyAddress = await poolAddressesProvider.getACLManager();
+    const aclManager = await getACLManager(aclManagerProxyAddress);
+
+    // Set role of EmergencyAdmin
+    const emergencyAdminRole = await aclManager.EMERGENCY_ADMIN_ROLE();
+    expect(await aclManager.addEmergencyAdmin(emergencyAdmin.address))
+      .to.emit(aclManager, 'RoleGranted')
+      .withArgs(emergencyAdminRole, emergencyAdmin.address, poolAdmin.address);
+
     // Update the Pool impl with a MockPool
     expect(await poolAddressesProvider.setPoolImpl(mockPool.address))
       .to.emit(poolAddressesProvider, 'PoolUpdated')
@@ -372,11 +395,6 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     const proxiedPoolConfiguratorAddress = await poolAddressesProvider.getPoolConfigurator();
     const proxiedPoolConfigurator = await getPoolConfiguratorProxy(proxiedPoolConfiguratorAddress);
-
-    // Update the EmergencyAdmin
-    expect(await poolAddressesProvider.setEmergencyAdmin(emergencyAdmin.address))
-      .to.emit(poolAddressesProvider, 'EmergencyAdminUpdated')
-      .withArgs(emergencyAdmin.address);
 
     // Pause reserve
     expect(await proxiedPoolConfigurator.connect(emergencyAdmin.signer).setPoolPause(true));

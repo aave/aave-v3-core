@@ -21,6 +21,7 @@ export enum eContractid {
   MintableERC20 = 'MintableERC20',
   MintableDelegationERC20 = 'MintableDelegationERC20',
   PoolAddressesProviderRegistry = 'PoolAddressesProviderRegistry',
+  ACLManager = 'ACLManager',
   PoolParametersProvider = 'PoolParametersProvider',
   PoolConfigurator = 'PoolConfigurator',
   ValidationLogic = 'ValidationLogic',
@@ -170,6 +171,7 @@ export enum ProtocolErrors {
   VL_SAME_BLOCK_BORROW_REPAY = '94',
   PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
   PC_FLASHLOAN_PREMIUM_INVALID = '96',
+  RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
 
   // old
 

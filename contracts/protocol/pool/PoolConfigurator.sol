@@ -1,30 +1,28 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
+import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {
-  InitializableImmutableAdminUpgradeabilityProxy
-} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {IPool} from '../../interfaces/IPool.sol';
-import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
+import {ConfiguratorLogic} from '../libraries/logic/ConfiguratorLogic.sol';
+import {ConfiguratorInputTypes} from '../libraries/types/ConfiguratorInputTypes.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IPoolConfigurator} from '../../interfaces/IPoolConfigurator.sol';
-import {ConfiguratorLogic} from '../libraries/logic/ConfiguratorLogic.sol';
-import {ConfiguratorInputTypes} from '../libraries/types/ConfiguratorInputTypes.sol';
+import {IPool} from '../../interfaces/IPool.sol';
+import {IACLManager} from '../../interfaces/IACLManager.sol';
 
 /**
- * @title PoolConfigurator contract
+ * @title PoolConfigurator
  * @author Aave
  * @dev Implements the configuration methods for the Aave protocol
  **/
-
 contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -56,6 +54,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   uint256 internal constant CONFIGURATOR_REVISION = 0x1;
 
+  /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
     return CONFIGURATOR_REVISION;
   }
@@ -252,7 +251,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit ReserveFactorChanged(asset, reserveFactor);
   }
 
-  ///@inheritdoc IPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setBorrowCap(address asset, uint256 borrowCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setBorrowCap(borrowCap);
@@ -260,12 +259,27 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit BorrowCapChanged(asset, borrowCap);
   }
 
-  ///@inheritdoc IPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setSupplyCap(address asset, uint256 supplyCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setSupplyCap(supplyCap);
     _pool.setConfiguration(asset, currentConfig.data);
     emit SupplyCapChanged(asset, supplyCap);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setLiquidationProtocolFee(address asset, uint256 fee)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setLiquidationProtocolFee(fee);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
   ///@inheritdoc IPoolConfigurator
@@ -287,35 +301,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
         setReservePause(reserves[i], paused);
       }
     }
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function registerRiskAdmin(address admin) external override onlyPoolAdmin {
-    _riskAdmins[admin] = true;
-    emit RiskAdminRegistered(admin);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function unregisterRiskAdmin(address admin) external override onlyPoolAdmin {
-    _riskAdmins[admin] = false;
-    emit RiskAdminUnregistered(admin);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function authorizeFlashBorrower(address flashBorrower) external override onlyPoolAdmin {
-    _pool.updateFlashBorrowerAuthorization(flashBorrower, true);
-    emit FlashBorrowerAuthorized(flashBorrower);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function unauthorizeFlashBorrower(address flashBorrower) external override onlyPoolAdmin {
-    _pool.updateFlashBorrowerAuthorization(flashBorrower, false);
-    emit FlashBorrowerUnauthorized(flashBorrower);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function isRiskAdmin(address admin) external view override onlyPoolAdmin returns (bool) {
-    return _riskAdmins[admin];
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -366,27 +351,27 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   function _onlyPoolAdmin() internal view {
-    require(_addressesProvider.getPoolAdmin() == msg.sender, Errors.CALLER_NOT_POOL_ADMIN);
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
   }
 
   function _onlyEmergencyAdmin() internal view {
-    require(
-      _addressesProvider.getEmergencyAdmin() == msg.sender,
-      Errors.PC_CALLER_NOT_EMERGENCY_ADMIN
-    );
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(aclManager.isEmergencyAdmin(msg.sender), Errors.PC_CALLER_NOT_EMERGENCY_ADMIN);
   }
 
   function _onlyPoolOrEmergencyAdmin() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(
-      _addressesProvider.getEmergencyAdmin() == msg.sender ||
-        _addressesProvider.getPoolAdmin() == msg.sender,
+      aclManager.isPoolAdmin(msg.sender) || aclManager.isEmergencyAdmin(msg.sender),
       Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
     );
   }
 
   function _onlyRiskOrPoolAdmins() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(
-      _riskAdmins[msg.sender] || _addressesProvider.getPoolAdmin() == msg.sender,
+      aclManager.isRiskAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
       Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
     );
   }
