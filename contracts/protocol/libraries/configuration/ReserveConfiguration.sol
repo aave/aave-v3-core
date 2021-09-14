@@ -661,7 +661,7 @@ library ReserveConfiguration {
    **/
   function getEModeCategoryMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
-    view
+    pure
     returns (uint256)
   {
     return

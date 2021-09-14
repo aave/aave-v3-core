@@ -46,9 +46,8 @@ library ValidationLogic {
     internal
     view
   {
-    (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
-      .reserveConfiguration
-      .getFlagsMemory();
+    (bool isActive, bool isFrozen, , , bool isPaused) =
+      reserveCache.reserveConfiguration.getFlagsMemory();
     (, , , uint256 reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCapMemory();
 
@@ -161,9 +160,7 @@ library ValidationLogic {
     );
 
     vars.borrowCap = reserveCache.reserveConfiguration.getBorrowCapMemory();
-    unchecked {
-      vars.assetUnit = 10**vars.reserveDecimals;
-    }
+    unchecked {vars.assetUnit = 10**vars.reserveDecimals;}
 
     if (vars.borrowCap != 0) {
       {
@@ -202,9 +199,7 @@ library ValidationLogic {
     );
 
     vars.amountInBaseCurrency = IPriceOracleGetter(oracle).getAssetPrice(asset) * amount;
-    unchecked {
-      vars.amountInBaseCurrency /= 10**vars.reserveDecimals;
-    }
+    unchecked {vars.amountInBaseCurrency /= 10**vars.reserveDecimals;}
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
     vars.collateralNeededInBaseCurrency = (vars.userDebtInBaseCurrency + vars.amountInBaseCurrency)
@@ -308,9 +303,8 @@ library ValidationLogic {
     uint256 variableDebt,
     DataTypes.InterestRateMode currentRateMode
   ) internal view {
-    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) = reserveCache
-      .reserveConfiguration
-      .getFlagsMemory();
+    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) =
+      reserveCache.reserveConfiguration.getFlagsMemory();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -363,8 +357,8 @@ library ValidationLogic {
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
     //if the usage ratio is below 95%, no rebalances are needed
-    uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
-      .wadToRay();
+    uint256 totalDebt =
+      (stableDebtToken.totalSupply() + variableDebtToken.totalSupply()).wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
     uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
@@ -372,9 +366,8 @@ library ValidationLogic {
     //then we allow rebalancing of the stable rate positions.
 
     uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
-    uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
-      reserve.interestRateStrategyAddress
-    ).getMaxVariableBorrowRate();
+    uint256 maxVariableBorrowRate =
+      IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).getMaxVariableBorrowRate();
 
     require(
       usageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
@@ -492,6 +485,32 @@ library ValidationLogic {
     require(totalDebt > 0, Errors.VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   }
 
+  function validateHealthFactor(
+    address user,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    DataTypes.UserConfigurationMap storage userConfig,
+    mapping(uint256 => address) storage reserves,
+    uint256 reservesCount,
+    address oracle
+  ) public view returns (uint256, bool) {
+    (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) =
+      GenericLogic.calculateUserAccountData(
+        user,
+        reservesData,
+        userConfig,
+        reserves,
+        reservesCount,
+        oracle
+      );
+
+    require(
+      healthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
+    );
+
+    return(healthFactor, hasZeroLtvCollateral);
+  }
+
   struct validateHFAndLtvLocalVars {
     uint256 healthFactor;
     uint256 assetLtv;
@@ -521,7 +540,7 @@ library ValidationLogic {
   ) internal view {
     validateHFAndLtvLocalVars memory vars;
     DataTypes.ReserveData memory reserve = reservesData[asset];
-    (, , , , vars.healthFactor, vars.hasZeroLtvCollateral) = GenericLogic.calculateUserAccountData(
+    (vars.healthFactor, vars.hasZeroLtvCollateral) = validateHealthFactor(
       from,
       reservesData,
       userConfig,
@@ -569,8 +588,7 @@ library ValidationLogic {
     mapping(address => DataTypes.ReserveData) storage reservesData,
     DataTypes.UserConfigurationMap memory userConfig,
     mapping(uint256 => address) storage reserves,
-    uint256 reservesCount,
-    address oracle
+    uint256 reservesCount
   ) external view {
     //eMode can always be enabled if the user hasn't deposited anything
     if (userConfig.isEmpty()) {
@@ -584,8 +602,8 @@ library ValidationLogic {
       unchecked {
         for (uint256 i = 0; i < reservesCount; i++) {
           if (userConfig.isUsingAsCollateralOrBorrowing(i)) {
-            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reserves[i]]
-              .configuration;
+            DataTypes.ReserveConfigurationMap memory configuration =
+              reservesData[reserves[i]].configuration;
             require(
               configuration.getEModeCategoryMemory() == categoryId,
               Errors.RC_INVALID_EMODE_CATEGORY
@@ -594,7 +612,5 @@ library ValidationLogic {
         }
       }
     }
-    // if categoryId is 0, setUserEModeCategory() will need to validate the HF after disabling eMode
-    // to ensure that the HF does not drop below 1
   }
 }

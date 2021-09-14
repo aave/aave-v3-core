@@ -315,20 +315,21 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    DataTypes.FlashloanParams memory flashParams = DataTypes.FlashloanParams(
-      receiverAddress,
-      assets,
-      amounts,
-      modes,
-      onBehalfOf,
-      params,
-      referralCode,
-      _flashLoanPremiumToProtocol,
-      _flashLoanPremiumTotal,
-      _maxStableRateBorrowSizePercent,
-      _reservesCount,
-      _addressesProvider.getPriceOracle()
-    );
+    DataTypes.FlashloanParams memory flashParams =
+      DataTypes.FlashloanParams(
+        receiverAddress,
+        assets,
+        amounts,
+        modes,
+        onBehalfOf,
+        params,
+        referralCode,
+        _flashLoanPremiumToProtocol,
+        _flashLoanPremiumTotal,
+        _maxStableRateBorrowSizePercent,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
+      );
 
     BorrowLogic.executeFlashLoan(
       _reserves,
@@ -623,10 +624,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reserves,
       _usersConfig[msg.sender],
       _reservesList,
-      _reservesCount,
-      _addressesProvider.getPriceOracle()
+      _reservesCount
     );
+    uint8 prevCategoryId = _userEModeCategories[msg.sender];
     _userEModeCategories[msg.sender] = categoryId;
+    if (prevCategoryId != 0 && categoryId == 0) {
+      ValidationLogic.validateHealthFactor(
+        msg.sender,
+        _reserves,
+        _usersConfig[msg.sender],
+        _reservesList,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
+      );
+    }
     emit UserEModeSet(msg.sender, categoryId);
   }
 
