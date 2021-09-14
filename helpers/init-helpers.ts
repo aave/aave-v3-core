@@ -1,6 +1,6 @@
 import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from './types';
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
-import { chunk, getDb, waitForTx } from './misc-utils';
+import { chunk, waitForTx } from './misc-utils';
 import {
   getATokensAndRatesHelper,
   getPoolAddressesProvider,

@@ -5,12 +5,14 @@ import {Pool} from '../protocol/pool/Pool.sol';
 import {PoolAddressesProvider} from '../protocol/configuration/PoolAddressesProvider.sol';
 import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {AToken} from '../protocol/tokenization/AToken.sol';
-import {
-  DefaultReserveInterestRateStrategy
-} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
+import {DefaultReserveInterestRateStrategy} from '../protocol/pool/DefaultReserveInterestRateStrategy.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {StringLib} from './StringLib.sol';
 
+/**
+ * @title ATokensAndRatesHelper
+ * @notice Implements a helper to configure reserves
+ * @author Aave
+ **/
 contract ATokensAndRatesHelper is Ownable {
   address payable private pool;
   address private addressesProvider;
@@ -44,25 +46,11 @@ contract ATokensAndRatesHelper is Ownable {
     poolConfigurator = _poolConfigurator;
   }
 
-  function initDeployment(InitDeploymentInput[] calldata inputParams) external onlyOwner {
-    for (uint256 i = 0; i < inputParams.length; i++) {
-      emit deployedContracts(
-        address(new AToken()),
-        address(
-          new DefaultReserveInterestRateStrategy(
-            PoolAddressesProvider(addressesProvider),
-            inputParams[i].rates[0],
-            inputParams[i].rates[1],
-            inputParams[i].rates[2],
-            inputParams[i].rates[3],
-            inputParams[i].rates[4],
-            inputParams[i].rates[5]
-          )
-        )
-      );
-    }
-  }
-
+  /**
+   * @notice Will configure multiple reserves with the given parameters
+   * @dev Only callable by owner. This contract needs to be risk of pool admin to execute actions on configurator
+   * @param inputParams The a list with parameters for assets
+   */
   function configureReserves(ConfigureReserveInput[] calldata inputParams) external onlyOwner {
     PoolConfigurator configurator = PoolConfigurator(poolConfigurator);
     for (uint256 i = 0; i < inputParams.length; i++) {

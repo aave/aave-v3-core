@@ -1,30 +1,27 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.6;
 
+import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {
-  InitializableImmutableAdminUpgradeabilityProxy
-} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {IPool} from '../../interfaces/IPool.sol';
-import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
+import {ConfiguratorLogic} from '../libraries/logic/ConfiguratorLogic.sol';
+import {ConfiguratorInputTypes} from '../libraries/types/ConfiguratorInputTypes.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IPoolConfigurator} from '../../interfaces/IPoolConfigurator.sol';
-import {ConfiguratorLogic} from '../libraries/logic/ConfiguratorLogic.sol';
-import {ConfiguratorInputTypes} from '../libraries/types/ConfiguratorInputTypes.sol';
+import {IPool} from '../../interfaces/IPool.sol';
 
 /**
- * @title PoolConfigurator contract
+ * @title PoolConfigurator
  * @author Aave
  * @dev Implements the configuration methods for the Aave protocol
  **/
-
 contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -56,7 +53,8 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   uint256 internal constant CONFIGURATOR_REVISION = 0x1;
 
-  function getRevision() internal pure override returns (uint256) {
+  /// @inheritdoc VersionedInitializable
+  function getRevision() internal pure virtual override returns (uint256) {
     return CONFIGURATOR_REVISION;
   }
 
@@ -123,7 +121,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _pool.setConfiguration(asset, currentConfig.data);
 
     emit BorrowingEnabledOnReserve(asset, stableBorrowRateEnabled);
-    }
+  }
 
   /// @inheritdoc IPoolConfigurator
   function disableBorrowingOnReserve(address asset) external override onlyRiskOrPoolAdmins {
@@ -252,7 +250,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit ReserveFactorChanged(asset, reserveFactor);
   }
 
-  ///@inheritdoc IPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setBorrowCap(address asset, uint256 borrowCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setBorrowCap(borrowCap);
@@ -260,12 +258,27 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit BorrowCapChanged(asset, borrowCap);
   }
 
-  ///@inheritdoc IPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setSupplyCap(address asset, uint256 supplyCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setSupplyCap(supplyCap);
     _pool.setConfiguration(asset, currentConfig.data);
     emit SupplyCapChanged(asset, supplyCap);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setLiquidationProtocolFee(address asset, uint256 fee)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setLiquidationProtocolFee(fee);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
   ///@inheritdoc IPoolConfigurator
@@ -351,7 +364,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       Errors.PC_FLASHLOAN_PREMIUMS_MISMATCH
     );
     _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), flashloanPremiumToProtocol);
-    emit FlashloanPremiumToProcolUpdated(flashloanPremiumToProtocol);
+    emit FlashloanPremiumToProtocolUpdated(flashloanPremiumToProtocol);
   }
 
   function _checkNoLiquidity(address asset) internal view {

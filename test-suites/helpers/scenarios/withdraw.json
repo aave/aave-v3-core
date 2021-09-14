@@ -1,7 +1,56 @@
 {
-  "title": "Pool: withdraw",
+  "title": "Pool: Withdraw",
   "description": "withdraw function.",
   "stories": [
+    {
+      "description": "Users 3 Deposit 1000 DAI, set using as collateral = false, then withdraw 1000 dai",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "DAI",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "3"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "setUseAsCollateral",
+          "args": {
+            "reserve": "DAI",
+            "user": "3",
+            "useAsCollateral": "false"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "withdraw",
+          "args": {
+            "reserve": "DAI",
+            "amount": "1000",
+            "user": "3"
+          },
+          "expected": "success"
+        }
+      ]
+    },
     {
       "description": "User 0 Deposits 1000 DAI in an empty reserve",
       "actions": [

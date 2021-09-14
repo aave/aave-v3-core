@@ -2,23 +2,23 @@
 pragma solidity 0.8.6;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {ReserveLogic} from './ReserveLogic.sol';
-import {GenericLogic} from './GenericLogic.sol';
-import {WadRayMath} from '../math/WadRayMath.sol';
-import {PercentageMath} from '../math/PercentageMath.sol';
+import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
-import {UserConfiguration} from '../configuration/UserConfiguration.sol';
-import {Errors} from '../helpers/Errors.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
-import {IAToken} from '../../../interfaces/IAToken.sol';
-import {DataTypes} from '../types/DataTypes.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
-import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
+import {IAToken} from '../../../interfaces/IAToken.sol';
+import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
+import {UserConfiguration} from '../configuration/UserConfiguration.sol';
+import {Errors} from '../helpers/Errors.sol';
+import {Helpers} from '../helpers/Helpers.sol';
+import {WadRayMath} from '../math/WadRayMath.sol';
+import {PercentageMath} from '../math/PercentageMath.sol';
+import {DataTypes} from '../types/DataTypes.sol';
+import {ReserveLogic} from './ReserveLogic.sol';
+import {GenericLogic} from './GenericLogic.sol';
 
 /**
  * @title ReserveLogic library
@@ -38,7 +38,7 @@ library ValidationLogic {
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
 
   /**
-   * @dev Validates a deposit action
+   * @notice Validates a deposit action
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be deposited
    */
@@ -46,8 +46,9 @@ library ValidationLogic {
     internal
     view
   {
-    (bool isActive, bool isFrozen, , , bool isPaused) =
-      reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
+      .reserveConfiguration
+      .getFlagsMemory();
     (, , , uint256 reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCapMemory();
 
@@ -67,7 +68,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a withdraw action
+   * @notice Validates a withdraw action
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be withdrawn
    * @param userBalance The balance of the user
@@ -107,7 +108,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a borrow action
+   * @notice Validates a borrow action
    * @param reserveCache the cached data of the reserve
    * @param asset The address of the asset to borrow
    * @param userAddress The address of the user
@@ -115,11 +116,11 @@ library ValidationLogic {
    * @param interestRateMode The interest rate mode at which the user is borrowing
    * @param maxStableLoanPercent The max amount of the liquidity that can be borrowed at stable rate, in percentage
    * @param reservesData The state of all the reserves
-   * @param userConfig The state of the user for the specific reserve
+   * @param userConfig The state of the specific user
    * @param reserves The addresses of all the active reserves
-   * @param oracle The price oracle
+   * @param reservesCount The number of available reserve
+   * @param oracle The address of the price oracle
    */
-
   function validateBorrow(
     DataTypes.ReserveCache memory reserveCache,
     address asset,
@@ -160,7 +161,9 @@ library ValidationLogic {
     );
 
     vars.borrowCap = reserveCache.reserveConfiguration.getBorrowCapMemory();
-    unchecked {vars.assetUnit = 10**vars.reserveDecimals;}
+    unchecked {
+      vars.assetUnit = 10**vars.reserveDecimals;
+    }
 
     if (vars.borrowCap != 0) {
       {
@@ -199,7 +202,9 @@ library ValidationLogic {
     );
 
     vars.amountInBaseCurrency = IPriceOracleGetter(oracle).getAssetPrice(asset) * amount;
-    unchecked {vars.amountInBaseCurrency /= 10**vars.reserveDecimals;}
+    unchecked {
+      vars.amountInBaseCurrency /= 10**vars.reserveDecimals;
+    }
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
     vars.collateralNeededInBaseCurrency = (vars.userDebtInBaseCurrency + vars.amountInBaseCurrency)
@@ -241,10 +246,12 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a repay action
+   * @notice Validates a repay action
+   * @param lastBorrower The address of the last borrower
+   * @param lastBorrowTimestamp The timestamp for last borrow
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
-   * @param rateMode the interest rate mode of the debt being repaid
+   * @param rateMode The interest rate mode of the debt being repaid
    * @param onBehalfOf The address of the user msg.sender is repaying for
    * @param stableDebt The borrow balance of the user
    * @param variableDebt The borrow balance of the user
@@ -285,7 +292,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a swap of borrow rate mode.
+   * @notice Validates a swap of borrow rate mode.
    * @param reserve The reserve state on which the user is swapping the rate
    * @param reserveCache The cached data of the reserve
    * @param userConfig The user reserves configuration
@@ -301,8 +308,9 @@ library ValidationLogic {
     uint256 variableDebt,
     DataTypes.InterestRateMode currentRateMode
   ) internal view {
-    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) =
-      reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) = reserveCache
+      .reserveConfiguration
+      .getFlagsMemory();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -333,7 +341,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a stable borrow rate rebalance action
+   * @notice Validates a stable borrow rate rebalance action
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
@@ -355,8 +363,8 @@ library ValidationLogic {
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
     //if the usage ratio is below 95%, no rebalances are needed
-    uint256 totalDebt =
-      (stableDebtToken.totalSupply() + variableDebtToken.totalSupply()).wadToRay();
+    uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
+      .wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
     uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
@@ -364,8 +372,9 @@ library ValidationLogic {
     //then we allow rebalancing of the stable rate positions.
 
     uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
-    uint256 maxVariableBorrowRate =
-      IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).getMaxVariableBorrowRate();
+    uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
+      reserve.interestRateStrategyAddress
+    ).getMaxVariableBorrowRate();
 
     require(
       usageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
@@ -376,8 +385,9 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates the action of setting an asset as collateral
+   * @notice Validates the action of setting an asset as collateral
    * @param reserveCache The cached data of the reserve
+   * @param userBalance The baalnce of the user
    */
   function validateSetUseReserveAsCollateral(
     DataTypes.ReserveCache memory reserveCache,
@@ -392,10 +402,11 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a flashloan action
+   * @notice Validates a flashloan action
    * @param assets The assets being flashborrowed
    * @param amounts The amounts for each asset being borrowed
-   **/
+   * @param reservesData The state of all the reserves
+   */
   function validateFlashloan(
     address[] memory assets,
     uint256[] memory amounts,
@@ -417,18 +428,17 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates the liquidation action
+   * @notice Validates the liquidation action
    * @param collateralReserve The reserve data of the collateral
    * @param principalReserveCache The cached reserve data of the principal
-   * @param userConfig The user configuration
-   * @param totalDebt Total debt balance of the user
+   * @param totalDebt The total debt balance of the user
    * @param user The address of the user being liquidated
    * @param reservesData The mapping of the reserves data
    * @param userConfig The user configuration mapping
    * @param reserves The list of the reserves
-   * @param reservesCount The number of reserves in the list
+   * @param reservesCount The number of available reserves
    * @param oracle The address of the price oracle
-   **/
+   */
   function validateLiquidationCall(
     DataTypes.ReserveData storage collateralReserve,
     DataTypes.ReserveCache memory principalReserveCache,
@@ -491,7 +501,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates the health factor of a user and the ltv of the asset being withdrawn
+   * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred
    * @param reservesData The state of all the reserves
@@ -531,7 +541,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a transfer action
+   * @notice Validates a transfer action
    * @param reserve The reserve object
    */
   function validateTransfer(DataTypes.ReserveData storage reserve) internal view {
@@ -539,7 +549,7 @@ library ValidationLogic {
   }
 
   /**
-   * @dev Validates a drop reserve action
+   * @notice Validates a drop reserve action
    * @param reserve The reserve object
    **/
   function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {

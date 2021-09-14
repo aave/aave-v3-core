@@ -18,9 +18,4 @@ contract MockAggregator {
   function getTokenType() external pure returns (uint256) {
     return 1;
   }
-
-  // function getSubTokens() external view returns (address[] memory) {
-  // TODO: implement mock for when multiple subtokens. Maybe we need to create diff mock contract
-  // to call it from the migration for this case??
-  // }
 }

@@ -30,20 +30,6 @@ jobs:
         run: npm ci
       - name: Test
         run: npm run ci:test
-      - name: Dev deployment
-        run: npm run aave:evm:dev:migration
-      - name: Mainnet deployment at Mainnet fork
-        run: npm run aave:fork:main
-        env:
-          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
-      - name: Amm deployment at Mainnet fork
-        run: npm run amm:fork:main
-        env:
-          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
-      - name: Aave deployment at Kovan fork
-        run: npm run aave:fork:kovan
-        env:
-          ALCHEMY_KEY: ${{ secrets.ALCHEMY_KEY }}
       # - name: Coverage
       #   run: npm run coverage
       # - uses: codecov/codecov-action@v1

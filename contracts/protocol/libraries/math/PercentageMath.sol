@@ -10,7 +10,6 @@ import {Errors} from '../helpers/Errors.sol';
  * @dev Percentages are defined by default with 2 decimals of precision (100.00). The precision is indicated by PERCENTAGE_FACTOR
  * @dev Operations are rounded half up
  **/
-
 library PercentageMath {
   uint256 constant PERCENTAGE_FACTOR = 1e4; //percentage plus two decimals
   uint256 constant HALF_PERCENT = PERCENTAGE_FACTOR / 2;

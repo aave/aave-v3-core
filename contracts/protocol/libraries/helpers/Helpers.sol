@@ -10,10 +10,11 @@ import {DataTypes} from '../types/DataTypes.sol';
  */
 library Helpers {
   /**
-   * @dev Fetches the user current stable and variable debt balances
+   * @notice Fetches the user current stable and variable debt balances
    * @param user The user address
    * @param reserve The reserve data object
-   * @return The stable and variable debt balance
+   * @return The stable debt balance
+   * @return The variable debt balance
    **/
   function getUserCurrentDebt(address user, DataTypes.ReserveData storage reserve)
     internal
@@ -26,6 +27,13 @@ library Helpers {
     );
   }
 
+  /**
+   * @notice Fetches the user current stable and variable debt balances
+   * @param user The user address
+   * @param reserve The reserve data object
+   * @return The stable debt balance
+   * @return The variable debt balance
+   **/
   function getUserCurrentDebtMemory(address user, DataTypes.ReserveData memory reserve)
     internal
     view

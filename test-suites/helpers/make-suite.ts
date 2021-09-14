@@ -12,6 +12,7 @@ import {
   getWETHMocked,
   getVariableDebtToken,
   getStableDebtToken,
+  getAaveOracle,
 } from '../../helpers/contracts-getters';
 import { tEthereumAddress } from '../../helpers/types';
 import { Pool } from '../../types/Pool';
@@ -23,19 +24,17 @@ import { PoolConfigurator } from '../../types/PoolConfigurator';
 import chai from 'chai';
 // @ts-ignore
 import bignumberChai from 'chai-bignumber';
-import { almostEqual } from './almost-equal';
 import { PriceOracle } from '../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../types/PoolAddressesProvider';
 import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProviderRegistry';
 import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { solidity } from 'ethereum-waffle';
-import { StableDebtToken, VariableDebtToken } from '../../types';
+import { AaveOracle, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 
 chai.use(bignumberChai());
-chai.use(almostEqual());
 chai.use(solidity);
 
 export interface SignerWithAddress {
@@ -51,6 +50,7 @@ export interface TestEnv {
   pool: Pool;
   configurator: PoolConfigurator;
   oracle: PriceOracle;
+  aaveOracle: AaveOracle;
   helpersContract: AaveProtocolDataProvider;
   weth: WETH9Mocked;
   aWETH: AToken;
@@ -80,6 +80,7 @@ const testEnv: TestEnv = {
   configurator: {} as PoolConfigurator,
   helpersContract: {} as AaveProtocolDataProvider,
   oracle: {} as PriceOracle,
+  aaveOracle: {} as AaveOracle,
   weth: {} as WETH9Mocked,
   aWETH: {} as AToken,
   dai: {} as MintableERC20,
@@ -118,6 +119,7 @@ export async function initializeMakeSuite() {
 
   testEnv.registry = await getPoolAddressesProviderRegistry();
   testEnv.oracle = await getPriceOracle();
+  testEnv.aaveOracle = await getAaveOracle();
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 

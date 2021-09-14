@@ -24,15 +24,7 @@ library ReserveLogic {
   using PercentageMath for uint256;
   using SafeERC20 for IERC20;
 
-  /**
-   * @dev Emitted when the state of a reserve is updated
-   * @param asset The address of the underlying asset of the reserve
-   * @param liquidityRate The new liquidity rate
-   * @param stableBorrowRate The new stable borrow rate
-   * @param variableBorrowRate The new variable borrow rate
-   * @param liquidityIndex The new liquidity index
-   * @param variableBorrowIndex The new variable borrow index
-   **/
+  // See `IPool` for descriptions
   event ReserveDataUpdated(
     address indexed asset,
     uint256 liquidityRate,
@@ -41,16 +33,15 @@ library ReserveLogic {
     uint256 liquidityIndex,
     uint256 variableBorrowIndex
   );
-
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   /**
-   * @dev Returns the ongoing normalized income for the reserve
-   * A value of 1e27 means there is no income. As time passes, the income is accrued
-   * A value of 2*1e27 means for each unit of asset one unit of income has been accrued
+   * @notice Returns the ongoing normalized income for the reserve
+   * @dev A value of 1e27 means there is no income. As time passes, the income is accrued
+   * @dev A value of 2*1e27 means for each unit of asset one unit of income has been accrued
    * @param reserve The reserve object
-   * @return the normalized income. expressed in ray
+   * @return The normalized income. expressed in ray
    **/
   function getNormalizedIncome(DataTypes.ReserveData storage reserve)
     internal
@@ -65,18 +56,17 @@ library ReserveLogic {
       return reserve.liquidityIndex;
     }
 
-    uint256 cumulated =
-      MathUtils.calculateLinearInterest(reserve.currentLiquidityRate, timestamp).rayMul(
-        reserve.liquidityIndex
-      );
+    uint256 cumulated = MathUtils
+      .calculateLinearInterest(reserve.currentLiquidityRate, timestamp)
+      .rayMul(reserve.liquidityIndex);
 
     return cumulated;
   }
 
   /**
-   * @dev Returns the ongoing normalized variable debt for the reserve
-   * A value of 1e27 means there is no debt. As time passes, the income is accrued
-   * A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
+   * @notice Returns the ongoing normalized variable debt for the reserve
+   * @dev A value of 1e27 means there is no debt. As time passes, the income is accrued
+   * @dev A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
    * @param reserve The reserve object
    * @return The normalized variable debt. expressed in ray
    **/
@@ -93,17 +83,17 @@ library ReserveLogic {
       return reserve.variableBorrowIndex;
     }
 
-    uint256 cumulated =
-      MathUtils.calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp).rayMul(
-        reserve.variableBorrowIndex
-      );
+    uint256 cumulated = MathUtils
+      .calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp)
+      .rayMul(reserve.variableBorrowIndex);
 
     return cumulated;
   }
 
   /**
-   * @dev Updates the liquidity cumulative index and the variable borrow index.
-   * @param reserve the reserve object
+   * @notice Updates the liquidity cumulative index and the variable borrow index.
+   * @param reserve The reserve object
+   * @param reserveCache The caching layer for the reserve data
    **/
   function updateState(
     DataTypes.ReserveData storage reserve,
@@ -114,7 +104,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
+   * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
    * the flashloan fee to the reserve, and spread it between all the depositors
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
@@ -136,9 +126,11 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Initializes a reserve
+   * @notice Initializes a reserve
    * @param reserve The reserve object
    * @param aTokenAddress The address of the overlying atoken contract
+   * @param stableDebtTokenAddress The address of the overlying stable debt token contract
+   * @param variableDebtTokenAddress The address of the overlying variable debt token contract
    * @param interestRateStrategyAddress The address of the interest rate strategy contract
    **/
   function init(
@@ -159,15 +151,15 @@ library ReserveLogic {
   }
 
   struct UpdateInterestRatesLocalVars {
-    uint256 newLiquidityRate;
-    uint256 newStableRate;
-    uint256 newVariableRate;
+    uint256 nextLiquidityRate;
+    uint256 nextStableRate;
+    uint256 nextVariableRate;
     uint256 avgStableRate;
     uint256 totalVariableDebt;
   }
 
   /**
-   * @dev Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
+   * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
    * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
    * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
@@ -185,9 +177,9 @@ library ReserveLogic {
       reserveCache.nextVariableBorrowIndex
     );
     (
-      vars.newLiquidityRate,
-      vars.newStableRate,
-      vars.newVariableRate
+      vars.nextLiquidityRate,
+      vars.nextStableRate,
+      vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
@@ -198,19 +190,19 @@ library ReserveLogic {
       reserveCache.nextAvgStableBorrowRate,
       reserveCache.reserveConfiguration.getReserveFactorMemory()
     );
-    require(vars.newLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
-    require(vars.newStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);
-    require(vars.newVariableRate <= type(uint128).max, Errors.RL_VARIABLE_BORROW_RATE_OVERFLOW);
+    require(vars.nextLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
+    require(vars.nextStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);
+    require(vars.nextVariableRate <= type(uint128).max, Errors.RL_VARIABLE_BORROW_RATE_OVERFLOW);
 
-    reserve.currentLiquidityRate = uint128(vars.newLiquidityRate);
-    reserve.currentStableBorrowRate = uint128(vars.newStableRate);
-    reserve.currentVariableBorrowRate = uint128(vars.newVariableRate);
+    reserve.currentLiquidityRate = uint128(vars.nextLiquidityRate);
+    reserve.currentStableBorrowRate = uint128(vars.nextStableRate);
+    reserve.currentVariableBorrowRate = uint128(vars.nextVariableRate);
 
     emit ReserveDataUpdated(
       reserveAddress,
-      vars.newLiquidityRate,
-      vars.newStableRate,
-      vars.newVariableRate,
+      vars.nextLiquidityRate,
+      vars.nextStableRate,
+      vars.nextVariableRate,
       reserveCache.nextLiquidityIndex,
       reserveCache.nextVariableBorrowIndex
     );
@@ -229,7 +221,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Mints part of the repaid interest to the reserve treasury as a function of the reserveFactor for the
+   * @notice Mints part of the repaid interest to the reserve treasury as a function of the reserveFactor for the
    * specific asset.
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The caching layer for the reserve data
@@ -284,7 +276,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Updates the reserve indexes and the timestamp of the update
+   * @notice Updates the reserve indexes and the timestamp of the update
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The cache layer holding the cached protocol data
    **/
@@ -297,11 +289,10 @@ library ReserveLogic {
 
     //only cumulating if there is any income being produced
     if (reserveCache.currLiquidityRate > 0) {
-      uint256 cumulatedLiquidityInterest =
-        MathUtils.calculateLinearInterest(
-          reserveCache.currLiquidityRate,
-          reserveCache.reserveLastUpdateTimestamp
-        );
+      uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
+        reserveCache.currLiquidityRate,
+        reserveCache.reserveLastUpdateTimestamp
+      );
       reserveCache.nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(
         reserveCache.currLiquidityIndex
       );
@@ -314,11 +305,10 @@ library ReserveLogic {
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
       if (reserveCache.currScaledVariableDebt != 0) {
-        uint256 cumulatedVariableBorrowInterest =
-          MathUtils.calculateCompoundedInterest(
-            reserveCache.currVariableBorrowRate,
-            reserveCache.reserveLastUpdateTimestamp
-          );
+        uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+          reserveCache.currVariableBorrowRate,
+          reserveCache.reserveLastUpdateTimestamp
+        );
         reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
           reserveCache.currVariableBorrowIndex
         );
@@ -335,7 +325,7 @@ library ReserveLogic {
   }
 
   /**
-   * @dev Creates a cache object to avoid repeated storage reads and external contract calls when updating state and interest rates.
+   * @notice Creates a cache object to avoid repeated storage reads and external contract calls when updating state and interest rates.
    * @param reserve The reserve object for which the cache will be filled
    * @return The cache object
    */
@@ -359,10 +349,8 @@ library ReserveLogic {
     reserveCache.reserveLastUpdateTimestamp = reserve.lastUpdateTimestamp;
 
     reserveCache.currScaledVariableDebt = reserveCache.nextScaledVariableDebt = IVariableDebtToken(
-      reserveCache
-        .variableDebtTokenAddress
-    )
-      .scaledTotalSupply();
+      reserveCache.variableDebtTokenAddress
+    ).scaledTotalSupply();
 
     (
       reserveCache.currPrincipalStableDebt,
@@ -372,46 +360,10 @@ library ReserveLogic {
     ) = IStableDebtToken(reserveCache.stableDebtTokenAddress).getSupplyData();
 
     // by default the actions are considered as not affecting the debt balances.
-    // if the action involves mint/burn of debt, the cache needs to be updated through refreshDebt()
+    // if the action involves mint/burn of debt, the cache needs to be updated
     reserveCache.nextTotalStableDebt = reserveCache.currTotalStableDebt;
     reserveCache.nextAvgStableBorrowRate = reserveCache.currAvgStableBorrowRate;
 
     return reserveCache;
-  }
-
-  /**
-   * @dev Updates the debt data in the cache object. MUST be invoked before updateInterestRates() when a protocol interaction
-   * causes minting or burning of debt.
-   * @param cache The cache object
-   * @param stableDebtMinted The stable debt minted as a consequence of the interaction
-   * @param stableDebtBurned The stable debt burned as a consequence of the interaction
-   * @param variableDebtMinted The variable debt minted as a consequence of the interaction
-   * @param variableDebtBurned The variable debt burned as a consequence of the interaction
-   */
-  function refreshDebt(
-    DataTypes.ReserveCache memory cache,
-    uint256 stableDebtMinted,
-    uint256 stableDebtBurned,
-    uint256 variableDebtMinted,
-    uint256 variableDebtBurned
-  ) internal view {
-    if (stableDebtMinted != 0 || stableDebtBurned != 0) {
-      if (cache.currTotalStableDebt + stableDebtMinted > stableDebtBurned) {
-        cache.nextTotalStableDebt = cache.currTotalStableDebt + stableDebtMinted - stableDebtBurned;
-        cache.nextAvgStableBorrowRate = IStableDebtToken(cache.stableDebtTokenAddress)
-          .getAverageStableRate();
-      } else {
-        cache.nextTotalStableDebt = cache.nextAvgStableBorrowRate = 0;
-      }
-    }
-
-    if (variableDebtMinted != 0 || variableDebtBurned != 0) {
-      uint256 scaledVariableDebtMinted = variableDebtMinted.rayDiv(cache.nextVariableBorrowIndex);
-      uint256 scaledVariableDebtBurned = variableDebtBurned.rayDiv(cache.nextVariableBorrowIndex);
-      cache.nextScaledVariableDebt =
-        cache.currScaledVariableDebt +
-        scaledVariableDebtMinted -
-        scaledVariableDebtBurned;
-    }
   }
 }
