@@ -96,11 +96,10 @@ interface IPoolAddressesProvider {
   function getACLManager() external view returns (address);
 
   /**
-   * @notice Updates the implementation of the ACLManager, or creates the proxy
-   * setting the new `aclmanager` implementation on the first time calling it
-   * @param aclManager The new ACLManager implementation
+   * @notice Updates the address of the ACLManager
+   * @param aclManager The address of the new ACLManager
    **/
-  function setACLManagerImpl(address aclManager) external;
+  function setACLManager(address aclManager) external;
 
   /**
    * @notice Returns the address of the ACL admin

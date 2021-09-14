@@ -57,11 +57,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   // Set ACL configuration
   // ACL Admin should be fixed beforehand
-  const aclManagerImpl = await deployACLManager();
-  await waitForTx(await addressesProvider.setACLManagerImpl(aclManagerImpl.address));
-  const aclManagerProxy = await addressesProvider.getACLManager();
-  await insertContractAddressInDb(eContractid.ACLManager, aclManagerProxy);
-  const aclManager = await getACLManager(aclManagerProxy);
+  const aclManager = await deployACLManager(addressesProvider.address);
+  await waitForTx(await addressesProvider.setACLManager(aclManager.address));
 
   await waitForTx(await aclManager.addPoolAdmin(aaveAdmin));
 

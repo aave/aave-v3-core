@@ -360,17 +360,13 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // Set the ACL admin
     expect(await poolAddressesProvider.setACLAdmin(poolAdmin.address));
 
-    // Update the ACLManager impl
-    const aclManagerImpl = await (
-      await new ACLManagerFactory(await getFirstSigner()).deploy()
+    // Update the ACLManager
+    const aclManager = await (
+      await new ACLManagerFactory(await getFirstSigner()).deploy(poolAddressesProvider.address)
     ).deployed();
-    expect(await poolAddressesProvider.setACLManagerImpl(aclManagerImpl.address))
+    expect(await poolAddressesProvider.setACLManager(aclManager.address))
       .to.emit(poolAddressesProvider, 'ACLManagerUpdated')
-      .withArgs(aclManagerImpl.address);
-
-    // Get the ACLManager
-    const aclManagerProxyAddress = await poolAddressesProvider.getACLManager();
-    const aclManager = await getACLManager(aclManagerProxyAddress);
+      .withArgs(aclManager.address);
 
     // Set role of EmergencyAdmin
     const emergencyAdminRole = await aclManager.EMERGENCY_ADMIN_ROLE();

@@ -112,8 +112,8 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setACLManagerImpl(address aclManager) external override onlyOwner {
-    _updateImpl(ACL_MANAGER, aclManager);
+  function setACLManager(address aclManager) external override onlyOwner {
+    _addresses[ACL_MANAGER] = aclManager;
     emit ACLManagerUpdated(aclManager);
   }
 
