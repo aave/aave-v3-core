@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v1
         if: ${{ steps.release.outputs.release_created }}
         with:
-          node-version: ${{ matrix.node-version }
+          node-version: ${{ matrix.node-version }}
           # Use the Github Package registry
           registry-url: https://npm.pkg.github.com/
       - run: npm ci
