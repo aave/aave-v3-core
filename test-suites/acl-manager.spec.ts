@@ -13,8 +13,7 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
 
   before(async () => {
     const { deployer, addressesProvider } = testEnv;
-    aclManager = await new ACLManagerFactory(deployer.signer).deploy();
-    expect(await aclManager.initialize(addressesProvider.address));
+    aclManager = await new ACLManagerFactory(deployer.signer).deploy(addressesProvider.address);
   });
 
   it('Check DEFAULT_ADMIN_ROLE', async () => {
@@ -240,13 +239,11 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.eq(false);
   });
 
-  it('Tries to initialize ACLManager when ACLAdmin is ZERO_ADDRESS (revert expected)', async () => {
+  it('Tries to deploy ACLManager when ACLAdmin is ZERO_ADDRESS (revert expected)', async () => {
     const { deployer, addressesProvider } = testEnv;
 
     expect(await addressesProvider.setACLAdmin(ZERO_ADDRESS));
-    aclManager = await new ACLManagerFactory(deployer.signer).deploy();
-    await expect(aclManager.initialize(addressesProvider.address)).to.be.revertedWith(
-      'ACL admin cannot be the zero address'
-    );
+    const deployTx = new ACLManagerFactory(deployer.signer).deploy(addressesProvider.address);
+    await expect(deployTx).to.be.revertedWith('ACL admin cannot be the zero address');
   });
 });

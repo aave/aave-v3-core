@@ -66,8 +66,11 @@ export const deployPoolAddressesProviderRegistry = async () =>
     eContractid.PoolAddressesProviderRegistry
   );
 
-export const deployACLManager = async () =>
-  withSave(await new ACLManagerFactory(await getFirstSigner()).deploy(), eContractid.ACLManager);
+export const deployACLManager = async (provider: tEthereumAddress) =>
+  withSave(
+    await new ACLManagerFactory(await getFirstSigner()).deploy(provider),
+    eContractid.ACLManager
+  );
 
 export const deployConfiguratorLogicLibrary = async () =>
   withSave(
