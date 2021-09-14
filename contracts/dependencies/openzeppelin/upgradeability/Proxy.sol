@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 /**
  * @title Proxy
@@ -45,13 +45,13 @@ abstract contract Proxy {
       returndatacopy(0, 0, returndatasize())
 
       switch result
-        // delegatecall returns 0 on error.
-        case 0 {
-          revert(0, returndatasize())
-        }
-        default {
-          return(0, returndatasize())
-        }
+      // delegatecall returns 0 on error.
+      case 0 {
+        revert(0, returndatasize())
+      }
+      default {
+        return(0, returndatasize())
+      }
     }
   }
 
