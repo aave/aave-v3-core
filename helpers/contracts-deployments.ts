@@ -408,12 +408,6 @@ export const deployMockAToken = async (
   return instance;
 };
 
-export const deployMockUniswapRouter = async () =>
-  withSave(
-    await new MockUniswapV2Router02Factory(await getFirstSigner()).deploy(),
-    eContractid.MockUniswapV2Router02
-  );
-
 export const deployMockIncentivesController = async () =>
   withSave(
     await new MockIncentivesControllerFactory(await getFirstSigner()).deploy(),
