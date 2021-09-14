@@ -25,7 +25,7 @@ interface IReserveInterestRateStrategy {
    * @notice Calculates the interest rates depending on the reserve's state and configurations.
    * @dev Deprecated: This function is kept for compatibility with previous DefaultInterestRateStrategy interfaces.
    * @param reserve The address of the reserve
-   * @param availableLiquidity The liquidity available in the corresponding aToken
+   * @param totalLiquidity The total supply of the corresponding aToken including to be minted/burned and pending to treasury
    * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate borrowings
@@ -53,8 +53,8 @@ interface IReserveInterestRateStrategy {
   /**
    * @notice Calculates the interest rates depending on the reserve's state and configurations
    * @param reserve The address of the reserve
-   * @param liquidityAdded The liquidity added during the operation
-   * @param liquidityTaken The liquidity taken during the operation
+   * @param aToken The address of the aToken in the reserve
+   * @param vars The params structure with the amount pending to treasury, amount to mint during operation and amount to burn during operation
    * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate borrowings
