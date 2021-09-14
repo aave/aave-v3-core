@@ -95,7 +95,7 @@ interface IPoolAddressesProvider {
   function getACLManager() external view returns (address);
 
   /**
-   * @notice Updates the addrses of the ACLManager
+   * @notice Updates the address of the ACLManager
    * @param aclManager The address of the new ACLManager
    **/
   function setACLManager(address aclManager) external;
