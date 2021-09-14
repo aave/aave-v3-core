@@ -68,7 +68,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function _onlyBridge() internal view {
     require(
       IACLManager(_addressesProvider.getACLManager()).isBridge(msg.sender),
-      'TODO: fix message. Caller not BRIDGE_ACCESS_CONTROL'
+      Errors.P_CALLER_NOT_BRIDGE
     );
   }
 

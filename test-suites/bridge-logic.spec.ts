@@ -17,10 +17,10 @@ import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
 import { BigNumber } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { DRE, waitForTx, advanceTimeAndBlock } from '../helpers/misc-utils';
-import { RateMode } from '../helpers/types';
+import { ProtocolErrors, RateMode } from '../helpers/types';
 
 import AaveConfig from '../market-config';
-import { ACLManager } from '../types';
+import { ACLManager, Errors } from '../types';
 import { getACLManager } from '../helpers/contracts-getters';
 
 const expectEqual = (
@@ -31,6 +31,8 @@ const expectEqual = (
 };
 
 makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
+  const { P_CALLER_NOT_BRIDGE } = ProtocolErrors;
+
   const depositAmount = parseEther('1000');
   const borrowAmount = parseEther('200');
   const withdrawAmount = parseEther('100');
@@ -85,7 +87,7 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
     const { users, pool, dai } = testEnv;
     await expect(
       pool.connect(users[1].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
-    ).to.be.revertedWith('TODO: fix message. Caller not BRIDGE_ACCESS_CONTROL');
+    ).to.be.revertedWith(P_CALLER_NOT_BRIDGE);
   });
 
   it('User 2 perform fast withdraw 100 aDAi from L2', async () => {
@@ -178,7 +180,7 @@ makeSuite('Bridge-logic testing with borrows', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(users[1].signer).backUnbacked(dai.address, mintAmount, feeAmount)
-    ).to.be.revertedWith('TODO: fix message. Caller not BRIDGE_ACCESS_CONTROL');
+    ).to.be.revertedWith(P_CALLER_NOT_BRIDGE);
   });
 
   it('100 bridged dai used to back unbacked', async () => {

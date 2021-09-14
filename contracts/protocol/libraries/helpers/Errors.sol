@@ -114,4 +114,5 @@ library Errors {
   string public constant PC_FLASHLOAN_PREMIUMS_MISMATCH = '95';
   string public constant PC_FLASHLOAN_PREMIUM_INVALID = '96';
   string public constant RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97';
+  string public constant P_CALLER_NOT_BRIDGE = '98';
 }
