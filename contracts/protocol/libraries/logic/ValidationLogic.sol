@@ -492,7 +492,7 @@ library ValidationLogic {
     mapping(uint256 => address) storage reserves,
     uint256 reservesCount,
     address oracle
-  ) public view returns (uint256, bool) {
+  ) internal view returns (uint256, bool) {
     (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) =
       GenericLogic.calculateUserAccountData(
         user,
@@ -571,7 +571,7 @@ library ValidationLogic {
    * @notice Validates a drop reserve action
    * @param reserve The reserve object
    **/
-  function validateDropReserve(DataTypes.ReserveData storage reserve) external view {
+  function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {
     require(
       IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0,
       Errors.RL_STABLE_DEBT_NOT_ZERO
@@ -589,7 +589,7 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap memory userConfig,
     mapping(uint256 => address) storage reserves,
     uint256 reservesCount
-  ) external view {
+  ) internal view {
     //eMode can always be enabled if the user hasn't deposited anything
     if (userConfig.isEmpty()) {
       return;
