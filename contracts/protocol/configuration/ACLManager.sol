@@ -3,7 +3,6 @@ pragma solidity 0.8.7;
 
 import {AccessControl} from '../../dependencies/openzeppelin/contracts/AccessControl.sol';
 import {IAccessControl} from '../../dependencies/openzeppelin/contracts/IAccessControl.sol';
-import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 
@@ -12,32 +11,25 @@ import {IACLManager} from '../../interfaces/IACLManager.sol';
  * @author Aave
  * @notice Access Control List Manager. Main registry of system roles and permissions.
  */
-contract ACLManager is VersionedInitializable, AccessControl, IACLManager {
+contract ACLManager is AccessControl, IACLManager {
   bytes32 public constant override POOL_ADMIN_ROLE = keccak256('POOL_ADMIN');
   bytes32 public constant override EMERGENCY_ADMIN_ROLE = keccak256('EMERGENCY_ADMIN');
   bytes32 public constant override RISK_ADMIN_ROLE = keccak256('RISK_ADMIN');
   bytes32 public constant override FLASH_BORROWER_ROLE = keccak256('FLASH_BORROWER');
   bytes32 public constant override BRIDGE_ROLE = keccak256('BRIDGE');
 
-  uint256 public constant REVISION = 0x1;
-
   IPoolAddressesProvider public _addressesProvider;
 
   /**
-   * @notice Initializes the ACL manager
-   * @param provider The address of the PoolAddressesProvider
+   * @notice Constructor
    * @dev The ACL admin should be initialized at the addressesProvider beforehand
+   * @param provider The address of the PoolAddressesProvider
    */
-  function initialize(IPoolAddressesProvider provider) public initializer {
+  constructor(IPoolAddressesProvider provider) {
     _addressesProvider = provider;
     address aclAdmin = provider.getACLAdmin();
     require(aclAdmin != address(0), 'ACL admin cannot be the zero address');
     _setupRole(DEFAULT_ADMIN_ROLE, aclAdmin);
-  }
-
-  /// @inheritdoc VersionedInitializable
-  function getRevision() internal pure virtual override returns (uint256) {
-    return REVISION;
   }
 
   /// @inheritdoc IACLManager
