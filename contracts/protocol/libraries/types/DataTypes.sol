@@ -50,7 +50,11 @@ library DataTypes {
     uint256 data;
   }
 
-  enum InterestRateMode {NONE, STABLE, VARIABLE}
+  enum InterestRateMode {
+    NONE,
+    STABLE,
+    VARIABLE
+  }
 
   struct ReserveCache {
     uint256 currScaledVariableDebt;
@@ -102,8 +106,6 @@ library DataTypes {
     uint256 amount;
     uint256 rateMode;
     address onBehalfOf;
-    address lastBorrower;
-    uint40 lastBorrowTimestamp;
     bool useATokens;
   }
 

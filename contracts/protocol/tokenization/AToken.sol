@@ -230,6 +230,11 @@ contract AToken is
     return super.totalSupply();
   }
 
+  /// @inheritdoc IScaledBalanceToken
+  function getPreviousIndex(address user) public view virtual override returns (uint256) {
+    return _userData[user].previousIndexOrStableRate;
+  }
+
   /**
    * @notice Returns the address of the Aave treasury, receiving the fees on this aToken
    * @return Address of the Aave treasury

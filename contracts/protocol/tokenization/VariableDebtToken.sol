@@ -171,6 +171,11 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return (super.balanceOf(user), super.totalSupply());
   }
 
+  /// @inheritdoc IScaledBalanceToken
+  function getPreviousIndex(address user) public view virtual override returns (uint256) {
+    return _userData[user].previousIndexOrStableRate;
+  }
+
   /**
    * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
    * @return The address of the underlying asset

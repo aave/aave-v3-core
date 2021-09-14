@@ -41,8 +41,4 @@ contract PoolStorage {
   mapping(address => bool) _authorizedFlashBorrowers;
 
   uint256 internal _flashLoanPremiumToProtocol;
-
-  address internal _lastBorrower;
-
-  uint40 internal _lastBorrowTimestamp;
 }
