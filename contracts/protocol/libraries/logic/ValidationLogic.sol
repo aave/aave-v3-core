@@ -19,7 +19,6 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
-import 'hardhat/console.sol';
 
 /**
  * @title ReserveLogic library
