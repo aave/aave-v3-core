@@ -19,8 +19,8 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param currentBalance The current balance of the user
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param newRate The rate of the debt after the minting
-   * @param avgStableRate The new average stable rate after the minting
-   * @param newTotalSupply The new total supply of the stable debt token after the action
+   * @param avgStableRate The next average stable rate after the minting
+   * @param newTotalSupply The next total supply of the stable debt token after the action
    **/
   event Mint(
     address indexed user,
@@ -38,9 +38,9 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param user The address of the user
    * @param amount The amount being burned
    * @param currentBalance The current balance of the user
-   * @param balanceIncrease The increase in balance since the last action of the user
-   * @param avgStableRate The new average stable rate after the burning
-   * @param newTotalSupply The new total supply of the stable debt token after the action
+   * @param balanceIncrease The the increase in balance since the last action of the user
+   * @param avgStableRate The next average stable rate after the burning
+   * @param newTotalSupply The next total supply of the stable debt token after the action
    **/
   event Burn(
     address indexed user,
@@ -60,14 +60,20 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param onBehalfOf The address receiving the debt tokens
    * @param amount The amount of debt tokens to mint
    * @param rate The rate of the debt being minted
-   * @return true if balance before mint was 0.
+   * @return returns isFirstBorrow, totalStableDebt and avgStableBorrowRate
    **/
   function mint(
     address user,
     address onBehalfOf,
     uint256 amount,
     uint256 rate
-  ) external returns (bool);
+  )
+    external
+    returns (
+      bool,
+      uint256,
+      uint256
+    );
 
   /**
    * @notice Burns debt of `user`
@@ -75,8 +81,9 @@ interface IStableDebtToken is IInitializableDebtToken {
    * and the rate of the previous debt
    * @param user The address of the user getting his debt burned
    * @param amount The amount of debt tokens getting burned
+   * @return totalStableDebt and avgStableBorrowRate
    **/
-  function burn(address user, uint256 amount) external;
+  function burn(address user, uint256 amount) external returns (uint256, uint256);
 
   /**
    * @notice Returns the average rate of all the stable rate loans.
