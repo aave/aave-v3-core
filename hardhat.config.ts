@@ -16,14 +16,14 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
-const HARDFORK = 'berlin';
+const HARDFORK = 'london';
 const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
 
 require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
 const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
-    enabled: false,
+    enabled: true,
   },
   contractSizer: {
     alphaSort: true,
@@ -31,11 +31,14 @@ const hardhatConfig: HardhatUserConfig = {
     disambiguatePaths: false,
   },
   solidity: {
-    // Docs for the compiler https://docs.soliditylang.org/en/v0.8.6/using-the-compiler.html
-    version: '0.8.6',
+    // Docs for the compiler https://docs.soliditylang.org/en/v0.8.7/using-the-compiler.html
+    version: '0.8.7',
     settings: {
-      optimizer: { enabled: true, runs: 25000 },
-      evmVersion: 'berlin',
+      optimizer: {
+        enabled: true,
+        runs: 25000,
+      },
+      evmVersion: 'london',
     },
   },
   typechain: {
