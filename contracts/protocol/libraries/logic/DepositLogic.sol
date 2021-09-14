@@ -46,11 +46,11 @@ library DepositLogic {
   function executeDeposit(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
-    uint256 userEModeCategoryId,
     address asset,
     uint256 amount,
     address onBehalfOf,
-    uint16 referralCode
+    uint16 referralCode,
+    uint8 userEModeCategory
   ) internal {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -62,12 +62,15 @@ library DepositLogic {
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
 
-    bool isFirstDeposit =
-      IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
+    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
+      onBehalfOf,
+      amount,
+      reserveCache.nextLiquidityIndex
+    );
 
     uint256 assetCategoryId = reserveCache.reserveConfiguration.getEModeCategoryMemory();
 
-    if (isFirstDeposit && (assetCategoryId == userEModeCategoryId || userEModeCategoryId == 0)) {
+    if (isFirstDeposit && (userEModeCategory == 0 || assetCategoryId == userEModeCategory)) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
     }
@@ -77,8 +80,9 @@ library DepositLogic {
 
   function executeWithdraw(
     mapping(address => DataTypes.ReserveData) storage reserves,
-    DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteWithdrawParams memory vars
   ) internal returns (uint256) {
     DataTypes.ReserveData storage reserve = reserves[vars.asset];
@@ -86,10 +90,9 @@ library DepositLogic {
 
     reserve.updateState(reserveCache);
 
-    uint256 userBalance =
-      IAToken(reserveCache.aTokenAddress).scaledBalanceOf(msg.sender).rayMul(
-        reserveCache.nextLiquidityIndex
-      );
+    uint256 userBalance = IAToken(reserveCache.aTokenAddress).scaledBalanceOf(msg.sender).rayMul(
+      reserveCache.nextLiquidityIndex
+    );
 
     uint256 amountToWithdraw = vars.amount;
 
@@ -111,13 +114,15 @@ library DepositLogic {
     if (userConfig.isUsingAsCollateral(reserve.id)) {
       if (userConfig.isBorrowingAny()) {
         ValidationLogic.validateHFAndLtv(
+          reserves,
+          reservesList,
+          eModeCategories,
+          userConfig,
           vars.asset,
           msg.sender,
-          reserves,
-          userConfig,
-          reservesList,
           vars.reservesCount,
-          vars.oracle
+          vars.oracle,
+          vars.userEModeCategory
         );
       }
 
@@ -135,6 +140,7 @@ library DepositLogic {
   function finalizeTransfer(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
     DataTypes.FinalizeTransferParams memory vars
   ) external {
@@ -148,13 +154,15 @@ library DepositLogic {
       if (fromConfig.isUsingAsCollateral(reserveId)) {
         if (fromConfig.isBorrowingAny()) {
           ValidationLogic.validateHFAndLtv(
+            reserves,
+            reservesList,
+            eModeCategories,
+            usersConfig[vars.from],
             vars.asset,
             vars.from,
-            reserves,
-            usersConfig[vars.from],
-            reservesList,
             vars.reservesCount,
-            vars.oracle
+            vars.oracle,
+            vars.fromEModeCategory
           );
         }
         if (vars.balanceFromBefore - vars.amount == 0) {
@@ -164,29 +172,35 @@ library DepositLogic {
       }
 
       if (vars.balanceToBefore == 0 && vars.amount != 0) {
-        DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
-        toConfig.setUsingAsCollateral(reserveId, true);
-        emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
+        DataTypes.ReserveConfigurationMap memory reserveConfig = reserves[vars.asset].configuration;
+        uint256 assetCategoryId = reserveConfig.getEModeCategoryMemory();
+
+        if (assetCategoryId == vars.toEModeCategory || vars.toEModeCategory == 0) {
+          DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
+          toConfig.setUsingAsCollateral(reserveId, true);
+          emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
+        }
       }
     }
   }
 
   function executeUseReserveAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
-    uint256 userEModeCategoryId,
     address asset,
     bool useAsCollateral,
-    mapping(uint256 => address) storage reservesList,
     uint256 reservesCount,
-    address priceOracle
+    address priceOracle,
+    uint8 userEModeCategory
   ) external {
     DataTypes.ReserveData storage reserve = reserves[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     uint256 userBalance = IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender);
 
-    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userEModeCategoryId, userBalance);
+    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userEModeCategory, userBalance);
 
     userConfig.setUsingAsCollateral(reserve.id, useAsCollateral);
 
@@ -194,13 +208,15 @@ library DepositLogic {
       emit ReserveUsedAsCollateralEnabled(asset, msg.sender);
     } else {
       ValidationLogic.validateHFAndLtv(
+        reserves,
+        reservesList,
+        eModeCategories,
+        userConfig,
         asset,
         msg.sender,
-        reserves,
-        userConfig,
-        reservesList,
         reservesCount,
-        priceOracle
+        priceOracle,
+        userEModeCategory
       );
 
       emit ReserveUsedAsCollateralDisabled(asset, msg.sender);

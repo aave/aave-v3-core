@@ -89,11 +89,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     DepositLogic.executeDeposit(
       _reserves[asset],
       _usersConfig[onBehalfOf],
-      _usersEModeCategory[onBehalfOf],
       asset,
       amount,
       onBehalfOf,
-      referralCode
+      referralCode,
+      _usersEModeCategory[onBehalfOf]
     );
   }
 
@@ -120,11 +120,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     DepositLogic.executeDeposit(
       _reserves[asset],
       _usersConfig[onBehalfOf],
-      _usersEModeCategory[onBehalfOf],
       asset,
       amount,
       onBehalfOf,
-      referralCode
+      referralCode,
+      _usersEModeCategory[onBehalfOf]
     );
   }
 
@@ -137,14 +137,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return
       DepositLogic.executeWithdraw(
         _reserves,
-        _usersConfig[msg.sender],
         _reservesList,
+        _eModeCategories,
+        _usersConfig[msg.sender],
         DataTypes.ExecuteWithdrawParams(
           asset,
           amount,
           to,
           _reservesCount,
-          _addressesProvider.getPriceOracle()
+          _addressesProvider.getPriceOracle(),
+          _usersEModeCategory[msg.sender]
         )
       );
   }
@@ -159,8 +161,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override {
     BorrowLogic.executeBorrow(
       _reserves,
-      _usersConfig[onBehalfOf],
       _reservesList,
+      _eModeCategories,
+      _usersConfig[onBehalfOf],
       DataTypes.ExecuteBorrowParams(
         asset,
         msg.sender,
@@ -171,7 +174,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         true,
         _maxStableRateBorrowSizePercent,
         _reservesCount,
-        _addressesProvider.getPriceOracle()
+        _addressesProvider.getPriceOracle(),
+        _usersEModeCategory[msg.sender]
       )
     );
     _lastBorrower = msg.sender;
@@ -274,13 +278,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
     DepositLogic.executeUseReserveAsCollateral(
       _reserves,
+      _reservesList,
+      _eModeCategories,
       _usersConfig[msg.sender],
-      _usersEModeCategory[msg.sender],
       asset,
       useAsCollateral,
-      _reservesList,
       _reservesCount,
-      _addressesProvider.getPriceOracle()
+      _addressesProvider.getPriceOracle(),
+      _usersEModeCategory[msg.sender]
     );
   }
 
@@ -296,6 +301,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reserves,
       _usersConfig,
       _reservesList,
+      _eModeCategories,
       DataTypes.ExecuteLiquidationCallParams(
         _reservesCount,
         debtToCover,
@@ -303,7 +309,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         debtAsset,
         user,
         receiveAToken,
-        _addressesProvider.getPriceOracle()
+        _addressesProvider.getPriceOracle(),
+        _usersEModeCategory[user]
       )
     );
   }
@@ -318,26 +325,27 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    DataTypes.FlashloanParams memory flashParams =
-      DataTypes.FlashloanParams(
-        receiverAddress,
-        assets,
-        amounts,
-        modes,
-        onBehalfOf,
-        params,
-        referralCode,
-        _flashLoanPremiumToProtocol,
-        _flashLoanPremiumTotal,
-        _maxStableRateBorrowSizePercent,
-        _reservesCount,
-        _addressesProvider.getPriceOracle()
-      );
+    DataTypes.FlashloanParams memory flashParams = DataTypes.FlashloanParams(
+      receiverAddress,
+      assets,
+      amounts,
+      modes,
+      onBehalfOf,
+      params,
+      referralCode,
+      _flashLoanPremiumToProtocol,
+      _flashLoanPremiumTotal,
+      _maxStableRateBorrowSizePercent,
+      _reservesCount,
+      _addressesProvider.getPriceOracle(),
+      _usersEModeCategory[onBehalfOf]
+    );
 
     BorrowLogic.executeFlashLoan(
       _reserves,
       _reservesList,
       _authorizedFlashBorrowers,
+      _eModeCategories,
       _usersConfig[onBehalfOf],
       flashParams
     );
@@ -400,12 +408,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
-      user,
       _reserves,
-      _usersConfig[user],
       _reservesList,
-      _reservesCount,
-      _addressesProvider.getPriceOracle()
+      _eModeCategories,
+      DataTypes.CalculateUserAccountDataParams(
+        _usersConfig[user],
+        _reservesCount,
+        user,
+        _addressesProvider.getPriceOracle(),
+        _usersEModeCategory[user]
+      )
     );
 
     availableBorrowsBase = GenericLogic.calculateAvailableBorrows(
@@ -518,6 +530,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     DepositLogic.finalizeTransfer(
       _reserves,
       _reservesList,
+      _eModeCategories,
       _usersConfig,
       DataTypes.FinalizeTransferParams(
         asset,
@@ -527,7 +540,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         balanceFromBefore,
         balanceToBefore,
         _reservesCount,
-        _addressesProvider.getPriceOracle()
+        _addressesProvider.getPriceOracle(),
+        _usersEModeCategory[from],
+        _usersEModeCategory[to]
       )
     );
   }
@@ -633,10 +648,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _usersEModeCategory[msg.sender] = categoryId;
     if (prevCategoryId != 0 && categoryId == 0) {
       ValidationLogic.validateHealthFactor(
-        msg.sender,
         _reserves,
-        _usersConfig[msg.sender],
         _reservesList,
+        _eModeCategories,
+        _usersConfig[msg.sender],
+        msg.sender,
+        _usersEModeCategory[msg.sender],
         _reservesCount,
         _addressesProvider.getPriceOracle()
       );

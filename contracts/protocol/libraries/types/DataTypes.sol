@@ -51,8 +51,12 @@ library DataTypes {
   }
 
   struct EModeAssetCategory {
+    // each eMode category has a custom ltv and liquidation threshold
+    uint16 ltv;
+    uint16 liquidationThreshold;
+    uint16 liquidationBonus;
+    // each eMode category may or may not have a custom oracle to override the individual assets price oracles
     address oracle;
-    string label;
     bool active;
   }
 
@@ -92,6 +96,7 @@ library DataTypes {
     address user;
     bool receiveAToken;
     address priceOracle;
+    uint8 userEModeCategory;
   }
 
   struct ExecuteBorrowParams {
@@ -105,6 +110,7 @@ library DataTypes {
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
     address oracle;
+    uint8 userEModeCategory;
   }
 
   struct ExecuteRepayParams {
@@ -123,6 +129,7 @@ library DataTypes {
     address to;
     uint256 reservesCount;
     address oracle;
+    uint8 userEModeCategory;
   }
 
   struct FinalizeTransferParams {
@@ -134,6 +141,8 @@ library DataTypes {
     uint256 balanceToBefore;
     uint256 reservesCount;
     address oracle;
+    uint8 fromEModeCategory;
+    uint8 toEModeCategory;
   }
 
   struct FlashloanParams {
@@ -149,5 +158,36 @@ library DataTypes {
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
     address oracle;
+    uint8 userEModeCategory;
+  }
+
+  struct CalculateUserAccountDataParams {
+    UserConfigurationMap userConfig;
+    uint256 reservesCount;
+    address user;
+    address oracle;
+    uint8 userEModeCategory;
+  }
+
+  struct ValidateBorrowParams {
+    DataTypes.ReserveCache reserveCache;
+    DataTypes.UserConfigurationMap userConfig;
+    address asset;
+    address userAddress;
+    uint256 amount;
+    uint256 interestRateMode;
+    uint256 maxStableLoanPercent;
+    uint256 reservesCount;
+    address oracle;
+    uint8 userEModeCategory;
+  }
+
+  struct ValidateLiquidationCallParams {
+    DataTypes.ReserveCache debtReserveCache;
+    uint256 totalDebt;
+    address user;
+    uint256 reservesCount;
+    address oracle;
+    uint8 userEModeCategory;
   }
 }

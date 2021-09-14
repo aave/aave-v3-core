@@ -375,11 +375,28 @@ interface IPoolConfigurator {
   function setLiquidationProtocolFee(address asset, uint256 fee) external;
 
   /**
-   * @notice Updates the asset category in eMode
+   * @notice Assign an eMode category to asset
    * @param asset The address of the underlying asset of the reserve
-   * @param category The new category of the asset
+   * @param categoryId The category id of the asset
    **/
-  function setEModeAssetCategory(address asset, uint256 category) external;
+  function setAssetEModeCategory(address asset, uint256 categoryId) external;
+
+  /**
+   * @notice Adds a new eMode category
+   * @param categoryId The id of the category to be configured
+   * @param ltv The ltv associated with the category
+   * @param liquidationThreshold The liquidation threshold associated with the category
+   * @param liquidationBonus The liquidation bonus associated with the category
+   * @param oracle The oracle associated with the category. If 0x0, the default assets oracles will be used to compute the overall
+   * debt and overcollateralization of the users using this category.
+   **/
+  function addEModeCategory(
+    uint8 categoryId,
+    uint16 ltv,
+    uint16 liquidationThreshold,
+    uint16 liquidationBonus,
+    address oracle
+  ) external;
 
   /**
    * @notice Registers a new admin with rights on risk related configurations

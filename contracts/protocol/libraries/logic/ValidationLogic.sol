@@ -46,8 +46,9 @@ library ValidationLogic {
     internal
     view
   {
-    (bool isActive, bool isFrozen, , , bool isPaused) =
-      reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
+      .reserveConfiguration
+      .getFlagsMemory();
     (, , , uint256 reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCapMemory();
 
@@ -108,34 +109,19 @@ library ValidationLogic {
 
   /**
    * @notice Validates a borrow action
-   * @param reserveCache the cached data of the reserve
-   * @param asset The address of the asset to borrow
-   * @param userAddress The address of the user
-   * @param amount The amount to be borrowed
-   * @param interestRateMode The interest rate mode at which the user is borrowing
-   * @param maxStableLoanPercent The max amount of the liquidity that can be borrowed at stable rate, in percentage
    * @param reservesData The state of all the reserves
-   * @param userConfig The state of the specific user
    * @param reserves The addresses of all the active reserves
-   * @param reservesCount The number of available reserve
-   * @param oracle The address of the price oracle
+   * @param params Additional params needed for the validation
    */
   function validateBorrow(
-    DataTypes.ReserveCache memory reserveCache,
-    address asset,
-    address userAddress,
-    uint256 amount,
-    uint256 interestRateMode,
-    uint256 maxStableLoanPercent,
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reserves,
-    uint256 reservesCount,
-    address oracle
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    DataTypes.ValidateBorrowParams memory params
   ) internal view {
     ValidateBorrowLocalVars memory vars;
 
-    (, , , vars.reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
+    (, , , vars.reserveDecimals, ) = params.reserveCache.reserveConfiguration.getParamsMemory();
 
     (
       vars.isActive,
@@ -143,32 +129,37 @@ library ValidationLogic {
       vars.borrowingEnabled,
       vars.stableRateBorrowingEnabled,
       vars.isPaused
-    ) = reserveCache.reserveConfiguration.getFlagsMemory();
+    ) = params.reserveCache.reserveConfiguration.getFlagsMemory();
 
     require(vars.isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!vars.isPaused, Errors.VL_RESERVE_PAUSED);
     require(!vars.isFrozen, Errors.VL_RESERVE_FROZEN);
-    require(amount != 0, Errors.VL_INVALID_AMOUNT);
+    require(params.amount != 0, Errors.VL_INVALID_AMOUNT);
 
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
     //validate interest rate mode
     require(
-      uint256(DataTypes.InterestRateMode.VARIABLE) == interestRateMode ||
-        uint256(DataTypes.InterestRateMode.STABLE) == interestRateMode,
+      uint256(DataTypes.InterestRateMode.VARIABLE) == params.interestRateMode ||
+        uint256(DataTypes.InterestRateMode.STABLE) == params.interestRateMode,
       Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
     );
 
-    vars.borrowCap = reserveCache.reserveConfiguration.getBorrowCapMemory();
-    unchecked {vars.assetUnit = 10**vars.reserveDecimals;}
+    vars.borrowCap = params.reserveCache.reserveConfiguration.getBorrowCapMemory();
+    unchecked {
+      vars.assetUnit = 10**vars.reserveDecimals;
+    }
 
     if (vars.borrowCap != 0) {
       {
-        vars.totalSupplyVariableDebt = reserveCache.currScaledVariableDebt.rayMul(
-          reserveCache.nextVariableBorrowIndex
+        vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
+          params.reserveCache.nextVariableBorrowIndex
         );
 
-        vars.totalDebt = reserveCache.currTotalStableDebt + vars.totalSupplyVariableDebt + amount;
+        vars.totalDebt =
+          params.reserveCache.currTotalStableDebt +
+          vars.totalSupplyVariableDebt +
+          params.amount;
         unchecked {
           require(vars.totalDebt / vars.assetUnit < vars.borrowCap, Errors.VL_BORROW_CAP_EXCEEDED);
         }
@@ -183,12 +174,16 @@ library ValidationLogic {
       vars.healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
-      userAddress,
       reservesData,
-      userConfig,
       reserves,
-      reservesCount,
-      oracle
+      eModeCategories,
+      DataTypes.CalculateUserAccountDataParams(
+        params.userConfig,
+        params.reservesCount,
+        params.userAddress,
+        params.oracle,
+        params.userEModeCategory
+      )
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
@@ -198,8 +193,12 @@ library ValidationLogic {
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 
-    vars.amountInBaseCurrency = IPriceOracleGetter(oracle).getAssetPrice(asset) * amount;
-    unchecked {vars.amountInBaseCurrency /= 10**vars.reserveDecimals;}
+    vars.amountInBaseCurrency =
+      IPriceOracleGetter(params.oracle).getAssetPrice(params.asset) *
+      params.amount;
+    unchecked {
+      vars.amountInBaseCurrency /= 10**vars.reserveDecimals;
+    }
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
     vars.collateralNeededInBaseCurrency = (vars.userDebtInBaseCurrency + vars.amountInBaseCurrency)
@@ -218,25 +217,28 @@ library ValidationLogic {
      * 3. Users will be able to borrow only a portion of the total available liquidity
      **/
 
-    if (interestRateMode == uint256(DataTypes.InterestRateMode.STABLE)) {
+    if (params.interestRateMode == uint256(DataTypes.InterestRateMode.STABLE)) {
       //check if the borrow mode is stable and if stable rate borrowing is enabled on this reserve
 
       require(vars.stableRateBorrowingEnabled, Errors.VL_STABLE_BORROWING_NOT_ENABLED);
 
       require(
-        !userConfig.isUsingAsCollateral(reservesData[asset].id) ||
-          reserveCache.reserveConfiguration.getLtvMemory() == 0 ||
-          amount > IERC20(reserveCache.aTokenAddress).balanceOf(userAddress),
+        !params.userConfig.isUsingAsCollateral(reservesData[params.asset].id) ||
+          params.reserveCache.reserveConfiguration.getLtvMemory() == 0 ||
+          params.amount > IERC20(params.reserveCache.aTokenAddress).balanceOf(params.userAddress),
         Errors.VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY
       );
 
-      vars.availableLiquidity = IERC20(asset).balanceOf(reserveCache.aTokenAddress);
+      vars.availableLiquidity = IERC20(params.asset).balanceOf(params.reserveCache.aTokenAddress);
 
       //calculate the max available loan size in stable rate mode as a percentage of the
       //available liquidity
-      uint256 maxLoanSizeStable = vars.availableLiquidity.percentMul(maxStableLoanPercent);
+      uint256 maxLoanSizeStable = vars.availableLiquidity.percentMul(params.maxStableLoanPercent);
 
-      require(amount <= maxLoanSizeStable, Errors.VL_AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
+      require(
+        params.amount <= maxLoanSizeStable,
+        Errors.VL_AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE
+      );
     }
   }
 
@@ -303,8 +305,9 @@ library ValidationLogic {
     uint256 variableDebt,
     DataTypes.InterestRateMode currentRateMode
   ) internal view {
-    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) =
-      reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) = reserveCache
+      .reserveConfiguration
+      .getFlagsMemory();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -357,8 +360,8 @@ library ValidationLogic {
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
     //if the usage ratio is below 95%, no rebalances are needed
-    uint256 totalDebt =
-      (stableDebtToken.totalSupply() + variableDebtToken.totalSupply()).wadToRay();
+    uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
+      .wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
     uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
@@ -366,8 +369,9 @@ library ValidationLogic {
     //then we allow rebalancing of the stable rate positions.
 
     uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
-    uint256 maxVariableBorrowRate =
-      IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).getMaxVariableBorrowRate();
+    uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
+      reserve.interestRateStrategyAddress
+    ).getMaxVariableBorrowRate();
 
     require(
       usageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
@@ -428,26 +432,20 @@ library ValidationLogic {
 
   /**
    * @notice Validates the liquidation action
-   * @param collateralReserve The reserve data of the collateral
-   * @param principalReserveCache The cached reserve data of the principal
-   * @param totalDebt The total debt balance of the user
-   * @param user The address of the user being liquidated
    * @param reservesData The mapping of the reserves data
-   * @param userConfig The user configuration mapping
    * @param reserves The list of the reserves
-   * @param reservesCount The number of available reserves
-   * @param oracle The address of the price oracle
+   * @param eModeCategories The mapping of the eMode categories
+   * @param userConfig The user configuration mapping
+   * @param collateralReserve The reserve data of the collateral
+   * @param params Additional parameters needed for the validation
    */
   function validateLiquidationCall(
-    DataTypes.ReserveData storage collateralReserve,
-    DataTypes.ReserveCache memory principalReserveCache,
-    uint256 totalDebt,
-    address user,
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reserves,
-    uint256 reservesCount,
-    address oracle
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap storage userConfig,
+    DataTypes.ReserveData storage collateralReserve,
+    DataTypes.ValidateLiquidationCallParams memory params
   ) internal view {
     ValidateLiquidationCallLocalVars memory vars;
 
@@ -455,7 +453,8 @@ library ValidationLogic {
       .configuration
       .getFlagsMemory();
 
-    (vars.principalReserveActive, , , , vars.principalReservePaused) = principalReserveCache
+    (vars.principalReserveActive, , , , vars.principalReservePaused) = params
+      .debtReserveCache
       .reserveConfiguration
       .getFlagsMemory();
 
@@ -469,12 +468,16 @@ library ValidationLogic {
     );
 
     (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
-      user,
       reservesData,
-      userConfig,
       reserves,
-      reservesCount,
-      oracle
+      eModeCategories,
+      DataTypes.CalculateUserAccountDataParams(
+        userConfig,
+        params.reservesCount,
+        params.user,
+        params.oracle,
+        params.userEModeCategory
+      )
     );
 
     require(
@@ -488,25 +491,31 @@ library ValidationLogic {
 
     //if collateral isn't enabled as collateral by user, it cannot be liquidated
     require(vars.isCollateralEnabled, Errors.VL_COLLATERAL_CANNOT_BE_LIQUIDATED);
-    require(totalDebt > 0, Errors.VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+    require(params.totalDebt > 0, Errors.VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   }
 
   function validateHealthFactor(
-    address user,
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reserves,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap memory userConfig,
+    address user,
+    uint8 userEModeCategory,
     uint256 reservesCount,
     address oracle
   ) internal view returns (uint256, bool) {
-    (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) =
-      GenericLogic.calculateUserAccountData(
-        user,
+    (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) = GenericLogic
+      .calculateUserAccountData(
         reservesData,
-        userConfig,
         reserves,
-        reservesCount,
-        oracle
+        eModeCategories,
+        DataTypes.CalculateUserAccountDataParams(
+          userConfig,
+          reservesCount,
+          user,
+          oracle,
+          userEModeCategory
+        )
       );
 
     require(
@@ -536,21 +545,25 @@ library ValidationLogic {
    * @param oracle The price oracle
    */
   function validateHFAndLtv(
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reserves,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap memory userConfig,
     address asset,
     address from,
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap storage userConfig,
-    mapping(uint256 => address) storage reserves,
     uint256 reservesCount,
-    address oracle
+    address oracle,
+    uint8 userEModeCategory
   ) internal view {
     validateHFAndLtvLocalVars memory vars;
     DataTypes.ReserveData memory reserve = reservesData[asset];
     (vars.healthFactor, vars.hasZeroLtvCollateral) = validateHealthFactor(
-      from,
       reservesData,
-      userConfig,
       reserves,
+      eModeCategories,
+      userConfig,
+      from,
+      userEModeCategory,
       reservesCount,
       oracle
     );
@@ -608,8 +621,8 @@ library ValidationLogic {
       unchecked {
         for (uint256 i = 0; i < reservesCount; i++) {
           if (userConfig.isUsingAsCollateralOrBorrowing(i)) {
-            DataTypes.ReserveConfigurationMap memory configuration =
-              reservesData[reserves[i]].configuration;
+            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reserves[i]]
+              .configuration;
             require(
               configuration.getEModeCategoryMemory() == categoryId,
               Errors.VL_INCONSISTENT_EMODE_CATEGORY

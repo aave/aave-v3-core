@@ -59,8 +59,9 @@ library BorrowLogic {
 
   function executeBorrow(
     mapping(address => DataTypes.ReserveData) storage reserves,
-    DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteBorrowParams memory params
   ) public {
     DataTypes.ReserveData storage reserve = reserves[params.asset];
@@ -69,17 +70,21 @@ library BorrowLogic {
     reserve.updateState(reserveCache);
 
     ValidationLogic.validateBorrow(
-      reserveCache,
-      params.asset,
-      params.onBehalfOf,
-      params.amount,
-      params.interestRateMode,
-      params.maxStableRateBorrowSizePercent,
       reserves,
-      userConfig,
       reservesList,
-      params.reservesCount,
-      params.oracle
+      eModeCategories,
+      DataTypes.ValidateBorrowParams(
+        reserveCache,
+        userConfig,
+        params.asset,
+        params.onBehalfOf,
+        params.amount,
+        params.interestRateMode,
+        params.maxStableRateBorrowSizePercent,
+        params.reservesCount,
+        params.oracle,
+        params.userEModeCategory
+      )
     );
 
     uint256 currentStableRate = 0;
@@ -219,6 +224,7 @@ library BorrowLogic {
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
     mapping(address => bool) storage authorizedFlashBorrowers,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory flashParams
   ) external {
@@ -301,8 +307,9 @@ library BorrowLogic {
         // eventually opens a debt position
         executeBorrow(
           reserves,
-          userConfig,
           reservesList,
+          eModeCategories,
+          userConfig,
           DataTypes.ExecuteBorrowParams(
             vars.currentAsset,
             msg.sender,
@@ -313,7 +320,8 @@ library BorrowLogic {
             false,
             flashParams.maxStableRateBorrowSizePercent,
             flashParams.reservesCount,
-            flashParams.oracle
+            flashParams.oracle,
+            flashParams.userEModeCategory
           )
         );
       }

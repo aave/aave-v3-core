@@ -78,6 +78,7 @@ library LiquidationLogic {
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
     mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
     DataTypes.ExecuteLiquidationCallParams memory params
   ) external {
     LiquidationCallLocalVars memory vars;
@@ -94,15 +95,19 @@ library LiquidationLogic {
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
     ValidationLogic.validateLiquidationCall(
-      collateralReserve,
-      vars.debtReserveCache,
-      vars.userStableDebt + vars.userVariableDebt,
-      params.user,
       reserves,
-      userConfig,
       reservesList,
-      params.reservesCount,
-      params.priceOracle
+      eModeCategories,
+      userConfig,
+      collateralReserve,
+      DataTypes.ValidateLiquidationCallParams(
+        vars.debtReserveCache,
+        vars.userStableDebt + vars.userVariableDebt,
+        params.user,
+        params.reservesCount,
+        params.priceOracle,
+        params.userEModeCategory
+      )
     );
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);

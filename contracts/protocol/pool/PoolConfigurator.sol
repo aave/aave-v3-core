@@ -281,8 +281,8 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
-    /// @inheritdoc IPoolConfigurator
-  function setEModeAssetCategory(address asset, uint256 category)
+  /// @inheritdoc IPoolConfigurator
+  function setAssetEModeCategory(address asset, uint256 category)
     external
     override
     onlyRiskOrPoolAdmins
@@ -295,7 +295,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
     emit EModeAssetCategoryChanged(asset, category);
   }
-
 
   ///@inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
@@ -340,6 +339,20 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function unauthorizeFlashBorrower(address flashBorrower) external override onlyPoolAdmin {
     _pool.updateFlashBorrowerAuthorization(flashBorrower, false);
     emit FlashBorrowerUnauthorized(flashBorrower);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function addEModeCategory(
+    uint8 categoryId,
+    uint16 ltv,
+    uint16 liquidationThreshold,
+    uint16 liquidationBonus,
+    address oracle
+  ) external override onlyPoolAdmin {
+    _pool.configureEModeCategory(
+      categoryId,
+      DataTypes.EModeAssetCategory(ltv, liquidationThreshold, liquidationBonus, oracle, true)
+    );
   }
 
   /// @inheritdoc IPoolConfigurator
