@@ -15,6 +15,7 @@ import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
+import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 
 /**
  * @title DepositLogic library
@@ -26,6 +27,7 @@ library DepositLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
 
@@ -44,6 +46,7 @@ library DepositLogic {
   function executeDeposit(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
+    uint256 userEModeCategoryId,
     address asset,
     uint256 amount,
     address onBehalfOf,
@@ -59,13 +62,12 @@ library DepositLogic {
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
 
-    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
-      onBehalfOf,
-      amount,
-      reserveCache.nextLiquidityIndex
-    );
+    bool isFirstDeposit =
+      IAToken(reserveCache.aTokenAddress).mint(onBehalfOf, amount, reserveCache.nextLiquidityIndex);
 
-    if (isFirstDeposit) {
+    uint256 assetCategoryId = reserveCache.reserveConfiguration.getEModeCategoryMemory();
+
+    if (isFirstDeposit && (assetCategoryId == userEModeCategoryId || userEModeCategoryId == 0)) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
     }
@@ -84,9 +86,10 @@ library DepositLogic {
 
     reserve.updateState(reserveCache);
 
-    uint256 userBalance = IAToken(reserveCache.aTokenAddress).scaledBalanceOf(msg.sender).rayMul(
-      reserveCache.nextLiquidityIndex
-    );
+    uint256 userBalance =
+      IAToken(reserveCache.aTokenAddress).scaledBalanceOf(msg.sender).rayMul(
+        reserveCache.nextLiquidityIndex
+      );
 
     uint256 amountToWithdraw = vars.amount;
 
@@ -168,9 +171,10 @@ library DepositLogic {
     }
   }
 
-  function setUserUseReserveAsCollateral(
+  function executeUseReserveAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
+    uint256 userEModeCategoryId,
     address asset,
     bool useAsCollateral,
     mapping(uint256 => address) storage reservesList,
@@ -182,7 +186,7 @@ library DepositLogic {
 
     uint256 userBalance = IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender);
 
-    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance);
+    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userEModeCategoryId, userBalance);
 
     userConfig.setUsingAsCollateral(reserve.id, useAsCollateral);
 

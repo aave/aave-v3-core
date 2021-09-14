@@ -48,5 +48,5 @@ contract PoolStorage {
 
   mapping(uint8 => DataTypes.EModeAssetCategory) _eModeCategories;
 
-  mapping(address => uint8) _userEModeCategories;
+  mapping(address => uint8) _usersEModeCategory;
 }

@@ -55,7 +55,7 @@ library DataTypes {
     string label;
     bool active;
   }
-  
+
   enum InterestRateMode {
     NONE,
     STABLE,

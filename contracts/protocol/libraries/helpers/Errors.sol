@@ -115,4 +115,5 @@ library Errors {
   string public constant PC_FLASHLOAN_PREMIUM_INVALID = '96';
   string public constant RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97';
   string public constant RC_INVALID_EMODE_CATEGORY = '98';
+  string public constant VL_INCONSISTENT_EMODE_CATEGORY = '99';
 }

@@ -89,6 +89,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     DepositLogic.executeDeposit(
       _reserves[asset],
       _usersConfig[onBehalfOf],
+      _usersEModeCategory[onBehalfOf],
       asset,
       amount,
       onBehalfOf,
@@ -119,6 +120,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     DepositLogic.executeDeposit(
       _reserves[asset],
       _usersConfig[onBehalfOf],
+      _usersEModeCategory[onBehalfOf],
       asset,
       amount,
       onBehalfOf,
@@ -270,9 +272,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
-    DepositLogic.setUserUseReserveAsCollateral(
+    DepositLogic.executeUseReserveAsCollateral(
       _reserves,
       _usersConfig[msg.sender],
+      _usersEModeCategory[msg.sender],
       asset,
       useAsCollateral,
       _reservesList,
@@ -626,8 +629,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reservesList,
       _reservesCount
     );
-    uint8 prevCategoryId = _userEModeCategories[msg.sender];
-    _userEModeCategories[msg.sender] = categoryId;
+    uint8 prevCategoryId = _usersEModeCategory[msg.sender];
+    _usersEModeCategory[msg.sender] = categoryId;
     if (prevCategoryId != 0 && categoryId == 0) {
       ValidationLogic.validateHealthFactor(
         msg.sender,

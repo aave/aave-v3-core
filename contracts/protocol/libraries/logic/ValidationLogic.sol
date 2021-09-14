@@ -384,12 +384,18 @@ library ValidationLogic {
    */
   function validateSetUseReserveAsCollateral(
     DataTypes.ReserveCache memory reserveCache,
+    uint256 userEModeCategoryId,
     uint256 userBalance
   ) internal pure {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
+    uint256 assetCategoryId = reserveCache.reserveConfiguration.getEModeCategoryMemory();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
+    require(
+      userEModeCategoryId == 0 || userEModeCategoryId == assetCategoryId,
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
 
     require(userBalance > 0, Errors.VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0);
   }
@@ -508,7 +514,7 @@ library ValidationLogic {
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 
-    return(healthFactor, hasZeroLtvCollateral);
+    return (healthFactor, hasZeroLtvCollateral);
   }
 
   struct validateHFAndLtvLocalVars {
@@ -606,7 +612,7 @@ library ValidationLogic {
               reservesData[reserves[i]].configuration;
             require(
               configuration.getEModeCategoryMemory() == categoryId,
-              Errors.RC_INVALID_EMODE_CATEGORY
+              Errors.VL_INCONSISTENT_EMODE_CATEGORY
             );
           }
         }
