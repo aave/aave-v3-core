@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
