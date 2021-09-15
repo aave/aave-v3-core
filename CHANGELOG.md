@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.0.2](https://www.github.com/aave/aave-v3-core/compare/v1.0.1...v1.0.2) (2021-09-15)
+
+
+### Bug Fixes
+
+* add repository field and fix publishConfig at package.json ([76b90e7](https://www.github.com/aave/aave-v3-core/commit/76b90e7780b602a48cbbd388a99a742dc24978a5))
+
 ### [1.0.1](https://www.github.com/aave/aave-v3-core/compare/v1.0.0...v1.0.1) (2021-09-15)
 
 
