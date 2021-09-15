@@ -175,7 +175,7 @@ library DepositLogic {
         DataTypes.ReserveConfigurationMap memory reserveConfig = reserves[vars.asset].configuration;
         uint256 assetCategoryId = reserveConfig.getEModeCategoryMemory();
 
-        if (assetCategoryId == vars.toEModeCategory || vars.toEModeCategory == 0) {
+        if (vars.toEModeCategory == 0 || assetCategoryId == vars.toEModeCategory) {
           DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
           toConfig.setUsingAsCollateral(reserveId, true);
           emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
