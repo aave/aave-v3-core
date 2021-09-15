@@ -11,23 +11,6 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
  **/
 interface IPool {
   /**
-   * @notice Emitted on deposit()
-   * @dev Deprecated: Used by the deprecated `deposit` function
-   * @param reserve The address of the underlying asset of the reserve
-   * @param user The address initiating the supply
-   * @param onBehalfOf The beneficiary of the supply, receiving the aTokens
-   * @param amount The amount supplied
-   * @param referral The referral code used
-   **/
-  event Deposit(
-    address indexed reserve,
-    address user,
-    address indexed onBehalfOf,
-    uint256 amount,
-    uint16 indexed referral
-  );
-
-  /**
    * @notice Emitted on supply()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the supply

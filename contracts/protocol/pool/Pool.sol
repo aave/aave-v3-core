@@ -621,7 +621,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode
   ) external override {
-    SupplyLogic.executeDeposit(
+    SupplyLogic.executeSupply(
       _reserves[asset],
       _usersConfig[onBehalfOf],
       asset,

@@ -33,13 +33,6 @@ library SupplyLogic {
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
   event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
-  event Deposit(
-    address indexed reserve,
-    address user,
-    address indexed onBehalfOf,
-    uint256 amount,
-    uint16 indexed referral
-  );
   event Supply(
     address indexed reserve,
     address user,
@@ -78,39 +71,6 @@ library SupplyLogic {
     }
 
     emit Supply(asset, msg.sender, onBehalfOf, amount, referralCode);
-  }
-
-  /// @dev Deprecated: used by the Pool function `deposit`
-  function executeDeposit(
-    DataTypes.ReserveData storage reserve,
-    DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    uint256 amount,
-    address onBehalfOf,
-    uint16 referralCode
-  ) internal {
-    DataTypes.ReserveCache memory reserveCache = reserve.cache();
-
-    reserve.updateState(reserveCache);
-
-    ValidationLogic.validateSupply(reserveCache, amount);
-
-    reserve.updateInterestRates(reserveCache, asset, amount, 0);
-
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
-
-    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
-      onBehalfOf,
-      amount,
-      reserveCache.nextLiquidityIndex
-    );
-
-    if (isFirstSupply) {
-      userConfig.setUsingAsCollateral(reserve.id, true);
-      emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
-    }
-
-    emit Deposit(asset, msg.sender, onBehalfOf, amount, referralCode);
   }
 
   function executeWithdraw(
