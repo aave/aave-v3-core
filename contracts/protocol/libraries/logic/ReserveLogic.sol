@@ -105,7 +105,7 @@ library ReserveLogic {
 
   /**
    * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
-   * the flashloan fee to the reserve, and spread it between all the depositors
+   * the flashloan fee to the reserve, and spread it between all the suppliers
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
    * @param amount The amount to accomulate
@@ -161,7 +161,7 @@ library ReserveLogic {
   /**
    * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
-   * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
+   * @param liquidityAdded The amount of liquidity added to the protocol (supply or repay) in the previous action
    * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
    **/
   function updateInterestRates(

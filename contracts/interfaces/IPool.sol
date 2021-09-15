@@ -14,9 +14,9 @@ interface IPool {
    * @notice Emitted on deposit()
    * @dev Deprecated: Used by the deprecated `deposit` function
    * @param reserve The address of the underlying asset of the reserve
-   * @param user The address initiating the deposit
-   * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
-   * @param amount The amount deposited
+   * @param user The address initiating the supply
+   * @param onBehalfOf The beneficiary of the supply, receiving the aTokens
+   * @param amount The amount supplied
    * @param referral The referral code used
    **/
   event Deposit(
@@ -243,7 +243,7 @@ interface IPool {
 
   /**
    * @notice Allows users to borrow a specific `amount` of the reserve underlying asset, provided that the borrower
-   * already deposited enough collateral, or he was given enough allowance by a credit delegator on the
+   * already supplied enough collateral, or he was given enough allowance by a credit delegator on the
    * corresponding debt token (StableDebtToken or VariableDebtToken)
    * - E.g. User borrows 100 USDC passing as `onBehalfOf` his own address, receiving the 100 USDC in his wallet
    *   and 100 stable/variable debt tokens, depending on the `interestRateMode`
@@ -293,6 +293,7 @@ interface IPool {
    * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
+   * @param deadline The deadline timestamp that the permit is valid
    * @param permitV The V parameter of ERC712 permit sig
    * @param permitR The R parameter of ERC712 permit sig
    * @param permitS The S parameter of ERC712 permit sig
@@ -339,17 +340,17 @@ interface IPool {
    * @notice Rebalances the stable interest rate of a user to the current stable rate defined on the reserve.
    * - Users can be rebalanced if the following conditions are satisfied:
    *     1. Usage ratio is above 95%
-   *     2. the current deposit APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too much has been
-   *        borrowed at a stable rate and depositors are not earning enough
+   *     2. the current supply APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too much has been
+   *        borrowed at a stable rate and suppliers are not earning enough
    * @param asset The address of the underlying asset borrowed
    * @param user The address of the user to be rebalanced
    **/
   function rebalanceStableBorrowRate(address asset, address user) external;
 
   /**
-   * @notice Allows depositors to enable/disable a specific deposited asset as collateral
-   * @param asset The address of the underlying asset deposited
-   * @param useAsCollateral True if the user wants to use the deposit as collateral, false otherwise
+   * @notice Allows suppliers to enable/disable a specific supplied asset as collateral
+   * @param asset The address of the underlying asset supplied
+   * @param useAsCollateral True if the user wants to use the supply as collateral, false otherwise
    **/
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external;
 
