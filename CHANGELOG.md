@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.0.1](https://www.github.com/aave/aave-v3-core/compare/v1.0.0...v1.0.1) (2021-09-15)
+
+
+### Bug Fixes
+
+* set release please to run at master ([599fe87](https://www.github.com/aave/aave-v3-core/commit/599fe870a95ab46b1db6869b8339a65871e10e57))
+
 ## 1.0.0 (2021-09-14)
 
 
