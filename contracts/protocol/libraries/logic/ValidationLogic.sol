@@ -388,8 +388,8 @@ library ValidationLogic {
    */
   function validateSetUseReserveAsCollateral(
     DataTypes.ReserveCache memory reserveCache,
-    uint256 userEModeCategoryId,
-    uint256 userBalance
+    uint256 userBalance,
+    uint8 userEModeCategory
   ) internal pure {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
     uint256 assetCategoryId = reserveCache.reserveConfiguration.getEModeCategoryMemory();
@@ -397,7 +397,7 @@ library ValidationLogic {
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(
-      userEModeCategoryId == 0 || userEModeCategoryId == assetCategoryId,
+      userEModeCategory == 0 || userEModeCategory == assetCategoryId,
       Errors.VL_INCONSISTENT_EMODE_CATEGORY
     );
 

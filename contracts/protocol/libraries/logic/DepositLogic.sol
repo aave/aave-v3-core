@@ -200,7 +200,7 @@ library DepositLogic {
 
     uint256 userBalance = IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender);
 
-    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userEModeCategory, userBalance);
+    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance, userEModeCategory);
 
     userConfig.setUsingAsCollateral(reserve.id, useAsCollateral);
 
