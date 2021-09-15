@@ -89,6 +89,10 @@
     "solidity"
   ],
   "publishConfig": {
-    "@aave:registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/aave/aave-v3-core"
   }
 }
