@@ -17,11 +17,11 @@ import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 
 /**
- * @title DepositLogic library
+ * @title SupplyLogic library
  * @author Aave
- * @notice Implements the base logic for deposit/withdraw
+ * @notice Implements the base logic for supply/withdraw
  */
-library DepositLogic {
+library SupplyLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
   using SafeERC20 for IERC20;
@@ -40,7 +40,47 @@ library DepositLogic {
     uint256 amount,
     uint16 indexed referral
   );
+  event Supply(
+    address indexed reserve,
+    address user,
+    address indexed onBehalfOf,
+    uint256 amount,
+    uint16 indexed referral
+  );
 
+  function executeSupply(
+    DataTypes.ReserveData storage reserve,
+    DataTypes.UserConfigurationMap storage userConfig,
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) internal {
+    DataTypes.ReserveCache memory reserveCache = reserve.cache();
+
+    reserve.updateState(reserveCache);
+
+    ValidationLogic.validateSupply(reserveCache, amount);
+
+    reserve.updateInterestRates(reserveCache, asset, amount, 0);
+
+    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
+
+    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
+      onBehalfOf,
+      amount,
+      reserveCache.nextLiquidityIndex
+    );
+
+    if (isFirstSupply) {
+      userConfig.setUsingAsCollateral(reserve.id, true);
+      emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+    }
+
+    emit Supply(asset, msg.sender, onBehalfOf, amount, referralCode);
+  }
+
+  /// @dev Deprecated: used by the Pool function `deposit`
   function executeDeposit(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
@@ -53,19 +93,19 @@ library DepositLogic {
 
     reserve.updateState(reserveCache);
 
-    ValidationLogic.validateDeposit(reserveCache, amount);
+    ValidationLogic.validateSupply(reserveCache, amount);
 
     reserve.updateInterestRates(reserveCache, asset, amount, 0);
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
 
-    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
+    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
       onBehalfOf,
       amount,
       reserveCache.nextLiquidityIndex
     );
 
-    if (isFirstDeposit) {
+    if (isFirstSupply) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
     }

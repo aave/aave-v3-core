@@ -42,7 +42,7 @@ library ValidationLogic {
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be deposited
    */
-  function validateDeposit(DataTypes.ReserveCache memory reserveCache, uint256 amount)
+  function validateSupply(DataTypes.ReserveCache memory reserveCache, uint256 amount)
     internal
     view
   {

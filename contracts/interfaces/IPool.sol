@@ -12,6 +12,7 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 interface IPool {
   /**
    * @notice Emitted on deposit()
+   * @dev Deprecated: Used by the deprecated `deposit` function
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the deposit
    * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
@@ -19,6 +20,22 @@ interface IPool {
    * @param referral The referral code used
    **/
   event Deposit(
+    address indexed reserve,
+    address user,
+    address indexed onBehalfOf,
+    uint256 amount,
+    uint16 indexed referral
+  );
+
+  /**
+   * @notice Emitted on supply()
+   * @param reserve The address of the underlying asset of the reserve
+   * @param user The address initiating the supply
+   * @param onBehalfOf The beneficiary of the supply, receiving the aTokens
+   * @param amount The amount supplied
+   * @param referral The referral code used
+   **/
+  event Supply(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
@@ -164,17 +181,17 @@ interface IPool {
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
 
   /**
-   * @notice Deposits an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
-   * - E.g. User deposits 100 USDC and gets in return 100 aUSDC
-   * @param asset The address of the underlying asset to deposit
-   * @param amount The amount to be deposited
+   * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
+   * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
+   * @param asset The address of the underlying asset to supply
+   * @param amount The amount to be supplied
    * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
    *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
    *   is a different wallet
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    **/
-  function deposit(
+  function supply(
     address asset,
     uint256 amount,
     address onBehalfOf,
@@ -182,20 +199,21 @@ interface IPool {
   ) external;
 
   /**
-   * @notice Deposit with transfer approval of asset to be deposited done via permit function
+   * @notice Supply with transfer approval of asset to be supplied done via permit function
    * see: https://eips.ethereum.org/EIPS/eip-2612 and https://eips.ethereum.org/EIPS/eip-713
-   * @param asset The address of the underlying asset to deposit
-   * @param amount The amount to be deposited
+   * @param asset The address of the underlying asset to supply
+   * @param amount The amount to be supplied
    * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
    *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
    *   is a different wallet
+   * @param deadline The deadline timestamp that the permit is valid
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    * @param permitV The V parameter of ERC712 permit sig
    * @param permitR The R parameter of ERC712 permit sig
    * @param permitS The S parameter of ERC712 permit sig
    **/
-  function depositWithPermit(
+  function supplyWithPermit(
     address asset,
     uint256 amount,
     address onBehalfOf,
@@ -575,4 +593,23 @@ interface IPool {
    * @param assets The list of reserves for which the minting needs to be executed
    **/
   function mintToTreasury(address[] calldata assets) external;
+
+  /**
+   * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
+   * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
+   * @dev Deprecated: Use the `supply` function instead
+   * @param asset The address of the underlying asset to supply
+   * @param amount The amount to be supplied
+   * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
+   *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
+   *   is a different wallet
+   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+   *   0 if the action is executed directly by the user, without any middle-man
+   **/
+  function deposit(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) external;
 }
