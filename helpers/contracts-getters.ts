@@ -20,7 +20,7 @@ import {
   MockPoolFactory,
   MockInitializableImpleFactory,
   MockInitializableImpleV2Factory,
-  DepositLogicFactory,
+  SupplyLogicFactory,
   BorrowLogicFactory,
   LiquidationLogicFactory,
 } from '../types';
@@ -50,8 +50,8 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
   );
 };
 
-export const getDepositLogic = async (address?: tEthereumAddress) =>
-  await DepositLogicFactory.connect(
+export const getSupplyLogic = async (address?: tEthereumAddress) =>
+  await SupplyLogicFactory.connect(
     address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );

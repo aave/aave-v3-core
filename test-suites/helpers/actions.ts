@@ -516,7 +516,7 @@ export const repay = async (
   }
 };
 
-export const depositWithPermit = async (
+export const supplyWithPermit = async (
   reserveSymbol: string,
   amount: string,
   sender: SignerWithAddress,
@@ -567,7 +567,7 @@ export const depositWithPermit = async (
     const txResult = await waitForTx(
       await pool
         .connect(sender.signer)
-        .depositWithPermit(
+        .supplyWithPermit(
           reserve,
           amountToDeposit,
           onBehalfOf,
@@ -619,7 +619,7 @@ export const depositWithPermit = async (
     await expect(
       pool
         .connect(sender.signer)
-        .depositWithPermit(
+        .supplyWithPermit(
           reserve,
           amountToDeposit,
           onBehalfOf,
