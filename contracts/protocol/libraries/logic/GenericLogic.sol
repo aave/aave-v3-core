@@ -44,7 +44,8 @@ library GenericLogic {
     uint256 avgLiquidationThreshold;
     uint256 normalizedIncome;
     uint256 normalizedDebt;
-    address eModeOracleAddress;
+    uint256 eModeAssetPrice;
+    address eModePriceSource;
     address currentReserveAddress;
     bool hasZeroLtvCollateral;
   }
@@ -86,6 +87,15 @@ library GenericLogic {
 
     CalculateUserAccountDataVars memory vars;
 
+    if (params.userEModeCategory != 0) {
+      vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
+      if (vars.eModePriceSource != address(0)) {
+        vars.eModeAssetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(
+          vars.eModePriceSource
+        );
+      }
+    }
+
     while (vars.i < params.reservesCount) {
       if (!params.userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
         unchecked {
@@ -112,7 +122,9 @@ library GenericLogic {
       unchecked {
         vars.assetUnit = 10**vars.decimals;
       }
-      vars.assetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
+      vars.assetPrice = vars.eModeAssetPrice > 0
+        ? vars.eModeAssetPrice
+        : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
         vars.normalizedIncome = currentReserve.getNormalizedIncome();
