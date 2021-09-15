@@ -31,7 +31,7 @@ import {PoolStorage} from './PoolStorage.sol';
  *   # Borrow
  *   # Repay
  *   # Swap their loans between variable and stable rate
- *   # Enable/disable their supplies as collateral rebalance stable rate borrow positions
+ *   # Enable/disable their supplied assets as collateral rebalance stable rate borrow positions
  *   # Liquidate positions
  *   # Execute Flash Loans
  * @dev To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
