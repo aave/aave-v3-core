@@ -84,15 +84,22 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     address onBehalfOf,
-    uint16 referralCode
+    uint16 referralCode,
+    bool useAsCollateral
   ) external override {
     SupplyLogic.executeSupply(
-      _reserves[asset],
-      _usersConfig[onBehalfOf],
-      asset,
-      amount,
-      onBehalfOf,
-      referralCode
+      _reserves,
+      _usersConfig[msg.sender],
+      _reservesList,
+      DataTypes.ExecuteSupplyParams(
+        asset,
+        amount,
+        onBehalfOf,
+        referralCode,
+        useAsCollateral,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
+      )
     );
   }
 
@@ -103,6 +110,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode,
     uint256 deadline,
+    bool useAsCollateral,
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
@@ -117,12 +125,18 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       permitS
     );
     SupplyLogic.executeSupply(
-      _reserves[asset],
+      _reserves,
       _usersConfig[onBehalfOf],
-      asset,
-      amount,
-      onBehalfOf,
-      referralCode
+      _reservesList,
+      DataTypes.ExecuteSupplyParams(
+        asset,
+        amount,
+        onBehalfOf,
+        referralCode,
+        useAsCollateral,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
+      )
     );
   }
 
@@ -622,12 +636,18 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint16 referralCode
   ) external override {
     SupplyLogic.executeSupply(
-      _reserves[asset],
-      _usersConfig[onBehalfOf],
-      asset,
-      amount,
-      onBehalfOf,
-      referralCode
+      _reserves,
+      _usersConfig[msg.sender],
+      _reservesList,
+      DataTypes.ExecuteSupplyParams(
+        asset,
+        amount,
+        onBehalfOf,
+        referralCode,
+        true,
+        _reservesCount,
+        _addressesProvider.getPriceOracle()
+      )
     );
   }
 }

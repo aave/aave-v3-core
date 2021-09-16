@@ -42,35 +42,50 @@ library SupplyLogic {
   );
 
   function executeSupply(
-    DataTypes.ReserveData storage reserve,
+    mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    uint256 amount,
-    address onBehalfOf,
-    uint16 referralCode
+    mapping(uint256 => address) storage reservesList,
+    DataTypes.ExecuteSupplyParams memory vars
   ) internal {
+    DataTypes.ReserveData storage reserve = reserves[vars.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
 
-    ValidationLogic.validateSupply(reserveCache, amount);
+    ValidationLogic.validateSupply(reserveCache, vars.amount);
 
-    reserve.updateInterestRates(reserveCache, asset, amount, 0);
+    reserve.updateInterestRates(reserveCache, vars.asset, vars.amount, 0);
 
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
+    IERC20(vars.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, vars.amount);
 
-    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
-      onBehalfOf,
-      amount,
+    IAToken(reserveCache.aTokenAddress).mint(
+      vars.onBehalfOf,
+      vars.amount,
       reserveCache.nextLiquidityIndex
     );
 
-    if (isFirstSupply) {
-      userConfig.setUsingAsCollateral(reserve.id, true);
-      emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+    if (vars.useAsCollateral) {
+      emit ReserveUsedAsCollateralEnabled(vars.asset, vars.onBehalfOf);
+    } else {
+      if (userConfig.isUsingAsCollateral(reserve.id)) {
+        if (userConfig.isBorrowingAny()) {
+          ValidationLogic.validateHFAndLtv(
+            vars.asset,
+            vars.onBehalfOf,
+            reserves,
+            userConfig,
+            reservesList,
+            vars.reservesCount,
+            vars.oracle
+          );
+        }
+      }
+      emit ReserveUsedAsCollateralDisabled(vars.asset, vars.onBehalfOf);
     }
 
-    emit Supply(asset, msg.sender, onBehalfOf, amount, referralCode);
+    userConfig.setUsingAsCollateral(reserve.id, vars.useAsCollateral);
+
+    emit Supply(vars.asset, msg.sender, vars.onBehalfOf, vars.amount, vars.referralCode);
   }
 
   function executeWithdraw(

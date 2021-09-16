@@ -17,13 +17,15 @@ interface IPool {
    * @param onBehalfOf The beneficiary of the supply, receiving the aTokens
    * @param amount The amount supplied
    * @param referral The referral code used
+   * @param useAsCollateral True if the user wants to use the supplied asset as collateral, false otherwise
    **/
   event Supply(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 indexed referral,
+    bool useAsCollateral
   );
 
   /**
@@ -173,12 +175,14 @@ interface IPool {
    *   is a different wallet
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
+   * @param useAsCollateral True if the user wants to use the supplied asset as collateral, false otherwise
    **/
   function supply(
     address asset,
     uint256 amount,
     address onBehalfOf,
-    uint16 referralCode
+    uint16 referralCode,
+    bool useAsCollateral
   ) external;
 
   /**
@@ -192,6 +196,7 @@ interface IPool {
    * @param deadline The deadline timestamp that the permit is valid
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
+   * @param useAsCollateral True if the user wants to use the supplied asset as collateral, false otherwise
    * @param permitV The V parameter of ERC712 permit sig
    * @param permitR The R parameter of ERC712 permit sig
    * @param permitS The S parameter of ERC712 permit sig
@@ -202,6 +207,7 @@ interface IPool {
     address onBehalfOf,
     uint16 referralCode,
     uint256 deadline,
+    bool useAsCollateral,
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
