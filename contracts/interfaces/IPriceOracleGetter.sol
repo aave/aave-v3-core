@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 /**
- * @title IPriceOracleGetter interface
+ * @title IPriceOracleGetter
+ * @author Aave
  * @notice Interface for the Aave price oracle.
  **/
-
 interface IPriceOracleGetter {
   /**
-   * @dev returns the asset price in ETH
-   * @param asset the address of the asset
-   * @return the ETH price of the asset
+   * @notice Returns the asset price in the base currency
+   * @param asset The address of the asset
+   * @return The price of the asset
    **/
   function getAssetPrice(address asset) external view returns (uint256);
 }

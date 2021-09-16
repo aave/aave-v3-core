@@ -31,19 +31,19 @@ const hardhatConfig: HardhatUserConfig = {
     disambiguatePaths: false,
   },
   solidity: {
-    // Docs for the compiler https://docs.soliditylang.org/en/v0.8.6/using-the-compiler.html
-    version: '0.8.6',
+    // Docs for the compiler https://docs.soliditylang.org/en/v0.8.7/using-the-compiler.html
+    version: '0.8.7',
     settings: {
-      optimizer: { enabled: true, runs: 25000 },
-      evmVersion: 'berlin',
+      optimizer: {
+        enabled: true,
+        runs: 25000,
+      },
+      evmVersion: 'london',
     },
   },
   typechain: {
     outDir: 'types',
     target: 'ethers-v5',
-  },
-  etherscan: {
-    apiKey: ETHERSCAN_KEY,
   },
   mocha: {
     timeout: 0,
@@ -57,6 +57,8 @@ const hardhatConfig: HardhatUserConfig = {
     coverage: {
       url: 'http://localhost:8555',
       chainId: COVERAGE_CHAINID,
+      throwOnTransactionFailures: true,
+      throwOnCallFailures: true,
     },
     hardhat: {
       hardfork: HARDFORK,

@@ -1,19 +1,17 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 /**
  * @title VersionedInitializable
- *
- * @dev Helper contract to implement initializer functions. To use it, replace
+ * @author Aave, inspired by the OpenZeppelin Initializable contract
+ * @notice Helper contract to implement initializer functions. To use it, replace
  * the constructor with a function that has the `initializer` modifier.
- * WARNING: Unlike constructors, initializer functions must be manually
+ * @dev WARNING: Unlike constructors, initializer functions must be manually
  * invoked. This applies both to deploying an Initializable contract, as well
  * as extending an Initializable contract via inheritance.
  * WARNING: When used with inheritance, manual care must be taken to not invoke
  * a parent initializer twice, or ensure that all initializers are idempotent,
  * because this is not dealt with automatically as with constructors.
- *
- * @author Aave, inspired by the OpenZeppelin Initializable contract
  */
 abstract contract VersionedInitializable {
   /**
@@ -50,13 +48,15 @@ abstract contract VersionedInitializable {
   }
 
   /**
-   * @dev returns the revision number of the contract
-   * Needs to be defined in the inherited class as a constant.
+   * @notice Returns the revision number of the contract
+   * @dev Needs to be defined in the inherited class as a constant.
+   * @return The revision number
    **/
   function getRevision() internal pure virtual returns (uint256);
 
   /**
-   * @dev Returns true if and only if the function is running in the constructor
+   * @notice Returns true if and only if the function is running in the constructor
+   * @return True if the function is running in the constructor
    **/
   function isConstructor() private view returns (bool) {
     // extcodesize checks the size of the code stored in an address, and

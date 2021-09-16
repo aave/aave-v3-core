@@ -1,19 +1,19 @@
 {
   "name": "@aave/core-v3",
-  "version": "0.0.1",
+  "version": "1.0.2",
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
-    "artifacts"
+    "artifacts",
+    "types"
   ],
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
-    "small:test": "npm run compile && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/test-aave/__setup.spec.ts ./test-suites/test-aave/flashloan.spec.ts",
     "run-env": "npm i && tail -f /dev/null",
     "hardhat": "hardhat",
     "compile": "SKIP_LOAD=true hardhat compile",
     "compile:clean": "npm run ci:clean && npm run compile",
-    "coverage": "TS_NODE_TRANSPILE_ONLY=1 hardhat coverage --testfiles './test-suites/*.spec.ts'",
+    "coverage": "npm run compile && npx hardhat coverage --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && npx hardhat coverage --testfiles 'test-suites/*.spec.ts'",
     "console:fork": "FORK=main hardhat console",
     "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
     "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
@@ -21,7 +21,8 @@
     "test-scenarios": "npm run compile && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
     "test-subgraph:scenarios": "npm run compile && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
     "ci:test": "npm run compile && npm run test",
-    "ci:clean": "rm -rf ./artifacts ./cache ./types"
+    "ci:clean": "rm -rf ./artifacts ./cache ./types",
+    "prepublish": "npm run compile"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
@@ -29,11 +30,10 @@
     "@openzeppelin/contracts": "4.2.0",
     "@tenderly/hardhat-tenderly": "1.1.0-beta.5",
     "@typechain/ethers-v5": "^2.0.0",
-    "@types/chai": "4.2.11",
+    "@types/chai": "^4.2.11",
     "@types/lowdb": "1.0.9",
     "@types/mocha": "7.0.2",
     "@types/node": "14.0.5",
-    "bignumber.js": "9.0.0",
     "chai": "4.2.0",
     "chai-bignumber": "3.0.0",
     "defender-relay-client": "^1.7.0",
@@ -43,7 +43,7 @@
     "ethereumjs-util": "7.0.2",
     "ethers": "^5.0.19",
     "globby": "^11.0.1",
-    "hardhat": "^2.5.0",
+    "hardhat": "^2.6.0",
     "hardhat-contract-sizer": "^2.0.3",
     "hardhat-gas-reporter": "^1.0.0",
     "hardhat-typechain": "^0.3.3",
@@ -87,5 +87,12 @@
     "protocol-v2",
     "ethereum",
     "solidity"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/aave/aave-v3-core"
+  }
 }

@@ -1,4 +1,4 @@
-import BigNumber from 'bignumber.js';
+import { BigNumber } from 'ethers';
 
 export interface SymbolMap<T> {
   [symbol: string]: T;
@@ -37,7 +37,7 @@ export enum eContractid {
   RateOracle = 'RateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
-  InitializableAdminUpgradeabilityProxy = 'InitializableAdminUpgradeabilityProxy',
+  InitializableImmutableAdminUpgradeabilityProxy = 'InitializableImmutableAdminUpgradeabilityProxy',
   MockFlashLoanReceiver = 'MockFlashLoanReceiver',
   AToken = 'AToken',
   MockAToken = 'MockAToken',
@@ -56,7 +56,13 @@ export enum eContractid {
   WETHMocked = 'WETHMocked',
   PoolImpl = 'PoolImpl',
   PoolConfiguratorImpl = 'PoolConfiguratorImpl',
-  MockUniswapV2Router02 = 'MockUniswapV2Router02',
+  MockIncentivesController = 'MockIncentivesController',
+  MockReserveConfiguration = 'MockReserveConfiguration',
+  MockPool = 'MockPool',
+  MockInitializableImple = 'MockInitializableImple',
+  MockInitializableImpleV2 = 'MockInitializableImpleV2',
+  MockInitializableFromConstructorImple = 'MockInitializableFromConstructorImple',
+  MockReentrantInitializableImple = 'MockReentrantInitializableImple',
 }
 
 /*
@@ -138,16 +144,20 @@ export enum ProtocolErrors {
   P_IS_PAUSED = '64', // 'Pool is paused'
   P_NO_MORE_RESERVES_ALLOWED = '65',
   P_INVALID_FLASH_LOAN_EXECUTOR_RETURN = '66',
+  P_NOT_CONTRACT = '78',
   RC_INVALID_LTV = '67',
   RC_INVALID_LIQ_THRESHOLD = '68',
   RC_INVALID_LIQ_BONUS = '69',
   RC_INVALID_DECIMALS = '70',
   RC_INVALID_RESERVE_FACTOR = '71',
   PAPR_INVALID_ADDRESSES_PROVIDER_ID = '72',
+  VL_INCONSISTENT_FLASHLOAN_PARAMS = '73',
+  SDT_STABLE_DEBT_OVERFLOW = '79',
   VL_BORROW_CAP_EXCEEDED = '81',
   RC_INVALID_BORROW_CAP = '82',
   VL_SUPPLY_CAP_EXCEEDED = '83',
   RC_INVALID_SUPPLY_CAP = '84',
+  PC_INVALID_CONFIGURATION = '75',
   PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN = '85',
   VL_RESERVE_PAUSED = '86',
   PC_CALLER_NOT_RISK_OR_POOL_ADMIN = '87',
@@ -158,6 +168,7 @@ export enum ProtocolErrors {
   VL_SAME_BLOCK_BORROW_REPAY = '94',
   PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
   PC_FLASHLOAN_PREMIUM_INVALID = '96',
+  RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
 
   // old
 

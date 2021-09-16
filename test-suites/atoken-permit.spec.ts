@@ -1,28 +1,32 @@
+import { expect } from 'chai';
+import { ethers, utils } from 'ethers';
+import { DRE } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
 import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contracts-helpers';
-import { expect } from 'chai';
-import { ethers } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { DRE } from '../helpers/misc-utils';
-import { waitForTx } from '../helpers/misc-utils';
-import { _TypedDataEncoder } from 'ethers/lib/utils';
-
-const { parseEther } = ethers.utils;
-const TEST_WALLET_PATH = '../test-wallets.js';
+import { getTestWallets } from './helpers/utils/wallets';
 
 makeSuite('AToken: Permit', (testEnv: TestEnv) => {
+  let testWallets;
+
+  const EIP712_REVISION = '1';
+
+  before(() => {
+    testWallets = getTestWallets();
+  });
+
   it('Checks the domain separator', async () => {
     const { aDai } = testEnv;
     const separator = await aDai.DOMAIN_SEPARATOR();
 
     const domain = {
       name: await aDai.name(),
-      version: '1',
+      version: EIP712_REVISION,
       chainId: DRE.network.config.chainId,
       verifyingContract: aDai.address,
     };
-    const domainSeparator = _TypedDataEncoder.hashDomain(domain);
+    const domainSeparator = utils._TypedDataEncoder.hashDomain(domain);
 
     expect(separator).to.be.equal(domainSeparator, 'Invalid domain separator');
   });
@@ -30,13 +34,13 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
   it('Get aDAI for tests', async () => {
     const { dai, pool, deployer } = testEnv;
 
-    await dai.mint(parseEther('20000'));
-    await dai.approve(pool.address, parseEther('20000'));
+    await dai.mint(utils.parseEther('20000'));
+    await dai.approve(pool.address, utils.parseEther('20000'));
 
-    await pool.deposit(dai.address, parseEther('20000'), deployer.address, 0);
+    await pool.deposit(dai.address, utils.parseEther('20000'), deployer.address, 0);
   });
 
-  it('Reverts submitting a permit with 0 expiration', async () => {
+  it('Tries to submit a permit with 0 expiration (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -46,11 +50,11 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const expiration = 0;
     const nonce = (await aDai._nonces(owner.address)).toNumber();
-    const permitAmount = ethers.utils.parseEther('2').toString();
+    const permitAmount = utils.parseEther('2').toString();
     const msgParams = buildPermitParams(
       chainId,
       aDai.address,
-      '1',
+      EIP712_REVISION,
       tokenName,
       owner.address,
       spender.address,
@@ -59,10 +63,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       expiration.toFixed()
     );
 
-    const ownerPrivateKey = require(TEST_WALLET_PATH).accounts[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     expect((await aDai.allowance(owner.address, spender.address)).toString()).to.be.equal(
       '0',
@@ -91,11 +92,11 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
     const nonce = (await aDai._nonces(owner.address)).toNumber();
-    const permitAmount = parseEther('2').toString();
+    const permitAmount = utils.parseEther('2').toString();
     const msgParams = buildPermitParams(
       chainId,
       aDai.address,
-      '1',
+      EIP712_REVISION,
       await aDai.name(),
       owner.address,
       spender.address,
@@ -104,10 +105,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = require(TEST_WALLET_PATH).accounts[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     expect((await aDai.allowance(owner.address, spender.address)).toString()).to.be.equal(
       '0',
@@ -116,7 +114,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
-    await waitForTx(
+    expect(
       await aDai
         .connect(spender.signer)
         .permit(owner.address, spender.address, permitAmount, deadline, v, r, s)
@@ -137,7 +135,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const msgParams = buildPermitParams(
       chainId,
       aDai.address,
-      '1',
+      EIP712_REVISION,
       await aDai.name(),
       owner.address,
       spender.address,
@@ -146,10 +144,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = require(TEST_WALLET_PATH).accounts[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -158,7 +153,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       'INVALID_ALLOWANCE_BEFORE_PERMIT'
     );
 
-    await waitForTx(
+    expect(
       await aDai
         .connect(spender.signer)
         .permit(owner.address, spender.address, permitAmount, deadline, v, r, s)
@@ -171,7 +166,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     expect((await aDai._nonces(owner.address)).toNumber()).to.be.equal(2);
   });
 
-  it('Tries to submit a permit with invalid nonce', async () => {
+  it('Tries to submit a permit with invalid nonce (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -183,7 +178,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const msgParams = buildPermitParams(
       chainId,
       aDai.address,
-      '1',
+      EIP712_REVISION,
       await aDai.name(),
       owner.address,
       spender.address,
@@ -192,10 +187,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = require(TEST_WALLET_PATH).accounts[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -206,7 +198,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     ).to.be.revertedWith('INVALID_SIGNATURE');
   });
 
-  it('Tries to submit a permit with invalid expiration (previous to the current block)', async () => {
+  it('Tries to submit a permit with invalid expiration (previous to the current block) (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -218,7 +210,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const msgParams = buildPermitParams(
       chainId,
       aDai.address,
-      '1',
+      EIP712_REVISION,
       await aDai.name(),
       owner.address,
       spender.address,
@@ -227,10 +219,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = require(TEST_WALLET_PATH).accounts[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -241,7 +230,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     ).to.be.revertedWith('INVALID_EXPIRATION');
   });
 
-  it('Tries to submit a permit with invalid signature', async () => {
+  it('Tries to submit a permit with invalid signature (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -253,7 +242,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const msgParams = buildPermitParams(
       chainId,
       aDai.address,
-      '1',
+      EIP712_REVISION,
       await aDai.name(),
       owner.address,
       spender.address,
@@ -262,10 +251,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = require(TEST_WALLET_PATH).accounts[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 
@@ -276,7 +262,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     ).to.be.revertedWith('INVALID_SIGNATURE');
   });
 
-  it('Tries to submit a permit with invalid owner', async () => {
+  it('Tries to submit a permit with invalid owner (revert expected)', async () => {
     const { aDai, deployer, users } = testEnv;
     const owner = deployer;
     const spender = users[1];
@@ -288,7 +274,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const msgParams = buildPermitParams(
       chainId,
       aDai.address,
-      '1',
+      EIP712_REVISION,
       await aDai.name(),
       owner.address,
       spender.address,
@@ -297,10 +283,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       permitAmount
     );
 
-    const ownerPrivateKey = require(TEST_WALLET_PATH).accounts[0].secretKey;
-    if (!ownerPrivateKey) {
-      throw new Error('INVALID_OWNER_PK');
-    }
+    const ownerPrivateKey = testWallets[0].secretKey;
 
     const { v, r, s } = getSignatureFromTypedData(ownerPrivateKey, msgParams);
 

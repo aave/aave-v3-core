@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
@@ -14,7 +14,7 @@ library UserConfiguration {
     0x5555555555555555555555555555555555555555555555555555555555555555;
 
   /**
-   * @dev Sets if the user is borrowing the reserve identified by reserveIndex
+   * @notice Sets if the user is borrowing the reserve identified by reserveIndex
    * @param self The configuration object
    * @param reserveIndex The index of the reserve in the bitmap
    * @param borrowing True if the user is borrowing the reserve, false otherwise
@@ -33,7 +33,7 @@ library UserConfiguration {
   }
 
   /**
-   * @dev Sets if the user is using as collateral the reserve identified by reserveIndex
+   * @notice Sets if the user is using as collateral the reserve identified by reserveIndex
    * @param self The configuration object
    * @param reserveIndex The index of the reserve in the bitmap
    * @param usingAsCollateral True if the user is usin the reserve as collateral, false otherwise
@@ -52,7 +52,7 @@ library UserConfiguration {
   }
 
   /**
-   * @dev Used to validate if a user has been using the reserve for borrowing or as collateral
+   * @notice Returns if a user has been using the reserve for borrowing or as collateral
    * @param self The configuration object
    * @param reserveIndex The index of the reserve in the bitmap
    * @return True if the user has been using a reserve for borrowing or as collateral, false otherwise
@@ -68,7 +68,7 @@ library UserConfiguration {
   }
 
   /**
-   * @dev Used to validate if a user has been using the reserve for borrowing
+   * @notice Validate a user has been using the reserve for borrowing
    * @param self The configuration object
    * @param reserveIndex The index of the reserve in the bitmap
    * @return True if the user has been using a reserve for borrowing, false otherwise
@@ -85,7 +85,7 @@ library UserConfiguration {
   }
 
   /**
-   * @dev Used to validate if a user has been using the reserve as collateral
+   * @notice Validate a user has been using the reserve as collateral
    * @param self The configuration object
    * @param reserveIndex The index of the reserve in the bitmap
    * @return True if the user has been using a reserve as collateral, false otherwise
@@ -102,7 +102,7 @@ library UserConfiguration {
   }
 
   /**
-   * @dev Used to validate if a user has been borrowing from any reserve
+   * @notice Validate a user has been borrowing from any reserve
    * @param self The configuration object
    * @return True if the user has been borrowing any reserve, false otherwise
    **/
@@ -111,7 +111,7 @@ library UserConfiguration {
   }
 
   /**
-   * @dev Used to validate if a user has not been using any reserve
+   * @notice Validate a user has not been using any reserve
    * @param self The configuration object
    * @return True if the user has been borrowing any reserve, false otherwise
    **/

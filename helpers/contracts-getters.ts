@@ -16,6 +16,13 @@ import {
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
+  AaveOracleFactory,
+  MockPoolFactory,
+  MockInitializableImpleFactory,
+  MockInitializableImpleV2Factory,
+  DepositLogicFactory,
+  BorrowLogicFactory,
+  LiquidationLogicFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -42,6 +49,24 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
     await getFirstSigner()
   );
 };
+
+export const getDepositLogic = async (address?: tEthereumAddress) =>
+  await DepositLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getBorrowLogic = async (address?: tEthereumAddress) =>
+  await BorrowLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getLiquidationLogic = async (address?: tEthereumAddress) =>
+  await LiquidationLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
 
 export const getPool = async (address?: tEthereumAddress) =>
   await PoolFactory.connect(
@@ -106,6 +131,12 @@ export const getAaveProtocolDataProvider = async (address?: tEthereumAddress) =>
       (
         await getDb().get(`${eContractid.AaveProtocolDataProvider}.${DRE.network.name}`).value()
       ).address,
+    await getFirstSigner()
+  );
+
+export const getAaveOracle = async (address?: tEthereumAddress) =>
+  await AaveOracleFactory.connect(
+    address || (await getDb().get(`${eContractid.AaveOracle}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
@@ -214,6 +245,30 @@ export const getMockStableDebtToken = async (address?: tEthereumAddress) =>
     address ||
       (
         await getDb().get(`${eContractid.MockStableDebtToken}.${DRE.network.name}`).value()
+      ).address,
+    await getFirstSigner()
+  );
+
+export const getMockPool = async (address?: tEthereumAddress) =>
+  await MockPoolFactory.connect(
+    address || (await getDb().get(`${eContractid.MockPool}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getMockInitializableImple = async (address?: tEthereumAddress) =>
+  await MockInitializableImpleFactory.connect(
+    address ||
+      (
+        await getDb().get(`${eContractid.MockInitializableImple}.${DRE.network.name}`).value()
+      ).address,
+    await getFirstSigner()
+  );
+
+export const getMockInitializableImpleV2 = async (address?: tEthereumAddress) =>
+  await MockInitializableImpleV2Factory.connect(
+    address ||
+      (
+        await getDb().get(`${eContractid.MockInitializableImpleV2}.${DRE.network.name}`).value()
       ).address,
     await getFirstSigner()
   );

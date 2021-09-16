@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 import {ERC20} from '../../dependencies/openzeppelin/contracts/ERC20.sol';
 
@@ -19,7 +19,7 @@ contract MintableDelegationERC20 is ERC20 {
   }
 
   /**
-   * @dev Function to mint tokensp
+   * @dev Function to mint tokens
    * @param value The amount of tokens to mint.
    * @return A boolean that indicates if the operation was successful.
    */

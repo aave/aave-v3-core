@@ -14,6 +14,7 @@ import {
   depositWithPermit,
 } from './actions';
 import { RateMode } from '../../helpers/types';
+import { getTestWallets } from './utils/wallets';
 
 export interface Action {
   name: string;
@@ -75,11 +76,7 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
 
   const user = users[parseInt(userIndex)];
 
-  const userPrivateKey =
-    require('../../test-wallets.js').accounts[parseInt(userIndex) + 1].secretKey;
-  if (!userPrivateKey) {
-    throw new Error('INVALID_OWNER_PK');
-  }
+  const userPrivateKey = getTestWallets()[parseInt(userIndex) + 1].secretKey;
 
   switch (name) {
     case 'mint':
