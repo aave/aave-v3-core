@@ -110,7 +110,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     _mint(onBehalfOf, castAmount);
 
-    _userData[user].previousIndexOrStableRate = castIndex;
+    _userState[user].additionalData = castIndex;
 
     emit Transfer(address(0), onBehalfOf, amount);
     emit Mint(user, onBehalfOf, amount + accumulatedDebt, index);
@@ -134,7 +134,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     _burn(user, castAmount);
 
-    _userData[user].previousIndexOrStableRate = castIndex;
+    _userState[user].additionalData = castIndex;
 
     emit Transfer(user, address(0), amount);
 

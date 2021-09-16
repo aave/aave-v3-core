@@ -123,7 +123,7 @@ contract AToken is
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
 
-    _userData[user].previousIndexOrStableRate = castIndex;
+    _userState[user].additionalData = castIndex;
 
     emit Transfer(user, address(0), amount);
     if (accumulatedInterest > amount) {
@@ -150,7 +150,7 @@ contract AToken is
 
     _mint(user, castAmount);
 
-    _userData[user].previousIndexOrStableRate = castIndex;
+    _userState[user].additionalData = castIndex;
 
     emit Transfer(address(0), user, amount);
     emit Mint(user, amount + accumulatedInterest, castIndex);

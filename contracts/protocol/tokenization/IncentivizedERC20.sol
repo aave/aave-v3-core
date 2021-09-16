@@ -16,11 +16,17 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
 
-  struct UserData {
+  /**
+   * @notice UserState - additionalData is a flexible field.
+   * ATokens and VariableDebtTokens use this field store the index of the
+   * user's last deposit/withdrawl/borrow/repayment. StableDebtTokens use
+   * this field to store the user's stable rate.
+   */
+  struct UserState {
     uint128 balance;
-    uint128 previousIndexOrStableRate;
+    uint128 additionalData;
   }
-  mapping(address => UserData) internal _userData;
+  mapping(address => UserState) internal _userState;
 
   mapping(address => mapping(address => uint256)) private _allowances;
   uint256 internal _totalSupply;
@@ -61,7 +67,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /// @inheritdoc IERC20
   function balanceOf(address account) public view virtual override returns (uint256) {
-    return _userData[account].balance;
+    return _userState[account].balance;
   }
 
   /**
@@ -139,10 +145,10 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address recipient,
     uint128 amount
   ) internal virtual {
-    uint128 oldSenderBalance = _userData[sender].balance;
-    _userData[sender].balance = oldSenderBalance - amount;
-    uint128 oldRecipientBalance = _userData[recipient].balance;
-    _userData[recipient].balance = _userData[recipient].balance + amount;
+    uint128 oldSenderBalance = _userState[sender].balance;
+    _userState[sender].balance = oldSenderBalance - amount;
+    uint128 oldRecipientBalance = _userState[recipient].balance;
+    _userState[recipient].balance = _userState[recipient].balance + amount;
 
     IAaveIncentivesController incentivesControllerLocal = _incentivesController;
     if (address(incentivesControllerLocal) != address(0)) {
@@ -159,8 +165,8 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     uint256 oldTotalSupply = _totalSupply;
     _totalSupply = oldTotalSupply + amount;
 
-    uint128 oldAccountBalance = _userData[account].balance;
-    _userData[account].balance = oldAccountBalance + amount;
+    uint128 oldAccountBalance = _userState[account].balance;
+    _userState[account].balance = oldAccountBalance + amount;
 
     IAaveIncentivesController incentivesControllerLocal = _incentivesController;
     if (address(incentivesControllerLocal) != address(0)) {
@@ -172,8 +178,8 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     uint256 oldTotalSupply = _totalSupply;
     _totalSupply = oldTotalSupply - amount;
 
-    uint128 oldAccountBalance = _userData[account].balance;
-    _userData[account].balance = oldAccountBalance - amount;
+    uint128 oldAccountBalance = _userState[account].balance;
+    _userState[account].balance = oldAccountBalance - amount;
 
     IAaveIncentivesController incentivesControllerLocal = _incentivesController;
 
@@ -214,7 +220,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     returns (uint256)
   {
     uint256 currentBalance = balanceOf(user);
-    uint256 previousIndex = _userData[user].previousIndexOrStableRate;
+    uint256 previousIndex = _userState[user].additionalData;
     uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
     return currentBalance - previousBalanceWithInterest;
   }

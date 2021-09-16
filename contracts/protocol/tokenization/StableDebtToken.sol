@@ -94,13 +94,13 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   /// @inheritdoc IStableDebtToken
   function getUserStableRate(address user) external view virtual override returns (uint256) {
-    return _userData[user].previousIndexOrStableRate;
+    return _userState[user].additionalData;
   }
 
   /// @inheritdoc IERC20
   function balanceOf(address account) public view virtual override returns (uint256) {
     uint256 accountBalance = super.balanceOf(account);
-    uint256 stableRate = _userData[account].previousIndexOrStableRate;
+    uint256 stableRate = _userState[account].additionalData;
     if (accountBalance == 0) {
       return 0;
     }
@@ -150,12 +150,12 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     vars.amountInRay = amount.wadToRay();
 
-    vars.currentStableRate = _userData[onBehalfOf].previousIndexOrStableRate;
+    vars.currentStableRate = _userState[onBehalfOf].additionalData;
     vars.nextStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
     require(vars.nextStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
-    _userData[onBehalfOf].previousIndexOrStableRate = uint128(vars.nextStableRate);
+    _userState[onBehalfOf].additionalData = uint128(vars.nextStableRate);
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
@@ -199,7 +199,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 previousSupply = totalSupply();
     uint256 nextAvgStableRate = 0;
     uint256 nextSupply = 0;
-    uint256 userStableRate = _userData[user].previousIndexOrStableRate;
+    uint256 userStableRate = _userState[user].additionalData;
 
     // Since the total supply and each single user debt accrue separately,
     // there might be accumulation errors so that the last borrower repaying
@@ -224,7 +224,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     }
 
     if (amount == currentBalance) {
-      _userData[user].previousIndexOrStableRate = 0;
+      _userState[user].additionalData = 0;
       _timestamps[user] = 0;
     } else {
       //solium-disable-next-line
@@ -380,8 +380,8 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 oldTotalSupply
   ) internal {
     uint128 castAmount = _castUint128(amount);
-    uint128 oldAccountBalance = _userData[account].balance;
-    _userData[account].balance = oldAccountBalance + castAmount;
+    uint128 oldAccountBalance = _userState[account].balance;
+    _userState[account].balance = oldAccountBalance + castAmount;
 
     if (address(_incentivesController) != address(0)) {
       _incentivesController.handleAction(account, oldTotalSupply, oldAccountBalance);
@@ -400,8 +400,8 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 oldTotalSupply
   ) internal {
     uint128 castAmount = _castUint128(amount);
-    uint128 oldAccountBalance = _userData[account].balance;
-    _userData[account].balance = oldAccountBalance - castAmount;
+    uint128 oldAccountBalance = _userState[account].balance;
+    _userState[account].balance = oldAccountBalance - castAmount;
 
     if (address(_incentivesController) != address(0)) {
       _incentivesController.handleAction(account, oldTotalSupply, oldAccountBalance);
