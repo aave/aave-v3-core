@@ -59,32 +59,34 @@ library SupplyLogic {
 
     IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, params.amount);
 
-    IAToken(reserveCache.aTokenAddress).mint(
+    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
       params.onBehalfOf,
       params.amount,
       reserveCache.nextLiquidityIndex
     );
 
-    userConfig.setUsingAsCollateral(reserve.id, params.useAsCollateral);
+    if (isFirstDeposit) {
+      userConfig.setUsingAsCollateral(reserve.id, params.useAsCollateral);
 
-    if (params.useAsCollateral) {
-      emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
-    } else {
-      // Validate HF in case its needed
-      if (userConfig.isUsingAsCollateral(reserve.id)) {
-        if (userConfig.isBorrowingAny()) {
-          ValidationLogic.validateHFAndLtv(
-            params.asset,
-            params.onBehalfOf,
-            reserves,
-            userConfig,
-            reservesList,
-            params.reservesCount,
-            params.oracle
-          );
+      if (params.useAsCollateral) {
+        emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
+      } else {
+        // Validate HF in case its needed
+        if (userConfig.isUsingAsCollateral(reserve.id)) {
+          if (userConfig.isBorrowingAny()) {
+            ValidationLogic.validateHFAndLtv(
+              params.asset,
+              params.onBehalfOf,
+              reserves,
+              userConfig,
+              reservesList,
+              params.reservesCount,
+              params.oracle
+            );
+          }
         }
+        emit ReserveUsedAsCollateralDisabled(params.asset, params.onBehalfOf);
       }
-      emit ReserveUsedAsCollateralDisabled(params.asset, params.onBehalfOf);
     }
 
     emit Supply(
