@@ -19,7 +19,8 @@
           "args": {
             "reserve": "DAI",
             "amount": "1",
-            "user": "2"
+            "user": "2",
+            "useAsCollateral": true
           },
           "expected": "success"
         }
@@ -42,7 +43,8 @@
           "args": {
             "reserve": "DAI",
             "amount": "1000",
-            "user": "0"
+            "user": "0",
+            "useAsCollateral": true
           },
           "expected": "success"
         },

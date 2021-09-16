@@ -118,7 +118,7 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
       break;
     case 'supplyWithPermit':
       {
-        const { amount, sendValue, onBehalfOf: onBehalfOfIndex } = action.args;
+        const { amount, sendValue, onBehalfOf: onBehalfOfIndex, useAsCollateral } = action.args;
         const onBehalfOf = onBehalfOfIndex
           ? users[parseInt(onBehalfOfIndex)].address
           : user.address;
@@ -133,6 +133,7 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
           user,
           userPrivateKey,
           onBehalfOf,
+          useAsCollateral,
           sendValue,
           expected,
           testEnv,
