@@ -89,7 +89,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override {
     SupplyLogic.executeSupply(
       _reserves,
-      _usersConfig[msg.sender],
+      _usersConfig[onBehalfOf],
       _reservesList,
       DataTypes.ExecuteSupplyParams(
         asset,
@@ -637,7 +637,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override {
     SupplyLogic.executeSupply(
       _reserves,
-      _usersConfig[msg.sender],
+      _usersConfig[onBehalfOf],
       _reservesList,
       DataTypes.ExecuteSupplyParams(
         asset,
