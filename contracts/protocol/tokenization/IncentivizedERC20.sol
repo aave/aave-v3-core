@@ -209,14 +209,14 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     _decimals = newDecimals;
   }
 
-  function _calculateAccruedInterest(uint256 previousBalance, address user)
-    internal
-    view
-    returns (uint256)
-  {
-    uint256 currentBalance = balanceOf(user);
+  function _calculateAccruedInterest(
+    address user,
+    uint256 scaledBalance,
+    uint256 currentIndex
+  ) internal view returns (uint256) {
     uint256 previousIndex = _userState[user].additionalData;
-    uint256 previousBalanceWithInterest = previousBalance.rayMul(previousIndex);
-    return currentBalance - previousBalanceWithInterest;
+    uint256 previousBalance = scaledBalance.rayMul(previousIndex);
+    uint256 currentBalance = scaledBalance.rayMul(currentIndex);
+    return currentBalance - previousBalance;
   }
 }

@@ -106,8 +106,8 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint128 castAmount = Helpers.castUint128(amountScaled);
     uint128 castIndex = Helpers.castUint128(index);
 
-    uint256 previousBalance = super.balanceOf(onBehalfOf);
-    uint256 accumulatedDebt = _calculateAccruedInterest(previousBalance, onBehalfOf);
+    uint256 previousBalance = super.balanceOf(user);
+    uint256 accumulatedDebt = _calculateAccruedInterest(onBehalfOf, previousBalance, index);
 
     _mint(onBehalfOf, castAmount);
 
@@ -131,7 +131,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint128 castAmount = Helpers.castUint128(amountScaled);
     uint128 castIndex = Helpers.castUint128(index);
 
-    uint256 accumulatedInterest = _calculateAccruedInterest(super.balanceOf(user), user);
+    uint256 accumulatedInterest = _calculateAccruedInterest(user, super.balanceOf(user), index);
 
     _burn(user, castAmount);
 
