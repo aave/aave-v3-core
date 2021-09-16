@@ -45,6 +45,8 @@ library GenericLogic {
     uint256 normalizedIncome;
     uint256 normalizedDebt;
     uint256 eModeAssetPrice;
+    uint256 eModeLtv;
+    uint256 eModeLiqThreshold;
     address eModePriceSource;
     address currentReserveAddress;
     bool hasZeroLtvCollateral;
@@ -89,6 +91,9 @@ library GenericLogic {
 
     if (params.userEModeCategory != 0) {
       vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
+      vars.eModeLtv = eModeCategories[params.userEModeCategory].ltv;
+      vars.eModeLiqThreshold = eModeCategories[params.userEModeCategory].liquidationThreshold;
+
       if (vars.eModePriceSource != address(0)) {
         vars.eModeAssetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(
           vars.eModePriceSource
@@ -143,14 +148,19 @@ library GenericLogic {
 
         vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
 
-        //only calculating the avg ltv and liq threshold if the user has eMode disabled.
         if (params.userEModeCategory == 0) {
-          vars.avgLtv = vars.avgLtv + vars.userBalanceInBaseCurrency * vars.ltv;
-
+          vars.avgLtv = vars.ltv > 0
+            ? vars.avgLtv + vars.userBalanceInBaseCurrency * vars.ltv
+            : vars.avgLtv;
           vars.avgLiquidationThreshold =
             vars.avgLiquidationThreshold +
             vars.userBalanceInBaseCurrency *
             vars.liquidationThreshold;
+        } else {
+          // an asset that has ltv = 0 should not have ltv as well when in eMode
+          vars.avgLtv = vars.ltv > 0
+            ? vars.avgLtv + vars.userBalanceInBaseCurrency * vars.eModeLtv
+            : vars.avgLtv;
         }
       }
 
@@ -177,15 +187,14 @@ library GenericLogic {
     }
 
     unchecked {
+      vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
+        ? vars.avgLtv / vars.totalCollateralInBaseCurrency
+        : 0;
       if (params.userEModeCategory == 0) {
-        vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
-          ? vars.avgLtv / vars.totalCollateralInBaseCurrency
-          : 0;
         vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
           ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency
           : 0;
       } else {
-        vars.avgLtv = eModeCategories[params.userEModeCategory].ltv;
         vars.avgLiquidationThreshold = eModeCategories[params.userEModeCategory]
           .liquidationThreshold;
       }
