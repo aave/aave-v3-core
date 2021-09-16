@@ -8,7 +8,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
-  const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT, MATH_UINT128_OVERFLOW } = ProtocolErrors;
+  const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT, HLP_UINT128_OVERFLOW } = ProtocolErrors;
 
   it('Check getters', async () => {
     const { pool, users, dai, aDai } = testEnv;
@@ -178,7 +178,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     } = testEnv;
 
     expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(
-      MATH_UINT128_OVERFLOW
+      HLP_UINT128_OVERFLOW
     );
   });
 });

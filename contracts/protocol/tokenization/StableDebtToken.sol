@@ -7,6 +7,7 @@ import {VersionedInitializable} from '../libraries/aave-upgradeability/Versioned
 import {MathUtils} from '../libraries/math/MathUtils.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
@@ -154,8 +155,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     vars.nextStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
-    require(vars.nextStableRate <= type(uint128).max, Errors.SDT_STABLE_DEBT_OVERFLOW);
-    _userState[onBehalfOf].additionalData = uint128(vars.nextStableRate);
+    _userState[onBehalfOf].additionalData = Helpers.castUint128(vars.nextStableRate);
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
@@ -379,7 +379,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint128 castAmount = _castUint128(amount);
+    uint128 castAmount = Helpers.castUint128(amount);
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance + castAmount;
 
@@ -399,7 +399,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint128 castAmount = _castUint128(amount);
+    uint128 castAmount = Helpers.castUint128(amount);
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance - castAmount;
 

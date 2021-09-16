@@ -130,11 +130,11 @@ export enum ProtocolErrors {
   MATH_MULTIPLICATION_OVERFLOW = '48',
   MATH_ADDITION_OVERFLOW = '49',
   MATH_DIVISION_BY_ZERO = '50',
-  RL_LIQUIDITY_INDEX_OVERFLOW = '51', //  Liquidity index overflows uint128
-  RL_VARIABLE_BORROW_INDEX_OVERFLOW = '52', //  Variable borrow index overflows uint128
-  RL_LIQUIDITY_RATE_OVERFLOW = '53', //  Liquidity rate overflows uint128
-  RL_VARIABLE_BORROW_RATE_OVERFLOW = '54', //  Variable borrow rate overflows uint128
-  RL_STABLE_BORROW_RATE_OVERFLOW = '55', //  Stable borrow rate overflows uint128
+  RL_LIQUIDITY_INDEX_OVERFLOW = '51', // Deprecated moved to general `HLP_UINT128_OVERFLOW`
+  RL_VARIABLE_BORROW_INDEX_OVERFLOW = '52', // Deprecated moved to general `HLP_UINT128_OVERFLOW`
+  RL_LIQUIDITY_RATE_OVERFLOW = '53', // Deprecated moved to general `HLP_UINT128_OVERFLOW`
+  RL_VARIABLE_BORROW_RATE_OVERFLOW = '54', // Deprecated moved to general `HLP_UINT128_OVERFLOW`
+  RL_STABLE_BORROW_RATE_OVERFLOW = '55', // Deprecated moved to general `HLP_UINT128_OVERFLOW`
   CT_INVALID_MINT_AMOUNT = '56', //invalid amount to mint
   P_FAILED_REPAY_WITH_COLLATERAL = '57',
   CT_INVALID_BURN_AMOUNT = '58', //invalid amount to burn
@@ -170,7 +170,7 @@ export enum ProtocolErrors {
   PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
   PC_FLASHLOAN_PREMIUM_INVALID = '96',
   RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
-  MATH_UINT128_OVERFLOW = '98',
+  HLP_UINT128_OVERFLOW = '98',
 
   // old
 

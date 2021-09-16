@@ -5,7 +5,7 @@ import {Context} from '../../dependencies/openzeppelin/contracts/Context.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
-import {Errors} from '../libraries/helpers/Errors.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 
 /**
@@ -80,7 +80,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /// @inheritdoc IERC20
   function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-    uint128 castAmount = _castUint128(amount);
+    uint128 castAmount = Helpers.castUint128(amount);
     _transfer(_msgSender(), recipient, castAmount);
     return true;
   }
@@ -108,7 +108,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address recipient,
     uint256 amount
   ) public virtual override returns (bool) {
-    uint128 castAmount = _castUint128(amount);
+    uint128 castAmount = Helpers.castUint128(amount);
     _transfer(sender, recipient, castAmount);
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
     return true;
@@ -207,11 +207,6 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   function _setDecimals(uint8 newDecimals) internal {
     _decimals = newDecimals;
-  }
-
-  function _castUint128(uint256 input) internal pure returns (uint128) {
-    require(input <= type(uint128).max, Errors.MATH_UINT128_OVERFLOW);
-    return uint128(input);
   }
 
   function _calculateAccruedInterest(uint256 previousBalance, address user)
