@@ -6,7 +6,7 @@ import { getFirstSigner } from './contracts-getters';
 import {
   AaveProtocolDataProviderFactory,
   ATokenFactory,
-  ATokensAndRatesHelperFactory,
+  ReservesSetupHelperFactory,
   AaveOracleFactory,
   DefaultReserveInterestRateStrategyFactory,
   DelegationAwareATokenFactory,
@@ -43,7 +43,7 @@ import {
   linkBytecode,
   insertContractAddressInDb,
 } from './contracts-helpers';
-import { StableAndVariableTokensHelperFactory } from '../types/StableAndVariableTokensHelperFactory';
+import { RateOracleSetupHelperFactory } from '../types/RateOracleSetupHelperFactory';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
@@ -313,20 +313,16 @@ export const deployAllMockTokens = async () => {
   return tokens;
 };
 
-export const deployStableAndVariableTokensHelper = async (
-  args: [tEthereumAddress, tEthereumAddress]
-) =>
+export const deployRateOracleSetupHelper = async () =>
   withSave(
-    await new StableAndVariableTokensHelperFactory(await getFirstSigner()).deploy(...args),
-    eContractid.StableAndVariableTokensHelper
+    await new RateOracleSetupHelperFactory(await getFirstSigner()).deploy(),
+    eContractid.RateOracleSetupHelper
   );
 
-export const deployATokensAndRatesHelper = async (
-  args: [tEthereumAddress, tEthereumAddress, tEthereumAddress]
-) =>
+export const deployReservesSetupHelper = async () =>
   withSave(
-    await new ATokensAndRatesHelperFactory(await getFirstSigner()).deploy(...args),
-    eContractid.ATokensAndRatesHelper
+    await new ReservesSetupHelperFactory(await getFirstSigner()).deploy(),
+    eContractid.ReservesSetupHelper
   );
 
 export const deployInitializableImmutableAdminUpgradeabilityProxy = async (
