@@ -49,8 +49,7 @@ library DepositLogic {
     address asset,
     uint256 amount,
     address onBehalfOf,
-    uint16 referralCode,
-    uint8 userEModeCategory
+    uint16 referralCode
   ) internal {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -68,9 +67,7 @@ library DepositLogic {
       reserveCache.nextLiquidityIndex
     );
 
-    uint256 assetCategoryId = reserveCache.reserveConfiguration.getEModeCategoryMemory();
-
-    if (isFirstDeposit && (userEModeCategory == 0 || assetCategoryId == userEModeCategory)) {
+    if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
     }
@@ -172,14 +169,9 @@ library DepositLogic {
       }
 
       if (vars.balanceToBefore == 0 && vars.amount != 0) {
-        DataTypes.ReserveConfigurationMap memory reserveConfig = reserves[vars.asset].configuration;
-        uint256 assetCategoryId = reserveConfig.getEModeCategoryMemory();
-
-        if (vars.toEModeCategory == 0 || assetCategoryId == vars.toEModeCategory) {
-          DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
-          toConfig.setUsingAsCollateral(reserveId, true);
-          emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
-        }
+        DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
+        toConfig.setUsingAsCollateral(reserveId, true);
+        emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
       }
     }
   }
@@ -200,7 +192,7 @@ library DepositLogic {
 
     uint256 userBalance = IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender);
 
-    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance, userEModeCategory);
+    ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance);
 
     userConfig.setUsingAsCollateral(reserve.id, useAsCollateral);
 

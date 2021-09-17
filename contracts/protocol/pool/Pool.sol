@@ -92,8 +92,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       asset,
       amount,
       onBehalfOf,
-      referralCode,
-      _usersEModeCategory[onBehalfOf]
+      referralCode
     );
   }
 
@@ -123,8 +122,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       asset,
       amount,
       onBehalfOf,
-      referralCode,
-      _usersEModeCategory[onBehalfOf]
+      referralCode
     );
   }
 

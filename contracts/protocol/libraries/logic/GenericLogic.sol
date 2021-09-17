@@ -148,20 +148,16 @@ library GenericLogic {
 
         vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
 
-        if (params.userEModeCategory == 0) {
-          vars.avgLtv = vars.ltv > 0
-            ? vars.avgLtv + vars.userBalanceInBaseCurrency * vars.ltv
-            : vars.avgLtv;
-          vars.avgLiquidationThreshold =
-            vars.avgLiquidationThreshold +
+        vars.avgLtv = vars.ltv > 0
+          ? vars.avgLtv +
             vars.userBalanceInBaseCurrency *
-            vars.liquidationThreshold;
-        } else {
-          // an asset that has ltv = 0 should not have ltv as well when in eMode
-          vars.avgLtv = vars.ltv > 0
-            ? vars.avgLtv + vars.userBalanceInBaseCurrency * vars.eModeLtv
-            : vars.avgLtv;
-        }
+            (params.userEModeCategory == 0 ? vars.ltv : vars.eModeLtv)
+          : vars.avgLtv;
+
+        vars.avgLiquidationThreshold =
+          vars.avgLiquidationThreshold +
+          vars.userBalanceInBaseCurrency *
+          (params.userEModeCategory == 0 ? vars.liquidationThreshold : vars.eModeLiqThreshold);
       }
 
       if (params.userConfig.isBorrowing(vars.i)) {
@@ -190,14 +186,9 @@ library GenericLogic {
       vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
         ? vars.avgLtv / vars.totalCollateralInBaseCurrency
         : 0;
-      if (params.userEModeCategory == 0) {
-        vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
-          ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency
-          : 0;
-      } else {
-        vars.avgLiquidationThreshold = eModeCategories[params.userEModeCategory]
-          .liquidationThreshold;
-      }
+      vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
+        ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency
+        : 0;
     }
 
     vars.healthFactor = (vars.totalDebtInBaseCurrency == 0)

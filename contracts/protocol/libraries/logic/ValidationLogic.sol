@@ -100,6 +100,7 @@ library ValidationLogic {
     uint256 borrowCap;
     uint256 amountInBaseCurrency;
     uint256 assetUnit;
+    address eModePriceSource;
     bool isActive;
     bool isFrozen;
     bool isPaused;
@@ -166,6 +167,15 @@ library ValidationLogic {
       }
     }
 
+    if (params.userEModeCategory != 0) {
+      require(
+        params.reserveCache.reserveConfiguration.getEModeCategoryMemory() ==
+          params.userEModeCategory,
+        Errors.VL_INCONSISTENT_EMODE_CATEGORY
+      );
+      vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
+    }
+
     (
       vars.userCollateralInBaseCurrency,
       vars.userDebtInBaseCurrency,
@@ -194,7 +204,9 @@ library ValidationLogic {
     );
 
     vars.amountInBaseCurrency =
-      IPriceOracleGetter(params.oracle).getAssetPrice(params.asset) *
+      IPriceOracleGetter(params.oracle).getAssetPrice(
+        vars.eModePriceSource != address(0) ? vars.eModePriceSource : params.asset
+      ) *
       params.amount;
     unchecked {
       vars.amountInBaseCurrency /= 10**vars.reserveDecimals;
@@ -388,19 +400,12 @@ library ValidationLogic {
    */
   function validateSetUseReserveAsCollateral(
     DataTypes.ReserveCache memory reserveCache,
-    uint256 userBalance,
-    uint8 userEModeCategory
+    uint256 userBalance
   ) internal pure {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
-    uint256 assetCategoryId = reserveCache.reserveConfiguration.getEModeCategoryMemory();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
-    require(
-      userEModeCategory == 0 || userEModeCategory == assetCategoryId,
-      Errors.VL_INCONSISTENT_EMODE_CATEGORY
-    );
-
     require(userBalance > 0, Errors.VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0);
   }
 
