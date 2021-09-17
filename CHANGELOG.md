@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.0.3](https://www.github.com/aave/aave-v3-core/compare/v1.0.2...v1.0.3) (2021-09-17)
+
+
+### Miscellaneous Chores
+
+* release 1.0.3 ([003569a](https://www.github.com/aave/aave-v3-core/commit/003569a1c336f9396715c306be78f1973348ca5c))
+
 ### [1.0.2](https://www.github.com/aave/aave-v3-core/compare/v1.0.1...v1.0.2) (2021-09-15)
 
 
