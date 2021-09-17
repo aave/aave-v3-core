@@ -425,23 +425,18 @@ library ReserveConfiguration {
       (self.data & ~LIQUIDATION_PROTOCOL_FEE_MASK) >> LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION;
   }
 
-    /**
+  /**
    * @notice Sets the eMode asset category
    * @param self The reserve configuration
    * @param category The asset category when the user selects the eMode
    **/
-  function setEModeCategory(
-    DataTypes.ReserveConfigurationMap memory self,
-    uint256 category
-  ) internal pure {
-    require(
-      category <= MAX_VALID_EMODE_CATEGORY,
-      Errors.RC_INVALID_EMODE_CATEGORY
-    );
+  function setEModeCategory(DataTypes.ReserveConfigurationMap memory self, uint256 category)
+    internal
+    pure
+  {
+    require(category <= MAX_VALID_EMODE_CATEGORY, Errors.RC_INVALID_EMODE_CATEGORY);
 
-    self.data =
-      (self.data & EMODE_CATEGORY_MASK) |
-      (category << EMODE_CATEGORY_START_BIT_POSITION);
+    self.data = (self.data & EMODE_CATEGORY_MASK) | (category << EMODE_CATEGORY_START_BIT_POSITION);
   }
 
   /**
@@ -454,8 +449,7 @@ library ReserveConfiguration {
     view
     returns (uint256)
   {
-    return
-      (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
+    return (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
   }
 
   /**
@@ -647,7 +641,7 @@ library ReserveConfiguration {
    **/
   function getLiquidationProtocolFeeMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
-    view
+    pure
     returns (uint256)
   {
     return
@@ -664,7 +658,19 @@ library ReserveConfiguration {
     pure
     returns (uint256)
   {
-    return
-      (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
+    return (self.data & ~EMODE_CATEGORY_MASK) >> EMODE_CATEGORY_START_BIT_POSITION;
+  }
+
+  /**
+   * @notice Gets the liquidation threshold of the reserve
+   * @param self The reserve configuration
+   * @return The liquidation threshold
+   **/
+  function getLiquidationThresholdMemory(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (uint256)
+  {
+    return (self.data & ~LIQUIDATION_THRESHOLD_MASK) >> LIQUIDATION_THRESHOLD_START_BIT_POSITION;
   }
 }

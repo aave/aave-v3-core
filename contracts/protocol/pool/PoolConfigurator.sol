@@ -282,12 +282,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setAssetEModeCategory(address asset, uint256 category)
+  function setAssetEModeCategory(address asset, uint8 category)
     external
     override
     onlyRiskOrPoolAdmins
   {
+    DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(category);
+
+    require(categoryData.liquidationThreshold > 0, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
+
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    require(
+      categoryData.liquidationThreshold > currentConfig.getLiquidationThresholdMemory(),
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
 
     currentConfig.setEModeCategory(category);
 
@@ -342,17 +351,19 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function addEModeCategory(
+  function setEModeCategory(
     uint8 categoryId,
     uint16 ltv,
     uint16 liquidationThreshold,
     uint16 liquidationBonus,
-    address oracle
-  ) external override onlyPoolAdmin {
+    address oracle,
+    string calldata label
+  ) external override onlyRiskOrPoolAdmins {
     _pool.configureEModeCategory(
       categoryId,
-      DataTypes.EModeAssetCategory(ltv, liquidationThreshold, liquidationBonus, oracle, true)
+      DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
     );
+    emit EModeCategoryAdded(categoryId, ltv, liquidationThreshold, liquidationBonus, oracle, label);
   }
 
   /// @inheritdoc IPoolConfigurator

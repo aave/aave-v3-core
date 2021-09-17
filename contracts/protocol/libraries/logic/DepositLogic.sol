@@ -78,7 +78,7 @@ library DepositLogic {
   function executeWithdraw(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteWithdrawParams memory vars
   ) internal returns (uint256) {
@@ -137,7 +137,7 @@ library DepositLogic {
   function finalizeTransfer(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
     DataTypes.FinalizeTransferParams memory vars
   ) external {
@@ -179,7 +179,7 @@ library DepositLogic {
   function executeUseReserveAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
     bool useAsCollateral,

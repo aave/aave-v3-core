@@ -69,7 +69,7 @@ library GenericLogic {
   function calculateUserAccountData(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.CalculateUserAccountDataParams memory params
   )
     internal

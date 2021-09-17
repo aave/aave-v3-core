@@ -117,7 +117,7 @@ library ValidationLogic {
   function validateBorrow(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.ValidateBorrowParams memory params
   ) internal view {
     ValidateBorrowLocalVars memory vars;
@@ -447,7 +447,7 @@ library ValidationLogic {
   function validateLiquidationCall(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveData storage collateralReserve,
     DataTypes.ValidateLiquidationCallParams memory params
@@ -502,7 +502,7 @@ library ValidationLogic {
   function validateHealthFactor(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     address user,
     uint8 userEModeCategory,
@@ -552,7 +552,7 @@ library ValidationLogic {
   function validateHFAndLtv(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     address asset,
     address from,
@@ -607,25 +607,39 @@ library ValidationLogic {
     require(IERC20(reserve.aTokenAddress).totalSupply() == 0, Errors.RL_ATOKEN_SUPPLY_NOT_ZERO);
   }
 
+  /**
+   * @notice Validates a drop reserve action
+   * @param reservesData the data mapping of the reserves
+   * @param reserves a mapping storing the list of reserves
+   * @param userConfig the user configuration
+   * @param reservesCount The total number of valid reserves
+   * @param categoryId The id of the category
+   **/
   function validateSetUserEMode(
-    uint8 categoryId,
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap memory userConfig,
     mapping(uint256 => address) storage reserves,
-    uint256 reservesCount
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap memory userConfig,
+    uint256 reservesCount,
+    uint8 categoryId
   ) internal view {
+    // category is invalid if the liq threshold is not set
+    require(
+      eModeCategories[categoryId].liquidationThreshold > 0,
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
+
     //eMode can always be enabled if the user hasn't deposited anything
     if (userConfig.isEmpty()) {
       return;
     }
 
     // if user is trying to set another category than default we require that
-    // 1. either the user has no deposited assets, or the deposited assets are all of categoryId
-    // 2. either the user is not borrowing, or it's borrowing assets of categoryId
+    // either the user is not borrowing, or it's borrowing assets of categoryId
     if (categoryId > 0) {
       unchecked {
         for (uint256 i = 0; i < reservesCount; i++) {
-          if (userConfig.isUsingAsCollateralOrBorrowing(i)) {
+          if (userConfig.isBorrowing(i)) {
             DataTypes.ReserveConfigurationMap memory configuration = reservesData[reserves[i]]
               .configuration;
             require(

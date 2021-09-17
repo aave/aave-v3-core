@@ -50,14 +50,14 @@ library DataTypes {
     uint256 data;
   }
 
-  struct EModeAssetCategory {
+  struct EModeCategory {
     // each eMode category has a custom ltv and liquidation threshold
     uint16 ltv;
     uint16 liquidationThreshold;
     uint16 liquidationBonus;
     // each eMode category may or may not have a custom oracle to override the individual assets price oracles
     address priceSource;
-    bool active;
+    string label;
   }
 
   enum InterestRateMode {

@@ -613,7 +613,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function configureEModeCategory(uint8 id, DataTypes.EModeAssetCategory memory category)
+  function configureEModeCategory(uint8 id, DataTypes.EModeCategory memory category)
     external
     override
     onlyPoolConfigurator
@@ -624,11 +624,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function getEModeCategoryConfig(uint8 id)
+  function getEModeCategoryData(uint8 id)
     external
     view
     override
-    returns (DataTypes.EModeAssetCategory memory)
+    returns (DataTypes.EModeCategory memory)
   {
     return _eModeCategories[id];
   }
@@ -636,14 +636,17 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function setUserEMode(uint8 categoryId) external virtual override {
     ValidationLogic.validateSetUserEMode(
-      categoryId,
       _reserves,
-      _usersConfig[msg.sender],
       _reservesList,
-      _reservesCount
+      _eModeCategories,
+      _usersConfig[msg.sender],
+      _reservesCount,
+      categoryId
     );
+
     uint8 prevCategoryId = _usersEModeCategory[msg.sender];
     _usersEModeCategory[msg.sender] = categoryId;
+
     if (prevCategoryId != 0 && categoryId == 0) {
       ValidationLogic.validateHealthFactor(
         _reserves,

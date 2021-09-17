@@ -75,7 +75,7 @@ library LiquidationLogic {
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
     mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.ExecuteLiquidationCallParams memory params
   ) external {
     LiquidationCallLocalVars memory vars;

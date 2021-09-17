@@ -60,7 +60,7 @@ library BorrowLogic {
   function executeBorrow(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteBorrowParams memory params
   ) public {
@@ -224,7 +224,7 @@ library BorrowLogic {
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
     mapping(address => bool) storage authorizedFlashBorrowers,
-    mapping(uint8 => DataTypes.EModeAssetCategory) storage eModeCategories,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory flashParams
   ) external {
