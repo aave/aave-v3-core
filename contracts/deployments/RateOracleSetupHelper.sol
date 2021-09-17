@@ -8,13 +8,13 @@ import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
  * @title RateOracleSetupHelper
  * @author Aave
  * @notice Deployment helper to setup initial borrow rates of multiple assets in one transaction.
- * - The RateOracle owner must transfer the ownership to RateOracleSetupHelper before calling to setOracleBorrowRates.
- * - The RateOracleSetupHelper is an Ownable contract, so only the deployer or future owners can call this contract.
+ * @dev The RateOracle owner must transfer the ownership to RateOracleSetupHelper before calling to setOracleBorrowRates.
+ * @dev The RateOracleSetupHelper is an Ownable contract, so only the deployer or future owners can call this contract.
  */
 contract RateOracleSetupHelper is Ownable {
 
   /**
-   * @notice External function called by the deployer account to set the initial borrow rates of the assets
+   * @notice External function called by the owner account to set the initial borrow rates of the assets
    * @param assets The addresses of the assets
    * @param rates The interest rates of each asset
    * @param oracle The address of the RateOracle contract
