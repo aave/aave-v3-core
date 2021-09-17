@@ -4,6 +4,13 @@ pragma solidity 0.8.7;
 import {PoolConfigurator} from '../protocol/pool/PoolConfigurator.sol';
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 
+/**
+ * @title ReservesSetupHelper
+ * @author Aave
+ * @notice Deployment helper to setup the assets risk parameters at PoolConfigurator in batch.
+ * - The Pool admin or risk admin must transfer the ownership to ReservesSetupHelper before calling to setOracleBorrowRates.
+ * - The ReservesSetupHelper is an Ownable contract, so only the deployer or future owners can call this contract.
+ */
 contract ReservesSetupHelper is Ownable {
   struct ConfigureReserveInput {
     address asset;
@@ -17,6 +24,11 @@ contract ReservesSetupHelper is Ownable {
     bool borrowingEnabled;
   }
 
+  /**
+   * @notice External function called by the deployer account to setup the assets risk parameters in batch.
+   * @param configurator The address of PoolConfigurator contract
+   * @param inputParams An array of ConfigureReserveInput struct that contains the assets and their risk parameters
+   */
   function configureReserves(
     PoolConfigurator configurator,
     ConfigureReserveInput[] calldata inputParams
