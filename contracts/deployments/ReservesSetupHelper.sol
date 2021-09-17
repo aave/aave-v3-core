@@ -8,8 +8,8 @@ import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
  * @title ReservesSetupHelper
  * @author Aave
  * @notice Deployment helper to setup the assets risk parameters at PoolConfigurator in batch.
- * - The Pool admin or risk admin must transfer the ownership to ReservesSetupHelper before calling to setOracleBorrowRates.
- * - The ReservesSetupHelper is an Ownable contract, so only the deployer or future owners can call this contract.
+ * @dev The Pool admin or risk admin must transfer the ownership to ReservesSetupHelper before calling to setOracleBorrowRates.
+ * @dev The ReservesSetupHelper is an Ownable contract, so only the deployer or future owners can call this contract.
  */
 contract ReservesSetupHelper is Ownable {
   struct ConfigureReserveInput {
@@ -25,7 +25,7 @@ contract ReservesSetupHelper is Ownable {
   }
 
   /**
-   * @notice External function called by the deployer account to setup the assets risk parameters in batch.
+   * @notice External function called by the owner account to setup the assets risk parameters in batch.
    * @param configurator The address of PoolConfigurator contract
    * @param inputParams An array of ConfigureReserveInput struct that contains the assets and their risk parameters
    */
