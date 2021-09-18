@@ -17,7 +17,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
 
   /**
-   * @notice UserState - additionalData is a flexible field.
+   * @dev UserState - additionalData is a flexible field.
    * ATokens and VariableDebtTokens use this field store the index of the
    * user's last deposit/withdrawl/borrow/repayment. StableDebtTokens use
    * this field to store the user's stable rate.
