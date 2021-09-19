@@ -111,7 +111,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     _userState[user].additionalData = Helpers.castUint128(index);
 
-    emit Transfer(address(0), onBehalfOf, amount);
+    emit Transfer(address(0), onBehalfOf, amount + accumulatedInterest);
     emit Mint(user, onBehalfOf, amount + accumulatedInterest, index);
 
     return (scaledBalance == 0, scaledTotalSupply());
@@ -135,11 +135,11 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     _userState[user].additionalData = Helpers.castUint128(index);
 
-    emit Transfer(user, address(0), amount);
-
     if (accumulatedInterest > amount) {
+      emit Transfer(address(0), user, accumulatedInterest - amount);
       emit Mint(user, user, accumulatedInterest - amount, index);
     } else {
+      emit Transfer(user, address(0), amount - accumulatedInterest);
       emit Burn(user, amount - accumulatedInterest, index);
     }
     return scaledTotalSupply();

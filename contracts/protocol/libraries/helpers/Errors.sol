@@ -72,16 +72,8 @@ library Errors {
   string public constant MATH_MULTIPLICATION_OVERFLOW = '48';
   string public constant MATH_ADDITION_OVERFLOW = '49';
   string public constant MATH_DIVISION_BY_ZERO = '50';
-  string public constant RL_LIQUIDITY_INDEX_OVERFLOW = '51'; // Deprecated moved to general `HLP_UINT128_OVERFLOW`
-  string public constant RL_VARIABLE_BORROW_INDEX_OVERFLOW = '52'; // Deprecated moved to general `HLP_UINT128_OVERFLOW`
-  string public constant RL_LIQUIDITY_RATE_OVERFLOW = '53'; // Deprecated moved to general `HLP_UINT128_OVERFLOW`
-  string public constant RL_VARIABLE_BORROW_RATE_OVERFLOW = '54'; // Deprecated moved to general `HLP_UINT128_OVERFLOW`
-  string public constant RL_STABLE_BORROW_RATE_OVERFLOW = '55'; // Deprecated moved to general `HLP_UINT128_OVERFLOW`
   string public constant CT_INVALID_MINT_AMOUNT = '56'; //invalid amount to mint
-  string public constant P_FAILED_REPAY_WITH_COLLATERAL = '57';
   string public constant CT_INVALID_BURN_AMOUNT = '58'; //invalid amount to burn
-  string public constant P_FAILED_COLLATERAL_SWAP = '60';
-  string public constant P_INVALID_EQUAL_ASSETS_TO_SWAP = '61';
   string public constant P_REENTRANCY_NOT_ALLOWED = '62';
   string public constant P_CALLER_MUST_BE_AN_ATOKEN = '63';
   string public constant P_IS_PAUSED = '64'; // Deprecated 'Pool is paused'
