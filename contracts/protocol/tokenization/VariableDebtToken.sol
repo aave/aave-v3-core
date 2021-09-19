@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
@@ -102,20 +103,18 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint128 castAmount = _castUint128(amountScaled);
-    uint128 castIndex = _castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    uint256 previousBalance = super.balanceOf(onBehalfOf);
-    uint256 accumulatedDebt = _calculateAccruedInterest(previousBalance, onBehalfOf);
+    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
-    _mint(onBehalfOf, castAmount);
+    _userState[user].additionalData = Helpers.castUint128(index);
 
-    _userData[user].previousIndexOrStableRate = castIndex;
+    emit Transfer(address(0), onBehalfOf, amount + accumulatedInterest);
+    emit Mint(user, onBehalfOf, amount + accumulatedInterest, index);
 
-    emit Transfer(address(0), onBehalfOf, amount);
-    emit Mint(user, onBehalfOf, amount + accumulatedDebt, index);
-
-    return (previousBalance == 0, scaledTotalSupply());
+    return (scaledBalance == 0, scaledTotalSupply());
   }
 
   /// @inheritdoc IVariableDebtToken
@@ -127,20 +126,20 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    uint128 castAmount = _castUint128(amountScaled);
-    uint128 castIndex = _castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
 
-    uint256 accumulatedInterest = _calculateAccruedInterest(super.balanceOf(user), user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    _burn(user, castAmount);
+    _burn(user, Helpers.castUint128(amountScaled));
 
-    _userData[user].previousIndexOrStableRate = castIndex;
-
-    emit Transfer(user, address(0), amount);
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     if (accumulatedInterest > amount) {
+      emit Transfer(address(0), user, accumulatedInterest - amount);
       emit Mint(user, user, accumulatedInterest - amount, index);
     } else {
+      emit Transfer(user, address(0), amount - accumulatedInterest);
       emit Burn(user, amount - accumulatedInterest, index);
     }
     return scaledTotalSupply();

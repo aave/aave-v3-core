@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.6;
+pragma solidity 0.8.7;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
@@ -112,22 +113,21 @@ contract AToken is
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    uint128 castAmount = _castUint128(amountScaled);
-    uint128 castIndex = _castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    uint256 accumulatedInterest = _calculateAccruedInterest(super.balanceOf(user), user);
-
-    _burn(user, castAmount);
+    _burn(user, Helpers.castUint128(amountScaled));
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
 
-    _userData[user].previousIndexOrStableRate = castIndex;
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(user, address(0), amount);
     if (accumulatedInterest > amount) {
-      emit Mint(user, accumulatedInterest - amount, castIndex);
+      emit Mint(user, accumulatedInterest - amount, index);
     } else {
       emit Burn(user, receiverOfUnderlying, amount - accumulatedInterest, index);
     }
@@ -142,20 +142,18 @@ contract AToken is
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint128 castAmount = _castUint128(amountScaled);
-    uint128 castIndex = _castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    uint256 previousBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = _calculateAccruedInterest(previousBalance, user);
+    _mint(user, Helpers.castUint128(amountScaled));
 
-    _mint(user, castAmount);
-
-    _userData[user].previousIndexOrStableRate = castIndex;
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(address(0), user, amount);
-    emit Mint(user, amount + accumulatedInterest, castIndex);
+    emit Mint(user, amount + accumulatedInterest, index);
 
-    return previousBalance == 0;
+    return scaledBalance == 0;
   }
 
   /// @inheritdoc IAToken
@@ -170,7 +168,7 @@ contract AToken is
     // The amount to mint can easily be very small since it is a fraction of the interest ccrued.
     // In that case, the treasury will experience a (very small) loss, but it
     // wont cause potentially valid transactions to fail.
-    _mint(treasury, _castUint128(amount.rayDiv(index)));
+    _mint(treasury, Helpers.castUint128(amount.rayDiv(index)));
 
     emit Transfer(address(0), treasury, amount);
     emit Mint(treasury, amount, index);
@@ -318,7 +316,7 @@ contract AToken is
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
 
-    super._transfer(from, to, _castUint128(amount.rayDiv(index)));
+    super._transfer(from, to, Helpers.castUint128(amount.rayDiv(index)));
 
     if (validate) {
       pool.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
