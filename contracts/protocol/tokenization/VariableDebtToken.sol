@@ -103,20 +103,18 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint128 castAmount = Helpers.castUint128(amountScaled);
-    uint128 castIndex = Helpers.castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    uint256 previousBalance = super.balanceOf(user);
-    uint256 accumulatedDebt = _calculateAccruedInterest(onBehalfOf, previousBalance, index);
+    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
-    _mint(onBehalfOf, castAmount);
-
-    _userState[user].additionalData = castIndex;
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(address(0), onBehalfOf, amount);
-    emit Mint(user, onBehalfOf, amount + accumulatedDebt, index);
+    emit Mint(user, onBehalfOf, amount + accumulatedInterest, index);
 
-    return (previousBalance == 0, scaledTotalSupply());
+    return (scaledBalance == 0, scaledTotalSupply());
   }
 
   /// @inheritdoc IVariableDebtToken
@@ -128,14 +126,14 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    uint128 castAmount = Helpers.castUint128(amountScaled);
-    uint128 castIndex = Helpers.castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
 
-    uint256 accumulatedInterest = _calculateAccruedInterest(user, super.balanceOf(user), index);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    _burn(user, castAmount);
+    _burn(user, Helpers.castUint128(amountScaled));
 
-    _userState[user].additionalData = castIndex;
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(user, address(0), amount);
 

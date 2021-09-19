@@ -148,7 +148,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     uint128 oldSenderBalance = _userState[sender].balance;
     _userState[sender].balance = oldSenderBalance - amount;
     uint128 oldRecipientBalance = _userState[recipient].balance;
-    _userState[recipient].balance = _userState[recipient].balance + amount;
+    _userState[recipient].balance = oldRecipientBalance + amount;
 
     IAaveIncentivesController incentivesControllerLocal = _incentivesController;
     if (address(incentivesControllerLocal) != address(0)) {
@@ -207,16 +207,5 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   function _setDecimals(uint8 newDecimals) internal {
     _decimals = newDecimals;
-  }
-
-  function _calculateAccruedInterest(
-    address user,
-    uint256 scaledBalance,
-    uint256 currentIndex
-  ) internal view returns (uint256) {
-    uint256 previousIndex = _userState[user].additionalData;
-    uint256 previousBalance = scaledBalance.rayMul(previousIndex);
-    uint256 currentBalance = scaledBalance.rayMul(currentIndex);
-    return currentBalance - previousBalance;
   }
 }

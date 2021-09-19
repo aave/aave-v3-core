@@ -113,22 +113,21 @@ contract AToken is
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    uint128 castAmount = Helpers.castUint128(amountScaled);
-    uint128 castIndex = Helpers.castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    uint256 accumulatedInterest = _calculateAccruedInterest(user, super.balanceOf(user), index);
-
-    _burn(user, castAmount);
+    _burn(user, Helpers.castUint128(amountScaled));
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
 
-    _userState[user].additionalData = castIndex;
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(user, address(0), amount);
     if (accumulatedInterest > amount) {
-      emit Mint(user, accumulatedInterest - amount, castIndex);
+      emit Mint(user, accumulatedInterest - amount, index);
     } else {
       emit Burn(user, receiverOfUnderlying, amount - accumulatedInterest, index);
     }
@@ -143,20 +142,18 @@ contract AToken is
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint128 castAmount = Helpers.castUint128(amountScaled);
-    uint128 castIndex = Helpers.castUint128(index);
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    uint256 previousBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = _calculateAccruedInterest(user, previousBalance, index);
+    _mint(user, Helpers.castUint128(amountScaled));
 
-    _mint(user, castAmount);
-
-    _userState[user].additionalData = castIndex;
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(address(0), user, amount);
-    emit Mint(user, amount + accumulatedInterest, castIndex);
+    emit Mint(user, amount + accumulatedInterest, index);
 
-    return previousBalance == 0;
+    return scaledBalance == 0;
   }
 
   /// @inheritdoc IAToken
