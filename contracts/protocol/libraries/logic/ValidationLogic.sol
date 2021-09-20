@@ -247,8 +247,6 @@ library ValidationLogic {
 
   /**
    * @notice Validates a repay action
-   * @param lastBorrower The address of the last borrower
-   * @param lastBorrowTimestamp The timestamp for last borrow
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
    * @param rateMode The interest rate mode of the debt being repaid
@@ -257,8 +255,6 @@ library ValidationLogic {
    * @param variableDebt The borrow balance of the user
    */
   function validateRepay(
-    address lastBorrower,
-    uint40 lastBorrowTimestamp,
     DataTypes.ReserveCache memory reserveCache,
     uint256 amountSent,
     DataTypes.InterestRateMode rateMode,
@@ -272,8 +268,17 @@ library ValidationLogic {
 
     require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
 
+    uint256 variableDebtPreviousIndex = IScaledBalanceToken(reserveCache.variableDebtTokenAddress)
+      .getPreviousIndex(onBehalfOf);
+
+    uint40 stableRatePreviousTimestamp = IStableDebtToken(reserveCache.stableDebtTokenAddress)
+      .getUserLastUpdated(onBehalfOf);
+
     require(
-      lastBorrower != onBehalfOf || lastBorrowTimestamp != uint40(block.timestamp),
+      (stableRatePreviousTimestamp < uint40(block.timestamp) &&
+        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
+        (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
+          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_SAME_BLOCK_BORROW_REPAY
     );
 

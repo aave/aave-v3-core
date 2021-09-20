@@ -5,6 +5,8 @@ import {Context} from '../../dependencies/openzeppelin/contracts/Context.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
+import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 
 /**
  * @title IncentivizedERC20
@@ -12,7 +14,19 @@ import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesControl
  * @notice Basic ERC20 implementation
  **/
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
-  mapping(address => uint256) internal _balances;
+  using WadRayMath for uint256;
+
+  /**
+   * @dev UserState - additionalData is a flexible field.
+   * ATokens and VariableDebtTokens use this field store the index of the
+   * user's last deposit/withdrawl/borrow/repayment. StableDebtTokens use
+   * this field to store the user's stable rate.
+   */
+  struct UserState {
+    uint128 balance;
+    uint128 additionalData;
+  }
+  mapping(address => UserState) internal _userState;
 
   mapping(address => mapping(address => uint256)) private _allowances;
   uint256 internal _totalSupply;
@@ -53,7 +67,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /// @inheritdoc IERC20
   function balanceOf(address account) public view virtual override returns (uint256) {
-    return _balances[account];
+    return _userState[account].balance;
   }
 
   /**
@@ -66,7 +80,8 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /// @inheritdoc IERC20
   function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
-    _transfer(_msgSender(), recipient, amount);
+    uint128 castAmount = Helpers.castUint128(amount);
+    _transfer(_msgSender(), recipient, castAmount);
     return true;
   }
 
@@ -93,8 +108,9 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address recipient,
     uint256 amount
   ) public virtual override returns (bool) {
-    _transfer(sender, recipient, amount);
-    _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - amount);
+    uint128 castAmount = Helpers.castUint128(amount);
+    _transfer(sender, recipient, castAmount);
+    _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
     return true;
   }
 
@@ -127,12 +143,12 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   function _transfer(
     address sender,
     address recipient,
-    uint256 amount
+    uint128 amount
   ) internal virtual {
-    uint256 oldSenderBalance = _balances[sender];
-    _balances[sender] = oldSenderBalance - amount;
-    uint256 oldRecipientBalance = _balances[recipient];
-    _balances[recipient] = _balances[recipient] + amount;
+    uint128 oldSenderBalance = _userState[sender].balance;
+    _userState[sender].balance = oldSenderBalance - amount;
+    uint128 oldRecipientBalance = _userState[recipient].balance;
+    _userState[recipient].balance = oldRecipientBalance + amount;
 
     IAaveIncentivesController incentivesControllerLocal = _incentivesController;
     if (address(incentivesControllerLocal) != address(0)) {
@@ -145,12 +161,12 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     emit Transfer(sender, recipient, amount);
   }
 
-  function _mint(address account, uint256 amount) internal virtual {
+  function _mint(address account, uint128 amount) internal virtual {
     uint256 oldTotalSupply = _totalSupply;
     _totalSupply = oldTotalSupply + amount;
 
-    uint256 oldAccountBalance = _balances[account];
-    _balances[account] = oldAccountBalance + amount;
+    uint128 oldAccountBalance = _userState[account].balance;
+    _userState[account].balance = oldAccountBalance + amount;
 
     IAaveIncentivesController incentivesControllerLocal = _incentivesController;
     if (address(incentivesControllerLocal) != address(0)) {
@@ -158,12 +174,12 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     }
   }
 
-  function _burn(address account, uint256 amount) internal virtual {
+  function _burn(address account, uint128 amount) internal virtual {
     uint256 oldTotalSupply = _totalSupply;
     _totalSupply = oldTotalSupply - amount;
 
-    uint256 oldAccountBalance = _balances[account];
-    _balances[account] = oldAccountBalance - amount;
+    uint128 oldAccountBalance = _userState[account].balance;
+    _userState[account].balance = oldAccountBalance - amount;
 
     IAaveIncentivesController incentivesControllerLocal = _incentivesController;
 
