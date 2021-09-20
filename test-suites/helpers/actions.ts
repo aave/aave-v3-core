@@ -461,7 +461,6 @@ export const repay = async (
 
   if (timeTravel) {
     const secondsToTravel = BigNumber.from(timeTravel).mul(ONE_YEAR).div(365).toNumber();
-    console.log("time traveling to ", secondsToTravel, " in the future" );
     await advanceTimeAndBlock(secondsToTravel);
   }
 
