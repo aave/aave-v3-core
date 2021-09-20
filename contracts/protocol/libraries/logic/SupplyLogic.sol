@@ -16,8 +16,6 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 
-import 'hardhat/console.sol';
-
 /**
  * @title SupplyLogic library
  * @author Aave
@@ -77,8 +75,8 @@ library SupplyLogic {
       } else {
         // Validate HF in case its needed
         if (userConfig.isUsingAsCollateral(reserve.id)) {
+          userConfig.setUsingAsCollateral(reserve.id, false);
           if (userConfig.isBorrowingAny()) {
-            userConfig.setUsingAsCollateral(reserve.id, false);
             ValidationLogic.validateHFAndLtv(
               params.asset,
               params.onBehalfOf,
@@ -90,6 +88,7 @@ library SupplyLogic {
             );
           }
         }
+
         emit ReserveUsedAsCollateralDisabled(params.asset, params.onBehalfOf);
       }
     }
