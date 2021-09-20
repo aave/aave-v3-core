@@ -17,6 +17,7 @@ contract ACLManager is AccessControl, IACLManager {
   bytes32 public constant override RISK_ADMIN_ROLE = keccak256('RISK_ADMIN');
   bytes32 public constant override FLASH_BORROWER_ROLE = keccak256('FLASH_BORROWER');
   bytes32 public constant override BRIDGE_ROLE = keccak256('BRIDGE');
+  bytes32 public constant override ASSET_LISTING_ADMIN_ROLE = keccak256('ASSET_LISTING_ADMIN');
 
   IPoolAddressesProvider public _addressesProvider;
 
@@ -99,5 +100,17 @@ contract ACLManager is AccessControl, IACLManager {
 
   function isBridge(address bridge) external view override returns (bool) {
     return hasRole(BRIDGE_ROLE, bridge);
+  }
+
+  function addAssetListingAdmin(address admin) external override {
+    grantRole(ASSET_LISTING_ADMIN_ROLE, admin);
+  }
+
+  function removeAssetListingAdmin(address admin) external override {
+    revokeRole(ASSET_LISTING_ADMIN_ROLE, admin);
+  }
+
+  function isAssetListingAdmin(address admin) external view override returns (bool) {
+    return hasRole(ASSET_LISTING_ADMIN_ROLE, admin);
   }
 }

@@ -17,6 +17,8 @@ interface IACLManager {
 
   function BRIDGE_ROLE() external view returns (bytes32);
 
+  function ASSET_LISTING_ADMIN_ROLE() external view returns (bytes32);
+
   /**
    * @notice Set the role as admin of a specific role.
    * @dev By default the admin role for all roles is `DEFAULT_ADMIN_ROLE`.
@@ -54,4 +56,10 @@ interface IACLManager {
   function removeBridge(address bridge) external;
 
   function isBridge(address bridge) external view returns (bool);
+
+  function addAssetListingAdmin(address admin) external;
+
+  function removeAssetListingAdmin(address admin) external;
+
+  function isAssetListingAdmin(address admin) external view returns (bool);
 }
