@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
-import { setBlocktime, timeLatest } from '../helpers/misc-utils';
+import { advanceTimeAndBlock, setBlocktime, timeLatest } from '../helpers/misc-utils';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
@@ -84,6 +84,8 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
       variableDebtDai,
       users: [user0, user1],
     } = testEnv;
+
+    await advanceTimeAndBlock(86400);
 
     const time = await timeLatest();
 

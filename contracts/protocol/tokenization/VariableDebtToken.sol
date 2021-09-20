@@ -172,7 +172,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   /// @inheritdoc IScaledBalanceToken
   function getPreviousIndex(address user) public view virtual override returns (uint256) {
-    return _userData[user].previousIndexOrStableRate;
+    return _userState[user].additionalData;
   }
 
   /**
