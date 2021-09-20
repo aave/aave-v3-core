@@ -277,7 +277,7 @@ library ValidationLogic {
     require(
       (stableRatePreviousTimestamp < uint40(block.timestamp) &&
         DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebtPreviousIndex < reserveCache.nextLiquidityIndex &&
+        (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
           DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_SAME_BLOCK_BORROW_REPAY
     );
