@@ -16,6 +16,8 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 
+import 'hardhat/console.sol';
+
 /**
  * @title SupplyLogic library
  * @author Aave
@@ -59,21 +61,24 @@ library SupplyLogic {
 
     IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, params.amount);
 
-    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
+    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
       params.onBehalfOf,
       params.amount,
       reserveCache.nextLiquidityIndex
     );
 
-    if (isFirstDeposit) {
-      userConfig.setUsingAsCollateral(reserve.id, params.useAsCollateral);
-
+    // Apply `useAsCollateral` if:
+    // - user supplies assets on its own
+    // - user supplies assets on behalf of another user and it's their first supplied assets
+    if (params.onBehalfOf == msg.sender || (params.onBehalfOf != msg.sender && isFirstSupply)) {
       if (params.useAsCollateral) {
+        userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
       } else {
         // Validate HF in case its needed
         if (userConfig.isUsingAsCollateral(reserve.id)) {
           if (userConfig.isBorrowingAny()) {
+            userConfig.setUsingAsCollateral(reserve.id, false);
             ValidationLogic.validateHFAndLtv(
               params.asset,
               params.onBehalfOf,
