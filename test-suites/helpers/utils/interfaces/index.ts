@@ -20,6 +20,7 @@ export interface ReserveData {
   symbol: string;
   decimals: BigNumber;
   reserveFactor: BigNumber;
+  availableLiquidity: BigNumber;
   totalLiquidity: BigNumber;
   scaledATokenSupply: BigNumber;
   totalStableDebt: BigNumber;
@@ -29,7 +30,8 @@ export interface ReserveData {
   averageStableBorrowRate: BigNumber;
   variableBorrowRate: BigNumber;
   stableBorrowRate: BigNumber;
-  utilizationRate: BigNumber;
+  supplyUtilizationRate: BigNumber;
+  borrowUtilizationRate: BigNumber;
   liquidityIndex: BigNumber;
   variableBorrowIndex: BigNumber;
   aTokenAddress: string;
