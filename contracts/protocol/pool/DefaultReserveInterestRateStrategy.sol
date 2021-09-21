@@ -181,9 +181,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       : vars.totalDebt.rayDiv(availableLiquidity + vars.totalDebt);
     vars.supplyUtilizationRate = totalLiquidity == 0 ? 0 : vars.totalDebt.rayDiv(totalLiquidity);
 
-    // Cap utilization at 1
-    vars.supplyUtilizationRate = vars.supplyUtilizationRate > WadRayMath.RAY
-      ? WadRayMath.RAY
+    // Cap supply utilization at borrow utilization
+    vars.supplyUtilizationRate = vars.supplyUtilizationRate > vars.borrowUtilizationRate
+      ? vars.borrowUtilizationRate
       : vars.supplyUtilizationRate;
 
     vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
