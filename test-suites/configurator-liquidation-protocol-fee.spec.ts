@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { MAX_UINT_AMOUNT, MAX_SUPPLY_CAP } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 

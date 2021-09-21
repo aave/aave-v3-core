@@ -24,6 +24,7 @@ describe('ReserveConfiguration', async () => {
   const DECIMALS = BigNumber.from(18);
   const BORROW_CAP = BigNumber.from(100);
   const SUPPLY_CAP = BigNumber.from(200);
+  const UNBACKED_MINT_CAP = BigNumber.from(300);
 
   const MAX_VALID_LTV = BigNumber.from(65535);
   const MAX_VALID_LIQUIDATION_THRESHOLD = BigNumber.from(65535);
@@ -139,6 +140,14 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.setSupplyCap(ZERO));
     expect(await configMock.getCaps()).to.be.eql([ZERO, ZERO]);
     expect(await configMock.getSupplyCap()).to.be.eq(ZERO);
+  });
+
+  it('getUnbackedMintCap()', async () => {
+    expect(await configMock.getUnbackedMintCap()).to.be.eq(ZERO);
+    expect(await configMock.setUnbackedMintCap(UNBACKED_MINT_CAP));
+    expect(await configMock.getUnbackedMintCap()).to.be.eq(UNBACKED_MINT_CAP);
+    expect(await configMock.setUnbackedMintCap(ZERO));
+    expect(await configMock.getUnbackedMintCap()).to.be.eq(ZERO);
   });
 
   it('setLtv() with ltv = MAX_VALID_LTV', async () => {
