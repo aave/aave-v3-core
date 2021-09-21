@@ -112,10 +112,9 @@ contract AaveProtocolDataProvider {
       .getConfiguration(asset);
 
     (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
-      .getParamsMemory();
+      .getParams();
 
-    (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration
-      .getFlagsMemory();
+    (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();
 
     usageAsCollateralEnabled = liquidationThreshold > 0;
   }
@@ -131,9 +130,7 @@ contract AaveProtocolDataProvider {
     view
     returns (uint256 borrowCap, uint256 supplyCap)
   {
-    (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool())
-      .getConfiguration(asset)
-      .getCapsMemory();
+    (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getCaps();
   }
 
   /**
@@ -142,9 +139,7 @@ contract AaveProtocolDataProvider {
    * @return isPaused True if the pool is paused, false otherwise
    **/
   function getPaused(address asset) external view returns (bool isPaused) {
-    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool())
-      .getConfiguration(asset)
-      .getFlagsMemory();
+    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getFlags();
   }
 
   /**
@@ -153,8 +148,7 @@ contract AaveProtocolDataProvider {
    * @return The protocol fee on liquidation
    **/
   function getLiquidationProtocolFee(address asset) external view returns (uint256) {
-    return
-      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFeeMemory();
+    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFee();
   }
 
   /**
