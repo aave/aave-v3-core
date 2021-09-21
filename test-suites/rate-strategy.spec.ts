@@ -36,8 +36,8 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       1: currentStableBorrowRate,
       2: currentVariableBorrowRate,
     } = await strategyInstance[
-      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256)'
-    ](dai.address, 0, 0, 0, 0, strategyDAI.reserveFactor);
+      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256,uint256)'
+    ](dai.address, 0, 0, 0, 0, 0, strategyDAI.reserveFactor);
 
     expect(currentLiquidityRate).to.be.equal(0, 'Invalid liquidity rate');
     expect(currentStableBorrowRate).to.be.equal(
@@ -56,9 +56,10 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       1: currentStableBorrowRate,
       2: currentVariableBorrowRate,
     } = await strategyInstance[
-      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256)'
+      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256,uint256)'
     ](
       dai.address,
+      '200000000000000000',
       '1000000000000000000',
       '0',
       '800000000000000000',
@@ -91,9 +92,10 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       1: currentStableBorrowRate,
       2: currentVariableBorrowRate,
     } = await strategyInstance[
-      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256)'
+      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256,uint256)'
     ](
       dai.address,
+      '0',
       '1000000000000000000',
       '0',
       '1000000000000000000',
@@ -129,9 +131,10 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       1: currentStableBorrowRate,
       2: currentVariableBorrowRate,
     } = await strategyInstance[
-      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256)'
+      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256,uint256)'
     ](
       dai.address,
+      '0',
       '800000000000000000',
       '400000000000000000',
       '400000000000000000',
@@ -155,6 +158,77 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
         .parseUnits('0.039', 27)
         .add(rateStrategyStableOne.stableRateSlope1)
         .add(rateStrategyStableOne.stableRateSlope2),
+      'Invalid stable rate'
+    );
+  });
+
+  it('Checks rates at 80% borrow utilization rate and 50% supply utilization due to minted tokens', async () => {
+    const {
+      0: currentLiquidityRate,
+      1: currentStableBorrowRate,
+      2: currentVariableBorrowRate,
+    } = await strategyInstance[
+      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256,uint256)'
+    ](
+      dai.address,
+      '200000000000000000',
+      '1600000000000000000',
+      '0',
+      '800000000000000000',
+      '0',
+      strategyDAI.reserveFactor
+    );
+
+    const expectedVariableRate = BigNumber.from(rateStrategyStableOne.baseVariableBorrowRate).add(
+      rateStrategyStableOne.variableRateSlope1
+    );
+
+    expect(currentLiquidityRate).to.be.equal(
+      expectedVariableRate
+        .percentMul(5000)
+        .percentMul(BigNumber.from(PERCENTAGE_FACTOR).sub(strategyDAI.reserveFactor)),
+      'Invalid liquidity rate'
+    );
+
+    expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
+
+    expect(currentStableBorrowRate).to.be.equal(
+      utils.parseUnits('0.039', 27).add(rateStrategyStableOne.stableRateSlope1),
+      'Invalid stable rate'
+    );
+  });
+
+  it('Checks rates at 80% borrow utilization rate and 0.8% supply utilization due to minted tokens', async () => {
+    const {
+      0: currentLiquidityRate,
+      1: currentStableBorrowRate,
+      2: currentVariableBorrowRate,
+    } = await strategyInstance[
+      'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256,uint256)'
+    ](
+      dai.address,
+      '200000000000000000',
+      '100000000000000000000',
+      '0',
+      '800000000000000000',
+      '0',
+      strategyDAI.reserveFactor
+    );
+
+    const expectedVariableRate = BigNumber.from(rateStrategyStableOne.baseVariableBorrowRate).add(
+      rateStrategyStableOne.variableRateSlope1
+    );
+
+    expect(currentLiquidityRate).to.be.equal(
+      expectedVariableRate
+        .percentMul(80)
+        .percentMul(BigNumber.from(PERCENTAGE_FACTOR).sub(strategyDAI.reserveFactor)),
+      'Invalid liquidity rate'
+    );
+    expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
+
+    expect(currentStableBorrowRate).to.be.equal(
+      utils.parseUnits('0.039', 27).add(rateStrategyStableOne.stableRateSlope1),
       'Invalid stable rate'
     );
   });
