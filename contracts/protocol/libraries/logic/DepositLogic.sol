@@ -55,7 +55,7 @@ library DepositLogic {
 
     ValidationLogic.validateDeposit(reserveCache, amount);
 
-    reserve.updateInterestRates(reserveCache, asset, amount, 0);
+    reserve.updateInterestRates(reserveCache, asset, amount, 0, amount, 0);
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
 
@@ -96,7 +96,7 @@ library DepositLogic {
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
 
-    reserve.updateInterestRates(reserveCache, vars.asset, 0, amountToWithdraw);
+    reserve.updateInterestRates(reserveCache, vars.asset, 0, amountToWithdraw, 0, amountToWithdraw);
 
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,

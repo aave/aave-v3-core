@@ -149,7 +149,14 @@ library LiquidationLogic {
           vars.debtReserveCache.nextVariableBorrowIndex
         );
 
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, 0, 0);
+      debtReserve.updateInterestRates(
+        vars.debtReserveCache,
+        params.debtAsset,
+        0,
+        0,
+        vars.actualDebtToLiquidate,
+        0
+      );
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -165,7 +172,14 @@ library LiquidationLogic {
         vars.actualDebtToLiquidate - vars.userVariableDebt
       );
 
-      debtReserve.updateInterestRates(vars.debtReserveCache, params.debtAsset, 0, 0);
+      debtReserve.updateInterestRates(
+        vars.debtReserveCache,
+        params.debtAsset,
+        0,
+        0,
+        vars.actualDebtToLiquidate,
+        0
+      );
     }
 
     if (params.receiveAToken) {
@@ -187,6 +201,8 @@ library LiquidationLogic {
       collateralReserve.updateInterestRates(
         collateralReserveCache,
         params.collateralAsset,
+        0,
+        vars.maxCollateralToLiquidate,
         0,
         vars.maxCollateralToLiquidate
       );

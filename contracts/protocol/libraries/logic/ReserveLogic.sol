@@ -169,7 +169,9 @@ library ReserveLogic {
     DataTypes.ReserveCache memory reserveCache,
     address reserveAddress,
     uint256 toMint,
-    uint256 toBurn
+    uint256 toBurn,
+    uint256 liquidityAdded,
+    uint256 liquidityTaken
   ) internal {
     UpdateInterestRatesLocalVars memory vars;
 
@@ -189,9 +191,15 @@ library ReserveLogic {
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       reserveAddress,
       reserveCache.aTokenAddress,
-      DataTypes.CalculateInterestRatesParams(accruedToTreasury, toMint, toBurn),
-      reserveCache.nextTotalStableDebt,
-      vars.totalVariableDebt,
+      DataTypes.CalculateInterestRatesParams(
+        accruedToTreasury,
+        toMint,
+        toBurn,
+        liquidityAdded,
+        liquidityTaken,
+        reserveCache.nextTotalStableDebt,
+        vars.totalVariableDebt
+      ),
       reserveCache.nextAvgStableBorrowRate,
       reserveCache.reserveConfiguration.getReserveFactorMemory()
     );

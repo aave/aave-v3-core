@@ -151,5 +151,9 @@ library DataTypes {
     uint256 pendingTreasuryMint;
     uint256 toMint;
     uint256 toBurn;
+    uint256 liquidityAdded;
+    uint256 liquidityTaken;
+    uint256 totalStableDebt;
+    uint256 totalVariableDebt;
   }
 }

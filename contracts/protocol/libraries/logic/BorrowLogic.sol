@@ -108,7 +108,14 @@ library BorrowLogic {
       userConfig.setBorrowing(reserve.id, true);
     }
 
-    reserve.updateInterestRates(reserveCache, params.asset, 0, 0);
+    reserve.updateInterestRates(
+      reserveCache,
+      params.asset,
+      0,
+      0,
+      0,
+      params.releaseUnderlying ? params.amount : 0
+    );
 
     if (params.releaseUnderlying) {
       IAToken(reserveCache.aTokenAddress).transferUnderlyingTo(params.user, params.amount);
@@ -170,7 +177,7 @@ library BorrowLogic {
       ).burn(params.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
     }
 
-    reserve.updateInterestRates(reserveCache, params.asset, 0, 0);
+    reserve.updateInterestRates(reserveCache, params.asset, 0, 0, paybackAmount, 0);
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
@@ -277,7 +284,14 @@ library BorrowLogic {
           reserve.accruedToTreasury +
           vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex);
 
-        reserve.updateInterestRates(reserveCache, vars.currentAsset, 0, 0);
+        reserve.updateInterestRates(
+          reserveCache,
+          vars.currentAsset,
+          0,
+          0,
+          vars.currentAmountPlusPremium,
+          0
+        );
 
         IERC20(vars.currentAsset).safeTransferFrom(
           flashParams.receiverAddress,
@@ -343,10 +357,8 @@ library BorrowLogic {
     (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
       address(stableDebtToken)
     ).mint(user, user, stableDebt, reserve.currentStableBorrowRate);
-    //reserveCache.nextTotalStableDebt = nextTotalStableDebt;
-    //reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
 
-    reserve.updateInterestRates(reserveCache, asset, 0, 0);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0, 0, 0);
 
     emit RebalanceStableBorrowRate(asset, user);
   }
@@ -392,7 +404,7 @@ library BorrowLogic {
       ).mint(msg.sender, msg.sender, variableDebt, reserve.currentStableBorrowRate);
     }
 
-    reserve.updateInterestRates(reserveCache, asset, 0, 0);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0, 0, 0);
 
     emit Swap(asset, msg.sender, rateMode);
   }

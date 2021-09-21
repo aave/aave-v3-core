@@ -104,8 +104,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     address reserve,
     address aToken,
     DataTypes.CalculateInterestRatesParams memory vars,
-    uint256 totalStableDebt,
-    uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
     uint256 reserveFactor
   )
@@ -118,6 +116,12 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       uint256
     )
   {
+    uint256 availableLiquidity = IERC20(reserve).balanceOf(aToken);
+    //avoid stack too deep
+    {
+      availableLiquidity = availableLiquidity + vars.liquidityAdded - vars.liquidityTaken;
+    }
+
     uint256 totalLiquidity = IERC20(aToken).totalSupply();
     //avoid stack too deep
     {
@@ -128,9 +132,10 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     return
       calculateInterestRates(
         reserve,
+        availableLiquidity,
         totalLiquidity,
-        totalStableDebt,
-        totalVariableDebt,
+        vars.totalStableDebt,
+        vars.totalVariableDebt,
         averageStableBorrowRate,
         reserveFactor
       );
@@ -141,12 +146,14 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 currentVariableBorrowRate;
     uint256 currentStableBorrowRate;
     uint256 currentLiquidityRate;
-    uint256 utilizationRate;
+    uint256 borrowUtilizationRate;
+    uint256 supplyUtilizationRate;
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
   function calculateInterestRates(
     address reserve,
+    uint256 availableLiquidity,
     uint256 totalLiquidity,
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
@@ -169,20 +176,22 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
 
-    vars.utilizationRate = totalLiquidity == 0 ? 0 : vars.totalDebt.rayDiv(totalLiquidity);
+    vars.borrowUtilizationRate = vars.totalDebt == 0
+      ? 0
+      : vars.totalDebt.rayDiv(availableLiquidity + vars.totalDebt);
+    vars.supplyUtilizationRate = totalLiquidity == 0 ? 0 : vars.totalDebt.rayDiv(totalLiquidity);
 
     // Cap utilization at 1
-    vars.utilizationRate = vars.utilizationRate > WadRayMath.RAY
+    vars.supplyUtilizationRate = vars.supplyUtilizationRate > WadRayMath.RAY
       ? WadRayMath.RAY
-      : vars.utilizationRate;
+      : vars.supplyUtilizationRate;
 
     vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
       .getMarketBorrowRate(reserve);
 
-    if (vars.utilizationRate > OPTIMAL_UTILIZATION_RATE) {
-      uint256 excessUtilizationRateRatio = (vars.utilizationRate - OPTIMAL_UTILIZATION_RATE).rayDiv(
-        EXCESS_UTILIZATION_RATE
-      );
+    if (vars.borrowUtilizationRate > OPTIMAL_UTILIZATION_RATE) {
+      uint256 excessUtilizationRateRatio = (vars.borrowUtilizationRate - OPTIMAL_UTILIZATION_RATE)
+        .rayDiv(EXCESS_UTILIZATION_RATE);
 
       vars.currentStableBorrowRate =
         vars.currentStableBorrowRate +
@@ -196,11 +205,11 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     } else {
       vars.currentStableBorrowRate =
         vars.currentStableBorrowRate +
-        _stableRateSlope1.rayMul(vars.utilizationRate.rayDiv(OPTIMAL_UTILIZATION_RATE));
+        _stableRateSlope1.rayMul(vars.borrowUtilizationRate.rayDiv(OPTIMAL_UTILIZATION_RATE));
 
       vars.currentVariableBorrowRate =
         _baseVariableBorrowRate +
-        vars.utilizationRate.rayMul(_variableRateSlope1).rayDiv(OPTIMAL_UTILIZATION_RATE);
+        _variableRateSlope1.rayMul(vars.borrowUtilizationRate).rayDiv(OPTIMAL_UTILIZATION_RATE);
     }
 
     vars.currentLiquidityRate = _getOverallBorrowRate(
@@ -208,7 +217,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       totalVariableDebt,
       vars.currentVariableBorrowRate,
       averageStableBorrowRate
-    ).rayMul(vars.utilizationRate).percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveFactor);
+    ).rayMul(vars.supplyUtilizationRate).percentMul(
+        PercentageMath.PERCENTAGE_FACTOR - reserveFactor
+      );
 
     return (
       vars.currentLiquidityRate,

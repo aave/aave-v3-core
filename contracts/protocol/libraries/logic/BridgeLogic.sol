@@ -51,7 +51,7 @@ library BridgeLogic {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
     ValidationLogic.validateDeposit(reserveCache, amount);
-    reserve.updateInterestRates(reserveCache, asset, amount, 0);
+    reserve.updateInterestRates(reserveCache, asset, amount, 0, 0, 0);
     bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
       onBehalfOf,
       amount,
@@ -85,7 +85,7 @@ library BridgeLogic {
     uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;
 
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
-    reserve.updateInterestRates(reserveCache, asset, 0, 0);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0, backingAmount, 0);
     reserve.unbacked = reserve.unbacked - backingAmount;
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);

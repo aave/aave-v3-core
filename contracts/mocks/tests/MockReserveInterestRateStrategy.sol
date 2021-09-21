@@ -57,6 +57,7 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256,
     uint256,
     uint256,
+    uint256,
     uint256
   )
     external
@@ -74,9 +75,7 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   function calculateInterestRates(
     address,
     address,
-    DataTypes.CalculateInterestRatesParams memory vars,
-    uint256,
-    uint256,
+    DataTypes.CalculateInterestRatesParams memory,
     uint256,
     uint256
   )

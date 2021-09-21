@@ -25,6 +25,7 @@ interface IReserveInterestRateStrategy {
    * @notice Calculates the interest rates depending on the reserve's state and configurations.
    * @dev Deprecated: This function is kept for compatibility with previous DefaultInterestRateStrategy interfaces.
    * @param reserve The address of the reserve
+   * @param availableLiquidity, The liquidity available in the corresponding aToken
    * @param totalLiquidity The total supply of the corresponding aToken including to be minted/burned and pending to treasury
    * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
@@ -36,6 +37,7 @@ interface IReserveInterestRateStrategy {
    **/
   function calculateInterestRates(
     address reserve,
+    uint256 availableLiquidity,
     uint256 totalLiquidity,
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
@@ -55,8 +57,6 @@ interface IReserveInterestRateStrategy {
    * @param reserve The address of the reserve
    * @param aToken The address of the aToken in the reserve
    * @param vars The params structure with the amount pending to treasury, amount to mint during operation and amount to burn during operation
-   * @param totalStableDebt The total borrowed from the reserve at a stable rate
-   * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param averageStableBorrowRate The weighted average of all the stable rate borrowings
    * @param reserveFactor The reserve portion of the interest that goes to the treasury of the market
    * @return The liquidity rate
@@ -67,8 +67,8 @@ interface IReserveInterestRateStrategy {
     address reserve,
     address aToken,
     DataTypes.CalculateInterestRatesParams memory vars,
-    uint256 totalStableDebt,
-    uint256 totalVariableDebt,
+    /*    uint256 totalStableDebt,
+    uint256 totalVariableDebt,*/
     uint256 averageStableBorrowRate,
     uint256 reserveFactor
   )
