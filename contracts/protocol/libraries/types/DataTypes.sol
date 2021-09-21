@@ -27,7 +27,7 @@ library DataTypes {
     uint8 id;
     //the current treasury balance, scaled
     uint256 accruedToTreasury;
-    //the quicikwithdraw balance waiting for underlying to be backed
+    //the quickwithdraw balance waiting for underlying to be backed
     uint256 unbacked;
   }
 
@@ -45,6 +45,11 @@ library DataTypes {
     //bit 64-79: reserve factor
     //bit 80-115 borrow cap, borrowCap == 0 => disabled
     //bit 116-151 supply cap, supplyCap == 0 => disabled
+    //bit 80-115 borrow cap, borrowCap == 0 => disabled
+    //bit 116-151 supply cap, supplyCap == 0 => disabled
+    //bit 152-167 liquidation protocol fee
+    //bit 168-175 eMode category
+    //bit 176-211 unbacked mint cap, unbackedMintCap == 0 => disabled
     uint256 data;
   }
 
