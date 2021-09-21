@@ -23,6 +23,8 @@ library ReserveConfiguration {
   uint256 constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant LIQUIDATION_PROTOCOL_FEE_MASK =  0xFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant EMODE_CATEGORY_MASK =            0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant UNBACKED_MINT_CAP_MASK =         0xFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
 
   /// @dev For the LTV, the start bit is 0 (up to 15), hence no bitshifting is needed
   uint256 constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -38,6 +40,8 @@ library ReserveConfiguration {
   uint256 constant BORROW_CAP_START_BIT_POSITION = 80;
   uint256 constant SUPPLY_CAP_START_BIT_POSITION = 116;
   uint256 constant LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION = 152;
+  uint256 constant EMODE_CATEGORY_START_BIT_POSITION = 168;
+  uint256 constant UNBACKED_MINT_CAP_START_BIT_POSITION = 176;
 
   uint256 constant MAX_VALID_LTV = 65535;
   uint256 constant MAX_VALID_LIQUIDATION_THRESHOLD = 65535;
@@ -47,6 +51,8 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_BORROW_CAP = 68719476735;
   uint256 constant MAX_VALID_SUPPLY_CAP = 68719476735;
   uint256 constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 10000;
+  uint256 constant MAX_VALID_EMODE_CATEGORY = 255;
+  uint256 constant MAX_VALID_UNBACKED_MINT_CAP = 68719476735;
 
   /**
    * @notice Sets the Loan to Value of the reserve
@@ -423,6 +429,35 @@ library ReserveConfiguration {
   }
 
   /**
+   * @notice Sets the unbacked mint cap of the reserve
+   * @param self The reserve configuration
+   * @param unbackedMintCap The unbacked mint cap
+   **/
+  function setUnbackedMintCap(
+    DataTypes.ReserveConfigurationMap memory self,
+    uint256 unbackedMintCap
+  ) internal pure {
+    require(unbackedMintCap <= MAX_VALID_UNBACKED_MINT_CAP, Errors.RC_INVALID_UNBACKED_MINT_CAP);
+
+    self.data =
+      (self.data & UNBACKED_MINT_CAP_MASK) |
+      (unbackedMintCap << UNBACKED_MINT_CAP_START_BIT_POSITION);
+  }
+
+  /**
+   * @dev Gets the unbacked mint cap of the reserve
+   * @param self The reserve configuration
+   * @return The unbacked mint cap
+   **/
+  function getUnbackedMintCap(DataTypes.ReserveConfigurationMap storage self)
+    internal
+    view
+    returns (uint256)
+  {
+    return (self.data & ~UNBACKED_MINT_CAP_MASK) >> UNBACKED_MINT_CAP_START_BIT_POSITION;
+  }
+
+  /**
    * @notice Gets the configuration flags of the reserve
    * @param self The reserve configuration
    * @return The state flag representing active
@@ -611,10 +646,23 @@ library ReserveConfiguration {
    **/
   function getLiquidationProtocolFeeMemory(DataTypes.ReserveConfigurationMap memory self)
     internal
-    view
+    pure
     returns (uint256)
   {
     return
       (self.data & ~LIQUIDATION_PROTOCOL_FEE_MASK) >> LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION;
+  }
+
+  /**
+   * @dev Gets the unbacked mint cap of the reserve from a memory object
+   * @param self The reserve configuration
+   * @return The unbacked mint cap
+   **/
+  function getUnbackedMintCapMemory(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (uint256)
+  {
+    return (self.data & ~UNBACKED_MINT_CAP_MASK) >> UNBACKED_MINT_CAP_START_BIT_POSITION;
   }
 }

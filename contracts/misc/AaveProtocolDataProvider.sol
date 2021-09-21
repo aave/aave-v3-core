@@ -160,6 +160,16 @@ contract AaveProtocolDataProvider {
   }
 
   /**
+   * @notice Returns the unbacked mint cap of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return The unbacked mint cap of the reserve
+   **/
+  function getUnbackedMintCap(address asset) external view returns (uint256) {
+    return
+      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getUnbackedMintCapMemory();
+  }
+
+  /**
    * @notice Returns the reserve data
    * @param asset The address of the underlying asset of the reserve
    * @return unbacked The amount of unbacked tokens
