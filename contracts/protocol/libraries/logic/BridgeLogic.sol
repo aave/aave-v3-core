@@ -85,7 +85,7 @@ library BridgeLogic {
     uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;
 
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
-    reserve.updateInterestRates(reserveCache, asset, 0, 0, backingAmount, 0);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0, amount + fee, 0);
     reserve.unbacked = reserve.unbacked - backingAmount;
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
