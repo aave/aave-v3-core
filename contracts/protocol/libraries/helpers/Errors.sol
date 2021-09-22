@@ -72,16 +72,8 @@ library Errors {
   string public constant MATH_MULTIPLICATION_OVERFLOW = '48';
   string public constant MATH_ADDITION_OVERFLOW = '49';
   string public constant MATH_DIVISION_BY_ZERO = '50';
-  string public constant RL_LIQUIDITY_INDEX_OVERFLOW = '51'; //  Liquidity index overflows uint128
-  string public constant RL_VARIABLE_BORROW_INDEX_OVERFLOW = '52'; //  Variable borrow index overflows uint128
-  string public constant RL_LIQUIDITY_RATE_OVERFLOW = '53'; //  Liquidity rate overflows uint128
-  string public constant RL_VARIABLE_BORROW_RATE_OVERFLOW = '54'; //  Variable borrow rate overflows uint128
-  string public constant RL_STABLE_BORROW_RATE_OVERFLOW = '55'; //  Stable borrow rate overflows uint128
   string public constant CT_INVALID_MINT_AMOUNT = '56'; //invalid amount to mint
-  string public constant P_FAILED_REPAY_WITH_COLLATERAL = '57';
   string public constant CT_INVALID_BURN_AMOUNT = '58'; //invalid amount to burn
-  string public constant P_FAILED_COLLATERAL_SWAP = '60';
-  string public constant P_INVALID_EQUAL_ASSETS_TO_SWAP = '61';
   string public constant P_REENTRANCY_NOT_ALLOWED = '62';
   string public constant P_CALLER_MUST_BE_AN_ATOKEN = '63';
   string public constant P_IS_PAUSED = '64'; // Deprecated 'Pool is paused'
@@ -97,7 +89,7 @@ library Errors {
   string public constant P_INCONSISTENT_PARAMS_LENGTH = '74';
   string public constant UL_INVALID_INDEX = '77';
   string public constant P_NOT_CONTRACT = '78';
-  string public constant SDT_STABLE_DEBT_OVERFLOW = '79';
+  string public constant SDT_STABLE_DEBT_OVERFLOW = '79'; // Deprecated moved to general `HLP_UINT128_OVERFLOW`
   string public constant SDT_BURN_EXCEEDS_BALANCE = '80';
   string public constant VL_BORROW_CAP_EXCEEDED = '81';
   string public constant RC_INVALID_BORROW_CAP = '82';
@@ -114,7 +106,8 @@ library Errors {
   string public constant PC_FLASHLOAN_PREMIUMS_MISMATCH = '95';
   string public constant PC_FLASHLOAN_PREMIUM_INVALID = '96';
   string public constant RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97';
-  string public constant P_CALLER_NOT_BRIDGE = '98';
-  string public constant RC_INVALID_UNBACKED_MINT_CAP = '99';
-  string public constant VL_UNBACKED_MINT_CAP_EXCEEDED = '100';
+  string public constant HLP_UINT128_OVERFLOW = '98';
+  string public constant P_CALLER_NOT_BRIDGE = '99';
+  string public constant RC_INVALID_UNBACKED_MINT_CAP = '100';
+  string public constant VL_UNBACKED_MINT_CAP_EXCEEDED = '101';
 }

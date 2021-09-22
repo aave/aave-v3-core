@@ -8,7 +8,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
-  const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
+  const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT, HLP_UINT128_OVERFLOW } = ProtocolErrors;
 
   it('Check getters', async () => {
     const { pool, users, dai, aDai } = testEnv;
@@ -169,5 +169,16 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await DRE.ethers.getSigner(pool.address);
 
     expect(await aDai.connect(poolSigner).mintToTreasury(0, utils.parseUnits('1', 27)));
+  });
+
+  it('transfer() amount > MAX_UINT_128', async () => {
+    const {
+      aDai,
+      users: [depositor, borrower],
+    } = testEnv;
+
+    expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(
+      HLP_UINT128_OVERFLOW
+    );
   });
 });

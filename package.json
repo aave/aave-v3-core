@@ -1,10 +1,11 @@
 {
   "name": "@aave/core-v3",
-  "version": "0.0.1",
+  "version": "1.0.3",
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
-    "artifacts"
+    "artifacts",
+    "types"
   ],
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
@@ -20,7 +21,8 @@
     "test-scenarios": "npm run compile && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
     "test-subgraph:scenarios": "npm run compile && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
     "ci:test": "npm run compile && npm run test",
-    "ci:clean": "rm -rf ./artifacts ./cache ./types"
+    "ci:clean": "rm -rf ./artifacts ./cache ./types",
+    "prepublish": "npm run compile"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.0",
@@ -28,7 +30,7 @@
     "@openzeppelin/contracts": "4.2.0",
     "@tenderly/hardhat-tenderly": "1.1.0-beta.5",
     "@typechain/ethers-v5": "^2.0.0",
-    "@types/chai": "4.2.11",
+    "@types/chai": "^4.2.11",
     "@types/lowdb": "1.0.9",
     "@types/mocha": "7.0.2",
     "@types/node": "14.0.5",
@@ -85,5 +87,12 @@
     "protocol-v2",
     "ethereum",
     "solidity"
-  ]
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/aave/aave-v3-core"
+  }
 }

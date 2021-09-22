@@ -28,4 +28,11 @@ interface IScaledBalanceToken {
    * @return The scaled total supply
    **/
   function scaledTotalSupply() external view returns (uint256);
+
+  /**
+   * @notice Returns last index interest was accrued to the user's balance
+   * @param user The address of the user
+   * @return The last index interest was accrued to the user's balance
+   **/
+  function getPreviousIndex(address user) external view returns (uint256);
 }

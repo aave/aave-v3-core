@@ -3,13 +3,8 @@ import { utils } from 'ethers';
 import { ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import {
-  MintableERC20,
-  RateOracle,
-  RateOracleFactory,
-  StableAndVariableTokensHelper,
-} from '../types';
-import { getFirstSigner, getStableAndVariableTokensHelper } from '../helpers/contracts-getters';
+import { MintableERC20, RateOracle, RateOracleFactory, RateOracleSetupHelper } from '../types';
+import { getFirstSigner, getRateOracleSetupHelper } from '../helpers/contracts-getters';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 
@@ -25,12 +20,12 @@ makeSuite('StableAndVariableTokenHelper', (testEnv: TestEnv) => {
 
   const BORROW_RATE = utils.parseUnits('0.03', 27).toString();
 
-  let tokenHelper: StableAndVariableTokensHelper;
+  let tokenHelper: RateOracleSetupHelper;
   let rateOracle: RateOracle;
   let mockToken: MintableERC20;
 
   before(async () => {
-    tokenHelper = await getStableAndVariableTokensHelper();
+    tokenHelper = await getRateOracleSetupHelper();
     rateOracle = await (await new RateOracleFactory(await getFirstSigner()).deploy()).deployed();
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
 

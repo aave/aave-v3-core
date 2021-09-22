@@ -26,14 +26,7 @@ import { makeSuite } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('Interest Rate and Index Overflow', (testEnv) => {
-  const {
-    RL_LIQUIDITY_RATE_OVERFLOW,
-    RL_STABLE_BORROW_RATE_OVERFLOW,
-    RL_VARIABLE_BORROW_RATE_OVERFLOW,
-    RL_LIQUIDITY_INDEX_OVERFLOW,
-    RL_VARIABLE_BORROW_INDEX_OVERFLOW,
-    SDT_STABLE_DEBT_OVERFLOW,
-  } = ProtocolErrors;
+  const { HLP_UINT128_OVERFLOW } = ProtocolErrors;
 
   let mockToken: MintableERC20;
   let mockStableDebtToken: StableDebtToken;
@@ -190,7 +183,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(RL_LIQUIDITY_RATE_OVERFLOW);
+    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `updateInterestRates` with nextStableRate > type(uint128).max (revert expected)', async () => {
@@ -215,7 +208,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(RL_STABLE_BORROW_RATE_OVERFLOW);
+    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `updateInterestRates` with nextVariableRate > type(uint128).max (revert expected)', async () => {
@@ -240,7 +233,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(RL_VARIABLE_BORROW_RATE_OVERFLOW);
+    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `_updateIndexes` with nextLiquidityIndex > type(uint128).max (revert expected)', async () => {
@@ -305,7 +298,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
+    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `_updateIndexes` with nextVariableBorrowIndex > type(uint128).max (revert expected)', async () => {
@@ -365,7 +358,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(RL_VARIABLE_BORROW_INDEX_OVERFLOW);
+    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `cumulateToLiquidityIndex` with liquidityIndex > type(uint128).max (revert expected)', async () => {
@@ -401,7 +394,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           '0x00',
           0
         )
-    ).to.be.revertedWith(RL_LIQUIDITY_INDEX_OVERFLOW);
+    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
   });
 
   it('StableDebtToken `mint` with nextStableRate > type(uint128).max (revert expected)', async () => {
@@ -427,6 +420,6 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           await convertToCurrencyDecimals(mockStableDebtToken.address, '100'),
           rate
         )
-    ).to.be.revertedWith(SDT_STABLE_DEBT_OVERFLOW);
+    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
   });
 });
