@@ -32,7 +32,7 @@ library BridgeLogic {
 
   /**
    * @notice Mint unbacked aTokens to a user and updates the unbacked for the reserve.
-   *   Essentially a deposit without transferring of the underlying.
+   * @dev Essentially a deposit without transferring of the underlying.
    * @param reserve The reserve to mint to
    * @param userConfig The user configuration to update
    * @param asset The address of the asset
@@ -50,31 +50,39 @@ library BridgeLogic {
     uint16 referralCode
   ) public {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
+
     reserve.updateState(reserveCache);
+
     ValidationLogic.validateDeposit(reserveCache, amount);
+
     reserve.updateInterestRates(reserveCache, asset, amount, 0, 0, 0);
+
     bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
       onBehalfOf,
       amount,
       reserveCache.nextLiquidityIndex
     );
+
     reserve.unbacked = reserve.unbacked + amount;
+
     uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCapMemory();
     (, , , uint256 reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
     require(
       unbackedMintCap == 0 || reserve.unbacked / (10**reserveDecimals) < unbackedMintCap,
       Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
     );
+
     if (isFirstDeposit) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
     }
+
     emit MintUnbacked(asset, msg.sender, onBehalfOf, amount, referralCode);
   }
 
   /**
-   * @dev Back the current unbacked with `amount` and pay `fee`.
-   *   If backing unnecessarily, excess `amount` will be added to `fee`.
+   * @notice Back the current unbacked with `amount` and pay `fee`.
+   * @dev If backing unnecessarily, excess amount will be added to `fee`.
    * @param reserve The reserve to back unbacked for
    * @param asset The address of the underlying asset to repay
    * @param amount The amount to back
@@ -87,12 +95,17 @@ library BridgeLogic {
     uint256 fee
   ) public {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
+
     reserve.updateState(reserveCache);
+
     uint256 backingAmount = (amount < reserve.unbacked) ? amount : reserve.unbacked;
-    uint256 totalFee = (backingAmount < amount) ? fee + (amount - backingAmount) : fee;
+
+    uint256 totalFee = (amount > backingAmount) ? (amount - backingAmount) + fee : fee;
 
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
+
     reserve.updateInterestRates(reserveCache, asset, 0, 0, amount + fee, 0);
+
     reserve.unbacked = reserve.unbacked - backingAmount;
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
