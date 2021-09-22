@@ -187,7 +187,7 @@ library ReserveLogic {
       reserveCache.nextTotalStableDebt,
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,
-      reserveCache.reserveConfiguration.getReserveFactorMemory()
+      reserveCache.reserveConfiguration.getReserveFactor()
     );
 
     reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);
@@ -228,7 +228,7 @@ library ReserveLogic {
   ) internal {
     AccrueToTreasuryLocalVars memory vars;
 
-    vars.reserveFactor = reserveCache.reserveConfiguration.getReserveFactorMemory();
+    vars.reserveFactor = reserveCache.reserveConfiguration.getReserveFactor();
 
     if (vars.reserveFactor == 0) {
       return;

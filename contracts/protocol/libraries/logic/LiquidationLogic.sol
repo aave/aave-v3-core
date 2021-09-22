@@ -301,7 +301,7 @@ library LiquidationLogic {
     (, , vars.liquidationBonus, vars.collateralDecimals, ) = collateralReserve
       .configuration
       .getParams();
-    vars.debtAssetDecimals = debtReserveCache.reserveConfiguration.getDecimalsMemory();
+    vars.debtAssetDecimals = debtReserveCache.reserveConfiguration.getDecimals();
     unchecked {
       vars.collateralAssetUnit = 10**vars.collateralDecimals;
       vars.debtAssetUnit = 10**vars.debtAssetDecimals;
