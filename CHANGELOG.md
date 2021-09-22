@@ -1,5 +1,14 @@
 # Changelog
 
+### [1.0.4](https://www.github.com/aave/aave-v3-core/compare/v1.0.3...v1.0.4) (2021-09-22)
+
+
+### Bug Fixes
+
+* fixed error after merging the main branch ([83f385f](https://www.github.com/aave/aave-v3-core/commit/83f385fc1fdcac9f87aaa94614bcda3020578fb0))
+* removed unnecessary overflow check ([4d9861d](https://www.github.com/aave/aave-v3-core/commit/4d9861d94d5531104f95af625cffead15f603d4d))
+* use nextVariableBorrowIndex instead of nextLiquidityIndex on repayValidation ([cf9007c](https://www.github.com/aave/aave-v3-core/commit/cf9007c78d6e2eaaa9816309ebc44f160c53ed3c))
+
 ### [1.0.3](https://www.github.com/aave/aave-v3-core/compare/v1.0.2...v1.0.3) (2021-09-17)
 
 
