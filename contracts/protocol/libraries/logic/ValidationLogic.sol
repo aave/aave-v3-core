@@ -48,9 +48,9 @@ library ValidationLogic {
   {
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
       .reserveConfiguration
-      .getFlagsMemory();
-    (, , , uint256 reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
-    uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCapMemory();
+      .getFlags();
+    (, , , uint256 reserveDecimals, ) = reserveCache.reserveConfiguration.getParams();
+    uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
 
     require(amount != 0, Errors.VL_INVALID_AMOUNT);
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
@@ -81,7 +81,7 @@ library ValidationLogic {
     require(amount != 0, Errors.VL_INVALID_AMOUNT);
     require(amount <= userBalance, Errors.VL_NOT_ENOUGH_AVAILABLE_USER_BALANCE);
 
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
   }
@@ -136,7 +136,7 @@ library ValidationLogic {
   ) internal view {
     ValidateBorrowLocalVars memory vars;
 
-    (, , , vars.reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
+    (, , , vars.reserveDecimals, ) = reserveCache.reserveConfiguration.getParams();
 
     (
       vars.isActive,
@@ -144,7 +144,7 @@ library ValidationLogic {
       vars.borrowingEnabled,
       vars.stableRateBorrowingEnabled,
       vars.isPaused
-    ) = reserveCache.reserveConfiguration.getFlagsMemory();
+    ) = reserveCache.reserveConfiguration.getFlags();
 
     require(vars.isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!vars.isPaused, Errors.VL_RESERVE_PAUSED);
@@ -160,7 +160,7 @@ library ValidationLogic {
       Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
     );
 
-    vars.borrowCap = reserveCache.reserveConfiguration.getBorrowCapMemory();
+    vars.borrowCap = reserveCache.reserveConfiguration.getBorrowCap();
     unchecked {
       vars.assetUnit = 10**vars.reserveDecimals;
     }
@@ -230,7 +230,7 @@ library ValidationLogic {
 
       require(
         !userConfig.isUsingAsCollateral(reservesData[asset].id) ||
-          reserveCache.reserveConfiguration.getLtvMemory() == 0 ||
+          reserveCache.reserveConfiguration.getLtv() == 0 ||
           amount > IERC20(reserveCache.aTokenAddress).balanceOf(userAddress),
         Errors.VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY
       );
@@ -247,8 +247,6 @@ library ValidationLogic {
 
   /**
    * @notice Validates a repay action
-   * @param lastBorrower The address of the last borrower
-   * @param lastBorrowTimestamp The timestamp for last borrow
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
    * @param rateMode The interest rate mode of the debt being repaid
@@ -257,8 +255,6 @@ library ValidationLogic {
    * @param variableDebt The borrow balance of the user
    */
   function validateRepay(
-    address lastBorrower,
-    uint40 lastBorrowTimestamp,
     DataTypes.ReserveCache memory reserveCache,
     uint256 amountSent,
     DataTypes.InterestRateMode rateMode,
@@ -266,14 +262,23 @@ library ValidationLogic {
     uint256 stableDebt,
     uint256 variableDebt
   ) internal view {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
     require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
 
+    uint256 variableDebtPreviousIndex = IScaledBalanceToken(reserveCache.variableDebtTokenAddress)
+      .getPreviousIndex(onBehalfOf);
+
+    uint40 stableRatePreviousTimestamp = IStableDebtToken(reserveCache.stableDebtTokenAddress)
+      .getUserLastUpdated(onBehalfOf);
+
     require(
-      lastBorrower != onBehalfOf || lastBorrowTimestamp != uint40(block.timestamp),
+      (stableRatePreviousTimestamp < uint40(block.timestamp) &&
+        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
+        (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
+          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_SAME_BLOCK_BORROW_REPAY
     );
 
@@ -310,7 +315,7 @@ library ValidationLogic {
   ) internal view {
     (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) = reserveCache
       .reserveConfiguration
-      .getFlagsMemory();
+      .getFlags();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -331,7 +336,7 @@ library ValidationLogic {
 
       require(
         !userConfig.isUsingAsCollateral(reserve.id) ||
-          reserveCache.reserveConfiguration.getLtvMemory() == 0 ||
+          reserveCache.reserveConfiguration.getLtv() == 0 ||
           stableDebt + variableDebt > IERC20(reserveCache.aTokenAddress).balanceOf(msg.sender),
         Errors.VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY
       );
@@ -357,7 +362,7 @@ library ValidationLogic {
     IERC20 variableDebtToken,
     address aTokenAddress
   ) internal view {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -393,7 +398,7 @@ library ValidationLogic {
     DataTypes.ReserveCache memory reserveCache,
     uint256 userBalance
   ) internal pure {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlagsMemory();
+    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -454,11 +459,11 @@ library ValidationLogic {
 
     (vars.collateralReserveActive, , , , vars.collateralReservePaused) = collateralReserve
       .configuration
-      .getFlagsMemory();
+      .getFlags();
 
     (vars.principalReserveActive, , , , vars.principalReservePaused) = principalReserveCache
       .reserveConfiguration
-      .getFlagsMemory();
+      .getFlags();
 
     require(
       vars.collateralReserveActive && vars.principalReserveActive,
@@ -535,7 +540,7 @@ library ValidationLogic {
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 
-    vars.assetLtv = reserve.configuration.getLtvMemory();
+    vars.assetLtv = reserve.configuration.getLtv();
 
     require(vars.assetLtv == 0 || !vars.hasZeroLtvCollateral, Errors.VL_LTV_VALIDATION_FAILED);
   }

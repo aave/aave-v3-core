@@ -50,8 +50,8 @@ export enum eContractid {
   VariableDebtToken = 'VariableDebtToken',
   FeeProvider = 'FeeProvider',
   TokenDistributor = 'TokenDistributor',
-  StableAndVariableTokensHelper = 'StableAndVariableTokensHelper',
-  ATokensAndRatesHelper = 'ATokensAndRatesHelper',
+  RateOracleSetupHelper = 'RateOracleSetupHelper',
+  ReservesSetupHelper = 'ReservesSetupHelper',
   WETH = 'WETH',
   WETHMocked = 'WETHMocked',
   PoolImpl = 'PoolImpl',
@@ -129,16 +129,8 @@ export enum ProtocolErrors {
   MATH_MULTIPLICATION_OVERFLOW = '48',
   MATH_ADDITION_OVERFLOW = '49',
   MATH_DIVISION_BY_ZERO = '50',
-  RL_LIQUIDITY_INDEX_OVERFLOW = '51', //  Liquidity index overflows uint128
-  RL_VARIABLE_BORROW_INDEX_OVERFLOW = '52', //  Variable borrow index overflows uint128
-  RL_LIQUIDITY_RATE_OVERFLOW = '53', //  Liquidity rate overflows uint128
-  RL_VARIABLE_BORROW_RATE_OVERFLOW = '54', //  Variable borrow rate overflows uint128
-  RL_STABLE_BORROW_RATE_OVERFLOW = '55', //  Stable borrow rate overflows uint128
   CT_INVALID_MINT_AMOUNT = '56', //invalid amount to mint
-  P_FAILED_REPAY_WITH_COLLATERAL = '57',
   CT_INVALID_BURN_AMOUNT = '58', //invalid amount to burn
-  P_FAILED_COLLATERAL_SWAP = '60',
-  P_INVALID_EQUAL_ASSETS_TO_SWAP = '61',
   P_REENTRANCY_NOT_ALLOWED = '62',
   P_CALLER_MUST_BE_AN_ATOKEN = '63',
   P_IS_PAUSED = '64', // 'Pool is paused'
@@ -169,6 +161,7 @@ export enum ProtocolErrors {
   PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
   PC_FLASHLOAN_PREMIUM_INVALID = '96',
   RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
+  HLP_UINT128_OVERFLOW = '98',
 
   // old
 

@@ -1,6 +1,6 @@
 {
   "name": "@aave/core-v3",
-  "version": "0.0.1",
+  "version": "1.0.3",
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
@@ -89,6 +89,10 @@
     "solidity"
   ],
   "publishConfig": {
-    "@aave:registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/aave/aave-v3-core"
   }
 }

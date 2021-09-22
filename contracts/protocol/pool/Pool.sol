@@ -186,8 +186,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _addressesProvider.getPriceOracle()
       )
     );
-    _lastBorrower = msg.sender;
-    _lastBorrowTimestamp = uint40(block.timestamp);
   }
 
   /// @inheritdoc IPool
@@ -201,15 +199,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       BorrowLogic.executeRepay(
         _reserves[asset],
         _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(
-          asset,
-          amount,
-          rateMode,
-          onBehalfOf,
-          _lastBorrower,
-          _lastBorrowTimestamp,
-          false
-        )
+        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, false)
       );
   }
 
@@ -237,15 +227,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       BorrowLogic.executeRepay(
         _reserves[asset],
         _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(
-          asset,
-          amount,
-          rateMode,
-          onBehalfOf,
-          _lastBorrower,
-          _lastBorrowTimestamp,
-          false
-        )
+        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, false)
       );
   }
 
@@ -260,15 +242,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       BorrowLogic.executeRepay(
         _reserves[asset],
         _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(
-          asset,
-          amount,
-          rateMode,
-          onBehalfOf,
-          _lastBorrower,
-          _lastBorrowTimestamp,
-          true
-        )
+        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, true)
       );
   }
 

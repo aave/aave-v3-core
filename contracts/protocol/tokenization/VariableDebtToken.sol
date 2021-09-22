@@ -5,6 +5,7 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
@@ -99,16 +100,21 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
 
-    uint256 previousBalance = super.balanceOf(onBehalfOf);
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    _mint(onBehalfOf, amountScaled);
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
 
-    emit Transfer(address(0), onBehalfOf, amount);
-    emit Mint(user, onBehalfOf, amount, index);
+    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
-    return (previousBalance == 0, scaledTotalSupply());
+    _userState[user].additionalData = Helpers.castUint128(index);
+
+    emit Transfer(address(0), onBehalfOf, amount + accumulatedInterest);
+    emit Mint(user, onBehalfOf, amount + accumulatedInterest, index);
+
+    return (scaledBalance == 0, scaledTotalSupply());
   }
 
   /// @inheritdoc IVariableDebtToken
@@ -120,10 +126,22 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    _burn(user, amountScaled);
+    uint256 scaledBalance = super.balanceOf(user);
 
-    emit Transfer(user, address(0), amount);
-    emit Burn(user, amount, index);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
+
+    _burn(user, Helpers.castUint128(amountScaled));
+
+    _userState[user].additionalData = Helpers.castUint128(index);
+
+    if (accumulatedInterest > amount) {
+      emit Transfer(address(0), user, accumulatedInterest - amount);
+      emit Mint(user, user, accumulatedInterest - amount, index);
+    } else {
+      emit Transfer(user, address(0), amount - accumulatedInterest);
+      emit Burn(user, amount - accumulatedInterest, index);
+    }
     return scaledTotalSupply();
   }
 
@@ -150,6 +168,11 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     returns (uint256, uint256)
   {
     return (super.balanceOf(user), super.totalSupply());
+  }
+
+  /// @inheritdoc IScaledBalanceToken
+  function getPreviousIndex(address user) public view virtual override returns (uint256) {
+    return _userState[user].additionalData;
   }
 
   /**

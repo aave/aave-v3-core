@@ -116,8 +116,6 @@ library DataTypes {
     uint256 amount;
     uint256 rateMode;
     address onBehalfOf;
-    address lastBorrower;
-    uint40 lastBorrowTimestamp;
     bool useATokens;
   }
 
