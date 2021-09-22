@@ -11,7 +11,7 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
  **/
 interface IPool {
   /**
-   * @dev Emitted on mintUnbacked()
+   * @notice Emitted on mintUnbacked()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the deposit
    * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
@@ -27,7 +27,7 @@ interface IPool {
   );
 
   /**
-   * @dev Emitted on backUnbacked()
+   * @notice Emitted on backUnbacked()
    * @param reserve The address of the underlying asset of the reserve
    * @param backer The address paying for the backing
    * @param amount The amount added as backing
@@ -35,7 +35,7 @@ interface IPool {
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   /**
-   * @dev Emitted on deposit()
+   * @notice Emitted on deposit()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the deposit
    * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
