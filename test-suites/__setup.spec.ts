@@ -15,11 +15,11 @@ import {
   deployMockFlashLoanReceiver,
   deployAaveProtocolDataProvider,
   deployRateOracle,
-  deployStableAndVariableTokensHelper,
-  deployATokensAndRatesHelper,
-  deployMockIncentivesController,
+  deployRateOracleSetupHelper,
+  deployReservesSetupHelper,
   deployAllMockTokens,
   deployACLManager,
+  deployMockIncentivesController,
 } from '../helpers/contracts-deployments';
 import { eContractid, tEthereumAddress } from '../helpers/types';
 import {
@@ -54,7 +54,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
 
   // Set ACL Admin
   await waitForTx(await addressesProvider.setACLAdmin(aaveAdmin));
-  
+
   // Set ACL configuration
   // ACL Admin should be fixed beforehand
   const aclManager = await deployACLManager(addressesProvider.address);
@@ -90,12 +90,8 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await waitForTx(await aclManager.addRiskAdmin(addressList[3]));
 
   // Deploy deployment helpers
-  await deployStableAndVariableTokensHelper([poolProxy.address, addressesProvider.address]);
-  await deployATokensAndRatesHelper([
-    poolProxy.address,
-    addressesProvider.address,
-    poolConfiguratorProxy.address,
-  ]);
+  await deployRateOracleSetupHelper();
+  await deployReservesSetupHelper();
 
   const fallbackOracle = await deployPriceOracle();
   await waitForTx(await fallbackOracle.setEthUsdPrice(MOCK_USD_PRICE_IN_WEI));

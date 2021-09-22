@@ -3,10 +3,10 @@ import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
 import { chunk, waitForTx } from './misc-utils';
 import {
   getACLManager,
-  getATokensAndRatesHelper,
+  getReservesSetupHelper,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
-  getStableAndVariableTokensHelper,
+  getRateOracleSetupHelper,
 } from './contracts-getters';
 import { rawInsertContractAddressInDb } from './contracts-helpers';
 import { BigNumber, BigNumberish } from 'ethers';
@@ -30,7 +30,6 @@ export const initReservesByHelper = async (
   incentivesController: tEthereumAddress
 ): Promise<BigNumber> => {
   let gasUsage = BigNumber.from('0');
-  const stableAndVariableDeployer = await getStableAndVariableTokensHelper();
 
   const addressProvider = await getPoolAddressesProvider();
 
@@ -244,8 +243,8 @@ export const configureReservesByHelper = async (
   admin: tEthereumAddress
 ) => {
   const addressProvider = await getPoolAddressesProvider();
-  const atokenAndRatesDeployer = await getATokensAndRatesHelper();
   const aclManager = await getACLManager();
+  const reservesSetupHelper = await getReservesSetupHelper();
   const tokens: string[] = [];
   const symbols: string[] = [];
 
@@ -314,24 +313,26 @@ export const configureReservesByHelper = async (
     symbols.push(assetSymbol);
   }
   if (tokens.length) {
-    // Set aTokenAndRatesDeployer as temporal admin
-    await waitForTx(await aclManager.addPoolAdmin(atokenAndRatesDeployer.address));
-    
+    // Add reservesSetupHelper as temporal admin
+    await waitForTx(await aclManager.addPoolAdmin(reservesSetupHelper.address));
+
     // Deploy init per chunks
     const enableChunks = 20;
     const chunkedSymbols = chunk(symbols, enableChunks);
     const chunkedInputParams = chunk(inputParams, enableChunks);
-    
+    const poolConfiguratorAddress = await addressProvider.getPoolConfigurator();
+
     console.log(`- Configure reserves in ${chunkedInputParams.length} txs`);
     for (let chunkIndex = 0; chunkIndex < chunkedInputParams.length; chunkIndex++) {
       await waitForTx(
-        await atokenAndRatesDeployer.configureReserves(chunkedInputParams[chunkIndex], {
-          gasLimit: 12000000,
-        })
-        );
-        console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
-      }
-      // Set deployer back as admin
-      await waitForTx(await aclManager.removePoolAdmin(atokenAndRatesDeployer.address));
+        await reservesSetupHelper.configureReserves(
+          poolConfiguratorAddress,
+          chunkedInputParams[chunkIndex]
+        )
+      );
+      console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
+    }
+    // Remove reservesSetupHelper as admin
+    await waitForTx(await aclManager.removePoolAdmin(reservesSetupHelper.address));
   }
 };
