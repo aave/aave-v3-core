@@ -307,8 +307,8 @@ library LiquidationLogic {
     vars.debtAssetPrice = oracle.getAssetPrice(debtAsset);
 
     vars.collateralDecimals = collateralReserve.configuration.getDecimals();
+    vars.debtAssetDecimals = debtReserveCache.reserveConfiguration.getDecimals();
 
-    vars.debtAssetDecimals = debtReserveCache.reserveConfiguration.getDecimalsMemory();
     unchecked {
       vars.collateralAssetUnit = 10**vars.collateralDecimals;
       vars.debtAssetUnit = 10**vars.debtAssetDecimals;

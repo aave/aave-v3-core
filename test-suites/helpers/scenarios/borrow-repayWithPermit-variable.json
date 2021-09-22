@@ -15,11 +15,12 @@
           "expected": "success"
         },
         {
-          "name": "depositWithPermit",
+          "name": "supplyWithPermit",
           "args": {
             "reserve": "DAI",
             "amount": "1",
-            "user": "2"
+            "user": "2",
+            "useAsCollateral": true
           },
           "expected": "success"
         }
@@ -38,11 +39,12 @@
           "expected": "success"
         },
         {
-          "name": "depositWithPermit",
+          "name": "supplyWithPermit",
           "args": {
             "reserve": "DAI",
             "amount": "1000",
-            "user": "0"
+            "user": "0",
+            "useAsCollateral": true
           },
           "expected": "success"
         },
@@ -153,7 +155,8 @@
             "amount": "-1",
             "user": "1",
             "onBehalfOf": "1",
-            "borrowRateMode": "variable"
+            "borrowRateMode": "variable",
+            "timeTravel" : "365"
           },
           "expected": "success"
         }

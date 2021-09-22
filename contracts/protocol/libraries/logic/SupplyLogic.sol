@@ -18,11 +18,11 @@ import {ReserveLogic} from './ReserveLogic.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 
 /**
- * @title DepositLogic library
+ * @title SupplyLogic library
  * @author Aave
- * @notice Implements the base logic for deposit/withdraw
+ * @notice Implements the base logic for supply/withdraw
  */
-library DepositLogic {
+library SupplyLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
   using SafeERC20 for IERC20;
@@ -35,44 +35,42 @@ library DepositLogic {
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
   event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
-  event Deposit(
+  event Supply(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
 
-  function executeDeposit(
-    DataTypes.ReserveData storage reserve,
+  function executeSupply(
+    mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    uint256 amount,
-    address onBehalfOf,
-    uint16 referralCode
+    DataTypes.ExecuteSupplyParams memory params
   ) internal {
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
 
-    ValidationLogic.validateDeposit(reserveCache, amount);
+    ValidationLogic.validateSupply(reserveCache, params.amount);
 
-    reserve.updateInterestRates(reserveCache, asset, amount, 0);
+    reserve.updateInterestRates(reserveCache, params.asset, params.amount, 0);
 
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
+    IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, params.amount);
 
-    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
-      onBehalfOf,
-      amount,
+    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
+      params.onBehalfOf,
+      params.amount,
       reserveCache.nextLiquidityIndex
     );
 
-    if (isFirstDeposit) {
+    if (isFirstSupply) {
       userConfig.setUsingAsCollateral(reserve.id, true);
-      emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+      emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
     }
 
-    emit Deposit(asset, msg.sender, onBehalfOf, amount, referralCode);
+    emit Supply(params.asset, msg.sender, params.onBehalfOf, params.amount, params.referralCode);
   }
 
   function executeWithdraw(

@@ -99,6 +99,13 @@ library DataTypes {
     uint8 userEModeCategory;
   }
 
+  struct ExecuteSupplyParams {
+    address asset;
+    uint256 amount;
+    address onBehalfOf;
+    uint16 referralCode;
+  }
+
   struct ExecuteBorrowParams {
     address asset;
     address user;
@@ -118,8 +125,6 @@ library DataTypes {
     uint256 amount;
     uint256 rateMode;
     address onBehalfOf;
-    address lastBorrower;
-    uint40 lastBorrowTimestamp;
     bool useATokens;
   }
 

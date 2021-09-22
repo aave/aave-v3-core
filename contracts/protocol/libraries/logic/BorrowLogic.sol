@@ -152,8 +152,6 @@ library BorrowLogic {
     reserve.updateState(reserveCache);
 
     ValidationLogic.validateRepay(
-      params.lastBorrower,
-      params.lastBorrowTimestamp,
       reserveCache,
       params.amount,
       interestRateMode,

@@ -431,6 +431,7 @@ export const repay = async (
   sendValue: string,
   expectedResult: string,
   testEnv: TestEnv,
+  timeTravel: string,
   revertMessage?: string
 ) => {
   const { pool } = testEnv;
@@ -457,6 +458,12 @@ export const repay = async (
     const valueToSend = await convertToCurrencyDecimals(reserve, sendValue);
     txOptions.value = valueToSend.toHexString(); // '0x' + BigNumber.from(valueToSend.toString()).toString(16);
   }
+
+  if (timeTravel) {
+    const secondsToTravel = BigNumber.from(timeTravel).mul(ONE_YEAR).div(365).toNumber();
+    await advanceTimeAndBlock(secondsToTravel);
+  }
+
 
   if (expectedResult === 'success') {
     const txResult = await waitForTx(
@@ -516,12 +523,13 @@ export const repay = async (
   }
 };
 
-export const depositWithPermit = async (
+export const supplyWithPermit = async (
   reserveSymbol: string,
   amount: string,
   sender: SignerWithAddress,
   senderPk: string,
   onBehalfOf: tEthereumAddress,
+  useAsCollateral: boolean,
   sendValue: string,
   expectedResult: string,
   testEnv: TestEnv,
@@ -567,7 +575,7 @@ export const depositWithPermit = async (
     const txResult = await waitForTx(
       await pool
         .connect(sender.signer)
-        .depositWithPermit(
+        .supplyWithPermit(
           reserve,
           amountToDeposit,
           onBehalfOf,
@@ -619,7 +627,7 @@ export const depositWithPermit = async (
     await expect(
       pool
         .connect(sender.signer)
-        .depositWithPermit(
+        .supplyWithPermit(
           reserve,
           amountToDeposit,
           onBehalfOf,

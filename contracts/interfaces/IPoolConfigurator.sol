@@ -330,7 +330,7 @@ interface IPoolConfigurator {
   function deactivateReserve(address asset) external;
 
   /**
-   * @notice Freezes a reserve. A frozen reserve doesn't allow any new deposit, borrow or rate swap
+   * @notice Freezes a reserve. A frozen reserve doesn't allow any new supply, borrow or rate swap
    *  but allows repayments, liquidations, rate rebalances and withdrawals
    * @param asset The address of the underlying asset of the reserve
    **/
@@ -343,7 +343,7 @@ interface IPoolConfigurator {
   function unfreezeReserve(address asset) external;
 
   /**
-   * @notice Pauses a reserve. A paused reserve does not allow any interaction (deposit, borrow, repay, swap interestrate, liquidate, atoken transfers)
+   * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay, swap interestrate, liquidate, atoken transfers)
    * @param asset The address of the underlying asset of the reserve
    * @param val True if pausing the reserve, false if unpausing
    **/

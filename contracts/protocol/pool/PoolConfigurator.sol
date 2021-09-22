@@ -160,7 +160,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       require(liquidationBonus == 0, Errors.PC_INVALID_CONFIGURATION);
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
-      //we need to ensure no liquidity is deposited
+      //we need to ensure no liquidity is supplied
       _checkNoLiquidity(asset);
     }
 
@@ -294,7 +294,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
     require(
-      categoryData.liquidationThreshold > currentConfig.getLiquidationThresholdMemory(),
+      categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
       Errors.VL_INCONSISTENT_EMODE_CATEGORY
     );
 

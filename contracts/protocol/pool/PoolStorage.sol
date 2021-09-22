@@ -41,11 +41,7 @@ contract PoolStorage {
   mapping(address => bool) _authorizedFlashBorrowers;
 
   uint256 internal _flashLoanPremiumToProtocol;
-
-  address internal _lastBorrower;
-
-  uint40 internal _lastBorrowTimestamp;
-
+  
   mapping(uint8 => DataTypes.EModeCategory) _eModeCategories;
 
   mapping(address => uint8) _usersEModeCategory;

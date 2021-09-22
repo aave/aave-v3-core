@@ -5,6 +5,7 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
@@ -111,14 +112,25 @@ contract AToken is
   ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
-    _burn(user, amountScaled);
+
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
+
+    _burn(user, Helpers.castUint128(amountScaled));
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
 
+    _userState[user].additionalData = Helpers.castUint128(index);
+
     emit Transfer(user, address(0), amount);
-    emit Burn(user, receiverOfUnderlying, amount, index);
+    if (accumulatedInterest > amount) {
+      emit Mint(user, accumulatedInterest - amount, index);
+    } else {
+      emit Burn(user, receiverOfUnderlying, amount - accumulatedInterest, index);
+    }
   }
 
   /// @inheritdoc IAToken
@@ -127,16 +139,21 @@ contract AToken is
     uint256 amount,
     uint256 index
   ) external override onlyPool returns (bool) {
-    uint256 previousBalance = super.balanceOf(user);
-
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
-    _mint(user, amountScaled);
+
+    uint256 scaledBalance = super.balanceOf(user);
+    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+      scaledBalance.rayMul(_userState[user].additionalData);
+
+    _mint(user, Helpers.castUint128(amountScaled));
+
+    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(address(0), user, amount);
-    emit Mint(user, amount, index);
+    emit Mint(user, amount + accumulatedInterest, index);
 
-    return previousBalance == 0;
+    return scaledBalance == 0;
   }
 
   /// @inheritdoc IAToken
@@ -151,7 +168,7 @@ contract AToken is
     // The amount to mint can easily be very small since it is a fraction of the interest ccrued.
     // In that case, the treasury will experience a (very small) loss, but it
     // wont cause potentially valid transactions to fail.
-    _mint(treasury, amount.rayDiv(index));
+    _mint(treasury, Helpers.castUint128(amount.rayDiv(index)));
 
     emit Transfer(address(0), treasury, amount);
     emit Mint(treasury, amount, index);
@@ -209,6 +226,11 @@ contract AToken is
   /// @inheritdoc IScaledBalanceToken
   function scaledTotalSupply() public view virtual override returns (uint256) {
     return super.totalSupply();
+  }
+
+  /// @inheritdoc IScaledBalanceToken
+  function getPreviousIndex(address user) public view virtual override returns (uint256) {
+    return _userState[user].additionalData;
   }
 
   /**
@@ -294,7 +316,7 @@ contract AToken is
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
 
-    super._transfer(from, to, amount.rayDiv(index));
+    super._transfer(from, to, Helpers.castUint128(amount.rayDiv(index)));
 
     if (validate) {
       pool.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
@@ -312,7 +334,7 @@ contract AToken is
   function _transfer(
     address from,
     address to,
-    uint256 amount
+    uint128 amount
   ) internal override {
     _transfer(from, to, amount, true);
   }

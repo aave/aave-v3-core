@@ -12,6 +12,7 @@ import {MathUtils} from '../math/MathUtils.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
 import {Errors} from '../helpers/Errors.sol';
+import {Helpers} from '../helpers/Helpers.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 
 /**
@@ -105,7 +106,7 @@ library ReserveLogic {
 
   /**
    * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
-   * the flashloan fee to the reserve, and spread it between all the depositors
+   * the flashloan fee to the reserve, and spread it between all the suppliers
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
    * @param amount The amount to accomulate
@@ -120,9 +121,7 @@ library ReserveLogic {
     uint256 result = amountToLiquidityRatio + WadRayMath.RAY;
 
     result = result.rayMul(reserve.liquidityIndex);
-    require(result <= type(uint128).max, Errors.RL_LIQUIDITY_INDEX_OVERFLOW);
-
-    reserve.liquidityIndex = uint128(result);
+    reserve.liquidityIndex = Helpers.castUint128(result);
   }
 
   /**
@@ -161,7 +160,7 @@ library ReserveLogic {
   /**
    * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
-   * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
+   * @param liquidityAdded The amount of liquidity added to the protocol (supply or repay) in the previous action
    * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
    **/
   function updateInterestRates(
@@ -188,15 +187,12 @@ library ReserveLogic {
       reserveCache.nextTotalStableDebt,
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,
-      reserveCache.reserveConfiguration.getReserveFactorMemory()
+      reserveCache.reserveConfiguration.getReserveFactor()
     );
-    require(vars.nextLiquidityRate <= type(uint128).max, Errors.RL_LIQUIDITY_RATE_OVERFLOW);
-    require(vars.nextStableRate <= type(uint128).max, Errors.RL_STABLE_BORROW_RATE_OVERFLOW);
-    require(vars.nextVariableRate <= type(uint128).max, Errors.RL_VARIABLE_BORROW_RATE_OVERFLOW);
 
-    reserve.currentLiquidityRate = uint128(vars.nextLiquidityRate);
-    reserve.currentStableBorrowRate = uint128(vars.nextStableRate);
-    reserve.currentVariableBorrowRate = uint128(vars.nextVariableRate);
+    reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);
+    reserve.currentStableBorrowRate = Helpers.castUint128(vars.nextStableRate);
+    reserve.currentVariableBorrowRate = Helpers.castUint128(vars.nextVariableRate);
 
     emit ReserveDataUpdated(
       reserveAddress,
@@ -232,7 +228,7 @@ library ReserveLogic {
   ) internal {
     AccrueToTreasuryLocalVars memory vars;
 
-    vars.reserveFactor = reserveCache.reserveConfiguration.getReserveFactorMemory();
+    vars.reserveFactor = reserveCache.reserveConfiguration.getReserveFactor();
 
     if (vars.reserveFactor == 0) {
       return;
@@ -296,11 +292,7 @@ library ReserveLogic {
       reserveCache.nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(
         reserveCache.currLiquidityIndex
       );
-      require(
-        reserveCache.nextLiquidityIndex <= type(uint128).max,
-        Errors.RL_LIQUIDITY_INDEX_OVERFLOW
-      );
-      reserve.liquidityIndex = uint128(reserveCache.nextLiquidityIndex);
+      reserve.liquidityIndex = Helpers.castUint128(reserveCache.nextLiquidityIndex);
 
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
@@ -312,11 +304,7 @@ library ReserveLogic {
         reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
           reserveCache.currVariableBorrowIndex
         );
-        require(
-          reserveCache.nextVariableBorrowIndex <= type(uint128).max,
-          Errors.RL_VARIABLE_BORROW_INDEX_OVERFLOW
-        );
-        reserve.variableBorrowIndex = uint128(reserveCache.nextVariableBorrowIndex);
+        reserve.variableBorrowIndex = Helpers.castUint128(reserveCache.nextVariableBorrowIndex);
       }
     }
 

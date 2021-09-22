@@ -26,7 +26,7 @@ export enum eContractid {
   ValidationLogic = 'ValidationLogic',
   ReserveLogic = 'ReserveLogic',
   GenericLogic = 'GenericLogic',
-  DepositLogic = 'DepositLogic',
+  SupplyLogic = 'SupplyLogic',
   BorrowLogic = 'BorrowLogic',
   LiquidationLogic = 'LiquidationLogic',
   ConfiguratorLogic = 'ConfiguratorLogic',
@@ -50,8 +50,8 @@ export enum eContractid {
   VariableDebtToken = 'VariableDebtToken',
   FeeProvider = 'FeeProvider',
   TokenDistributor = 'TokenDistributor',
-  StableAndVariableTokensHelper = 'StableAndVariableTokensHelper',
-  ATokensAndRatesHelper = 'ATokensAndRatesHelper',
+  RateOracleSetupHelper = 'RateOracleSetupHelper',
+  ReservesSetupHelper = 'ReservesSetupHelper',
   WETH = 'WETH',
   WETHMocked = 'WETHMocked',
   PoolImpl = 'PoolImpl',
@@ -99,7 +99,7 @@ export enum ProtocolErrors {
   VL_NO_STABLE_RATE_LOAN_IN_RESERVE = '17', // 'User does not have a stable rate loan in progress on this reserve'
   VL_NO_VARIABLE_RATE_LOAN_IN_RESERVE = '18', // 'User does not have a variable rate loan in progress on this reserve'
   VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0 = '19', // 'The underlying balance needs to be greater than 0'
-  VL_DEPOSIT_ALREADY_IN_USE = '20', // 'User deposit is already being used as collateral'
+  VL_SUPPLIED_ASSETS_ALREADY_IN_USE = '20', // 'User supplied assets are already being used as collateral'
   P_NOT_ENOUGH_STABLE_BORROW_BALANCE = '21', // 'User does not have any stable rate loan for this reserve'
   P_INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET = '22', // 'Interest rate rebalance conditions were not met'
   P_LIQUIDATION_CALL_FAILED = '23', // 'Liquidation call failed'
@@ -129,16 +129,8 @@ export enum ProtocolErrors {
   MATH_MULTIPLICATION_OVERFLOW = '48',
   MATH_ADDITION_OVERFLOW = '49',
   MATH_DIVISION_BY_ZERO = '50',
-  RL_LIQUIDITY_INDEX_OVERFLOW = '51', //  Liquidity index overflows uint128
-  RL_VARIABLE_BORROW_INDEX_OVERFLOW = '52', //  Variable borrow index overflows uint128
-  RL_LIQUIDITY_RATE_OVERFLOW = '53', //  Liquidity rate overflows uint128
-  RL_VARIABLE_BORROW_RATE_OVERFLOW = '54', //  Variable borrow rate overflows uint128
-  RL_STABLE_BORROW_RATE_OVERFLOW = '55', //  Stable borrow rate overflows uint128
   CT_INVALID_MINT_AMOUNT = '56', //invalid amount to mint
-  P_FAILED_REPAY_WITH_COLLATERAL = '57',
   CT_INVALID_BURN_AMOUNT = '58', //invalid amount to burn
-  P_FAILED_COLLATERAL_SWAP = '60',
-  P_INVALID_EQUAL_ASSETS_TO_SWAP = '61',
   P_REENTRANCY_NOT_ALLOWED = '62',
   P_CALLER_MUST_BE_AN_ATOKEN = '63',
   P_IS_PAUSED = '64', // 'Pool is paused'
@@ -169,6 +161,7 @@ export enum ProtocolErrors {
   PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
   PC_FLASHLOAN_PREMIUM_INVALID = '96',
   RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
+  HLP_UINT128_OVERFLOW = '100',
 
   // old
 
