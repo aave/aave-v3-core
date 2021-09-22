@@ -11,19 +11,19 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
  **/
 interface IPool {
   /**
-   * @notice Emitted on deposit()
+   * @notice Emitted on supply()
    * @param reserve The address of the underlying asset of the reserve
-   * @param user The address initiating the deposit
-   * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
-   * @param amount The amount deposited
-   * @param referral The referral code used
+   * @param user The address initiating the supply
+   * @param onBehalfOf The beneficiary of the supply, receiving the aTokens
+   * @param amount The amount supplied
+   * @param referralCode The referral code used
    **/
-  event Deposit(
+  event Supply(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
 
   /**
@@ -164,17 +164,17 @@ interface IPool {
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
 
   /**
-   * @notice Deposits an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
-   * - E.g. User deposits 100 USDC and gets in return 100 aUSDC
-   * @param asset The address of the underlying asset to deposit
-   * @param amount The amount to be deposited
+   * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
+   * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
+   * @param asset The address of the underlying asset to supply
+   * @param amount The amount to be supplied
    * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
    *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
    *   is a different wallet
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    **/
-  function deposit(
+  function supply(
     address asset,
     uint256 amount,
     address onBehalfOf,
@@ -182,20 +182,21 @@ interface IPool {
   ) external;
 
   /**
-   * @notice Deposit with transfer approval of asset to be deposited done via permit function
+   * @notice Supply with transfer approval of asset to be supplied done via permit function
    * see: https://eips.ethereum.org/EIPS/eip-2612 and https://eips.ethereum.org/EIPS/eip-713
-   * @param asset The address of the underlying asset to deposit
-   * @param amount The amount to be deposited
+   * @param asset The address of the underlying asset to supply
+   * @param amount The amount to be supplied
    * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
    *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
    *   is a different wallet
+   * @param deadline The deadline timestamp that the permit is valid
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    * @param permitV The V parameter of ERC712 permit sig
    * @param permitR The R parameter of ERC712 permit sig
    * @param permitS The S parameter of ERC712 permit sig
    **/
-  function depositWithPermit(
+  function supplyWithPermit(
     address asset,
     uint256 amount,
     address onBehalfOf,
@@ -225,7 +226,7 @@ interface IPool {
 
   /**
    * @notice Allows users to borrow a specific `amount` of the reserve underlying asset, provided that the borrower
-   * already deposited enough collateral, or he was given enough allowance by a credit delegator on the
+   * already supplied enough collateral, or he was given enough allowance by a credit delegator on the
    * corresponding debt token (StableDebtToken or VariableDebtToken)
    * - E.g. User borrows 100 USDC passing as `onBehalfOf` his own address, receiving the 100 USDC in his wallet
    *   and 100 stable/variable debt tokens, depending on the `interestRateMode`
@@ -275,6 +276,7 @@ interface IPool {
    * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
+   * @param deadline The deadline timestamp that the permit is valid
    * @param permitV The V parameter of ERC712 permit sig
    * @param permitR The R parameter of ERC712 permit sig
    * @param permitS The S parameter of ERC712 permit sig
@@ -321,17 +323,17 @@ interface IPool {
    * @notice Rebalances the stable interest rate of a user to the current stable rate defined on the reserve.
    * - Users can be rebalanced if the following conditions are satisfied:
    *     1. Usage ratio is above 95%
-   *     2. the current deposit APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too much has been
-   *        borrowed at a stable rate and depositors are not earning enough
+   *     2. the current supply APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too much has been
+   *        borrowed at a stable rate and suppliers are not earning enough
    * @param asset The address of the underlying asset borrowed
    * @param user The address of the user to be rebalanced
    **/
   function rebalanceStableBorrowRate(address asset, address user) external;
 
   /**
-   * @notice Allows depositors to enable/disable a specific deposited asset as collateral
-   * @param asset The address of the underlying asset deposited
-   * @param useAsCollateral True if the user wants to use the deposit as collateral, false otherwise
+   * @notice Allows suppliers to enable/disable a specific supplied asset as collateral
+   * @param asset The address of the underlying asset supplied
+   * @param useAsCollateral True if the user wants to use the supply as collateral, false otherwise
    **/
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external;
 
@@ -575,4 +577,23 @@ interface IPool {
    * @param assets The list of reserves for which the minting needs to be executed
    **/
   function mintToTreasury(address[] calldata assets) external;
+
+  /**
+   * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
+   * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
+   * @dev Deprecated: Use the `supply` function instead
+   * @param asset The address of the underlying asset to supply
+   * @param amount The amount to be supplied
+   * @param onBehalfOf The address that will receive the aTokens, same as msg.sender if the user
+   *   wants to receive them on his own wallet, or a different address if the beneficiary of aTokens
+   *   is a different wallet
+   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+   *   0 if the action is executed directly by the user, without any middle-man
+   **/
+  function deposit(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) external;
 }

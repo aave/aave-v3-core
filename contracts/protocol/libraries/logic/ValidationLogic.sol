@@ -38,11 +38,11 @@ library ValidationLogic {
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
 
   /**
-   * @notice Validates a deposit action
+   * @notice Validates a supply action
    * @param reserveCache The cached data of the reserve
-   * @param amount The amount to be deposited
+   * @param amount The amount to be supplied
    */
-  function validateDeposit(DataTypes.ReserveCache memory reserveCache, uint256 amount)
+  function validateSupply(DataTypes.ReserveCache memory reserveCache, uint256 amount)
     internal
     view
   {
@@ -328,7 +328,7 @@ library ValidationLogic {
       /**
        * user wants to swap to stable, before swapping we need to ensure that
        * 1. stable borrow rate is enabled on the reserve
-       * 2. user is not trying to abuse the reserve by depositing
+       * 2. user is not trying to abuse the reserve by supplying
        * more collateral than he is borrowing, artificially lowering
        * the interest rate, borrowing at variable, and switching to stable
        **/
