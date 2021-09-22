@@ -93,9 +93,6 @@ library DataTypes {
     uint256 amount;
     address onBehalfOf;
     uint16 referralCode;
-    bool useAsCollateral;
-    uint256 reservesCount;
-    address oracle;
   }
 
   struct ExecuteBorrowParams {

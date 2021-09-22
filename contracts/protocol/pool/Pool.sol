@@ -84,21 +84,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     address onBehalfOf,
-    uint16 referralCode,
-    bool useAsCollateral
+    uint16 referralCode
   ) external override {
     SupplyLogic.executeSupply(
       _reserves,
       _usersConfig[onBehalfOf],
-      _reservesList,
       DataTypes.ExecuteSupplyParams(
         asset,
         amount,
         onBehalfOf,
-        referralCode,
-        useAsCollateral,
-        _reservesCount,
-        _addressesProvider.getPriceOracle()
+        referralCode
       )
     );
   }
@@ -110,7 +105,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode,
     uint256 deadline,
-    bool useAsCollateral,
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
@@ -127,15 +121,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     SupplyLogic.executeSupply(
       _reserves,
       _usersConfig[onBehalfOf],
-      _reservesList,
       DataTypes.ExecuteSupplyParams(
         asset,
         amount,
         onBehalfOf,
-        referralCode,
-        useAsCollateral,
-        _reservesCount,
-        _addressesProvider.getPriceOracle()
+        referralCode
       )
     );
   }
@@ -612,15 +602,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     SupplyLogic.executeSupply(
       _reserves,
       _usersConfig[onBehalfOf],
-      _reservesList,
       DataTypes.ExecuteSupplyParams(
         asset,
         amount,
         onBehalfOf,
-        referralCode,
-        true,
-        _reservesCount,
-        _addressesProvider.getPriceOracle()
+        referralCode
       )
     );
   }

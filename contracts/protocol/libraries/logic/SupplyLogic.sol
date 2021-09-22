@@ -38,14 +38,12 @@ library SupplyLogic {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral,
-    bool useAsCollateral
+    uint16 indexed referralCode
   );
 
   function executeSupply(
     mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
-    mapping(uint256 => address) storage reservesList,
     DataTypes.ExecuteSupplyParams memory params
   ) internal {
     DataTypes.ReserveData storage reserve = reserves[params.asset];
@@ -65,42 +63,12 @@ library SupplyLogic {
       reserveCache.nextLiquidityIndex
     );
 
-    // Apply `useAsCollateral` if:
-    // - user supplies assets on its own
-    // - user supplies assets on behalf of another user and it's their first supplied assets
-    if (params.onBehalfOf == msg.sender || (params.onBehalfOf != msg.sender && isFirstSupply)) {
-      if (params.useAsCollateral) {
-        userConfig.setUsingAsCollateral(reserve.id, true);
-        emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
-      } else {
-        // Validate HF in case its needed
-        if (userConfig.isUsingAsCollateral(reserve.id)) {
-          userConfig.setUsingAsCollateral(reserve.id, false);
-          if (userConfig.isBorrowingAny()) {
-            ValidationLogic.validateHFAndLtv(
-              params.asset,
-              params.onBehalfOf,
-              reserves,
-              userConfig,
-              reservesList,
-              params.reservesCount,
-              params.oracle
-            );
-          }
-        }
-
-        emit ReserveUsedAsCollateralDisabled(params.asset, params.onBehalfOf);
-      }
+    if (isFirstSupply) {
+      userConfig.setUsingAsCollateral(reserve.id, true);
+      emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
     }
 
-    emit Supply(
-      params.asset,
-      msg.sender,
-      params.onBehalfOf,
-      params.amount,
-      params.referralCode,
-      params.useAsCollateral
-    );
+    emit Supply(params.asset, msg.sender, params.onBehalfOf, params.amount, params.referralCode);
   }
 
   function executeWithdraw(
