@@ -106,7 +106,7 @@ library ReserveLogic {
 
   /**
    * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
-   * the flashloan fee to the reserve, and spread it between all the depositors
+   * the flashloan fee to the reserve, and spread it between all the suppliers
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
    * @param amount The amount to accomulate
@@ -160,7 +160,7 @@ library ReserveLogic {
   /**
    * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
    * @param reserve The address of the reserve to be updated
-   * @param liquidityAdded The amount of liquidity added to the protocol (deposit or repay) in the previous action
+   * @param liquidityAdded The amount of liquidity added to the protocol (supply or repay) in the previous action
    * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
    **/
   function updateInterestRates(
@@ -187,7 +187,7 @@ library ReserveLogic {
       reserveCache.nextTotalStableDebt,
       vars.totalVariableDebt,
       reserveCache.nextAvgStableBorrowRate,
-      reserveCache.reserveConfiguration.getReserveFactorMemory()
+      reserveCache.reserveConfiguration.getReserveFactor()
     );
 
     reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);
@@ -228,7 +228,7 @@ library ReserveLogic {
   ) internal {
     AccrueToTreasuryLocalVars memory vars;
 
-    vars.reserveFactor = reserveCache.reserveConfiguration.getReserveFactorMemory();
+    vars.reserveFactor = reserveCache.reserveConfiguration.getReserveFactor();
 
     if (vars.reserveFactor == 0) {
       return;

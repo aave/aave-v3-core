@@ -11,7 +11,7 @@ import {
   rebalanceStableBorrowRate,
   delegateBorrowAllowance,
   repayWithPermit,
-  depositWithPermit,
+  supplyWithPermit,
 } from './actions';
 import { RateMode } from '../../helpers/types';
 import { getTestWallets } from './utils/wallets';
@@ -116,9 +116,9 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
         );
       }
       break;
-    case 'depositWithPermit':
+    case 'supplyWithPermit':
       {
-        const { amount, sendValue, onBehalfOf: onBehalfOfIndex } = action.args;
+        const { amount, sendValue, onBehalfOf: onBehalfOfIndex, useAsCollateral } = action.args;
         const onBehalfOf = onBehalfOfIndex
           ? users[parseInt(onBehalfOfIndex)].address
           : user.address;
@@ -127,12 +127,13 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
           throw `Invalid amount to deposit into the ${reserve} reserve`;
         }
 
-        await depositWithPermit(
+        await supplyWithPermit(
           reserve,
           amount,
           user,
           userPrivateKey,
           onBehalfOf,
+          useAsCollateral,
           sendValue,
           expected,
           testEnv,

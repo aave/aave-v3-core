@@ -10,7 +10,7 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
-import {DepositLogic} from '../libraries/logic/DepositLogic.sol';
+import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
@@ -27,12 +27,12 @@ import {PoolStorage} from './PoolStorage.sol';
  * @author Aave
  * @notice Main point of interaction with an Aave protocol's market
  * - Users can:
- *   # Deposit
+ *   # Supply
  *   # Withdraw
  *   # Borrow
  *   # Repay
  *   # Swap their loans between variable and stable rate
- *   # Enable/disable their deposits as collateral rebalance stable rate borrow positions
+ *   # Enable/disable their supplied assets as collateral rebalance stable rate borrow positions
  *   # Liquidate positions
  *   # Execute Flash Loans
  * @dev To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
@@ -81,24 +81,26 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function deposit(
+  function supply(
     address asset,
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
   ) external override {
-    DepositLogic.executeDeposit(
-      _reserves[asset],
+    SupplyLogic.executeSupply(
+      _reserves,
       _usersConfig[onBehalfOf],
-      asset,
-      amount,
-      onBehalfOf,
-      referralCode
+      DataTypes.ExecuteSupplyParams(
+        asset,
+        amount,
+        onBehalfOf,
+        referralCode
+      )
     );
   }
 
   /// @inheritdoc IPool
-  function depositWithPermit(
+  function supplyWithPermit(
     address asset,
     uint256 amount,
     address onBehalfOf,
@@ -117,13 +119,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       permitR,
       permitS
     );
-    DepositLogic.executeDeposit(
-      _reserves[asset],
+    SupplyLogic.executeSupply(
+      _reserves,
       _usersConfig[onBehalfOf],
-      asset,
-      amount,
-      onBehalfOf,
-      referralCode
+      DataTypes.ExecuteSupplyParams(
+        asset,
+        amount,
+        onBehalfOf,
+        referralCode
+      )
     );
   }
 
@@ -134,7 +138,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address to
   ) external override returns (uint256) {
     return
-      DepositLogic.executeWithdraw(
+      SupplyLogic.executeWithdraw(
         _reserves,
         _usersConfig[msg.sender],
         _reservesList,
@@ -245,7 +249,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
-    DepositLogic.setUserUseReserveAsCollateral(
+    SupplyLogic.setUserUseReserveAsCollateral(
       _reserves,
       _usersConfig[msg.sender],
       asset,
@@ -486,7 +490,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceToBefore
   ) external override {
     require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
-    DepositLogic.finalizeTransfer(
+    SupplyLogic.finalizeTransfer(
       _reserves,
       _reservesList,
       _usersConfig,
@@ -572,5 +576,25 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         }
       }
     }
+  }
+
+  /// @inheritdoc IPool
+  /// @dev Deprecated: mantained for compatibilty purposes
+  function deposit(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) external override {
+    SupplyLogic.executeSupply(
+      _reserves,
+      _usersConfig[onBehalfOf],
+      DataTypes.ExecuteSupplyParams(
+        asset,
+        amount,
+        onBehalfOf,
+        referralCode
+      )
+    );
   }
 }

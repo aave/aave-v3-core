@@ -88,6 +88,13 @@ library DataTypes {
     address priceOracle;
   }
 
+  struct ExecuteSupplyParams {
+    address asset;
+    uint256 amount;
+    address onBehalfOf;
+    uint16 referralCode;
+  }
+
   struct ExecuteBorrowParams {
     address asset;
     address user;

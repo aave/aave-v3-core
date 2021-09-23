@@ -88,19 +88,19 @@ export const deployPoolConfigurator = async () => {
   return withSave(poolConfiguratorImpl, eContractid.PoolConfigurator);
 };
 
-export const deployDepositLogic = async () => {
-  const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
+export const deploySupplyLogic = async () => {
+  const supplyLogicArtifact = await readArtifact(eContractid.SupplyLogic);
 
-  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {});
-  const depositLogicFactory = await DRE.ethers.getContractFactory(
-    depositLogicArtifact.abi,
-    linkedDepositLogicByteCode
+  const linkedSupplyLogicByteCode = linkBytecode(supplyLogicArtifact, {});
+  const supplyLogicFactory = await DRE.ethers.getContractFactory(
+    supplyLogicArtifact.abi,
+    linkedSupplyLogicByteCode
   );
-  const depositLogic = await (
-    await depositLogicFactory.connect(await getFirstSigner()).deploy()
+  const supplyLogic = await (
+    await supplyLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
-  return withSave(depositLogic, eContractid.DepositLogic);
+  return withSave(supplyLogic, eContractid.SupplyLogic);
 };
 
 export const deployBorrowLogic = async () => {
@@ -132,7 +132,7 @@ export const deployLiquidationLogic = async () => {
 };
 
 export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
-  const depositLogic = await deployDepositLogic();
+  const supplyLogic = await deploySupplyLogic();
   const borrowLogic = await deployBorrowLogic();
   const liquidationLogic = await deployLiquidationLogic();
   // Hardcoded solidity placeholders, if any library changes path this will fail.
@@ -148,7 +148,7 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   // libName example: GenericLogic
   return {
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
-    ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
+    ['__$db79717e66442ee197e8271d032a066e34$__']: supplyLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
     ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address,
   };

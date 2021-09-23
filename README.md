@@ -19,7 +19,7 @@ This repository contains the smart contracts source code and markets configurati
 
 ## What is Aave?
 
-Aave is a decentralized non-custodial liquidity markets protocol where users can participate as depositors or borrowers. Depositors provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) or undercollateralized (one-block liquidity) fashion.
+Aave is a decentralized non-custodial liquidity markets protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) or undercollateralized (one-block liquidity) fashion.
 
 ## Documentation
 
@@ -55,8 +55,8 @@ import {IPool} from "@aave/protocol-v2/contracts/interfaces/IPool.sol";
 
 contract Misc {
 
-  function deposit(address pool, address token, address user, uint256 amount) public {
-    IPool(pool).deposit(token, amount, user, 0);
+  function supply(address pool, address token, address user, uint256 amount) public {
+    IPool(pool).supply(token, amount, user, 0);
     {...}
   }
 }
@@ -185,8 +185,8 @@ const DAI = await contractGetters.getIErc20Detailed("0x6B175474E89094C44Da98b954
 // Approve 100 DAI to Pool address
 await DAI.connect(signer).approve(pool.address, ethers.utils.parseUnits('100'));
 
-// Deposit 100 DAI
-await pool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
+// Supply 100 DAI
+await pool.connect(signer).supply(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
 
 ```
 
@@ -221,6 +221,6 @@ const DAI = await contractGetters.getIErc20Detailed("0x6B175474E89094C44Da98b954
 // Approve 100 DAI to Pool address
 await DAI.connect(signer).approve(pool.address, ethers.utils.parseUnits('100'));
 
-// Deposit 100 DAI
-await pool.connect(signer).deposit(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
+// Supply 100 DAI
+await pool.connect(signer).supply(DAI.address, ethers.utils.parseUnits('100'), await signer.getAddress(), '0');
 ```
