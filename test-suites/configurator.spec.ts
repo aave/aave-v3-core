@@ -1,8 +1,16 @@
 import { expect } from 'chai';
-import { BigNumber } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 import { ONE_ADDRESS, RAY, ZERO_ADDRESS } from '../helpers/constants';
+import { deployMintableERC20 } from '../helpers/contracts-deployments';
+import { getFirstSigner } from '../helpers/contracts-getters';
 import { strategyWETH } from '../market-config/reservesConfigs';
-import { AaveProtocolDataProvider } from '../types';
+import {
+  AaveProtocolDataProvider,
+  ATokenFactory,
+  MockReserveInterestRateStrategyFactory,
+  StableDebtTokenFactory,
+  VariableDebtTokenFactory,
+} from '../types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 type ReserveConfigurationValues = {
@@ -105,6 +113,71 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       borrowCap: borrowCap,
       supplyCap: supplyCap,
     };
+  });
+
+  it('InitReserves via AssetListing admin', async () => {
+    const { addressesProvider, configurator, poolAdmin, aclManager, users } = testEnv;
+
+    // const snapId
+    const assetListingAdmin = users[4];
+    // Add new AssetListingAdmin
+    expect(
+      await aclManager.connect(poolAdmin.signer).addAssetListingAdmin(assetListingAdmin.address)
+    );
+
+    // Deploy mock `InitReserveInput`
+    const mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
+    const stableDebtTokenImplementation = await new StableDebtTokenFactory(
+      await getFirstSigner()
+    ).deploy();
+    const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
+      await getFirstSigner()
+    ).deploy();
+    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
+    const mockRateStrategy = await new MockReserveInterestRateStrategyFactory(
+      await getFirstSigner()
+    ).deploy(addressesProvider.address, 0, 0, 0, 0, 0, 0);
+
+    // Init the reserve
+    const initInputParams: {
+      aTokenImpl: string;
+      stableDebtTokenImpl: string;
+      variableDebtTokenImpl: string;
+      underlyingAssetDecimals: BigNumberish;
+      interestRateStrategyAddress: string;
+      underlyingAsset: string;
+      treasury: string;
+      incentivesController: string;
+      underlyingAssetName: string;
+      aTokenName: string;
+      aTokenSymbol: string;
+      variableDebtTokenName: string;
+      variableDebtTokenSymbol: string;
+      stableDebtTokenName: string;
+      stableDebtTokenSymbol: string;
+      params: string;
+    }[] = [
+      {
+        aTokenImpl: aTokenImplementation.address,
+        stableDebtTokenImpl: stableDebtTokenImplementation.address,
+        variableDebtTokenImpl: variableDebtTokenImplementation.address,
+        underlyingAssetDecimals: 18,
+        interestRateStrategyAddress: mockRateStrategy.address,
+        underlyingAsset: mockToken.address,
+        treasury: ZERO_ADDRESS,
+        incentivesController: ZERO_ADDRESS,
+        underlyingAssetName: 'MOCK',
+        aTokenName: 'AMOCK',
+        aTokenSymbol: 'AMOCK',
+        variableDebtTokenName: 'VMOCK',
+        variableDebtTokenSymbol: 'VMOCK',
+        stableDebtTokenName: 'SMOCK',
+        stableDebtTokenSymbol: 'SMOCK',
+        params: '0x10',
+      },
+    ];
+
+    expect(await configurator.connect(assetListingAdmin.signer).initReserves(initInputParams));
   });
 
   it('Deactivates the ETH reserve', async () => {
@@ -571,7 +644,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.true;
     expect(await aclManager.isRiskAdmin(newRiskAdmin)).to.be.true;
   });
-  
+
   it('Unregister risk admins', async () => {
     const { aclManager, poolAdmin, users, riskAdmin } = testEnv;
 

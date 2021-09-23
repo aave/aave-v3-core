@@ -9,9 +9,10 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN,
     PC_CALLER_NOT_RISK_OR_POOL_ADMIN,
     PC_CALLER_NOT_EMERGENCY_ADMIN,
+    PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN,
   } = ProtocolErrors;
 
-  it('Test the accessibility of onlyPoolAdmin modified functions', async () => {
+  it('Test the accessibility of onlyAssetListingOrPoolAdmins modified functions', async () => {
     const { configurator, users } = testEnv;
     const nonPoolAdmin = users[2];
 
@@ -37,6 +38,21 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
         params: '0x10',
       },
     ];
+
+    const calls = [{ fn: 'initReserves', args: [randomInitReserve] }];
+    for (const call of calls) {
+      await expect(
+        configurator.connect(nonPoolAdmin.signer)[call.fn](...call.args)
+      ).to.be.revertedWith(PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
+    }
+  });
+
+  it('Test the accessibility of onlyPoolAdmin modified functions', async () => {
+    const { configurator, users } = testEnv;
+    const nonPoolAdmin = users[2];
+
+    const randomAddress = ONE_ADDRESS;
+    const randomNumber = '0';
     const randomUpdateAToken = {
       asset: randomAddress,
       treasury: randomAddress,
@@ -56,7 +72,6 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     };
 
     const calls = [
-      { fn: 'initReserves', args: [randomInitReserve] },
       { fn: 'dropReserve', args: [randomAddress] },
       { fn: 'updateAToken', args: [randomUpdateAToken] },
       { fn: 'updateStableDebtToken', args: [randomUpdateDebtToken] },
