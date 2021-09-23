@@ -169,6 +169,20 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
   });
 
+  it('Set a eMode category to DAI with 0 LT (revert expected)', async () => {
+    const { configurator, poolAdmin, dai } = testEnv;
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory('101', '9800', '0', '10100', ZERO_ADDRESS, 'INCONSISTENT')
+    );
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '101')
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
   it('Tries to disable the DAI reserve with liquidity on it (revert expected)', async () => {
     const { dai, pool, configurator } = testEnv;
     const userAddress = await pool.signer.getAddress();
