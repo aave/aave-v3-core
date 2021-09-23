@@ -623,4 +623,48 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await pool.FLASHLOAN_PREMIUM_TOTAL()).to.be.eq(newPremiumTotal);
     expect(await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL()).to.be.eq(newPremiumToProtocol);
   });
+
+  it('Adds a new eMode category for stablecoins', async () => {
+    const { configurator, pool, poolAdmin } = testEnv;
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory('1', '9800', '9800', '10100', ONE_ADDRESS, 'STABLECOINS')
+    )
+      .to.emit(configurator, 'EModeCategoryAdded')
+      .withArgs(1, 9800, 9800, 10100, ONE_ADDRESS, 'STABLECOINS');
+
+    const categoryData = await pool.getEModeCategoryData(1);
+    expect(categoryData.ltv).to.be.equal(9800, 'invalid eMode category ltv');
+    expect(categoryData.liquidationThreshold).to.be.equal(
+      9800,
+      'invalid eMode category liq threshold'
+    );
+    expect(categoryData.liquidationBonus).to.be.equal(10100, 'invalid eMode category liq bonus');
+    expect(categoryData.priceSource).to.be.equal(
+      ONE_ADDRESS,
+      'invalid eMode category price source'
+    );
+  });
+
+  it('Set a eMode category to an asset', async () => {
+    const { configurator, pool, poolAdmin, dai } = testEnv;
+
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '1'))
+      .to.emit(configurator, 'EModeAssetCategoryChanged')
+      .withArgs(dai.address, 1);
+
+    const categoryData = await pool.getEModeCategoryData(1);
+    expect(categoryData.ltv).to.be.equal(9800, 'invalid eMode category ltv');
+    expect(categoryData.liquidationThreshold).to.be.equal(
+      9800,
+      'invalid eMode category liq threshold'
+    );
+    expect(categoryData.liquidationBonus).to.be.equal(10100, 'invalid eMode category liq bonus');
+    expect(categoryData.priceSource).to.be.equal(
+      ONE_ADDRESS,
+      'invalid eMode category price source'
+    );
+  });
 });
