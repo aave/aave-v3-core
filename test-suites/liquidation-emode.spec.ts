@@ -5,7 +5,8 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { parseUnits } from '@ethersproject/units';
 import './helpers/utils/wadraymath';
-import { getUserData } from './helpers/utils/helpers';
+import { getReserveData, getUserData } from './helpers/utils/helpers';
+import { BigNumber } from 'ethers';
 
 makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (testEnv: TestEnv) => {
   const { INVALID_HF } = ProtocolErrors;
@@ -122,12 +123,15 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       usdc,
       users: [, borrower, , liquidator],
       pool,
+      oracle,
       helpersContract,
     } = testEnv;
 
     await dai.connect(liquidator.signer).mint(parseUnits('100000', 18));
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
+    const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
     const userReserveDataBefore = await getUserData(
       pool,
       helpersContract,
@@ -143,12 +147,58 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       .connect(liquidator.signer)
       .liquidationCall(usdc.address, dai.address, borrower.address, amountToLiquidate, false);
 
-    const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
+    const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+    const userReserveDataAfter = await helpersContract.getUserReserveData(
+      dai.address,
+      borrower.address
+    );
 
+    const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
     expect(userGlobalDataAfter.healthFactor).to.be.gt(userGlobalDataBefore.healthFactor);
     expect(userGlobalDataAfter.totalCollateralBase).to.be.lt(
       userGlobalDataBefore.totalCollateralBase
     );
     expect(userGlobalDataAfter.totalDebtBase).to.be.lt(userGlobalDataBefore.totalDebtBase);
+
+    const collateralPrice = await oracle.getAssetPrice(usdc.address);
+    const principalPrice = await oracle.getAssetPrice(dai.address);
+    const collateralDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
+      .decimals;
+    const principalDecimals = (await helpersContract.getReserveConfigurationData(dai.address))
+      .decimals;
+
+    const expectedCollateralLiquidated = principalPrice
+      .mul(amountToLiquidate)
+      .percentMul(10100)
+      .mul(BigNumber.from(10).pow(collateralDecimals))
+      .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
+
+    expect(userReserveDataAfter.currentVariableDebt).to.be.closeTo(
+      userReserveDataBefore.currentVariableDebt.sub(amountToLiquidate),
+      2,
+      'Invalid user borrow balance after liquidation'
+    );
+
+    //the liquidity index of the principal reserve needs to be bigger than the index before
+    expect(daiReserveDataAfter.liquidityIndex).to.be.eq(
+      daiReserveDataBefore.liquidityIndex,
+      'Invalid liquidity index'
+    );
+
+    //the principal APY after a liquidation needs to be lower than the APY before
+    expect(daiReserveDataAfter.liquidityRate).to.be.eq(0, 'Invalid liquidity APY');
+
+    expect(daiReserveDataAfter.availableLiquidity).to.be.closeTo(
+      daiReserveDataBefore.availableLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal available liquidity'
+    );
+
+    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.availableLiquidity.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral available liquidity'
+    );
   });
 });
