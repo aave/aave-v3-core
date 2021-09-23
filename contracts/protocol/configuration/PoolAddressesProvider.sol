@@ -18,14 +18,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
   bytes32 private constant POOL = 'POOL';
   bytes32 private constant POOL_CONFIGURATOR = 'POOL_CONFIGURATOR';
-
-  /// @dev Deprecated: poolAdmin managed via ACLManager
-  bytes32 private constant POOL_ADMIN = 'POOL_ADMIN';
-  /// @dev Deprecated: emergencyAdmin managed via ACLManager
-  bytes32 private constant EMERGENCY_ADMIN = 'EMERGENCY_ADMIN';
-  /// @dev Deprecated: collateralManager no longer used
-  bytes32 private constant POOL_COLLATERAL_MANAGER = 'COLLATERAL_MANAGER';
-
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
   bytes32 private constant ACL_MANAGER = 'ACL_MANAGER';
