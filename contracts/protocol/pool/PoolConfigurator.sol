@@ -47,6 +47,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _;
   }
 
+  modifier onlyAssetListingOrPoolAdmins() {
+    _onlyAssetListingOrPoolAdmins();
+    _;
+  }
+
   modifier onlyRiskOrPoolAdmins() {
     _onlyRiskOrPoolAdmins();
     _;
@@ -68,7 +73,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function initReserves(ConfiguratorInputTypes.InitReserveInput[] calldata input)
     external
     override
-    onlyPoolAdmin
+    onlyAssetListingOrPoolAdmins
   {
     IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
@@ -365,6 +370,14 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(
       aclManager.isPoolAdmin(msg.sender) || aclManager.isEmergencyAdmin(msg.sender),
       Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
+    );
+  }
+
+  function _onlyAssetListingOrPoolAdmins() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(
+      aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
+      Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
     );
   }
 
