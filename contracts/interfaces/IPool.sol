@@ -521,21 +521,6 @@ interface IPool {
   function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
-   * @notice Authorizes/Unauthorizes a flash borrower. Authorized borrowers pay no flash loan premium.
-   * @dev Only callable by the PoolConfigurator contract
-   * @param flashBorrower The address of the flash borrower
-   * @param authorized `true` to authorize, `false` to unauthorize
-   */
-  function updateFlashBorrowerAuthorization(address flashBorrower, bool authorized) external;
-
-  /**
-   * @notice Returns whether a flashborrower is authorized (pays no premium)
-   * @param flashBorrower The address of the flash borrower
-   * @return True if authorized, `false` if not
-   */
-  function isFlashBorrowerAuthorized(address flashBorrower) external view returns (bool);
-
-  /**
    * @notice Updates flash loan premiums. Flash loan premium consist in 2 parts
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves

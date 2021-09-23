@@ -107,4 +107,5 @@ library Errors {
   string public constant PC_FLASHLOAN_PREMIUM_INVALID = '96';
   string public constant RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97';
   string public constant HLP_UINT128_OVERFLOW = '98';
+  string public constant PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '99';
 }

@@ -28,17 +28,11 @@ contract PoolStorage {
 
   uint256 internal _reservesCount;
 
-  // Deprecated: global Pool pause state, no longer used
-  // Replaced by pause states for each reserve
-  bool internal _paused;
-
   uint256 internal _maxStableRateBorrowSizePercent;
 
   uint256 internal _flashLoanPremiumTotal;
 
   uint256 internal _maxNumberOfReserves;
-
-  mapping(address => bool) _authorizedFlashBorrowers;
 
   uint256 internal _flashLoanPremiumToProtocol;
 }

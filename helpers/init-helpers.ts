@@ -2,6 +2,7 @@ import { eContractid, iMultiPoolsAssets, IReserveParams, tEthereumAddress } from
 import { AaveProtocolDataProvider } from '../types/AaveProtocolDataProvider';
 import { chunk, waitForTx } from './misc-utils';
 import {
+  getACLManager,
   getReservesSetupHelper,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
@@ -242,6 +243,7 @@ export const configureReservesByHelper = async (
   admin: tEthereumAddress
 ) => {
   const addressProvider = await getPoolAddressesProvider();
+  const aclManager = await getACLManager();
   const reservesSetupHelper = await getReservesSetupHelper();
   const tokens: string[] = [];
   const symbols: string[] = [];
@@ -311,8 +313,8 @@ export const configureReservesByHelper = async (
     symbols.push(assetSymbol);
   }
   if (tokens.length) {
-    // Set aTokenAndRatesDeployer as temporal admin
-    await waitForTx(await addressProvider.setPoolAdmin(reservesSetupHelper.address));
+    // Add reservesSetupHelper as temporal admin
+    await waitForTx(await aclManager.addPoolAdmin(reservesSetupHelper.address));
 
     // Deploy init per chunks
     const enableChunks = 20;
@@ -330,7 +332,7 @@ export const configureReservesByHelper = async (
       );
       console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
     }
-    // Set deployer back as admin
-    await waitForTx(await addressProvider.setPoolAdmin(admin));
+    // Remove reservesSetupHelper as admin
+    await waitForTx(await aclManager.removePoolAdmin(reservesSetupHelper.address));
   }
 };

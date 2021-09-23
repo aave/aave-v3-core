@@ -19,6 +19,7 @@ import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
+import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
 
 /**
@@ -311,7 +312,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     BorrowLogic.executeFlashLoan(
       _reserves,
       _reservesList,
-      _authorizedFlashBorrowers,
+      IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender),
       _usersConfig[onBehalfOf],
       flashParams
     );
@@ -548,20 +549,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     _reserves[asset].configuration.data = configuration;
-  }
-
-  /// @inheritdoc IPool
-  function updateFlashBorrowerAuthorization(address flashBorrower, bool authorized)
-    external
-    override
-    onlyPoolConfigurator
-  {
-    _authorizedFlashBorrowers[flashBorrower] = authorized;
-  }
-
-  /// @inheritdoc IPool
-  function isFlashBorrowerAuthorized(address flashBorrower) external view override returns (bool) {
-    return _authorizedFlashBorrowers[flashBorrower];
   }
 
   /// @inheritdoc IPool

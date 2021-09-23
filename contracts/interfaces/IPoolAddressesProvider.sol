@@ -9,11 +9,11 @@ pragma solidity 0.8.7;
 interface IPoolAddressesProvider {
   event MarketIdSet(string newMarketId);
   event PoolUpdated(address indexed newAddress);
-  event ConfigurationAdminUpdated(address indexed newAddress);
-  event EmergencyAdminUpdated(address indexed newAddress);
   event PoolConfiguratorUpdated(address indexed newAddress);
   event PriceOracleUpdated(address indexed newAddress);
   event RateOracleUpdated(address indexed newAddress);
+  event ACLManagerUpdated(address indexed newAddress);
+  event ACLAdminUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
@@ -80,19 +80,6 @@ interface IPoolAddressesProvider {
    **/
   function setPoolConfiguratorImpl(address configurator) external;
 
-  /**
-   * @notice The functions below are getters/setters of addresses that are outside the context
-   * of the protocol hence the upgradable proxy pattern is not used
-   **/
-
-  function getPoolAdmin() external view returns (address);
-
-  function setPoolAdmin(address admin) external;
-
-  function getEmergencyAdmin() external view returns (address);
-
-  function setEmergencyAdmin(address admin) external;
-
   function getPriceOracle() external view returns (address);
 
   function setPriceOracle(address priceOracle) external;
@@ -100,4 +87,28 @@ interface IPoolAddressesProvider {
   function getRateOracle() external view returns (address);
 
   function setRateOracle(address rateOracle) external;
+
+  /**
+   * @notice Returns the address of the ACL manager proxy
+   * @return The ACLManager proxy address
+   */
+  function getACLManager() external view returns (address);
+
+  /**
+   * @notice Updates the address of the ACLManager
+   * @param aclManager The address of the new ACLManager
+   **/
+  function setACLManager(address aclManager) external;
+
+  /**
+   * @notice Returns the address of the ACL admin
+   * @return The address of the ACL admin
+   */
+  function getACLAdmin() external view returns (address);
+
+  /**
+   * @notice Updates the address of the ACL admin
+   * @param aclAdmin The address of the new ACL admin
+   */
+  function setACLAdmin(address aclAdmin) external;
 }
