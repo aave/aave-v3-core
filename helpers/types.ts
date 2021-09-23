@@ -21,6 +21,7 @@ export enum eContractid {
   MintableERC20 = 'MintableERC20',
   MintableDelegationERC20 = 'MintableDelegationERC20',
   PoolAddressesProviderRegistry = 'PoolAddressesProviderRegistry',
+  ACLManager = 'ACLManager',
   PoolParametersProvider = 'PoolParametersProvider',
   PoolConfigurator = 'PoolConfigurator',
   ValidationLogic = 'ValidationLogic',
@@ -164,6 +165,7 @@ export enum ProtocolErrors {
   RC_INVALID_EMODE_CATEGORY = '98',
   VL_INCONSISTENT_EMODE_CATEGORY = '99',
   HLP_UINT128_OVERFLOW = '100',
+  PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101',
 
   // old
 

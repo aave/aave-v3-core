@@ -13,6 +13,7 @@ import {
   getVariableDebtToken,
   getStableDebtToken,
   getAaveOracle,
+  getACLManager,
 } from '../../helpers/contracts-getters';
 import { tEthereumAddress } from '../../helpers/types';
 import { Pool } from '../../types/Pool';
@@ -30,7 +31,7 @@ import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProvider
 import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { solidity } from 'ethereum-waffle';
-import { AaveOracle, StableDebtToken, VariableDebtToken } from '../../types';
+import { AaveOracle, ACLManager, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 
@@ -63,6 +64,7 @@ export interface TestEnv {
   aave: MintableERC20;
   addressesProvider: PoolAddressesProvider;
   registry: PoolAddressesProviderRegistry;
+  aclManager: ACLManager;
 }
 
 let HardhatSnapshotId: string = '0x1';
@@ -92,6 +94,7 @@ const testEnv: TestEnv = {
   aave: {} as MintableERC20,
   addressesProvider: {} as PoolAddressesProvider,
   registry: {} as PoolAddressesProviderRegistry,
+  aclManager: {} as ACLManager,
 } as TestEnv;
 
 export async function initializeMakeSuite() {
@@ -118,6 +121,8 @@ export async function initializeMakeSuite() {
   testEnv.addressesProvider = await getPoolAddressesProvider();
 
   testEnv.registry = await getPoolAddressesProviderRegistry();
+  testEnv.aclManager = await getACLManager();
+
   testEnv.oracle = await getPriceOracle();
   testEnv.aaveOracle = await getAaveOracle();
 

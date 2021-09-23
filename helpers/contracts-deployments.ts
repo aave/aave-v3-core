@@ -36,6 +36,7 @@ import {
   MockInitializableImpleV2Factory,
   InitializableImmutableAdminUpgradeabilityProxyFactory,
   WETH9Mocked,
+  ACLManagerFactory,
 } from '../types';
 import {
   withSave,
@@ -63,6 +64,12 @@ export const deployPoolAddressesProviderRegistry = async () =>
   withSave(
     await new PoolAddressesProviderRegistryFactory(await getFirstSigner()).deploy(),
     eContractid.PoolAddressesProviderRegistry
+  );
+
+export const deployACLManager = async (provider: tEthereumAddress) =>
+  withSave(
+    await new ACLManagerFactory(await getFirstSigner()).deploy(provider),
+    eContractid.ACLManager
   );
 
 export const deployConfiguratorLogicLibrary = async () =>

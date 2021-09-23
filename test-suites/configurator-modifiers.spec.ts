@@ -9,9 +9,10 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN,
     PC_CALLER_NOT_RISK_OR_POOL_ADMIN,
     PC_CALLER_NOT_EMERGENCY_ADMIN,
+    PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN,
   } = ProtocolErrors;
 
-  it('Test the accessibility of onlyPoolAdmin modified functions', async () => {
+  it('Test the accessibility of onlyAssetListingOrPoolAdmins modified functions', async () => {
     const { configurator, users } = testEnv;
     const nonPoolAdmin = users[2];
 
@@ -37,6 +38,21 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
         params: '0x10',
       },
     ];
+
+    const calls = [{ fn: 'initReserves', args: [randomInitReserve] }];
+    for (const call of calls) {
+      await expect(
+        configurator.connect(nonPoolAdmin.signer)[call.fn](...call.args)
+      ).to.be.revertedWith(PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
+    }
+  });
+
+  it('Test the accessibility of onlyPoolAdmin modified functions', async () => {
+    const { configurator, users } = testEnv;
+    const nonPoolAdmin = users[2];
+
+    const randomAddress = ONE_ADDRESS;
+    const randomNumber = '0';
     const randomUpdateAToken = {
       asset: randomAddress,
       treasury: randomAddress,
@@ -56,18 +72,12 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     };
 
     const calls = [
-      { fn: 'initReserves', args: [randomInitReserve] },
       { fn: 'dropReserve', args: [randomAddress] },
       { fn: 'updateAToken', args: [randomUpdateAToken] },
       { fn: 'updateStableDebtToken', args: [randomUpdateDebtToken] },
       { fn: 'updateVariableDebtToken', args: [randomUpdateDebtToken] },
       { fn: 'activateReserve', args: [randomAddress] },
       { fn: 'deactivateReserve', args: [randomAddress] },
-      { fn: 'registerRiskAdmin', args: [randomAddress] },
-      { fn: 'unregisterRiskAdmin', args: [randomAddress] },
-      { fn: 'authorizeFlashBorrower', args: [randomAddress] },
-      { fn: 'unauthorizeFlashBorrower', args: [randomAddress] },
-      { fn: 'isRiskAdmin', args: [randomAddress] },
       { fn: 'updateFlashloanPremiumTotal', args: [randomNumber] },
       { fn: 'updateFlashloanPremiumToProtocol', args: [randomNumber] },
     ];
@@ -108,29 +118,6 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
         configurator.connect(nonRiskOrPoolAdmins.signer)[call.fn](...call.args)
       ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
     }
-  });
-
-  it('Checks only pool admin can register/unregister a risk Admins', async () => {
-    const { configurator, users, riskAdmin, emergencyAdmin } = testEnv;
-
-    await expect(
-      configurator.connect(riskAdmin.signer).registerRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-
-    await expect(
-      configurator.connect(riskAdmin.signer).unregisterRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-
-    await expect(
-      configurator.connect(emergencyAdmin.signer).registerRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
-    await expect(
-      configurator.connect(emergencyAdmin.signer).unregisterRiskAdmin(users[3].address),
-      CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 
   it('Tries to pause reserve with non-emergency-admin account (revert expected)', async () => {

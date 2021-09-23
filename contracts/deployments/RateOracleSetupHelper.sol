@@ -12,7 +12,6 @@ import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
  * @dev The RateOracleSetupHelper is an Ownable contract, so only the deployer or future owners can call this contract.
  */
 contract RateOracleSetupHelper is Ownable {
-
   /**
    * @notice External function called by the owner account to set the initial borrow rates of the assets
    * @param assets The addresses of the assets
@@ -32,7 +31,7 @@ contract RateOracleSetupHelper is Ownable {
     }
   }
 
-   /**
+  /**
    * @notice External function called by the deployer account to give ownership of the RateOracle back to the corresponding owner address.
    * @param oracle The address of the RateOracle contract
    * @param admin The corresponding owner address

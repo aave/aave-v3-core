@@ -16,6 +16,7 @@ import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IPoolConfigurator} from '../../interfaces/IPoolConfigurator.sol';
 import {IPool} from '../../interfaces/IPool.sol';
+import {IACLManager} from '../../interfaces/IACLManager.sol';
 
 /**
  * @title PoolConfigurator
@@ -46,6 +47,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _;
   }
 
+  modifier onlyAssetListingOrPoolAdmins() {
+    _onlyAssetListingOrPoolAdmins();
+    _;
+  }
+
   modifier onlyRiskOrPoolAdmins() {
     _onlyRiskOrPoolAdmins();
     _;
@@ -67,7 +73,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function initReserves(ConfiguratorInputTypes.InitReserveInput[] calldata input)
     external
     override
-    onlyPoolAdmin
+    onlyAssetListingOrPoolAdmins
   {
     IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
@@ -282,6 +288,22 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setEModeCategory(
+    uint8 categoryId,
+    uint16 ltv,
+    uint16 liquidationThreshold,
+    uint16 liquidationBonus,
+    address oracle,
+    string calldata label
+  ) external override onlyRiskOrPoolAdmins {
+    _pool.configureEModeCategory(
+      categoryId,
+      DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
+    );
+    emit EModeCategoryAdded(categoryId, ltv, liquidationThreshold, liquidationBonus, oracle, label);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setAssetEModeCategory(address asset, uint8 category)
     external
     override
@@ -324,51 +346,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
         setReservePause(reserves[i], paused);
       }
     }
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function registerRiskAdmin(address admin) external override onlyPoolAdmin {
-    _riskAdmins[admin] = true;
-    emit RiskAdminRegistered(admin);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function unregisterRiskAdmin(address admin) external override onlyPoolAdmin {
-    _riskAdmins[admin] = false;
-    emit RiskAdminUnregistered(admin);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function authorizeFlashBorrower(address flashBorrower) external override onlyPoolAdmin {
-    _pool.updateFlashBorrowerAuthorization(flashBorrower, true);
-    emit FlashBorrowerAuthorized(flashBorrower);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function unauthorizeFlashBorrower(address flashBorrower) external override onlyPoolAdmin {
-    _pool.updateFlashBorrowerAuthorization(flashBorrower, false);
-    emit FlashBorrowerUnauthorized(flashBorrower);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function setEModeCategory(
-    uint8 categoryId,
-    uint16 ltv,
-    uint16 liquidationThreshold,
-    uint16 liquidationBonus,
-    address oracle,
-    string calldata label
-  ) external override onlyRiskOrPoolAdmins {
-    _pool.configureEModeCategory(
-      categoryId,
-      DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
-    );
-    emit EModeCategoryAdded(categoryId, ltv, liquidationThreshold, liquidationBonus, oracle, label);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function isRiskAdmin(address admin) external view override onlyPoolAdmin returns (bool) {
-    return _riskAdmins[admin];
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -419,27 +396,35 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   function _onlyPoolAdmin() internal view {
-    require(_addressesProvider.getPoolAdmin() == msg.sender, Errors.CALLER_NOT_POOL_ADMIN);
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
   }
 
   function _onlyEmergencyAdmin() internal view {
-    require(
-      _addressesProvider.getEmergencyAdmin() == msg.sender,
-      Errors.PC_CALLER_NOT_EMERGENCY_ADMIN
-    );
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(aclManager.isEmergencyAdmin(msg.sender), Errors.PC_CALLER_NOT_EMERGENCY_ADMIN);
   }
 
   function _onlyPoolOrEmergencyAdmin() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(
-      _addressesProvider.getEmergencyAdmin() == msg.sender ||
-        _addressesProvider.getPoolAdmin() == msg.sender,
+      aclManager.isPoolAdmin(msg.sender) || aclManager.isEmergencyAdmin(msg.sender),
       Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
     );
   }
 
-  function _onlyRiskOrPoolAdmins() internal view {
+  function _onlyAssetListingOrPoolAdmins() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(
-      _riskAdmins[msg.sender] || _addressesProvider.getPoolAdmin() == msg.sender,
+      aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
+      Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
+    );
+  }
+
+  function _onlyRiskOrPoolAdmins() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(
+      aclManager.isRiskAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
       Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
     );
   }

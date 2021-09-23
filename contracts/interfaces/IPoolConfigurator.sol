@@ -210,18 +210,6 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when a new borrower is authorized (fees = 0)
-   * @param flashBorrower The address of the authorized borrower
-   **/
-  event FlashBorrowerAuthorized(address indexed flashBorrower);
-
-  /**
-   * @notice Emitted when a borrower is unauthorized
-   * @param flashBorrower The address of the unauthorized borrower
-   **/
-  event FlashBorrowerUnauthorized(address indexed flashBorrower);
-
-  /**
    * @notice Emitted when a new risk admin is registered
    * @param admin The newly registered admin
    **/
@@ -417,36 +405,6 @@ interface IPoolConfigurator {
     address oracle,
     string calldata label
   ) external;
-
-  /**
-   * @notice Registers a new admin with rights on risk related configurations
-   * @param admin The address of the admin to register
-   **/
-  function registerRiskAdmin(address admin) external;
-
-  /**
-   * @notice Unegisters a risk admin
-   * @param admin The address of the admin to unregister
-   **/
-  function unregisterRiskAdmin(address admin) external;
-
-  /**
-   * @notice Returns wether an address in a risk admin or not
-   * @param admin The address of the potential admin
-   **/
-  function isRiskAdmin(address admin) external view returns (bool);
-
-  /**
-   * @notice Authorize a new borrower (fees are 0 for the authorized borrower)
-   * @param flashBorrower The address of the authorized borrower
-   **/
-  function authorizeFlashBorrower(address flashBorrower) external;
-
-  /**
-   * @notice Unauthorize a borrower
-   * @param flashBorrower The address of the unauthorized borrower
-   **/
-  function unauthorizeFlashBorrower(address flashBorrower) external;
 
   /**
    * @notice Drops a reserve entirely

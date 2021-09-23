@@ -164,6 +164,7 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
+    bool isAuthorizedFlashBorrower;
   }
 
   struct CalculateUserAccountDataParams {
