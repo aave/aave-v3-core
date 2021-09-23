@@ -89,12 +89,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     SupplyLogic.executeSupply(
       _reserves,
       _usersConfig[onBehalfOf],
-      DataTypes.ExecuteSupplyParams(
-        asset,
-        amount,
-        onBehalfOf,
-        referralCode
-      )
+      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
     );
   }
 
@@ -121,12 +116,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     SupplyLogic.executeSupply(
       _reserves,
       _usersConfig[onBehalfOf],
-      DataTypes.ExecuteSupplyParams(
-        asset,
-        amount,
-        onBehalfOf,
-        referralCode
-      )
+      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
     );
   }
 
@@ -640,6 +630,17 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     emit UserEModeSet(msg.sender, categoryId);
   }
 
+  /// @inheritdoc IPool
+  function getUserEMode(address user) external view override returns (uint256) {
+    return _usersEModeCategory[user];
+  }
+
+  /// @inheritdoc IPool
+  function getAssetEMode(address asset) external view override returns (uint256) {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _reserves[asset].configuration;
+    return currentConfig.getEModeCategory();
+  }
+
   function _addReserveToList(address asset) internal {
     uint256 reservesCount = _reservesCount;
 
@@ -669,12 +670,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     SupplyLogic.executeSupply(
       _reserves,
       _usersConfig[onBehalfOf],
-      DataTypes.ExecuteSupplyParams(
-        asset,
-        amount,
-        onBehalfOf,
-        referralCode
-      )
+      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
     );
   }
 }
