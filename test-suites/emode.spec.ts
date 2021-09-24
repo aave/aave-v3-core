@@ -8,6 +8,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { formatUnits, parseUnits } from '@ethersproject/units';
+import './helpers/utils/wadraymath';
 
 makeSuite('eMode tests', (testEnv: TestEnv) => {
   const { RC_INVALID_EMODE_CATEGORY } = ProtocolErrors;
@@ -122,19 +123,69 @@ makeSuite('eMode tests', (testEnv: TestEnv) => {
     await pool
       .connect(user.signer)
       .borrow(dai.address, amountDAIToBorrow, RateMode.Variable, 0, user.address);
+
+    const userGlobalDataAFter = await pool.getUserAccountData(user.address);
+
+    expect(userGlobalDataAFter.totalCollateralBase.percentMul(8000)).to.be.gte(
+      userGlobalDataAFter.totalDebtBase
+    );
   });
 
-  it('User data', async () => {
+  it('Category with usdc priceFeed', async () => {
     const {
+      configurator,
       pool,
-      users: [, user],
+      poolAdmin,
       dai,
+      usdc,
       oracle,
+      users: [, , user2],
     } = testEnv;
+    const { ltv, lt, lb, label } = STABLECOINS_CATEGORY;
 
-    const userGlobalData = await pool.getUserAccountData(user.address);
+    const id = 2;
+    const categoryOracle = usdc.address;
 
-    console.log(`Total collateral: ${formatUnits(userGlobalData.totalCollateralBase, 18)}`);
-    console.log(`Total debt      : ${formatUnits(userGlobalData.totalDebtBase, 18)}`);
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(id, ltv, lt, lb, categoryOracle, label)
+    )
+      .to.emit(configurator, 'EModeCategoryAdded')
+      .withArgs(id, ltv, lt, lb, categoryOracle, label);
+
+    const categoryData = await pool.getEModeCategoryData(id);
+    expect(categoryData.ltv).to.be.equal(ltv, 'invalid eMode category ltv');
+    expect(categoryData.liquidationThreshold).to.be.equal(
+      lt,
+      'invalid eMode category liq threshold'
+    );
+    expect(categoryData.liquidationBonus).to.be.equal(lb, 'invalid eMode category liq bonus');
+    expect(categoryData.priceSource).to.be.equal(
+      categoryOracle,
+      'invalid eMode category price source'
+    );
+    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, id);
+
+    const daiAmount = parseUnits('1000', 18);
+
+    await dai.connect(user2.signer).mint(daiAmount);
+    await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.connect(user2.signer).supply(dai.address, daiAmount, user2.address, 0);
+
+    const daiPrice = await oracle.getAssetPrice(dai.address);
+    const usdcPrice = await oracle.getAssetPrice(usdc.address);
+
+    const dataBefore = await pool.getUserAccountData(user2.address);
+    const expectedCollateralDaiPrice = daiAmount.wadMul(daiPrice);
+    expect(dataBefore.totalCollateralBase).to.be.eq(expectedCollateralDaiPrice);
+
+    await pool.connect(user2.signer).setUserEMode(id);
+    expect(await pool.getUserEMode(user2.address)).to.be.eq(id);
+
+    const dataAfter = await pool.getUserAccountData(user2.address);
+    const expectedCollateralUsdcPrice = daiAmount.wadMul(usdcPrice);
+    expect(dataAfter.totalCollateralBase).to.be.eq(expectedCollateralUsdcPrice);
   });
 });
