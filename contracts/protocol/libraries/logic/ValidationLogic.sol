@@ -577,11 +577,6 @@ library ValidationLogic {
       oracle
     );
 
-    require(
-      vars.healthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
-      Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
-    );
-
     vars.assetLtv = reserve.configuration.getLtv();
 
     require(vars.assetLtv == 0 || !vars.hasZeroLtvCollateral, Errors.VL_LTV_VALIDATION_FAILED);
