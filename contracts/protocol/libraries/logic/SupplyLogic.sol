@@ -137,14 +137,14 @@ library SupplyLogic {
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
-    DataTypes.FinalizeTransferParams memory vars
+    DataTypes.FinalizeTransferParams memory params
   ) external {
-    ValidationLogic.validateTransfer(reserves[vars.asset]);
+    ValidationLogic.validateTransfer(reserves[params.asset]);
 
-    uint256 reserveId = reserves[vars.asset].id;
+    uint256 reserveId = reserves[params.asset].id;
 
-    if (vars.from != vars.to) {
-      DataTypes.UserConfigurationMap storage fromConfig = usersConfig[vars.from];
+    if (params.from != params.to) {
+      DataTypes.UserConfigurationMap storage fromConfig = usersConfig[params.from];
 
       if (fromConfig.isUsingAsCollateral(reserveId)) {
         if (fromConfig.isBorrowingAny()) {
@@ -152,24 +152,24 @@ library SupplyLogic {
             reserves,
             reservesList,
             eModeCategories,
-            usersConfig[vars.from],
-            vars.asset,
-            vars.from,
-            vars.reservesCount,
-            vars.oracle,
-            vars.fromEModeCategory
+            usersConfig[params.from],
+            params.asset,
+            params.from,
+            params.reservesCount,
+            params.oracle,
+            params.fromEModeCategory
           );
         }
-        if (vars.balanceFromBefore - vars.amount == 0) {
+        if (params.balanceFromBefore - params.amount == 0) {
           fromConfig.setUsingAsCollateral(reserveId, false);
-          emit ReserveUsedAsCollateralDisabled(vars.asset, vars.from);
+          emit ReserveUsedAsCollateralDisabled(params.asset, params.from);
         }
       }
 
-      if (vars.balanceToBefore == 0 && vars.amount != 0) {
-        DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
+      if (params.balanceToBefore == 0 && params.amount != 0) {
+        DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         toConfig.setUsingAsCollateral(reserveId, true);
-        emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
+        emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
       }
     }
   }
