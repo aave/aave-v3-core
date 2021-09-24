@@ -570,13 +570,6 @@ interface IPool {
   function getUserEMode(address user) external view returns (uint256);
 
   /**
-   * @notice Returns the eMode category of a reserve
-   * @param asset The address of the underlying asset
-   * @return The eMode id of the reserve
-   */
-  function getAssetEMode(address asset) external view returns (uint256);
-
-  /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate
    * @return The percentage of available liquidity to borrow
    */

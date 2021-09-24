@@ -622,12 +622,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersEModeCategory[user];
   }
 
-  /// @inheritdoc IPool
-  function getAssetEMode(address asset) external view override returns (uint256) {
-    DataTypes.ReserveConfigurationMap memory currentConfig = _reserves[asset].configuration;
-    return currentConfig.getEModeCategory();
-  }
-
   function _addReserveToList(address asset) internal {
     uint256 reservesCount = _reservesCount;
 

@@ -304,12 +304,12 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setAssetEModeCategory(address asset, uint8 category)
+  function setAssetEModeCategory(address asset, uint8 categoryId)
     external
     override
     onlyRiskOrPoolAdmins
   {
-    DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(category);
+    DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
 
     require(categoryData.liquidationThreshold > 0, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
 
@@ -320,11 +320,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       Errors.VL_INCONSISTENT_EMODE_CATEGORY
     );
 
-    currentConfig.setEModeCategory(category);
+    currentConfig.setEModeCategory(categoryId);
 
     _pool.setConfiguration(asset, currentConfig.data);
 
-    emit EModeAssetCategoryChanged(asset, category);
+    emit EModeAssetCategoryChanged(asset, categoryId);
   }
 
   ///@inheritdoc IPoolConfigurator
