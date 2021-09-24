@@ -32,13 +32,16 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
   });
 
   it('Add DAI and USDC to category id 1', async () => {
-    const { configurator, poolAdmin, dai, usdc } = testEnv;
+    const { configurator, pool, poolAdmin, dai, usdc } = testEnv;
 
     await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, 1);
     await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, 1);
+
+    expect(await pool.getAssetEMode(dai.address)).to.be.eq(1);
+    expect(await pool.getAssetEMode(usdc.address)).to.be.eq(1);
   });
 
-  it('Some funds the DAI pool', async () => {
+  it('Someone funds the DAI pool', async () => {
     const {
       pool,
       users: [daiFunder],
@@ -67,6 +70,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       .supply(usdc.address, parseUnits('10000', 6), depositor.address, 0);
 
     await pool.connect(depositor.signer).setUserEMode(1);
+    expect(await pool.getUserEMode(depositor.address)).to.be.eq(1);
   });
 
   it('Borrow 98% LTV in dai', async () => {
