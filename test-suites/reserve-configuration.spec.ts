@@ -73,13 +73,13 @@ describe('ReserveConfiguration', async () => {
   it('getEModeCategory()', async () => {
     expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
     expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
-    expect(await configMock.setDecimals(EMODE_CATEGORY));
+    expect(await configMock.setEModeCategory(EMODE_CATEGORY));
     // eMode category is the 6th param
     expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, EMODE_CATEGORY]);
-    expect(await configMock.getDecimals()).to.be.eq(EMODE_CATEGORY);
-    expect(await configMock.setDecimals(0));
+    expect(await configMock.getEModeCategory()).to.be.eq(EMODE_CATEGORY);
+    expect(await configMock.setEModeCategory(0));
     expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
-    expect(await configMock.getDecimals()).to.be.eq(ZERO);
+    expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
   });
 
   it('getFrozen()', async () => {

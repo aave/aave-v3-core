@@ -49,7 +49,7 @@ library ValidationLogic {
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
       .reserveConfiguration
       .getFlags();
-    (, , , uint256 reserveDecimals, ,) = reserveCache.reserveConfiguration.getParams();
+    (, , , uint256 reserveDecimals, , ) = reserveCache.reserveConfiguration.getParams();
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
 
     require(amount != 0, Errors.VL_INVALID_AMOUNT);
@@ -122,7 +122,7 @@ library ValidationLogic {
   ) internal view {
     ValidateBorrowLocalVars memory vars;
 
-    (, , , vars.reserveDecimals, ,) = params.reserveCache.reserveConfiguration.getParams();
+    (, , , vars.reserveDecimals, , ) = params.reserveCache.reserveConfiguration.getParams();
 
     (
       vars.isActive,
@@ -169,8 +169,7 @@ library ValidationLogic {
 
     if (params.userEModeCategory != 0) {
       require(
-        params.reserveCache.reserveConfiguration.getEModeCategory() ==
-          params.userEModeCategory,
+        params.reserveCache.reserveConfiguration.getEModeCategory() == params.userEModeCategory,
         Errors.VL_INCONSISTENT_EMODE_CATEGORY
       );
       vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
@@ -630,7 +629,7 @@ library ValidationLogic {
   ) internal view {
     // category is invalid if the liq threshold is not set
     require(
-      eModeCategories[categoryId].liquidationThreshold > 0,
+      categoryId == 0 || eModeCategories[categoryId].liquidationThreshold > 0,
       Errors.VL_INCONSISTENT_EMODE_CATEGORY
     );
 

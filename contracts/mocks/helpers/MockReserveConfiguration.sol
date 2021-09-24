@@ -103,6 +103,12 @@ contract MockReserveConfiguration {
     return configuration.getEModeCategory();
   }
 
+  function setEModeCategory(uint8 categoryId) external {
+    DataTypes.ReserveConfigurationMap memory config = configuration;
+    config.setEModeCategory(categoryId);
+    configuration = config;
+  }
+  
   function setSupplyCap(uint256 supplyCap) external {
     DataTypes.ReserveConfigurationMap memory config = configuration;
     config.setSupplyCap(supplyCap);
