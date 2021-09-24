@@ -78,9 +78,9 @@ library SupplyLogic {
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
-    DataTypes.ExecuteWithdrawParams memory vars
+    DataTypes.ExecuteWithdrawParams memory params
   ) internal returns (uint256) {
-    DataTypes.ReserveData storage reserve = reserves[vars.asset];
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
@@ -89,19 +89,19 @@ library SupplyLogic {
       reserveCache.nextLiquidityIndex
     );
 
-    uint256 amountToWithdraw = vars.amount;
+    uint256 amountToWithdraw = params.amount;
 
-    if (vars.amount == type(uint256).max) {
+    if (params.amount == type(uint256).max) {
       amountToWithdraw = userBalance;
     }
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
 
-    reserve.updateInterestRates(reserveCache, vars.asset, 0, amountToWithdraw);
+    reserve.updateInterestRates(reserveCache, params.asset, 0, amountToWithdraw);
 
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,
-      vars.to,
+      params.to,
       amountToWithdraw,
       reserveCache.nextLiquidityIndex
     );
@@ -113,21 +113,21 @@ library SupplyLogic {
           reservesList,
           eModeCategories,
           userConfig,
-          vars.asset,
+          params.asset,
           msg.sender,
-          vars.reservesCount,
-          vars.oracle,
-          vars.userEModeCategory
+          params.reservesCount,
+          params.oracle,
+          params.userEModeCategory
         );
       }
 
       if (amountToWithdraw == userBalance) {
         userConfig.setUsingAsCollateral(reserve.id, false);
-        emit ReserveUsedAsCollateralDisabled(vars.asset, msg.sender);
+        emit ReserveUsedAsCollateralDisabled(params.asset, msg.sender);
       }
     }
 
-    emit Withdraw(vars.asset, msg.sender, vars.to, amountToWithdraw);
+    emit Withdraw(params.asset, msg.sender, params.to, amountToWithdraw);
 
     return amountToWithdraw;
   }
