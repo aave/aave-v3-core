@@ -30,6 +30,7 @@ export enum eContractid {
   SupplyLogic = 'SupplyLogic',
   BorrowLogic = 'BorrowLogic',
   LiquidationLogic = 'LiquidationLogic',
+  EModeLogic = 'EModeLogic',
   ConfiguratorLogic = 'ConfiguratorLogic',
   Pool = 'Pool',
   PriceOracle = 'PriceOracle',

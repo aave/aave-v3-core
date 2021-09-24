@@ -10,6 +10,7 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
+import {EModeLogic} from '../libraries/logic/EModeLogic.sol';
 import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
@@ -590,31 +591,18 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function setUserEMode(uint8 categoryId) external virtual override {
-    ValidationLogic.validateSetUserEMode(
+    EModeLogic.executeSetUserEMode(
       _reserves,
       _reservesList,
       _eModeCategories,
+      _usersEModeCategory,
       _usersConfig[msg.sender],
-      _reservesCount,
-      categoryId
-    );
-
-    uint8 prevCategoryId = _usersEModeCategory[msg.sender];
-    _usersEModeCategory[msg.sender] = categoryId;
-
-    if (prevCategoryId != 0 && categoryId == 0) {
-      ValidationLogic.validateHealthFactor(
-        _reserves,
-        _reservesList,
-        _eModeCategories,
-        _usersConfig[msg.sender],
-        msg.sender,
-        _usersEModeCategory[msg.sender],
+      DataTypes.ExecuteSetUserEModeParams(
         _reservesCount,
-        _addressesProvider.getPriceOracle()
-      );
-    }
-    emit UserEModeSet(msg.sender, categoryId);
+        _addressesProvider.getPriceOracle(),
+        categoryId
+      )
+    );
   }
 
   /// @inheritdoc IPool

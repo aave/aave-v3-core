@@ -137,6 +137,12 @@ library DataTypes {
     uint8 userEModeCategory;
   }
 
+    struct ExecuteSetUserEModeParams {
+    uint256 reservesCount;
+    address oracle;
+    uint8 categoryId;
+  }
+
   struct FinalizeTransferParams {
     address asset;
     address from;
