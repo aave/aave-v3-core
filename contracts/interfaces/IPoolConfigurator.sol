@@ -137,9 +137,9 @@ interface IPoolConfigurator {
   /**
    * @notice Emitted when the category of an asset in eMode is changed
    * @param asset The address of the underlying asset of the reserve
-   * @param category The new eMode asset category
+   * @param categoryId The new eMode asset category
    **/
-  event EModeAssetCategoryChanged(address indexed asset, uint256 category);
+  event EModeAssetCategoryChanged(address indexed asset, uint8 categoryId);
 
   /**
    * @notice Emitted when a new eMode category is added
@@ -151,7 +151,7 @@ interface IPoolConfigurator {
    * @param label A human readable identifier for the category
    **/
   event EModeCategoryAdded(
-    uint256 indexed categoryId,
+    uint8 indexed categoryId,
     uint256 ltv,
     uint256 liquidationThreshold,
     uint256 liquidationBonus,
