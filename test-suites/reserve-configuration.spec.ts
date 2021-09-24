@@ -29,6 +29,7 @@ describe('ReserveConfiguration', async () => {
   const MAX_VALID_LTV = BigNumber.from(65535);
   const MAX_VALID_LIQUIDATION_THRESHOLD = BigNumber.from(65535);
   const MAX_VALID_DECIMALS = BigNumber.from(255);
+  const MAX_VALID_EMODE_CATEGORY = BigNumber.from(255);
 
   before(async () => {
     configMock = await deployMockReserveConfiguration();
@@ -212,7 +213,14 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
     expect(await configMock.setDecimals(MAX_VALID_DECIMALS));
     // Decimals is the 4th param
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, MAX_VALID_DECIMALS, ZERO, ZERO]);
+    expect(await configMock.getParams()).to.be.eql([
+      ZERO,
+      ZERO,
+      ZERO,
+      MAX_VALID_DECIMALS,
+      ZERO,
+      ZERO,
+    ]);
     expect(await configMock.getDecimals()).to.be.eq(MAX_VALID_DECIMALS);
     expect(await configMock.setDecimals(0));
     expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
@@ -229,5 +237,24 @@ describe('ReserveConfiguration', async () => {
       RC_INVALID_DECIMALS
     );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
+  });
+
+  it('setEModeCategory() with categoryID = MAX_VALID_EMODE_CATEGORY', async () => {
+    expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
+    expect(await configMock.setEModeCategory(MAX_VALID_EMODE_CATEGORY));
+    expect(await configMock.getEModeCategory()).to.be.eq(MAX_VALID_EMODE_CATEGORY);
+    expect(await configMock.setEModeCategory(0));
+    expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
+  });
+
+  it('setEModeCategory() with categoryID > MAX_VALID_EMODE_CATEGORY (revert expected)', async () => {
+    expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
+
+    const { RC_INVALID_EMODE_CATEGORY } = ProtocolErrors;
+
+    await expect(configMock.setEModeCategory(MAX_VALID_EMODE_CATEGORY.add(1))).to.be.revertedWith(
+      RC_INVALID_EMODE_CATEGORY
+    );
+    expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
   });
 });

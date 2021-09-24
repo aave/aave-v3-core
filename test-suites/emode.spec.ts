@@ -4,6 +4,7 @@ import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import './helpers/utils/wadraymath';
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   const { VL_INCONSISTENT_EMODE_CATEGORY, VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } =
@@ -113,7 +114,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       await helpersContract.getUserReserveData(dai.address, user0.address);
     expect(user0UseAsCollateral).to.be.true;
 
-    await expect(
+    expect(
       await pool
         .connect(user1.signer)
         .supply(
@@ -131,9 +132,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   it('User 0 borrows 98 USDC and tries to deactivate eMode (revert expected)', async () => {
     const {
       pool,
-      dai,
       usdc,
-      users: [user0, user1],
+      users: [user0],
     } = testEnv;
     expect(
       await pool
@@ -159,7 +159,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       pool,
       dai,
       usdc,
-      users: [user0, user1],
+      users: [user0],
     } = testEnv;
     expect(
       await pool
@@ -183,7 +183,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       pool,
       helpersContract,
       weth,
-      users: [user0, user1],
+      users: [user0],
     } = testEnv;
     const userDataBefore = await pool.getUserAccountData(user0.address);
 
@@ -246,8 +246,6 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   it('User 0 tries to activate eMode for ethereum category (revert expected)', async () => {
     const {
       pool,
-      helpersContract,
-      weth,
       users: [user0],
     } = testEnv;
 
@@ -261,10 +259,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   it('User 0 tries to borrow (non-category asset) WETH (revert expected)', async () => {
     const {
       pool,
-      helpersContract,
-      dai,
       weth,
-      users: [user0, user1],
+      users: [user0],
     } = testEnv;
 
     await expect(
@@ -282,9 +278,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   it('User 1 tries to borrow (non-category asset) DAI (revert expected)', async () => {
     const {
       pool,
-      helpersContract,
       dai,
-      weth,
       users: [, user1],
     } = testEnv;
 
@@ -304,11 +298,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   it('User 0 repays USDC debt and activate eMode for ethereum category', async () => {
     const {
       pool,
-      helpersContract,
-      dai,
       usdc,
-      weth,
-      users: [user0, user1],
+      users: [user0],
     } = testEnv;
 
     expect(
@@ -324,11 +315,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   it('User 0 tries to borrow (non-category asset) USDC (revert expected)', async () => {
     const {
       pool,
-      helpersContract,
-      dai,
       usdc,
-      weth,
-      users: [user0, user1],
+      users: [user0],
     } = testEnv;
 
     await expect(
@@ -345,15 +333,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   });
 
   it('Admin adds a category for stablecoins with DAI (same price feed)', async () => {
-    const {
-      configurator,
-      pool,
-      poolAdmin,
-      dai,
-      usdc,
-      oracle,
-      users: [, , user2],
-    } = testEnv;
+    const { configurator, pool, poolAdmin, dai, usdc } = testEnv;
     const { ltv, lt, lb, label } = CATEGORIES.STABLECOINS;
 
     const id = 3;
@@ -383,9 +363,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
 
   it('User 2 supplies DAI and activates eMode for stablecoins (same price feed)', async () => {
     const {
-      configurator,
       pool,
-      poolAdmin,
       dai,
       usdc,
       oracle,
