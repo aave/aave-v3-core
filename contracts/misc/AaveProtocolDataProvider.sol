@@ -111,7 +111,7 @@ contract AaveProtocolDataProvider {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset);
 
-    (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
+    (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor,) = configuration
       .getParams();
 
     (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();

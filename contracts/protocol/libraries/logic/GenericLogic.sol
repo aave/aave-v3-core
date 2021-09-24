@@ -47,6 +47,7 @@ library GenericLogic {
     uint256 eModeAssetPrice;
     uint256 eModeLtv;
     uint256 eModeLiqThreshold;
+    uint256 eModeAssetCategory;
     address eModePriceSource;
     address currentReserveAddress;
     bool hasZeroLtvCollateral;
@@ -120,9 +121,14 @@ library GenericLogic {
 
       DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
 
-      (vars.ltv, vars.liquidationThreshold, , vars.decimals, ) = currentReserve
-        .configuration
-        .getParams();
+      (
+        vars.ltv,
+        vars.liquidationThreshold,
+        ,
+        vars.decimals,
+        ,
+        vars.eModeAssetCategory
+      ) = currentReserve.configuration.getParams();
 
       unchecked {
         vars.assetUnit = 10**vars.decimals;
@@ -151,13 +157,21 @@ library GenericLogic {
         vars.avgLtv = vars.ltv > 0
           ? vars.avgLtv +
             vars.userBalanceInBaseCurrency *
-            (params.userEModeCategory == 0 ? vars.ltv : vars.eModeLtv)
+            (
+              (params.userEModeCategory == 0 || vars.eModeAssetCategory != params.userEModeCategory)
+                ? vars.ltv
+                : vars.eModeLtv
+            )
           : vars.avgLtv;
 
         vars.avgLiquidationThreshold =
           vars.avgLiquidationThreshold +
           vars.userBalanceInBaseCurrency *
-          (params.userEModeCategory == 0 ? vars.liquidationThreshold : vars.eModeLiqThreshold);
+          (
+            (params.userEModeCategory == 0 || vars.eModeAssetCategory != params.userEModeCategory)
+              ? vars.liquidationThreshold
+              : vars.eModeLiqThreshold
+          );
       }
 
       if (params.userConfig.isBorrowing(vars.i)) {
