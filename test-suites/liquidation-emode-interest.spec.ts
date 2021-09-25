@@ -1,34 +1,55 @@
 import { expect } from 'chai';
+import { BigNumber, utils } from 'ethers';
 import { DRE, increaseTime } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { ProtocolErrors, RateMode } from '../helpers/types';
-import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { parseUnits } from '@ethersproject/units';
-import './helpers/utils/wadraymath';
-import { getReserveData, getUserData } from './helpers/utils/helpers';
-import { BigNumber } from 'ethers';
+import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
+import { getReserveData, getUserData } from './helpers/utils/helpers';
+import { makeSuite, TestEnv } from './helpers/make-suite';
+import './helpers/utils/wadraymath';
 
 makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (testEnv: TestEnv) => {
   const { INVALID_HF } = ProtocolErrors;
+
+  const CATEGORY = {
+    id: BigNumber.from('1'),
+    ltv: BigNumber.from('9800'),
+    lt: BigNumber.from('9850'),
+    lb: BigNumber.from('10100'),
+    oracle: ZERO_ADDRESS,
+    label: 'STABLECOINS',
+  };
+
   it('Adds category id 1 (stablecoins)', async () => {
     const { configurator, pool, poolAdmin } = testEnv;
 
-    await configurator
-      .connect(poolAdmin.signer)
-      .setEModeCategory(1, '9800', '9850', '10100', ZERO_ADDRESS, 'STABLECOINS');
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(
+          CATEGORY.id,
+          CATEGORY.ltv,
+          CATEGORY.lt,
+          CATEGORY.lb,
+          CATEGORY.oracle,
+          CATEGORY.label
+        )
+    );
 
-    const categoryData = await pool.getEModeCategoryData(1);
+    const categoryData = await pool.getEModeCategoryData(CATEGORY.id);
 
-    expect(categoryData.ltv).to.be.equal(9800, 'invalid eMode category ltv');
+    expect(categoryData.ltv).to.be.equal(CATEGORY.ltv, 'invalid eMode category ltv');
     expect(categoryData.liquidationThreshold).to.be.equal(
-      9850,
+      CATEGORY.lt,
       'invalid eMode category liq threshold'
     );
-    expect(categoryData.liquidationBonus).to.be.equal(10100, 'invalid eMode category liq bonus');
+    expect(categoryData.liquidationBonus).to.be.equal(
+      CATEGORY.lb,
+      'invalid eMode category liq bonus'
+    );
     expect(categoryData.priceSource).to.be.equal(
-      ZERO_ADDRESS,
+      CATEGORY.oracle,
       'invalid eMode category price source'
     );
   });
@@ -36,17 +57,21 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
   it('Add DAI and USDC to category id 1', async () => {
     const { configurator, poolAdmin, dai, usdc } = testEnv;
 
-    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, 1);
-    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, 1);
+    expect(
+      await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, CATEGORY.id)
+    );
+    expect(
+      await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, CATEGORY.id)
+    );
   });
 
-  it('Some funds the DAI pool', async () => {
+  it('Someone funds the DAI pool', async () => {
     const {
       pool,
       users: [daiFunder],
       dai,
     } = testEnv;
-    const supplyAmount = parseUnits('10000', 18);
+    const supplyAmount = utils.parseUnits('10000', 18);
 
     await dai.connect(daiFunder.signer).mint(supplyAmount);
     await dai.connect(daiFunder.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -61,17 +86,17 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
       usdc,
     } = testEnv;
 
-    await usdc.connect(borrower.signer).mint(parseUnits('10000', 6));
+    await usdc.connect(borrower.signer).mint(utils.parseUnits('10000', 6));
     await usdc.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(borrower.signer)
-      .supply(usdc.address, parseUnits('10000', 6), borrower.address, 0);
+      .supply(usdc.address, utils.parseUnits('10000', 6), borrower.address, 0);
 
-    await pool.connect(borrower.signer).setUserEMode(1);
+    await pool.connect(borrower.signer).setUserEMode(CATEGORY.id);
   });
 
-  it('Borrow as much dai as possible', async () => {
+  it('Borrow as much DAI as possible', async () => {
     const {
       pool,
       users: [, borrower],
@@ -99,11 +124,11 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
     } = testEnv;
 
     const userGlobalDataBefore = await pool.getUserAccountData(borrower.address);
-    expect(userGlobalDataBefore.healthFactor).to.be.gt(parseUnits('1', 18), INVALID_HF);
+    expect(userGlobalDataBefore.healthFactor).to.be.gt(utils.parseUnits('1', 18), INVALID_HF);
     await increaseTime(60 * 60 * 24 * 3);
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
-    expect(userGlobalDataAfter.healthFactor).to.be.lt(parseUnits('1', 18), INVALID_HF);
+    expect(userGlobalDataAfter.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
   });
 
   it('Liquidates the borrow', async () => {
@@ -116,7 +141,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
       helpersContract,
     } = testEnv;
 
-    await dai.connect(liquidator.signer).mint(parseUnits('100000', 18));
+    await dai.connect(liquidator.signer).mint(utils.parseUnits('100000', 18));
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -159,7 +184,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
 
     const expectedCollateralLiquidated = principalPrice
       .mul(amountToLiquidate)
-      .percentMul(10100)
+      .percentMul(CATEGORY.lb)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 

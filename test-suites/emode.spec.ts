@@ -56,7 +56,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   });
 
   it('Admin adds a category for stablecoins with DAI and USDC', async () => {
-    const { configurator, pool, dai, usdc, poolAdmin } = testEnv;
+    const { configurator, helpersContract, dai, usdc, poolAdmin } = testEnv;
 
     const { id, ltv, lt, lb, oracle, label } = CATEGORIES.STABLECOINS;
 
@@ -66,12 +66,12 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, id));
     expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, id));
 
-    expect(await pool.getAssetEMode(dai.address)).to.be.eq(id);
-    expect(await pool.getAssetEMode(usdc.address)).to.be.eq(id);
+    expect(await helpersContract.getReserveEModeCategory(dai.address)).to.be.eq(id);
+    expect(await helpersContract.getReserveEModeCategory(usdc.address)).to.be.eq(id);
   });
 
   it('Admin adds a category for ethereum with WETH', async () => {
-    const { configurator, pool, weth, poolAdmin } = testEnv;
+    const { configurator, helpersContract, weth, poolAdmin } = testEnv;
 
     const { id, ltv, lt, lb, oracle, label } = CATEGORIES.ETHEREUM;
 
@@ -80,7 +80,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     );
     expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(weth.address, id));
 
-    expect(await pool.getAssetEMode(weth.address)).to.be.eq(id);
+    expect(await helpersContract.getReserveEModeCategory(weth.address)).to.be.eq(id);
   });
 
   it('User 0 activates eMode for stablecoins category', async () => {
@@ -152,6 +152,27 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
     expect(await pool.getUserEMode(user0.address)).to.be.eq(userCategory);
+  });
+
+  it('User 0 tries to sends aTokens to user 3 (revert expected)', async () => {
+    const {
+      pool,
+      dai,
+      aDai,
+      users: [user0, , , user3],
+    } = testEnv;
+
+    expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.STABLECOINS.id);
+    expect(await pool.getUserEMode(user3.address)).to.be.eq(0);
+
+    await expect(
+      aDai
+        .connect(user0.signer)
+        .transfer(user3.address, await convertToCurrencyDecimals(dai.address, '10'))
+    ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
+
+    expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.STABLECOINS.id);
+    expect(await pool.getUserEMode(user3.address)).to.be.eq(0);
   });
 
   it('User 0 repays 50 USDC and withdraws 10 DAI', async () => {
@@ -275,6 +296,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
         )
     ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
   });
+
   it('User 1 tries to borrow (non-category asset) DAI (revert expected)', async () => {
     const {
       pool,
@@ -295,7 +317,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
   });
 
-  it('User 0 repays USDC debt and activate eMode for ethereum category', async () => {
+  it('User 0 repays USDC debt and activates eMode for ethereum category', async () => {
     const {
       pool,
       usdc,
@@ -310,6 +332,16 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
 
     expect(await pool.connect(user0.signer).setUserEMode(CATEGORIES.ETHEREUM.id));
     expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.ETHEREUM.id);
+  });
+
+  it('User 1 activates eMode for stablecoins category', async () => {
+    const {
+      pool,
+      users: [, user1],
+    } = testEnv;
+
+    expect(await pool.connect(user1.signer).setUserEMode(CATEGORIES.STABLECOINS.id));
+    expect(await pool.getUserEMode(user1.address)).to.be.eq(CATEGORIES.STABLECOINS.id);
   });
 
   it('User 0 tries to borrow (non-category asset) USDC (revert expected)', async () => {
@@ -332,7 +364,141 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
   });
 
-  it('Admin adds a category for stablecoins with DAI (same price feed)', async () => {
+  it('User 0 sends aTokens to user 3', async () => {
+    const {
+      pool,
+      dai,
+      aDai,
+      users: [user0, , , user3],
+    } = testEnv;
+
+    expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.ETHEREUM.id);
+    expect(await pool.getUserEMode(user3.address)).to.be.eq(0);
+
+    const transferAmount = await convertToCurrencyDecimals(dai.address, '10');
+
+    const balanceBeforeUser0 = await aDai.balanceOf(user0.address);
+    const balanceBeforeUser3 = await aDai.balanceOf(user3.address);
+
+    expect(await aDai.connect(user0.signer).transfer(user3.address, transferAmount));
+
+    expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.ETHEREUM.id);
+    expect(await pool.getUserEMode(user3.address)).to.be.eq(0);
+
+    expect(await aDai.balanceOf(user0.address)).to.be.eq(balanceBeforeUser0.sub(transferAmount));
+    expect(await aDai.balanceOf(user3.address)).to.be.eq(balanceBeforeUser3.add(transferAmount));
+  });
+
+  it('User 0 sends aTokens to user 3', async () => {
+    const {
+      pool,
+      dai,
+      aDai,
+      users: [user0, , , user3],
+    } = testEnv;
+
+    expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.ETHEREUM.id);
+    expect(await pool.getUserEMode(user3.address)).to.be.eq(0);
+
+    const balanceBeforeUser0 = await aDai.balanceOf(user0.address);
+    const balanceBeforeUser3 = await aDai.balanceOf(user3.address);
+
+    const transferAmount = await convertToCurrencyDecimals(dai.address, '10');
+    expect(await aDai.connect(user0.signer).transfer(user3.address, transferAmount));
+
+    expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.ETHEREUM.id);
+    expect(await pool.getUserEMode(user3.address)).to.be.eq(0);
+
+    expect(await aDai.balanceOf(user0.address)).to.be.eq(balanceBeforeUser0.sub(transferAmount));
+    expect(await aDai.balanceOf(user3.address)).to.be.eq(balanceBeforeUser3.add(transferAmount));
+  });
+
+  it('Admin lowers LTV of stablecoins eMode category, decreasing user borrowing power', async () => {
+    const {
+      configurator,
+      pool,
+      users: [, user1],
+    } = testEnv;
+
+    const { id } = CATEGORIES.STABLECOINS;
+
+    const userDataBefore = await pool.getUserAccountData(user1.address);
+
+    const eModeData = await pool.getEModeCategoryData(id);
+    const newLtv = BigNumber.from(eModeData.ltv.toString()).div(2);
+
+    expect(
+      await configurator.setEModeCategory(
+        id,
+        newLtv,
+        eModeData.liquidationThreshold,
+        eModeData.liquidationBonus,
+        eModeData.priceSource,
+        eModeData.label
+      )
+    );
+
+    const userDataAfter = await pool.getUserAccountData(user1.address);
+
+    expect(userDataAfter.availableBorrowsBase).to.be.lt(userDataBefore.availableBorrowsBase);
+  });
+
+  it('User 1 withdraws 0.7 WETH and borrows 100 USDC', async () => {
+    const {
+      pool,
+      weth,
+      usdc,
+      users: [, user1],
+    } = testEnv;
+
+    expect(
+      await pool
+        .connect(user1.signer)
+        .withdraw(weth.address, await convertToCurrencyDecimals(weth.address, '0.7'), user1.address)
+    );
+
+    expect(
+      await pool
+        .connect(user1.signer)
+        .borrow(
+          usdc.address,
+          await convertToCurrencyDecimals(usdc.address, '100'),
+          RateMode.Variable,
+          0,
+          user1.address
+        )
+    );
+  });
+
+  it('Admin lowers LT of stablecoins eMode category, decreasing user health factor', async () => {
+    const {
+      configurator,
+      pool,
+      users: [, user1],
+    } = testEnv;
+
+    const { id } = CATEGORIES.STABLECOINS;
+
+    const userDataBefore = await pool.getUserAccountData(user1.address);
+
+    const eModeData = await pool.getEModeCategoryData(id);
+    const newLt = BigNumber.from('8000');
+    expect(
+      await configurator.setEModeCategory(
+        id,
+        eModeData.ltv,
+        newLt,
+        eModeData.liquidationBonus,
+        eModeData.priceSource,
+        eModeData.label
+      )
+    );
+
+    const userDataAfter = await pool.getUserAccountData(user1.address);
+    expect(userDataAfter.healthFactor).to.be.lt(userDataBefore.healthFactor);
+  });
+
+  it('Admin adds a category for stablecoins with DAI (own price feed)', async () => {
     const { configurator, pool, poolAdmin, dai, usdc } = testEnv;
     const { ltv, lt, lb, label } = CATEGORIES.STABLECOINS;
 
@@ -358,10 +524,10 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       categoryOracle,
       'invalid eMode category price source'
     );
-    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, id);
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, id));
   });
 
-  it('User 2 supplies DAI and activates eMode for stablecoins (same price feed)', async () => {
+  it('User 2 supplies DAI and activates eMode for stablecoins (own price feed)', async () => {
     const {
       pool,
       dai,
@@ -373,7 +539,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     const id = 3;
     const daiAmount = utils.parseUnits('1000', 18);
 
-    await pool.connect(user2.signer).supply(dai.address, daiAmount, user2.address, 0);
+    expect(await pool.connect(user2.signer).supply(dai.address, daiAmount, user2.address, 0));
 
     const daiPrice = await oracle.getAssetPrice(dai.address);
     const usdcPrice = await oracle.getAssetPrice(usdc.address);
@@ -382,11 +548,28 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     const expectedCollateralDaiPrice = daiAmount.wadMul(daiPrice);
     expect(dataBefore.totalCollateralBase).to.be.eq(expectedCollateralDaiPrice);
 
-    await pool.connect(user2.signer).setUserEMode(id);
+    expect(await pool.connect(user2.signer).setUserEMode(id));
     expect(await pool.getUserEMode(user2.address)).to.be.eq(id);
 
     const dataAfter = await pool.getUserAccountData(user2.address);
     const expectedCollateralUsdcPrice = daiAmount.wadMul(usdcPrice);
     expect(dataAfter.totalCollateralBase).to.be.eq(expectedCollateralUsdcPrice);
+  });
+
+  it('User 0 deactivate eMode', async () => {
+    const {
+      pool,
+      users: [user0],
+    } = testEnv;
+
+    const userDataBefore = await pool.getUserAccountData(user0.address);
+
+    expect(await pool.connect(user0.signer).setUserEMode(0));
+    expect(await pool.getUserEMode(user0.address)).to.be.eq(0);
+
+    const userDataAfter = await pool.getUserAccountData(user0.address);
+    expect(userDataAfter.totalCollateralBase).to.be.eq(userDataBefore.totalCollateralBase);
+    expect(userDataAfter.availableBorrowsBase).to.be.lt(userDataBefore.availableBorrowsBase);
+    expect(userDataAfter.healthFactor).to.be.eq(userDataBefore.healthFactor);
   });
 });

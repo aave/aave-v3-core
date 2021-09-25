@@ -155,13 +155,36 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(RC_INVALID_EMODE_CATEGORY);
   });
 
-  it('Set a eMode category to DAI with inconsistent LT (revert expected)', async () => {
+  it('Set a eMode category to DAI with zero LT (revert expected)', async () => {
     const { configurator, poolAdmin, dai } = testEnv;
 
     expect(
       await configurator
         .connect(poolAdmin.signer)
-        .setEModeCategory('100', '9800', '7900', '10100', ZERO_ADDRESS, 'INCONSISTENT')
+        .setEModeCategory('100', '9800', '0', '10100', ZERO_ADDRESS, 'INCONSISTENT')
+    );
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('Set a eMode category to DAI with fewer LT (revert expected)', async () => {
+    const { configurator, helpersContract, poolAdmin, dai } = testEnv;
+
+    const { liquidationThreshold } = await helpersContract.getReserveConfigurationData(dai.address);
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(
+          '100',
+          '9800',
+          liquidationThreshold.sub(1),
+          '10100',
+          ZERO_ADDRESS,
+          'INCONSISTENT'
+        )
     );
 
     await expect(

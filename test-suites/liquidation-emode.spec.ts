@@ -1,44 +1,53 @@
 import { expect } from 'chai';
+import { BigNumber, utils } from 'ethers';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { parseUnits } from '@ethersproject/units';
-import './helpers/utils/wadraymath';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
-import { BigNumber } from 'ethers';
+import './helpers/utils/wadraymath';
 
 makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (testEnv: TestEnv) => {
   const { INVALID_HF } = ProtocolErrors;
+
+  const CATEGORY = {
+    id: BigNumber.from('1'),
+    ltv: BigNumber.from('9800'),
+    lt: BigNumber.from('9850'),
+    lb: BigNumber.from('10100'),
+    oracle: ZERO_ADDRESS,
+    label: 'STABLECOINS',
+  };
+
   it('Adds category id 1 (stablecoins)', async () => {
     const { configurator, pool, poolAdmin } = testEnv;
 
-    await configurator
+    expect(await configurator
       .connect(poolAdmin.signer)
-      .setEModeCategory(1, '9800', '9850', '10100', ZERO_ADDRESS, 'STABLECOINS');
+      .setEModeCategory(1, CATEGORY.ltv, CATEGORY.lt, CATEGORY.lb, CATEGORY.oracle, CATEGORY.label));
 
-    const categoryData = await pool.getEModeCategoryData(1);
+    const categoryData = await pool.getEModeCategoryData(CATEGORY.id);
 
-    expect(categoryData.ltv).to.be.equal(9800, 'invalid eMode category ltv');
+    expect(categoryData.ltv).to.be.equal(CATEGORY.ltv, 'invalid eMode category ltv');
     expect(categoryData.liquidationThreshold).to.be.equal(
-      9850,
+      CATEGORY.lt,
       'invalid eMode category liq threshold'
     );
-    expect(categoryData.liquidationBonus).to.be.equal(10100, 'invalid eMode category liq bonus');
+    expect(categoryData.liquidationBonus).to.be.equal(CATEGORY.lb, 'invalid eMode category liq bonus');
     expect(categoryData.priceSource).to.be.equal(
-      ZERO_ADDRESS,
+      CATEGORY.oracle,
       'invalid eMode category price source'
     );
   });
 
   it('Add DAI and USDC to category id 1', async () => {
-    const { configurator, pool, poolAdmin, dai, usdc } = testEnv;
+    const { configurator, pool, helpersContract, poolAdmin, dai, usdc } = testEnv;
 
-    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, 1);
-    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, 1);
+    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, CATEGORY.id);
+    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, CATEGORY.id);
 
-    expect(await pool.getAssetEMode(dai.address)).to.be.eq(1);
-    expect(await pool.getAssetEMode(usdc.address)).to.be.eq(1);
+    expect(await helpersContract.getReserveEModeCategory(dai.address)).to.be.eq(CATEGORY.id);
+    expect(await helpersContract.getReserveEModeCategory(usdc.address)).to.be.eq(CATEGORY.id);
   });
 
   it('Someone funds the DAI pool', async () => {
@@ -47,7 +56,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       users: [daiFunder],
       dai,
     } = testEnv;
-    const supplyAmount = parseUnits('1', 36);
+    const supplyAmount = utils.parseUnits('1', 36);
 
     await dai.connect(daiFunder.signer).mint(supplyAmount);
     await dai.connect(daiFunder.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -62,15 +71,15 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       usdc,
     } = testEnv;
 
-    await usdc.connect(depositor.signer).mint(parseUnits('10000', 6));
+    await usdc.connect(depositor.signer).mint(utils.parseUnits('10000', 6));
     await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
       .connect(depositor.signer)
-      .supply(usdc.address, parseUnits('10000', 6), depositor.address, 0);
+      .supply(usdc.address, utils.parseUnits('10000', 6), depositor.address, 0);
 
-    await pool.connect(depositor.signer).setUserEMode(1);
-    expect(await pool.getUserEMode(depositor.address)).to.be.eq(1);
+    await pool.connect(depositor.signer).setUserEMode(CATEGORY.id);
+    expect(await pool.getUserEMode(depositor.address)).to.be.eq(CATEGORY.id);
   });
 
   it('Borrow 98% LTV in dai', async () => {
@@ -105,20 +114,20 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     const daiPrice = await oracle.getAssetPrice(dai.address);
 
     const userGlobalDataBefore = await pool.getUserAccountData(depositor.address);
-    expect(userGlobalDataBefore.healthFactor).to.be.gt(parseUnits('1', 18));
+    expect(userGlobalDataBefore.healthFactor).to.be.gt(utils.parseUnits('1', 18));
 
     await oracle.setAssetPrice(
       dai.address,
-      daiPrice.mul(userGlobalDataBefore.healthFactor).div(parseUnits('1', 18))
+      daiPrice.mul(userGlobalDataBefore.healthFactor).div(utils.parseUnits('1', 18))
     );
 
     const userGlobalDataMid = await pool.getUserAccountData(depositor.address);
-    expect(userGlobalDataMid.healthFactor).to.be.gt(parseUnits('1', 18));
+    expect(userGlobalDataMid.healthFactor).to.be.gt(utils.parseUnits('1', 18));
 
     await oracle.setAssetPrice(dai.address, (await oracle.getAssetPrice(dai.address)).add(1));
 
     const userGlobalDataAfter = await pool.getUserAccountData(depositor.address);
-    expect(userGlobalDataAfter.healthFactor).to.be.lt(parseUnits('1', 18), INVALID_HF);
+    expect(userGlobalDataAfter.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
   });
 
   it('Liquidates the borrow', async () => {
@@ -131,7 +140,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       helpersContract,
     } = testEnv;
 
-    await dai.connect(liquidator.signer).mint(parseUnits('100000', 18));
+    await dai.connect(liquidator.signer).mint(utils.parseUnits('100000', 18));
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -174,7 +183,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     const expectedCollateralLiquidated = principalPrice
       .mul(amountToLiquidate)
-      .percentMul(10100)
+      .percentMul(CATEGORY.lb)
       .mul(BigNumber.from(10).pow(collateralDecimals))
       .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
 
