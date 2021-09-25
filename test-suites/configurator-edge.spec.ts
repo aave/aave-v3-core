@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
-import { MAX_BORROW_CAP, MAX_UNBACKED_MINT_CAP, MAX_UINT_AMOUNT, MAX_SUPPLY_CAP } from '../helpers/constants';
+import { MAX_BORROW_CAP, MAX_UNBACKED_MINT_CAP, MAX_UINT_AMOUNT, MAX_SUPPLY_CAP, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
@@ -16,6 +16,8 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     RC_INVALID_BORROW_CAP,
     RC_INVALID_SUPPLY_CAP,
     RC_INVALID_UNBACKED_MINT_CAP,
+    RC_INVALID_EMODE_CATEGORY,
+    VL_INCONSISTENT_EMODE_CATEGORY,
   } = ProtocolErrors;
 
   it('ReserveConfiguration setLiquidationBonus() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
@@ -149,6 +151,67 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     await expect(
       configurator.setUnbackedMintCap(weth.address, BigNumber.from(MAX_UNBACKED_MINT_CAP).add(1))
     ).to.be.revertedWith(RC_INVALID_UNBACKED_MINT_CAP);
+  });
+  
+  it('Tries to add a category with id 0 (revert expected)', async () => {
+    const { configurator, poolAdmin } = testEnv;
+
+    await expect(
+      configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(0, '9800', '9800', '10100', ZERO_ADDRESS, 'INVALID_ID_CATEGORY')
+    ).to.be.revertedWith(RC_INVALID_EMODE_CATEGORY);
+  });
+
+  it('Set a eMode category to DAI with zero LT (revert expected)', async () => {
+    const { configurator, poolAdmin, dai } = testEnv;
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory('100', '9800', '0', '10100', ZERO_ADDRESS, 'INCONSISTENT')
+    );
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('Set a eMode category to DAI with fewer LT (revert expected)', async () => {
+    const { configurator, helpersContract, poolAdmin, dai } = testEnv;
+
+    const { liquidationThreshold } = await helpersContract.getReserveConfigurationData(dai.address);
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(
+          '100',
+          '9800',
+          liquidationThreshold.sub(1),
+          '10100',
+          ZERO_ADDRESS,
+          'INCONSISTENT'
+        )
+    );
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('Set a eMode category to DAI with 0 LT (revert expected)', async () => {
+    const { configurator, poolAdmin, dai } = testEnv;
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory('101', '9800', '0', '10100', ZERO_ADDRESS, 'INCONSISTENT')
+    );
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '101')
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
   });
 
   it('Tries to disable the DAI reserve with liquidity on it (revert expected)', async () => {

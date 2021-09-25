@@ -59,8 +59,9 @@ library BorrowLogic {
 
   function executeBorrow(
     mapping(address => DataTypes.ReserveData) storage reserves,
-    DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteBorrowParams memory params
   ) public {
     DataTypes.ReserveData storage reserve = reserves[params.asset];
@@ -69,17 +70,21 @@ library BorrowLogic {
     reserve.updateState(reserveCache);
 
     ValidationLogic.validateBorrow(
-      reserveCache,
-      params.asset,
-      params.onBehalfOf,
-      params.amount,
-      params.interestRateMode,
-      params.maxStableRateBorrowSizePercent,
       reserves,
-      userConfig,
       reservesList,
-      params.reservesCount,
-      params.oracle
+      eModeCategories,
+      DataTypes.ValidateBorrowParams(
+        reserveCache,
+        userConfig,
+        params.asset,
+        params.onBehalfOf,
+        params.amount,
+        params.interestRateMode,
+        params.maxStableRateBorrowSizePercent,
+        params.reservesCount,
+        params.oracle,
+        params.userEModeCategory
+      )
     );
 
     uint256 currentStableRate = 0;
@@ -218,56 +223,56 @@ library BorrowLogic {
   function executeFlashLoan(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    bool isAuthorizedFlashBorrower,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
-    DataTypes.FlashloanParams memory flashParams
+    DataTypes.FlashloanParams memory params
   ) external {
     FlashLoanLocalVars memory vars;
 
-    vars.aTokenAddresses = new address[](flashParams.assets.length);
-    vars.totalPremiums = new uint256[](flashParams.assets.length);
+    vars.aTokenAddresses = new address[](params.assets.length);
+    vars.totalPremiums = new uint256[](params.assets.length);
 
-    ValidationLogic.validateFlashloan(flashParams.assets, flashParams.amounts, reserves);
+    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
 
-    vars.receiver = IFlashLoanReceiver(flashParams.receiverAddress);
-    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = isAuthorizedFlashBorrower
+    vars.receiver = IFlashLoanReceiver(params.receiverAddress);
+    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
       ? (0, 0)
-      : (flashParams.flashLoanPremiumTotal, flashParams.flashLoanPremiumToProtocol);
+      : (params.flashLoanPremiumTotal, params.flashLoanPremiumToProtocol);
 
-    for (vars.i = 0; vars.i < flashParams.assets.length; vars.i++) {
-      vars.aTokenAddresses[vars.i] = reserves[flashParams.assets[vars.i]].aTokenAddress;
-      vars.totalPremiums[vars.i] = flashParams.amounts[vars.i].percentMul(
+    for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
+      vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;
+      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(
         vars.flashloanPremiumTotal
       );
       IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
-        flashParams.receiverAddress,
-        flashParams.amounts[vars.i]
+        params.receiverAddress,
+        params.amounts[vars.i]
       );
     }
 
     require(
       vars.receiver.executeOperation(
-        flashParams.assets,
-        flashParams.amounts,
+        params.assets,
+        params.amounts,
         vars.totalPremiums,
         msg.sender,
-        flashParams.params
+        params.params
       ),
       Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
     );
 
-    for (vars.i = 0; vars.i < flashParams.assets.length; vars.i++) {
-      vars.currentAsset = flashParams.assets[vars.i];
-      vars.currentAmount = flashParams.amounts[vars.i];
+    for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
+      vars.currentAsset = params.assets[vars.i];
+      vars.currentAmount = params.amounts[vars.i];
       vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
       vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
-      vars.currentPremiumToProtocol = flashParams.amounts[vars.i].percentMul(
+      vars.currentPremiumToProtocol = params.amounts[vars.i].percentMul(
         vars.flashloanPremiumToProtocol
       );
       vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
 
       if (
-        DataTypes.InterestRateMode(flashParams.modes[vars.i]) == DataTypes.InterestRateMode.NONE
+        DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE
       ) {
         DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
         DataTypes.ReserveCache memory reserveCache = reserve.cache();
@@ -292,7 +297,7 @@ library BorrowLogic {
         );
 
         IERC20(vars.currentAsset).safeTransferFrom(
-          flashParams.receiverAddress,
+          params.receiverAddress,
           vars.currentATokenAddress,
           vars.currentAmountPlusPremium
         );
@@ -301,29 +306,31 @@ library BorrowLogic {
         // eventually opens a debt position
         executeBorrow(
           reserves,
-          userConfig,
           reservesList,
+          eModeCategories,
+          userConfig,
           DataTypes.ExecuteBorrowParams(
             vars.currentAsset,
             msg.sender,
-            flashParams.onBehalfOf,
+            params.onBehalfOf,
             vars.currentAmount,
-            flashParams.modes[vars.i],
-            flashParams.referralCode,
+            params.modes[vars.i],
+            params.referralCode,
             false,
-            flashParams.maxStableRateBorrowSizePercent,
-            flashParams.reservesCount,
-            flashParams.oracle
+            params.maxStableRateBorrowSizePercent,
+            params.reservesCount,
+            params.oracle,
+            params.userEModeCategory
           )
         );
       }
       emit FlashLoan(
-        flashParams.receiverAddress,
+        params.receiverAddress,
         msg.sender,
         vars.currentAsset,
         vars.currentAmount,
         vars.totalPremiums[vars.i],
-        flashParams.referralCode
+        params.referralCode
       );
     }
   }

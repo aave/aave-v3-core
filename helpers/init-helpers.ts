@@ -333,7 +333,7 @@ export const configureReservesByHelper = async (
       );
       console.log(`  - Init for: ${chunkedSymbols[chunkIndex].join(', ')}`);
     }
-    // Remove reservesSetupHelper from pool admins
+    // Remove reservesSetupHelper as admin
     await waitForTx(await aclManager.removePoolAdmin(reservesSetupHelper.address));
   }
 };

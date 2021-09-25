@@ -1,8 +1,16 @@
 import { expect } from 'chai';
-import { BigNumber } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 import { ONE_ADDRESS, RAY, ZERO_ADDRESS } from '../helpers/constants';
+import { deployMintableERC20 } from '../helpers/contracts-deployments';
+import { getFirstSigner } from '../helpers/contracts-getters';
 import { strategyWETH } from '../market-config/reservesConfigs';
-import { AaveProtocolDataProvider } from '../types';
+import {
+  AaveProtocolDataProvider,
+  ATokenFactory,
+  MockReserveInterestRateStrategyFactory,
+  StableDebtTokenFactory,
+  VariableDebtTokenFactory,
+} from '../types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 type ReserveConfigurationValues = {
@@ -16,6 +24,7 @@ type ReserveConfigurationValues = {
   stableBorrowRateEnabled: boolean;
   isActive: boolean;
   isFrozen: boolean;
+  eModeCategory: BigNumber,
   borrowCap: string;
   supplyCap: string;
 };
@@ -33,6 +42,7 @@ const expectReserveConfigurationData = (
     isActive: boolean;
     isFrozen: boolean;
   },
+  eModeCategory: BigNumber,
   capsCfg: {
     borrowCap: BigNumber;
     supplyCap: BigNumber;
@@ -64,6 +74,7 @@ const expectReserveConfigurationData = (
   );
   expect(reserveCfg.isActive).to.be.eq(values.isActive, 'isActive is not correct');
   expect(reserveCfg.isFrozen).to.be.eq(values.isFrozen, 'isFrozen is not correct');
+  expect(eModeCategory).to.be.eq(values.eModeCategory, 'eModeCategory is not correct');
   expect(capsCfg.borrowCap).to.be.eq(values.borrowCap, 'borrowCap is not correct');
   expect(capsCfg.supplyCap).to.be.eq(values.supplyCap, 'supplyCap is not correct');
 };
@@ -71,6 +82,7 @@ const expectReserveConfigurationData = (
 const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: string) => {
   return Promise.all([
     helpersContract.getReserveConfigurationData(asset),
+    helpersContract.getReserveEModeCategory(asset),
     helpersContract.getReserveCaps(asset),
     helpersContract.getPaused(asset),
     helpersContract.getLiquidationProtocolFee(asset),
@@ -104,9 +116,75 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       stableBorrowRateEnabled,
       isActive: true,
       isFrozen: false,
+      eModeCategory: BigNumber.from(0),
       borrowCap: borrowCap,
       supplyCap: supplyCap,
     };
+  });
+
+  it('InitReserves via AssetListing admin', async () => {
+    const { addressesProvider, configurator, poolAdmin, aclManager, users } = testEnv;
+
+    // const snapId
+    const assetListingAdmin = users[4];
+    // Add new AssetListingAdmin
+    expect(
+      await aclManager.connect(poolAdmin.signer).addAssetListingAdmin(assetListingAdmin.address)
+    );
+
+    // Deploy mock `InitReserveInput`
+    const mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
+    const stableDebtTokenImplementation = await new StableDebtTokenFactory(
+      await getFirstSigner()
+    ).deploy();
+    const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
+      await getFirstSigner()
+    ).deploy();
+    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
+    const mockRateStrategy = await new MockReserveInterestRateStrategyFactory(
+      await getFirstSigner()
+    ).deploy(addressesProvider.address, 0, 0, 0, 0, 0, 0);
+
+    // Init the reserve
+    const initInputParams: {
+      aTokenImpl: string;
+      stableDebtTokenImpl: string;
+      variableDebtTokenImpl: string;
+      underlyingAssetDecimals: BigNumberish;
+      interestRateStrategyAddress: string;
+      underlyingAsset: string;
+      treasury: string;
+      incentivesController: string;
+      underlyingAssetName: string;
+      aTokenName: string;
+      aTokenSymbol: string;
+      variableDebtTokenName: string;
+      variableDebtTokenSymbol: string;
+      stableDebtTokenName: string;
+      stableDebtTokenSymbol: string;
+      params: string;
+    }[] = [
+      {
+        aTokenImpl: aTokenImplementation.address,
+        stableDebtTokenImpl: stableDebtTokenImplementation.address,
+        variableDebtTokenImpl: variableDebtTokenImplementation.address,
+        underlyingAssetDecimals: 18,
+        interestRateStrategyAddress: mockRateStrategy.address,
+        underlyingAsset: mockToken.address,
+        treasury: ZERO_ADDRESS,
+        incentivesController: ZERO_ADDRESS,
+        underlyingAssetName: 'MOCK',
+        aTokenName: 'AMOCK',
+        aTokenSymbol: 'AMOCK',
+        variableDebtTokenName: 'VMOCK',
+        variableDebtTokenSymbol: 'VMOCK',
+        stableDebtTokenName: 'SMOCK',
+        stableDebtTokenSymbol: 'SMOCK',
+        params: '0x10',
+      },
+    ];
+
+    expect(await configurator.connect(assetListingAdmin.signer).initReserves(initInputParams));
   });
 
   it('Deactivates the ETH reserve', async () => {
@@ -128,9 +206,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await configurator.setReservePause(weth.address, true))
       .to.emit(configurator, 'ReservePaused')
       .withArgs(weth.address);
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, { ...baseConfigValues });
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, { ...baseConfigValues });
     expect(isPaused).to.be.equal(true);
   });
 
@@ -140,9 +218,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReserveUnpaused')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, { ...baseConfigValues });
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, { ...baseConfigValues });
     expect(isPaused).to.be.equal(false);
   });
 
@@ -152,9 +230,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReservePaused')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, { ...baseConfigValues });
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, { ...baseConfigValues });
     expect(isPaused).to.be.equal(true);
   });
 
@@ -164,9 +242,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReserveUnpaused')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, { ...baseConfigValues });
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, { ...baseConfigValues });
     expect(isPaused).to.be.equal(false);
   });
 
@@ -176,9 +254,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await configurator.freezeReserve(weth.address))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address);
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       isFrozen: true,
     });
@@ -191,9 +269,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReserveUnfrozen')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, { ...baseConfigValues });
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, { ...baseConfigValues });
     expect(isPaused).to.be.equal(false);
   });
 
@@ -203,9 +281,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       isFrozen: true,
     });
@@ -218,9 +296,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReserveUnfrozen')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, { ...baseConfigValues });
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, { ...baseConfigValues });
     expect(isPaused).to.be.equal(false);
   });
 
@@ -230,9 +308,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'BorrowingDisabledOnReserve')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       borrowingEnabled: false,
     });
@@ -245,10 +323,10 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'BorrowingEnabledOnReserve')
       .withArgs(weth.address, true);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
     const { variableBorrowIndex } = await helpersContract.getReserveData(weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
     });
     expect(isPaused).to.be.equal(false);
@@ -261,9 +339,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'BorrowingDisabledOnReserve')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       borrowingEnabled: false,
     });
@@ -278,10 +356,10 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'BorrowingEnabledOnReserve')
       .withArgs(weth.address, true);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
     const { variableBorrowIndex } = await helpersContract.getReserveData(weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
     });
     expect(isPaused).to.be.equal(false);
@@ -294,9 +372,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'CollateralConfigurationChanged')
       .withArgs(weth.address, 0, 0, 0);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       baseLTVAsCollateral: '0',
       liquidationThreshold: '0',
@@ -312,9 +390,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'CollateralConfigurationChanged')
       .withArgs(weth.address, '8000', '8250', '10500');
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       baseLTVAsCollateral: '8000',
       liquidationThreshold: '8250',
@@ -333,9 +411,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'CollateralConfigurationChanged')
       .withArgs(weth.address, 0, 0, 0);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       baseLTVAsCollateral: '0',
       liquidationThreshold: '0',
@@ -355,9 +433,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'CollateralConfigurationChanged')
       .withArgs(weth.address, '8000', '8250', '10500');
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       baseLTVAsCollateral: '8000',
       liquidationThreshold: '8250',
@@ -371,9 +449,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await configurator.disableReserveStableRate(weth.address))
       .to.emit(configurator, 'StableRateDisabledOnReserve')
       .withArgs(weth.address);
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       stableBorrowRateEnabled: false,
     });
@@ -386,9 +464,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'StableRateEnabledOnReserve')
       .withArgs(weth.address);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
     });
     expect(isPaused).to.be.equal(false);
@@ -399,9 +477,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await configurator.connect(riskAdmin.signer).disableReserveStableRate(weth.address))
       .to.emit(configurator, 'StableRateDisabledOnReserve')
       .withArgs(weth.address);
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       stableBorrowRateEnabled: false,
     });
@@ -413,9 +491,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await configurator.connect(riskAdmin.signer).enableReserveStableRate(weth.address))
       .to.emit(configurator, 'StableRateEnabledOnReserve')
       .withArgs(weth.address);
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
     });
     expect(isPaused).to.be.equal(false);
@@ -429,9 +507,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReserveFactorChanged')
       .withArgs(weth.address, newReserveFactor);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       reserveFactor: newReserveFactor,
     });
@@ -447,9 +525,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'ReserveFactorChanged')
       .withArgs(weth.address, newReserveFactor);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       reserveFactor: newReserveFactor,
     });
@@ -483,9 +561,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(weth.address, newBorrowCap);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       borrowCap: newBorrowCap,
     });
@@ -499,9 +577,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(weth.address, newBorrowCap);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       borrowCap: newBorrowCap,
     });
@@ -516,9 +594,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'SupplyCapChanged')
       .withArgs(weth.address, newSupplyCap);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       borrowCap: newBorrowCap,
       supplyCap: newSupplyCap,
@@ -534,9 +612,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .to.emit(configurator, 'SupplyCapChanged')
       .withArgs(weth.address, newSupplyCap);
 
-    const [configData, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
+    const [configData, eModeCategory, reserveCaps, isPaused] = await getReserveData(helpersContract, weth.address);
 
-    expectReserveConfigurationData(configData, reserveCaps, {
+    expectReserveConfigurationData(configData, eModeCategory, reserveCaps, {
       ...baseConfigValues,
       borrowCap: newBorrowCap,
       supplyCap: newSupplyCap,
@@ -651,5 +729,49 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
     expect(await pool.FLASHLOAN_PREMIUM_TOTAL()).to.be.eq(newPremiumTotal);
     expect(await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL()).to.be.eq(newPremiumToProtocol);
+  });
+
+  it('Adds a new eMode category for stablecoins', async () => {
+    const { configurator, pool, poolAdmin } = testEnv;
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory('1', '9800', '9800', '10100', ONE_ADDRESS, 'STABLECOINS')
+    )
+      .to.emit(configurator, 'EModeCategoryAdded')
+      .withArgs(1, 9800, 9800, 10100, ONE_ADDRESS, 'STABLECOINS');
+
+    const categoryData = await pool.getEModeCategoryData(1);
+    expect(categoryData.ltv).to.be.equal(9800, 'invalid eMode category ltv');
+    expect(categoryData.liquidationThreshold).to.be.equal(
+      9800,
+      'invalid eMode category liq threshold'
+    );
+    expect(categoryData.liquidationBonus).to.be.equal(10100, 'invalid eMode category liq bonus');
+    expect(categoryData.priceSource).to.be.equal(
+      ONE_ADDRESS,
+      'invalid eMode category price source'
+    );
+  });
+
+  it('Set a eMode category to an asset', async () => {
+    const { configurator, pool, poolAdmin, dai } = testEnv;
+
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '1'))
+      .to.emit(configurator, 'EModeAssetCategoryChanged')
+      .withArgs(dai.address, 1);
+
+    const categoryData = await pool.getEModeCategoryData(1);
+    expect(categoryData.ltv).to.be.equal(9800, 'invalid eMode category ltv');
+    expect(categoryData.liquidationThreshold).to.be.equal(
+      9800,
+      'invalid eMode category liq threshold'
+    );
+    expect(categoryData.liquidationBonus).to.be.equal(10100, 'invalid eMode category liq bonus');
+    expect(categoryData.priceSource).to.be.equal(
+      ONE_ADDRESS,
+      'invalid eMode category price source'
+    );
   });
 });

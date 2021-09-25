@@ -27,7 +27,8 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
    * @param onBehalfOf The address receiving the debt tokens
    * @param amount The amount of debt being minted
    * @param index The variable debt index of the reserve
-   * @return if the the previous balance of the user is 0 and the scaled total debt of the reserve
+   * @return True if the previous balance of the user is 0, false otherwise
+   * @return The scaled total debt of the reserve
    **/
   function mint(
     address user,

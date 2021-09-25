@@ -20,11 +20,12 @@ import {
   MockPoolFactory,
   MockInitializableImpleFactory,
   MockInitializableImpleV2Factory,
-  DepositLogicFactory,
+  SupplyLogicFactory,
   BorrowLogicFactory,
   LiquidationLogicFactory,
   BridgeLogicFactory,
   ACLManagerFactory,
+  EModeLogicFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -60,9 +61,9 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
   );
 };
 
-export const getDepositLogic = async (address?: tEthereumAddress) =>
-  await DepositLogicFactory.connect(
-    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+export const getSupplyLogic = async (address?: tEthereumAddress) =>
+  await SupplyLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.SupplyLogic}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
@@ -74,13 +75,19 @@ export const getBridgeLogic = async (address?: tEthereumAddress) =>
 
 export const getBorrowLogic = async (address?: tEthereumAddress) =>
   await BorrowLogicFactory.connect(
-    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    address || (await getDb().get(`${eContractid.BorrowLogic}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getLiquidationLogic = async (address?: tEthereumAddress) =>
   await LiquidationLogicFactory.connect(
-    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
+    address || (await getDb().get(`${eContractid.LiquidationLogic}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getEModeLogic = async (address?: tEthereumAddress) =>
+  await EModeLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.EModeLogic}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

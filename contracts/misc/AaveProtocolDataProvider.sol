@@ -113,13 +113,23 @@ contract AaveProtocolDataProvider {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset);
 
-    (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor) = configuration
-      .getParamsMemory();
+    (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor, ) = configuration
+      .getParams();
 
-    (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration
-      .getFlagsMemory();
+    (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();
 
     usageAsCollateralEnabled = liquidationThreshold > 0;
+  }
+
+  /**
+   * Returns the efficiency mode category of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return eModeCategory The eMode id of the reserve
+   */
+  function getReserveEModeCategory(address asset) external view returns (uint256) {
+    DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
+      .getConfiguration(asset);
+    return configuration.getEModeCategory();
   }
 
   /**
@@ -133,9 +143,7 @@ contract AaveProtocolDataProvider {
     view
     returns (uint256 borrowCap, uint256 supplyCap)
   {
-    (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool())
-      .getConfiguration(asset)
-      .getCapsMemory();
+    (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getCaps();
   }
 
   /**
@@ -144,9 +152,7 @@ contract AaveProtocolDataProvider {
    * @return isPaused True if the pool is paused, false otherwise
    **/
   function getPaused(address asset) external view returns (bool isPaused) {
-    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool())
-      .getConfiguration(asset)
-      .getFlagsMemory();
+    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getFlags();
   }
 
   /**
@@ -155,8 +161,7 @@ contract AaveProtocolDataProvider {
    * @return The protocol fee on liquidation
    **/
   function getLiquidationProtocolFee(address asset) external view returns (uint256) {
-    return
-      IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFeeMemory();
+    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFee();
   }
 
   /**
@@ -165,7 +170,7 @@ contract AaveProtocolDataProvider {
    * @return The unbacked mint cap of the reserve
    **/
   function getUnbackedMintCap(address asset) external view returns (uint256) {
-    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getUnbackedMintCapMemory();
+    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getUnbackedMintCap();
   }
 
   /**

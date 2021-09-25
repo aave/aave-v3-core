@@ -48,12 +48,12 @@ library BridgeLogic {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) public {
+  ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
 
-    ValidationLogic.validateDeposit(reserveCache, amount);
+    ValidationLogic.validateSupply(reserveCache, amount);
 
     reserve.updateInterestRates(reserveCache, asset, amount, 0, 0, 0);
 
@@ -65,8 +65,8 @@ library BridgeLogic {
 
     reserve.unbacked = reserve.unbacked + amount;
 
-    uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCapMemory();
-    (, , , uint256 reserveDecimals, ) = reserveCache.reserveConfiguration.getParamsMemory();
+    uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCap();
+    (, , , uint256 reserveDecimals, ,) = reserveCache.reserveConfiguration.getParams();
     require(
       unbackedMintCap == 0 || reserve.unbacked / (10**reserveDecimals) < unbackedMintCap,
       Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
@@ -93,7 +93,7 @@ library BridgeLogic {
     address asset,
     uint256 amount,
     uint256 fee
-  ) public {
+  ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);

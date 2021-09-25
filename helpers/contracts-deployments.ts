@@ -37,6 +37,7 @@ import {
   MockReserveConfigurationFactory,
   MockPoolFactory,
   MockReentrantInitializableImpleFactory,
+  EModeLogicFactory,
 } from '../types';
 import {
   withSave,
@@ -88,19 +89,19 @@ export const deployPoolConfigurator = async () => {
   return withSave(poolConfiguratorImpl, eContractid.PoolConfigurator);
 };
 
-export const deployDepositLogic = async () => {
-  const depositLogicArtifact = await readArtifact(eContractid.DepositLogic);
+export const deploySupplyLogic = async () => {
+  const supplyLogicArtifact = await readArtifact(eContractid.SupplyLogic);
 
-  const linkedDepositLogicByteCode = linkBytecode(depositLogicArtifact, {});
-  const depositLogicFactory = await DRE.ethers.getContractFactory(
-    depositLogicArtifact.abi,
-    linkedDepositLogicByteCode
+  const linkedSupplyLogicByteCode = linkBytecode(supplyLogicArtifact, {});
+  const supplyLogicFactory = await DRE.ethers.getContractFactory(
+    supplyLogicArtifact.abi,
+    linkedSupplyLogicByteCode
   );
-  const depositLogic = await (
-    await depositLogicFactory.connect(await getFirstSigner()).deploy()
+  const supplyLogic = await (
+    await supplyLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
-  return withSave(depositLogic, eContractid.DepositLogic);
+  return withSave(supplyLogic, eContractid.SupplyLogic);
 };
 
 export const deployBorrowLogic = async () => {
@@ -120,12 +121,12 @@ export const deployBorrowLogic = async () => {
 export const deployLiquidationLogic = async () => {
   const liquidationLogicArtifact = await readArtifact(eContractid.LiquidationLogic);
 
-  const borrowLogicFactory = await DRE.ethers.getContractFactory(
+  const liquidationLogicFactory = await DRE.ethers.getContractFactory(
     liquidationLogicArtifact.abi,
     liquidationLogicArtifact.bytecode
   );
   const liquidationLogic = await (
-    await borrowLogicFactory.connect(await getFirstSigner()).deploy()
+    await liquidationLogicFactory.connect(await getFirstSigner()).deploy()
   ).deployed();
 
   return withSave(liquidationLogic, eContractid.LiquidationLogic);
@@ -144,11 +145,27 @@ export const deployBridgeLogic = async () => {
   return withSave(bridgeLogic, eContractid.BridgeLogic);
 };
 
+export const deployEModeLogic = async () => {
+  const eModeLogicArtifact = await readArtifact(eContractid.EModeLogic);
+
+  const eModeLogicFactory = await DRE.ethers.getContractFactory(
+    eModeLogicArtifact.abi,
+    eModeLogicArtifact.bytecode
+  );
+  const eModeLogic = await (
+    await eModeLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(eModeLogic, eContractid.EModeLogic);
+};
+
+
 export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
-  const depositLogic = await deployDepositLogic();
+  const supplyLogic = await deploySupplyLogic();
   const borrowLogic = await deployBorrowLogic();
   const liquidationLogic = await deployLiquidationLogic();
   const bridgeLogic = await deployBridgeLogic();
+  const eModeLogic = await deployEModeLogic();
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -163,9 +180,10 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   return {
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
     ['__$b06080f092f400a43662c3f835a4d9baa8$__']: bridgeLogic.address,
-    ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: depositLogic.address,
+    ['__$db79717e66442ee197e8271d032a066e34$__']: supplyLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
     ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address,
+    ['__$e4b9550ff526a295e1233dea02821b9004$__']: eModeLogic.address,
   };
 };
 

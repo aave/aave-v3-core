@@ -47,6 +47,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _;
   }
 
+  modifier onlyAssetListingOrPoolAdmins() {
+    _onlyAssetListingOrPoolAdmins();
+    _;
+  }
+
   modifier onlyRiskOrPoolAdmins() {
     _onlyRiskOrPoolAdmins();
     _;
@@ -68,7 +73,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function initReserves(ConfiguratorInputTypes.InitReserveInput[] calldata input)
     external
     override
-    onlyPoolAdmin
+    onlyAssetListingOrPoolAdmins
   {
     IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
@@ -161,7 +166,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       require(liquidationBonus == 0, Errors.PC_INVALID_CONFIGURATION);
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
-      //we need to ensure no liquidity is deposited
+      //we need to ensure no liquidity is supplied
       _checkNoLiquidity(asset);
     }
 
@@ -282,6 +287,45 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
+  function setEModeCategory(
+    uint8 categoryId,
+    uint16 ltv,
+    uint16 liquidationThreshold,
+    uint16 liquidationBonus,
+    address oracle,
+    string calldata label
+  ) external override onlyRiskOrPoolAdmins {
+    _pool.configureEModeCategory(
+      categoryId,
+      DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
+    );
+    emit EModeCategoryAdded(categoryId, ltv, liquidationThreshold, liquidationBonus, oracle, label);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setAssetEModeCategory(address asset, uint8 categoryId)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
+
+    require(categoryData.liquidationThreshold > 0, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
+
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    require(
+      categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
+
+    currentConfig.setEModeCategory(categoryId);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit EModeAssetCategoryChanged(asset, categoryId);
+  }
+
   /// @inheritdoc IPoolConfigurator
   function setUnbackedMintCap(address asset, uint256 unbackedMintCap)
     external
@@ -297,7 +341,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit UnbackedMintCapChanged(asset, unbackedMintCap);
   }
 
-  ///@inheritdoc IPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override
@@ -380,6 +424,14 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(
       aclManager.isPoolAdmin(msg.sender) || aclManager.isEmergencyAdmin(msg.sender),
       Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
+    );
+  }
+
+  function _onlyAssetListingOrPoolAdmins() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(
+      aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
+      Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
     );
   }
 

@@ -15,17 +15,19 @@ import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
+import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 
 /**
- * @title DepositLogic library
+ * @title SupplyLogic library
  * @author Aave
- * @notice Implements the base logic for deposit/withdraw
+ * @notice Implements the base logic for supply/withdraw
  */
-library DepositLogic {
+library SupplyLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
   using SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
 
@@ -33,53 +35,52 @@ library DepositLogic {
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
   event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
-  event Deposit(
+  event Supply(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
 
-  function executeDeposit(
-    DataTypes.ReserveData storage reserve,
+  function executeSupply(
+    mapping(address => DataTypes.ReserveData) storage reserves,
     DataTypes.UserConfigurationMap storage userConfig,
-    address asset,
-    uint256 amount,
-    address onBehalfOf,
-    uint16 referralCode
+    DataTypes.ExecuteSupplyParams memory params
   ) internal {
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
 
-    ValidationLogic.validateDeposit(reserveCache, amount);
+    ValidationLogic.validateSupply(reserveCache, params.amount);
 
-    reserve.updateInterestRates(reserveCache, asset, amount, 0, amount, 0);
+    reserve.updateInterestRates(reserveCache, params.asset, params.amount, 0, params.amount, 0);
 
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount);
+    IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, params.amount);
 
-    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
-      onBehalfOf,
-      amount,
+    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
+      params.onBehalfOf,
+      params.amount,
       reserveCache.nextLiquidityIndex
     );
 
-    if (isFirstDeposit) {
+    if (isFirstSupply) {
       userConfig.setUsingAsCollateral(reserve.id, true);
-      emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+      emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
     }
 
-    emit Deposit(asset, msg.sender, onBehalfOf, amount, referralCode);
+    emit Supply(params.asset, msg.sender, params.onBehalfOf, params.amount, params.referralCode);
   }
 
   function executeWithdraw(
     mapping(address => DataTypes.ReserveData) storage reserves,
-    DataTypes.UserConfigurationMap storage userConfig,
     mapping(uint256 => address) storage reservesList,
-    DataTypes.ExecuteWithdrawParams memory vars
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.UserConfigurationMap storage userConfig,
+    DataTypes.ExecuteWithdrawParams memory params
   ) internal returns (uint256) {
-    DataTypes.ReserveData storage reserve = reserves[vars.asset];
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
@@ -88,19 +89,19 @@ library DepositLogic {
       reserveCache.nextLiquidityIndex
     );
 
-    uint256 amountToWithdraw = vars.amount;
+    uint256 amountToWithdraw = params.amount;
 
-    if (vars.amount == type(uint256).max) {
+    if (params.amount == type(uint256).max) {
       amountToWithdraw = userBalance;
     }
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
 
-    reserve.updateInterestRates(reserveCache, vars.asset, 0, amountToWithdraw, 0, amountToWithdraw);
+    reserve.updateInterestRates(reserveCache, params.asset, 0, amountToWithdraw, 0, amountToWithdraw);
 
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,
-      vars.to,
+      params.to,
       amountToWithdraw,
       reserveCache.nextLiquidityIndex
     );
@@ -108,23 +109,25 @@ library DepositLogic {
     if (userConfig.isUsingAsCollateral(reserve.id)) {
       if (userConfig.isBorrowingAny()) {
         ValidationLogic.validateHFAndLtv(
-          vars.asset,
-          msg.sender,
           reserves,
-          userConfig,
           reservesList,
-          vars.reservesCount,
-          vars.oracle
+          eModeCategories,
+          userConfig,
+          params.asset,
+          msg.sender,
+          params.reservesCount,
+          params.oracle,
+          params.userEModeCategory
         );
       }
 
       if (amountToWithdraw == userBalance) {
         userConfig.setUsingAsCollateral(reserve.id, false);
-        emit ReserveUsedAsCollateralDisabled(vars.asset, msg.sender);
+        emit ReserveUsedAsCollateralDisabled(params.asset, msg.sender);
       }
     }
 
-    emit Withdraw(vars.asset, msg.sender, vars.to, amountToWithdraw);
+    emit Withdraw(params.asset, msg.sender, params.to, amountToWithdraw);
 
     return amountToWithdraw;
   }
@@ -132,50 +135,55 @@ library DepositLogic {
   function finalizeTransfer(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
-    DataTypes.FinalizeTransferParams memory vars
-  ) public {
-    ValidationLogic.validateTransfer(reserves[vars.asset]);
+    DataTypes.FinalizeTransferParams memory params
+  ) external {
+    ValidationLogic.validateTransfer(reserves[params.asset]);
 
-    uint256 reserveId = reserves[vars.asset].id;
+    uint256 reserveId = reserves[params.asset].id;
 
-    if (vars.from != vars.to) {
-      DataTypes.UserConfigurationMap storage fromConfig = usersConfig[vars.from];
+    if (params.from != params.to) {
+      DataTypes.UserConfigurationMap storage fromConfig = usersConfig[params.from];
 
       if (fromConfig.isUsingAsCollateral(reserveId)) {
         if (fromConfig.isBorrowingAny()) {
           ValidationLogic.validateHFAndLtv(
-            vars.asset,
-            vars.from,
             reserves,
-            usersConfig[vars.from],
             reservesList,
-            vars.reservesCount,
-            vars.oracle
+            eModeCategories,
+            usersConfig[params.from],
+            params.asset,
+            params.from,
+            params.reservesCount,
+            params.oracle,
+            params.fromEModeCategory
           );
         }
-        if (vars.balanceFromBefore - vars.amount == 0) {
+        if (params.balanceFromBefore - params.amount == 0) {
           fromConfig.setUsingAsCollateral(reserveId, false);
-          emit ReserveUsedAsCollateralDisabled(vars.asset, vars.from);
+          emit ReserveUsedAsCollateralDisabled(params.asset, params.from);
         }
       }
 
-      if (vars.balanceToBefore == 0 && vars.amount != 0) {
-        DataTypes.UserConfigurationMap storage toConfig = usersConfig[vars.to];
+      if (params.balanceToBefore == 0 && params.amount != 0) {
+        DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         toConfig.setUsingAsCollateral(reserveId, true);
-        emit ReserveUsedAsCollateralEnabled(vars.asset, vars.to);
+        emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
       }
     }
   }
 
-  function setUserUseReserveAsCollateral(
+  function executeUseReserveAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
     bool useAsCollateral,
-    mapping(uint256 => address) storage reservesList,
     uint256 reservesCount,
-    address priceOracle
+    address priceOracle,
+    uint8 userEModeCategory
   ) external {
     DataTypes.ReserveData storage reserve = reserves[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
@@ -190,13 +198,15 @@ library DepositLogic {
       emit ReserveUsedAsCollateralEnabled(asset, msg.sender);
     } else {
       ValidationLogic.validateHFAndLtv(
+        reserves,
+        reservesList,
+        eModeCategories,
+        userConfig,
         asset,
         msg.sender,
-        reserves,
-        userConfig,
-        reservesList,
         reservesCount,
-        priceOracle
+        priceOracle,
+        userEModeCategory
       );
 
       emit ReserveUsedAsCollateralDisabled(asset, msg.sender);

@@ -8,9 +8,10 @@ import { MockPoolInheritedFactory } from '../types';
 import {
   getBorrowLogic,
   getBridgeLogic,
-  getDepositLogic,
+  getSupplyLogic,
   getFirstSigner,
   getLiquidationLogic,
+  getEModeLogic,
 } from '../helpers/contracts-getters';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
@@ -183,10 +184,12 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Deploy the mock Pool with a setter of `maxNumberOfReserves`
     const libraries = {
       ['__$b06080f092f400a43662c3f835a4d9baa8$__']: (await getBridgeLogic()).address,
-      ['__$209f7610f7b09602dd9c7c2ef5b135794a$__']: (await getDepositLogic()).address,
+      ['__$db79717e66442ee197e8271d032a066e34$__']: (await getSupplyLogic()).address,
       ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: (await getBorrowLogic()).address,
       ['__$f598c634f2d943205ac23f707b80075cbb$__']: (await getLiquidationLogic()).address,
+      ['__$e4b9550ff526a295e1233dea02821b9004$__']: (await getEModeLogic()).address,
     };
+
     const mockPoolImpl = await (
       await new MockPoolInheritedFactory(libraries, await getFirstSigner()).deploy()
     ).deployed();

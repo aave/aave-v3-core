@@ -160,6 +160,17 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.eq(true);
   });
 
+  it('Grant ASSET_LISTING_ADMIN role', async () => {
+    const {
+      deployer,
+      users: [, , , , , assetListingAdmin],
+    } = testEnv;
+
+    expect(await aclManager.isAssetListingAdmin(assetListingAdmin.address)).to.be.eq(false);
+    await aclManager.connect(deployer.signer).addAssetListingAdmin(assetListingAdmin.address);
+    expect(await aclManager.isAssetListingAdmin(assetListingAdmin.address)).to.be.eq(true);
+  });
+
   it('Revoke FLASH_BORROWER', async () => {
     const {
       users: [flashBorrowAdmin, flashBorrower],
@@ -237,6 +248,17 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.eq(true);
     await aclManager.connect(deployer.signer).removeRiskAdmin(riskAdmin.address);
     expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.eq(false);
+  });
+
+  it('Revoke ASSET_LISTING_ADMIN', async () => {
+    const {
+      deployer,
+      users: [, , , , , assetListingAdmin],
+    } = testEnv;
+
+    expect(await aclManager.isAssetListingAdmin(assetListingAdmin.address)).to.be.eq(true);
+    await aclManager.connect(deployer.signer).removeAssetListingAdmin(assetListingAdmin.address);
+    expect(await aclManager.isAssetListingAdmin(assetListingAdmin.address)).to.be.eq(false);
   });
 
   it('Tries to deploy ACLManager when ACLAdmin is ZERO_ADDRESS (revert expected)', async () => {

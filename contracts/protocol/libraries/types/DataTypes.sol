@@ -36,7 +36,7 @@ library DataTypes {
     //bit 16-31: Liq. threshold
     //bit 32-47: Liq. bonus
     //bit 48-55: Decimals
-    //bit 56: Reserve is active
+    //bit 56: reserve is active
     //bit 57: reserve is frozen
     //bit 58: borrowing is enabled
     //bit 59: stable rate borrowing enabled
@@ -55,6 +55,16 @@ library DataTypes {
 
   struct UserConfigurationMap {
     uint256 data;
+  }
+
+  struct EModeCategory {
+    // each eMode category has a custom ltv and liquidation threshold
+    uint16 ltv;
+    uint16 liquidationThreshold;
+    uint16 liquidationBonus;
+    // each eMode category may or may not have a custom oracle to override the individual assets price oracles
+    address priceSource;
+    string label;
   }
 
   enum InterestRateMode {
@@ -93,6 +103,14 @@ library DataTypes {
     address user;
     bool receiveAToken;
     address priceOracle;
+    uint8 userEModeCategory;
+  }
+
+  struct ExecuteSupplyParams {
+    address asset;
+    uint256 amount;
+    address onBehalfOf;
+    uint16 referralCode;
   }
 
   struct ExecuteBorrowParams {
@@ -106,6 +124,7 @@ library DataTypes {
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
     address oracle;
+    uint8 userEModeCategory;
   }
 
   struct ExecuteRepayParams {
@@ -122,6 +141,13 @@ library DataTypes {
     address to;
     uint256 reservesCount;
     address oracle;
+    uint8 userEModeCategory;
+  }
+
+    struct ExecuteSetUserEModeParams {
+    uint256 reservesCount;
+    address oracle;
+    uint8 categoryId;
   }
 
   struct FinalizeTransferParams {
@@ -133,6 +159,8 @@ library DataTypes {
     uint256 balanceToBefore;
     uint256 reservesCount;
     address oracle;
+    uint8 fromEModeCategory;
+    uint8 toEModeCategory;
   }
 
   struct FlashloanParams {
@@ -148,6 +176,38 @@ library DataTypes {
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
     address oracle;
+    uint8 userEModeCategory;
+    bool isAuthorizedFlashBorrower;
+  }
+
+  struct CalculateUserAccountDataParams {
+    UserConfigurationMap userConfig;
+    uint256 reservesCount;
+    address user;
+    address oracle;
+    uint8 userEModeCategory;
+  }
+
+  struct ValidateBorrowParams {
+    DataTypes.ReserveCache reserveCache;
+    DataTypes.UserConfigurationMap userConfig;
+    address asset;
+    address userAddress;
+    uint256 amount;
+    uint256 interestRateMode;
+    uint256 maxStableLoanPercent;
+    uint256 reservesCount;
+    address oracle;
+    uint8 userEModeCategory;
+  }
+
+  struct ValidateLiquidationCallParams {
+    DataTypes.ReserveCache debtReserveCache;
+    uint256 totalDebt;
+    address user;
+    uint256 reservesCount;
+    address oracle;
+    uint8 userEModeCategory;
   }
 
   struct CalculateInterestRatesParams {
