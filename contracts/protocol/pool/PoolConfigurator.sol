@@ -287,7 +287,47 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
-  ///@inheritdoc IPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
+  function setEModeCategory(
+    uint8 categoryId,
+    uint16 ltv,
+    uint16 liquidationThreshold,
+    uint16 liquidationBonus,
+    address oracle,
+    string calldata label
+  ) external override onlyRiskOrPoolAdmins {
+    _pool.configureEModeCategory(
+      categoryId,
+      DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
+    );
+    emit EModeCategoryAdded(categoryId, ltv, liquidationThreshold, liquidationBonus, oracle, label);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setAssetEModeCategory(address asset, uint8 categoryId)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
+
+    require(categoryData.liquidationThreshold > 0, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
+
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    require(
+      categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
+
+    currentConfig.setEModeCategory(categoryId);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit EModeAssetCategoryChanged(asset, categoryId);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override

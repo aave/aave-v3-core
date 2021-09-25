@@ -110,6 +110,8 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
       { fn: 'setBorrowCap', args: [randomAddress, randomNumber] },
       { fn: 'setSupplyCap', args: [randomAddress, randomNumber] },
       { fn: 'setReserveInterestRateStrategyAddress', args: [randomAddress, randomAddress] },
+      { fn: 'setEModeCategory', args: [randomNumber, randomNumber, randomNumber, randomNumber, randomAddress, '']},
+      { fn: 'setAssetEModeCategory', args: [randomAddress, randomNumber]}
     ];
     for (const call of calls) {
       await expect(

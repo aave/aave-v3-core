@@ -135,6 +135,31 @@ interface IPoolConfigurator {
   event LiquidationProtocolFeeChanged(address indexed asset, uint256 fee);
 
   /**
+   * @notice Emitted when the category of an asset in eMode is changed
+   * @param asset The address of the underlying asset of the reserve
+   * @param categoryId The new eMode asset category
+   **/
+  event EModeAssetCategoryChanged(address indexed asset, uint8 categoryId);
+
+  /**
+   * @notice Emitted when a new eMode category is added
+   * @param categoryId The new eMode category id
+   * @param ltv The ltv for the asset category in eMode
+   * @param liquidationThreshold The liquidationThreshold for the asset category in eMode
+   * @param liquidationBonus The liquidationBonus for the asset category in eMode
+   * @param oracle The optional address of the price oracle specific for this category
+   * @param label A human readable identifier for the category
+   **/
+  event EModeCategoryAdded(
+    uint8 indexed categoryId,
+    uint256 ltv,
+    uint256 liquidationThreshold,
+    uint256 liquidationBonus,
+    address oracle,
+    string label
+  );
+
+  /**
    * @notice Emitted when the reserve decimals are updated
    * @param asset The address of the underlying asset of the reserve
    * @param decimals The new decimals
@@ -354,6 +379,32 @@ interface IPoolConfigurator {
    * @param fee The new supply of the reserve
    **/
   function setLiquidationProtocolFee(address asset, uint256 fee) external;
+
+  /**
+   * @notice Assign an eMode category to asset
+   * @param asset The address of the underlying asset of the reserve
+   * @param categoryId The category id of the asset
+   **/
+  function setAssetEModeCategory(address asset, uint8 categoryId) external;
+
+  /**
+   * @notice Adds a new eMode category
+   * @param categoryId The id of the category to be configured
+   * @param ltv The ltv associated with the category
+   * @param liquidationThreshold The liquidation threshold associated with the category
+   * @param liquidationBonus The liquidation bonus associated with the category
+   * @param oracle The oracle associated with the category. If 0x0, the default assets oracles will be used to compute the overall
+   * @param label a label identifying the category
+   * debt and overcollateralization of the users using this category.
+   **/
+  function setEModeCategory(
+    uint8 categoryId,
+    uint16 ltv,
+    uint16 liquidationThreshold,
+    uint16 liquidationBonus,
+    address oracle,
+    string calldata label
+  ) external;
 
   /**
    * @notice Drops a reserve entirely

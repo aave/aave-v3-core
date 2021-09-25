@@ -164,6 +164,13 @@ interface IPool {
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
 
   /**
+   * @notice Emitted when the user selects a certain asset category for eMode
+   * @param user The address of the user
+   * @param categoryId The category id
+   **/
+  event UserEModeSet(address indexed user, uint8 categoryId);
+
+  /*
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
    * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
    * @param asset The address of the underlying asset to supply
@@ -532,6 +539,35 @@ interface IPool {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external;
+
+  /**
+   * @notice Configures a new category for the eMode.
+   * @dev In eMode, the protocol allows very high borrowing power to borrow assets of the same category.
+   * The category 0 is reserved as it's the default for volatile assets
+   * @param id The id of the category
+   * @param config The configuration of the category
+   */
+  function configureEModeCategory(uint8 id, DataTypes.EModeCategory memory config) external;
+
+  /**
+   * @notice Returns the data of an eMode category
+   * @param id The id of the category
+   * @return The configuration data of the category
+   */
+  function getEModeCategoryData(uint8 id) external returns (DataTypes.EModeCategory memory);
+
+  /**
+   * @notice Allows a user to use the protocol in eMode
+   * @param categoryId The id of the category
+   */
+  function setUserEMode(uint8 categoryId) external;
+
+  /**
+   * @notice Returns the eMode the user is using
+   * @param user The address of the user
+   * @return The eMode id
+   */
+  function getUserEMode(address user) external view returns (uint256);
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate

@@ -5,6 +5,8 @@ import { RateMode, ProtocolErrors } from '../helpers/types';
 import { evmRevert, evmSnapshot, setAutomine } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { ethers } from 'hardhat';
+import { parseUnits } from '@ethersproject/units';
 
 makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -22,6 +24,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0,
     VL_INCONSISTENT_FLASHLOAN_PARAMS,
     VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
+    VL_INCONSISTENT_EMODE_CATEGORY,
   } = ProtocolErrors;
 
   let snap: string;
@@ -698,5 +701,134 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
           0
         )
     ).to.be.revertedWith(VL_INCONSISTENT_FLASHLOAN_PARAMS);
+  });
+
+  it('validateSetUserEMode() with LT == 0 (reverts)', async () => {
+    const {
+      configurator,
+      poolAdmin,
+      pool,
+      users: [user],
+    } = testEnv;
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory('101', '9800', '0', '10100', ethers.constants.AddressZero, 'INCONSISTENT')
+    );
+
+    await expect(pool.connect(user.signer).setUserEMode(101)).to.be.revertedWith(
+      VL_INCONSISTENT_EMODE_CATEGORY
+    );
+  });
+
+  it('validateSetUserEMode() with empty config', async () => {
+    const {
+      configurator,
+      poolAdmin,
+      pool,
+      users: [user],
+    } = testEnv;
+
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(
+          '101',
+          '9800',
+          '9900',
+          '10100',
+          ethers.constants.AddressZero,
+          'INCONSISTENT'
+        )
+    );
+
+    await pool.connect(user.signer).setUserEMode(101);
+  });
+
+  it('validateSetUserEMode() with categoryId == 0', async () => {
+    const {
+      dai,
+      pool,
+      users: [user],
+    } = testEnv;
+
+    // Deposit to make sure config is not empty
+    await dai.connect(user.signer).mint(parseUnits('1000', 18));
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
+
+    await pool.connect(user.signer).setUserEMode(0);
+
+    expect(await pool.getUserEMode(user.address)).to.be.eq(0);
+  });
+
+  it('validateBorrow() with eMode > 0, borrowing asset not in category (revert expected)', async () => {
+    const {
+      configurator,
+      poolAdmin,
+      usdc,
+      dai,
+      pool,
+      users: [user, usdcProvider],
+    } = testEnv;
+
+    await usdc.connect(usdcProvider.signer).mint(parseUnits('1000', 6));
+    await usdc.connect(usdcProvider.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(usdcProvider.signer)
+      .supply(usdc.address, parseUnits('1000', 6), usdcProvider.address, 0);
+
+    await dai.connect(user.signer).mint(parseUnits('1000', 18));
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
+
+    await configurator
+      .connect(poolAdmin.signer)
+      .setEModeCategory('101', '9800', '9900', '10100', ethers.constants.AddressZero, 'NO-ASSETS');
+
+    await pool.connect(user.signer).setUserEMode(101);
+
+    await expect(
+      pool
+        .connect(user.signer)
+        .borrow(usdc.address, parseUnits('100', 6), RateMode.Variable, 0, user.address)
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('validateHFAndLtv() with HF < 1 (revert expected)', async () => {
+    const {
+      usdc,
+      dai,
+      pool,
+      oracle,
+      users: [user, usdcProvider],
+    } = testEnv;
+
+    await usdc.connect(usdcProvider.signer).mint(parseUnits('1000', 6));
+    await usdc.connect(usdcProvider.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(usdcProvider.signer)
+      .supply(usdc.address, parseUnits('1000', 6), usdcProvider.address, 0);
+
+    await dai.connect(user.signer).mint(parseUnits('1000', 18));
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
+
+    const userGlobalData = await pool.getUserAccountData(user.address);
+    const usdcPrice = await oracle.getAssetPrice(usdc.address);
+
+    const amountUSDCToBorrow = await convertToCurrencyDecimals(
+      usdc.address,
+      userGlobalData.availableBorrowsBase.div(usdcPrice).toString()
+    );
+
+    await pool
+      .connect(user.signer)
+      .borrow(usdc.address, amountUSDCToBorrow, RateMode.Variable, 0, user.address);
+
+    await expect(
+      pool.connect(user.signer).withdraw(dai.address, parseUnits('500', 18), user.address)
+    ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
   });
 });

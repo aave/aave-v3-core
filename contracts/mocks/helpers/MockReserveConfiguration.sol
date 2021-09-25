@@ -99,6 +99,16 @@ contract MockReserveConfiguration {
     return configuration.getBorrowCap();
   }
 
+  function getEModeCategory() external view returns (uint256) {
+    return configuration.getEModeCategory();
+  }
+
+  function setEModeCategory(uint256 categoryId) external {
+    DataTypes.ReserveConfigurationMap memory config = configuration;
+    config.setEModeCategory(categoryId);
+    configuration = config;
+  }
+
   function setSupplyCap(uint256 supplyCap) external {
     DataTypes.ReserveConfigurationMap memory config = configuration;
     config.setSupplyCap(supplyCap);
@@ -127,6 +137,7 @@ contract MockReserveConfiguration {
     external
     view
     returns (
+      uint256,
       uint256,
       uint256,
       uint256,

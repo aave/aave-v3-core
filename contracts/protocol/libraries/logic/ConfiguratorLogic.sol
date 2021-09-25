@@ -126,7 +126,7 @@ library ConfiguratorLogic {
   {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
-    (, , , uint256 decimals, ) = cachedPool.getConfiguration(input.asset).getParams();
+    (, , , uint256 decimals, ,) = cachedPool.getConfiguration(input.asset).getParams();
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableAToken.initialize.selector,
@@ -151,7 +151,7 @@ library ConfiguratorLogic {
   ) public {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
-    (, , , uint256 decimals, ) = cachedPool.getConfiguration(input.asset).getParams();
+    (, , , uint256 decimals, ,) = cachedPool.getConfiguration(input.asset).getParams();
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
@@ -183,7 +183,7 @@ library ConfiguratorLogic {
   ) public {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
-    (, , , uint256 decimals, ) = cachedPool.getConfiguration(input.asset).getParams();
+    (, , , uint256 decimals, ,) = cachedPool.getConfiguration(input.asset).getParams();
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,

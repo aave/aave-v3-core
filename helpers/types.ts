@@ -30,6 +30,7 @@ export enum eContractid {
   SupplyLogic = 'SupplyLogic',
   BorrowLogic = 'BorrowLogic',
   LiquidationLogic = 'LiquidationLogic',
+  EModeLogic = 'EModeLogic',
   ConfiguratorLogic = 'ConfiguratorLogic',
   Pool = 'Pool',
   PriceOracle = 'PriceOracle',
@@ -162,8 +163,10 @@ export enum ProtocolErrors {
   PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
   PC_FLASHLOAN_PREMIUM_INVALID = '96',
   RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
-  HLP_UINT128_OVERFLOW = '98',
-  PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '99',
+  RC_INVALID_EMODE_CATEGORY = '98',
+  VL_INCONSISTENT_EMODE_CATEGORY = '99',
+  HLP_UINT128_OVERFLOW = '100',
+  PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101',
 
   // old
 

@@ -44,6 +44,11 @@ library GenericLogic {
     uint256 avgLiquidationThreshold;
     uint256 normalizedIncome;
     uint256 normalizedDebt;
+    uint256 eModeAssetPrice;
+    uint256 eModeLtv;
+    uint256 eModeLiqThreshold;
+    uint256 eModeAssetCategory;
+    address eModePriceSource;
     address currentReserveAddress;
     bool hasZeroLtvCollateral;
   }
@@ -52,12 +57,9 @@ library GenericLogic {
    * @notice Calculates the user data across the reserves.
    * @dev It includes the total liquidity/collateral/borrow balances in the base currency used by the price feed,
    * the average Loan To Value, the average Liquidation Ratio, and the Health factor.
-   * @param user The address of the user
    * @param reservesData The data of all the reserves
-   * @param userConfig The configuration of the user
    * @param reserves The list of the available reserves
-   * @param reservesCount The number of the available reserves
-   * @param oracle The price oracle address
+   * @param params Additional parameters needed for the calculation
    * @return The total collateral of the user in the base currency used by the price feed
    * @return The total debt of the user in the base currency used by the price feed
    * @return The average ltv of the user
@@ -66,12 +68,10 @@ library GenericLogic {
    * @return True if the ltv is zero, false otherwise
    **/
   function calculateUserAccountData(
-    address user,
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    DataTypes.UserConfigurationMap memory userConfig,
     mapping(uint256 => address) storage reserves,
-    uint256 reservesCount,
-    address oracle
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.CalculateUserAccountDataParams memory params
   )
     internal
     view
@@ -84,14 +84,26 @@ library GenericLogic {
       bool
     )
   {
-    if (userConfig.isEmpty()) {
+    if (params.userConfig.isEmpty()) {
       return (0, 0, 0, 0, type(uint256).max, false);
     }
 
     CalculateUserAccountDataVars memory vars;
 
-    while (vars.i < reservesCount) {
-      if (!userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
+    if (params.userEModeCategory != 0) {
+      vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
+      vars.eModeLtv = eModeCategories[params.userEModeCategory].ltv;
+      vars.eModeLiqThreshold = eModeCategories[params.userEModeCategory].liquidationThreshold;
+
+      if (vars.eModePriceSource != address(0)) {
+        vars.eModeAssetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(
+          vars.eModePriceSource
+        );
+      }
+    }
+
+    while (vars.i < params.reservesCount) {
+      if (!params.userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
         unchecked {
           ++vars.i;
         }
@@ -109,18 +121,27 @@ library GenericLogic {
 
       DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
 
-      (vars.ltv, vars.liquidationThreshold, , vars.decimals, ) = currentReserve
-        .configuration
-        .getParams();
+      (
+        vars.ltv,
+        vars.liquidationThreshold,
+        ,
+        vars.decimals,
+        ,
+        vars.eModeAssetCategory
+      ) = currentReserve.configuration.getParams();
 
       unchecked {
         vars.assetUnit = 10**vars.decimals;
       }
-      vars.assetPrice = IPriceOracleGetter(oracle).getAssetPrice(vars.currentReserveAddress);
+      vars.assetPrice = vars.eModeAssetPrice > 0
+        ? vars.eModeAssetPrice
+        : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
-      if (vars.liquidationThreshold != 0 && userConfig.isUsingAsCollateral(vars.i)) {
+      if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
         vars.normalizedIncome = currentReserve.getNormalizedIncome();
-        vars.userBalance = IScaledBalanceToken(currentReserve.aTokenAddress).scaledBalanceOf(user);
+        vars.userBalance = IScaledBalanceToken(currentReserve.aTokenAddress).scaledBalanceOf(
+          params.user
+        );
         vars.userBalance = vars.userBalance.rayMul(vars.normalizedIncome);
 
         vars.userBalanceInBaseCurrency = (vars.assetPrice * vars.userBalance);
@@ -131,19 +152,32 @@ library GenericLogic {
           vars.totalCollateralInBaseCurrency +
           vars.userBalanceInBaseCurrency;
 
-        vars.avgLtv = vars.avgLtv + vars.userBalanceInBaseCurrency * vars.ltv;
         vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
+
+        vars.avgLtv = vars.ltv > 0
+          ? vars.avgLtv +
+            vars.userBalanceInBaseCurrency *
+            (
+              (params.userEModeCategory == 0 || vars.eModeAssetCategory != params.userEModeCategory)
+                ? vars.ltv
+                : vars.eModeLtv
+            )
+          : vars.avgLtv;
 
         vars.avgLiquidationThreshold =
           vars.avgLiquidationThreshold +
           vars.userBalanceInBaseCurrency *
-          vars.liquidationThreshold;
+          (
+            (params.userEModeCategory == 0 || vars.eModeAssetCategory != params.userEModeCategory)
+              ? vars.liquidationThreshold
+              : vars.eModeLiqThreshold
+          );
       }
 
-      if (userConfig.isBorrowing(vars.i)) {
-        vars.userStableDebt = IERC20(currentReserve.stableDebtTokenAddress).balanceOf(user);
+      if (params.userConfig.isBorrowing(vars.i)) {
+        vars.userStableDebt = IERC20(currentReserve.stableDebtTokenAddress).balanceOf(params.user);
         vars.userDebt = IScaledBalanceToken(currentReserve.variableDebtTokenAddress)
-          .scaledBalanceOf(user);
+          .scaledBalanceOf(params.user);
 
         if (vars.userDebt > 0) {
           vars.normalizedDebt = currentReserve.getNormalizedDebt();
