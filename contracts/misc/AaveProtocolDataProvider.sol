@@ -111,12 +111,23 @@ contract AaveProtocolDataProvider {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset);
 
-    (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor,) = configuration
+    (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor, ) = configuration
       .getParams();
 
     (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();
 
     usageAsCollateralEnabled = liquidationThreshold > 0;
+  }
+
+  /**
+   * Returns the efficiency mode category of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return eModeCategory The eMode id of the reserve
+   */
+  function getReserveEModeCategory(address asset) external view returns (uint256) {
+    DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
+      .getConfiguration(asset);
+    return configuration.getEModeCategory();
   }
 
   /**
