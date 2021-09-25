@@ -358,8 +358,6 @@ library BorrowLogic {
     (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
       address(stableDebtToken)
     ).mint(user, user, stableDebt, reserve.currentStableBorrowRate);
-    //reserveCache.nextTotalStableDebt = nextTotalStableDebt;
-    //reserveCache.nextAvgStableBorrowRate = nextAvgStableBorrowRate;
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 

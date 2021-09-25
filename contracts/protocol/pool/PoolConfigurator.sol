@@ -327,7 +327,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit EModeAssetCategoryChanged(asset, categoryId);
   }
 
-  ///@inheritdoc IPoolConfigurator
+  /// @inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external
     override

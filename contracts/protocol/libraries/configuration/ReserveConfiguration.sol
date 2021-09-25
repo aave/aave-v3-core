@@ -452,6 +452,7 @@ library ReserveConfiguration {
    * @return The state param representing liquidation bonus
    * @return The state param representing reserve decimals
    * @return The state param representing reserve factor
+   * @return The state param representing eMode category
    **/
   function getParams(DataTypes.ReserveConfigurationMap memory self)
     internal
