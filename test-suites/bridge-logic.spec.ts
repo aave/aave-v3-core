@@ -4,7 +4,7 @@ import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
 import { waitForTx, advanceTimeAndBlock } from '../helpers/misc-utils';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getACLManager } from '../helpers/contracts-getters';
-import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP } from '../helpers/constants';
 import { ACLManager } from '../types';
 import AaveConfig from '../market-config';
 import { TestEnv, makeSuite } from './helpers/make-suite';
@@ -93,7 +93,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
     ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
 
-    expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, '0'));
+    expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, MAX_UNBACKED_MINT_CAP));
   });
 
   it('User 2 perform fast withdraw 100 aDai from L2', async () => {
@@ -119,7 +119,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
     ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
 
-    expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, '0'));
+    expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, MAX_UNBACKED_MINT_CAP));
   });
 
   it('User 2 perform another fast withdraw 100 aDai from L2', async () => {
