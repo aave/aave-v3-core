@@ -87,6 +87,7 @@ library DataTypes {
     uint256 nextVariableBorrowIndex;
     uint256 currLiquidityRate;
     uint256 currVariableBorrowRate;
+    uint256 reserveFactor;
     DataTypes.ReserveConfigurationMap reserveConfiguration;
     address aTokenAddress;
     address stableDebtTokenAddress;
@@ -216,5 +217,9 @@ library DataTypes {
     uint256 liquidityTaken;
     uint256 totalStableDebt;
     uint256 totalVariableDebt;
+    uint256 averageStableBorrowRate;
+    uint256 reserveFactor;
+    address reserve;
+    address aToken;
   }
 }

@@ -183,17 +183,17 @@ library ReserveLogic {
       vars.nextStableRate,
       vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
-      reserveAddress,
-      reserveCache.aTokenAddress,
       DataTypes.CalculateInterestRatesParams(
-        reserve.unbacked,
+        reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
         liquidityAdded,
         liquidityTaken,
         reserveCache.nextTotalStableDebt,
-        vars.totalVariableDebt
-      ),
-      reserveCache.nextAvgStableBorrowRate,
-      reserveCache.reserveConfiguration.getReserveFactor()
+        vars.totalVariableDebt,
+        reserveCache.nextAvgStableBorrowRate,
+        reserveCache.reserveFactor,
+        reserveAddress,
+        reserveCache.aTokenAddress
+      )
     );
 
     reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);
@@ -218,7 +218,6 @@ library ReserveLogic {
     uint256 cumulatedStableInterest;
     uint256 totalDebtAccrued;
     uint256 amountToMint;
-    uint256 reserveFactor;
     uint40 stableSupplyUpdatedTimestamp;
   }
 
@@ -234,9 +233,7 @@ library ReserveLogic {
   ) internal {
     AccrueToTreasuryLocalVars memory vars;
 
-    vars.reserveFactor = reserveCache.reserveConfiguration.getReserveFactor();
-
-    if (vars.reserveFactor == 0) {
+    if (reserveCache.reserveFactor == 0) {
       return;
     }
 
@@ -268,12 +265,12 @@ library ReserveLogic {
       vars.prevTotalVariableDebt -
       vars.prevTotalStableDebt;
 
-    vars.amountToMint = vars.totalDebtAccrued.percentMul(vars.reserveFactor);
+    vars.amountToMint = vars.totalDebtAccrued.percentMul(reserveCache.reserveFactor);
 
     if (vars.amountToMint != 0) {
       reserve.accruedToTreasury =
         reserve.accruedToTreasury +
-        uint128(vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex));
+        Helpers.castUint128((vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex)));
     }
   }
 
@@ -331,6 +328,7 @@ library ReserveLogic {
     DataTypes.ReserveCache memory reserveCache;
 
     reserveCache.reserveConfiguration = reserve.configuration;
+    reserveCache.reserveFactor = reserveCache.reserveConfiguration.getReserveFactor();
     reserveCache.currLiquidityIndex = reserve.liquidityIndex;
     reserveCache.currVariableBorrowIndex = reserve.variableBorrowIndex;
     reserveCache.currLiquidityRate = reserve.currentLiquidityRate;

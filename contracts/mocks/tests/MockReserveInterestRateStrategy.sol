@@ -51,34 +51,7 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
     _variableBorrowRate = variableBorrowRate;
   }
 
-  function calculateInterestRates(
-    address,
-    uint256,
-    uint256,
-    uint256,
-    uint256,
-    uint256,
-    uint256
-  )
-    external
-    view
-    override
-    returns (
-      uint256,
-      uint256,
-      uint256
-    )
-  {
-    return (_liquidityRate, _stableBorrowRate, _variableBorrowRate);
-  }
-
-  function calculateInterestRates(
-    address,
-    address,
-    DataTypes.CalculateInterestRatesParams memory,
-    uint256,
-    uint256
-  )
+  function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory)
     external
     view
     override
@@ -91,23 +64,23 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
     return (_liquidityRate, _stableBorrowRate, _variableBorrowRate);
   }
 
-  function variableRateSlope1() external view returns (uint256) {
+  function getVariableRateSlope1() external view returns (uint256) {
     return _variableRateSlope1;
   }
 
-  function variableRateSlope2() external view returns (uint256) {
+  function getVariableRateSlope2() external view returns (uint256) {
     return _variableRateSlope2;
   }
 
-  function stableRateSlope1() external view returns (uint256) {
+  function getStableRateSlope1() external view returns (uint256) {
     return _stableRateSlope1;
   }
 
-  function stableRateSlope2() external view returns (uint256) {
+  function getStableRateSlope2() external view returns (uint256) {
     return _stableRateSlope2;
   }
 
-  function baseVariableBorrowRate() external view override returns (uint256) {
+  function getBaseVariableBorrowRate() external view override returns (uint256) {
     return _baseVariableBorrowRate;
   }
 

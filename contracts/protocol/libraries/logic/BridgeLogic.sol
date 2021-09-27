@@ -9,6 +9,7 @@ import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {Errors} from '../helpers/Errors.sol';
+import {Helpers} from '../helpers/Helpers.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 
@@ -32,7 +33,7 @@ library BridgeLogic {
 
   /**
    * @notice Mint unbacked aTokens to a user and updates the unbacked for the reserve.
-   * @dev Essentially a deposit without transferring of the underlying.
+   * @dev Essentially a supply without transferring the underlying.
    * @param reserve The reserve to mint to
    * @param userConfig The user configuration to update
    * @param asset The address of the asset
@@ -55,20 +56,22 @@ library BridgeLogic {
 
     ValidationLogic.validateSupply(reserveCache, amount);
 
-    reserve.unbacked = reserve.unbacked + uint128(amount);
+    uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCap();
+    uint256 reserveDecimals = reserveCache.reserveConfiguration.getDecimals();
+
+    uint256 unbacked = reserve.unbacked = reserve.unbacked + Helpers.castUint128(amount);
+
+    require(
+      unbackedMintCap > 0 && unbacked / (10**reserveDecimals) < unbackedMintCap,
+      Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
+    );
+
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
       onBehalfOf,
       amount,
       reserveCache.nextLiquidityIndex
-    );
-
-    uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCap();
-    (, , , uint256 reserveDecimals, , ) = reserveCache.reserveConfiguration.getParams();
-    require(
-      unbackedMintCap == 0 || reserve.unbacked / (10**reserveDecimals) < unbackedMintCap,
-      Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
     );
 
     if (isFirstDeposit) {
@@ -81,7 +84,6 @@ library BridgeLogic {
 
   /**
    * @notice Back the current unbacked with `amount` and pay `fee`.
-   * @dev If backing unnecessarily, excess amount will be added to `fee`.
    * @param reserve The reserve to back unbacked for
    * @param asset The address of the underlying asset to repay
    * @param amount The amount to back
@@ -99,15 +101,13 @@ library BridgeLogic {
 
     uint256 backingAmount = (amount < reserve.unbacked) ? amount : reserve.unbacked;
 
-    uint256 totalFee = (amount > backingAmount) ? (amount - backingAmount) + fee : fee;
+    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), fee);
 
-    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
+    reserve.unbacked = reserve.unbacked - Helpers.castUint128(backingAmount);
+    reserve.updateInterestRates(reserveCache, asset, backingAmount + fee, 0);
 
-    reserve.unbacked = reserve.unbacked - uint128(backingAmount);
-    reserve.updateInterestRates(reserveCache, asset, amount + fee, 0);
+    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, backingAmount + fee);
 
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
-
-    emit BackUnbacked(asset, msg.sender, backingAmount, totalFee);
+    emit BackUnbacked(asset, msg.sender, backingAmount, fee);
   }
 }

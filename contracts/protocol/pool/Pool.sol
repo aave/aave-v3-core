@@ -93,20 +93,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _flashLoanPremiumToProtocol = 0;
   }
 
-  /// @inheritdoc IPool
-  function supply(
-    address asset,
-    uint256 amount,
-    address onBehalfOf,
-    uint16 referralCode
-  ) external override {
-    SupplyLogic.executeSupply(
-      _reserves,
-      _usersConfig[onBehalfOf],
-      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
-    );
-  }
-
   ///@inheritdoc IPool
   function mintUnbacked(
     address asset,
@@ -131,6 +117,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 fee
   ) external override onlyBridge {
     BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee);
+  }
+
+  /// @inheritdoc IPool
+  function supply(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) external override {
+    SupplyLogic.executeSupply(
+      _reserves,
+      _usersConfig[onBehalfOf],
+      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
+    );
   }
 
   /// @inheritdoc IPool
