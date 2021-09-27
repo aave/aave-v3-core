@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./IERC165.sol";
+import './IERC165.sol';
 
 /**
  * @dev Implementation of the {IERC165} interface.
@@ -19,10 +19,10 @@ import "./IERC165.sol";
  * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.
  */
 abstract contract ERC165 is IERC165 {
-    /**
-     * @dev See {IERC165-supportsInterface}.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return interfaceId == type(IERC165).interfaceId;
-    }
+  /**
+   * @dev See {IERC165-supportsInterface}.
+   */
+  function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    return interfaceId == type(IERC165).interfaceId;
+  }
 }

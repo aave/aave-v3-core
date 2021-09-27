@@ -85,6 +85,8 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
     helpersContract.getReserveEModeCategory(asset),
     helpersContract.getReserveCaps(asset),
     helpersContract.getPaused(asset),
+    helpersContract.getLiquidationProtocolFee(asset),
+    helpersContract.getUnbackedMintCap(asset),
   ]);
 };
 
@@ -530,6 +532,26 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       reserveFactor: newReserveFactor,
     });
     expect(isPaused).to.be.equal(false);
+  });
+
+  it('Updates the unbackedMintCap of WETH via pool admin', async () => {
+    const { configurator, helpersContract, weth } = testEnv;
+    const newUnbackedMintCap = '10000';
+    expect(await configurator.setUnbackedMintCap(weth.address, newUnbackedMintCap))
+      .to.emit(configurator, 'UnbackedMintCapChanged')
+      .withArgs(weth.address, newUnbackedMintCap);
+
+    expect(await helpersContract.getUnbackedMintCap(weth.address)).to.be.eq(newUnbackedMintCap);
+  });
+
+  it('Updates the unbackedMintCap of WETH via risk admin', async () => {
+    const { configurator, helpersContract, weth } = testEnv;
+    const newUnbackedMintCap = '20000';
+    expect(await configurator.setUnbackedMintCap(weth.address, newUnbackedMintCap))
+      .to.emit(configurator, 'UnbackedMintCapChanged')
+      .withArgs(weth.address, newUnbackedMintCap);
+
+    expect(await helpersContract.getUnbackedMintCap(weth.address)).to.be.eq(newUnbackedMintCap);
   });
 
   it('Updates the borrowCap of WETH via pool admin', async () => {

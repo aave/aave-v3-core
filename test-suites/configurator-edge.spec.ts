@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
-import { MAX_BORROW_CAP, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { MAX_BORROW_CAP, MAX_UNBACKED_MINT_CAP, MAX_UINT_AMOUNT, MAX_SUPPLY_CAP, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
@@ -15,6 +15,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     PC_RESERVE_LIQUIDITY_NOT_0,
     RC_INVALID_BORROW_CAP,
     RC_INVALID_SUPPLY_CAP,
+    RC_INVALID_UNBACKED_MINT_CAP,
     RC_INVALID_EMODE_CATEGORY,
     VL_INCONSISTENT_EMODE_CATEGORY,
   } = ProtocolErrors;
@@ -141,10 +142,17 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
   it('Tries to update supplyCap > MAX_SUPPLY_CAP (revert expected)', async () => {
     const { configurator, weth } = testEnv;
     await expect(
-      configurator.setSupplyCap(weth.address, BigNumber.from(MAX_BORROW_CAP).add(1))
+      configurator.setSupplyCap(weth.address, BigNumber.from(MAX_SUPPLY_CAP).add(1))
     ).to.be.revertedWith(RC_INVALID_SUPPLY_CAP);
   });
 
+  it('Tries to update unbackedMintCap > MAX_UNBACKED_MINT_CAP (revert expected)', async () => {
+    const { configurator, weth } = testEnv;
+    await expect(
+      configurator.setUnbackedMintCap(weth.address, BigNumber.from(MAX_UNBACKED_MINT_CAP).add(1))
+    ).to.be.revertedWith(RC_INVALID_UNBACKED_MINT_CAP);
+  });
+  
   it('Tries to add a category with id 0 (revert expected)', async () => {
     const { configurator, poolAdmin } = testEnv;
 

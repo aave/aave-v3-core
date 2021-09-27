@@ -11,6 +11,30 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
  **/
 interface IPool {
   /**
+   * @notice Emitted on mintUnbacked()
+   * @param reserve The address of the underlying asset of the reserve
+   * @param user The address initiating the deposit
+   * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
+   * @param amount The amount deposited
+   * @param referral The referral code used
+   **/
+  event MintUnbacked(
+    address indexed reserve,
+    address user,
+    address indexed onBehalfOf,
+    uint256 amount,
+    uint16 indexed referral
+  );
+
+  /**
+   * @notice Emitted on backUnbacked()
+   * @param reserve The address of the underlying asset of the reserve
+   * @param backer The address paying for the backing
+   * @param amount The amount added as backing
+   **/
+  event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
+
+  /**
    * @notice Emitted on supply()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the supply
@@ -162,6 +186,34 @@ interface IPool {
    * @param amountMinted The amount minted to the treasury
    **/
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
+
+  /**
+   * @dev Mints an `amount` of aTokens to the `onBehalfOf`
+   * @param asset The address of the underlying asset to mint
+   * @param amount The amount to mint
+   * @param onBehalfOf The address that will receive the aTokens
+   * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
+   *   0 if the action is executed directly by the user, without any middle-man
+   **/
+  function mintUnbacked(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) external;
+
+  /**
+   * @dev Back the current unbacked underlying with `amount` and pay `fee`.
+   *   If backing unnecessarily, excess `amount` will be added to `fee`.
+   * @param asset The address of the underlying asset to repay
+   * @param amount The amount to back
+   * @param fee The amount paid in fees
+   **/
+  function backUnbacked(
+    address asset,
+    uint256 amount,
+    uint256 fee
+  ) external;
 
   /**
    * @notice Emitted when the user selects a certain asset category for eMode

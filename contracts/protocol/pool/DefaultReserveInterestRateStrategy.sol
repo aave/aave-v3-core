@@ -7,6 +7,8 @@ import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IRateOracle} from '../../interfaces/IRateOracle.sol';
+import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {DataTypes} from '../libraries/types/DataTypes.sol';
 
 /**
  * @title DefaultReserveInterestRateStrategy contract
@@ -71,24 +73,24 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     _stableRateSlope2 = stableRateSlope2;
   }
 
-  function variableRateSlope1() external view returns (uint256) {
+  function getVariableRateSlope1() external view returns (uint256) {
     return _variableRateSlope1;
   }
 
-  function variableRateSlope2() external view returns (uint256) {
+  function getVariableRateSlope2() external view returns (uint256) {
     return _variableRateSlope2;
   }
 
-  function stableRateSlope1() external view returns (uint256) {
+  function getStableRateSlope1() external view returns (uint256) {
     return _stableRateSlope1;
   }
 
-  function stableRateSlope2() external view returns (uint256) {
+  function getStableRateSlope2() external view returns (uint256) {
     return _stableRateSlope2;
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
-  function baseVariableBorrowRate() external view override returns (uint256) {
+  function getBaseVariableBorrowRate() external view override returns (uint256) {
     return _baseVariableBorrowRate;
   }
 
@@ -97,59 +99,19 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     return _baseVariableBorrowRate + _variableRateSlope1 + _variableRateSlope2;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
-  function calculateInterestRates(
-    address reserve,
-    address aToken,
-    uint256 liquidityAdded,
-    uint256 liquidityTaken,
-    uint256 totalStableDebt,
-    uint256 totalVariableDebt,
-    uint256 averageStableBorrowRate,
-    uint256 reserveFactor
-  )
-    external
-    view
-    override
-    returns (
-      uint256,
-      uint256,
-      uint256
-    )
-  {
-    uint256 availableLiquidity = IERC20(reserve).balanceOf(aToken);
-    //avoid stack too deep
-    availableLiquidity = availableLiquidity + liquidityAdded - liquidityTaken;
-
-    return
-      calculateInterestRates(
-        reserve,
-        availableLiquidity,
-        totalStableDebt,
-        totalVariableDebt,
-        averageStableBorrowRate,
-        reserveFactor
-      );
-  }
-
   struct CalcInterestRatesLocalVars {
+    uint256 availableLiquidity;
     uint256 totalDebt;
     uint256 currentVariableBorrowRate;
     uint256 currentStableBorrowRate;
     uint256 currentLiquidityRate;
-    uint256 utilizationRate;
+    uint256 borrowUtilizationRate;
+    uint256 supplyUtilizationRate;
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
-  function calculateInterestRates(
-    address reserve,
-    uint256 availableLiquidity,
-    uint256 totalStableDebt,
-    uint256 totalVariableDebt,
-    uint256 averageStableBorrowRate,
-    uint256 reserveFactor
-  )
-    public
+  function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory params)
+    external
     view
     override
     returns (
@@ -160,22 +122,30 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   {
     CalcInterestRatesLocalVars memory vars;
 
-    vars.totalDebt = totalStableDebt + totalVariableDebt;
+    vars.availableLiquidity =
+      IERC20(params.reserve).balanceOf(params.aToken) +
+      params.liquidityAdded -
+      params.liquidityTaken;
+
+    vars.totalDebt = params.totalStableDebt + params.totalVariableDebt;
     vars.currentVariableBorrowRate = 0;
     vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
 
-    vars.utilizationRate = vars.totalDebt == 0
+    vars.borrowUtilizationRate = vars.totalDebt == 0
       ? 0
-      : vars.totalDebt.rayDiv(availableLiquidity + vars.totalDebt);
+      : vars.totalDebt.rayDiv(vars.availableLiquidity + vars.totalDebt);
+
+    vars.supplyUtilizationRate = vars.totalDebt == 0
+      ? 0
+      : vars.totalDebt.rayDiv(vars.availableLiquidity + params.unbacked + vars.totalDebt);
 
     vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
-      .getMarketBorrowRate(reserve);
+      .getMarketBorrowRate(params.reserve);
 
-    if (vars.utilizationRate > OPTIMAL_UTILIZATION_RATE) {
-      uint256 excessUtilizationRateRatio = (vars.utilizationRate - OPTIMAL_UTILIZATION_RATE).rayDiv(
-        EXCESS_UTILIZATION_RATE
-      );
+    if (vars.borrowUtilizationRate > OPTIMAL_UTILIZATION_RATE) {
+      uint256 excessUtilizationRateRatio = (vars.borrowUtilizationRate - OPTIMAL_UTILIZATION_RATE)
+        .rayDiv(EXCESS_UTILIZATION_RATE);
 
       vars.currentStableBorrowRate =
         vars.currentStableBorrowRate +
@@ -189,19 +159,21 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     } else {
       vars.currentStableBorrowRate =
         vars.currentStableBorrowRate +
-        _stableRateSlope1.rayMul(vars.utilizationRate.rayDiv(OPTIMAL_UTILIZATION_RATE));
+        _stableRateSlope1.rayMul(vars.borrowUtilizationRate.rayDiv(OPTIMAL_UTILIZATION_RATE));
 
       vars.currentVariableBorrowRate =
         _baseVariableBorrowRate +
-        vars.utilizationRate.rayMul(_variableRateSlope1).rayDiv(OPTIMAL_UTILIZATION_RATE);
+        _variableRateSlope1.rayMul(vars.borrowUtilizationRate).rayDiv(OPTIMAL_UTILIZATION_RATE);
     }
 
     vars.currentLiquidityRate = _getOverallBorrowRate(
-      totalStableDebt,
-      totalVariableDebt,
+      params.totalStableDebt,
+      params.totalVariableDebt,
       vars.currentVariableBorrowRate,
-      averageStableBorrowRate
-    ).rayMul(vars.utilizationRate).percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveFactor);
+      params.averageStableBorrowRate
+    ).rayMul(vars.supplyUtilizationRate).percentMul(
+        PercentageMath.PERCENTAGE_FACTOR - params.reserveFactor
+      );
 
     return (
       vars.currentLiquidityRate,

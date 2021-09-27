@@ -5,7 +5,7 @@ import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
-import { getUserData } from './helpers/utils/helpers';
+import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
 
 makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
@@ -122,8 +122,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //approve protocol to access the liquidator wallet
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    const daiReserveDataBefore = await helpersContract.getReserveData(dai.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
 
     const userReserveDataBefore = await getUserData(
       pool,
@@ -147,8 +147,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       borrower.address
     );
 
-    const daiReserveDataAfter = await helpersContract.getReserveData(dai.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(dai.address);
@@ -195,6 +195,18 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     expect(daiReserveDataAfter.liquidityRate).to.be.lt(
       daiReserveDataBefore.liquidityRate,
       'Invalid liquidity APY'
+    );
+
+    expect(daiReserveDataAfter.totalLiquidity).to.be.closeTo(
+      daiReserveDataBefore.totalLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(ethReserveDataAfter.totalLiquidity).to.be.closeTo(
+      ethReserveDataBefore.totalLiquidity.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral total liquidity'
     );
 
     expect(daiReserveDataAfter.availableLiquidity).to.be.closeTo(
@@ -279,8 +291,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
 
@@ -295,8 +307,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const usdcReserveDataAfter = await helpersContract.getReserveData(usdc.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(usdc.address);
@@ -330,6 +342,18 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     expect(usdcReserveDataAfter.liquidityRate).to.be.lt(
       usdcReserveDataBefore.liquidityRate,
       'Invalid liquidity APY'
+    );
+
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(ethReserveDataAfter.totalLiquidity).to.be.closeTo(
+      ethReserveDataBefore.totalLiquidity.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral total liquidity'
     );
 
     expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
@@ -385,8 +409,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
-    const aaveReserveDataBefore = await helpersContract.getReserveData(aave.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const aaveReserveDataBefore = await getReserveData(helpersContract, aave.address);
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
 
@@ -404,8 +428,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const usdcReserveDataAfter = await helpersContract.getReserveData(usdc.address);
-    const aaveReserveDataAfter = await helpersContract.getReserveData(aave.address);
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+    const aaveReserveDataAfter = await getReserveData(helpersContract, aave.address);
 
     const aaveConfiguration = await helpersContract.getReserveConfigurationData(aave.address);
     const collateralDecimals = aaveConfiguration.decimals;
@@ -428,6 +452,18 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       userReserveDataBefore.currentStableDebt.sub(expectedPrincipal),
       2,
       'Invalid user borrow balance after liquidation'
+    );
+
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(expectedPrincipal),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(aaveReserveDataAfter.totalLiquidity).to.be.closeTo(
+      aaveReserveDataBefore.totalLiquidity.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral total liquidity'
     );
 
     expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(

@@ -30,6 +30,7 @@ export enum eContractid {
   SupplyLogic = 'SupplyLogic',
   BorrowLogic = 'BorrowLogic',
   LiquidationLogic = 'LiquidationLogic',
+  BridgeLogic = 'BridgeLogic',
   EModeLogic = 'EModeLogic',
   ConfiguratorLogic = 'ConfiguratorLogic',
   Pool = 'Pool',
@@ -167,6 +168,10 @@ export enum ProtocolErrors {
   VL_INCONSISTENT_EMODE_CATEGORY = '99',
   HLP_UINT128_OVERFLOW = '100',
   PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101',
+  P_CALLER_NOT_BRIDGE = '102',
+  RC_INVALID_UNBACKED_MINT_CAP = '103',
+  VL_UNBACKED_MINT_CAP_EXCEEDED = '104',
+
 
   // old
 

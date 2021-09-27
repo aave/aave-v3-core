@@ -28,15 +28,15 @@ import {
   WETH9MockedFactory,
   ConfiguratorLogicFactory,
   MockIncentivesControllerFactory,
-  MockReserveConfigurationFactory,
-  MockPoolFactory,
-  MockInitializableImpleFactory,
   MockInitializableFromConstructorImpleFactory,
-  MockReentrantInitializableImpleFactory,
+  MockInitializableImpleFactory,
   MockInitializableImpleV2Factory,
   InitializableImmutableAdminUpgradeabilityProxyFactory,
   WETH9Mocked,
   ACLManagerFactory,
+  MockReserveConfigurationFactory,
+  MockPoolFactory,
+  MockReentrantInitializableImpleFactory,
   EModeLogicFactory,
 } from '../types';
 import {
@@ -132,6 +132,19 @@ export const deployLiquidationLogic = async () => {
   return withSave(liquidationLogic, eContractid.LiquidationLogic);
 };
 
+export const deployBridgeLogic = async () => {
+  const bridgeLogicArtifact = await readArtifact(eContractid.BridgeLogic);
+  const bridgeLogicFactory = await DRE.ethers.getContractFactory(
+    bridgeLogicArtifact.abi,
+    bridgeLogicArtifact.bytecode
+  );
+  const bridgeLogic = await (
+    await bridgeLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(bridgeLogic, eContractid.BridgeLogic);
+};
+
 export const deployEModeLogic = async () => {
   const eModeLogicArtifact = await readArtifact(eContractid.EModeLogic);
 
@@ -151,6 +164,7 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   const supplyLogic = await deploySupplyLogic();
   const borrowLogic = await deployBorrowLogic();
   const liquidationLogic = await deployLiquidationLogic();
+  const bridgeLogic = await deployBridgeLogic();
   const eModeLogic = await deployEModeLogic();
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
@@ -165,6 +179,7 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   // libName example: GenericLogic
   return {
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
+    ['__$b06080f092f400a43662c3f835a4d9baa8$__']: bridgeLogic.address,
     ['__$db79717e66442ee197e8271d032a066e34$__']: supplyLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
     ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address,

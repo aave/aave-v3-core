@@ -245,6 +245,7 @@ export const configureReservesByHelper = async (
   const addressProvider = await getPoolAddressesProvider();
   const aclManager = await getACLManager();
   const reservesSetupHelper = await getReservesSetupHelper();
+
   const tokens: string[] = [];
   const symbols: string[] = [];
 

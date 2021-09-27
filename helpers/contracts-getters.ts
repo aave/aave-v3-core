@@ -23,6 +23,7 @@ import {
   SupplyLogicFactory,
   BorrowLogicFactory,
   LiquidationLogicFactory,
+  BridgeLogicFactory,
   ACLManagerFactory,
   EModeLogicFactory,
 } from '../types';
@@ -63,6 +64,12 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
 export const getSupplyLogic = async (address?: tEthereumAddress) =>
   await SupplyLogicFactory.connect(
     address || (await getDb().get(`${eContractid.SupplyLogic}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getBridgeLogic = async (address?: tEthereumAddress) =>
+  await BridgeLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 

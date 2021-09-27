@@ -26,7 +26,9 @@ library DataTypes {
     //the id of the reserve. Represents the position in the list of the active reserves
     uint8 id;
     //the current treasury balance, scaled
-    uint256 accruedToTreasury;
+    uint128 accruedToTreasury;
+    //the quickwithdraw balance waiting for underlying to be backed
+    uint128 unbacked;
   }
 
   struct ReserveConfigurationMap {
@@ -41,10 +43,13 @@ library DataTypes {
     //bit 60: asset is paused
     //bit 61-63: reserved
     //bit 64-79: reserve factor
-    //bit 80-115: borrow cap, borrowCap == 0 => disabled
-    //bit 116-151: supply cap, supplyCap == 0 => disabled
-    //bit 152-167: liquidation protocol fee
-    //bit 168-176: eMode category
+    //bit 80-115 borrow cap, borrowCap == 0 => disabled
+    //bit 116-151 supply cap, supplyCap == 0 => disabled
+    //bit 80-115 borrow cap, borrowCap == 0 => disabled
+    //bit 116-151 supply cap, supplyCap == 0 => disabled
+    //bit 152-167 liquidation protocol fee
+    //bit 168-175 eMode category
+    //bit 176-211 unbacked mint cap, unbackedMintCap == 0 => disabled
     uint256 data;
   }
 
@@ -82,6 +87,7 @@ library DataTypes {
     uint256 nextVariableBorrowIndex;
     uint256 currLiquidityRate;
     uint256 currVariableBorrowRate;
+    uint256 reserveFactor;
     DataTypes.ReserveConfigurationMap reserveConfiguration;
     address aTokenAddress;
     address stableDebtTokenAddress;
@@ -139,7 +145,7 @@ library DataTypes {
     uint8 userEModeCategory;
   }
 
-    struct ExecuteSetUserEModeParams {
+  struct ExecuteSetUserEModeParams {
     uint256 reservesCount;
     address oracle;
     uint8 categoryId;
@@ -203,5 +209,17 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
+  }
+
+  struct CalculateInterestRatesParams {
+    uint256 unbacked;
+    uint256 liquidityAdded;
+    uint256 liquidityTaken;
+    uint256 totalStableDebt;
+    uint256 totalVariableDebt;
+    uint256 averageStableBorrowRate;
+    uint256 reserveFactor;
+    address reserve;
+    address aToken;
   }
 }

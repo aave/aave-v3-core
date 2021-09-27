@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.7;
 
-import {ReserveConfiguration} from '../../protocol/libraries/configuration/ReserveConfiguration.sol';
+import {
+  ReserveConfiguration
+} from '../../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
 contract MockReserveConfiguration {
@@ -117,6 +119,16 @@ contract MockReserveConfiguration {
 
   function getSupplyCap() external view returns (uint256) {
     return configuration.getSupplyCap();
+  }
+
+  function setUnbackedMintCap(uint256 unbackedMintCap) external {
+    DataTypes.ReserveConfigurationMap memory config = configuration;
+    config.setUnbackedMintCap(unbackedMintCap);
+    configuration = config;
+  }
+
+  function getUnbackedMintCap() external view returns (uint256) {
+    return configuration.getUnbackedMintCap();
   }
 
   function getFlags()

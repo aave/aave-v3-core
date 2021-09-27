@@ -49,7 +49,8 @@ library ValidationLogic {
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
       .reserveConfiguration
       .getFlags();
-    (, , , uint256 reserveDecimals, , ) = reserveCache.reserveConfiguration.getParams();
+    
+    uint256 reserveDecimals = reserveCache.reserveConfiguration.getDecimals();
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
 
     require(amount != 0, Errors.VL_INVALID_AMOUNT);
@@ -122,7 +123,7 @@ library ValidationLogic {
   ) internal view {
     ValidateBorrowLocalVars memory vars;
 
-    (, , , vars.reserveDecimals, , ) = params.reserveCache.reserveConfiguration.getParams();
+    vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
 
     (
       vars.isActive,

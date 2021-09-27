@@ -135,6 +135,12 @@ interface IPoolConfigurator {
   event LiquidationProtocolFeeChanged(address indexed asset, uint256 fee);
 
   /**
+   * @notice Emitted when the unbacked mint cap of a reserve is updated
+   * @param asset The address of the underlying asset of the reserve
+   * @param unbackedMintCap The unbacked mint cap
+   */
+  event UnbackedMintCapChanged(address indexed asset, uint256 unbackedMintCap);
+   /*
    * @notice Emitted when the category of an asset in eMode is changed
    * @param asset The address of the underlying asset of the reserve
    * @param categoryId The new eMode asset category
@@ -381,6 +387,13 @@ interface IPoolConfigurator {
   function setLiquidationProtocolFee(address asset, uint256 fee) external;
 
   /**
+   * @notice Updates the unbacked mint cap of reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @param unbackedMintCap The new unbacked mint cap of the reserve
+   **/
+  function setUnbackedMintCap(address asset, uint256 unbackedMintCap) external;
+   
+   /*
    * @notice Assign an eMode category to asset
    * @param asset The address of the underlying asset of the reserve
    * @param categoryId The category id of the asset

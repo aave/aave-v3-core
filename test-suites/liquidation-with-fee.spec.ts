@@ -6,7 +6,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { ATokenFactory } from '../types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
-import { getUserData } from './helpers/utils/helpers';
+import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
 
 makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
@@ -127,8 +127,8 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     //approve protocol to access the liquidator wallet
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    const daiReserveDataBefore = await helpersContract.getReserveData(dai.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
 
     const liquidatorBalanceBefore = await weth.balanceOf(liquidator.address);
 
@@ -165,8 +165,8 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       borrower.address
     );
 
-    const daiReserveDataAfter = await helpersContract.getReserveData(dai.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const liquidatorBalanceAfter = await weth.balanceOf(liquidator.address);
 
@@ -250,6 +250,20 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       2,
       'Invalid liquidator balance'
     );
+
+    expect(daiReserveDataAfter.totalLiquidity).to.be.closeTo(
+      daiReserveDataBefore.totalLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(ethReserveDataAfter.totalLiquidity).to.be.closeTo(
+      ethReserveDataBefore.totalLiquidity.sub(
+        totalCollateralLiquidated.sub(liquidationProtocolFees)
+      ),
+      2,
+      'Invalid collateral total liquidity'
+    );
   });
 
   it('User 3 deposits 1000 USDC, user 4 1 WETH, user 4 borrows - drops HF, liquidates the borrow', async () => {
@@ -321,8 +335,8 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
 
     const liquidatorBalanceBefore = await weth.balanceOf(liquidator.address);
 
@@ -350,8 +364,8 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const usdcReserveDataAfter = await helpersContract.getReserveData(usdc.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const liquidatorBalanceAfter = await weth.balanceOf(liquidator.address);
     const treasuryDataAfter = await helpersContract.getUserReserveData(
@@ -421,6 +435,20 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       2,
       'Invalid liquidator balance'
     );
+
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(ethReserveDataAfter.totalLiquidity).to.be.closeTo(
+      ethReserveDataBefore.totalLiquidity.sub(
+        totalCollateralLiquidated.sub(liquidationProtocolFees)
+      ),
+      2,
+      'Invalid collateral total liquidity'
+    );
   });
 
   it('User 4 deposits 10 AAVE - drops HF, liquidates the AAVE, which results on a lower amount being liquidated', async () => {
@@ -463,8 +491,8 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
-    const aaveReserveDataBefore = await helpersContract.getReserveData(aave.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const aaveReserveDataBefore = await getReserveData(helpersContract, aave.address);
 
     const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
 
@@ -495,8 +523,8 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const usdcReserveDataAfter = await helpersContract.getReserveData(usdc.address);
-    const aaveReserveDataAfter = await helpersContract.getReserveData(aave.address);
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+    const aaveReserveDataAfter = await getReserveData(helpersContract, aave.address);
 
     const aaveConfiguration = await helpersContract.getReserveConfigurationData(aave.address);
     const collateralDecimals = aaveConfiguration.decimals;
@@ -547,6 +575,18 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       aaveReserveDataBefore.availableLiquidity,
       2,
       'Invalid collateral available liquidity'
+    );
+
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(expectedPrincipal),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(aaveReserveDataAfter.totalLiquidity).to.be.closeTo(
+      aaveReserveDataBefore.totalLiquidity,
+      2,
+      'Invalid collateral total liquidity'
     );
 
     expect(aAaveTokenBalanceBefore).to.be.equal(

@@ -37,9 +37,9 @@ export const increaseTime = async (secondsToIncrease: number) => {
   await DRE.ethers.provider.send('evm_mine', []);
 };
 
-export const setBlocktime = async( time: number) => {
-  await DRE.ethers.provider.send("evm_setNextBlockTimestamp", [time])
-}
+export const setBlocktime = async (time: number) => {
+  await DRE.ethers.provider.send('evm_setNextBlockTimestamp', [time]);
+};
 
 // Workaround for time travel tests bug: https://github.com/Tonyhaenn/hh-time-travel/blob/0161d993065a0b7585ec5a043af2eb4b654498b8/test/test.js#L12
 export const advanceTimeAndBlock = async function (forwardTime: number) {
