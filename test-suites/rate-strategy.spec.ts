@@ -209,7 +209,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     const availableLiquidity = BigNumber.from('200000000000000000');
     const totalVariableDebt = BigNumber.from('800000000000000000');
     // 0.008 = y / (x + y) -> x = 124 y
-    const totalLiquidity = totalVariableDebt.mul('124').sub(availableLiquidity);
+    const unbacked = totalVariableDebt.mul('124').sub(availableLiquidity);
 
     const {
       0: currentLiquidityRate,
@@ -220,7 +220,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     ](
       dai.address,
       availableLiquidity,
-      totalLiquidity,
+      unbacked,
       '0',
       totalVariableDebt,
       '0',
