@@ -159,8 +159,6 @@ library LiquidationLogic {
       debtReserve.updateInterestRates(
         vars.debtReserveCache,
         params.debtAsset,
-        0,
-        0,
         vars.actualDebtToLiquidate,
         0
       );
@@ -182,8 +180,6 @@ library LiquidationLogic {
       debtReserve.updateInterestRates(
         vars.debtReserveCache,
         params.debtAsset,
-        0,
-        0,
         vars.actualDebtToLiquidate,
         0
       );
@@ -208,8 +204,6 @@ library LiquidationLogic {
       collateralReserve.updateInterestRates(
         collateralReserveCache,
         params.collateralAsset,
-        0,
-        vars.maxCollateralToLiquidate,
         0,
         vars.maxCollateralToLiquidate
       );

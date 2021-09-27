@@ -179,7 +179,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     const reserveDataAfter = await getReserveData(helpersContract, dai.address);
 
     const expectedReserveDataAfter = calcExpectedReserveDataAfterBackUnbacked(
-      (await aDai.scaledTotalSupply()).toString(),
+      await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       feeAmount.toString(),
       reserveDataBefore,
@@ -216,7 +216,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     const reserveDataAfter = await getReserveData(helpersContract, dai.address);
 
     const expectedReserveDataAfter = calcExpectedReserveDataAfterBackUnbacked(
-      (await aDai.scaledTotalSupply()).toString(),
+      await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       feeAmount.toString(),
       reserveDataBefore,
@@ -242,7 +242,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     const reserveDataAfter = await getReserveData(helpersContract, dai.address);
 
     const expectedReserveDataAfter = calcExpectedReserveDataAfterBackUnbacked(
-      (await aDai.scaledTotalSupply()).toString(),
+      await aDai.scaledTotalSupply(),
       '0',
       withdrawAmount.toString(),
       reserveDataBefore,
@@ -271,7 +271,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     const reserveDataAfter = await getReserveData(helpersContract, dai.address);
 
     const expectedReserveDataAfter = calcExpectedReserveDataAfterBackUnbacked(
-      (await aDai.scaledTotalSupply()).toString(),
+      await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       '0',
       reserveDataBefore,

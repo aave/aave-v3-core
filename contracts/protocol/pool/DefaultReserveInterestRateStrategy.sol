@@ -122,18 +122,11 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       availableLiquidity = availableLiquidity + vars.liquidityAdded - vars.liquidityTaken;
     }
 
-    uint256 totalLiquidity = IERC20(aToken).totalSupply();
-    //avoid stack too deep
-    {
-      totalLiquidity = totalLiquidity + vars.pendingTreasuryMint + vars.toMint;
-      totalLiquidity = totalLiquidity - vars.toBurn;
-    }
-
     return
       calculateInterestRates(
         reserve,
         availableLiquidity,
-        totalLiquidity,
+        vars.unbacked,
         vars.totalStableDebt,
         vars.totalVariableDebt,
         averageStableBorrowRate,
@@ -154,7 +147,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   function calculateInterestRates(
     address reserve,
     uint256 availableLiquidity,
-    uint256 totalLiquidity,
+    uint256 unbacked,
     uint256 totalStableDebt,
     uint256 totalVariableDebt,
     uint256 averageStableBorrowRate,
@@ -179,12 +172,10 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.borrowUtilizationRate = vars.totalDebt == 0
       ? 0
       : vars.totalDebt.rayDiv(availableLiquidity + vars.totalDebt);
-    vars.supplyUtilizationRate = totalLiquidity == 0 ? 0 : vars.totalDebt.rayDiv(totalLiquidity);
 
-    // Cap supply utilization at borrow utilization
-    vars.supplyUtilizationRate = vars.supplyUtilizationRate > vars.borrowUtilizationRate
-      ? vars.borrowUtilizationRate
-      : vars.supplyUtilizationRate;
+    vars.supplyUtilizationRate = vars.totalDebt == 0
+      ? 0
+      : vars.totalDebt.rayDiv(availableLiquidity + unbacked + vars.totalDebt);
 
     vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
       .getMarketBorrowRate(reserve);

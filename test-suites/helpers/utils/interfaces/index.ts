@@ -22,7 +22,6 @@ export interface ReserveData {
   reserveFactor: BigNumber;
   availableLiquidity: BigNumber;
   totalLiquidity: BigNumber;
-  scaledATokenSupply: BigNumber;
   totalStableDebt: BigNumber;
   totalVariableDebt: BigNumber;
   principalStableDebt: BigNumber;

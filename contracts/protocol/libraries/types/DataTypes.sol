@@ -26,9 +26,9 @@ library DataTypes {
     //the id of the reserve. Represents the position in the list of the active reserves
     uint8 id;
     //the current treasury balance, scaled
-    uint256 accruedToTreasury;
+    uint128 accruedToTreasury;
     //the quickwithdraw balance waiting for underlying to be backed
-    uint256 unbacked;
+    uint128 unbacked;
   }
 
   struct ReserveConfigurationMap {
@@ -144,7 +144,7 @@ library DataTypes {
     uint8 userEModeCategory;
   }
 
-    struct ExecuteSetUserEModeParams {
+  struct ExecuteSetUserEModeParams {
     uint256 reservesCount;
     address oracle;
     uint8 categoryId;
@@ -211,9 +211,7 @@ library DataTypes {
   }
 
   struct CalculateInterestRatesParams {
-    uint256 pendingTreasuryMint;
-    uint256 toMint;
-    uint256 toBurn;
+    uint256 unbacked;
     uint256 liquidityAdded;
     uint256 liquidityTaken;
     uint256 totalStableDebt;

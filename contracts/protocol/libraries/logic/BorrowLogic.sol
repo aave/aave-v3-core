@@ -117,8 +117,6 @@ library BorrowLogic {
       reserveCache,
       params.asset,
       0,
-      0,
-      0,
       params.releaseUnderlying ? params.amount : 0
     );
 
@@ -180,7 +178,7 @@ library BorrowLogic {
       ).burn(params.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
     }
 
-    reserve.updateInterestRates(reserveCache, params.asset, 0, 0, paybackAmount, 0);
+    reserve.updateInterestRates(reserveCache, params.asset, paybackAmount, 0);
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
@@ -241,9 +239,7 @@ library BorrowLogic {
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;
-      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(
-        vars.flashloanPremiumTotal
-      );
+      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(vars.flashloanPremiumTotal);
       IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
         params.receiverAddress,
         params.amounts[vars.i]
@@ -271,9 +267,7 @@ library BorrowLogic {
       );
       vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
 
-      if (
-        DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE
-      ) {
+      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
         DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
         DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -285,13 +279,11 @@ library BorrowLogic {
 
         reserve.accruedToTreasury =
           reserve.accruedToTreasury +
-          vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex);
+          uint128(vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex));
 
         reserve.updateInterestRates(
           reserveCache,
           vars.currentAsset,
-          0,
-          0,
           vars.currentAmountPlusPremium,
           0
         );
@@ -363,7 +355,7 @@ library BorrowLogic {
       address(stableDebtToken)
     ).mint(user, user, stableDebt, reserve.currentStableBorrowRate);
 
-    reserve.updateInterestRates(reserveCache, asset, 0, 0, 0, 0);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     emit RebalanceStableBorrowRate(asset, user);
   }
@@ -409,7 +401,7 @@ library BorrowLogic {
       ).mint(msg.sender, msg.sender, variableDebt, reserve.currentStableBorrowRate);
     }
 
-    reserve.updateInterestRates(reserveCache, asset, 0, 0, 0, 0);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     emit Swap(asset, msg.sender, rateMode);
   }

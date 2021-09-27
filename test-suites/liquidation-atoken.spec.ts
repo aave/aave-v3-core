@@ -235,18 +235,8 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid collateral available liquidity'
     );
 
-    const expectedLiquidityAfter = daiReserveDataBefore.scaledATokenSupply
-      .rayMul(daiReserveDataAfter.liquidityIndex)
-      .add(
-        daiReserveDataAfter.accruedToTreasuryScaled
-          .sub(daiReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(daiReserveDataAfter.liquidityIndex)
-      );
-
-    const daiTotalLiquidityAfter = daiReserveDataAfter.totalLiquidity;
-
-    expect(daiTotalLiquidityAfter).to.be.closeTo(
-      expectedLiquidityAfter,
+    expect(daiReserveDataAfter.totalLiquidity).to.be.closeTo(
+      daiReserveDataBefore.totalLiquidity.add(amountToLiquidate),
       2,
       'Invalid principal total liquidity'
     );
@@ -413,18 +403,8 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid principal available liquidity'
     );
 
-    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
-      .rayMul(usdcReserveDataAfter.liquidityIndex)
-      .add(
-        usdcReserveDataAfter.accruedToTreasuryScaled
-          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(usdcReserveDataAfter.liquidityIndex)
-      );
-
-    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalLiquidity;
-
-    expect(usdcExpectedLiquidityAfter).to.be.closeTo(
-      usdcTotalLiquidityAfter,
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(amountToLiquidate),
       2,
       'Invalid principal total liquidity'
     );

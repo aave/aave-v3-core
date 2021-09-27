@@ -55,7 +55,7 @@ library SupplyLogic {
 
     ValidationLogic.validateSupply(reserveCache, params.amount);
 
-    reserve.updateInterestRates(reserveCache, params.asset, params.amount, 0, params.amount, 0);
+    reserve.updateInterestRates(reserveCache, params.asset, params.amount, 0);
 
     IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, params.amount);
 
@@ -97,7 +97,7 @@ library SupplyLogic {
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
 
-    reserve.updateInterestRates(reserveCache, params.asset, 0, amountToWithdraw, 0, amountToWithdraw);
+    reserve.updateInterestRates(reserveCache, params.asset, 0, amountToWithdraw);
 
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,

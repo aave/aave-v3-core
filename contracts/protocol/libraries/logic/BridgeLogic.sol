@@ -55,7 +55,8 @@ library BridgeLogic {
 
     ValidationLogic.validateSupply(reserveCache, amount);
 
-    reserve.updateInterestRates(reserveCache, asset, amount, 0, 0, 0);
+    reserve.unbacked = reserve.unbacked + uint128(amount);
+    reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
       onBehalfOf,
@@ -63,10 +64,8 @@ library BridgeLogic {
       reserveCache.nextLiquidityIndex
     );
 
-    reserve.unbacked = reserve.unbacked + amount;
-
     uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCap();
-    (, , , uint256 reserveDecimals, ,) = reserveCache.reserveConfiguration.getParams();
+    (, , , uint256 reserveDecimals, , ) = reserveCache.reserveConfiguration.getParams();
     require(
       unbackedMintCap == 0 || reserve.unbacked / (10**reserveDecimals) < unbackedMintCap,
       Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
@@ -104,9 +103,8 @@ library BridgeLogic {
 
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), totalFee);
 
-    reserve.updateInterestRates(reserveCache, asset, 0, 0, amount + fee, 0);
-
-    reserve.unbacked = reserve.unbacked - backingAmount;
+    reserve.unbacked = reserve.unbacked - uint128(backingAmount);
+    reserve.updateInterestRates(reserveCache, asset, amount + fee, 0);
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, amount + fee);
 

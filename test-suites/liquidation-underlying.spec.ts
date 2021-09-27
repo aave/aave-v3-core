@@ -197,18 +197,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid liquidity APY'
     );
 
-    // We also need to account for the interest and accrued
-    const daiExpectedLiquidityAfter = daiReserveDataBefore.scaledATokenSupply
-      .rayMul(daiReserveDataAfter.liquidityIndex)
-      .add(
-        daiReserveDataAfter.accruedToTreasuryScaled
-          .sub(daiReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(daiReserveDataAfter.liquidityIndex)
-      );
-    const daiTotalLiquidityAfter = daiReserveDataAfter.totalLiquidity;
-
-    expect(daiTotalLiquidityAfter).to.be.closeTo(
-      daiExpectedLiquidityAfter,
+    expect(daiReserveDataAfter.totalLiquidity).to.be.closeTo(
+      daiReserveDataBefore.totalLiquidity.add(amountToLiquidate),
       2,
       'Invalid principal total liquidity'
     );
@@ -354,17 +344,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid liquidity APY'
     );
 
-    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
-      .rayMul(usdcReserveDataAfter.liquidityIndex)
-      .add(
-        usdcReserveDataAfter.accruedToTreasuryScaled
-          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(usdcReserveDataAfter.liquidityIndex)
-      );
-    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalLiquidity;
-
-    expect(usdcTotalLiquidityAfter).to.be.closeTo(
-      usdcExpectedLiquidityAfter,
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(amountToLiquidate),
       2,
       'Invalid principal total liquidity'
     );
@@ -473,17 +454,8 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       'Invalid user borrow balance after liquidation'
     );
 
-    const usdcExpectedLiquidityAfter = usdcReserveDataBefore.scaledATokenSupply
-      .rayMul(usdcReserveDataAfter.liquidityIndex)
-      .add(
-        usdcReserveDataAfter.accruedToTreasuryScaled
-          .sub(usdcReserveDataBefore.accruedToTreasuryScaled)
-          .rayMul(usdcReserveDataAfter.liquidityIndex)
-      );
-    const usdcTotalLiquidityAfter = usdcReserveDataAfter.totalLiquidity;
-
-    expect(usdcTotalLiquidityAfter).to.be.closeTo(
-      usdcExpectedLiquidityAfter,
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(expectedPrincipal),
       2,
       'Invalid principal total liquidity'
     );

@@ -41,16 +41,13 @@ export const getReserveData = async (
   const accruedToTreasuryScaled = reserveData.accruedToTreasuryScaled;
   const unbacked = reserveData.unbacked;
   const aToken = (await getAToken(tokenAddresses.aTokenAddress)) as AToken;
-  const scaledATokenSupply = await aToken.scaledTotalSupply();
 
   // Need the reserve factor
   const reserveFactor = reserveConfiguration.reserveFactor;
 
   const availableLiquidity = await token.balanceOf(aToken.address);
 
-  const totalLiquidity = scaledATokenSupply
-    .rayMul(reserveData.liquidityIndex)
-    .add(accruedToTreasuryScaled.rayMul(reserveData.liquidityIndex));
+  const totalLiquidity = availableLiquidity.add(unbacked);
 
   const totalDebt = reserveData.totalStableDebt.add(reserveData.totalVariableDebt);
 
@@ -58,9 +55,9 @@ export const getReserveData = async (
     ? BigNumber.from(0)
     : totalDebt.rayDiv(availableLiquidity.add(totalDebt));
 
-  let supplyUtilizationRate = totalLiquidity.eq(0)
+  let supplyUtilizationRate = totalDebt.eq(0)
     ? BigNumber.from(0)
-    : totalDebt.rayDiv(totalLiquidity);
+    : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
 
   supplyUtilizationRate =
     supplyUtilizationRate > borrowUtilizationRate ? borrowUtilizationRate : supplyUtilizationRate;
@@ -69,7 +66,6 @@ export const getReserveData = async (
     reserveFactor,
     unbacked,
     accruedToTreasuryScaled,
-    scaledATokenSupply,
     availableLiquidity,
     totalLiquidity,
     borrowUtilizationRate,

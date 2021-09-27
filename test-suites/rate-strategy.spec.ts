@@ -63,7 +63,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     ](
       dai.address,
       '200000000000000000',
-      '1000000000000000000',
+      '0',
       '0',
       '800000000000000000',
       '0',
@@ -102,15 +102,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       2: currentVariableBorrowRate,
     } = await strategyInstance[
       'calculateInterestRates(address,uint256,uint256,uint256,uint256,uint256,uint256)'
-    ](
-      dai.address,
-      '0',
-      '1000000000000000000',
-      '0',
-      '1000000000000000000',
-      '0',
-      strategyDAI.reserveFactor
-    );
+    ](dai.address, '0', '0', '0', '1000000000000000000', '0', strategyDAI.reserveFactor);
 
     const expectedVariableRate = BigNumber.from(rateStrategyStableTwo.baseVariableBorrowRate)
       .add(rateStrategyStableTwo.variableRateSlope1)
@@ -150,7 +142,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     ](
       dai.address,
       '0',
-      '800000000000000000',
+      '0',
       '400000000000000000',
       '400000000000000000',
       '100000000000000000000000000',
@@ -187,7 +179,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     ](
       dai.address,
       '200000000000000000',
-      '1600000000000000000',
+      '600000000000000000',
       '0',
       '800000000000000000',
       '0',
@@ -216,7 +208,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   it('Checks rates at 80% borrow utilization rate and 0.8% supply utilization due to minted tokens', async () => {
     const availableLiquidity = BigNumber.from('200000000000000000');
     const totalVariableDebt = BigNumber.from('800000000000000000');
-    const totalLiquidity = availableLiquidity.add(totalVariableDebt).mul(100);
+    // 0.008 = y / (x + y) -> x = 124 y
+    const totalLiquidity = totalVariableDebt.mul('124').sub(availableLiquidity);
+
     const {
       0: currentLiquidityRate,
       1: currentStableBorrowRate,
@@ -267,7 +261,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     ](
       dai.address,
       '9920000000000000000000',
-      '10000000000000000000000',
+      '0',
       '0',
       '80000000000000000000',
       '0',

@@ -159,9 +159,9 @@ library ReserveLogic {
 
   /**
    * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
-   * @param reserve The address of the reserve to be updated
-   * @param toMint The amount of aTokens created (deposit) in the previous action
-   * @param toBurn The amount of aTokens destroyed (withdraw)
+   * @param reserve The reserve reserve to be updated
+   * @param reserveCache The caching layer for the reserve data
+   * @param reserveAddress The address of the reserve to be updated
    * @param liquidityAdded The amount of liquidity added to the protocol (supply or repay) in the previous action
    * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
    **/
@@ -169,8 +169,6 @@ library ReserveLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
     address reserveAddress,
-    uint256 toMint,
-    uint256 toBurn,
     uint256 liquidityAdded,
     uint256 liquidityTaken
   ) internal {
@@ -180,11 +178,6 @@ library ReserveLogic {
       reserveCache.nextVariableBorrowIndex
     );
 
-    uint256 accruedToTreasury;
-    {
-      accruedToTreasury = reserve.accruedToTreasury.rayMul(reserveCache.nextLiquidityIndex);
-    }
-
     (
       vars.nextLiquidityRate,
       vars.nextStableRate,
@@ -193,9 +186,7 @@ library ReserveLogic {
       reserveAddress,
       reserveCache.aTokenAddress,
       DataTypes.CalculateInterestRatesParams(
-        accruedToTreasury,
-        toMint,
-        toBurn,
+        reserve.unbacked,
         liquidityAdded,
         liquidityTaken,
         reserveCache.nextTotalStableDebt,
@@ -282,7 +273,7 @@ library ReserveLogic {
     if (vars.amountToMint != 0) {
       reserve.accruedToTreasury =
         reserve.accruedToTreasury +
-        vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex);
+        uint128(vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex));
     }
   }
 
