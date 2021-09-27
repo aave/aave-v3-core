@@ -19,6 +19,7 @@ library ReserveConfiguration {
   uint256 constant BORROWING_MASK =                 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant STABLE_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant ISOLATION_MODE_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -34,7 +35,8 @@ library ReserveConfiguration {
   uint256 constant BORROWING_ENABLED_START_BIT_POSITION = 58;
   uint256 constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
   uint256 constant IS_PAUSED_START_BIT_POSITION = 60;
-  /// @dev bits 61 62 63 unused yet
+  uint256 constant ISOLATION_MODE_START_BIT_POSITION = 61;
+  /// @dev bits 62 63 unused yet
   uint256 constant RESERVE_FACTOR_START_BIT_POSITION = 64;
   uint256 constant BORROW_CAP_START_BIT_POSITION = 80;
   uint256 constant SUPPLY_CAP_START_BIT_POSITION = 116;
@@ -214,6 +216,26 @@ library ReserveConfiguration {
    **/
   function getPaused(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
     return (self.data & ~PAUSED_MASK) != 0;
+  }
+
+  /**
+   * @notice Sets the isolation mode for the reserve
+   * @param self The reserve configuration
+   * @param isolation True if the reserve should be in isolation mode, false otherwise
+   **/
+  function setIsolationMode(DataTypes.ReserveConfigurationMap memory self, bool isolation) internal pure {
+    self.data =
+      (self.data & ISOLATION_MODE_MASK) |
+      (uint256(isolation ? 1 : 0) << ISOLATION_MODE_START_BIT_POSITION);
+  }
+
+  /**
+   * @notice Gets the state of the isolation mode for the reserve
+   * @param self The reserve configuration
+   * @return True if the reserve is in isolation mode, false otherwise
+   **/
+  function getIsolationMode(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
+    return (self.data & ~ISOLATION_MODE_MASK) != 0;
   }
 
   /**
@@ -421,11 +443,13 @@ library ReserveConfiguration {
    * @return The state flag representing borrowing enabled
    * @return The state flag representing stabelRateBorrowing enabled
    * @return The state flag representing paused
+   * @return The state flag representing isolation mode
    **/
   function getFlags(DataTypes.ReserveConfigurationMap memory self)
     internal
     pure
     returns (
+      bool,
       bool,
       bool,
       bool,
@@ -440,6 +464,7 @@ library ReserveConfiguration {
       (dataLocal & ~FROZEN_MASK) != 0,
       (dataLocal & ~BORROWING_MASK) != 0,
       (dataLocal & ~STABLE_BORROWING_MASK) != 0,
+      (dataLocal & ~PAUSED_MASK) != 0,
       (dataLocal & ~PAUSED_MASK) != 0
     );
   }

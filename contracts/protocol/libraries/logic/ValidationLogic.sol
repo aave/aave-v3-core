@@ -46,7 +46,7 @@ library ValidationLogic {
     internal
     view
   {
-    (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
+    (bool isActive, bool isFrozen, , , bool isPaused, ) = reserveCache
       .reserveConfiguration
       .getFlags();
     (, , , uint256 reserveDecimals, , ) = reserveCache.reserveConfiguration.getParams();
@@ -81,7 +81,7 @@ library ValidationLogic {
     require(amount != 0, Errors.VL_INVALID_AMOUNT);
     require(amount <= userBalance, Errors.VL_NOT_ENOUGH_AVAILABLE_USER_BALANCE);
 
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+    (bool isActive, , , , bool isPaused,) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
   }
@@ -129,7 +129,7 @@ library ValidationLogic {
       vars.isFrozen,
       vars.borrowingEnabled,
       vars.stableRateBorrowingEnabled,
-      vars.isPaused
+      vars.isPaused,
     ) = params.reserveCache.reserveConfiguration.getFlags();
 
     require(vars.isActive, Errors.VL_NO_ACTIVE_RESERVE);
@@ -270,7 +270,7 @@ library ValidationLogic {
     uint256 stableDebt,
     uint256 variableDebt
   ) internal view {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+    (bool isActive, , , , bool isPaused, ) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
@@ -321,7 +321,7 @@ library ValidationLogic {
     uint256 variableDebt,
     DataTypes.InterestRateMode currentRateMode
   ) internal view {
-    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) = reserveCache
+    (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused, ) = reserveCache
       .reserveConfiguration
       .getFlags();
 
@@ -370,7 +370,7 @@ library ValidationLogic {
     IERC20 variableDebtToken,
     address aTokenAddress
   ) internal view {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+    (bool isActive, , , , bool isPaused, ) = reserveCache.reserveConfiguration.getFlags();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -406,7 +406,7 @@ library ValidationLogic {
     DataTypes.ReserveCache memory reserveCache,
     uint256 userBalance
   ) internal pure {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+    (bool isActive, , , , bool isPaused, ) = reserveCache.reserveConfiguration.getFlags();
 
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
@@ -458,11 +458,11 @@ library ValidationLogic {
   ) internal view {
     ValidateLiquidationCallLocalVars memory vars;
 
-    (vars.collateralReserveActive, , , , vars.collateralReservePaused) = collateralReserve
+    (vars.collateralReserveActive, , , , vars.collateralReservePaused, ) = collateralReserve
       .configuration
       .getFlags();
 
-    (vars.principalReserveActive, , , , vars.principalReservePaused) = params
+    (vars.principalReserveActive, , , , vars.principalReservePaused, ) = params
       .debtReserveCache
       .reserveConfiguration
       .getFlags();

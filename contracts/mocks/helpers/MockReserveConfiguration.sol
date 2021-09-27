@@ -127,6 +127,7 @@ contract MockReserveConfiguration {
       bool,
       bool,
       bool,
+      bool,
       bool
     )
   {

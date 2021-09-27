@@ -114,7 +114,7 @@ contract AaveProtocolDataProvider {
     (ltv, liquidationThreshold, liquidationBonus, decimals, reserveFactor, ) = configuration
       .getParams();
 
-    (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();
+    (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, , ) = configuration.getFlags();
 
     usageAsCollateralEnabled = liquidationThreshold > 0;
   }
@@ -150,7 +150,7 @@ contract AaveProtocolDataProvider {
    * @return isPaused True if the pool is paused, false otherwise
    **/
   function getPaused(address asset) external view returns (bool isPaused) {
-    (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getFlags();
+    (, , , , isPaused, ) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getFlags();
   }
 
   /**
