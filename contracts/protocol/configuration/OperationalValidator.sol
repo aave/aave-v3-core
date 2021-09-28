@@ -3,17 +3,17 @@ pragma solidity 0.8.7;
 
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IOperationalValidator} from '../../interfaces/IOperationalValidator.sol';
-import {ISequencerOracle} from '../../interfaces/ISequencerOracle.sol';
+import {IPriceOracleSentinel} from '../../interfaces/IPriceOracleSentinel.sol';
 
 /**
  * @title OperationalValidator
  * @author Aave
- * @notice It validates if operations are allowed depending on the Sequencer Health.
- * @dev After a Sequencer downtime, users can make their positions healthier during the grace period.
+ * @notice It validates if operations are allowed depending on the PriceOracle health.
+ * @dev After a PriceOracle downtime, once it gets up, users can make their positions healthy during a grace period.
  */
 contract OperationalValidator is IOperationalValidator {
   IPoolAddressesProvider public _addressesProvider;
-  ISequencerOracle public _sequencerOracle;
+  IPriceOracleSentinel public _priceOracleSentinel;
   uint256 public _gracePeriod;
 
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 ether;
@@ -21,16 +21,16 @@ contract OperationalValidator is IOperationalValidator {
   /**
    * @notice Constructor
    * @param provider The address of the PoolAddressesProvider
-   * @param sequencerOracle The address of the Sequencer Health oracle
+   * @param priceOracleSentinel The address of the PriceOracleSentinel
    * @param gracePeriod The duration of the grace period in seconds
    */
   constructor(
     IPoolAddressesProvider provider,
-    ISequencerOracle sequencerOracle,
+    IPriceOracleSentinel priceOracleSentinel,
     uint256 gracePeriod
   ) {
     _addressesProvider = provider;
-    _sequencerOracle = sequencerOracle;
+    _priceOracleSentinel = priceOracleSentinel;
     _gracePeriod = gracePeriod;
   }
 
@@ -48,7 +48,7 @@ contract OperationalValidator is IOperationalValidator {
   }
 
   function _isUpAndGracePeriodPassed() internal view returns (bool) {
-    (bool isDown, uint256 timestampGotUp) = _sequencerOracle.latestAnswer();
+    (bool isDown, uint256 timestampGotUp) = _priceOracleSentinel.latestAnswer();
     return !isDown && block.timestamp - timestampGotUp > _gracePeriod;
   }
 }

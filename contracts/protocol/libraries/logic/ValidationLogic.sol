@@ -141,12 +141,11 @@ library ValidationLogic {
 
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
-    if (params.operationalValidator != address(0)) {
-      require(
+    require(
+      !params.reserveCache.reserveConfiguration.getOperationalValidatorActive() ||
         IOperationalValidator(params.operationalValidator).isBorrowAllowed(),
-        Errors.VL_SEQUENCER_IS_DOWN
-      );
-    }
+      Errors.VL_PRICE_ORACLE_SENTINEL_FAILED
+    );
 
     //validate interest rate mode
     require(
@@ -498,12 +497,11 @@ library ValidationLogic {
       )
     );
 
-    if (params.operationalValidator != address(0)) {
-      require(
+    require(
+      !params.debtReserveCache.reserveConfiguration.getOperationalValidatorActive() ||
         IOperationalValidator(params.operationalValidator).isLiquidationAllowed(vars.healthFactor),
-        Errors.VL_SEQUENCER_IS_DOWN
-      );
-    }
+      Errors.VL_PRICE_ORACLE_SENTINEL_FAILED
+    );
 
     require(
       vars.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,

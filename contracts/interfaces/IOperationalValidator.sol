@@ -9,14 +9,14 @@ pragma solidity 0.8.7;
 interface IOperationalValidator {
   /**
    * @notice Returns true if the `borrow` operation is allowed.
-   * @dev Operation not allowed when sequencer is down or grace period not passed.
+   * @dev Operation not allowed when PriceOracle is down or grace period not passed.
    * @return True if the `borrow` operation is allowed, false otherwise.
    */
   function isBorrowAllowed() external view returns (bool);
 
   /**
    * @notice Returns true if the `liquidation` operation is allowed.
-   * @dev Operation not allowed when sequencer is down or grace period not passed.
+   * @dev Operation not allowed when PriceOracle is down or grace period not passed.
    * @dev If the healthfactor is below a minimum threshold, the liquidation is allowed.
    * @param healthFactor The health factor of the position to liquidate
    * @return True if the `liquidation` operation is allowed, false otherwise.

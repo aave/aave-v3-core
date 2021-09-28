@@ -245,6 +245,24 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setOperationalValidatorActive(address asset, bool state)
+    public
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    currentConfig.setOperationalValidatorActive(state);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    if (state) {
+      emit OperationalValidatorActivated(asset);
+    } else {
+      emit OperationalValidatorDeactivated(asset);
+    }
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setReserveFactor(address asset, uint256 reserveFactor)
     external
     override

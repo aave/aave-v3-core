@@ -101,6 +101,18 @@ interface IPoolConfigurator {
   event ReserveUnpaused(address indexed asset);
 
   /**
+   * @notice Emitted when the OperationalValidator is activated for the reserve
+   * @param asset The address of the underlying asset of the reserve
+   **/
+  event OperationalValidatorActivated(address indexed asset);
+
+  /**
+   * @notice Emitted when the OperationalValidator is deactivated for the reserve
+   * @param asset The address of the underlying asset of the reserve
+   **/
+  event OperationalValidatorDeactivated(address indexed asset);
+
+  /**
    * @notice Emitted when a reserve is dropped
    * @param asset The address of the underlying asset of the reserve
    **/
@@ -342,6 +354,13 @@ interface IPoolConfigurator {
    * @param val True if pausing the reserve, false if unpausing
    **/
   function setReservePause(address asset, bool val) external;
+
+  /**
+   * @notice Set the state of the OperationalValidator for the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @param state True if activating the OperationalValidator, false if deactivating
+   **/
+  function setOperationalValidatorActive(address asset, bool state) external;
 
   /**
    * @notice Updates the reserve factor of a reserve

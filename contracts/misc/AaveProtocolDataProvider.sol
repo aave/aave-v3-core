@@ -122,9 +122,20 @@ contract AaveProtocolDataProvider {
   }
 
   /**
+   * Returns the state of the OperationValidator of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return True if the OperationalValidator is active for the reserve, false otherwise
+   */
+  function getReserveOperationValidatorState(address asset) external view returns (bool) {
+    DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
+      .getConfiguration(asset);
+    return configuration.getOperationalValidatorActive();
+  }
+
+  /**
    * Returns the efficiency mode category of the reserve
    * @param asset The address of the underlying asset of the reserve
-   * @return eModeCategory The eMode id of the reserve
+   * @return The eMode id of the reserve
    */
   function getReserveEModeCategory(address asset) external view returns (uint256) {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
