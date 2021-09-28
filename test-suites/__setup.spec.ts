@@ -20,7 +20,6 @@ import {
   deployAllMockTokens,
   deployACLManager,
   deployMockIncentivesController,
-  deployOperationalValidator,
 } from '../helpers/contracts-deployments';
 import { eContractid, tEthereumAddress } from '../helpers/types';
 import {
