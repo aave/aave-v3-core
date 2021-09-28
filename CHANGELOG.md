@@ -1,5 +1,71 @@
 # Changelog
 
+## [1.1.0](https://www.github.com/aave/aave-v3-core/compare/v1.0.3...v1.1.0) (2021-09-28)
+
+
+### Features
+
+* Add `unbackedMintCap` to control unbacked atokens minting ([bde09e3](https://www.github.com/aave/aave-v3-core/commit/bde09e30dea092f442c2bbf14a94bb04e15dea62))
+* Add asset listing admin role ([3c3cd50](https://www.github.com/aave/aave-v3-core/commit/3c3cd50873c379d1b126c523039a36532ae16f1c))
+* Add eMode category getters on Pool ([1e5a4e2](https://www.github.com/aave/aave-v3-core/commit/1e5a4e26e1c9d6b2084dbbe9936d1c60db485249))
+* Add flag for OperationValidator at ReserveConfig, add renaming ([6515d1d](https://www.github.com/aave/aave-v3-core/commit/6515d1de492f9532363b6f303ffd6c6a810bd175))
+* Add getReserveEModeCategory at DataProvider ([268dac1](https://www.github.com/aave/aave-v3-core/commit/268dac16779745fc54bbef9b7a11f5c563cdae37))
+* Add initial contract to validate operations ([d6af2e5](https://www.github.com/aave/aave-v3-core/commit/d6af2e5caa9ab714bb7091ee5553a8582ec9cf2c))
+* Add new onlyAssetListingOrPoolAdmin for initReserves ([9d36fa5](https://www.github.com/aave/aave-v3-core/commit/9d36fa56327e110c1d954b183046e1ea983b55a6))
+* Add test cases ([0814ac2](https://www.github.com/aave/aave-v3-core/commit/0814ac29f5318e0f7eca0a02cf523c684c1bc74b))
+* Add test cases for category emode registration ([31ab296](https://www.github.com/aave/aave-v3-core/commit/31ab296db37e0e934b761cf5527c609c0e7d90fc))
+* Add tests for edge cases of `supply` function ([30d5f83](https://www.github.com/aave/aave-v3-core/commit/30d5f83d1478925865d175824fafd0fef20e9d89))
+* Add tests for the new unbackedMint cap control ([ad92076](https://www.github.com/aave/aave-v3-core/commit/ad9207672a66f0e9c9bff5c43b77ee84ba96aadc))
+* added optimal stable to variable debt ratio ([e0a9756](https://www.github.com/aave/aave-v3-core/commit/e0a9756822a42f8d990ee4ce466b9300b1f3f6eb))
+* added validation and events on eMode categories configuration ([fdf483b](https://www.github.com/aave/aave-v3-core/commit/fdf483bd70d95146e12d781bf55875e72b0137e3))
+* Initial OperationalValidator integration ([5088148](https://www.github.com/aave/aave-v3-core/commit/5088148abd402153535180ddd6a3841b8e6b9198))
+* refactored InterestRateStrategy, fixed conditions ([5196636](https://www.github.com/aave/aave-v3-core/commit/51966363ae3ce6cab7a532d3f2b3ab5180295046))
+* removal of the rate oracle, initial implementation, tests fixed ([1f5b953](https://www.github.com/aave/aave-v3-core/commit/1f5b9530b39a6c5ea1f8edbdfdf3d34b5c43192f))
+* Rename `OperationalValidator` to `PriceOracleSentinel` ([9004f49](https://www.github.com/aave/aave-v3-core/commit/9004f49775fa4c57b07a259f3b660298cdef855c))
+
+
+### Bug Fixes
+
+* Add additional checks to liquidation tests ([e06c74f](https://www.github.com/aave/aave-v3-core/commit/e06c74fceeeb33211363e0cb1cf0e2f5549933f4))
+* Add check for previous index ([3cfc67c](https://www.github.com/aave/aave-v3-core/commit/3cfc67c9c9a9dffb78ee63aed9e2c48fa9c8a75b))
+* Add checks for avaiable liquidity in liqudations ([80cb24d](https://www.github.com/aave/aave-v3-core/commit/80cb24ddd72cd075c488f16f1a697e907ece6d30))
+* Add cleanups and fixes to tests ([ccd5a96](https://www.github.com/aave/aave-v3-core/commit/ccd5a961e2e0eb6d73d5f0e696383b762daf1f3e))
+* Add fixes to OperationalValidator contracts ([829be88](https://www.github.com/aave/aave-v3-core/commit/829be8826c84fa67fce6745b5768dbee5127e5e4))
+* Add tests for `ASSET_LISTING_ADMIN` role ([84aa268](https://www.github.com/aave/aave-v3-core/commit/84aa26830124fee2fa4479e8ed3fc16ccbd38024))
+* Cap supply utilization at borrow utilization ([5e79c48](https://www.github.com/aave/aave-v3-core/commit/5e79c48f9d9d10492166a8801f34f0a73114affb))
+* Fix `supply` function  error at `SupplyLogic` lib. ([6c112e8](https://www.github.com/aave/aave-v3-core/commit/6c112e89a271003acb8ed3a33fcb6a9f9bc2c196))
+* Fix docs of `ACLManager` contract ([acfebe8](https://www.github.com/aave/aave-v3-core/commit/acfebe8e685e1b980fc74be5f9f16d73ea4aeeec))
+* Fix docs of OperationValidator contract ([213094c](https://www.github.com/aave/aave-v3-core/commit/213094cebf281c3d2e84affcfc448b74677cca0c))
+* Fix duplicated code at `validateHF` ([6a30bbb](https://www.github.com/aave/aave-v3-core/commit/6a30bbb46cad3d1330db5174f47dcc0dc7b169c2))
+* Fix liquidityAdded in BridgeLogic backUnbacked ([68764ee](https://www.github.com/aave/aave-v3-core/commit/68764ee1d539495f6beaf3df545806f466e710fd))
+* Fix package-lock ([5e37eeb](https://www.github.com/aave/aave-v3-core/commit/5e37eeba93ee371261286322d757f1a6fb113d01))
+* Fix some comments on contracts ([973e644](https://www.github.com/aave/aave-v3-core/commit/973e6447bb49981f66791fa3be48475a9c0e4b25))
+* Fix tests ([506d339](https://www.github.com/aave/aave-v3-core/commit/506d339f6fc958484b3b09095bb5bebb6ee5a230))
+* fixed borrow condition, removed conditions on transfer/deposit/use as collateral ([8dbe7e4](https://www.github.com/aave/aave-v3-core/commit/8dbe7e4d186c834eca1a80e3d01d9d939ddd2038))
+* fixed calculation of the avg ltv/liq threshold in eMode ([0534f47](https://www.github.com/aave/aave-v3-core/commit/0534f47dfc16ba3a3f7f1c274b80de662ca54b72))
+* fixed error after merging the main branch ([83f385f](https://www.github.com/aave/aave-v3-core/commit/83f385fc1fdcac9f87aaa94614bcda3020578fb0))
+* fixed logic for the stable rate offset, fixed tests ([c319929](https://www.github.com/aave/aave-v3-core/commit/c31992993519a5b964656093b034de6b4fa91a3d))
+* fixed validateSetUserEMode ([750fd34](https://www.github.com/aave/aave-v3-core/commit/750fd349e8c52726d505844fa47376c8784d7109))
+* Improve readability and fix docs of `BridgeLogic` ([2c48e7e](https://www.github.com/aave/aave-v3-core/commit/2c48e7e64cc7a2de53e54865b11ecefbe0acedea))
+* Initial interest rate fix ([350c528](https://www.github.com/aave/aave-v3-core/commit/350c528354d3cbb55f66458b812395d31fc12d95))
+* Move `isBorrowAllowed` higher up in `validateBorrow` ([93a447c](https://www.github.com/aave/aave-v3-core/commit/93a447c2a18e17a5067b47dbe7e724970d9eff9b))
+* npm dependencies ([2a366f7](https://www.github.com/aave/aave-v3-core/commit/2a366f7f708803137c7dab2916e524709a7afc83))
+* refactored PriceOracleSentinel, valdiation conditions, removed reserve config ([e112db9](https://www.github.com/aave/aave-v3-core/commit/e112db92acbaf3a41f2197a7b270b5b42d1586b7))
+* Remove AToken totalSupply from interest computation ([9b779e9](https://www.github.com/aave/aave-v3-core/commit/9b779e9ead03fc919f7fa6f38c6dbe361d47198f))
+* Remove deployOperationalValidator import ([3152285](https://www.github.com/aave/aave-v3-core/commit/3152285ae7e7bbb126ff41a403bd6f7a13767607))
+* Remove deprecated code of contracts ([282b629](https://www.github.com/aave/aave-v3-core/commit/282b6297e7276b579cd59ff182d670ebf9aeca12))
+* removed unnecessary overflow check ([4d9861d](https://www.github.com/aave/aave-v3-core/commit/4d9861d94d5531104f95af625cffead15f603d4d))
+* removed useAsCollateral flag in supply ([891da9b](https://www.github.com/aave/aave-v3-core/commit/891da9bdeccc6c09e8b65472618370725030fbc9))
+* Rename variable `rate-strategy.spec.ts` ([f7fbdac](https://www.github.com/aave/aave-v3-core/commit/f7fbdac5fa0eea659ba4da6c5f87eae6e82fec51))
+* Revert renaming back to SequencerOracle ([53ab533](https://www.github.com/aave/aave-v3-core/commit/53ab533d0c4c56d59002e4efcc8f3c4ae5c44f10))
+* Update `rate-strategy.spec.ts` to use strategy two ([31335e0](https://www.github.com/aave/aave-v3-core/commit/31335e0ff373d343b7bb2887a499e66ea2b7cff4))
+* Update and fix contracts docs ([171acdf](https://www.github.com/aave/aave-v3-core/commit/171acdf711b243234c1baa350c30485e58f9f4f3))
+* Update comments in IPool ([3e32f07](https://www.github.com/aave/aave-v3-core/commit/3e32f07f9966c97242035580f1f6672bba27cd7a))
+* Update operation-validator reserve getters ([bcdc91d](https://www.github.com/aave/aave-v3-core/commit/bcdc91d134403f49b15f13a07c996e22ff7da844))
+* Update tests for new interest rate calculation ([a37d9a1](https://www.github.com/aave/aave-v3-core/commit/a37d9a10591b5b39f63731a3d8257d024a540538))
+* Upgrade  library to make it work with london hf. ([c1e6fec](https://www.github.com/aave/aave-v3-core/commit/c1e6fecbcffa7d6160a896ec00d3cedb248cfa8c))
+* use nextVariableBorrowIndex instead of nextLiquidityIndex on repayValidation ([cf9007c](https://www.github.com/aave/aave-v3-core/commit/cf9007c78d6e2eaaa9816309ebc44f160c53ed3c))
+
 ### [1.0.3](https://www.github.com/aave/aave-v3-core/compare/v1.0.2...v1.0.3) (2021-09-17)
 
 
