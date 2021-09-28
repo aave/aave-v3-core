@@ -11,7 +11,6 @@ interface IPoolAddressesProvider {
   event PoolUpdated(address indexed newAddress);
   event PoolConfiguratorUpdated(address indexed newAddress);
   event PriceOracleUpdated(address indexed newAddress);
-  event RateOracleUpdated(address indexed newAddress);
   event ACLManagerUpdated(address indexed newAddress);
   event ACLAdminUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
@@ -84,10 +83,6 @@ interface IPoolAddressesProvider {
   function getPriceOracle() external view returns (address);
 
   function setPriceOracle(address priceOracle) external;
-
-  function getRateOracle() external view returns (address);
-
-  function setRateOracle(address rateOracle) external;
 
   /**
    * @notice Returns the address of the ACL manager proxy

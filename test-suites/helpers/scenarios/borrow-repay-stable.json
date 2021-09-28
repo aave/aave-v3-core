@@ -399,10 +399,10 @@
         },
         {
           "name": "mint",
-          "description": "Mint 15 DAI to cover the interest",
+          "description": "Mint 100 DAI to cover the interest",
           "args": {
             "reserve": "DAI",
-            "amount": "15",
+            "amount": "100",
             "user": "1"
           },
           "expected": "success"
@@ -428,10 +428,10 @@
         },
         {
           "name": "mint",
-          "description": "Mint 20 DAI to cover the interest",
+          "description": "Mint 100 DAI to cover the interest",
           "args": {
             "reserve": "DAI",
-            "amount": "20",
+            "amount": "100",
             "user": "2"
           },
           "expected": "success"
@@ -457,10 +457,10 @@
         },
         {
           "name": "mint",
-          "description": "Mint 30 DAI to cover the interest",
+          "description": "Mint 100 DAI to cover the interest",
           "args": {
             "reserve": "DAI",
-            "amount": "30",
+            "amount": "100",
             "user": "3"
           },
           "expected": "success"
@@ -486,10 +486,10 @@
         },
         {
           "name": "mint",
-          "description": "Mint 30 DAI to cover the interest",
+          "description": "Mint 100 DAI to cover the interest",
           "args": {
             "reserve": "DAI",
-            "amount": "30",
+            "amount": "100",
             "user": "4"
           },
           "expected": "success"

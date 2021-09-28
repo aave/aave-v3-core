@@ -59,6 +59,8 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
     throw `An expected resut for action ${name} is required`;
   }
 
+  console.log(`Executing action ${name}, user ${userIndex}`);
+
   let rateMode: string = RateMode.None;
 
   if (borrowRateMode) {
@@ -202,7 +204,7 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
 
     case 'repay':
       {
-        const { amount, timeTravel, borrowRateMode, sendValue } = action.args;
+        const { amount, timeTravel, sendValue } = action.args;
         let { onBehalfOf: onBehalfOfIndex } = action.args;
 
         if (!amount || amount === '') {

@@ -14,7 +14,6 @@ import {
   PoolAddressesProviderRegistryFactory,
   PoolConfiguratorFactory,
   PoolFactory,
-  RateOracleFactory,
   MintableDelegationERC20Factory,
   MintableERC20Factory,
   MockAggregatorFactory,
@@ -45,7 +44,6 @@ import {
   linkBytecode,
   insertContractAddressInDb,
 } from './contracts-helpers';
-import { RateOracleSetupHelperFactory } from '../types/RateOracleSetupHelperFactory';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
@@ -197,9 +195,6 @@ export const deployPool = async () => {
 export const deployPriceOracle = async () =>
   withSave(await new PriceOracleFactory(await getFirstSigner()).deploy(), eContractid.PriceOracle);
 
-export const deployRateOracle = async () =>
-  withSave(await new RateOracleFactory(await getFirstSigner()).deploy(), eContractid.RateOracle);
-
 export const deployMockAggregator = async (price: tStringTokenSmallUnits) =>
   withSave(
     await new MockAggregatorFactory(await getFirstSigner()).deploy(price),
@@ -241,7 +236,7 @@ export const deployMintableDelegationERC20 = async (
   );
 
 export const deployDefaultReserveInterestRateStrategy = async (
-  args: [tEthereumAddress, string, string, string, string, string, string]
+  args: [tEthereumAddress, string, string, string, string, string, string, string, string]
 ) =>
   withSave(
     await new DefaultReserveInterestRateStrategyFactory(await getFirstSigner()).deploy(...args),
@@ -352,12 +347,6 @@ export const deployAllMockTokens = async () => {
 
   return tokens;
 };
-
-export const deployRateOracleSetupHelper = async () =>
-  withSave(
-    await new RateOracleSetupHelperFactory(await getFirstSigner()).deploy(),
-    eContractid.RateOracleSetupHelper
-  );
 
 export const deployReservesSetupHelper = async () =>
   withSave(

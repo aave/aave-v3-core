@@ -15,6 +15,7 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
+import 'hardhat/console.sol';
 
 /**
  * @title BorrowLogic library
@@ -163,6 +164,8 @@ library BorrowLogic {
     uint256 paybackAmount = interestRateMode == DataTypes.InterestRateMode.STABLE
       ? stableDebt
       : variableDebt;
+
+    console.log('Payback amount: ', paybackAmount);
 
     if (params.amount < paybackAmount) {
       paybackAmount = params.amount;

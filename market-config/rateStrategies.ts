@@ -10,6 +10,8 @@ export const rateStrategyStableOne: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('1', 27).toString(),
   stableRateSlope1: '0',
   stableRateSlope2: '0',
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 // DAI TUSD
@@ -21,6 +23,8 @@ export const rateStrategyStableTwo: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('0.75', 27).toString(),
   stableRateSlope1: utils.parseUnits('0.02', 27).toString(),
   stableRateSlope2: utils.parseUnits('0.75', 27).toString(),
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 // USDC USDT
@@ -32,6 +36,8 @@ export const rateStrategyStableThree: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('0.6', 27).toString(),
   stableRateSlope1: utils.parseUnits('0.02', 27).toString(),
   stableRateSlope2: utils.parseUnits('0.6', 27).toString(),
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 // WETH
@@ -43,6 +49,8 @@ export const rateStrategyWETH: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('1', 27).toString(),
   stableRateSlope1: utils.parseUnits('0.1', 27).toString(),
   stableRateSlope2: utils.parseUnits('1', 27).toString(),
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 // AAVE
@@ -54,6 +62,8 @@ export const rateStrategyAAVE: IInterestRateStrategyParams = {
   variableRateSlope2: '0',
   stableRateSlope1: '0',
   stableRateSlope2: '0',
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 // BAT ENJ LINK MANA MKR REN YFI ZRX
@@ -65,6 +75,8 @@ export const rateStrategyVolatileOne: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('3', 27).toString(),
   stableRateSlope1: utils.parseUnits('0.1', 27).toString(),
   stableRateSlope2: utils.parseUnits('0.3', 27).toString(),
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 // KNC WBTC
@@ -76,6 +88,8 @@ export const rateStrategyVolatileTwo: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('3', 27).toString(),
   stableRateSlope1: utils.parseUnits('0.1', 27).toString(),
   stableRateSlope2: utils.parseUnits('0.3', 27).toString(),
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 // SNX
@@ -87,6 +101,8 @@ export const rateStrategyVolatileThree: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('3', 27).toString(),
   stableRateSlope1: utils.parseUnits('0.1', 27).toString(),
   stableRateSlope2: utils.parseUnits('3', 27).toString(),
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
 
 export const rateStrategyVolatileFour: IInterestRateStrategyParams = {
@@ -97,4 +113,6 @@ export const rateStrategyVolatileFour: IInterestRateStrategyParams = {
   variableRateSlope2: utils.parseUnits('3', 27).toString(),
   stableRateSlope1: '0',
   stableRateSlope2: '0',
+  baseStableRateOffset: utils.parseUnits('0.02', 27).toString(),
+  stableRateExcessOffset: utils.parseUnits('0.05', 27).toString()
 };
