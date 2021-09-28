@@ -132,7 +132,7 @@ export const initReservesByHelper = async (
       stableRateSlope2,
       baseStableRateOffset,
       stableRateExcessOffset,
-      optimalStableToVariableDebtRatio,
+      optimalStableToTotalDebtRatio,
     } = strategy;
     if (!strategyAddresses[strategy.name]) {
       // Strategy does not exist, create a new one
@@ -146,7 +146,7 @@ export const initReservesByHelper = async (
         stableRateSlope2,
         baseStableRateOffset,
         stableRateExcessOffset,
-        optimalStableToVariableDebtRatio,
+        optimalStableToTotalDebtRatio,
       ];
       strategyAddresses[strategy.name] = (
         await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name])

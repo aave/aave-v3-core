@@ -443,9 +443,6 @@ export const repay = async (
     testEnv
   );
 
-  console.log("Repaying user ", user.address);
-  console.log("Repay amount ", amount);
-
   let amountToRepay = '0';
 
   if (amount !== '-1') {

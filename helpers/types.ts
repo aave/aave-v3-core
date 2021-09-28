@@ -325,7 +325,7 @@ export interface IInterestRateStrategyParams {
   stableRateSlope2: string;
   baseStableRateOffset: string;
   stableRateExcessOffset: string;
-  optimalStableToVariableDebtRatio: string;
+  optimalStableToTotalDebtRatio: string;
 }
 
 export interface IReserveBorrowParams {

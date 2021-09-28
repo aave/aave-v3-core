@@ -59,8 +59,6 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
     throw `An expected resut for action ${name} is required`;
   }
 
-  console.log(`Executing action ${name}, user ${userIndex}`);
-
   let rateMode: string = RateMode.None;
 
   if (borrowRateMode) {

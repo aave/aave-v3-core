@@ -47,7 +47,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       rateStrategyStableTwo.stableRateSlope2,
       rateStrategyStableTwo.baseStableRateOffset,
       rateStrategyStableTwo.stableRateExcessOffset,
-      rateStrategyStableTwo.optimalStableToVariableDebtRatio,
+      rateStrategyStableTwo.optimalStableToTotalDebtRatio,
     ]);
   });
 
@@ -201,7 +201,12 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentStableBorrowRate).to.be.equal(
       baseStableRate
         .add(rateStrategyStableTwo.stableRateSlope1)
-        .add(rateStrategyStableTwo.stableRateSlope2),
+        .add(rateStrategyStableTwo.stableRateSlope2)
+        .add(
+          BigNumber.from(rateStrategyStableTwo.stableRateExcessOffset).rayMul(
+            BigNumber.from(utils.parseUnits('0.375', 27))
+          )
+        ),
       'Invalid stable rate'
     );
   });
