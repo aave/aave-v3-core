@@ -122,6 +122,17 @@ contract AaveProtocolDataProvider {
   }
 
   /**
+   * Returns the state of the PriceOracleSentinel of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return True if the PriceOracleSentinel is active for the reserve, false otherwise
+   */
+  function getReservePriceOracleSentinelState(address asset) external view returns (bool) {
+    DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
+      .getConfiguration(asset);
+    return configuration.getPriceOracleSentinelActive();
+  }
+
+  /**
    * Returns the efficiency mode category of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return The eMode id of the reserve

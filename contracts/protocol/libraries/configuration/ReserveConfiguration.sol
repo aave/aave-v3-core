@@ -19,6 +19,7 @@ library ReserveConfiguration {
   uint256 constant BORROWING_MASK =                 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant STABLE_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant PRICE_ORACLE_SENTINEL_MASK =     0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -35,7 +36,8 @@ library ReserveConfiguration {
   uint256 constant BORROWING_ENABLED_START_BIT_POSITION = 58;
   uint256 constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
   uint256 constant IS_PAUSED_START_BIT_POSITION = 60;
-  /// @dev bits 61 62 63 unused yet
+  uint256 constant PRICE_ORACLE_SENTINEL_ACTIVE_START_BIT_POSITION = 62;
+  /// @dev bits 61 63 unused yet
   uint256 constant RESERVE_FACTOR_START_BIT_POSITION = 64;
   uint256 constant BORROW_CAP_START_BIT_POSITION = 80;
   uint256 constant SUPPLY_CAP_START_BIT_POSITION = 116;
@@ -217,6 +219,33 @@ library ReserveConfiguration {
    **/
   function getPaused(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
     return (self.data & ~PAUSED_MASK) != 0;
+  }
+
+  /**
+   * @notice Sets the state of the price oracle sentinel for the reserve
+   * @param self The reserve configuration
+   * @param state True if the price oracle sentinel is active, false otherwise
+   **/
+  function setPriceOracleSentinelActive(DataTypes.ReserveConfigurationMap memory self, bool state)
+    internal
+    pure
+  {
+    self.data =
+      (self.data & PRICE_ORACLE_SENTINEL_MASK) |
+      (uint256(state ? 1 : 0) << PRICE_ORACLE_SENTINEL_ACTIVE_START_BIT_POSITION);
+  }
+
+  /**
+   * @notice Gets the state of the price oracle sentinel for the reserve
+   * @param self The reserve configuration
+   * @return True if the price oracle sentinel is active, false otherwise
+   **/
+  function getPriceOracleSentinelActive(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (bool)
+  {
+    return (self.data & ~PRICE_ORACLE_SENTINEL_MASK) != 0;
   }
 
   /**

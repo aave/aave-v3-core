@@ -245,6 +245,26 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setPriceOracleSentinelActive(bool state) public override onlyRiskOrPoolAdmins {
+    address[] memory reservesList = _pool.getReservesList();
+
+    for (uint8 i = 0; i < reservesList.length; i++) {
+      address asset = reservesList[i];
+
+      DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+      currentConfig.setPriceOracleSentinelActive(state);
+
+      _pool.setConfiguration(asset, currentConfig.data);
+
+      if (state) {
+        emit PriceOracleSentinelActivated(asset);
+      } else {
+        emit PriceOracleSentinelDeactivated(asset);
+      }
+    }
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setReserveFactor(address asset, uint256 reserveFactor)
     external
     override
