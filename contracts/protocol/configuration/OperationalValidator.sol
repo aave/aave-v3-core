@@ -8,12 +8,15 @@ import {ISequencerOracle} from '../../interfaces/ISequencerOracle.sol';
 /**
  * @title OperationalValidator
  * @author Aave
- * @notice
+ * @notice It validates if operations are allowed depending on the Sequencer Health.
+ * @dev After a Sequencer downtime, users can make their positions healthier during the grace period.
  */
 contract OperationalValidator is IOperationalValidator {
   IPoolAddressesProvider public _addressesProvider;
   ISequencerOracle public _sequencerOracle;
   uint256 public _gracePeriod;
+
+  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 ether;
 
   /**
    * @notice Constructor
@@ -32,18 +35,15 @@ contract OperationalValidator is IOperationalValidator {
 
   /// @inheritdoc IOperationalValidator
   function isBorrowAllowed() public view override returns (bool) {
-    // If the sequencer goes down, borrowing is not allowed
     return _isUpAndGracePeriodPassed();
   }
 
   /// @inheritdoc IOperationalValidator
   function isLiquidationAllowed(uint256 healthFactor) public view override returns (bool) {
-    if (healthFactor < 0.95 ether) {
+    if (healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD) {
       return true;
     }
     return _isUpAndGracePeriodPassed();
-    // If the sequencer goes down AND HF > 0.9, liquidation is not allowed
-    // If timestampSequencerGotUp - block.timestamp > gracePeriod, liquidation allowed
   }
 
   function _isUpAndGracePeriodPassed() internal view returns (bool) {

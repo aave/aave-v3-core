@@ -23,6 +23,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       addressesProvider.setPoolConfiguratorImpl,
       addressesProvider.setPriceOracle,
       addressesProvider.setRateOracle,
+      addressesProvider.setACLAdmin,
+      addressesProvider.setOperationalValidator,
     ]) {
       await expect(contractFunction(mockAddress)).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
     }

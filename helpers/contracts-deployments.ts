@@ -37,8 +37,6 @@ import {
   MockReserveConfigurationFactory,
   MockPoolFactory,
   MockReentrantInitializableImpleFactory,
-  EModeLogicFactory,
-  OperationalValidatorFactory,
 } from '../types';
 import {
   withSave,
@@ -51,7 +49,6 @@ import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
 import AaveConfig from '../market-config';
-import { BigNumber } from 'ethers';
 
 const readArtifact = async (id: string) => {
   return (DRE as HardhatRuntimeEnvironment).artifacts.readArtifact(id);
