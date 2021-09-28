@@ -6,8 +6,8 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
   OperationalValidator,
   OperationalValidatorFactory,
-  SequencerOracle,
-  SequencerOracleFactory,
+  PriceOracleSentinel,
+  PriceOracleSentinelFactory,
 } from '../types';
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
@@ -17,9 +17,9 @@ import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
 
 makeSuite('OperationalValidator', (testEnv: TestEnv) => {
-  const { VL_SEQUENCER_IS_DOWN, INVALID_HF } = ProtocolErrors;
+  const { VL_PRICE_ORACLE_SENTINEL_FAILED, INVALID_HF } = ProtocolErrors;
 
-  let sequencerOracle: SequencerOracle;
+  let priceOracleSentinel: PriceOracleSentinel;
   let operationalValidator: OperationalValidator;
 
   const GRACE_PERIOD = BigNumber.from(60 * 60);
@@ -27,20 +27,22 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
   before(async () => {
     const { addressesProvider, deployer } = testEnv;
 
-    // Deploy SequencerOracle
-    sequencerOracle = await (await new SequencerOracleFactory(deployer.signer).deploy()).deployed();
+    // Deploy PriceOracleSentinel
+    priceOracleSentinel = await (
+      await new PriceOracleSentinelFactory(deployer.signer).deploy()
+    ).deployed();
 
     operationalValidator = await (
       await new OperationalValidatorFactory(await getFirstSigner()).deploy(
         addressesProvider.address,
-        sequencerOracle.address,
+        priceOracleSentinel.address,
         GRACE_PERIOD
       )
     ).deployed();
   });
 
-  it('Admin sets a OperationalValidator', async () => {
-    const { addressesProvider, poolAdmin } = testEnv;
+  it('Admin sets a OperationalValidator and activate it for DAI and WETH', async () => {
+    const { addressesProvider, configurator, helpersContract, poolAdmin, dai, weth } = testEnv;
 
     expect(
       await addressesProvider
@@ -54,9 +56,18 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
       operationalValidator.address
     );
 
-    const answer = await sequencerOracle.latestAnswer();
+    const answer = await priceOracleSentinel.latestAnswer();
     expect(answer[0]).to.be.eq(false);
     expect(answer[1]).to.be.eq(0);
+
+    expect(
+      await configurator.connect(poolAdmin.signer).setOperationalValidatorActive(dai.address, true)
+    );
+    expect(
+      await configurator.connect(poolAdmin.signer).setOperationalValidatorActive(weth.address, true)
+    );
+    expect(await helpersContract.getReserveOperationValidatorState(dai.address)).to.be.true;
+    expect(await helpersContract.getReserveOperationValidatorState(weth.address)).to.be.true;
   });
 
   it('Borrow DAI', async () => {
@@ -111,7 +122,7 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
     }
   });
 
-  it('Kill sequencer and drop health factor below 1', async () => {
+  it('Kill PriceOracleSentinel and drop health factor below 1', async () => {
     const {
       dai,
       users: [, borrower],
@@ -124,11 +135,11 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
     expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
-    const currAnswer = await sequencerOracle.latestAnswer();
-    waitForTx(await sequencerOracle.setAnswer(true, currAnswer[1]));
+    const currAnswer = await priceOracleSentinel.latestAnswer();
+    waitForTx(await priceOracleSentinel.setAnswer(true, currAnswer[1]));
   });
 
-  it('Tries to liquidate borrower when sequencer is down (HF > 0.95) (revert expected)', async () => {
+  it('Tries to liquidate borrower when PriceOracleSentinel is down (HF > 0.95) (revert expected)', async () => {
     const {
       pool,
       dai,
@@ -150,7 +161,7 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
     const amountToLiquidate = userReserveDataBefore.currentVariableDebt.div(2);
     await expect(
       pool.liquidationCall(weth.address, dai.address, borrower.address, amountToLiquidate, true)
-    ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
   });
 
   it('Drop health factor lower', async () => {
@@ -168,7 +179,7 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
     expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
   });
 
-  it('Liquidates borrower when sequencer is down (HF < 0.95)', async () => {
+  it('Liquidates borrower when PriceOracleSentinel is down (HF < 0.95)', async () => {
     const {
       pool,
       dai,
@@ -218,8 +229,6 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
       weth.address,
       borrower.address
     );
-
-    const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
     const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
     const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
@@ -316,11 +325,11 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
   });
 
-  it('Turn on sequencer', async () => {
-    await waitForTx(await sequencerOracle.setAnswer(false, await timeLatest()));
+  it('Turn on PriceOracleSentinel', async () => {
+    await waitForTx(await priceOracleSentinel.setAnswer(false, await timeLatest()));
   });
 
   it('User tries to borrow (revert expected)', async () => {
@@ -341,12 +350,12 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
   });
 
-  it('Turn off sequencer + increase time more than grace period', async () => {
-    const currAnswer = await sequencerOracle.latestAnswer();
-    await waitForTx(await sequencerOracle.setAnswer(true, currAnswer[1]));
+  it('Turn off PriceOracleSentinel + increase time more than grace period', async () => {
+    const currAnswer = await priceOracleSentinel.latestAnswer();
+    await waitForTx(await priceOracleSentinel.setAnswer(true, currAnswer[1]));
     await increaseTime(GRACE_PERIOD.mul(2).toNumber());
   });
 
@@ -368,11 +377,11 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
   });
 
-  it('Turn on sequencer + increase time past grace period', async () => {
-    await waitForTx(await sequencerOracle.setAnswer(false, await timeLatest()));
+  it('Turn on PriceOracleSentinel + increase time past grace period', async () => {
+    await waitForTx(await priceOracleSentinel.setAnswer(false, await timeLatest()));
     await increaseTime(GRACE_PERIOD.mul(2).toNumber());
   });
 
@@ -412,7 +421,7 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
     expect(userGlobalData.healthFactor).to.be.gt(utils.parseUnits('0.95', 18), INVALID_HF);
   });
 
-  it('Liquidates borrower when sequencer is up again', async () => {
+  it('Liquidates borrower when PriceOracleSentinel is up again', async () => {
     const {
       pool,
       dai,

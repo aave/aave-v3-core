@@ -107,6 +107,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
       { fn: 'freezeReserve', args: [randomAddress] },
       { fn: 'unfreezeReserve', args: [randomAddress] },
       { fn: 'setReserveFactor', args: [randomAddress, randomNumber] },
+      { fn: 'setOperationalValidatorActive', args: [randomAddress, true]},
       { fn: 'setBorrowCap', args: [randomAddress, randomNumber] },
       { fn: 'setSupplyCap', args: [randomAddress, randomNumber] },
       { fn: 'setReserveInterestRateStrategyAddress', args: [randomAddress, randomAddress] },
