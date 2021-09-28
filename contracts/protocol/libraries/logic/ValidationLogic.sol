@@ -37,6 +37,7 @@ library ValidationLogic {
 
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
+  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
 
   /**
    * @notice Validates a supply action
@@ -142,9 +143,9 @@ library ValidationLogic {
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
     require(
-      !params.reserveCache.reserveConfiguration.getPriceOracleSentinelActive() ||
+      params.priceOracleSentinel == address(0) ||
         IPriceOracleSentinel(params.priceOracleSentinel).isBorrowAllowed(),
-      Errors.VL_PRICE_ORACLE_SENTINEL_FAILED
+      Errors.VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
 
     //validate interest rate mode
@@ -498,9 +499,10 @@ library ValidationLogic {
     );
 
     require(
-      !params.debtReserveCache.reserveConfiguration.getPriceOracleSentinelActive() ||
-        IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(vars.healthFactor),
-      Errors.VL_PRICE_ORACLE_SENTINEL_FAILED
+      params.priceOracleSentinel == address(0) ||
+        vars.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
+        IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(),
+      Errors.VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
 
     require(
