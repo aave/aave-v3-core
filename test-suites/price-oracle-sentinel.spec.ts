@@ -4,8 +4,8 @@ import { DRE, increaseTime, timeLatest, waitForTx } from '../helpers/misc-utils'
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
-  OperationalValidator,
-  OperationalValidatorFactory,
+  PriceOracleSentinel,
+  PriceOracleSentinelFactory,
   SequencerOracle,
   SequencerOracleFactory,
 } from '../types';
@@ -16,11 +16,11 @@ import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculatio
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
 
-makeSuite('OperationalValidator', (testEnv: TestEnv) => {
+makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   const { VL_PRICE_ORACLE_SENTINEL_FAILED, INVALID_HF } = ProtocolErrors;
 
   let sequencerOracle: SequencerOracle;
-  let operationalValidator: OperationalValidator;
+  let priceOracleSentinel: PriceOracleSentinel;
 
   const GRACE_PERIOD = BigNumber.from(60 * 60);
 
@@ -32,8 +32,8 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
       await new SequencerOracleFactory(deployer.signer).deploy()
     ).deployed();
 
-    operationalValidator = await (
-      await new OperationalValidatorFactory(await getFirstSigner()).deploy(
+    priceOracleSentinel = await (
+      await new PriceOracleSentinelFactory(await getFirstSigner()).deploy(
         addressesProvider.address,
         sequencerOracle.address,
         GRACE_PERIOD
@@ -41,19 +41,19 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
     ).deployed();
   });
 
-  it('Admin sets a OperationalValidator and activate it for DAI and WETH', async () => {
+  it('Admin sets a PriceOracleSentinel and activate it for DAI and WETH', async () => {
     const { addressesProvider, configurator, helpersContract, poolAdmin, dai, weth } = testEnv;
 
     expect(
       await addressesProvider
         .connect(poolAdmin.signer)
-        .setOperationalValidator(operationalValidator.address)
+        .setPriceOracleSentinel(priceOracleSentinel.address)
     )
-      .to.emit(addressesProvider, 'OperationalValidatorUpdated')
-      .withArgs(operationalValidator.address);
+      .to.emit(addressesProvider, 'PriceOracleSentinelUpdated')
+      .withArgs(priceOracleSentinel.address);
 
-    expect(await addressesProvider.getOperationalValidator()).to.be.eq(
-      operationalValidator.address
+    expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(
+      priceOracleSentinel.address
     );
 
     const answer = await sequencerOracle.latestAnswer();
@@ -61,13 +61,13 @@ makeSuite('OperationalValidator', (testEnv: TestEnv) => {
     expect(answer[1]).to.be.eq(0);
 
     expect(
-      await configurator.connect(poolAdmin.signer).setOperationalValidatorActive(dai.address, true)
+      await configurator.connect(poolAdmin.signer).setPriceOracleSentinelActive(dai.address, true)
     );
     expect(
-      await configurator.connect(poolAdmin.signer).setOperationalValidatorActive(weth.address, true)
+      await configurator.connect(poolAdmin.signer).setPriceOracleSentinelActive(weth.address, true)
     );
-    expect(await helpersContract.getReserveOperationValidatorState(dai.address)).to.be.true;
-    expect(await helpersContract.getReserveOperationValidatorState(weth.address)).to.be.true;
+    expect(await helpersContract.getReservePriceOracleSentinelState(dai.address)).to.be.true;
+    expect(await helpersContract.getReservePriceOracleSentinelState(weth.address)).to.be.true;
   });
 
   it('Borrow DAI', async () => {
