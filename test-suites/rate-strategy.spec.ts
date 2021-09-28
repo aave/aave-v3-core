@@ -27,6 +27,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   let strategyInstance: DefaultReserveInterestRateStrategy;
   let dai: MintableERC20;
   let aDai: AToken;
+  const baseStableRate = BigNumber.from(rateStrategyStableTwo.variableRateSlope1).add(
+    rateStrategyStableTwo.baseStableRateOffset
+  );
 
   before(async () => {
     dai = testEnv.dai;
@@ -42,6 +45,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       rateStrategyStableTwo.variableRateSlope2,
       rateStrategyStableTwo.stableRateSlope1,
       rateStrategyStableTwo.stableRateSlope2,
+      rateStrategyStableTwo.baseStableRateOffset,
+      rateStrategyStableTwo.stableRateExcessOffset,
+      rateStrategyStableTwo.optimalStableToTotalDebtRatio,
     ]);
   });
 
@@ -65,10 +71,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     } = await strategyInstance.calculateInterestRates(params);
 
     expect(currentLiquidityRate).to.be.equal(0, 'Invalid liquidity rate');
-    expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27),
-      'Invalid stable rate'
-    );
+    expect(currentStableBorrowRate).to.be.equal(baseStableRate, 'Invalid stable rate');
     expect(currentVariableBorrowRate).to.be.equal(
       rateStrategyStableTwo.baseVariableBorrowRate,
       'Invalid variable rate'
@@ -108,7 +111,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27).add(rateStrategyStableTwo.stableRateSlope1),
+      baseStableRate.add(rateStrategyStableTwo.stableRateSlope1),
       'Invalid stable rate'
     );
 
@@ -120,9 +123,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   });
 
   it('Checks rates at 100% utilization rate', async () => {
-    
-    let params : CalculateInterestRatesParams = 
-    {
+    let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: '0',
       liquidityTaken: 0,
@@ -131,9 +132,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       averageStableBorrowRate: 0,
       reserveFactor: strategyDAI.reserveFactor,
       reserve: dai.address,
-      aToken: aDai.address, 
-    }
-    
+      aToken: aDai.address,
+    };
+
     const {
       0: currentLiquidityRate,
       1: currentStableBorrowRate,
@@ -154,8 +155,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils
-        .parseUnits('0.039', 27)
+      baseStableRate
         .add(rateStrategyStableTwo.stableRateSlope1)
         .add(rateStrategyStableTwo.stableRateSlope2),
       'Invalid stable rate'
@@ -169,20 +169,18 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   });
 
   it('Checks rates at 100% utilization rate, 50% stable debt and 50% variable debt, with a 10% avg stable rate', async () => {
-    
-    let params : CalculateInterestRatesParams = 
-    {
+    let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: '0',
       liquidityTaken: 0,
       totalStableDebt: '400000000000000000',
       totalVariableDebt: '400000000000000000',
-      averageStableBorrowRate:  '100000000000000000000000000',
+      averageStableBorrowRate: '100000000000000000000000000',
       reserveFactor: strategyDAI.reserveFactor,
       reserve: dai.address,
-      aToken: aDai.address, 
-    }
-    
+      aToken: aDai.address,
+    };
+
     const {
       0: currentLiquidityRate,
       1: currentStableBorrowRate,
@@ -201,29 +199,31 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
     expect(currentLiquidityRate).to.be.equal(expectedLiquidityRate, 'Invalid liquidity rate');
     expect(currentStableBorrowRate).to.be.equal(
-      utils
-        .parseUnits('0.039', 27)
+      baseStableRate
         .add(rateStrategyStableTwo.stableRateSlope1)
-        .add(rateStrategyStableTwo.stableRateSlope2),
+        .add(rateStrategyStableTwo.stableRateSlope2)
+        .add(
+          BigNumber.from(rateStrategyStableTwo.stableRateExcessOffset).rayMul(
+            BigNumber.from(utils.parseUnits('0.375', 27))
+          )
+        ),
       'Invalid stable rate'
     );
   });
 
   it('Checks rates at 80% borrow utilization rate and 50% supply utilization due to minted tokens', async () => {
-    
-    let params : CalculateInterestRatesParams = 
-    {
+    let params: CalculateInterestRatesParams = {
       unbacked: '600000000000000000',
       liquidityAdded: '200000000000000000',
       liquidityTaken: 0,
       totalStableDebt: '0',
       totalVariableDebt: '800000000000000000',
-      averageStableBorrowRate:  '0',
+      averageStableBorrowRate: '0',
       reserveFactor: strategyDAI.reserveFactor,
       reserve: dai.address,
-      aToken: aDai.address, 
-    }
-    
+      aToken: aDai.address,
+    };
+
     const {
       0: currentLiquidityRate,
       1: currentStableBorrowRate,
@@ -244,7 +244,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27).add(rateStrategyStableTwo.stableRateSlope1),
+      baseStableRate.add(rateStrategyStableTwo.stableRateSlope1),
       'Invalid stable rate'
     );
   });
@@ -253,18 +253,17 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     const availableLiquidity = BigNumber.from('200000000000000000');
     const totalVariableDebt = BigNumber.from('800000000000000000');
 
-    let params : CalculateInterestRatesParams = 
-    {
+    let params: CalculateInterestRatesParams = {
       unbacked: totalVariableDebt.mul('124').sub(availableLiquidity),
       liquidityAdded: availableLiquidity,
       liquidityTaken: 0,
       totalStableDebt: '0',
       totalVariableDebt: totalVariableDebt,
-      averageStableBorrowRate:  '0',
+      averageStableBorrowRate: '0',
       reserveFactor: strategyDAI.reserveFactor,
       reserve: dai.address,
-      aToken: aDai.address, 
-    }
+      aToken: aDai.address,
+    };
 
     const {
       0: currentLiquidityRate,
@@ -285,7 +284,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27).add(rateStrategyStableTwo.stableRateSlope1),
+      baseStableRate.add(rateStrategyStableTwo.stableRateSlope1),
       'Invalid stable rate'
     );
 
@@ -297,19 +296,17 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   });
 
   it('Checks rates at 0.8% utilization', async () => {
-    
-    let params : CalculateInterestRatesParams = 
-    {
+    let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: '9920000000000000000000',
       liquidityTaken: 0,
       totalStableDebt: '0',
       totalVariableDebt: '80000000000000000000',
-      averageStableBorrowRate:  '0',
+      averageStableBorrowRate: '0',
       reserveFactor: strategyDAI.reserveFactor,
       reserve: dai.address,
-      aToken: aDai.address, 
-    }
+      aToken: aDai.address,
+    };
 
     const {
       0: currentLiquidityRate,
@@ -334,13 +331,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils
-        .parseUnits('0.039', 27)
-        .add(
-          BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(
-            utilRate.rayDiv(optimalRate)
-          )
-        ),
+      baseStableRate.add(
+        BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(utilRate.rayDiv(optimalRate))
+      ),
       'Invalid stable rate'
     );
 

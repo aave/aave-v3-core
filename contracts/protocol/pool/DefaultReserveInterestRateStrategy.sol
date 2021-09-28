@@ -6,7 +6,6 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {IRateOracle} from '../../interfaces/IRateOracle.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 
@@ -28,6 +27,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * Expressed in ray
    **/
   uint256 public immutable OPTIMAL_UTILIZATION_RATE;
+
+  uint256 public immutable OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO;
 
   /**
    * @dev This constant represents the excess utilization rate above the optimal. It's always equal to
@@ -54,6 +55,10 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   // Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _stableRateSlope2;
 
+  uint256 internal immutable _baseStableRateOffset;
+
+  uint256 internal immutable _stableRateExcessOffset;
+
   constructor(
     IPoolAddressesProvider provider,
     uint256 optimalUtilizationRate,
@@ -61,16 +66,22 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 variableRateSlope1,
     uint256 variableRateSlope2,
     uint256 stableRateSlope1,
-    uint256 stableRateSlope2
+    uint256 stableRateSlope2,
+    uint256 baseStableRateOffset,
+    uint256 stableRateExcessOffset,
+    uint256 optimalStableToTotalDebtRatio
   ) {
     OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
     EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
+    OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = optimalStableToTotalDebtRatio;
     addressesProvider = provider;
     _baseVariableBorrowRate = baseVariableBorrowRate;
     _variableRateSlope1 = variableRateSlope1;
     _variableRateSlope2 = variableRateSlope2;
     _stableRateSlope1 = stableRateSlope1;
     _stableRateSlope2 = stableRateSlope2;
+    _baseStableRateOffset = baseStableRateOffset;
+    _stableRateExcessOffset = stableRateExcessOffset;
   }
 
   function getVariableRateSlope1() external view returns (uint256) {
@@ -87,6 +98,10 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   function getStableRateSlope2() external view returns (uint256) {
     return _stableRateSlope2;
+  }
+
+  function getBaseStableBorrowRate() public view returns (uint256) {
+    return _variableRateSlope1 + _baseStableRateOffset;
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
@@ -107,6 +122,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 currentLiquidityRate;
     uint256 borrowUtilizationRate;
     uint256 supplyUtilizationRate;
+    uint256 stableToTotalDebtRatio;
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
@@ -128,6 +144,11 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       params.liquidityTaken;
 
     vars.totalDebt = params.totalStableDebt + params.totalVariableDebt;
+
+    vars.stableToTotalDebtRatio = vars.totalDebt > 0
+      ? params.totalStableDebt.rayDiv(vars.totalDebt)
+      : 0;
+
     vars.currentVariableBorrowRate = 0;
     vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
@@ -140,8 +161,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       ? 0
       : vars.totalDebt.rayDiv(vars.availableLiquidity + params.unbacked + vars.totalDebt);
 
-    vars.currentStableBorrowRate = IRateOracle(addressesProvider.getRateOracle())
-      .getMarketBorrowRate(params.reserve);
+    vars.currentStableBorrowRate = getBaseStableBorrowRate();
 
     if (vars.borrowUtilizationRate > OPTIMAL_UTILIZATION_RATE) {
       uint256 excessUtilizationRateRatio = (vars.borrowUtilizationRate - OPTIMAL_UTILIZATION_RATE)
@@ -164,6 +184,12 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       vars.currentVariableBorrowRate =
         _baseVariableBorrowRate +
         _variableRateSlope1.rayMul(vars.borrowUtilizationRate).rayDiv(OPTIMAL_UTILIZATION_RATE);
+    }
+
+    if (vars.stableToTotalDebtRatio > OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO) {
+      uint256 excessRatio = (vars.stableToTotalDebtRatio - OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO)
+        .rayDiv(WadRayMath.RAY - OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO);
+      vars.currentStableBorrowRate += _stableRateExcessOffset.rayMul(excessRatio);
     }
 
     vars.currentLiquidityRate = _getOverallBorrowRate(

@@ -37,7 +37,6 @@ export enum eContractid {
   PriceOracle = 'PriceOracle',
   Proxy = 'Proxy',
   MockAggregator = 'MockAggregator',
-  RateOracle = 'RateOracle',
   AaveOracle = 'AaveOracle',
   DefaultReserveInterestRateStrategy = 'DefaultReserveInterestRateStrategy',
   InitializableImmutableAdminUpgradeabilityProxy = 'InitializableImmutableAdminUpgradeabilityProxy',
@@ -53,7 +52,6 @@ export enum eContractid {
   VariableDebtToken = 'VariableDebtToken',
   FeeProvider = 'FeeProvider',
   TokenDistributor = 'TokenDistributor',
-  RateOracleSetupHelper = 'RateOracleSetupHelper',
   ReservesSetupHelper = 'ReservesSetupHelper',
   WETH = 'WETH',
   WETHMocked = 'WETHMocked',
@@ -171,7 +169,6 @@ export enum ProtocolErrors {
   P_CALLER_NOT_BRIDGE = '102',
   RC_INVALID_UNBACKED_MINT_CAP = '103',
   VL_UNBACKED_MINT_CAP_EXCEEDED = '104',
-
 
   // old
 
@@ -326,6 +323,9 @@ export interface IInterestRateStrategyParams {
   variableRateSlope2: string;
   stableRateSlope1: string;
   stableRateSlope2: string;
+  baseStableRateOffset: string;
+  stableRateExcessOffset: string;
+  optimalStableToTotalDebtRatio: string;
 }
 
 export interface IReserveBorrowParams {
@@ -382,10 +382,6 @@ export interface IMocksConfig {
   AllAssetsInitialPrices: iAssetBase<string>;
 }
 
-export interface IRateOracleRatesCommon {
-  [token: string]: IRate;
-}
-
 export interface IRate {
   borrowRate: string;
 }
@@ -403,8 +399,6 @@ export interface ICommonConfiguration {
   ProviderRegistryOwner: tEthereumAddress | undefined;
   PoolConfigurator: tEthereumAddress | undefined;
   Pool: tEthereumAddress | undefined;
-  RateOracleRatesCommon: iMultiPoolsAssets<IMarketRates>;
-  RateOracle: tEthereumAddress | undefined;
   TokenDistributor: tEthereumAddress | undefined;
   AaveOracle: tEthereumAddress | undefined;
   FallbackOracle: tEthereumAddress | undefined;
