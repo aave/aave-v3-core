@@ -20,8 +20,9 @@ contract OperationalValidator is IOperationalValidator {
 
   /**
    * @notice Constructor
-   * @dev
    * @param provider The address of the PoolAddressesProvider
+   * @param sequencerOracle The address of the Sequencer Health oracle
+   * @param gracePeriod The duration of the grace period in seconds
    */
   constructor(
     IPoolAddressesProvider provider,
