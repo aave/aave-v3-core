@@ -26,11 +26,15 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     expect(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
 
+    expect(await aDai.getPreviousIndex(users[0].address)).to.be.eq(0);
+
     expect(
       await pool
         .connect(users[0].signer)
         .deposit(dai.address, amountDAItoDeposit, users[0].address, '0')
     );
+
+    expect(await aDai.getPreviousIndex(users[0].address)).to.be.gt(0);
 
     expect(await aDai.connect(users[0].signer).transfer(users[0].address, amountDAItoDeposit))
       .to.emit(aDai, 'Transfer')

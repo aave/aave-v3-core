@@ -110,4 +110,8 @@ library Errors {
   string public constant VL_INCONSISTENT_EMODE_CATEGORY = '99';
   string public constant HLP_UINT128_OVERFLOW = '100';
   string public constant PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101';
+  string public constant P_CALLER_NOT_BRIDGE = '102';
+  string public constant RC_INVALID_UNBACKED_MINT_CAP = '103';
+  string public constant VL_UNBACKED_MINT_CAP_EXCEEDED = '104';
+  string public constant VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED = '105';
 }

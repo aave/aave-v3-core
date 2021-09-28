@@ -136,7 +136,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
 
     const userReserveDataBefore = await getUserData(
       pool,
@@ -175,8 +175,8 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const daiReserveDataAfter = await helpersContract.getReserveData(dai.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(dai.address);
@@ -229,6 +229,18 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid principal available liquidity'
     );
 
+    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
+      ethReserveDataBefore.availableLiquidity,
+      2,
+      'Invalid collateral available liquidity'
+    );
+
+    expect(daiReserveDataAfter.totalLiquidity).to.be.closeTo(
+      daiReserveDataBefore.totalLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal total liquidity'
+    );
+
     //the liquidity index of the principal reserve needs to be bigger than the index before
     expect(daiReserveDataAfter.liquidityIndex).to.be.gte(
       daiReserveDataBefore.liquidityIndex,
@@ -241,10 +253,11 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid liquidity APY'
     );
 
-    expect(ethReserveDataAfter.availableLiquidity).to.be.closeTo(
-      ethReserveDataBefore.availableLiquidity,
+    // We need the scaled balances here
+    expect(ethReserveDataAfter.totalLiquidity).to.be.closeTo(
+      ethReserveDataBefore.totalLiquidity,
       2,
-      'Invalid collateral available liquidity'
+      'Invalid collateral total liquidity'
     );
 
     expect(
@@ -321,8 +334,8 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       borrower.address
     );
 
-    const usdcReserveDataBefore = await helpersContract.getReserveData(usdc.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
     const userWethReserveDataBefore = await getUserData(
       pool,
       helpersContract,
@@ -352,8 +365,8 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const usdcReserveDataAfter = await helpersContract.getReserveData(usdc.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(usdc.address);
@@ -390,6 +403,12 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       'Invalid principal available liquidity'
     );
 
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal total liquidity'
+    );
+
     //the liquidity index of the principal reserve needs to be bigger than the index before
     expect(usdcReserveDataAfter.liquidityIndex).to.be.gte(
       usdcReserveDataBefore.liquidityIndex,
@@ -406,6 +425,12 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       ethReserveDataBefore.availableLiquidity,
       2,
       'Invalid collateral available liquidity'
+    );
+
+    expect(ethReserveDataAfter.totalLiquidity).to.be.closeTo(
+      ethReserveDataBefore.totalLiquidity,
+      2,
+      'Invalid collateral total liquidity'
     );
   });
 });

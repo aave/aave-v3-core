@@ -202,7 +202,7 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
 
     case 'repay':
       {
-        const { amount, timeTravel, borrowRateMode, sendValue } = action.args;
+        const { amount, timeTravel, sendValue } = action.args;
         let { onBehalfOf: onBehalfOfIndex } = action.args;
 
         if (!amount || amount === '') {

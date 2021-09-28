@@ -6,13 +6,11 @@ import {
   PoolAddressesProviderRegistryFactory,
   PoolConfiguratorFactory,
   PoolFactory,
-  RateOracleFactory,
   MintableERC20Factory,
   MockFlashLoanReceiverFactory,
   MockStableDebtTokenFactory,
   MockVariableDebtTokenFactory,
   PriceOracleFactory,
-  RateOracleSetupHelperFactory,
   StableDebtTokenFactory,
   VariableDebtTokenFactory,
   WETH9MockedFactory,
@@ -23,8 +21,11 @@ import {
   SupplyLogicFactory,
   BorrowLogicFactory,
   LiquidationLogicFactory,
+  BridgeLogicFactory,
   ACLManagerFactory,
   EModeLogicFactory,
+  DefaultReserveInterestRateStrategy,
+  DefaultReserveInterestRateStrategyFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -62,19 +63,34 @@ export const getPoolConfiguratorProxy = async (address?: tEthereumAddress) => {
 
 export const getSupplyLogic = async (address?: tEthereumAddress) =>
   await SupplyLogicFactory.connect(
-    address || (await getDb().get(`${eContractid.SupplyLogic}.${DRE.network.name}`).value()).address,
+    address ||
+      (
+        await getDb().get(`${eContractid.SupplyLogic}.${DRE.network.name}`).value()
+      ).address,
+    await getFirstSigner()
+  );
+
+export const getBridgeLogic = async (address?: tEthereumAddress) =>
+  await BridgeLogicFactory.connect(
+    address || (await getDb().get(`${eContractid.Pool}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
 export const getBorrowLogic = async (address?: tEthereumAddress) =>
   await BorrowLogicFactory.connect(
-    address || (await getDb().get(`${eContractid.BorrowLogic}.${DRE.network.name}`).value()).address,
+    address ||
+      (
+        await getDb().get(`${eContractid.BorrowLogic}.${DRE.network.name}`).value()
+      ).address,
     await getFirstSigner()
   );
 
 export const getLiquidationLogic = async (address?: tEthereumAddress) =>
   await LiquidationLogicFactory.connect(
-    address || (await getDb().get(`${eContractid.LiquidationLogic}.${DRE.network.name}`).value()).address,
+    address ||
+      (
+        await getDb().get(`${eContractid.LiquidationLogic}.${DRE.network.name}`).value()
+      ).address,
     await getFirstSigner()
   );
 
@@ -123,6 +139,17 @@ export const getVariableDebtToken = async (address?: tEthereumAddress) =>
     await getFirstSigner()
   );
 
+export const getIRStrategy = async (address?: tEthereumAddress) =>
+  await DefaultReserveInterestRateStrategyFactory.connect(
+    address ||
+      (
+        await getDb()
+          .get(`${eContractid.DefaultReserveInterestRateStrategy}.${DRE.network.name}`)
+          .value()
+      ).address,
+    await getFirstSigner()
+  );
+
 export const getMintableERC20 = async (address: tEthereumAddress) =>
   await MintableERC20Factory.connect(
     address ||
@@ -162,12 +189,6 @@ export const getMockFlashLoanReceiver = async (address?: tEthereumAddress) =>
       (
         await getDb().get(`${eContractid.MockFlashLoanReceiver}.${DRE.network.name}`).value()
       ).address,
-    await getFirstSigner()
-  );
-
-export const getRateOracle = async (address?: tEthereumAddress) =>
-  await RateOracleFactory.connect(
-    address || (await getDb().get(`${eContractid.RateOracle}.${DRE.network.name}`).value()).address,
     await getFirstSigner()
   );
 
@@ -220,15 +241,6 @@ export const getPoolAddressesProviderRegistry = async (address?: tEthereumAddres
             .get(`${eContractid.PoolAddressesProviderRegistry}.${DRE.network.name}`)
             .value()
         ).address,
-    await getFirstSigner()
-  );
-
-export const getRateOracleSetupHelper = async (address?: tEthereumAddress) =>
-  await RateOracleSetupHelperFactory.connect(
-    address ||
-      (
-        await getDb().get(`${eContractid.RateOracleSetupHelper}.${DRE.network.name}`).value()
-      ).address,
     await getFirstSigner()
   );
 

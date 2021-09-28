@@ -287,7 +287,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
-  /// @inheritdoc IPoolConfigurator
   function setEModeCategory(
     uint8 categoryId,
     uint16 ltv,
@@ -325,6 +324,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _pool.setConfiguration(asset, currentConfig.data);
 
     emit EModeAssetCategoryChanged(asset, categoryId);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setUnbackedMintCap(address asset, uint256 unbackedMintCap)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setUnbackedMintCap(unbackedMintCap);
+
+    _pool.setConfiguration(asset, currentConfig.data);
+
+    emit UnbackedMintCapChanged(asset, unbackedMintCap);
   }
 
   /// @inheritdoc IPoolConfigurator

@@ -10,6 +10,7 @@ import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
+import {IPriceOracleSentinel} from '../../../interfaces/IPriceOracleSentinel.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
@@ -36,6 +37,7 @@ library ValidationLogic {
 
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
+  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
 
   /**
    * @notice Validates a supply action
@@ -49,7 +51,8 @@ library ValidationLogic {
     (bool isActive, bool isFrozen, , , bool isPaused, ) = reserveCache
       .reserveConfiguration
       .getFlags();
-    (, , , uint256 reserveDecimals, , ) = reserveCache.reserveConfiguration.getParams();
+
+    uint256 reserveDecimals = reserveCache.reserveConfiguration.getDecimals();
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
 
     require(amount != 0, Errors.VL_INVALID_AMOUNT);
@@ -122,7 +125,7 @@ library ValidationLogic {
   ) internal view {
     ValidateBorrowLocalVars memory vars;
 
-    (, , , vars.reserveDecimals, , ) = params.reserveCache.reserveConfiguration.getParams();
+    vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
 
     (
       vars.isActive,
@@ -138,6 +141,12 @@ library ValidationLogic {
     require(params.amount != 0, Errors.VL_INVALID_AMOUNT);
 
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
+
+    require(
+      params.priceOracleSentinel == address(0) ||
+        IPriceOracleSentinel(params.priceOracleSentinel).isBorrowAllowed(),
+      Errors.VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED
+    );
 
     //validate interest rate mode
     require(
@@ -487,6 +496,13 @@ library ValidationLogic {
         params.oracle,
         params.userEModeCategory
       )
+    );
+
+    require(
+      params.priceOracleSentinel == address(0) ||
+        vars.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
+        IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(),
+      Errors.VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
 
     require(

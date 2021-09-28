@@ -103,7 +103,8 @@ library LiquidationLogic {
         params.user,
         params.reservesCount,
         params.priceOracle,
-        params.userEModeCategory
+        params.userEModeCategory,
+        params.priceOracleSentinel
       )
     );
 

@@ -1,52 +1,77 @@
 import { Pool } from '../../../types/Pool';
 import { ReserveData, UserReserveData } from './interfaces';
 import {
-  getRateOracle,
   getIErc20Detailed,
   getMintableERC20,
   getAToken,
   getStableDebtToken,
   getVariableDebtToken,
+  getIRStrategy,
 } from '../../../helpers/contracts-getters';
 import { tEthereumAddress } from '../../../helpers/types';
 import { getDb, DRE } from '../../../helpers/misc-utils';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { BigNumber } from 'ethers';
+import { AToken } from '../../../types';
 
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
   reserve: tEthereumAddress
 ): Promise<ReserveData> => {
-  const [reserveData, tokenAddresses, rateOracle, token] = await Promise.all([
+  const [reserveData, tokenAddresses, irStrategyAddress, reserveConfiguration, token] = await Promise.all([
     helper.getReserveData(reserve),
     helper.getReserveTokensAddresses(reserve),
-    getRateOracle(),
+    helper.getIRStrategyAddress(reserve),
+    helper.getReserveConfigurationData(reserve),
     getIErc20Detailed(reserve),
   ]);
 
   const stableDebtToken = await getStableDebtToken(tokenAddresses.stableDebtTokenAddress);
   const variableDebtToken = await getVariableDebtToken(tokenAddresses.variableDebtTokenAddress);
+  const irStrategy = await getIRStrategy(irStrategyAddress);
+
+  const baseStableRate = await irStrategy.getBaseStableBorrowRate();
 
   const { 0: principalStableDebt } = await stableDebtToken.getSupplyData();
   const totalStableDebtLastUpdated = await stableDebtToken.getTotalSupplyLastUpdated();
 
   const scaledVariableDebt = await variableDebtToken.scaledTotalSupply();
 
-  const rate = (await rateOracle.getMarketBorrowRate(reserve)).toString();
   const symbol = await token.symbol();
   const decimals = BigNumber.from(await token.decimals());
 
-  const totalLiquidity = reserveData.availableLiquidity
-    .add(reserveData.totalStableDebt)
-    .add(reserveData.totalVariableDebt);
+  const accruedToTreasuryScaled = reserveData.accruedToTreasuryScaled;
+  const unbacked = reserveData.unbacked;
+  const aToken = (await getAToken(tokenAddresses.aTokenAddress)) as AToken;
 
-  const utilizationRate = totalLiquidity.eq(0)
+  // Need the reserve factor
+  const reserveFactor = reserveConfiguration.reserveFactor;
+
+  const availableLiquidity = await token.balanceOf(aToken.address);
+
+  const totalLiquidity = availableLiquidity.add(unbacked);
+
+  const totalDebt = reserveData.totalStableDebt.add(reserveData.totalVariableDebt);
+
+  const borrowUtilizationRate = totalDebt.eq(0)
     ? BigNumber.from(0)
-    : reserveData.totalStableDebt.add(reserveData.totalVariableDebt).rayDiv(totalLiquidity);
+    : totalDebt.rayDiv(availableLiquidity.add(totalDebt));
+
+  let supplyUtilizationRate = totalDebt.eq(0)
+    ? BigNumber.from(0)
+    : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
+
+  supplyUtilizationRate =
+    supplyUtilizationRate > borrowUtilizationRate ? borrowUtilizationRate : supplyUtilizationRate;
+
   return {
+    reserveFactor,
+    unbacked,
+    accruedToTreasuryScaled,
+    availableLiquidity,
     totalLiquidity,
-    utilizationRate,
-    availableLiquidity: reserveData.availableLiquidity,
+    borrowUtilizationRate,
+    supplyUtilizationRate,
     totalStableDebt: reserveData.totalStableDebt,
     totalVariableDebt: reserveData.totalVariableDebt,
     liquidityRate: reserveData.liquidityRate,
@@ -63,7 +88,7 @@ export const getReserveData = async (
     aTokenAddress: tokenAddresses.aTokenAddress,
     symbol,
     decimals,
-    marketStableRate: BigNumber.from(rate),
+    marketStableRate: BigNumber.from(baseStableRate),
   };
 };
 

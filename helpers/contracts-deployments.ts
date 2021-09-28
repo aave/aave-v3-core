@@ -14,7 +14,6 @@ import {
   PoolAddressesProviderRegistryFactory,
   PoolConfiguratorFactory,
   PoolFactory,
-  RateOracleFactory,
   MintableDelegationERC20Factory,
   MintableERC20Factory,
   MockAggregatorFactory,
@@ -28,16 +27,15 @@ import {
   WETH9MockedFactory,
   ConfiguratorLogicFactory,
   MockIncentivesControllerFactory,
-  MockReserveConfigurationFactory,
-  MockPoolFactory,
-  MockInitializableImpleFactory,
   MockInitializableFromConstructorImpleFactory,
-  MockReentrantInitializableImpleFactory,
+  MockInitializableImpleFactory,
   MockInitializableImpleV2Factory,
   InitializableImmutableAdminUpgradeabilityProxyFactory,
   WETH9Mocked,
   ACLManagerFactory,
-  EModeLogicFactory,
+  MockReserveConfigurationFactory,
+  MockPoolFactory,
+  MockReentrantInitializableImpleFactory,
 } from '../types';
 import {
   withSave,
@@ -45,7 +43,6 @@ import {
   linkBytecode,
   insertContractAddressInDb,
 } from './contracts-helpers';
-import { RateOracleSetupHelperFactory } from '../types/RateOracleSetupHelperFactory';
 import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { PoolLibraryAddresses } from '../types/PoolFactory';
@@ -132,6 +129,19 @@ export const deployLiquidationLogic = async () => {
   return withSave(liquidationLogic, eContractid.LiquidationLogic);
 };
 
+export const deployBridgeLogic = async () => {
+  const bridgeLogicArtifact = await readArtifact(eContractid.BridgeLogic);
+  const bridgeLogicFactory = await DRE.ethers.getContractFactory(
+    bridgeLogicArtifact.abi,
+    bridgeLogicArtifact.bytecode
+  );
+  const bridgeLogic = await (
+    await bridgeLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(bridgeLogic, eContractid.BridgeLogic);
+};
+
 export const deployEModeLogic = async () => {
   const eModeLogicArtifact = await readArtifact(eContractid.EModeLogic);
 
@@ -146,11 +156,11 @@ export const deployEModeLogic = async () => {
   return withSave(eModeLogic, eContractid.EModeLogic);
 };
 
-
 export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   const supplyLogic = await deploySupplyLogic();
   const borrowLogic = await deployBorrowLogic();
   const liquidationLogic = await deployLiquidationLogic();
+  const bridgeLogic = await deployBridgeLogic();
   const eModeLogic = await deployEModeLogic();
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
@@ -165,6 +175,7 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   // libName example: GenericLogic
   return {
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
+    ['__$b06080f092f400a43662c3f835a4d9baa8$__']: bridgeLogic.address,
     ['__$db79717e66442ee197e8271d032a066e34$__']: supplyLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,
     ['__$f598c634f2d943205ac23f707b80075cbb$__']: liquidationLogic.address,
@@ -181,9 +192,6 @@ export const deployPool = async () => {
 
 export const deployPriceOracle = async () =>
   withSave(await new PriceOracleFactory(await getFirstSigner()).deploy(), eContractid.PriceOracle);
-
-export const deployRateOracle = async () =>
-  withSave(await new RateOracleFactory(await getFirstSigner()).deploy(), eContractid.RateOracle);
 
 export const deployMockAggregator = async (price: tStringTokenSmallUnits) =>
   withSave(
@@ -226,7 +234,7 @@ export const deployMintableDelegationERC20 = async (
   );
 
 export const deployDefaultReserveInterestRateStrategy = async (
-  args: [tEthereumAddress, string, string, string, string, string, string]
+  args: [tEthereumAddress, string, string, string, string, string, string, string, string, string]
 ) =>
   withSave(
     await new DefaultReserveInterestRateStrategyFactory(await getFirstSigner()).deploy(...args),
@@ -337,12 +345,6 @@ export const deployAllMockTokens = async () => {
 
   return tokens;
 };
-
-export const deployRateOracleSetupHelper = async () =>
-  withSave(
-    await new RateOracleSetupHelperFactory(await getFirstSigner()).deploy(),
-    eContractid.RateOracleSetupHelper
-  );
 
 export const deployReservesSetupHelper = async () =>
   withSave(

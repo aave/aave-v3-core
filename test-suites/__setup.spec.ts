@@ -14,8 +14,6 @@ import {
   deployAaveOracle,
   deployMockFlashLoanReceiver,
   deployAaveProtocolDataProvider,
-  deployRateOracle,
-  deployRateOracleSetupHelper,
   deployReservesSetupHelper,
   deployAllMockTokens,
   deployACLManager,
@@ -25,7 +23,6 @@ import { eContractid, tEthereumAddress } from '../helpers/types';
 import {
   setInitialAssetPricesInOracle,
   deployAllMockAggregators,
-  setInitialMarketRatesInRatesOracleByHelper,
 } from '../helpers/oracles-helpers';
 import { waitForTx } from '../helpers/misc-utils';
 import { initReservesByHelper, configureReservesByHelper } from '../helpers/init-helpers';
@@ -34,7 +31,6 @@ import {
   getPool,
   getPoolConfiguratorProxy,
   getPairsTokenAggregator,
-  getACLManager,
 } from '../helpers/contracts-getters';
 import { initializeMakeSuite } from './helpers/make-suite';
 
@@ -42,7 +38,6 @@ const MOCK_USD_PRICE_IN_WEI = AaveConfig.ProtocolGlobalParams.MockUsdPriceInWei;
 const ALL_ASSETS_INITIAL_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
 const USD_ADDRESS = AaveConfig.ProtocolGlobalParams.UsdAddress;
 const MOCK_CHAINLINK_AGGREGATORS_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
-const RATE_ORACLE_RATES_COMMON = AaveConfig.RateOracleRatesCommon;
 
 const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   console.time('setup');
@@ -90,7 +85,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await waitForTx(await aclManager.addRiskAdmin(addressList[3]));
 
   // Deploy deployment helpers
-  await deployRateOracleSetupHelper();
   await deployReservesSetupHelper();
 
   const fallbackOracle = await deployPriceOracle();
@@ -175,19 +169,10 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   ]);
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
 
-  const rateOracle = await deployRateOracle();
-  await waitForTx(await addressesProvider.setRateOracle(rateOracle.address));
-
   const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
   const allReservesAddresses = {
     ...tokensAddressesWithoutUsd,
   };
-  await setInitialMarketRatesInRatesOracleByHelper(
-    RATE_ORACLE_RATES_COMMON,
-    allReservesAddresses,
-    rateOracle,
-    aaveAdmin
-  );
 
   const reservesParams = AaveConfig.ReservesConfig;
 

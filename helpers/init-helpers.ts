@@ -6,7 +6,6 @@ import {
   getReservesSetupHelper,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
-  getRateOracleSetupHelper,
 } from './contracts-getters';
 import { rawInsertContractAddressInDb } from './contracts-helpers';
 import { BigNumber, BigNumberish } from 'ethers';
@@ -62,6 +61,9 @@ export const initReservesByHelper = async (
 
   let strategyRates: [
     string, // addresses provider
+    string,
+    string,
+    string,
     string,
     string,
     string,
@@ -128,6 +130,9 @@ export const initReservesByHelper = async (
       variableRateSlope2,
       stableRateSlope1,
       stableRateSlope2,
+      baseStableRateOffset,
+      stableRateExcessOffset,
+      optimalStableToTotalDebtRatio,
     } = strategy;
     if (!strategyAddresses[strategy.name]) {
       // Strategy does not exist, create a new one
@@ -139,6 +144,9 @@ export const initReservesByHelper = async (
         variableRateSlope2,
         stableRateSlope1,
         stableRateSlope2,
+        baseStableRateOffset,
+        stableRateExcessOffset,
+        optimalStableToTotalDebtRatio,
       ];
       strategyAddresses[strategy.name] = (
         await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name])
@@ -245,6 +253,7 @@ export const configureReservesByHelper = async (
   const addressProvider = await getPoolAddressesProvider();
   const aclManager = await getACLManager();
   const reservesSetupHelper = await getReservesSetupHelper();
+
   const tokens: string[] = [];
   const symbols: string[] = [];
 
