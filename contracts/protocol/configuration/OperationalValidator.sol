@@ -3,7 +3,7 @@ pragma solidity 0.8.7;
 
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IOperationalValidator} from '../../interfaces/IOperationalValidator.sol';
-import {IPriceOracleSentinel} from '../../interfaces/IPriceOracleSentinel.sol';
+import {ISequencerOracle} from '../../interfaces/ISequencerOracle.sol';
 
 /**
  * @title OperationalValidator
@@ -13,7 +13,7 @@ import {IPriceOracleSentinel} from '../../interfaces/IPriceOracleSentinel.sol';
  */
 contract OperationalValidator is IOperationalValidator {
   IPoolAddressesProvider public _addressesProvider;
-  IPriceOracleSentinel public _priceOracleSentinel;
+  ISequencerOracle public _oracle;
   uint256 public _gracePeriod;
 
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 ether;
@@ -21,16 +21,16 @@ contract OperationalValidator is IOperationalValidator {
   /**
    * @notice Constructor
    * @param provider The address of the PoolAddressesProvider
-   * @param priceOracleSentinel The address of the PriceOracleSentinel
+   * @param oracle The address of the SequencerOracle
    * @param gracePeriod The duration of the grace period in seconds
    */
   constructor(
     IPoolAddressesProvider provider,
-    IPriceOracleSentinel priceOracleSentinel,
+    ISequencerOracle oracle,
     uint256 gracePeriod
   ) {
     _addressesProvider = provider;
-    _priceOracleSentinel = priceOracleSentinel;
+    _oracle = oracle;
     _gracePeriod = gracePeriod;
   }
 
@@ -48,7 +48,7 @@ contract OperationalValidator is IOperationalValidator {
   }
 
   function _isUpAndGracePeriodPassed() internal view returns (bool) {
-    (bool isDown, uint256 timestampGotUp) = _priceOracleSentinel.latestAnswer();
+    (bool isDown, uint256 timestampGotUp) = _oracle.latestAnswer();
     return !isDown && block.timestamp - timestampGotUp > _gracePeriod;
   }
 }
