@@ -62,7 +62,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     expect(await helpersContract.getReservePriceOracleSentinelState(weth.address)).to.be.true;
   });
 
-  it('Flashloan dai and weth', async () => {
+  it('Flashloan dai and weth with variable debt when not returned', async () => {
     const {
       deployer,
       addressesProvider,

@@ -25,6 +25,7 @@ type ReserveConfigurationValues = {
   isActive: boolean;
   isFrozen: boolean;
   isPaused: boolean;
+  isPriceOracleSentinelActive: boolean;
   eModeCategory: BigNumber;
   borrowCap: string;
   supplyCap: string;
@@ -35,10 +36,8 @@ const expectReserveConfigurationData = async (
   asset: string,
   values: ReserveConfigurationValues
 ) => {
-  const [reserveCfg, eModeCategory, reserveCaps, isPaused] = await getReserveData(
-    helpersContract,
-    asset
-  );
+  const [reserveCfg, isPriceOracleSentinelActive, eModeCategory, reserveCaps, isPaused] =
+    await getReserveData(helpersContract, asset);
   expect(reserveCfg.decimals).to.be.eq(values.reserveDecimals, 'reserveDecimals is not correct');
   expect(reserveCfg.ltv).to.be.eq(values.baseLTVAsCollateral, 'ltv is not correct');
   expect(reserveCfg.liquidationThreshold).to.be.eq(
@@ -65,6 +64,10 @@ const expectReserveConfigurationData = async (
   expect(reserveCfg.isActive).to.be.eq(values.isActive, 'isActive is not correct');
   expect(reserveCfg.isFrozen).to.be.eq(values.isFrozen, 'isFrozen is not correct');
   expect(isPaused).to.be.equal(values.isPaused, 'isPaused is not correct');
+  expect(isPriceOracleSentinelActive).to.be.eq(
+    values.isPriceOracleSentinelActive,
+    'isPriceOracleSentinelActive is not correct'
+  );
   expect(eModeCategory).to.be.eq(values.eModeCategory, 'eModeCategory is not correct');
   expect(reserveCaps.borrowCap).to.be.eq(values.borrowCap, 'borrowCap is not correct');
   expect(reserveCaps.supplyCap).to.be.eq(values.supplyCap, 'supplyCap is not correct');
@@ -73,6 +76,7 @@ const expectReserveConfigurationData = async (
 const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: string) => {
   return Promise.all([
     helpersContract.getReserveConfigurationData(asset),
+    helpersContract.getReservePriceOracleSentinelState(asset),
     helpersContract.getReserveEModeCategory(asset),
     helpersContract.getReserveCaps(asset),
     helpersContract.getPaused(asset),
@@ -108,6 +112,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       isActive: true,
       isFrozen: false,
       isPaused: false,
+      isPriceOracleSentinelActive: false,
       eModeCategory: BigNumber.from(0),
       borrowCap: borrowCap,
       supplyCap: supplyCap,
@@ -273,6 +278,48 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
     expect(await configurator.connect(riskAdmin.signer).unfreezeReserve(weth.address))
       .to.emit(configurator, 'ReserveUnfrozen')
+      .withArgs(weth.address);
+
+    await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
+  });
+
+  it('Activates the PriceOracleSentinel by pool Admin', async () => {
+    const { configurator, weth, helpersContract } = testEnv;
+    expect(await configurator.setPriceOracleSentinelActive(true))
+      .to.emit(configurator, 'PriceOracleSentinelActivated')
+      .withArgs(weth.address);
+
+    await expectReserveConfigurationData(helpersContract, weth.address, {
+      ...baseConfigValues,
+      isPriceOracleSentinelActive: true,
+    });
+  });
+
+  it('Deactivates the PriceOracleSentinel by Pool admin', async () => {
+    const { configurator, helpersContract, weth } = testEnv;
+    expect(await configurator.setPriceOracleSentinelActive(false))
+      .to.emit(configurator, 'PriceOracleSentinelDeactivated')
+      .withArgs(weth.address);
+
+    await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
+  });
+
+  it('Activates the PriceOracleSentinel by Risk Admin', async () => {
+    const { configurator, weth, helpersContract, riskAdmin } = testEnv;
+    expect(await configurator.connect(riskAdmin.signer).setPriceOracleSentinelActive(true))
+      .to.emit(configurator, 'PriceOracleSentinelActivated')
+      .withArgs(weth.address);
+
+    await expectReserveConfigurationData(helpersContract, weth.address, {
+      ...baseConfigValues,
+      isPriceOracleSentinelActive: true,
+    });
+  });
+
+  it('Deactivates the PriceOracleSentinel by Risk admin', async () => {
+    const { configurator, helpersContract, weth, riskAdmin } = testEnv;
+    expect(await configurator.connect(riskAdmin.signer).setPriceOracleSentinelActive(false))
+      .to.emit(configurator, 'PriceOracleSentinelDeactivated')
       .withArgs(weth.address);
 
     await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
