@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { DRE, increaseTime, timeLatest, waitForTx } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT, oneEther, ZERO_ADDRESS } from '../helpers/constants';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
   OperationalValidator,
@@ -12,44 +12,54 @@ import {
 import { getFirstSigner } from '../helpers/contracts-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { formatUnits, parseUnits } from '@ethersproject/units';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
 
-makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
+makeSuite('OperationalValidator', (testEnv: TestEnv) => {
   const { VL_SEQUENCER_IS_DOWN, INVALID_HF } = ProtocolErrors;
 
   let sequencerOracle: SequencerOracle;
   let operationalValidator: OperationalValidator;
 
-  it('Initialization', async () => {
-    const { pool, addressesProvider, poolAdmin, deployer } = testEnv;
+  const GRACE_PERIOD = BigNumber.from(60 * 60);
 
+  before(async () => {
+    const { addressesProvider, deployer } = testEnv;
+
+    // Deploy SequencerOracle
     sequencerOracle = await (await new SequencerOracleFactory(deployer.signer).deploy()).deployed();
 
     operationalValidator = await (
       await new OperationalValidatorFactory(await getFirstSigner()).deploy(
         addressesProvider.address,
         sequencerOracle.address,
-        BigNumber.from(60 * 60)
+        GRACE_PERIOD
       )
     ).deployed();
+  });
+
+  it('Admin sets a OperationalValidator', async () => {
+    const { addressesProvider, poolAdmin } = testEnv;
 
     expect(
       await addressesProvider
         .connect(poolAdmin.signer)
         .setOperationalValidator(operationalValidator.address)
-    );
-  });
+    )
+      .to.emit(addressesProvider, 'OperationalValidatorUpdated')
+      .withArgs(operationalValidator.address);
 
-  it('Default answer', async () => {
+    expect(await addressesProvider.getOperationalValidator()).to.be.eq(
+      operationalValidator.address
+    );
+
     const answer = await sequencerOracle.latestAnswer();
     expect(answer[0]).to.be.eq(false);
     expect(answer[1]).to.be.eq(0);
   });
 
-  it('Borrow dai', async () => {
+  it('Borrow DAI', async () => {
     const {
       dai,
       weth,
@@ -108,30 +118,26 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       pool,
       oracle,
     } = testEnv;
+
     const daiPrice = await oracle.getAssetPrice(dai.address);
     await oracle.setAssetPrice(dai.address, daiPrice.percentMul(11000));
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
-    expect(userGlobalData.healthFactor).to.be.lt(parseUnits('1', 18), INVALID_HF);
+    expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
     const currAnswer = await sequencerOracle.latestAnswer();
     waitForTx(await sequencerOracle.setAnswer(true, currAnswer[1]));
   });
 
-  it('Tries to liquidate borrower when sequencers down HF > 0.95 (revert expected)', async () => {
+  it('Tries to liquidate borrower when sequencer is down (HF > 0.95) (revert expected)', async () => {
     const {
       pool,
       dai,
       weth,
       users: [, borrower],
-      oracle,
       helpersContract,
-      deployer,
     } = testEnv;
 
-    //mints dai to the caller
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
-
-    //approve protocol to access depositor wallet
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const userReserveDataBefore = await getUserData(
@@ -142,8 +148,6 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
     );
 
     const amountToLiquidate = userReserveDataBefore.currentVariableDebt.div(2);
-
-    // The supply is the same, but there should be a change in who has what. The liquidator should have received what the borrower lost.
     await expect(
       pool.liquidationCall(weth.address, dai.address, borrower.address, amountToLiquidate, true)
     ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
@@ -156,14 +160,15 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       pool,
       oracle,
     } = testEnv;
+
     const daiPrice = await oracle.getAssetPrice(dai.address);
     await oracle.setAssetPrice(dai.address, daiPrice.percentMul(11000));
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
-    expect(userGlobalData.healthFactor).to.be.lt(parseUnits('1', 18), INVALID_HF);
+    expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
   });
 
-  it('Liquidates borrower when sequencers is down HF < 0.95', async () => {
+  it('Liquidates borrower when sequencer is down (HF < 0.95)', async () => {
     const {
       pool,
       dai,
@@ -174,11 +179,7 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       deployer,
     } = testEnv;
 
-    //mints dai to the caller
-
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
-
-    //approve protocol to access depositor wallet
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -200,7 +201,6 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
 
     const amountToLiquidate = userReserveDataBefore.currentVariableDebt.div(2);
 
-    // The supply is the same, but there should be a change in who has what. The liquidator should have received what the borrower lost.
     const tx = await pool.liquidationCall(
       weth.address,
       dai.address,
@@ -260,8 +260,6 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       userReserveDataBefore,
       txTimestamp
     );
-
-    //expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
     expect(userReserveDataAfter.currentVariableDebt).to.be.closeTo(
       variableDebtBeforeTx.sub(amountToLiquidate),
@@ -308,18 +306,20 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       oracle,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(parseUnits('1', 18));
+    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).supply(weth.address, parseUnits('1', 18), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
 
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseUnits('100', 18), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
     ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
   });
 
-  it('Turn on sequencers', async () => {
+  it('Turn on sequencer', async () => {
     await waitForTx(await sequencerOracle.setAnswer(false, await timeLatest()));
   });
 
@@ -329,24 +329,25 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       weth,
       users: [, , , user],
       pool,
-      oracle,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(parseUnits('1', 18));
+    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).supply(weth.address, parseUnits('1', 18), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
 
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseUnits('100', 18), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
     ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
   });
 
   it('Turn off sequencer + increase time more than grace period', async () => {
     const currAnswer = await sequencerOracle.latestAnswer();
     await waitForTx(await sequencerOracle.setAnswer(true, currAnswer[1]));
-    await increaseTime(60 * 60 * 2);
+    await increaseTime(GRACE_PERIOD.mul(2).toNumber());
   });
 
   it('User tries to borrow (revert expected)', async () => {
@@ -355,23 +356,24 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       weth,
       users: [, , , user],
       pool,
-      oracle,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(parseUnits('1', 18));
+    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).supply(weth.address, parseUnits('1', 18), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
 
     await expect(
       pool
         .connect(user.signer)
-        .borrow(dai.address, parseUnits('100', 18), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
     ).to.be.revertedWith(VL_SEQUENCER_IS_DOWN);
   });
 
-  it('Turn on sequencers + increase time past grace period', async () => {
+  it('Turn on sequencer + increase time past grace period', async () => {
     await waitForTx(await sequencerOracle.setAnswer(false, await timeLatest()));
-    await increaseTime(60 * 60 * 2);
+    await increaseTime(GRACE_PERIOD.mul(2).toNumber());
   });
 
   it('User tries to borrow', async () => {
@@ -380,17 +382,18 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       weth,
       users: [, , , user],
       pool,
-      oracle,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(parseUnits('1', 18));
+    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user.signer).supply(weth.address, parseUnits('1', 18), user.address, 0);
+    await pool
+      .connect(user.signer)
+      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
 
     await waitForTx(
       await pool
         .connect(user.signer)
-        .borrow(dai.address, parseUnits('100', 18), RateMode.Variable, 0, user.address)
+        .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
     );
   });
 
@@ -405,11 +408,11 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
     await oracle.setAssetPrice(dai.address, daiPrice.percentMul(9500));
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
-    expect(userGlobalData.healthFactor).to.be.lt(parseUnits('1', 18), INVALID_HF);
-    expect(userGlobalData.healthFactor).to.be.gt(parseUnits('0.95', 18), INVALID_HF);
+    expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
+    expect(userGlobalData.healthFactor).to.be.gt(utils.parseUnits('0.95', 18), INVALID_HF);
   });
 
-  it('Liquidates borrower when sequencers is up again', async () => {
+  it('Liquidates borrower when sequencer is up again', async () => {
     const {
       pool,
       dai,
@@ -420,11 +423,7 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       deployer,
     } = testEnv;
 
-    //mints dai to the caller
-
     await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
-
-    //approve protocol to access depositor wallet
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -506,8 +505,6 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
       userReserveDataBefore,
       txTimestamp
     );
-
-    //expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
 
     expect(userReserveDataAfter.currentVariableDebt).to.be.closeTo(
       variableDebtBeforeTx.sub(amountToLiquidate),

@@ -1,5 +1,5 @@
 import rawBRE from 'hardhat';
-import { BigNumber, ethers, Signer } from 'ethers';
+import { ethers, Signer } from 'ethers';
 import {
   insertContractAddressInDb,
   getEthersSigners,
@@ -33,11 +33,9 @@ import AaveConfig from '../market-config';
 import {
   getPool,
   getPoolConfiguratorProxy,
-  getPairsTokenAggregator,
-  getACLManager,
+  getPairsTokenAggregator
 } from '../helpers/contracts-getters';
 import { initializeMakeSuite } from './helpers/make-suite';
-import { ZERO_ADDRESS } from '../helpers/constants';
 
 const MOCK_USD_PRICE_IN_WEI = AaveConfig.ProtocolGlobalParams.MockUsdPriceInWei;
 const ALL_ASSETS_INITIAL_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;
