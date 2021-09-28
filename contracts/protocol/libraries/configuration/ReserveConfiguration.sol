@@ -19,13 +19,13 @@ library ReserveConfiguration {
   uint256 constant BORROWING_MASK =                 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant STABLE_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
-  uint256 constant ISOLATION_MODE_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant LIQUIDATION_PROTOCOL_FEE_MASK =  0xFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant EMODE_CATEGORY_MASK =            0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant UNBACKED_MINT_CAP_MASK =         0xFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant ISOLATION_DEBT_CEILING_MASK =    0xFFF00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
 
   /// @dev For the LTV, the start bit is 0 (up to 15), hence no bitshifting is needed
   uint256 constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -36,14 +36,14 @@ library ReserveConfiguration {
   uint256 constant BORROWING_ENABLED_START_BIT_POSITION = 58;
   uint256 constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
   uint256 constant IS_PAUSED_START_BIT_POSITION = 60;
-  uint256 constant ISOLATION_MODE_START_BIT_POSITION = 61;
-  /// @dev bits 62 63 unused yet
+  /// @dev bits 61 62 63 unused yet
   uint256 constant RESERVE_FACTOR_START_BIT_POSITION = 64;
   uint256 constant BORROW_CAP_START_BIT_POSITION = 80;
   uint256 constant SUPPLY_CAP_START_BIT_POSITION = 116;
   uint256 constant LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION = 152;
   uint256 constant EMODE_CATEGORY_START_BIT_POSITION = 168;
   uint256 constant UNBACKED_MINT_CAP_START_BIT_POSITION = 176;
+  uint256 constant ISOLATION_DEBT_CEILING_START_BIT_POSITION = 212;
 
   uint256 constant MAX_VALID_LTV = 65535;
   uint256 constant MAX_VALID_LIQUIDATION_THRESHOLD = 65535;
@@ -55,6 +55,7 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 10000;
   uint256 constant MAX_VALID_EMODE_CATEGORY = 255;
   uint256 constant MAX_VALID_UNBACKED_MINT_CAP = 68719476735;
+  uint256 constant MAX_VALID_ISOLATION_DEBT_CEILING = 4294967296;
 
   /**
    * @notice Sets the Loan to Value of the reserve
@@ -222,26 +223,6 @@ library ReserveConfiguration {
   }
 
   /**
-   * @notice Sets the isolation mode for the reserve
-   * @param self The reserve configuration
-   * @param isolation True if the reserve should be in isolation mode, false otherwise
-   **/
-  function setIsolationMode(DataTypes.ReserveConfigurationMap memory self, bool isolation) internal pure {
-    self.data =
-      (self.data & ISOLATION_MODE_MASK) |
-      (uint256(isolation ? 1 : 0) << ISOLATION_MODE_START_BIT_POSITION);
-  }
-
-  /**
-   * @notice Gets the state of the isolation mode for the reserve
-   * @param self The reserve configuration
-   * @return True if the reserve is in isolation mode, false otherwise
-   **/
-  function getIsolationMode(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
-    return (self.data & ~ISOLATION_MODE_MASK) != 0;
-  }
-
-  /**
    * @notice Enables or disables borrowing on the reserve
    * @param self The reserve configuration
    * @param enabled True if the borrowing needs to be enabled, false otherwise
@@ -376,6 +357,35 @@ library ReserveConfiguration {
     returns (uint256)
   {
     return (self.data & ~SUPPLY_CAP_MASK) >> SUPPLY_CAP_START_BIT_POSITION;
+  }
+
+  /**
+   * @notice Sets the debt ceiling in isolation mode for the asset
+   * @param self The reserve configuration
+   * @param ceiling The maximum debt ceiling for the asset
+   **/
+  function setIsolationDebtCeiling(DataTypes.ReserveConfigurationMap memory self, uint256 ceiling)
+    internal
+    pure
+  {
+    require(ceiling <= MAX_VALID_ISOLATION_DEBT_CEILING, Errors.RC_INVALID_ISOLATION_DEBT_CEILING);
+
+    self.data =
+      (self.data & ISOLATION_DEBT_CEILING_MASK) |
+      (ceiling << ISOLATION_DEBT_CEILING_START_BIT_POSITION);
+  }
+
+  /**
+   * @notice Gets the debt ceiling for the asset if the asset is in isolation mode
+   * @param self The reserve configuration
+   * @return The debt ceiling (0 = isolation mode disabled)
+   **/
+  function getIsolationDebtCeiling(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (uint256)
+  {
+    return (self.data & ~ISOLATION_DEBT_CEILING_MASK) >> ISOLATION_DEBT_CEILING_START_BIT_POSITION;
   }
 
   /**
