@@ -182,7 +182,7 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
 
     const userReserveDataBefore = await getUserData(
       pool,
@@ -221,8 +221,8 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const daiReserveDataAfter = await helpersContract.getReserveData(dai.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(dai.address);
@@ -428,7 +428,7 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
-    const ethReserveDataBefore = await helpersContract.getReserveData(weth.address);
+    const ethReserveDataBefore = await getReserveData(helpersContract, weth.address);
 
     const userReserveDataBefore = await getUserData(
       pool,
@@ -467,8 +467,8 @@ makeSuite('Operational Validator: ', (testEnv: TestEnv) => {
 
     const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
 
-    const daiReserveDataAfter = await helpersContract.getReserveData(dai.address);
-    const ethReserveDataAfter = await helpersContract.getReserveData(weth.address);
+    const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
     const collateralPrice = await oracle.getAssetPrice(weth.address);
     const principalPrice = await oracle.getAssetPrice(dai.address);
