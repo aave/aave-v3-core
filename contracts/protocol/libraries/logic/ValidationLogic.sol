@@ -140,6 +140,13 @@ library ValidationLogic {
 
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
+    if (params.operationalValidator != address(0)) {
+      require(
+        IOperationalValidator(params.operationalValidator).isBorrowAllowed(),
+        Errors.VL_SEQUENCER_IS_DOWN
+      );
+    }
+
     //validate interest rate mode
     require(
       uint256(DataTypes.InterestRateMode.VARIABLE) == params.interestRateMode ||
@@ -197,13 +204,6 @@ library ValidationLogic {
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
-
-    if (params.operationalValidator != address(0)) {
-      require(
-        IOperationalValidator(params.operationalValidator).isBorrowAllowed(),
-        Errors.VL_SEQUENCER_IS_DOWN
-      );
-    }
 
     require(
       vars.healthFactor > GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
