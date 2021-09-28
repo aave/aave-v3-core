@@ -50,7 +50,6 @@ export const AaveConfig: IAaveConfiguration = {
   EmergencyAdminIndex: 1,
   ProviderRegistry: undefined,
   ProviderRegistryOwner: undefined,
-  RateOracle: undefined,
   PoolConfigurator: undefined,
   Pool: undefined,
   TokenDistributor: undefined,
@@ -98,68 +97,6 @@ export const AaveConfig: IAaveConfiguration = {
     [eEthereumNetwork.hardhat]: undefined,
     [eEthereumNetwork.coverage]: undefined,
     [eEthereumNetwork.tenderlyMain]: undefined,
-  },
-  RateOracleRatesCommon: {
-    AAVE: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    BAT: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    BUSD: {
-      borrowRate: utils.parseUnits('0.05', 27).toString(),
-    },
-    DAI: {
-      borrowRate: utils.parseUnits('0.039', 27).toString(),
-    },
-    ENJ: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    KNC: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    LINK: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    MANA: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    MKR: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    REN: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    SNX: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    SUSD: {
-      borrowRate: utils.parseUnits('0.035', 27).toString(),
-    },
-    TUSD: {
-      borrowRate: utils.parseUnits('0.035', 27).toString(),
-    },
-    UNI: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    USDC: {
-      borrowRate: utils.parseUnits('0.039', 27).toString(),
-    },
-    USDT: {
-      borrowRate: utils.parseUnits('0.035', 27).toString(),
-    },
-    WBTC: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    WETH: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    YFI: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
-    ZRX: {
-      borrowRate: utils.parseUnits('0.03', 27).toString(),
-    },
   },
 };
 

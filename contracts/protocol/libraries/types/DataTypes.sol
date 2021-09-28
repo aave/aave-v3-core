@@ -8,10 +8,10 @@ library DataTypes {
     ReserveConfigurationMap configuration;
     //the liquidity index. Expressed in ray
     uint128 liquidityIndex;
-    //variable borrow index. Expressed in ray
-    uint128 variableBorrowIndex;
     //the current supply rate. Expressed in ray
     uint128 currentLiquidityRate;
+    //variable borrow index. Expressed in ray
+    uint128 variableBorrowIndex;
     //the current variable borrow rate. Expressed in ray
     uint128 currentVariableBorrowRate;
     //the current stable borrow rate. Expressed in ray

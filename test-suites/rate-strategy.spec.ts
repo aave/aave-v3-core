@@ -27,6 +27,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   let strategyInstance: DefaultReserveInterestRateStrategy;
   let dai: MintableERC20;
   let aDai: AToken;
+  const baseStableRate = BigNumber.from(rateStrategyStableTwo.variableRateSlope1).add(
+    rateStrategyStableTwo.baseStableRateOffset
+  );
 
   before(async () => {
     dai = testEnv.dai;
@@ -42,6 +45,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       rateStrategyStableTwo.variableRateSlope2,
       rateStrategyStableTwo.stableRateSlope1,
       rateStrategyStableTwo.stableRateSlope2,
+      rateStrategyStableTwo.baseStableRateOffset,
+      rateStrategyStableTwo.stableRateExcessOffset,
+      rateStrategyStableTwo.optimalStableToTotalDebtRatio,
     ]);
   });
 
@@ -65,10 +71,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     } = await strategyInstance.calculateInterestRates(params);
 
     expect(currentLiquidityRate).to.be.equal(0, 'Invalid liquidity rate');
-    expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27),
-      'Invalid stable rate'
-    );
+    expect(currentStableBorrowRate).to.be.equal(baseStableRate, 'Invalid stable rate');
     expect(currentVariableBorrowRate).to.be.equal(
       rateStrategyStableTwo.baseVariableBorrowRate,
       'Invalid variable rate'
@@ -108,7 +111,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27).add(rateStrategyStableTwo.stableRateSlope1),
+      baseStableRate.add(rateStrategyStableTwo.stableRateSlope1),
       'Invalid stable rate'
     );
 
@@ -152,8 +155,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils
-        .parseUnits('0.039', 27)
+      baseStableRate
         .add(rateStrategyStableTwo.stableRateSlope1)
         .add(rateStrategyStableTwo.stableRateSlope2),
       'Invalid stable rate'
@@ -197,10 +199,14 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
     expect(currentLiquidityRate).to.be.equal(expectedLiquidityRate, 'Invalid liquidity rate');
     expect(currentStableBorrowRate).to.be.equal(
-      utils
-        .parseUnits('0.039', 27)
+      baseStableRate
         .add(rateStrategyStableTwo.stableRateSlope1)
-        .add(rateStrategyStableTwo.stableRateSlope2),
+        .add(rateStrategyStableTwo.stableRateSlope2)
+        .add(
+          BigNumber.from(rateStrategyStableTwo.stableRateExcessOffset).rayMul(
+            BigNumber.from(utils.parseUnits('0.375', 27))
+          )
+        ),
       'Invalid stable rate'
     );
   });
@@ -238,7 +244,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27).add(rateStrategyStableTwo.stableRateSlope1),
+      baseStableRate.add(rateStrategyStableTwo.stableRateSlope1),
       'Invalid stable rate'
     );
   });
@@ -278,7 +284,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils.parseUnits('0.039', 27).add(rateStrategyStableTwo.stableRateSlope1),
+      baseStableRate.add(rateStrategyStableTwo.stableRateSlope1),
       'Invalid stable rate'
     );
 
@@ -325,13 +331,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');
 
     expect(currentStableBorrowRate).to.be.equal(
-      utils
-        .parseUnits('0.039', 27)
-        .add(
-          BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(
-            utilRate.rayDiv(optimalRate)
-          )
-        ),
+      baseStableRate.add(
+        BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(utilRate.rayDiv(optimalRate))
+      ),
       'Invalid stable rate'
     );
 

@@ -14,6 +14,7 @@ import { getFirstSigner } from '../helpers/contracts-getters';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import { makeSuite } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { setBlocktime, timeLatest } from '../helpers/misc-utils';
 
 makeSuite('Reserve Without Incentives Controller', (testEnv) => {
   let mockToken: MintableERC20;
@@ -233,27 +234,33 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
       users: [, , user],
     } = testEnv;
 
-    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
-    expect(await mockToken.balanceOf(user.address)).to.be.eq(
+    const mintAmount = await convertToCurrencyDecimals(mockToken.address, '100');
+    await mockToken.connect(user.signer).mint(mintAmount);
+
+    const expectedMockTokenBalance = mintAmount.add(
       await convertToCurrencyDecimals(mockToken.address, '100')
     );
-    expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
-    expect(await mockStableDebt.balanceOf(user.address)).to.be.eq(
-      await convertToCurrencyDecimals(mockStableDebt.address, '100')
-    );
-
-    await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool
-      .connect(user.signer)
-      .repay(
-        mockToken.address,
-        await convertToCurrencyDecimals(mockToken.address, '100'),
-        RateMode.Stable,
-        user.address
-      );
 
     expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
-    expect(await mockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(expectedMockTokenBalance);
+    expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
+
+    await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    const time = await timeLatest();
+
+    await setBlocktime(time.add(1).toNumber());
+
+    const stableDebtBefore = await mockStableDebt.balanceOf(user.address, { blockTag: 'pending' });
+
+    await pool
+      .connect(user.signer)
+      .repay(mockToken.address, stableDebtBefore, RateMode.Stable, user.address);
+
+    expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(
+      expectedMockTokenBalance.sub(stableDebtBefore)
+    );
     expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
     expect(await mockStableDebt.balanceOf(user.address)).to.be.eq(0);
   });
@@ -264,23 +271,18 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
       users: [, user],
     } = testEnv;
 
-    expect(await aMockToken.balanceOf(user.address)).to.be.eq(
-      await convertToCurrencyDecimals(aMockToken.address, '1000')
-    );
     expect(await mockToken.balanceOf(user.address)).to.be.eq(0);
+
+    const aMockTokenBalanceBefore = await aMockToken.balanceOf(user.address, {
+      blockTag: 'pending',
+    });
 
     await aMockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .withdraw(
-        mockToken.address,
-        await convertToCurrencyDecimals(mockToken.address, '1000'),
-        user.address
-      );
+      .withdraw(mockToken.address, aMockTokenBalanceBefore, user.address);
 
     expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
-    expect(await mockToken.balanceOf(user.address)).to.be.eq(
-      await convertToCurrencyDecimals(mockToken.address, '1000')
-    );
+    expect(await mockToken.balanceOf(user.address)).to.be.eq(aMockTokenBalanceBefore);
   });
 });

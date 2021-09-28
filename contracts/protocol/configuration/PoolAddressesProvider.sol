@@ -19,7 +19,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant POOL = 'POOL';
   bytes32 private constant POOL_CONFIGURATOR = 'POOL_CONFIGURATOR';
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
-  bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
   bytes32 private constant ACL_MANAGER = 'ACL_MANAGER';
   bytes32 private constant ACL_ADMIN = 'ACL_ADMIN';
   bytes32 private constant PRICE_ORACLE_SENTINEL = 'PRICE_ORACLE_SENTINEL';
@@ -88,15 +87,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   function setPriceOracle(address priceOracle) external override onlyOwner {
     _addresses[PRICE_ORACLE] = priceOracle;
     emit PriceOracleUpdated(priceOracle);
-  }
-
-  function getRateOracle() external view override returns (address) {
-    return getAddress(RATE_ORACLE);
-  }
-
-  function setRateOracle(address rateOracle) external override onlyOwner {
-    _addresses[RATE_ORACLE] = rateOracle;
-    emit RateOracleUpdated(rateOracle);
   }
 
   /// @inheritdoc IPoolAddressesProvider

@@ -22,7 +22,6 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       addressesProvider.setPoolImpl,
       addressesProvider.setPoolConfiguratorImpl,
       addressesProvider.setPriceOracle,
-      addressesProvider.setRateOracle,
       addressesProvider.setACLAdmin,
       addressesProvider.setPriceOracleSentinel,
     ]) {

@@ -314,4 +314,17 @@ contract AaveProtocolDataProvider {
       reserve.variableDebtTokenAddress
     );
   }
+
+  /**
+   * @notice Returns the address of the IR strategy
+   * @param asset The address of the underlying asset of the reserve
+   * @return irStrategyAddress The address of the IR strategy
+   */
+  function getIRStrategyAddress(address asset) external view returns (address irStrategyAddress) {
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
+
+    return (reserve.interestRateStrategyAddress);
+  }
 }
