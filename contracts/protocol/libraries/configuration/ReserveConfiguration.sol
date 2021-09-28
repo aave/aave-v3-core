@@ -485,13 +485,11 @@ library ReserveConfiguration {
    * @return The state flag representing borrowing enabled
    * @return The state flag representing stabelRateBorrowing enabled
    * @return The state flag representing paused
-   * @return The state flag representing isolation mode
    **/
   function getFlags(DataTypes.ReserveConfigurationMap memory self)
     internal
     pure
     returns (
-      bool,
       bool,
       bool,
       bool,
@@ -506,7 +504,6 @@ library ReserveConfiguration {
       (dataLocal & ~FROZEN_MASK) != 0,
       (dataLocal & ~BORROWING_MASK) != 0,
       (dataLocal & ~STABLE_BORROWING_MASK) != 0,
-      (dataLocal & ~PAUSED_MASK) != 0,
       (dataLocal & ~PAUSED_MASK) != 0
     );
   }
