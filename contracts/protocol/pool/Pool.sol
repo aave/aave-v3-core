@@ -22,6 +22,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
+import {BridgeLogic} from './../libraries/logic/BridgeLogic.sol';
 
 /**
  * @title Pool contract
@@ -53,6 +54,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _;
   }
 
+  modifier onlyBridge() {
+    _onlyBridge();
+    _;
+  }
+
   function _onlyPoolConfigurator() internal view {
     require(
       _addressesProvider.getPoolConfigurator() == msg.sender,
@@ -60,7 +66,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  /// @inheritdoc VersionedInitializable
+  function _onlyBridge() internal view {
+    require(
+      IACLManager(_addressesProvider.getACLManager()).isBridge(msg.sender),
+      Errors.P_CALLER_NOT_BRIDGE
+    );
+  }
+
   function getRevision() internal pure virtual override returns (uint256) {
     return POOL_REVISION;
   }
@@ -79,6 +91,32 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _flashLoanPremiumTotal = 9;
     _maxNumberOfReserves = 128;
     _flashLoanPremiumToProtocol = 0;
+  }
+
+  ///@inheritdoc IPool
+  function mintUnbacked(
+    address asset,
+    uint256 amount,
+    address onBehalfOf,
+    uint16 referralCode
+  ) external override onlyBridge {
+    BridgeLogic.mintUnbacked(
+      _reserves[asset],
+      _usersConfig[onBehalfOf],
+      asset,
+      amount,
+      onBehalfOf,
+      referralCode
+    );
+  }
+
+  ///@inheritdoc IPool
+  function backUnbacked(
+    address asset,
+    uint256 amount,
+    uint256 fee
+  ) external override onlyBridge {
+    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee);
   }
 
   /// @inheritdoc IPool

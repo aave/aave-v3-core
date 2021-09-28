@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { utils } from 'ethers';
+import { BigNumber, utils } from 'ethers';
 import {
   getMockFlashLoanReceiver,
   getStableDebtToken,
@@ -10,6 +10,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import './helpers/utils/wadraymath';
 
 makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
@@ -65,9 +66,9 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const currentLiquidityRate = reserveData.liquidityRate;
     const currentLiquidityIndex = reserveData.liquidityIndex;
 
-    const totalLiquidity = reserveData.availableLiquidity
-      .add(reserveData.totalStableDebt)
-      .add(reserveData.totalVariableDebt);
+    const totalLiquidity = reserveData.totalAToken.add(
+      reserveData.accruedToTreasuryScaled.rayMul(reserveData.liquidityIndex)
+    );
 
     expect(totalLiquidity).to.be.equal('1000000000000000000');
     expect(currentLiquidityRate).to.be.equal('0');
@@ -94,9 +95,9 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const currentLiquidityRate = reserveData.liquidityRate;
     const currentLiquidityIndex = reserveData.liquidityIndex;
 
-    const totalLiquidity = reserveData.availableLiquidity
-      .add(reserveData.totalStableDebt)
-      .add(reserveData.totalVariableDebt);
+    const totalLiquidity = reserveData.totalAToken.add(
+      reserveData.accruedToTreasuryScaled.rayMul(reserveData.liquidityIndex)
+    );
 
     expect(totalLiquidity).to.be.equal('1000000000000000000');
     expect(currentLiquidityRate).to.be.equal('0');
@@ -278,9 +279,9 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const reserveData = await helpersContract.getReserveData(usdc.address);
     const userData = await helpersContract.getUserReserveData(usdc.address, depositor.address);
 
-    const totalLiquidity = reserveData.availableLiquidity
-      .add(reserveData.totalStableDebt)
-      .add(reserveData.totalVariableDebt);
+    const totalLiquidity = reserveData.totalAToken.add(
+      reserveData.accruedToTreasuryScaled.rayMul(reserveData.liquidityIndex)
+    );
 
     const expectedLiquidity = await convertToCurrencyDecimals(usdc.address, '1000');
 

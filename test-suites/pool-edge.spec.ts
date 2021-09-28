@@ -7,6 +7,7 @@ import { ProtocolErrors } from '../helpers/types';
 import { MockPoolInheritedFactory } from '../types';
 import {
   getBorrowLogic,
+  getBridgeLogic,
   getSupplyLogic,
   getFirstSigner,
   getLiquidationLogic,
@@ -182,6 +183,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     // Deploy the mock Pool with a setter of `maxNumberOfReserves`
     const libraries = {
+      ['__$b06080f092f400a43662c3f835a4d9baa8$__']: (await getBridgeLogic()).address,
       ['__$db79717e66442ee197e8271d032a066e34$__']: (await getSupplyLogic()).address,
       ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: (await getBorrowLogic()).address,
       ['__$f598c634f2d943205ac23f707b80075cbb$__']: (await getLiquidationLogic()).address,

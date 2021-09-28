@@ -12,14 +12,16 @@ import { tEthereumAddress } from '../../../helpers/types';
 import { getDb, DRE } from '../../../helpers/misc-utils';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { BigNumber } from 'ethers';
+import { AToken } from '../../../types';
 
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
   reserve: tEthereumAddress
 ): Promise<ReserveData> => {
-  const [reserveData, tokenAddresses, rateOracle, token] = await Promise.all([
+  const [reserveData, tokenAddresses, reserveConfiguration, rateOracle, token] = await Promise.all([
     helper.getReserveData(reserve),
     helper.getReserveTokensAddresses(reserve),
+    helper.getReserveConfigurationData(reserve),
     getRateOracle(),
     getIErc20Detailed(reserve),
   ]);
@@ -36,17 +38,38 @@ export const getReserveData = async (
   const symbol = await token.symbol();
   const decimals = BigNumber.from(await token.decimals());
 
-  const totalLiquidity = reserveData.availableLiquidity
-    .add(reserveData.totalStableDebt)
-    .add(reserveData.totalVariableDebt);
+  const accruedToTreasuryScaled = reserveData.accruedToTreasuryScaled;
+  const unbacked = reserveData.unbacked;
+  const aToken = (await getAToken(tokenAddresses.aTokenAddress)) as AToken;
 
-  const utilizationRate = totalLiquidity.eq(0)
+  // Need the reserve factor
+  const reserveFactor = reserveConfiguration.reserveFactor;
+
+  const availableLiquidity = await token.balanceOf(aToken.address);
+
+  const totalLiquidity = availableLiquidity.add(unbacked);
+
+  const totalDebt = reserveData.totalStableDebt.add(reserveData.totalVariableDebt);
+
+  const borrowUtilizationRate = totalDebt.eq(0)
     ? BigNumber.from(0)
-    : reserveData.totalStableDebt.add(reserveData.totalVariableDebt).rayDiv(totalLiquidity);
+    : totalDebt.rayDiv(availableLiquidity.add(totalDebt));
+
+  let supplyUtilizationRate = totalDebt.eq(0)
+    ? BigNumber.from(0)
+    : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
+
+  supplyUtilizationRate =
+    supplyUtilizationRate > borrowUtilizationRate ? borrowUtilizationRate : supplyUtilizationRate;
+
   return {
+    reserveFactor,
+    unbacked,
+    accruedToTreasuryScaled,
+    availableLiquidity,
     totalLiquidity,
-    utilizationRate,
-    availableLiquidity: reserveData.availableLiquidity,
+    borrowUtilizationRate,
+    supplyUtilizationRate,
     totalStableDebt: reserveData.totalStableDebt,
     totalVariableDebt: reserveData.totalVariableDebt,
     liquidityRate: reserveData.liquidityRate,

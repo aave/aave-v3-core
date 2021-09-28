@@ -5,6 +5,7 @@ import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detai
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
+import {WadRayMath} from '../protocol/libraries/math/WadRayMath.sol';
 import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
@@ -18,6 +19,7 @@ import {IPool} from '../interfaces/IPool.sol';
 contract AaveProtocolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using WadRayMath for uint256;
 
   address constant MKR = 0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2;
   address constant ETH = 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE;
@@ -163,9 +165,20 @@ contract AaveProtocolDataProvider {
   }
 
   /**
+   * @notice Returns the unbacked mint cap of the reserve
+   * @param asset The address of the underlying asset of the reserve
+   * @return The unbacked mint cap of the reserve
+   **/
+  function getUnbackedMintCap(address asset) external view returns (uint256) {
+    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getUnbackedMintCap();
+  }
+
+  /**
    * @notice Returns the reserve data
    * @param asset The address of the underlying asset of the reserve
-   * @return availableLiquidity The available liquidity of the reserve
+   * @return unbacked The amount of unbacked tokens
+   * @return accruedToTreasuryScaled The scaled amount of tokens accrued to treasury that is to be minted
+   * @return totalAToken The total supply of the aToken
    * @return totalStableDebt The total stable debt of the reserve
    * @return totalVariableDebt The total variable debt of the reserve
    * @return liquidityRate The liquidity rate of the reserve
@@ -180,7 +193,9 @@ contract AaveProtocolDataProvider {
     external
     view
     returns (
-      uint256 availableLiquidity,
+      uint256 unbacked,
+      uint256 accruedToTreasuryScaled,
+      uint256 totalAToken,
       uint256 totalStableDebt,
       uint256 totalVariableDebt,
       uint256 liquidityRate,
@@ -197,7 +212,9 @@ contract AaveProtocolDataProvider {
     );
 
     return (
-      IERC20Detailed(asset).balanceOf(reserve.aTokenAddress),
+      reserve.unbacked,
+      reserve.accruedToTreasury,
+      IERC20Detailed(reserve.aTokenAddress).totalSupply(),
       IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply(),
       IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply(),
       reserve.currentLiquidityRate,

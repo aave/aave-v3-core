@@ -16,6 +16,7 @@ interface IPoolAddressesProvider {
   event ACLAdminUpdated(address indexed newAddress);
   event OperationalValidatorUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
+  event BridgeAccessControlUpdated(address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
   /**

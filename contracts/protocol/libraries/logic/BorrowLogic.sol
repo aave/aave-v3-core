@@ -280,7 +280,7 @@ library BorrowLogic {
 
         reserve.accruedToTreasury =
           reserve.accruedToTreasury +
-          vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex);
+          Helpers.castUint128(vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex));
 
         reserve.updateInterestRates(
           reserveCache,
