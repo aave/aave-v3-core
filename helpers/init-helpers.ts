@@ -68,6 +68,7 @@ export const initReservesByHelper = async (
     string,
     string,
     string,
+    string,
     string
   ];
   let rateStrategies: Record<string, typeof strategyRates> = {};
@@ -130,7 +131,8 @@ export const initReservesByHelper = async (
       stableRateSlope1,
       stableRateSlope2,
       baseStableRateOffset,
-      stableRateExcessOffset
+      stableRateExcessOffset,
+      optimalStableToVariableDebtRatio,
     } = strategy;
     if (!strategyAddresses[strategy.name]) {
       // Strategy does not exist, create a new one
@@ -143,7 +145,8 @@ export const initReservesByHelper = async (
         stableRateSlope1,
         stableRateSlope2,
         baseStableRateOffset,
-        stableRateExcessOffset
+        stableRateExcessOffset,
+        optimalStableToVariableDebtRatio,
       ];
       strategyAddresses[strategy.name] = (
         await deployDefaultReserveInterestRateStrategy(rateStrategies[strategy.name])

@@ -157,7 +157,6 @@ export const deployEModeLogic = async () => {
   return withSave(eModeLogic, eContractid.EModeLogic);
 };
 
-
 export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   const supplyLogic = await deploySupplyLogic();
   const borrowLogic = await deployBorrowLogic();
@@ -236,7 +235,7 @@ export const deployMintableDelegationERC20 = async (
   );
 
 export const deployDefaultReserveInterestRateStrategy = async (
-  args: [tEthereumAddress, string, string, string, string, string, string, string, string]
+  args: [tEthereumAddress, string, string, string, string, string, string, string, string, string]
 ) =>
   withSave(
     await new DefaultReserveInterestRateStrategyFactory(await getFirstSigner()).deploy(...args),

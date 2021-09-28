@@ -8,7 +8,7 @@ import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRat
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
-import "hardhat/console.sol";
+import 'hardhat/console.sol';
 
 /**
  * @title DefaultReserveInterestRateStrategy contract
@@ -28,6 +28,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * Expressed in ray
    **/
   uint256 public immutable OPTIMAL_UTILIZATION_RATE;
+
+  uint256 public immutable OPTIMAL_STABLE_TO_VARIABLE_DEBT_RATIO;
 
   /**
    * @dev This constant represents the excess utilization rate above the optimal. It's always equal to
@@ -67,10 +69,12 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 stableRateSlope1,
     uint256 stableRateSlope2,
     uint256 baseStableRateOffset,
-    uint256 stableRateExcessOffset
+    uint256 stableRateExcessOffset,
+    uint256 optimalStableToVariableDebtRatio
   ) {
     OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
     EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
+    OPTIMAL_STABLE_TO_VARIABLE_DEBT_RATIO = optimalStableToVariableDebtRatio;
     addressesProvider = provider;
     _baseVariableBorrowRate = baseVariableBorrowRate;
     _variableRateSlope1 = variableRateSlope1;
@@ -97,7 +101,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     return _stableRateSlope2;
   }
 
-  function getBaseStableBorrowRate() public view returns(uint256) {
+  function getBaseStableBorrowRate() public view returns (uint256) {
     return _variableRateSlope1 + _baseStableRateOffset;
   }
 

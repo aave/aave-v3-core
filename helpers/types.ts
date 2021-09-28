@@ -170,7 +170,6 @@ export enum ProtocolErrors {
   RC_INVALID_UNBACKED_MINT_CAP = '103',
   VL_UNBACKED_MINT_CAP_EXCEEDED = '104',
 
-
   // old
 
   INVALID_FROM_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
@@ -326,6 +325,7 @@ export interface IInterestRateStrategyParams {
   stableRateSlope2: string;
   baseStableRateOffset: string;
   stableRateExcessOffset: string;
+  optimalStableToVariableDebtRatio: string;
 }
 
 export interface IReserveBorrowParams {
