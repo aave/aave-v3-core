@@ -17,7 +17,7 @@ import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
 
 makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
-  const { VL_PRICE_ORACLE_SENTINEL_FAILED, INVALID_HF } = ProtocolErrors;
+  const { VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED, INVALID_HF } = ProtocolErrors;
 
   let sequencerOracle: SequencerOracle;
   let priceOracleSentinel: PriceOracleSentinel;
@@ -28,9 +28,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const { addressesProvider, deployer } = testEnv;
 
     // Deploy SequencerOracle
-    sequencerOracle = await (
-      await new SequencerOracleFactory(deployer.signer).deploy()
-    ).deployed();
+    sequencerOracle = await (await new SequencerOracleFactory(deployer.signer).deploy()).deployed();
 
     priceOracleSentinel = await (
       await new PriceOracleSentinelFactory(await getFirstSigner()).deploy(
@@ -52,22 +50,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       .to.emit(addressesProvider, 'PriceOracleSentinelUpdated')
       .withArgs(priceOracleSentinel.address);
 
-    expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(
-      priceOracleSentinel.address
-    );
+    expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(priceOracleSentinel.address);
 
     const answer = await sequencerOracle.latestAnswer();
     expect(answer[0]).to.be.eq(false);
     expect(answer[1]).to.be.eq(0);
-
-    expect(
-      await configurator.connect(poolAdmin.signer).setPriceOracleSentinelActive(dai.address, true)
-    );
-    expect(
-      await configurator.connect(poolAdmin.signer).setPriceOracleSentinelActive(weth.address, true)
-    );
-    expect(await helpersContract.getReservePriceOracleSentinelState(dai.address)).to.be.true;
-    expect(await helpersContract.getReservePriceOracleSentinelState(weth.address)).to.be.true;
   });
 
   it('Borrow DAI', async () => {
@@ -161,7 +148,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const amountToLiquidate = userReserveDataBefore.currentVariableDebt.div(2);
     await expect(
       pool.liquidationCall(weth.address, dai.address, borrower.address, amountToLiquidate, true)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Drop health factor lower', async () => {
@@ -325,7 +312,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Turn on sequencer', async () => {
@@ -350,7 +337,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Turn off sequencer + increase time more than grace period', async () => {
@@ -377,7 +364,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_FAILED);
+    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Turn on sequencer + increase time past grace period', async () => {

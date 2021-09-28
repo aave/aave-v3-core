@@ -101,18 +101,6 @@ interface IPoolConfigurator {
   event ReserveUnpaused(address indexed asset);
 
   /**
-   * @notice Emitted when the PriceOracleSentinel is activated for the reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event PriceOracleSentinelActivated(address indexed asset);
-
-  /**
-   * @notice Emitted when the PriceOracleSentinel is deactivated for the reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event PriceOracleSentinelDeactivated(address indexed asset);
-
-  /**
    * @notice Emitted when a reserve is dropped
    * @param asset The address of the underlying asset of the reserve
    **/
@@ -354,13 +342,6 @@ interface IPoolConfigurator {
    * @param val True if pausing the reserve, false if unpausing
    **/
   function setReservePause(address asset, bool val) external;
-
-  /**
-   * @notice Set the state of the PriceOracleSentinel for the reserve
-   * @param asset The address of the underlying asset of the reserve
-   * @param state True if activating the PriceOracleSentinel, false if deactivating
-   **/
-  function setPriceOracleSentinelActive(address asset, bool state) external;
 
   /**
    * @notice Updates the reserve factor of a reserve

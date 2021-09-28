@@ -16,8 +16,6 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   ISequencerOracle public _oracle;
   uint256 public _gracePeriod;
 
-  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 ether;
-
   /**
    * @notice Constructor
    * @param provider The address of the PoolAddressesProvider
@@ -40,10 +38,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   }
 
   /// @inheritdoc IPriceOracleSentinel
-  function isLiquidationAllowed(uint256 healthFactor) public view override returns (bool) {
-    if (healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD) {
-      return true;
-    }
+  function isLiquidationAllowed() public view override returns (bool) {
     return _isUpAndGracePeriodPassed();
   }
 
