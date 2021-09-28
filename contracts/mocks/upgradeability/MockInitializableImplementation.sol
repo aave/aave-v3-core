@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.7;
 
-import {
-  VersionedInitializable
-} from '../../protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
+import {VersionedInitializable} from '../../protocol/libraries/aave-upgradeability/VersionedInitializable.sol';
 
 contract MockInitializableImple is VersionedInitializable {
   uint256 public value;

@@ -93,7 +93,11 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
     ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
 
-    expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, MAX_UNBACKED_MINT_CAP));
+    expect(
+      await configurator
+        .connect(riskAdmin.signer)
+        .setUnbackedMintCap(dai.address, MAX_UNBACKED_MINT_CAP)
+    );
   });
 
   it('User 2 perform fast withdraw 100 aDai from L2', async () => {
@@ -119,7 +123,11 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
     ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
 
-    expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, MAX_UNBACKED_MINT_CAP));
+    expect(
+      await configurator
+        .connect(riskAdmin.signer)
+        .setUnbackedMintCap(dai.address, MAX_UNBACKED_MINT_CAP)
+    );
   });
 
   it('User 2 perform another fast withdraw 100 aDai from L2', async () => {

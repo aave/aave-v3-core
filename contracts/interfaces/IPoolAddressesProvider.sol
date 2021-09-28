@@ -13,6 +13,7 @@ interface IPoolAddressesProvider {
   event PriceOracleUpdated(address indexed newAddress);
   event ACLManagerUpdated(address indexed newAddress);
   event ACLAdminUpdated(address indexed newAddress);
+  event PriceOracleSentinelUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
   event BridgeAccessControlUpdated(address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
@@ -107,4 +108,16 @@ interface IPoolAddressesProvider {
    * @param aclAdmin The address of the new ACL admin
    */
   function setACLAdmin(address aclAdmin) external;
+
+  /**
+   * @notice Returns the address of the PriceOracleSentinel
+   * @return The PriceOracleSentinel address
+   */
+  function getPriceOracleSentinel() external view returns (address);
+
+  /**
+   * @notice Updates the address of the PriceOracleSentinel
+   * @param oracleSentinel The address of the new PriceOracleSentinel
+   **/
+  function setPriceOracleSentinel(address oracleSentinel) external;
 }

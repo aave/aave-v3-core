@@ -36,7 +36,6 @@ import {
   MockReserveConfigurationFactory,
   MockPoolFactory,
   MockReentrantInitializableImpleFactory,
-  EModeLogicFactory,
 } from '../types';
 import {
   withSave,

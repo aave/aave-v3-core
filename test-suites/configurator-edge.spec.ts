@@ -2,7 +2,13 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { ProtocolErrors } from '../helpers/types';
-import { MAX_BORROW_CAP, MAX_UNBACKED_MINT_CAP, MAX_UINT_AMOUNT, MAX_SUPPLY_CAP, ZERO_ADDRESS } from '../helpers/constants';
+import {
+  MAX_BORROW_CAP,
+  MAX_UNBACKED_MINT_CAP,
+  MAX_UINT_AMOUNT,
+  MAX_SUPPLY_CAP,
+  ZERO_ADDRESS,
+} from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
@@ -152,7 +158,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator.setUnbackedMintCap(weth.address, BigNumber.from(MAX_UNBACKED_MINT_CAP).add(1))
     ).to.be.revertedWith(RC_INVALID_UNBACKED_MINT_CAP);
   });
-  
+
   it('Tries to add a category with id 0 (revert expected)', async () => {
     const { configurator, poolAdmin } = testEnv;
 

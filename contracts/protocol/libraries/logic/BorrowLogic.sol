@@ -83,7 +83,8 @@ library BorrowLogic {
         params.maxStableRateBorrowSizePercent,
         params.reservesCount,
         params.oracle,
-        params.userEModeCategory
+        params.userEModeCategory,
+        params.priceOracleSentinel
       )
     );
 
@@ -312,7 +313,8 @@ library BorrowLogic {
             params.maxStableRateBorrowSizePercent,
             params.reservesCount,
             params.oracle,
-            params.userEModeCategory
+            params.userEModeCategory,
+            params.priceOracleSentinel
           )
         );
       }

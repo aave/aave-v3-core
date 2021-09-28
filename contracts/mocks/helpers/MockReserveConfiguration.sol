@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.7;
 
-import {
-  ReserveConfiguration
-} from '../../protocol/libraries/configuration/ReserveConfiguration.sol';
+import {ReserveConfiguration} from '../../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
 contract MockReserveConfiguration {

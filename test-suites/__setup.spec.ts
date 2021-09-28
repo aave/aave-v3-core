@@ -31,7 +31,6 @@ import {
   getPool,
   getPoolConfiguratorProxy,
   getPairsTokenAggregator,
-  getACLManager,
 } from '../helpers/contracts-getters';
 import { initializeMakeSuite } from './helpers/make-suite';
 
@@ -169,7 +168,6 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
     ethers.constants.WeiPerEther.toString(),
   ]);
   await waitForTx(await addressesProvider.setPriceOracle(fallbackOracle.address));
-
 
   const { USD, ...tokensAddressesWithoutUsd } = allTokenAddresses;
   const allReservesAddresses = {

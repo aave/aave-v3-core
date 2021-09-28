@@ -21,6 +21,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant PRICE_ORACLE = 'PRICE_ORACLE';
   bytes32 private constant ACL_MANAGER = 'ACL_MANAGER';
   bytes32 private constant ACL_ADMIN = 'ACL_ADMIN';
+  bytes32 private constant PRICE_ORACLE_SENTINEL = 'PRICE_ORACLE_SENTINEL';
 
   constructor(string memory marketId) {
     _setMarketId(marketId);
@@ -108,6 +109,17 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   function setACLAdmin(address aclAdmin) external override onlyOwner {
     _addresses[ACL_ADMIN] = aclAdmin;
     emit ACLAdminUpdated(aclAdmin);
+  }
+
+  /// @inheritdoc IPoolAddressesProvider
+  function setPriceOracleSentinel(address oracleSentinel) external override onlyOwner {
+    _addresses[PRICE_ORACLE_SENTINEL] = oracleSentinel;
+    emit PriceOracleSentinelUpdated(oracleSentinel);
+  }
+
+  /// @inheritdoc IPoolAddressesProvider
+  function getPriceOracleSentinel() external view override returns (address) {
+    return getAddress(PRICE_ORACLE_SENTINEL);
   }
 
   /**

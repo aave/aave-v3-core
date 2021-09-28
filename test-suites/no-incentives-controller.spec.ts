@@ -241,11 +241,9 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
       await convertToCurrencyDecimals(mockToken.address, '100')
     );
 
-
     expect(await aMockToken.balanceOf(user.address)).to.be.eq(0);
     expect(await mockToken.balanceOf(user.address)).to.be.eq(expectedMockTokenBalance);
     expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
-
 
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
