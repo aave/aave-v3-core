@@ -46,7 +46,8 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       rateStrategyStableTwo.stableRateSlope1,
       rateStrategyStableTwo.stableRateSlope2,
       rateStrategyStableTwo.baseStableRateOffset,
-      rateStrategyStableTwo.stableRateExcessOffset
+      rateStrategyStableTwo.stableRateExcessOffset,
+      rateStrategyStableTwo.optimalStableToVariableDebtRatio,
     ]);
   });
 
