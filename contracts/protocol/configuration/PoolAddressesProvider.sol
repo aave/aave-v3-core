@@ -22,6 +22,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant RATE_ORACLE = 'RATE_ORACLE';
   bytes32 private constant ACL_MANAGER = 'ACL_MANAGER';
   bytes32 private constant ACL_ADMIN = 'ACL_ADMIN';
+  bytes32 private constant OPERATIONAL_VALIDATOR = 'OPERATIONAL_VALIDATOR';
 
   constructor(string memory marketId) {
     _setMarketId(marketId);
@@ -118,6 +119,17 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   function setACLAdmin(address aclAdmin) external override onlyOwner {
     _addresses[ACL_ADMIN] = aclAdmin;
     emit ACLAdminUpdated(aclAdmin);
+  }
+
+  /// @inheritdoc IPoolAddressesProvider
+  function setOperationalValidator(address operationalValidator) external override onlyOwner {
+    _addresses[OPERATIONAL_VALIDATOR] = operationalValidator;
+    emit OperationalValidatorUpdated(operationalValidator);
+  }
+
+  /// @inheritdoc IPoolAddressesProvider
+  function getOperationalValidator() external view override returns (address) {
+    return getAddress(OPERATIONAL_VALIDATOR);
   }
 
   /**

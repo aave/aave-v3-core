@@ -14,6 +14,7 @@ interface IPoolAddressesProvider {
   event RateOracleUpdated(address indexed newAddress);
   event ACLManagerUpdated(address indexed newAddress);
   event ACLAdminUpdated(address indexed newAddress);
+  event OperationalValidatorUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
@@ -111,4 +112,16 @@ interface IPoolAddressesProvider {
    * @param aclAdmin The address of the new ACL admin
    */
   function setACLAdmin(address aclAdmin) external;
+
+  /**
+   * @notice Returns the address of the OperationalValidator
+   * @return The OperationalValidator address
+   */
+  function getOperationalValidator() external view returns (address);
+
+  /**
+   * @notice Updates the address of the OperationalValidator
+   * @param operationalValidator The address of the new OperationalValidator
+   **/
+  function setOperationalValidator(address operationalValidator) external;
 }

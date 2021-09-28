@@ -110,4 +110,5 @@ library Errors {
   string public constant VL_INCONSISTENT_EMODE_CATEGORY = '99';
   string public constant HLP_UINT128_OVERFLOW = '100';
   string public constant PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101';
+  string public constant VL_SEQUENCER_IS_DOWN = '102';
 }

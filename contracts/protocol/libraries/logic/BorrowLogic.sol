@@ -83,7 +83,8 @@ library BorrowLogic {
         params.maxStableRateBorrowSizePercent,
         params.reservesCount,
         params.oracle,
-        params.userEModeCategory
+        params.userEModeCategory,
+        params.operationalValidator
       )
     );
 
@@ -239,9 +240,7 @@ library BorrowLogic {
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;
-      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(
-        vars.flashloanPremiumTotal
-      );
+      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(vars.flashloanPremiumTotal);
       IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
         params.receiverAddress,
         params.amounts[vars.i]
@@ -269,9 +268,7 @@ library BorrowLogic {
       );
       vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
 
-      if (
-        DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE
-      ) {
+      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
         DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
         DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -316,7 +313,8 @@ library BorrowLogic {
             params.maxStableRateBorrowSizePercent,
             params.reservesCount,
             params.oracle,
-            params.userEModeCategory
+            params.userEModeCategory,
+            params.operationalValidator
           )
         );
       }

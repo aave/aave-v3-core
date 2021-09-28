@@ -1,5 +1,5 @@
 import rawBRE from 'hardhat';
-import { ethers, Signer } from 'ethers';
+import { BigNumber, ethers, Signer } from 'ethers';
 import {
   insertContractAddressInDb,
   getEthersSigners,
@@ -20,6 +20,7 @@ import {
   deployAllMockTokens,
   deployACLManager,
   deployMockIncentivesController,
+  deployOperationalValidator,
 } from '../helpers/contracts-deployments';
 import { eContractid, tEthereumAddress } from '../helpers/types';
 import {
@@ -37,6 +38,7 @@ import {
   getACLManager,
 } from '../helpers/contracts-getters';
 import { initializeMakeSuite } from './helpers/make-suite';
+import { ZERO_ADDRESS } from '../helpers/constants';
 
 const MOCK_USD_PRICE_IN_WEI = AaveConfig.ProtocolGlobalParams.MockUsdPriceInWei;
 const ALL_ASSETS_INITIAL_PRICES = AaveConfig.Mocks.AllAssetsInitialPrices;

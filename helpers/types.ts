@@ -22,6 +22,7 @@ export enum eContractid {
   MintableDelegationERC20 = 'MintableDelegationERC20',
   PoolAddressesProviderRegistry = 'PoolAddressesProviderRegistry',
   ACLManager = 'ACLManager',
+  OperationalValidator = 'OperationalValidator',
   PoolParametersProvider = 'PoolParametersProvider',
   PoolConfigurator = 'PoolConfigurator',
   ValidationLogic = 'ValidationLogic',
@@ -167,6 +168,7 @@ export enum ProtocolErrors {
   VL_INCONSISTENT_EMODE_CATEGORY = '99',
   HLP_UINT128_OVERFLOW = '100',
   PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101',
+  VL_SEQUENCER_IS_DOWN = '102',
 
   // old
 

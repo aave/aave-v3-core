@@ -99,6 +99,7 @@ library DataTypes {
     bool receiveAToken;
     address priceOracle;
     uint8 userEModeCategory;
+    address operationalValidator;
   }
 
   struct ExecuteSupplyParams {
@@ -120,6 +121,7 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
+    address operationalValidator;
   }
 
   struct ExecuteRepayParams {
@@ -139,7 +141,7 @@ library DataTypes {
     uint8 userEModeCategory;
   }
 
-    struct ExecuteSetUserEModeParams {
+  struct ExecuteSetUserEModeParams {
     uint256 reservesCount;
     address oracle;
     uint8 categoryId;
@@ -173,6 +175,7 @@ library DataTypes {
     address oracle;
     uint8 userEModeCategory;
     bool isAuthorizedFlashBorrower;
+    address operationalValidator;
   }
 
   struct CalculateUserAccountDataParams {
@@ -194,6 +197,7 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
+    address operationalValidator;
   }
 
   struct ValidateLiquidationCallParams {
@@ -203,5 +207,6 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
+    address operationalValidator;
   }
 }

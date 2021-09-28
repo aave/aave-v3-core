@@ -10,6 +10,7 @@ import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
+import {IOperationalValidator} from '../../../interfaces/IOperationalValidator.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
@@ -196,6 +197,13 @@ library ValidationLogic {
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
+
+    if (params.operationalValidator != address(0)) {
+      require(
+        IOperationalValidator(params.operationalValidator).isBorrowAllowed(),
+        Errors.VL_SEQUENCER_IS_DOWN
+      );
+    }
 
     require(
       vars.healthFactor > GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
@@ -488,6 +496,13 @@ library ValidationLogic {
         params.userEModeCategory
       )
     );
+
+    if (params.operationalValidator != address(0)) {
+      require(
+        IOperationalValidator(params.operationalValidator).isLiquidationAllowed(vars.healthFactor),
+        Errors.VL_SEQUENCER_IS_DOWN
+      );
+    }
 
     require(
       vars.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
