@@ -122,14 +122,14 @@ contract AaveProtocolDataProvider {
   }
 
   /**
-   * Returns the state of the OperationValidator of the reserve
+   * Returns the state of the PriceOracleSentinel of the reserve
    * @param asset The address of the underlying asset of the reserve
-   * @return True if the OperationalValidator is active for the reserve, false otherwise
+   * @return True if the PriceOracleSentinel is active for the reserve, false otherwise
    */
-  function getReserveOperationValidatorState(address asset) external view returns (bool) {
+  function getReservePriceOracleSentinelState(address asset) external view returns (bool) {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset);
-    return configuration.getOperationalValidatorActive();
+    return configuration.getPriceOracleSentinelActive();
   }
 
   /**

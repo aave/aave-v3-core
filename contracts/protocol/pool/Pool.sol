@@ -208,7 +208,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _reservesCount,
         _addressesProvider.getPriceOracle(),
         _usersEModeCategory[msg.sender],
-        _addressesProvider.getOperationalValidator()
+        _addressesProvider.getPriceOracleSentinel()
       )
     );
   }
@@ -318,7 +318,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         receiveAToken,
         _addressesProvider.getPriceOracle(),
         _usersEModeCategory[user],
-        _addressesProvider.getOperationalValidator()
+        _addressesProvider.getPriceOracleSentinel()
       )
     );
   }
@@ -348,7 +348,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _addressesProvider.getPriceOracle(),
       _usersEModeCategory[onBehalfOf],
       IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender),
-      _addressesProvider.getOperationalValidator()
+      _addressesProvider.getPriceOracleSentinel()
     );
 
     BorrowLogic.executeFlashLoan(

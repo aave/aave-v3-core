@@ -14,7 +14,7 @@ interface IPoolAddressesProvider {
   event RateOracleUpdated(address indexed newAddress);
   event ACLManagerUpdated(address indexed newAddress);
   event ACLAdminUpdated(address indexed newAddress);
-  event OperationalValidatorUpdated(address indexed newAddress);
+  event PriceOracleSentinelUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
   event BridgeAccessControlUpdated(address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
@@ -115,14 +115,14 @@ interface IPoolAddressesProvider {
   function setACLAdmin(address aclAdmin) external;
 
   /**
-   * @notice Returns the address of the OperationalValidator
-   * @return The OperationalValidator address
+   * @notice Returns the address of the PriceOracleSentinel
+   * @return The PriceOracleSentinel address
    */
-  function getOperationalValidator() external view returns (address);
+  function getPriceOracleSentinel() external view returns (address);
 
   /**
-   * @notice Updates the address of the OperationalValidator
-   * @param operationalValidator The address of the new OperationalValidator
+   * @notice Updates the address of the PriceOracleSentinel
+   * @param oracleSentinel The address of the new PriceOracleSentinel
    **/
-  function setOperationalValidator(address operationalValidator) external;
+  function setPriceOracleSentinel(address oracleSentinel) external;
 }

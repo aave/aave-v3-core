@@ -2,16 +2,16 @@
 pragma solidity 0.8.7;
 
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {IOperationalValidator} from '../../interfaces/IOperationalValidator.sol';
+import {IPriceOracleSentinel} from '../../interfaces/IPriceOracleSentinel.sol';
 import {ISequencerOracle} from '../../interfaces/ISequencerOracle.sol';
 
 /**
- * @title OperationalValidator
+ * @title PriceOracleSentinel
  * @author Aave
  * @notice It validates if operations are allowed depending on the PriceOracle health.
  * @dev After a PriceOracle downtime, once it gets up, users can make their positions healthy during a grace period.
  */
-contract OperationalValidator is IOperationalValidator {
+contract PriceOracleSentinel is IPriceOracleSentinel {
   IPoolAddressesProvider public _addressesProvider;
   ISequencerOracle public _oracle;
   uint256 public _gracePeriod;
@@ -34,12 +34,12 @@ contract OperationalValidator is IOperationalValidator {
     _gracePeriod = gracePeriod;
   }
 
-  /// @inheritdoc IOperationalValidator
+  /// @inheritdoc IPriceOracleSentinel
   function isBorrowAllowed() public view override returns (bool) {
     return _isUpAndGracePeriodPassed();
   }
 
-  /// @inheritdoc IOperationalValidator
+  /// @inheritdoc IPriceOracleSentinel
   function isLiquidationAllowed(uint256 healthFactor) public view override returns (bool) {
     if (healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD) {
       return true;

@@ -84,7 +84,7 @@ library BorrowLogic {
         params.reservesCount,
         params.oracle,
         params.userEModeCategory,
-        params.operationalValidator
+        params.priceOracleSentinel
       )
     );
 
@@ -314,7 +314,7 @@ library BorrowLogic {
             params.reservesCount,
             params.oracle,
             params.userEModeCategory,
-            params.operationalValidator
+            params.priceOracleSentinel
           )
         );
       }

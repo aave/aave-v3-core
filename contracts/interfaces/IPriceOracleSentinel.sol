@@ -2,11 +2,11 @@
 pragma solidity 0.8.7;
 
 /**
- * @title IOperationalValidator
+ * @title IPriceOracleSentinel
  * @author Aave
- * @notice Defines the basic interface for the OperationValidator
+ * @notice Defines the basic interface for the PriceOracleSentinel
  */
-interface IOperationalValidator {
+interface IPriceOracleSentinel {
   /**
    * @notice Returns true if the `borrow` operation is allowed.
    * @dev Operation not allowed when PriceOracle is down or grace period not passed.

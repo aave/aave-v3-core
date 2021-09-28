@@ -10,7 +10,7 @@ import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
-import {IOperationalValidator} from '../../../interfaces/IOperationalValidator.sol';
+import {IPriceOracleSentinel} from '../../../interfaces/IPriceOracleSentinel.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
@@ -142,8 +142,8 @@ library ValidationLogic {
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
     require(
-      !params.reserveCache.reserveConfiguration.getOperationalValidatorActive() ||
-        IOperationalValidator(params.operationalValidator).isBorrowAllowed(),
+      !params.reserveCache.reserveConfiguration.getPriceOracleSentinelActive() ||
+        IPriceOracleSentinel(params.priceOracleSentinel).isBorrowAllowed(),
       Errors.VL_PRICE_ORACLE_SENTINEL_FAILED
     );
 
@@ -498,8 +498,8 @@ library ValidationLogic {
     );
 
     require(
-      !params.debtReserveCache.reserveConfiguration.getOperationalValidatorActive() ||
-        IOperationalValidator(params.operationalValidator).isLiquidationAllowed(vars.healthFactor),
+      !params.debtReserveCache.reserveConfiguration.getPriceOracleSentinelActive() ||
+        IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(vars.healthFactor),
       Errors.VL_PRICE_ORACLE_SENTINEL_FAILED
     );
 

@@ -101,16 +101,16 @@ interface IPoolConfigurator {
   event ReserveUnpaused(address indexed asset);
 
   /**
-   * @notice Emitted when the OperationalValidator is activated for the reserve
+   * @notice Emitted when the PriceOracleSentinel is activated for the reserve
    * @param asset The address of the underlying asset of the reserve
    **/
-  event OperationalValidatorActivated(address indexed asset);
+  event PriceOracleSentinelActivated(address indexed asset);
 
   /**
-   * @notice Emitted when the OperationalValidator is deactivated for the reserve
+   * @notice Emitted when the PriceOracleSentinel is deactivated for the reserve
    * @param asset The address of the underlying asset of the reserve
    **/
-  event OperationalValidatorDeactivated(address indexed asset);
+  event PriceOracleSentinelDeactivated(address indexed asset);
 
   /**
    * @notice Emitted when a reserve is dropped
@@ -356,11 +356,11 @@ interface IPoolConfigurator {
   function setReservePause(address asset, bool val) external;
 
   /**
-   * @notice Set the state of the OperationalValidator for the reserve
+   * @notice Set the state of the PriceOracleSentinel for the reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param state True if activating the OperationalValidator, false if deactivating
+   * @param state True if activating the PriceOracleSentinel, false if deactivating
    **/
-  function setOperationalValidatorActive(address asset, bool state) external;
+  function setPriceOracleSentinelActive(address asset, bool state) external;
 
   /**
    * @notice Updates the reserve factor of a reserve

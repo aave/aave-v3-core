@@ -245,20 +245,20 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setOperationalValidatorActive(address asset, bool state)
+  function setPriceOracleSentinelActive(address asset, bool state)
     public
     override
     onlyRiskOrPoolAdmins
   {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setOperationalValidatorActive(state);
+    currentConfig.setPriceOracleSentinelActive(state);
 
     _pool.setConfiguration(asset, currentConfig.data);
 
     if (state) {
-      emit OperationalValidatorActivated(asset);
+      emit PriceOracleSentinelActivated(asset);
     } else {
-      emit OperationalValidatorDeactivated(asset);
+      emit PriceOracleSentinelDeactivated(asset);
     }
   }
 
