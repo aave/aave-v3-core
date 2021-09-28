@@ -208,7 +208,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _reservesCount,
         _addressesProvider.getPriceOracle(),
         _usersEModeCategory[msg.sender],
-        _addressesProvider.getPriceOracleSentinel()
+        _reserves[asset].configuration.getPriceOracleSentinelActive()
+          ? _addressesProvider.getPriceOracleSentinel()
+          : address(0)
       )
     );
   }
@@ -318,7 +320,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         receiveAToken,
         _addressesProvider.getPriceOracle(),
         _usersEModeCategory[user],
-        _addressesProvider.getPriceOracleSentinel()
+        _reserves[debtAsset].configuration.getPriceOracleSentinelActive()
+          ? _addressesProvider.getPriceOracleSentinel()
+          : address(0)
       )
     );
   }
@@ -348,7 +352,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _addressesProvider.getPriceOracle(),
       _usersEModeCategory[onBehalfOf],
       IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender),
-      _addressesProvider.getPriceOracleSentinel()
+      _reserves[assets[0]].configuration.getPriceOracleSentinelActive()
+        ? _addressesProvider.getPriceOracleSentinel()
+        : address(0)
     );
 
     BorrowLogic.executeFlashLoan(

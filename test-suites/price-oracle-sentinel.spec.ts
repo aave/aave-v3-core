@@ -1,9 +1,10 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { DRE, increaseTime, timeLatest, waitForTx } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, RAY } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
+  MockFlashLoanReceiverFactory,
   PriceOracleSentinel,
   PriceOracleSentinelFactory,
   SequencerOracle,
@@ -28,9 +29,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const { addressesProvider, deployer } = testEnv;
 
     // Deploy SequencerOracle
-    sequencerOracle = await (
-      await new SequencerOracleFactory(deployer.signer).deploy()
-    ).deployed();
+    sequencerOracle = await (await new SequencerOracleFactory(deployer.signer).deploy()).deployed();
 
     priceOracleSentinel = await (
       await new PriceOracleSentinelFactory(await getFirstSigner()).deploy(
@@ -52,9 +51,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       .to.emit(addressesProvider, 'PriceOracleSentinelUpdated')
       .withArgs(priceOracleSentinel.address);
 
-    expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(
-      priceOracleSentinel.address
-    );
+    expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(priceOracleSentinel.address);
 
     const answer = await sequencerOracle.latestAnswer();
     expect(answer[0]).to.be.eq(false);
@@ -68,6 +65,61 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     );
     expect(await helpersContract.getReservePriceOracleSentinelState(dai.address)).to.be.true;
     expect(await helpersContract.getReservePriceOracleSentinelState(weth.address)).to.be.true;
+  });
+
+  it('Flashloan dai and weth, with dai sentinel inactive (expect revert)', async () => {
+    const {
+      deployer,
+      addressesProvider,
+      pool,
+      configurator,
+      helpersContract,
+      poolAdmin,
+      dai,
+      weth,
+    } = testEnv;
+
+    expect(
+      await configurator.connect(poolAdmin.signer).setPriceOracleSentinelActive(dai.address, false)
+    );
+
+    await dai.mint(await convertToCurrencyDecimals(dai.address, '2000'));
+    await dai.approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.supply(
+      dai.address,
+      await convertToCurrencyDecimals(dai.address, '2000'),
+      deployer.address,
+      0
+    );
+
+    await weth.mint(await convertToCurrencyDecimals(weth.address, '1'));
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.supply(
+      weth.address,
+      await convertToCurrencyDecimals(weth.address, '1'),
+      deployer.address,
+      0
+    );
+
+    const flashLoanMock = await (
+      await new MockFlashLoanReceiverFactory(deployer.signer).deploy(addressesProvider.address)
+    ).deployed();
+
+    await expect(
+      pool.flashLoan(
+        flashLoanMock.address,
+        [dai.address, weth.address],
+        [1000, 1000],
+        [RateMode.Variable, RateMode.Variable],
+        deployer.address,
+        '0x',
+        0
+      )
+    ).to.be.revertedWith('function call to a non-contract account');
+
+    expect(
+      await configurator.connect(poolAdmin.signer).setPriceOracleSentinelActive(dai.address, true)
+    );
   });
 
   it('Borrow DAI', async () => {
