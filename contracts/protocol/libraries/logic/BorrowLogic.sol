@@ -8,6 +8,7 @@ import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
+import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
@@ -26,6 +27,7 @@ library BorrowLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
 
@@ -125,7 +127,7 @@ library BorrowLogic {
 
     if (isolationModeActive) {
       reserves[isolationModeCollateralAddress].isolationModeTotalDebt += Helpers.castUint128(
-        params.amount
+        params.amount / 10**reserveCache.reserveConfiguration.getDecimals()
       );
     }
 
@@ -214,7 +216,7 @@ library BorrowLogic {
       } else {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
           isolationModeTotalDebt -
-          Helpers.castUint128(paybackAmount);
+          Helpers.castUint128(paybackAmount / 10**reserveCache.reserveConfiguration.getDecimals());
       }
     }
 
