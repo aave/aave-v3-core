@@ -257,6 +257,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setDebtCeiling(address asset, uint256 ceiling) external override onlyRiskOrPoolAdmins {
+    DataTypes.ReserveData memory reserveData = _pool.getReserveData(asset);
+    uint256 aTokenSupply = IERC20Detailed(reserveData.aTokenAddress).totalSupply();
+
+    if (ceiling > 0) {
+      require(aTokenSupply == 0, Errors.PC_INVALID_DEBT_CEILING_ASSET_ALREADY_SUPPLIED);
+    }
+
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    currentConfig.setDebtCeiling(ceiling);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit DebtCeilingChanged(asset, ceiling);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setBorrowCap(address asset, uint256 borrowCap) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setBorrowCap(borrowCap);

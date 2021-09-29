@@ -67,7 +67,8 @@ library SupplyLogic {
     );
 
     if (isFirstSupply) {
-      if (!userConfig.isInIsolationMode(reserves, reservesList)) {
+      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
+      if (!isolationModeActive) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
       }
@@ -171,7 +172,8 @@ library SupplyLogic {
 
       if (params.balanceToBefore == 0 && params.amount != 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
-        if (!toConfig.isInIsolationMode(reserves, reservesList)) {
+        (bool isolationModeActive, , ) = toConfig.getIsolationModeState(reserves, reservesList);
+        if (!isolationModeActive) {
           toConfig.setUsingAsCollateral(reserveId, true);
           emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
         }
@@ -198,7 +200,9 @@ library SupplyLogic {
     ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance);
 
     if (useAsCollateral) {
-      require(!userConfig.isInIsolationMode(reserves, reservesList));
+      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
+      require(!isolationModeActive, Errors.SL_USER_IN_ISOLATION_MODE);
+
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, msg.sender);
     } else {

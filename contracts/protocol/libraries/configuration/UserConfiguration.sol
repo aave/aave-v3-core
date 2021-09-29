@@ -152,27 +152,37 @@ library UserConfiguration {
     return self.data == 0;
   }
 
-  function isInIsolationMode(
+  function getIsolationModeState(
     DataTypes.UserConfigurationMap memory self,
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList
-  ) internal view returns (bool) {
+  )
+    internal
+    view
+    returns (
+      bool,
+      address,
+      uint256
+    )
+  {
     if (!isUsingAsCollateralAny(self)) {
-      return false;
+      return (false, address(0), 0);
     }
     if (isUsingAsCollateralOne(self)) {
       uint256 assetId = _getFirstAssetAsCollateralId(self);
 
       address assetAddress = reservesList[assetId];
       uint256 ceiling = reservesData[assetAddress].configuration.getDebtCeiling();
-      return ceiling > 0;
+      if (ceiling > 0) {
+        return (true, assetAddress, ceiling);
+      }
     }
-    return false;
+    return (false, address(0), 0);
   }
 
   function _getFirstAssetAsCollateralId(DataTypes.UserConfigurationMap memory self)
     internal
-    view
+    pure
     returns (uint256)
   {
     unchecked {

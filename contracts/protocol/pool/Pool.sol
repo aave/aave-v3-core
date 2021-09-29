@@ -224,6 +224,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
+        _reserves,
+        _reservesList,
         _reserves[asset],
         _usersConfig[onBehalfOf],
         DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, false)
@@ -241,21 +243,34 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bytes32 permitR,
     bytes32 permitS
   ) external override returns (uint256) {
-    IERC20WithPermit(asset).permit(
-      msg.sender,
-      address(this),
-      amount,
-      deadline,
-      permitV,
-      permitR,
-      permitS
-    );
-    return
-      BorrowLogic.executeRepay(
-        _reserves[asset],
-        _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, false)
+    {
+      IERC20WithPermit(asset).permit(
+        msg.sender,
+        address(this),
+        amount,
+        deadline,
+        permitV,
+        permitR,
+        permitS
       );
+    }
+    {
+      DataTypes.ExecuteRepayParams memory params = DataTypes.ExecuteRepayParams(
+        asset,
+        amount,
+        rateMode,
+        onBehalfOf,
+        false
+      );
+      return
+        BorrowLogic.executeRepay(
+          _reserves,
+          _reservesList,
+          _reserves[asset],
+          _usersConfig[onBehalfOf],
+          params
+        );
+    }
   }
 
   /// @inheritdoc IPool
@@ -267,6 +282,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
+        _reserves,
+        _reservesList,
         _reserves[asset],
         _usersConfig[onBehalfOf],
         DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, true)

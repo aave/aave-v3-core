@@ -29,6 +29,7 @@ library DataTypes {
     uint128 accruedToTreasury;
     //the quickwithdraw balance waiting for underlying to be backed
     uint128 unbacked;
+    uint128 isolationModeTotalDebt;
   }
 
   struct ReserveConfigurationMap {
@@ -204,6 +205,9 @@ library DataTypes {
     address oracle;
     uint8 userEModeCategory;
     address priceOracleSentinel;
+    bool isolationModeActive;
+    address isolationModeCollateralAddress;
+    uint256 isolationModeDebtCeiling;
   }
 
   struct ValidateLiquidationCallParams {
