@@ -25,6 +25,7 @@ library ReserveConfiguration {
   uint256 constant LIQUIDATION_PROTOCOL_FEE_MASK =  0xFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant EMODE_CATEGORY_MASK =            0xFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant UNBACKED_MINT_CAP_MASK =         0xFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant DEBT_CEILING_MASK =              0xFFF00000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
 
   /// @dev For the LTV, the start bit is 0 (up to 15), hence no bitshifting is needed
   uint256 constant LIQUIDATION_THRESHOLD_START_BIT_POSITION = 16;
@@ -42,6 +43,7 @@ library ReserveConfiguration {
   uint256 constant LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION = 152;
   uint256 constant EMODE_CATEGORY_START_BIT_POSITION = 168;
   uint256 constant UNBACKED_MINT_CAP_START_BIT_POSITION = 176;
+  uint256 constant DEBT_CEILING_START_BIT_POSITION = 212;
 
   uint256 constant MAX_VALID_LTV = 65535;
   uint256 constant MAX_VALID_LIQUIDATION_THRESHOLD = 65535;
@@ -53,6 +55,7 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 10000;
   uint256 constant MAX_VALID_EMODE_CATEGORY = 255;
   uint256 constant MAX_VALID_UNBACKED_MINT_CAP = 68719476735;
+  uint256 constant MAX_VALID_DEBT_CEILING = 4294967296;
 
   /**
    * @notice Sets the Loan to Value of the reserve
@@ -354,6 +357,33 @@ library ReserveConfiguration {
     returns (uint256)
   {
     return (self.data & ~SUPPLY_CAP_MASK) >> SUPPLY_CAP_START_BIT_POSITION;
+  }
+
+  /**
+   * @notice Sets the debt ceiling in isolation mode for the asset
+   * @param self The reserve configuration
+   * @param ceiling The maximum debt ceiling for the asset
+   **/
+  function setDebtCeiling(DataTypes.ReserveConfigurationMap memory self, uint256 ceiling)
+    internal
+    pure
+  {
+    require(ceiling <= MAX_VALID_DEBT_CEILING, Errors.RC_INVALID_DEBT_CEILING);
+
+    self.data = (self.data & DEBT_CEILING_MASK) | (ceiling << DEBT_CEILING_START_BIT_POSITION);
+  }
+
+  /**
+   * @notice Gets the debt ceiling for the asset if the asset is in isolation mode
+   * @param self The reserve configuration
+   * @return The debt ceiling (0 = isolation mode disabled)
+   **/
+  function getDebtCeiling(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (uint256)
+  {
+    return (self.data & ~DEBT_CEILING_MASK) >> DEBT_CEILING_START_BIT_POSITION;
   }
 
   /**

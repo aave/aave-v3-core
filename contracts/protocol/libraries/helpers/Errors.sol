@@ -114,4 +114,9 @@ library Errors {
   string public constant RC_INVALID_UNBACKED_MINT_CAP = '103';
   string public constant VL_UNBACKED_MINT_CAP_EXCEEDED = '104';
   string public constant VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED = '105';
+  string public constant RC_INVALID_DEBT_CEILING = '106';
+  string public constant PC_INVALID_DEBT_CEILING_ASSET_ALREADY_SUPPLIED = '107';
+  string public constant VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY = '108';
+  string public constant VL_DEBT_CEILING_CROSSED = '109';
+  string public constant SL_USER_IN_ISOLATION_MODE = '110';
 }

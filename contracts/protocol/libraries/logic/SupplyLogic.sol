@@ -45,6 +45,7 @@ library SupplyLogic {
 
   function executeSupply(
     mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteSupplyParams memory params
   ) external {
@@ -66,8 +67,11 @@ library SupplyLogic {
     );
 
     if (isFirstSupply) {
-      userConfig.setUsingAsCollateral(reserve.id, true);
-      emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
+      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
+      if (!isolationModeActive) {
+        userConfig.setUsingAsCollateral(reserve.id, true);
+        emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
+      }
     }
 
     emit Supply(params.asset, msg.sender, params.onBehalfOf, params.amount, params.referralCode);
@@ -168,8 +172,11 @@ library SupplyLogic {
 
       if (params.balanceToBefore == 0 && params.amount != 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
-        toConfig.setUsingAsCollateral(reserveId, true);
-        emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
+        (bool isolationModeActive, , ) = toConfig.getIsolationModeState(reserves, reservesList);
+        if (!isolationModeActive) {
+          toConfig.setUsingAsCollateral(reserveId, true);
+          emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
+        }
       }
     }
   }
@@ -192,11 +199,14 @@ library SupplyLogic {
 
     ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance);
 
-    userConfig.setUsingAsCollateral(reserve.id, useAsCollateral);
-
     if (useAsCollateral) {
+      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
+      require(!isolationModeActive, Errors.SL_USER_IN_ISOLATION_MODE);
+
+      userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, msg.sender);
     } else {
+      userConfig.setUsingAsCollateral(reserve.id, false);
       ValidationLogic.validateHFAndLtv(
         reserves,
         reservesList,

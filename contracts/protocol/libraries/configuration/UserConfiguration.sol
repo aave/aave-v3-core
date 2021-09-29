@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
+import {ReserveConfiguration} from './ReserveConfiguration.sol';
 
 /**
  * @title UserConfiguration library
@@ -10,8 +11,12 @@ import {DataTypes} from '../types/DataTypes.sol';
  * @notice Implements the bitmap logic to handle the user configuration
  */
 library UserConfiguration {
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+
   uint256 internal constant BORROWING_MASK =
     0x5555555555555555555555555555555555555555555555555555555555555555;
+  uint256 internal constant COLLATERAL_MASK =
+    0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;
 
   /**
    * @notice Sets if the user is borrowing the reserve identified by reserveIndex
@@ -102,7 +107,35 @@ library UserConfiguration {
   }
 
   /**
-   * @notice Validate a user has been borrowing from any reserve
+   * @notice Checks if a user has been supplying only one reserve as collateral
+   * @dev this uses a simple trick - if a number is a power of two (only one bit set) then n & (n - 1) == 0
+   * @param self The configuration object
+   * @return True if the user has been supplying as collateral one reserve, false otherwise
+   **/
+  function isUsingAsCollateralOne(DataTypes.UserConfigurationMap memory self)
+    internal
+    pure
+    returns (bool)
+  {
+    uint256 collateralData = self.data & COLLATERAL_MASK;
+    return collateralData & (collateralData - 1) == 0;
+  }
+
+  /**
+   * @notice Checks if a user has been supplying any reserve as collateral
+   * @param self The configuration object
+   * @return True if the user has been supplying as collateral any reserve, false otherwise
+   **/
+  function isUsingAsCollateralAny(DataTypes.UserConfigurationMap memory self)
+    internal
+    pure
+    returns (bool)
+  {
+    return self.data & COLLATERAL_MASK != 0;
+  }
+
+  /**
+   * @notice Checks if a user has been borrowing from any reserve
    * @param self The configuration object
    * @return True if the user has been borrowing any reserve, false otherwise
    **/
@@ -111,11 +144,56 @@ library UserConfiguration {
   }
 
   /**
-   * @notice Validate a user has not been using any reserve
+   * @notice Checks if a user has not been using any reserve for borrowing or supply
    * @param self The configuration object
    * @return True if the user has been borrowing any reserve, false otherwise
    **/
   function isEmpty(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
     return self.data == 0;
+  }
+
+  function getIsolationModeState(
+    DataTypes.UserConfigurationMap memory self,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reservesList
+  )
+    internal
+    view
+    returns (
+      bool,
+      address,
+      uint256
+    )
+  {
+    if (!isUsingAsCollateralAny(self)) {
+      return (false, address(0), 0);
+    }
+    if (isUsingAsCollateralOne(self)) {
+      uint256 assetId = _getFirstAssetAsCollateralId(self);
+
+      address assetAddress = reservesList[assetId];
+      uint256 ceiling = reservesData[assetAddress].configuration.getDebtCeiling();
+      if (ceiling > 0) {
+        return (true, assetAddress, ceiling);
+      }
+    }
+    return (false, address(0), 0);
+  }
+
+  function _getFirstAssetAsCollateralId(DataTypes.UserConfigurationMap memory self)
+    internal
+    pure
+    returns (uint256)
+  {
+    unchecked {
+      uint256 collateralData = self.data & COLLATERAL_MASK;
+      uint256 firstCollateralPosition = collateralData & ~(collateralData - 1);
+      uint256 id;
+
+      while ((firstCollateralPosition >>= 2) > 0) {
+        id += 2;
+      }
+      return id / 2;
+    }
   }
 }

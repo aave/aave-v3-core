@@ -216,6 +216,13 @@ interface IPoolConfigurator {
   );
 
   /**
+   * @notice Emitted when the debt ceiling of an asset is set
+   * @param asset The address of the underlying asset of the reserve
+   * @param ceiling The new debt ceiling
+   **/
+  event DebtCeilingChanged(address indexed asset, uint256 ceiling);
+
+  /**
    * @notice Emitted when a new risk admin is registered
    * @param admin The newly registered admin
    **/
@@ -439,4 +446,10 @@ interface IPoolConfigurator {
    * @param flashloanPremiumToProtocol The part of the premium sent to protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 flashloanPremiumToProtocol) external;
+
+  /**
+   * @notice Sets the debt ceiling for an asset
+   * @param ceiling The new debt ceiling
+   */
+  function setDebtCeiling(address asset, uint256 ceiling) external;
 }

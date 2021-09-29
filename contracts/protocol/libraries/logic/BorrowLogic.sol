@@ -8,6 +8,7 @@ import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
+import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
@@ -26,6 +27,7 @@ library BorrowLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
 
@@ -69,6 +71,12 @@ library BorrowLogic {
 
     reserve.updateState(reserveCache);
 
+    (
+      bool isolationModeActive,
+      address isolationModeCollateralAddress,
+      uint256 isolationModeDebtCeiling
+    ) = userConfig.getIsolationModeState(reserves, reservesList);
+
     ValidationLogic.validateBorrow(
       reserves,
       reservesList,
@@ -84,7 +92,10 @@ library BorrowLogic {
         params.reservesCount,
         params.oracle,
         params.userEModeCategory,
-        params.priceOracleSentinel
+        params.priceOracleSentinel,
+        isolationModeActive,
+        isolationModeCollateralAddress,
+        isolationModeDebtCeiling
       )
     );
 
@@ -114,6 +125,12 @@ library BorrowLogic {
       userConfig.setBorrowing(reserve.id, true);
     }
 
+    if (isolationModeActive) {
+      reserves[isolationModeCollateralAddress].isolationModeTotalDebt += Helpers.castUint128(
+        params.amount / 10**reserveCache.reserveConfiguration.getDecimals()
+      );
+    }
+
     reserve.updateInterestRates(
       reserveCache,
       params.asset,
@@ -139,6 +156,8 @@ library BorrowLogic {
   }
 
   function executeRepay(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory params
@@ -183,6 +202,22 @@ library BorrowLogic {
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
+    }
+
+    (bool isolationModeActive, address isolationModeCollateralAddress, ) = userConfig
+      .getIsolationModeState(reserves, reservesList);
+
+    if (isolationModeActive) {
+      uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+        .isolationModeTotalDebt;
+      // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
+      if (isolationModeTotalDebt < paybackAmount) {
+        reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
+      } else {
+        reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
+          isolationModeTotalDebt -
+          Helpers.castUint128(paybackAmount / 10**reserveCache.reserveConfiguration.getDecimals());
+      }
     }
 
     if (params.useATokens) {
