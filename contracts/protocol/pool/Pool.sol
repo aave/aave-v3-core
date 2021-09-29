@@ -128,6 +128,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override {
     SupplyLogic.executeSupply(
       _reserves,
+      _reservesList,
       _usersConfig[onBehalfOf],
       DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
     );
@@ -155,6 +156,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
     SupplyLogic.executeSupply(
       _reserves,
+      _reservesList,
       _usersConfig[onBehalfOf],
       DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
     );
@@ -679,6 +681,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override {
     SupplyLogic.executeSupply(
       _reserves,
+      _reservesList,
       _usersConfig[onBehalfOf],
       DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
     );

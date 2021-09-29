@@ -3,6 +3,7 @@ pragma solidity 0.8.7;
 
 import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
+import {ReserveConfiguration} from './ReserveConfiguration.sol';
 
 /**
  * @title UserConfiguration library
@@ -10,6 +11,8 @@ import {DataTypes} from '../types/DataTypes.sol';
  * @notice Implements the bitmap logic to handle the user configuration
  */
 library UserConfiguration {
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+
   uint256 internal constant BORROWING_MASK =
     0x5555555555555555555555555555555555555555555555555555555555555555;
   uint256 internal constant COLLATERAL_MASK =
@@ -147,5 +150,40 @@ library UserConfiguration {
    **/
   function isEmpty(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
     return self.data == 0;
+  }
+
+  function isInIsolationMode(
+    DataTypes.UserConfigurationMap memory self,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reservesList
+  ) internal view returns (bool) {
+    if (!isUsingAsCollateralAny(self)) {
+      return false;
+    }
+    if (isUsingAsCollateralOne(self)) {
+      uint256 assetId = _getFirstAssetAsCollateralId(self);
+
+      address assetAddress = reservesList[assetId];
+      uint256 ceiling = reservesData[assetAddress].configuration.getDebtCeiling();
+      return ceiling > 0;
+    }
+    return false;
+  }
+
+  function _getFirstAssetAsCollateralId(DataTypes.UserConfigurationMap memory self)
+    internal
+    view
+    returns (uint256)
+  {
+    unchecked {
+      uint256 collateralData = self.data & COLLATERAL_MASK;
+      uint256 firstCollateralPosition = collateralData & ~(collateralData - 1);
+      uint256 id;
+
+      while ((firstCollateralPosition >>= 2) > 0) {
+        id += 2;
+      }
+      return id / 2;
+    }
   }
 }
