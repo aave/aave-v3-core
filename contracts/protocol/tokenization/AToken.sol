@@ -117,13 +117,13 @@ contract AToken is
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
+    _userState[user].additionalData = Helpers.castUint128(index);
+
     _burn(user, Helpers.castUint128(amountScaled));
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
-
-    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(user, address(0), amount);
     if (accumulatedInterest > amount) {
@@ -146,9 +146,9 @@ contract AToken is
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _mint(user, Helpers.castUint128(amountScaled));
-
     _userState[user].additionalData = Helpers.castUint128(index);
+
+    _mint(user, Helpers.castUint128(amountScaled));
 
     emit Transfer(address(0), user, amount);
     emit Mint(user, amount + accumulatedInterest, index);

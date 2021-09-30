@@ -141,8 +141,8 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
     if (proxyAddress == address(0)) {
       proxy = new InitializableImmutableAdminUpgradeabilityProxy(address(this));
-      proxy.initialize(newAddress, params);
       _addresses[id] = address(proxy);
+      proxy.initialize(newAddress, params);
       emit ProxyCreated(id, address(proxy));
     } else {
       proxy.upgradeToAndCall(newAddress, params);

@@ -109,8 +109,8 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     uint256 amount
   ) public virtual override returns (bool) {
     uint128 castAmount = Helpers.castUint128(amount);
-    _transfer(sender, recipient, castAmount);
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
+    _transfer(sender, recipient, castAmount);
     return true;
   }
 

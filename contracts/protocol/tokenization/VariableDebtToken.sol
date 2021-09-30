@@ -107,9 +107,9 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
-
     _userState[user].additionalData = Helpers.castUint128(index);
+
+    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
     emit Transfer(address(0), onBehalfOf, amount + accumulatedInterest);
     emit Mint(user, onBehalfOf, amount + accumulatedInterest, index);
@@ -127,13 +127,12 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _burn(user, Helpers.castUint128(amountScaled));
-
     _userState[user].additionalData = Helpers.castUint128(index);
+
+    _burn(user, Helpers.castUint128(amountScaled));
 
     if (accumulatedInterest > amount) {
       emit Transfer(address(0), user, accumulatedInterest - amount);
