@@ -70,10 +70,8 @@ library MathUtils {
 
       expMinusTwo = exp > 2 ? exp - 2 : 0;
 
-      ratePerSecond = rate / SECONDS_PER_YEAR;
-
-      basePowerTwo = ratePerSecond.rayMul(ratePerSecond);
-      basePowerThree = basePowerTwo.rayMul(ratePerSecond);
+      basePowerTwo = rate.rayMul(rate) / (SECONDS_PER_YEAR * SECONDS_PER_YEAR);
+      basePowerThree = basePowerTwo.rayMul(rate) / SECONDS_PER_YEAR;
     }
 
     uint256 secondTerm = exp * expMinusOne * basePowerTwo;
@@ -85,7 +83,7 @@ library MathUtils {
       thirdTerm /= 6;
     }
 
-    return WadRayMath.RAY + ratePerSecond * exp + secondTerm + thirdTerm;
+    return WadRayMath.RAY + (rate * exp) / SECONDS_PER_YEAR + secondTerm + thirdTerm;
   }
 
   /**
