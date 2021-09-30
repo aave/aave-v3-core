@@ -182,11 +182,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     return (currentBalance == 0, vars.nextSupply, vars.currentAvgStableRate);
   }
 
-  /**
-   * @dev Burns debt of `user`
-   * @param user The address of the user getting his debt burned
-   * @param amount The amount of debt tokens getting burned
-   **/
+  /// @inheritdoc IStableDebtToken
   function burn(address user, uint256 amount)
     external
     override
