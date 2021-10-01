@@ -1,17 +1,14 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.7;
 
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {FlashLoanReceiverBase} from '../../flashloan/base/FlashLoanReceiverBase.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';
 
 contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   using SafeERC20 for IERC20;
-  using SafeMath for uint256;
 
   IPoolAddressesProvider internal _provider;
 
@@ -71,7 +68,7 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
 
       uint256 amountToReturn = (_amountToApprove != 0)
         ? _amountToApprove
-        : amounts[i].add(premiums[i]);
+        : amounts[i] + premiums[i];
       //execution does not fail - mint tokens and return them to the _destination
 
       token.mint(premiums[i]);
