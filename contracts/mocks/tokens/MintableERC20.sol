@@ -2,12 +2,13 @@
 pragma solidity 0.8.7;
 
 import {ERC20} from '../../dependencies/openzeppelin/contracts/ERC20.sol';
+import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 
 /**
  * @title ERC20Mintable
  * @dev ERC20 minting logic
  */
-contract MintableERC20 is ERC20 {
+contract MintableERC20 is IERC20WithPermit, ERC20 {
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
     keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
@@ -49,7 +50,7 @@ contract MintableERC20 is ERC20 {
     uint8 v,
     bytes32 r,
     bytes32 s
-  ) external {
+  ) external override {
     require(owner != address(0), 'INVALID_OWNER');
     //solium-disable-next-line
     require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
