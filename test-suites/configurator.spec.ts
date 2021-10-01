@@ -115,7 +115,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   });
 
   it('InitReserves via AssetListing admin', async () => {
-    const { addressesProvider, configurator, poolAdmin, aclManager, users } = testEnv;
+    const { addressesProvider, configurator, poolAdmin, aclManager, users, pool } = testEnv;
 
     // const snapId
     const assetListingAdmin = users[4];
@@ -128,11 +128,13 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
     const stableDebtTokenImplementation = await new StableDebtTokenFactory(
       await getFirstSigner()
-    ).deploy();
+    ).deploy(pool.address);
     const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
       await getFirstSigner()
-    ).deploy();
-    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
+    ).deploy(pool.address);
+    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy(
+      pool.address
+    );
     const mockRateStrategy = await new MockReserveInterestRateStrategyFactory(
       await getFirstSigner()
     ).deploy(addressesProvider.address, 0, 0, 0, 0, 0, 0);

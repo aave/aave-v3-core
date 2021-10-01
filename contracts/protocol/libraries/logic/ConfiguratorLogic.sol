@@ -53,7 +53,6 @@ library ConfiguratorLogic {
       input.aTokenImpl,
       abi.encodeWithSelector(
         IInitializableAToken.initialize.selector,
-        pool,
         input.treasury,
         input.underlyingAsset,
         IAaveIncentivesController(input.incentivesController),
@@ -68,7 +67,6 @@ library ConfiguratorLogic {
       input.stableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
-        pool,
         input.underlyingAsset,
         IAaveIncentivesController(input.incentivesController),
         input.underlyingAssetDecimals,
@@ -82,7 +80,6 @@ library ConfiguratorLogic {
       input.variableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
-        pool,
         input.underlyingAsset,
         IAaveIncentivesController(input.incentivesController),
         input.underlyingAssetDecimals,
@@ -126,11 +123,10 @@ library ConfiguratorLogic {
   {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
-    (, , , uint256 decimals, ,) = cachedPool.getConfiguration(input.asset).getParams();
+    (, , , uint256 decimals, , ) = cachedPool.getConfiguration(input.asset).getParams();
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableAToken.initialize.selector,
-      cachedPool,
       input.treasury,
       input.asset,
       input.incentivesController,
@@ -151,11 +147,10 @@ library ConfiguratorLogic {
   ) public {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
-    (, , , uint256 decimals, ,) = cachedPool.getConfiguration(input.asset).getParams();
+    (, , , uint256 decimals, , ) = cachedPool.getConfiguration(input.asset).getParams();
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
-      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
@@ -183,11 +178,10 @@ library ConfiguratorLogic {
   ) public {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
-    (, , , uint256 decimals, ,) = cachedPool.getConfiguration(input.asset).getParams();
+    (, , , uint256 decimals, , ) = cachedPool.getConfiguration(input.asset).getParams();
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
-      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,

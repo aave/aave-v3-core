@@ -40,7 +40,7 @@ contract AToken is
 
   bytes32 public DOMAIN_SEPARATOR;
 
-  IPool internal _pool;
+  IPool internal immutable _pool;
   address internal _treasury;
   address internal _underlyingAsset;
 
@@ -54,9 +54,12 @@ contract AToken is
     return ATOKEN_REVISION;
   }
 
+  constructor(IPool pool) {
+    _pool = pool;
+  }
+
   /// @inheritdoc IInitializableAToken
   function initialize(
-    IPool pool,
     address treasury,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
@@ -86,14 +89,13 @@ contract AToken is
     _setSymbol(aTokenSymbol);
     _setDecimals(aTokenDecimals);
 
-    _pool = pool;
     _treasury = treasury;
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
     emit Initialized(
       underlyingAsset,
-      address(pool),
+      address(_pool),
       treasury,
       address(incentivesController),
       aTokenDecimals,
@@ -309,9 +311,8 @@ contract AToken is
     bool validate
   ) internal {
     address underlyingAsset = _underlyingAsset;
-    IPool pool = _pool;
 
-    uint256 index = pool.getReserveNormalizedIncome(underlyingAsset);
+    uint256 index = _pool.getReserveNormalizedIncome(underlyingAsset);
 
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
@@ -319,7 +320,7 @@ contract AToken is
     super._transfer(from, to, Helpers.castUint128(amount.rayDiv(index)));
 
     if (validate) {
-      pool.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
+      _pool.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
     }
 
     emit BalanceTransfer(from, to, amount, index);

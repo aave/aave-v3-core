@@ -29,11 +29,13 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
 
     const stableDebtTokenImplementation = await new StableDebtTokenFactory(
       await getFirstSigner()
-    ).deploy();
+    ).deploy(pool.address);
     const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
       await getFirstSigner()
-    ).deploy();
-    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
+    ).deploy(pool.address);
+    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy(
+      pool.address
+    );
 
     const daiData = await pool.getReserveData(dai.address);
 

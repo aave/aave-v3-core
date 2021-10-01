@@ -241,15 +241,15 @@ export const deployDefaultReserveInterestRateStrategy = async (
     eContractid.DefaultReserveInterestRateStrategy
   );
 
-export const deployGenericStableDebtToken = async () =>
+export const deployGenericStableDebtToken = async (poolAddress: tEthereumAddress) =>
   withSave(
-    await new StableDebtTokenFactory(await getFirstSigner()).deploy(),
+    await new StableDebtTokenFactory(await getFirstSigner()).deploy(poolAddress),
     eContractid.StableDebtToken
   );
 
-export const deployGenericVariableDebtToken = async () =>
+export const deployGenericVariableDebtToken = async (poolAddress: tEthereumAddress) =>
   withSave(
-    await new VariableDebtTokenFactory(await getFirstSigner()).deploy(),
+    await new VariableDebtTokenFactory(await getFirstSigner()).deploy(poolAddress),
     eContractid.VariableDebtToken
   );
 
@@ -262,12 +262,11 @@ export const deployGenericAToken = async ([
   symbol,
 ]: [tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string]) => {
   const instance = await withSave(
-    await new ATokenFactory(await getFirstSigner()).deploy(),
+    await new ATokenFactory(await getFirstSigner()).deploy(poolAddress),
     eContractid.AToken
   );
 
   await instance.initialize(
-    poolAddress,
     treasuryAddress,
     underlyingAssetAddress,
     incentivesController,
@@ -280,11 +279,11 @@ export const deployGenericAToken = async ([
   return instance;
 };
 
-export const deployGenericATokenImpl = async () =>
-  withSave(await new ATokenFactory(await getFirstSigner()).deploy(), eContractid.AToken);
+export const deployGenericATokenImpl = async (poolAddress: tEthereumAddress) =>
+  withSave(await new ATokenFactory(await getFirstSigner()).deploy(poolAddress), eContractid.AToken);
 
 export const deployDelegationAwareAToken = async ([
-  pool,
+  poolAddress,
   underlyingAssetAddress,
   treasuryAddress,
   incentivesController,
@@ -292,12 +291,11 @@ export const deployDelegationAwareAToken = async ([
   symbol,
 ]: [tEthereumAddress, tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string]) => {
   const instance = await withSave(
-    await new DelegationAwareATokenFactory(await getFirstSigner()).deploy(),
+    await new DelegationAwareATokenFactory(await getFirstSigner()).deploy(poolAddress),
     eContractid.DelegationAwareAToken
   );
 
   await instance.initialize(
-    pool,
     treasuryAddress,
     underlyingAssetAddress,
     incentivesController,
@@ -310,9 +308,9 @@ export const deployDelegationAwareAToken = async ([
   return instance;
 };
 
-export const deployDelegationAwareATokenImpl = async () =>
+export const deployDelegationAwareATokenImpl = async (poolAddress: tEthereumAddress) =>
   withSave(
-    await new DelegationAwareATokenFactory(await getFirstSigner()).deploy(),
+    await new DelegationAwareATokenFactory(await getFirstSigner()).deploy(poolAddress),
     eContractid.DelegationAwareAToken
   );
 
@@ -366,11 +364,11 @@ export const deployMockStableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string]
 ) => {
   const instance = await withSave(
-    await new MockStableDebtTokenFactory(await getFirstSigner()).deploy(),
+    await new MockStableDebtTokenFactory(await getFirstSigner()).deploy(args[0]),
     eContractid.MockStableDebtToken
   );
 
-  await instance.initialize(args[0], args[1], args[2], '18', args[3], args[4], args[5]);
+  await instance.initialize(args[1], args[2], '18', args[3], args[4], args[5]);
 
   return instance;
 };
@@ -382,11 +380,11 @@ export const deployMockVariableDebtToken = async (
   args: [tEthereumAddress, tEthereumAddress, tEthereumAddress, string, string, string]
 ) => {
   const instance = await withSave(
-    await new MockVariableDebtTokenFactory(await getFirstSigner()).deploy(),
+    await new MockVariableDebtTokenFactory(await getFirstSigner()).deploy(args[0]),
     eContractid.MockVariableDebtToken
   );
 
-  await instance.initialize(args[0], args[1], args[2], '18', args[3], args[4], args[5]);
+  await instance.initialize(args[1], args[2], '18', args[3], args[4], args[5]);
 
   return instance;
 };
@@ -403,11 +401,11 @@ export const deployMockAToken = async (
   ]
 ) => {
   const instance = await withSave(
-    await new MockATokenFactory(await getFirstSigner()).deploy(),
+    await new MockATokenFactory(await getFirstSigner()).deploy(args[0]),
     eContractid.MockAToken
   );
 
-  await instance.initialize(args[0], args[2], args[1], args[3], '18', args[4], args[5], args[6]);
+  await instance.initialize(args[2], args[1], args[3], '18', args[4], args[5], args[6]);
 
   return instance;
 };

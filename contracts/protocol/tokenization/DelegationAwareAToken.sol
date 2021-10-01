@@ -14,6 +14,8 @@ import {AToken} from './AToken.sol';
  * @dev The underlying asset needs to be compatible with the COMP delegation interface
  */
 contract DelegationAwareAToken is AToken {
+  constructor(IPool pool) AToken(pool) {}
+
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(IPool(_pool).getAddressesProvider().getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);

@@ -41,11 +41,13 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     let stableDebtTokenImplementation = await new StableDebtTokenFactory(
       await getFirstSigner()
-    ).deploy();
+    ).deploy(pool.address);
     let variableDebtTokenImplementation = await new VariableDebtTokenFactory(
       await getFirstSigner()
-    ).deploy();
-    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy();
+    ).deploy(pool.address);
+    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy(
+      pool.address
+    );
 
     mockRateStrategy = await new MockReserveInterestRateStrategyFactory(
       await getFirstSigner()

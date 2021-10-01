@@ -6,6 +6,8 @@ import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
 contract MockAToken is AToken {
+  constructor(IPool pool) AToken(pool) {}
+
   function getRevision() internal pure override returns (uint256) {
     return 0x2;
   }
