@@ -65,12 +65,7 @@ contract AToken is
     string calldata aTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId;
-
-    //solium-disable-next-line
-    assembly {
-      chainId := chainid()
-    }
+    uint256 chainId = block.chainid;
 
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(
@@ -255,14 +250,8 @@ contract AToken is
   }
 
   /// @inheritdoc IAToken
-  function transferUnderlyingTo(address target, uint256 amount)
-    external
-    override
-    onlyPool
-    returns (uint256)
-  {
+  function transferUnderlyingTo(address target, uint256 amount) external override onlyPool {
     IERC20(_underlyingAsset).safeTransfer(target, amount);
-    return amount;
   }
 
   /// @inheritdoc IAToken

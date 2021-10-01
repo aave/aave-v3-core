@@ -37,12 +37,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId;
-
-    //solium-disable-next-line
-    assembly {
-      chainId := chainid()
-    }
+    uint256 chainId = block.chainid;
 
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);

@@ -328,11 +328,6 @@ library ValidationLogic {
           DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_NO_DEBT_OF_SELECTED_TYPE
     );
-
-    require(
-      amountSent != type(uint256).max || msg.sender == onBehalfOf,
-      Errors.VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
-    );
   }
 
   /**
