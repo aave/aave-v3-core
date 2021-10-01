@@ -29,12 +29,15 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   mapping(address => uint40) internal _timestamps;
   uint40 internal _totalSupplyTimestamp;
 
-  IPool internal _pool;
+  IPool internal immutable _pool;
   address internal _underlyingAsset;
+
+  constructor(IPool pool) {
+    _pool = pool;
+  }
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
-    IPool pool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
@@ -53,7 +56,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
 
-    _pool = pool;
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
@@ -69,7 +71,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     emit Initialized(
       underlyingAsset,
-      address(pool),
+      address(_pool),
       address(incentivesController),
       debtTokenDecimals,
       debtTokenName,

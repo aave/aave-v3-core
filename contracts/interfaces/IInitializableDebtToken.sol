@@ -32,7 +32,6 @@ interface IInitializableDebtToken {
 
   /**
    * @notice Initializes the debt token.
-   * @param pool The address of the pool where this aToken will be used
    * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
    * @param incentivesController The smart contract managing potential incentives distribution
    * @param debtTokenDecimals The decimals of the debtToken, same as the underlying asset's
@@ -41,7 +40,6 @@ interface IInitializableDebtToken {
    * @param params A set of encoded parameters for additional initialization
    */
   function initialize(
-    IPool pool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,

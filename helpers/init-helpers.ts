@@ -6,6 +6,7 @@ import {
   getReservesSetupHelper,
   getPoolAddressesProvider,
   getPoolConfiguratorProxy,
+  getPool,
 } from './contracts-getters';
 import { rawInsertContractAddressInDb } from './contracts-helpers';
 import { BigNumber, BigNumberish } from 'ethers';
@@ -31,6 +32,7 @@ export const initReservesByHelper = async (
   let gasUsage = BigNumber.from('0');
 
   const addressProvider = await getPoolAddressesProvider();
+  const pool = await getPool();
 
   // CHUNK CONFIGURATION
   const initChunks = 4;
@@ -92,10 +94,14 @@ export const initReservesByHelper = async (
   //   rawInsertContractAddressInDb(`variableDebtTokenImpl`, variableDebtTokenImplementationAddress);
   // });
   //gasUsage = gasUsage.add(tx1.gasUsed);
-  stableDebtTokenImplementationAddress = await (await deployGenericStableDebtToken()).address;
-  variableDebtTokenImplementationAddress = await (await deployGenericVariableDebtToken()).address;
+  stableDebtTokenImplementationAddress = await (
+    await deployGenericStableDebtToken(pool.address)
+  ).address;
+  variableDebtTokenImplementationAddress = await (
+    await deployGenericVariableDebtToken(pool.address)
+  ).address;
 
-  const aTokenImplementation = await deployGenericATokenImpl();
+  const aTokenImplementation = await deployGenericATokenImpl(pool.address);
   aTokenImplementationAddress = aTokenImplementation.address;
   rawInsertContractAddressInDb(`aTokenImpl`, aTokenImplementationAddress);
 
@@ -104,7 +110,7 @@ export const initReservesByHelper = async (
   ) as [string, IReserveParams][];
 
   if (delegatedAwareReserves.length > 0) {
-    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl();
+    const delegationAwareATokenImplementation = await deployDelegationAwareATokenImpl(pool.address);
     delegationAwareATokenImplementationAddress = delegationAwareATokenImplementation.address;
     rawInsertContractAddressInDb(
       `delegationAwareATokenImpl`,

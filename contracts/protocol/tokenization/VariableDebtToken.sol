@@ -24,12 +24,15 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
-  IPool internal _pool;
+  IPool internal immutable _pool;
   address internal _underlyingAsset;
+
+  constructor(IPool pool) {
+    _pool = pool;
+  }
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
-    IPool pool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
@@ -48,7 +51,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
 
-    _pool = pool;
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
@@ -64,7 +66,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     emit Initialized(
       underlyingAsset,
-      address(pool),
+      address(_pool),
       address(incentivesController),
       debtTokenDecimals,
       debtTokenName,
