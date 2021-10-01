@@ -24,11 +24,7 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
     string memory symbol,
     uint8 decimals
   ) ERC20(name, symbol) {
-    uint256 chainId;
-
-    assembly {
-      chainId := chainid()
-    }
+    uint256 chainId = block.chainid;
 
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(

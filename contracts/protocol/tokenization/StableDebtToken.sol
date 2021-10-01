@@ -42,12 +42,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     string memory debtTokenSymbol,
     bytes calldata params
   ) public override initializer {
-    uint256 chainId;
-
-    //solium-disable-next-line
-    assembly {
-      chainId := chainid()
-    }
+    uint256 chainId = block.chainid;
 
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);

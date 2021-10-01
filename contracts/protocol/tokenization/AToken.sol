@@ -65,12 +65,7 @@ contract AToken is
     string calldata aTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId;
-
-    //solium-disable-next-line
-    assembly {
-      chainId := chainid()
-    }
+    uint256 chainId = block.chainid;
 
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(
