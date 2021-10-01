@@ -62,7 +62,6 @@ library MathUtils {
 
     uint256 expMinusOne;
     uint256 expMinusTwo;
-    uint256 ratePerSecond;
     uint256 basePowerTwo;
     uint256 basePowerThree;
     unchecked {
