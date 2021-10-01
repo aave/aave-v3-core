@@ -254,10 +254,8 @@ contract AToken is
     external
     override
     onlyPool
-    returns (uint256)
   {
     IERC20(_underlyingAsset).safeTransfer(target, amount);
-    return amount;
   }
 
   /// @inheritdoc IAToken
