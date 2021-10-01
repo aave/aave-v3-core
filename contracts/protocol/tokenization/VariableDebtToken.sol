@@ -36,7 +36,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     string memory debtTokenName,
     string memory debtTokenSymbol,
     bytes calldata params
-  ) public override initializer {
+  ) external override initializer {
     uint256 chainId;
 
     //solium-disable-next-line
@@ -145,7 +145,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   }
 
   /// @inheritdoc IScaledBalanceToken
-  function scaledBalanceOf(address user) public view virtual override returns (uint256) {
+  function scaledBalanceOf(address user) external view virtual override returns (uint256) {
     return super.balanceOf(user);
   }
 
@@ -170,7 +170,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   }
 
   /// @inheritdoc IScaledBalanceToken
-  function getPreviousIndex(address user) public view virtual override returns (uint256) {
+  function getPreviousIndex(address user) external view virtual override returns (uint256) {
     return _userState[user].additionalData;
   }
 
@@ -178,7 +178,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
    * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
    * @return The address of the underlying asset
    **/
-  function UNDERLYING_ASSET_ADDRESS() public view returns (address) {
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
     return _underlyingAsset;
   }
 
@@ -186,7 +186,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
    * @notice Returns the address of the pool where this debtToken is used
    * @return The address of the Pool
    **/
-  function POOL() public view returns (IPool) {
+  function POOL() external view returns (IPool) {
     return _pool;
   }
 

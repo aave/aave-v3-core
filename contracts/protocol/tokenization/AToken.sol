@@ -229,7 +229,7 @@ contract AToken is
   }
 
   /// @inheritdoc IScaledBalanceToken
-  function getPreviousIndex(address user) public view virtual override returns (uint256) {
+  function getPreviousIndex(address user) external view virtual override returns (uint256) {
     return _userState[user].additionalData;
   }
 
@@ -237,12 +237,12 @@ contract AToken is
    * @notice Returns the address of the Aave treasury, receiving the fees on this aToken
    * @return Address of the Aave treasury
    **/
-  function RESERVE_TREASURY_ADDRESS() public view override returns (address) {
+  function RESERVE_TREASURY_ADDRESS() external view override returns (address) {
     return _treasury;
   }
 
   /// @inheritdoc IAToken
-  function UNDERLYING_ASSET_ADDRESS() public view override returns (address) {
+  function UNDERLYING_ASSET_ADDRESS() external view override returns (address) {
     return _underlyingAsset;
   }
 
@@ -250,7 +250,7 @@ contract AToken is
    * @notice Returns the address of the pool where this aToken is used
    * @return Address of the pool
    **/
-  function POOL() public view returns (IPool) {
+  function POOL() external view returns (IPool) {
     return _pool;
   }
 

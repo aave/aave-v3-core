@@ -41,7 +41,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     string memory debtTokenName,
     string memory debtTokenSymbol,
     bytes calldata params
-  ) public override initializer {
+  ) external override initializer {
     uint256 chainId;
 
     //solium-disable-next-line
@@ -282,7 +282,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   /// @inheritdoc IStableDebtToken
   function getSupplyData()
-    public
+    external
     view
     override
     returns (
@@ -297,7 +297,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /// @inheritdoc IStableDebtToken
-  function getTotalSupplyAndAvgRate() public view override returns (uint256, uint256) {
+  function getTotalSupplyAndAvgRate() external view override returns (uint256, uint256) {
     uint256 avgRate = _avgStableRate;
     return (_calcTotalSupply(avgRate), avgRate);
   }
@@ -308,7 +308,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /// @inheritdoc IStableDebtToken
-  function getTotalSupplyLastUpdated() public view override returns (uint40) {
+  function getTotalSupplyLastUpdated() external view override returns (uint40) {
     return _totalSupplyTimestamp;
   }
 
@@ -321,7 +321,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
    * @return The address of the underlying asset
    **/
-  function UNDERLYING_ASSET_ADDRESS() public view returns (address) {
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
     return _underlyingAsset;
   }
 
@@ -329,7 +329,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @notice Returns the address of the pool where this debtToken is used
    * @return The address of the Pool
    **/
-  function POOL() public view returns (IPool) {
+  function POOL() external view returns (IPool) {
     return _pool;
   }
 
