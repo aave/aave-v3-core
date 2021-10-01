@@ -85,7 +85,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    *   on subsequent operations
    * @param provider The address of the PoolAddressesProvider
    **/
-  function initialize(IPoolAddressesProvider provider) public initializer {
+  function initialize(IPoolAddressesProvider provider) external initializer {
     _addressesProvider = provider;
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;

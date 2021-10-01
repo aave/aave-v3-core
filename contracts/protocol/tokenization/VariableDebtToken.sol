@@ -36,7 +36,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     string memory debtTokenName,
     string memory debtTokenSymbol,
     bytes calldata params
-  ) public override initializer {
+  ) external override initializer {
     uint256 chainId = block.chainid;
 
     _setName(debtTokenName);
