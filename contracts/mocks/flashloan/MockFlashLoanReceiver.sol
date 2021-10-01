@@ -33,7 +33,7 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
     _simulateEOA = flag;
   }
 
-  function amountToApprove() public view returns (uint256) {
+  function getAmountToApprove() public view returns (uint256) {
     return _amountToApprove;
   }
 
