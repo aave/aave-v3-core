@@ -131,4 +131,26 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     await evmRevert(snapId);
   });
+
+  it('Owner updates the data provider', async () => {
+    const snapId = await evmSnapshot();
+
+    const { addressesProvider, helpersContract, users } = testEnv;
+    const currentAddressesProviderOwner = users[1];
+
+    expect(await addressesProvider.getDataProvider(), helpersContract.address);
+
+    expect(
+      await addressesProvider
+        .connect(currentAddressesProviderOwner.signer)
+        .setDataProvider(ZERO_ADDRESS)
+    )
+      .to.emit(addressesProvider, 'DataProviderUpdated')
+      .withArgs(ZERO_ADDRESS);
+
+    expect(await addressesProvider.getDataProvider()).to.be.not.eq(helpersContract.address);
+    expect(await addressesProvider.getDataProvider()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapId);
+  });
 });
