@@ -16,6 +16,7 @@ interface IPoolAddressesProvider {
   event PriceOracleSentinelUpdated(address indexed newAddress);
   event ProxyCreated(bytes32 id, address indexed newAddress);
   event BridgeAccessControlUpdated(address indexed newAddress);
+  event DataProviderUpdated(address indexed newAddress);
   event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
 
   /**
@@ -120,4 +121,16 @@ interface IPoolAddressesProvider {
    * @param oracleSentinel The address of the new PriceOracleSentinel
    **/
   function setPriceOracleSentinel(address oracleSentinel) external;
+
+  /**
+   * @notice Updates the address of the DataProvider
+   * @param dataProvider The address of the new DataProvider
+   **/
+  function setDataProvider(address dataProvider) external;
+
+  /**
+   * @notice Returns the address of the DataProvider
+   * @return The DataProvider address
+   */
+  function getDataProvider() external returns (address);
 }
