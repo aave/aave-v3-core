@@ -132,5 +132,5 @@ interface IPoolAddressesProvider {
    * @notice Returns the address of the DataProvider
    * @return The DataProvider address
    */
-  function getDataProvider() external returns (address);
+  function getDataProvider() external view returns (address);
 }
