@@ -124,13 +124,13 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setDataProvider(address dataProvider) external override onlyOwner {
+  function setPoolDataProvider(address dataProvider) external override onlyOwner {
     _addresses[DATA_PROVIDER] = dataProvider;
-    emit DataProviderUpdated(dataProvider);
+    emit PoolDataProviderUpdated(dataProvider);
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function getDataProvider() external view override returns (address) {
+  function getPoolDataProvider() external view override returns (address) {
     return getAddress(DATA_PROVIDER);
   }
 

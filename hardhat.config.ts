@@ -23,7 +23,7 @@ require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
 const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
-    enabled: true,
+    enabled: false,
   },
   contractSizer: {
     alphaSort: true,

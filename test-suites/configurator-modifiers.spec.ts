@@ -80,6 +80,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
       { fn: 'deactivateReserve', args: [randomAddress] },
       { fn: 'updateFlashloanPremiumTotal', args: [randomNumber] },
       { fn: 'updateFlashloanPremiumToProtocol', args: [randomNumber] },
+      { fn: 'updateFlashloanPremiumToProtocol', args: [randomNumber] },
     ];
     for (const call of calls) {
       await expect(

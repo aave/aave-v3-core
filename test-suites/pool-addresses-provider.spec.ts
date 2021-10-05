@@ -24,7 +24,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       addressesProvider.setPriceOracle,
       addressesProvider.setACLAdmin,
       addressesProvider.setPriceOracleSentinel,
-      addressesProvider.setDataProvider,
+      addressesProvider.setPoolDataProvider,
     ]) {
       await expect(contractFunction(mockAddress)).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
     }
@@ -138,18 +138,18 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const { addressesProvider, helpersContract, users } = testEnv;
     const currentAddressesProviderOwner = users[1];
 
-    expect(await addressesProvider.getDataProvider(), helpersContract.address);
+    expect(await addressesProvider.getPoolDataProvider(), helpersContract.address);
 
     expect(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
-        .setDataProvider(ZERO_ADDRESS)
+        .setPoolDataProvider(ZERO_ADDRESS)
     )
-      .to.emit(addressesProvider, 'DataProviderUpdated')
+      .to.emit(addressesProvider, 'PoolDataProviderUpdated')
       .withArgs(ZERO_ADDRESS);
 
-    expect(await addressesProvider.getDataProvider()).to.be.not.eq(helpersContract.address);
-    expect(await addressesProvider.getDataProvider()).to.be.eq(ZERO_ADDRESS);
+    expect(await addressesProvider.getPoolDataProvider()).to.be.not.eq(helpersContract.address);
+    expect(await addressesProvider.getPoolDataProvider()).to.be.eq(ZERO_ADDRESS);
 
     await evmRevert(snapId);
   });

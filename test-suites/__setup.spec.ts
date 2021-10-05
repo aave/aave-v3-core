@@ -181,7 +181,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await insertContractAddressInDb(eContractid.AaveProtocolDataProvider, testHelpers.address);
   const admin = await deployer.getAddress();
 
-  await addressesProvider.setDataProvider(testHelpers.address);
+  await addressesProvider.setPoolDataProvider(testHelpers.address);
 
   console.log('Initialize configuration');
 
