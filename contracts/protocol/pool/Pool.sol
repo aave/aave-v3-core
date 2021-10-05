@@ -12,6 +12,7 @@ import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {EModeLogic} from '../libraries/logic/EModeLogic.sol';
 import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
+import {FlashLoanLogic} from '../libraries/logic/FlashLoanLogic.sol';
 import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
@@ -370,7 +371,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _addressesProvider.getPriceOracleSentinel()
     );
 
-    BorrowLogic.executeFlashLoan(
+    FlashLoanLogic.executeFlashLoan(
       _reserves,
       _reservesList,
       _eModeCategories,
@@ -396,7 +397,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _flashLoanPremiumToProtocol,
       _flashLoanPremiumTotal
     );
-    BorrowLogic.executeSimpleFlashLoan(_reserves[asset], flashParams);
+    FlashLoanLogic.executeSimpleFlashLoan(_reserves[asset], flashParams);
   }
 
   /// @inheritdoc IPool

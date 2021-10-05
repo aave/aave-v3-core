@@ -463,13 +463,9 @@ library ValidationLogic {
 
   /**
    * @notice Validates a flashloan action
-   * @param asset The asset being flashborrowed
    * @param reserveData The state of the reserve
    */
-  function validateSimpleFlashloan(address asset, DataTypes.ReserveData storage reserveData)
-    internal
-    view
-  {
+  function validateSimpleFlashloan(DataTypes.ReserveData storage reserveData) internal view {
     require(!reserveData.configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
   }
 
