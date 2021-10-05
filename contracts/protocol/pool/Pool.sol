@@ -380,6 +380,26 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
+  function simpleFlashLoan(
+    address receiverAddress,
+    address asset,
+    uint256 amount,
+    bytes calldata params,
+    uint16 referralCode
+  ) external override {
+    DataTypes.SimpleFlashloanParams memory flashParams = DataTypes.SimpleFlashloanParams(
+      receiverAddress,
+      asset,
+      amount,
+      params,
+      referralCode,
+      _flashLoanPremiumToProtocol,
+      _flashLoanPremiumTotal
+    );
+    BorrowLogic.executeSimpleFlashLoan(_reserves[asset], flashParams);
+  }
+
+  /// @inheritdoc IPool
   function mintToTreasury(address[] calldata assets) external override {
     for (uint256 i = 0; i < assets.length; i++) {
       address assetAddress = assets[i];

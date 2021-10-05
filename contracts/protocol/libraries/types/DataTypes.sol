@@ -185,6 +185,16 @@ library DataTypes {
     address priceOracleSentinel;
   }
 
+  struct SimpleFlashloanParams {
+    address receiverAddress;
+    address asset;
+    uint256 amount;
+    bytes params;
+    uint16 referralCode;
+    uint256 flashLoanPremiumToProtocol;
+    uint256 flashLoanPremiumTotal;
+  }
+
   struct CalculateUserAccountDataParams {
     UserConfigurationMap userConfig;
     uint256 reservesCount;

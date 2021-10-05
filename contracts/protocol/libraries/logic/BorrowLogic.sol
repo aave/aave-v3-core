@@ -7,6 +7,7 @@ import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
+import {ISimpleFlashLoanReceiver} from '../../../flashloan/interfaces/ISimpleFlashLoanReceiver.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
@@ -362,6 +363,71 @@ library BorrowLogic {
         params.referralCode
       );
     }
+  }
+
+  struct SimpleFlashLoanLocalVars {
+    ISimpleFlashLoanReceiver receiver;
+    address aTokenAddress;
+    uint256 totalPremium;
+    uint256 premiumToLP;
+    uint256 premiumToProtocol;
+    uint256 amountPlusPremium;
+  }
+
+  function executeSimpleFlashLoan(
+    DataTypes.ReserveData storage reserve,
+    DataTypes.SimpleFlashloanParams memory params
+  ) external {
+    SimpleFlashLoanLocalVars memory vars;
+
+    ValidationLogic.validateSimpleFlashloan(params.asset, reserve);
+
+    vars.receiver = ISimpleFlashLoanReceiver(params.receiverAddress);
+
+    vars.aTokenAddress = reserve.aTokenAddress;
+    vars.totalPremium = params.amount.percentMul(params.flashLoanPremiumTotal);
+    vars.amountPlusPremium = params.amount + vars.totalPremium;
+    IAToken(vars.aTokenAddress).transferUnderlyingTo(params.receiverAddress, params.amount);
+
+    require(
+      vars.receiver.executeOperation(
+        params.asset,
+        params.amount,
+        vars.totalPremium,
+        msg.sender,
+        params.params
+      ),
+      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+    );
+
+    vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
+    vars.premiumToLP = vars.totalPremium - vars.premiumToProtocol;
+
+    DataTypes.ReserveCache memory reserveCache = reserve.cache();
+
+    reserve.updateState(reserveCache);
+    reserve.cumulateToLiquidityIndex(IERC20(vars.aTokenAddress).totalSupply(), vars.premiumToLP);
+
+    reserve.accruedToTreasury =
+      reserve.accruedToTreasury +
+      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserve.liquidityIndex));
+
+    reserve.updateInterestRates(reserveCache, params.asset, vars.amountPlusPremium, 0);
+
+    IERC20(params.asset).safeTransferFrom(
+      params.receiverAddress,
+      vars.aTokenAddress,
+      vars.amountPlusPremium
+    );
+
+    emit FlashLoan(
+      params.receiverAddress,
+      msg.sender,
+      params.asset,
+      params.amount,
+      vars.totalPremium,
+      0
+    );
   }
 
   function rebalanceStableBorrowRate(
