@@ -365,10 +365,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _flashLoanPremiumTotal,
       _maxStableRateBorrowSizePercent,
       _reservesCount,
-      _addressesProvider.getPriceOracle(),
+      address(_addressesProvider),
       _usersEModeCategory[onBehalfOf],
-      IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender),
-      _addressesProvider.getPriceOracleSentinel()
+      IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender)
     );
 
     FlashLoanLogic.executeFlashLoan(

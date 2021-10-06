@@ -6,6 +6,7 @@ import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {ISimpleFlashLoanReceiver} from '../../../flashloan/interfaces/ISimpleFlashLoanReceiver.sol';
+import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
@@ -43,6 +44,7 @@ library FlashLoanLogic {
   struct FlashLoanLocalVars {
     IFlashLoanReceiver receiver;
     address oracle;
+    address oracleSentinel;
     uint256 i;
     address currentAsset;
     address currentATokenAddress;
@@ -135,6 +137,9 @@ library FlashLoanLogic {
       } else {
         // If the user chose to not return the funds, the system checks if there is enough collateral and
         // eventually opens a debt position
+        vars.oracle = IPoolAddressesProvider(params.addressesProvider).getPriceOracle();
+        vars.oracleSentinel = IPoolAddressesProvider(params.addressesProvider)
+          .getPriceOracleSentinel();
         BorrowLogic.executeBorrow(
           reserves,
           reservesList,
@@ -150,9 +155,9 @@ library FlashLoanLogic {
             false,
             params.maxStableRateBorrowSizePercent,
             params.reservesCount,
-            params.oracle,
+            vars.oracle,
             params.userEModeCategory,
-            params.priceOracleSentinel
+            vars.oracleSentinel
           )
         );
       }
