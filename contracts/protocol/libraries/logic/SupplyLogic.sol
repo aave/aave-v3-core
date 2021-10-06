@@ -68,7 +68,10 @@ library SupplyLogic {
 
     if (isFirstSupply) {
       (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
-      if (!isolationModeActive) {
+      if (
+        ((!isolationModeActive && (reserveCache.ReserveConfiguration.getDebtCeiling() == 0)) ||
+          !reserveCache.configuration.isUsingAsCollateralAny())
+      ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
       }
