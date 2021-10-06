@@ -409,9 +409,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   function _checkNoLiquidity(address asset) internal view {
-    (, , uint256 totalATokens, , , , , , , , , ) = IPoolDataProvider(
+    uint256 totalATokens = IPoolDataProvider(_addressesProvider.getPoolDataProvider())
+      .getATokenTotalSupply(asset);
+    /*(, , uint256 totalATokens, , , , , , , , , ) = IPoolDataProvider(
       _addressesProvider.getPoolDataProvider()
-    ).getReserveData(asset);
+    ).getReserveData(asset);*/
 
     require(totalATokens == 0, Errors.PC_RESERVE_LIQUIDITY_NOT_0);
   }
