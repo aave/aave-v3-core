@@ -69,8 +69,8 @@ library SupplyLogic {
     if (isFirstSupply) {
       (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
       if (
-        ((!isolationModeActive && (reserveCache.ReserveConfiguration.getDebtCeiling() == 0)) ||
-          !reserveCache.configuration.isUsingAsCollateralAny())
+        ((!isolationModeActive && (reserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
+          !userConfig.isUsingAsCollateralAny())
       ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
@@ -204,7 +204,12 @@ library SupplyLogic {
 
     if (useAsCollateral) {
       (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
-      require(!isolationModeActive, Errors.SL_USER_IN_ISOLATION_MODE);
+      require(
+        !isolationModeActive &&
+          (reserveCache.reserveConfiguration.getDebtCeiling() == 0 ||
+            !userConfig.isUsingAsCollateralAny()),
+        Errors.SL_USER_IN_ISOLATION_MODE
+      );
 
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, msg.sender);
