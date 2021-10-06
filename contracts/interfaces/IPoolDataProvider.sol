@@ -35,4 +35,11 @@ interface IPoolDataProvider {
       uint256 variableBorrowIndex,
       uint40 lastUpdateTimestamp
     );
+
+  /**
+   * @notice Returns the total supply of aTokens for a given asset
+   * @param asset The address of the underlying asset of the reserve
+   * @return The total supply of the aToken
+   **/
+  function getATokenTotalSupply(address asset) external view returns (uint256);
 }
