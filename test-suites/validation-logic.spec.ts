@@ -12,6 +12,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {
     VL_NO_ACTIVE_RESERVE,
     VL_RESERVE_FROZEN,
+    VL_RESERVE_PAUSED,
     VL_INVALID_AMOUNT,
     VL_BORROWING_NOT_ENABLED,
     VL_STABLE_BORROWING_NOT_ENABLED,
@@ -701,6 +702,22 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
           0
         )
     ).to.be.revertedWith(VL_INCONSISTENT_FLASHLOAN_PARAMS);
+  });
+
+  it('validateSimpleFlashLoan() with paused reserve', async () => {
+    const {
+      configurator,
+      poolAdmin,
+      pool,
+      weth,
+      users: [user],
+    } = testEnv;
+
+    expect(await configurator.connect(poolAdmin.signer).setReservePause(weth.address, true));
+
+    await expect(
+      pool.connect(user.signer).simpleFlashLoan(user.address, weth.address, 0, '0x10', 0)
+    ).to.be.revertedWith(VL_RESERVE_PAUSED);
   });
 
   it('validateSetUserEMode() with LT == 0 (reverts)', async () => {
