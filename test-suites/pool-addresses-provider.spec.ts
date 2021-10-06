@@ -24,6 +24,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       addressesProvider.setPriceOracle,
       addressesProvider.setACLAdmin,
       addressesProvider.setPriceOracleSentinel,
+      addressesProvider.setPoolDataProvider,
     ]) {
       await expect(contractFunction(mockAddress)).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
     }
@@ -127,6 +128,28 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     expect(await addressesProvider.getMarketId()).to.be.not.eq(oldMarketId);
     expect(await addressesProvider.getMarketId()).to.be.eq(NEW_MARKET_ID);
+
+    await evmRevert(snapId);
+  });
+
+  it('Owner updates the data provider', async () => {
+    const snapId = await evmSnapshot();
+
+    const { addressesProvider, helpersContract, users } = testEnv;
+    const currentAddressesProviderOwner = users[1];
+
+    expect(await addressesProvider.getPoolDataProvider(), helpersContract.address);
+
+    expect(
+      await addressesProvider
+        .connect(currentAddressesProviderOwner.signer)
+        .setPoolDataProvider(ZERO_ADDRESS)
+    )
+      .to.emit(addressesProvider, 'PoolDataProviderUpdated')
+      .withArgs(ZERO_ADDRESS);
+
+    expect(await addressesProvider.getPoolDataProvider()).to.be.not.eq(helpersContract.address);
+    expect(await addressesProvider.getPoolDataProvider()).to.be.eq(ZERO_ADDRESS);
 
     await evmRevert(snapId);
   });

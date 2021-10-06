@@ -10,13 +10,14 @@ import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IStableDebtToken} from '../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../interfaces/IVariableDebtToken.sol';
 import {IPool} from '../interfaces/IPool.sol';
+import {IPoolDataProvider} from '../interfaces/IPoolDataProvider.sol';
 
 /**
  * @title AaveProtocolDataProvider
  * @author Aave
  * @notice Peripherial contract to gather and extract information from the Pool.
  */
-contract AaveProtocolDataProvider {
+contract AaveProtocolDataProvider is IPoolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using WadRayMath for uint256;
@@ -192,6 +193,7 @@ contract AaveProtocolDataProvider {
   function getReserveData(address asset)
     external
     view
+    override
     returns (
       uint256 unbacked,
       uint256 accruedToTreasuryScaled,

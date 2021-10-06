@@ -17,6 +17,7 @@ import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesControl
 import {IPoolConfigurator} from '../../interfaces/IPoolConfigurator.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
+import {IPoolDataProvider} from '../../interfaces/IPoolDataProvider.sol';
 
 /**
  * @title PoolConfigurator
@@ -258,13 +259,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /// @inheritdoc IPoolConfigurator
   function setDebtCeiling(address asset, uint256 ceiling) external override onlyRiskOrPoolAdmins {
-    DataTypes.ReserveData memory reserveData = _pool.getReserveData(asset);
-    uint256 aTokenSupply = IERC20Detailed(reserveData.aTokenAddress).totalSupply();
-
-    if (ceiling > 0) {
-      require(aTokenSupply == 0, Errors.PC_INVALID_DEBT_CEILING_ASSET_ALREADY_SUPPLIED);
-    }
-
+    _checkNoLiquidity(asset);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setDebtCeiling(ceiling);
     _pool.setConfiguration(asset, currentConfig.data);
@@ -414,14 +409,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   function _checkNoLiquidity(address asset) internal view {
-    DataTypes.ReserveData memory reserveData = _pool.getReserveData(asset);
+    (, , uint256 totalATokens, , , , , , , , , ) = IPoolDataProvider(
+      _addressesProvider.getPoolDataProvider()
+    ).getReserveData(asset);
 
-    uint256 availableLiquidity = IERC20Detailed(asset).balanceOf(reserveData.aTokenAddress);
-
-    require(
-      availableLiquidity == 0 && reserveData.currentLiquidityRate == 0,
-      Errors.PC_RESERVE_LIQUIDITY_NOT_0
-    );
+    require(totalATokens == 0, Errors.PC_RESERVE_LIQUIDITY_NOT_0);
   }
 
   function _onlyPoolAdmin() internal view {
