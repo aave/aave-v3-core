@@ -22,7 +22,7 @@ import {ReserveLogic} from './ReserveLogic.sol';
 /**
  * @title FlashLoanLogic library
  * @author Aave
- * @notice Implements the logic for the simple flash loan
+ * @notice Implements the logic for the flash loans
  */
 library FlashLoanLogic {
   using ReserveLogic for DataTypes.ReserveCache;
