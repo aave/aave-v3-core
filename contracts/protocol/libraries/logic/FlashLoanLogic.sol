@@ -3,8 +3,6 @@ pragma solidity 0.8.7;
 
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
-import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {ISimpleFlashLoanReceiver} from '../../../flashloan/interfaces/ISimpleFlashLoanReceiver.sol';
