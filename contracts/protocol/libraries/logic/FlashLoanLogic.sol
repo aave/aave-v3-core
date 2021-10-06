@@ -187,7 +187,6 @@ library FlashLoanLogic {
   ) external {
     SimpleFlashLoanLocalVars memory vars;
 
-    // This is just testing that t
     ValidationLogic.validateSimpleFlashloan(reserve);
 
     vars.receiver = ISimpleFlashLoanReceiver(params.receiverAddress);
