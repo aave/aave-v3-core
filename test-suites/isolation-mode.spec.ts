@@ -108,4 +108,50 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     expect(userData.usageAsCollateralEnabled).to.be.eq(false);
   });
+
+  it('User 2 supplies DAI, transfers to user 1. Checks DAI is enabled as collateral', async () => {
+    const { dai, aDai, aave, weth, users, pool, helpersContract } = testEnv;
+
+    const amount = utils.parseEther('100');
+    await dai.connect(users[2].signer).mint(amount);
+    await pool.connect(users[2].signer).supply(dai.address, amount, users[2].address, 0);
+
+    await aDai.connect(users[2].signer).transfer(users[1].address, amount);
+
+    const userData = await helpersContract.getUserReserveData(dai.address, users[1].address);
+
+    expect(userData.usageAsCollateralEnabled).to.be.eq(true);
+  });
+
+  it('User 1 withdraws everything. User 2 supplies ETH, User 1 supplies AAVE, tries to borrow ETH (revert expected)', async () => {
+    const { dai, aave, weth, users, pool, helpersContract } = testEnv;
+
+    await pool
+      .connect(users[1].signer)
+      .withdraw(weth.address, utils.parseEther('1'), users[1].address);
+
+    await pool
+      .connect(users[1].signer)
+      .withdraw(aave.address, utils.parseEther('1'), users[1].address);
+
+    await pool
+      .connect(users[1].signer)
+      .withdraw(dai.address, utils.parseEther('100'), users[1].address);
+
+    const wethAmount = utils.parseEther('1');
+
+    await weth.connect(users[2].signer).mint(wethAmount);
+    await weth.connect(users[2].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[2].signer).supply(weth.address, wethAmount, users[2].address, 0);
+
+    const amount = utils.parseEther('1');
+
+    await pool.connect(users[1].signer).supply(aave.address, amount, users[1].address, 0);
+
+    await expect(
+      pool
+        .connect(users[1].signer)
+        .borrow(weth.address, utils.parseEther('0.01'), '2', 0, users[1].address)
+    ).to.be.revertedWith();
+  });
 });
