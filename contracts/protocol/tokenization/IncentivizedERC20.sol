@@ -46,17 +46,17 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /// @inheritdoc IERC20Detailed
-  function name() public view override returns (string memory) {
+  function name() external view override returns (string memory) {
     return _name;
   }
 
   /// @inheritdoc IERC20Detailed
-  function symbol() public view override returns (string memory) {
+  function symbol() external view override returns (string memory) {
     return _symbol;
   }
 
   /// @inheritdoc IERC20Detailed
-  function decimals() public view override returns (uint8) {
+  function decimals() external view override returns (uint8) {
     return _decimals;
   }
 
@@ -79,7 +79,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /// @inheritdoc IERC20
-  function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+  function transfer(address recipient, uint256 amount) external virtual override returns (bool) {
     uint128 castAmount = Helpers.castUint128(amount);
     _transfer(_msgSender(), recipient, castAmount);
     return true;
@@ -87,7 +87,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /// @inheritdoc IERC20
   function allowance(address owner, address spender)
-    public
+    external
     view
     virtual
     override
@@ -97,7 +97,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /// @inheritdoc IERC20
-  function approve(address spender, uint256 amount) public virtual override returns (bool) {
+  function approve(address spender, uint256 amount) external virtual override returns (bool) {
     _approve(_msgSender(), spender, amount);
     return true;
   }
@@ -107,10 +107,10 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address sender,
     address recipient,
     uint256 amount
-  ) public virtual override returns (bool) {
+  ) external virtual override returns (bool) {
     uint128 castAmount = Helpers.castUint128(amount);
-    _transfer(sender, recipient, castAmount);
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
+    _transfer(sender, recipient, castAmount);
     return true;
   }
 
@@ -120,7 +120,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
    * @param addedValue The amount being added to the allowance
    * @return `true`
    **/
-  function increaseAllowance(address spender, uint256 addedValue) public virtual returns (bool) {
+  function increaseAllowance(address spender, uint256 addedValue) external virtual returns (bool) {
     _approve(_msgSender(), spender, _allowances[_msgSender()][spender] + addedValue);
     return true;
   }
@@ -132,7 +132,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
    * @return `true`
    **/
   function decreaseAllowance(address spender, uint256 subtractedValue)
-    public
+    external
     virtual
     returns (bool)
   {
