@@ -1,8 +1,10 @@
 import { expect } from 'chai';
 import { BigNumber, BigNumberish } from 'ethers';
-import { ONE_ADDRESS, RAY, ZERO_ADDRESS } from '../helpers/constants';
+import { hasUncaughtExceptionCaptureCallback } from 'process';
+import { MAX_UINT_AMOUNT, ONE_ADDRESS, RAY, ZERO_ADDRESS } from '../helpers/constants';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import { getFirstSigner } from '../helpers/contracts-getters';
+import { ProtocolErrors } from '../helpers/types';
 import { strategyWETH } from '../market-config/reservesConfigs';
 import {
   AaveProtocolDataProvider,
@@ -83,6 +85,7 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   let baseConfigValues: ReserveConfigurationValues;
+  const { PC_RESERVE_LIQUIDITY_NOT_0 } = ProtocolErrors;
 
   before(() => {
     const {
@@ -567,6 +570,11 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
     expect(before.interestRateStrategyAddress).to.not.be.eq(ZERO_ADDRESS);
     expect(after.interestRateStrategyAddress).to.be.eq(ZERO_ADDRESS);
+
+    //reset interest rate strategy to the correct one
+    await configurator
+      .connect(poolAdmin.signer)
+      .setReserveInterestRateStrategyAddress(weth.address, before.interestRateStrategyAddress);
   });
 
   it('Updates the ReserveInterestRateStrategy address of WETH via risk admin', async () => {
@@ -585,6 +593,11 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
     expect(before.interestRateStrategyAddress).to.not.be.eq(ONE_ADDRESS);
     expect(after.interestRateStrategyAddress).to.be.eq(ONE_ADDRESS);
+
+    //reset interest rate strategy to the correct one
+    await configurator
+      .connect(riskAdmin.signer)
+      .setReserveInterestRateStrategyAddress(weth.address, before.interestRateStrategyAddress);
   });
 
   it('Register a new risk Admin', async () => {
@@ -601,7 +614,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await aclManager.isRiskAdmin(newRiskAdmin)).to.be.true;
   });
 
-  it('Unregister risk admins', async () => {
+  it('Unregister the new risk admin', async () => {
     const { aclManager, poolAdmin, users, riskAdmin } = testEnv;
 
     const riskAdminRole = await aclManager.RISK_ADMIN_ROLE();
@@ -610,11 +623,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await aclManager.removeRiskAdmin(newRiskAdmin))
       .to.emit(aclManager, 'RoleRevoked')
       .withArgs(riskAdminRole, newRiskAdmin, poolAdmin.address);
-    expect(await aclManager.removeRiskAdmin(riskAdmin.address))
-      .to.emit(aclManager, 'RoleRevoked')
-      .withArgs(riskAdminRole, riskAdmin.address, poolAdmin.address);
 
-    expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.false;
+    expect(await aclManager.isRiskAdmin(riskAdmin.address)).to.be.true;
     expect(await aclManager.isRiskAdmin(newRiskAdmin)).to.be.false;
   });
 
@@ -702,5 +712,90 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       ONE_ADDRESS,
       'invalid eMode category price source'
     );
+  });
+
+  it('Sets a debt ceiling through the pool admin', async () => {
+    const { configurator, helpersContract, weth, poolAdmin } = testEnv;
+
+    expect(await configurator.connect(poolAdmin.signer).setDebtCeiling(weth.address, '1'))
+      .to.emit(configurator, 'DebtCeilingChanged')
+      .withArgs(weth.address, '1');
+
+    const newCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    expect(newCeiling).to.be.eq('1', 'Invalid debt ceiling');
+  });
+
+  it('Sets a debt ceiling through the risk admin', async () => {
+    const { configurator, helpersContract, weth, riskAdmin } = testEnv;
+
+    expect(await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, '10'))
+      .to.emit(configurator, 'DebtCeilingChanged')
+      .withArgs(weth.address, '10');
+
+    const newCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    expect(newCeiling).to.be.eq('10', 'Invalid debt ceiling');
+  });
+
+  it('Resets the WETH debt ceiling. Tries to set debt ceiling after liquidity has been provided (revert expected)', async () => {
+    const {
+      configurator,
+      weth,
+      riskAdmin,
+      pool,
+      users: [user1],
+    } = testEnv;
+
+    await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, '0');
+
+    // user 1 deposits
+    await weth.connect(user1.signer).mint('100');
+
+    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.connect(user1.signer).supply(weth.address, '100', user1.address, '0');
+
+    await expect(configurator.setDebtCeiling(weth.address, '100')).to.be.revertedWith(
+      PC_RESERVE_LIQUIDITY_NOT_0
+    );
+  });
+
+  it('Withdraws supplied liquidity, sets WETH debt ceiling', async () => {
+    const {
+      configurator,
+      helpersContract,
+      weth,
+      riskAdmin,
+      pool,
+      users: [user1],
+    } = testEnv;
+
+    await pool.connect(user1.signer).withdraw(weth.address, MAX_UINT_AMOUNT, user1.address);
+
+    await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, '100');
+
+    const newCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    expect(newCeiling).to.be.eq('100');
+  });
+
+  it('Readds liquidity, increases WETH debt ceiling', async () => {
+    const {
+      configurator,
+      helpersContract,
+      weth,
+      riskAdmin,
+      pool,
+      users: [user1],
+    } = testEnv;
+
+    await pool.connect(user1.signer).supply(weth.address, '100', user1.address, '0');
+
+    await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, '200');
+
+    const newCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    expect(newCeiling).to.be.eq('200');
   });
 });

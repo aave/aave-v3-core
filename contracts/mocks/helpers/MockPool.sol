@@ -8,7 +8,7 @@ contract MockPool {
   address _addressesProvider;
   address[] _reserveList;
 
-  function initialize(address provider) public {
+  function initialize(address provider) external {
     _addressesProvider = provider;
   }
 

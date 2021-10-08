@@ -259,8 +259,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /// @inheritdoc IPoolConfigurator
   function setDebtCeiling(address asset, uint256 ceiling) external override onlyRiskOrPoolAdmins {
-    _checkNoLiquidity(asset);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    if (currentConfig.getDebtCeiling() == 0) {
+      _checkNoLiquidity(asset);
+    }
     currentConfig.setDebtCeiling(ceiling);
     _pool.setConfiguration(asset, currentConfig.data);
     emit DebtCeilingChanged(asset, ceiling);

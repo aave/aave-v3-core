@@ -86,7 +86,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    *   on subsequent operations
    * @param provider The address of the PoolAddressesProvider
    **/
-  function initialize(IPoolAddressesProvider provider) public initializer {
+  function initialize(IPoolAddressesProvider provider) external initializer {
     _addressesProvider = provider;
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
@@ -414,11 +414,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       uint256 accruedToTreasury = reserve.accruedToTreasury;
 
       if (accruedToTreasury != 0) {
+        reserve.accruedToTreasury = 0;
         uint256 normalizedIncome = reserve.getNormalizedIncome();
         uint256 amountToMint = accruedToTreasury.rayMul(normalizedIncome);
         IAToken(reserve.aTokenAddress).mintToTreasury(amountToMint, normalizedIncome);
 
-        reserve.accruedToTreasury = 0;
         emit MintedToTreasury(assetAddress, amountToMint);
       }
     }
