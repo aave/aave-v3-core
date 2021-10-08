@@ -68,12 +68,7 @@ contract AToken is
     string calldata aTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId;
-
-    //solium-disable-next-line
-    assembly {
-      chainId := chainid()
-    }
+    uint256 chainId = block.chainid;
 
     DOMAIN_SEPARATOR = keccak256(
       abi.encode(
@@ -119,13 +114,13 @@ contract AToken is
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
+    _userState[user].additionalData = Helpers.castUint128(index);
+
     _burn(user, Helpers.castUint128(amountScaled));
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
-
-    _userState[user].additionalData = Helpers.castUint128(index);
 
     emit Transfer(user, address(0), amount);
     if (accumulatedInterest > amount) {
@@ -148,9 +143,9 @@ contract AToken is
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _mint(user, Helpers.castUint128(amountScaled));
-
     _userState[user].additionalData = Helpers.castUint128(index);
+
+    _mint(user, Helpers.castUint128(amountScaled));
 
     emit Transfer(address(0), user, amount);
     emit Mint(user, amount + accumulatedInterest, index);
@@ -231,7 +226,7 @@ contract AToken is
   }
 
   /// @inheritdoc IScaledBalanceToken
-  function getPreviousIndex(address user) public view virtual override returns (uint256) {
+  function getPreviousIndex(address user) external view virtual override returns (uint256) {
     return _userState[user].additionalData;
   }
 
@@ -239,12 +234,12 @@ contract AToken is
    * @notice Returns the address of the Aave treasury, receiving the fees on this aToken
    * @return Address of the Aave treasury
    **/
-  function RESERVE_TREASURY_ADDRESS() public view override returns (address) {
+  function RESERVE_TREASURY_ADDRESS() external view override returns (address) {
     return _treasury;
   }
 
   /// @inheritdoc IAToken
-  function UNDERLYING_ASSET_ADDRESS() public view override returns (address) {
+  function UNDERLYING_ASSET_ADDRESS() external view override returns (address) {
     return _underlyingAsset;
   }
 
@@ -252,19 +247,13 @@ contract AToken is
    * @notice Returns the address of the pool where this aToken is used
    * @return Address of the pool
    **/
-  function POOL() public view returns (IPool) {
+  function POOL() external view returns (IPool) {
     return _pool;
   }
 
   /// @inheritdoc IAToken
-  function transferUnderlyingTo(address target, uint256 amount)
-    external
-    override
-    onlyPool
-    returns (uint256)
-  {
+  function transferUnderlyingTo(address target, uint256 amount) external override onlyPool {
     IERC20(_underlyingAsset).safeTransfer(target, amount);
-    return amount;
   }
 
   /// @inheritdoc IAToken

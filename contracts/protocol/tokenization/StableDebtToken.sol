@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.7;
 
-import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {MathUtils} from '../libraries/math/MathUtils.sol';
@@ -44,13 +43,8 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     string memory debtTokenName,
     string memory debtTokenSymbol,
     bytes calldata params
-  ) public override initializer {
-    uint256 chainId;
-
-    //solium-disable-next-line
-    assembly {
-      chainId := chainid()
-    }
+  ) external override initializer {
+    uint256 chainId = block.chainid;
 
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
@@ -184,11 +178,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     return (currentBalance == 0, vars.nextSupply, vars.currentAvgStableRate);
   }
 
-  /**
-   * @dev Burns debt of `user`
-   * @param user The address of the user getting his debt burned
-   * @param amount The amount of debt tokens getting burned
-   **/
+  /// @inheritdoc IStableDebtToken
   function burn(address user, uint256 amount)
     external
     override
@@ -288,7 +278,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   /// @inheritdoc IStableDebtToken
   function getSupplyData()
-    public
+    external
     view
     override
     returns (
@@ -303,7 +293,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /// @inheritdoc IStableDebtToken
-  function getTotalSupplyAndAvgRate() public view override returns (uint256, uint256) {
+  function getTotalSupplyAndAvgRate() external view override returns (uint256, uint256) {
     uint256 avgRate = _avgStableRate;
     return (_calcTotalSupply(avgRate), avgRate);
   }
@@ -314,7 +304,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /// @inheritdoc IStableDebtToken
-  function getTotalSupplyLastUpdated() public view override returns (uint40) {
+  function getTotalSupplyLastUpdated() external view override returns (uint40) {
     return _totalSupplyTimestamp;
   }
 
@@ -327,7 +317,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
    * @return The address of the underlying asset
    **/
-  function UNDERLYING_ASSET_ADDRESS() public view returns (address) {
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
     return _underlyingAsset;
   }
 
@@ -335,7 +325,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @notice Returns the address of the pool where this debtToken is used
    * @return The address of the Pool
    **/
-  function POOL() public view returns (IPool) {
+  function POOL() external view returns (IPool) {
     return _pool;
   }
 
