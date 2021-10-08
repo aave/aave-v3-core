@@ -184,7 +184,7 @@ library DataTypes {
     bool isAuthorizedFlashBorrower;
   }
 
-  struct SimpleFlashloanParams {
+  struct FlashloanSimpleParams {
     address receiverAddress;
     address asset;
     uint256 amount;

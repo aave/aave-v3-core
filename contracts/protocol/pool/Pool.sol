@@ -380,14 +380,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function simpleFlashLoan(
+  function flashLoanSimple(
     address receiverAddress,
     address asset,
     uint256 amount,
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    DataTypes.SimpleFlashloanParams memory flashParams = DataTypes.SimpleFlashloanParams(
+    DataTypes.FlashloanSimpleParams memory flashParams = DataTypes.FlashloanSimpleParams(
       receiverAddress,
       asset,
       amount,
@@ -396,7 +396,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _flashLoanPremiumToProtocol,
       _flashLoanPremiumTotal
     );
-    FlashLoanLogic.executeSimpleFlashLoan(_reserves[asset], flashParams);
+    FlashLoanLogic.executeFlashLoanSimple(_reserves[asset], flashParams);
   }
 
   /// @inheritdoc IPool

@@ -454,7 +454,7 @@ interface IPool {
    * @param referralCode The code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    **/
-  function simpleFlashLoan(
+  function flashLoanSimple(
     address receiverAddress,
     address asset,
     uint256 amount,

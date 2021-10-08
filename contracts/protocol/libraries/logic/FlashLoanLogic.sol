@@ -174,27 +174,28 @@ library FlashLoanLogic {
 
   struct SimpleFlashLoanLocalVars {
     ISimpleFlashLoanReceiver receiver;
-    address aTokenAddress;
     uint256 totalPremium;
     uint256 premiumToLP;
     uint256 premiumToProtocol;
     uint256 amountPlusPremium;
   }
 
-  function executeSimpleFlashLoan(
+  function executeFlashLoanSimple(
     DataTypes.ReserveData storage reserve,
-    DataTypes.SimpleFlashloanParams memory params
+    DataTypes.FlashloanSimpleParams memory params
   ) external {
     SimpleFlashLoanLocalVars memory vars;
 
-    ValidationLogic.validateSimpleFlashloan(reserve);
+    DataTypes.ReserveCache memory reserveCache = reserve.cache();
+    reserve.updateState(reserveCache);
+
+    ValidationLogic.validateFlashloanSimple(reserveCache);
 
     vars.receiver = ISimpleFlashLoanReceiver(params.receiverAddress);
 
-    vars.aTokenAddress = reserve.aTokenAddress;
     vars.totalPremium = params.amount.percentMul(params.flashLoanPremiumTotal);
     vars.amountPlusPremium = params.amount + vars.totalPremium;
-    IAToken(vars.aTokenAddress).transferUnderlyingTo(params.receiverAddress, params.amount);
+    IAToken(reserveCache.aTokenAddress).transferUnderlyingTo(params.receiverAddress, params.amount);
 
     require(
       vars.receiver.executeOperation(
@@ -210,10 +211,10 @@ library FlashLoanLogic {
     vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
     vars.premiumToLP = vars.totalPremium - vars.premiumToProtocol;
 
-    DataTypes.ReserveCache memory reserveCache = reserve.cache();
-
-    reserve.updateState(reserveCache);
-    reserve.cumulateToLiquidityIndex(IERC20(vars.aTokenAddress).totalSupply(), vars.premiumToLP);
+    reserve.cumulateToLiquidityIndex(
+      IERC20(reserveCache.aTokenAddress).totalSupply(),
+      vars.premiumToLP
+    );
 
     reserve.accruedToTreasury =
       reserve.accruedToTreasury +
@@ -223,7 +224,7 @@ library FlashLoanLogic {
 
     IERC20(params.asset).safeTransferFrom(
       params.receiverAddress,
-      vars.aTokenAddress,
+      reserveCache.aTokenAddress,
       vars.amountPlusPremium
     );
 
