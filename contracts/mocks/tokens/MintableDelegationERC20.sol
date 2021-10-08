@@ -2,12 +2,13 @@
 pragma solidity 0.8.7;
 
 import {ERC20} from '../../dependencies/openzeppelin/contracts/ERC20.sol';
+import {IDelegationToken} from '../../interfaces/IDelegationToken.sol';
 
 /**
- * @title ERC20Mintable
- * @dev ERC20 minting logic
+ * @title MintableDelegationERC20
+ * @dev ERC20 minting logic with delegation
  */
-contract MintableDelegationERC20 is ERC20 {
+contract MintableDelegationERC20 is IDelegationToken, ERC20 {
   address public delegatee;
 
   constructor(
@@ -28,7 +29,7 @@ contract MintableDelegationERC20 is ERC20 {
     return true;
   }
 
-  function delegate(address delegateeAddress) external {
+  function delegate(address delegateeAddress) external override {
     delegatee = delegateeAddress;
   }
 }

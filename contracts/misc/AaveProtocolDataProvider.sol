@@ -239,6 +239,18 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /**
+   * @notice Returns the total supply of aTokens for a given asset
+   * @param asset The address of the underlying asset of the reserve
+   * @return The total supply of the aToken
+   **/
+  function getATokenTotalSupply(address asset) external view override returns (uint256) {
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
+    return IERC20Detailed(reserve.aTokenAddress).totalSupply();
+  }
+
+  /**
    * @notice Returns the user data in a reserve
    * @param asset The address of the underlying asset of the reserve
    * @param user The address of the user

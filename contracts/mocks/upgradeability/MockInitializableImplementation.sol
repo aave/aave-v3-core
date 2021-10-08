@@ -22,7 +22,7 @@ contract MockInitializableImple is VersionedInitializable {
     uint256 val,
     string memory txt,
     uint256[] memory vals
-  ) public initializer {
+  ) external initializer {
     value = val;
     text = txt;
     values = vals;
