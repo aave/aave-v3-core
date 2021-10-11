@@ -1,15 +1,10 @@
 const { expect } = require('chai');
-import { BigNumber, utils } from 'ethers';
+import { utils } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { waitForTx, advanceTimeAndBlock, increaseTime } from '../helpers/misc-utils';
+import { increaseTime } from '../helpers/misc-utils';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { getACLManager } from '../helpers/contracts-getters';
-import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP, ZERO_ADDRESS } from '../helpers/constants';
-import { ACLManager } from '../types';
-import AaveConfig from '../market-config';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { TestEnv, makeSuite } from './helpers/make-suite';
-import { getReserveData } from './helpers/utils/helpers';
-import { getTxCostAndTimestamp } from './helpers/actions';
 import './helpers/utils/wadraymath';
 
 const expectEqual = (

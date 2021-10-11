@@ -55,7 +55,7 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 10000;
   uint256 constant MAX_VALID_EMODE_CATEGORY = 255;
   uint256 constant MAX_VALID_UNBACKED_MINT_CAP = 68719476735;
-  uint256 constant MAX_VALID_DEBT_CEILING = 4294967296;
+  uint256 constant MAX_VALID_DEBT_CEILING = 4294967295;
 
   /**
    * @notice Sets the Loan to Value of the reserve
