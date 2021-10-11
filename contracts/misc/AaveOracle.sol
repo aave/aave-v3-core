@@ -4,8 +4,11 @@ pragma solidity 0.8.7;
 import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {IACLManager} from '../interfaces/IACLManager.sol';
+import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
 import {IChainlinkAggregator} from '../interfaces/IChainlinkAggregator.sol';
+import {Errors} from '../protocol/libraries/helpers/Errors.sol';
 
 /**
  * @title AaveOracle
@@ -38,13 +41,21 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
    */
   event FallbackOracleUpdated(address indexed fallbackOracle);
 
+
+  IPoolAddressesProvider internal _addressesProvider;
   mapping(address => IChainlinkAggregator) private assetsSources;
   IPriceOracleGetter private _fallbackOracle;
   address public immutable BASE_CURRENCY;
   uint256 public immutable BASE_CURRENCY_UNIT;
 
+  modifier onlyAssetListingOrPoolAdmins() {
+    _onlyAssetListingOrPoolAdmins();
+    _;
+  }
+
   /**
    * @notice Constructor
+   * @param provider The address of the new PoolAddressesProvider
    * @param assets The addresses of the assets
    * @param sources The address of the source of each asset
    * @param fallbackOracle The address of the fallback oracle to use if the data of an
@@ -53,12 +64,14 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
    * @param baseCurrencyUnit The unit of the base currency
    */
   constructor(
+    IPoolAddressesProvider provider,
     address[] memory assets,
     address[] memory sources,
     address fallbackOracle,
     address baseCurrency,
     uint256 baseCurrencyUnit
   ) {
+    _addressesProvider = provider;
     _setFallbackOracle(fallbackOracle);
     _setAssetsSources(assets, sources);
     BASE_CURRENCY = baseCurrency;
@@ -73,7 +86,7 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
    */
   function setAssetSources(address[] calldata assets, address[] calldata sources)
     external
-    onlyOwner
+    onlyAssetListingOrPoolAdmins
   {
     _setAssetsSources(assets, sources);
   }
@@ -155,5 +168,13 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
    */
   function getFallbackOracle() external view returns (address) {
     return address(_fallbackOracle);
+  }
+
+  function _onlyAssetListingOrPoolAdmins() internal view {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(
+      aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
+      Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
+    );
   }
 }
