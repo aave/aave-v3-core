@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.7;
 
-import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
-import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IACLManager} from '../interfaces/IACLManager.sol';
 import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
@@ -18,9 +15,7 @@ import {Errors} from '../protocol/libraries/helpers/Errors.sol';
  * - If the returned price by a Chainlink aggregator is <= 0, the call is forwarded to a fallback oracle
  * - Owned by the Aave governance
  */
-contract AaveOracle is IPriceOracleGetter, Ownable {
-  using SafeERC20 for IERC20;
-
+contract AaveOracle is IPriceOracleGetter {
   /**
    * @notice Emitted after the base currency is set
    * @param baseCurrency The base currency of used for price quotes
@@ -40,7 +35,6 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
    * @param fallbackOracle The address of the fallback oracle
    */
   event FallbackOracleUpdated(address indexed fallbackOracle);
-
 
   IPoolAddressesProvider internal _addressesProvider;
   mapping(address => IChainlinkAggregator) private assetsSources;
@@ -96,7 +90,7 @@ contract AaveOracle is IPriceOracleGetter, Ownable {
    * - Callable only by the Aave governance
    * @param fallbackOracle The address of the fallback oracle
    */
-  function setFallbackOracle(address fallbackOracle) external onlyOwner {
+  function setFallbackOracle(address fallbackOracle) external onlyAssetListingOrPoolAdmins {
     _setFallbackOracle(fallbackOracle);
   }
 
