@@ -716,7 +716,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(await configurator.connect(poolAdmin.signer).setReservePause(weth.address, true));
 
     await expect(
-      pool.connect(user.signer).simpleFlashLoan(user.address, weth.address, 0, '0x10', 0)
+      pool.connect(user.signer).flashLoanSimple(user.address, weth.address, 0, '0x10', 0)
     ).to.be.revertedWith(VL_RESERVE_PAUSED);
   });
 

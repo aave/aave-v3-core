@@ -81,7 +81,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const wethReservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
 
-    await pool.simpleFlashLoan(
+    await pool.flashLoanSimple(
       _mockSimpleFlashLoanReceiver.address,
       weth.address,
       wethFlashBorrowedAmount,
@@ -129,7 +129,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const reservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
 
-    const txResult = await pool.simpleFlashLoan(
+    const txResult = await pool.flashLoanSimple(
       _mockSimpleFlashLoanReceiver.address,
       weth.address,
       flashBorrowedAmount,
@@ -163,7 +163,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(caller.signer)
-        .simpleFlashLoan(
+        .flashLoanSimple(
           _mockSimpleFlashLoanReceiver.address,
           weth.address,
           ethers.utils.parseEther('0.8'),
@@ -182,7 +182,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(caller.signer)
-        .simpleFlashLoan(
+        .flashLoanSimple(
           _mockSimpleFlashLoanReceiver.address,
           weth.address,
           ethers.utils.parseEther('0.8'),
@@ -197,7 +197,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const caller = users[1];
 
     await expect(
-      pool.connect(caller.signer).simpleFlashLoan(
+      pool.connect(caller.signer).flashLoanSimple(
         _mockSimpleFlashLoanReceiver.address,
         weth.address,
         '1004415000000000000', //slightly higher than the available liquidity
@@ -213,7 +213,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const caller = users[1];
 
     await expect(
-      pool.simpleFlashLoan(deployer.address, weth.address, '1000000000000000000', '0x10', '0')
+      pool.flashLoanSimple(deployer.address, weth.address, '1000000000000000000', '0x10', '0')
     ).to.be.reverted;
   });
 
@@ -251,7 +251,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const reservesBefore = await aUsdc.balanceOf(await aUsdc.RESERVE_TREASURY_ADDRESS());
 
-    await pool.simpleFlashLoan(
+    await pool.flashLoanSimple(
       _mockSimpleFlashLoanReceiver.address,
       usdc.address,
       flashBorrowedAmount,
@@ -287,7 +287,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(caller.signer)
-        .simpleFlashLoan(
+        .flashLoanSimple(
           _mockSimpleFlashLoanReceiver.address,
           usdc.address,
           flashloanAmount,
@@ -317,7 +317,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     await expect(
       pool
         .connect(caller.signer)
-        .simpleFlashLoan(
+        .flashLoanSimple(
           _mockSimpleFlashLoanReceiver.address,
           weth.address,
           flashAmount,
