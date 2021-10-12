@@ -175,14 +175,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return _underlyingAsset;
   }
 
-  /**
-   * @notice Returns the address of the pool where this debtToken is used
-   * @return The address of the Pool
-   **/
-  function POOL() external view returns (IPool) {
-    return _pool;
-  }
-
   /// @inheritdoc DebtTokenBase
   function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;

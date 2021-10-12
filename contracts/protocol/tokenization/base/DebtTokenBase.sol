@@ -102,6 +102,21 @@ abstract contract DebtTokenBase is
   }
 
   /**
+   * @notice Returns the address of the underlying asset of this debt token
+   * @dev For internal usage in the logic of the parent contracts
+   * @return The address of the underlying asset
+   **/
+  function _getUnderlyingAssetAddress() internal view virtual returns (address);
+
+  /**
+   * @notice Returns the address of the pool where this debtToken is used
+   * @return The address of the Pool
+   **/
+  function POOL() external view returns (IPool) {
+    return _pool;
+  }
+
+  /**
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
    **/
@@ -153,11 +168,4 @@ abstract contract DebtTokenBase is
 
     emit BorrowAllowanceDelegated(delegator, delegatee, _getUnderlyingAssetAddress(), newAllowance);
   }
-
-  /**
-   * @notice Returns the address of the underlying asset of this debt token
-   * @dev For internal usage in the logic of the parent contracts
-   * @return The address of the underlying asset
-   **/
-  function _getUnderlyingAssetAddress() internal view virtual returns (address);
 }
