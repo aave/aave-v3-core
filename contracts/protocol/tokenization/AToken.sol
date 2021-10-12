@@ -19,11 +19,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
  * @author Aave
  * @notice Implementation of the interest bearing token for the Aave protocol
  */
-contract AToken is
-  VersionedInitializable,
-  IncentivizedERC20('ATOKEN_IMPL', 'ATOKEN_IMPL', 0),
-  IAToken
-{
+contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   using WadRayMath for uint256;
   using SafeERC20 for IERC20;
 
@@ -54,7 +50,9 @@ contract AToken is
     return ATOKEN_REVISION;
   }
 
-  constructor(IPool pool) {
+  constructor(IPool pool)
+    IncentivizedERC20(pool.getAddressesProvider(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
+  {
     _pool = pool;
   }
 
