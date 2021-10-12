@@ -31,8 +31,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   IPoolAddressesProvider internal _addressesProvider;
   IPool internal _pool;
 
-  mapping(address => bool) private _riskAdmins;
-
   modifier onlyPoolAdmin() {
     _onlyPoolAdmin();
     _;
