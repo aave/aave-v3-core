@@ -14,7 +14,7 @@ import {IncentivizedERC20} from '../IncentivizedERC20.sol';
  * @dev Transfer and approve functionalities are disabled since its a non-transferable token.
  */
 abstract contract DebtTokenBase is
-  IncentivizedERC20('DEBTTOKEN_IMPL', 'DEBTTOKEN_IMPL', 0),
+  IncentivizedERC20,
   VersionedInitializable,
   ICreditDelegationToken
 {
@@ -38,7 +38,9 @@ abstract contract DebtTokenBase is
     _;
   }
 
-  constructor(IPool pool) {
+  constructor(IPool pool)
+    IncentivizedERC20(pool.getAddressesProvider(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
+  {
     _pool = pool;
   }
 
