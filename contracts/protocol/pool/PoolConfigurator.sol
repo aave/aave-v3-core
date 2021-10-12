@@ -168,7 +168,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
       //we need to ensure no liquidity is supplied
-      _checkNoLiquidity(asset);
+      _checkNoDepositors(asset);
     }
 
     currentConfig.setLtv(ltv);
@@ -207,7 +207,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /// @inheritdoc IPoolConfigurator
   function deactivateReserve(address asset) external override onlyPoolAdmin {
-    _checkNoLiquidity(asset);
+    _checkNoDepositors(asset);
 
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setActive(false);
@@ -261,7 +261,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function setDebtCeiling(address asset, uint256 ceiling) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     if (currentConfig.getDebtCeiling() == 0) {
-      _checkNoLiquidity(asset);
+      _checkNoDepositors(asset);
     }
     currentConfig.setDebtCeiling(ceiling);
     _pool.setConfiguration(asset, currentConfig.data);
@@ -410,7 +410,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit FlashloanPremiumToProtocolUpdated(flashloanPremiumToProtocol);
   }
 
-  function _checkNoLiquidity(address asset) internal view {
+  function _checkNoDepositors(address asset) internal view {
     uint256 totalATokens = IPoolDataProvider(_addressesProvider.getPoolDataProvider())
       .getATokenTotalSupply(asset);
     require(totalATokens == 0, Errors.PC_RESERVE_LIQUIDITY_NOT_0);

@@ -56,6 +56,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   await waitForTx(await addressesProvider.setACLManager(aclManager.address));
 
   await waitForTx(await aclManager.addPoolAdmin(aaveAdmin));
+  await waitForTx(await aclManager.addAssetListingAdmin(aaveAdmin));
 
   //setting users[1] as emergency admin, which is in position 2 in the DRE addresses list
   const addressList = await getEthersSignersAddresses();
@@ -161,6 +162,7 @@ const buildTestEnv = async (deployer: Signer, secondaryWallet: Signer) => {
   const [tokens, aggregators] = getPairsTokenAggregator(allTokenAddresses, allAggregatorsAddresses);
 
   await deployAaveOracle([
+    addressesProvider.address,
     tokens,
     aggregators,
     fallbackOracle.address,

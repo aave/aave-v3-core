@@ -16,7 +16,7 @@ const expectEqual = (
 
 makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const depositAmount = utils.parseEther('1000');
-  const ceilingAmount = '100';
+  const ceilingAmount = '10000';
 
   const { VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY, VL_DEBT_CEILING_CROSSED } = ProtocolErrors;
 
@@ -162,7 +162,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     const reserveData = await pool.getReserveData(aave.address);
 
-    expect(reserveData.isolationModeTotalDebt).to.be.eq('10');
+    expect(reserveData.isolationModeTotalDebt).to.be.eq('1000');
   });
 
   it('User 3 deposits 100 AAVE, borrows 10 DAI. Check debt ceiling', async () => {
@@ -178,7 +178,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     const reserveData = await pool.getReserveData(aave.address);
 
-    expect(reserveData.isolationModeTotalDebt).to.be.eq('20');
+    expect(reserveData.isolationModeTotalDebt).to.be.eq('2000');
   });
 
   it('User 4 deposits 500 AAVE, tries to borrow past the debt ceiling (revert expected)', async () => {
