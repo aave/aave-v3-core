@@ -235,6 +235,12 @@ interface IPoolConfigurator {
   event RiskAdminUnregistered(address indexed admin);
 
   /**
+   * @notice Emitted when the bridge protocol premium is updated
+   * @param bridgePremiumToProtocol The new premium
+   */
+  event BridgePremiumToProtocolUpdated(uint256 bridgePremiumToProtocol);
+
+  /**
    * @notice Emitted when a the total premium on flashloans is updated
    * @param flashloanPremiumTotal The new premium
    **/
@@ -431,6 +437,12 @@ interface IPoolConfigurator {
    * @param asset The address of the reserve to drop
    **/
   function dropReserve(address asset) external;
+
+  /**
+   * @notice Updates the bridge premium collected by the protocol reserves
+   * @param bridgePremiumToProtocol The part of the premium sent to protocol
+   */
+  function updateBridgeProtocolPremium(uint256 bridgePremiumToProtocol) external;
 
   /**
    * @notice Updates the total flash loan premium

@@ -8,6 +8,7 @@ import {DataTypes} from '../types/DataTypes.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
+import {PercentageMath} from '../math/PercentageMath.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {Helpers} from '../helpers/Helpers.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
@@ -19,6 +20,7 @@ library BridgeLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
+  using PercentageMath for uint256;
   using SafeERC20 for IERC20;
 
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
@@ -93,7 +95,8 @@ library BridgeLogic {
     DataTypes.ReserveData storage reserve,
     address asset,
     uint256 amount,
-    uint256 fee
+    uint256 fee,
+    uint256 premiumToProtocolPercentage
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -101,7 +104,14 @@ library BridgeLogic {
 
     uint256 backingAmount = (amount < reserve.unbacked) ? amount : reserve.unbacked;
 
-    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), fee);
+    uint256 premiumToProtocol = fee.percentMul(premiumToProtocolPercentage);
+    uint256 premiumToLP = fee - premiumToProtocol;
+
+    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), premiumToLP);
+
+    reserve.accruedToTreasury =
+      reserve.accruedToTreasury +
+      Helpers.castUint128(premiumToProtocol.rayDiv(reserve.liquidityIndex));
 
     reserve.unbacked = reserve.unbacked - Helpers.castUint128(backingAmount);
     reserve.updateInterestRates(reserveCache, asset, backingAmount + fee, 0);

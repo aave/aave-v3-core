@@ -32,6 +32,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
   const withdrawAmount = utils.parseEther('100');
   const feeBP = BigNumber.from(30);
   const denominatorBP = BigNumber.from(10000);
+  const bridgeProtocolPremiumBP = BigNumber.from(2000);
 
   const mintAmount = withdrawAmount.mul(denominatorBP.sub(feeBP)).div(denominatorBP);
   const feeAmount = withdrawAmount.mul(feeBP).div(denominatorBP);
@@ -41,12 +42,16 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
   before(async () => {
     calculationsConfiguration.reservesParams = AaveConfig.ReservesConfig;
 
-    const { users } = testEnv;
+    const { users, poolAdmin, configurator } = testEnv;
 
     aclManager = await getACLManager();
 
     await aclManager.addBridge(users[2].address);
     await aclManager.addBridge(users[3].address);
+
+    await configurator
+      .connect(poolAdmin.signer)
+      .updateBridgeProtocolPremium(bridgeProtocolPremiumBP);
   });
 
   it('User 0 deposit 1000 dai.', async () => {
@@ -190,6 +195,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       feeAmount.toString(),
+      bridgeProtocolPremiumBP.toString(),
       reserveDataBefore,
       txTimestamp
     );
@@ -227,6 +233,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       feeAmount.toString(),
+      bridgeProtocolPremiumBP.toString(),
       reserveDataBefore,
       txTimestamp
     );
@@ -253,6 +260,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       '0',
       withdrawAmount.toString(),
+      bridgeProtocolPremiumBP.toString(),
       reserveDataBefore,
       txTimestamp
     );
@@ -282,6 +290,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       '0',
+      bridgeProtocolPremiumBP.toString(),
       reserveDataBefore,
       txTimestamp
     );

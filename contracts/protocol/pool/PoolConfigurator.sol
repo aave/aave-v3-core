@@ -375,6 +375,20 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function updateBridgeProtocolPremium(uint256 bridgePremiumToProtocol)
+    external
+    override
+    onlyPoolAdmin
+  {
+    require(
+      bridgePremiumToProtocol < PercentageMath.PERCENTAGE_FACTOR,
+      Errors.PC_BRIDGE_PREMIUM_INVALID
+    );
+    _pool.updateBridgeProtocolPremium(bridgePremiumToProtocol);
+    emit BridgePremiumToProtocolUpdated(bridgePremiumToProtocol);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function updateFlashloanPremiumTotal(uint256 flashloanPremiumTotal)
     external
     override

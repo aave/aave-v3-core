@@ -24,6 +24,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     RC_INVALID_UNBACKED_MINT_CAP,
     RC_INVALID_EMODE_CATEGORY,
     VL_INCONSISTENT_EMODE_CATEGORY,
+    PC_BRIDGE_PREMIUM_INVALID,
   } = ProtocolErrors;
 
   it('ReserveConfiguration setLiquidationBonus() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
@@ -88,6 +89,14 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(poolAdmin.signer).configureReserveAsCollateral(dai.address, 0, 0, 10500)
     ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+  });
+
+  it('Tries to update bridge premium > PERCENTAGE_FACTOR (revert expected)', async () => {
+    const { configurator } = testEnv;
+    const newPremiumTotal = 10001;
+    await expect(configurator.updateBridgeProtocolPremium(newPremiumTotal)).to.be.revertedWith(
+      PC_BRIDGE_PREMIUM_INVALID
+    );
   });
 
   it('Tries to update flashloan premium total > PERCENTAGE_FACTOR (revert expected)', async () => {
