@@ -28,13 +28,18 @@ abstract contract DebtTokenBase is
     );
   mapping(address => uint256) public _nonces;
   bytes32 public DOMAIN_SEPARATOR;
+  IPool internal immutable _pool;
 
   /**
    * @dev Only pool can call functions marked by this modifier
    **/
   modifier onlyPool() {
-    require(_msgSender() == address(_getPool()), Errors.CT_CALLER_MUST_BE_POOL);
+    require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
     _;
+  }
+
+  constructor(IPool pool) {
+    _pool = pool;
   }
 
   /// @inheritdoc ICreditDelegationToken
@@ -155,11 +160,4 @@ abstract contract DebtTokenBase is
    * @return The address of the underlying asset
    **/
   function _getUnderlyingAssetAddress() internal view virtual returns (address);
-
-  /**
-   * @notice Returns the address of the pool where this debt token is used
-   * @dev For internal usage in the logic of the parent contracts
-   * @return The address of the Pool
-   **/
-  function _getPool() internal view virtual returns (IPool);
 }

@@ -28,12 +28,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   mapping(address => uint40) internal _timestamps;
   uint40 internal _totalSupplyTimestamp;
 
-  IPool internal immutable _pool;
   address internal _underlyingAsset;
 
-  constructor(IPool pool) {
-    _pool = pool;
-  }
+  constructor(IPool pool) DebtTokenBase(pool) {}
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
@@ -332,11 +329,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   /// @inheritdoc DebtTokenBase
   function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;
-  }
-
-  /// @inheritdoc DebtTokenBase
-  function _getPool() internal view override returns (IPool) {
-    return _pool;
   }
 
   /**
