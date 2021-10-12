@@ -12,6 +12,7 @@ import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
+import {IncentivizedERC20} from './IncentivizedERC20.sol';
 
 /**
  * @title StableDebtToken
@@ -31,7 +32,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   IPool internal immutable _pool;
   address internal _underlyingAsset;
 
-  constructor(IPool pool) {
+  constructor(IPool pool)
+    IncentivizedERC20(pool.getAddressesProvider(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
+  {
     _pool = pool;
   }
 

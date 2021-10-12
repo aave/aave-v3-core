@@ -14,7 +14,7 @@ import {IncentivizedERC20} from '../IncentivizedERC20.sol';
  * @dev Transfer and approve functionalities are disabled since its a non-transferable token.
  */
 abstract contract DebtTokenBase is
-  IncentivizedERC20('DEBTTOKEN_IMPL', 'DEBTTOKEN_IMPL', 0),
+  IncentivizedERC20,
   VersionedInitializable,
   ICreditDelegationToken
 {
