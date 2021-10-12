@@ -127,7 +127,10 @@ library BorrowLogic {
 
     if (isolationModeActive) {
       reserves[isolationModeCollateralAddress].isolationModeTotalDebt += Helpers.castUint128(
-        params.amount / 10**reserveCache.reserveConfiguration.getDecimals()
+        params.amount /
+          10 **
+            (reserveCache.reserveConfiguration.getDecimals() -
+              ReserveConfiguration.DEBT_CEILING_DECIMALS)
       );
     }
 
@@ -216,7 +219,12 @@ library BorrowLogic {
       } else {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
           isolationModeTotalDebt -
-          Helpers.castUint128(paybackAmount / 10**reserveCache.reserveConfiguration.getDecimals());
+          Helpers.castUint128(
+            paybackAmount /
+              10 **
+                (reserveCache.reserveConfiguration.getDecimals() -
+                  ReserveConfiguration.DEBT_CEILING_DECIMALS)
+          );
       }
     }
 
