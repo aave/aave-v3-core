@@ -96,7 +96,7 @@ library BridgeLogic {
     address asset,
     uint256 amount,
     uint256 fee,
-    uint256 premiumToProtocolPercentage
+    uint256 premiumToProtocolBPs
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -104,7 +104,7 @@ library BridgeLogic {
 
     uint256 backingAmount = (amount < reserve.unbacked) ? amount : reserve.unbacked;
 
-    uint256 premiumToProtocol = fee.percentMul(premiumToProtocolPercentage);
+    uint256 premiumToProtocol = fee.percentMul(premiumToProtocolBPs);
     uint256 premiumToLP = fee - premiumToProtocol;
 
     reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), premiumToLP);
