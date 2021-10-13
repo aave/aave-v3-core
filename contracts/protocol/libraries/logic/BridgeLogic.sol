@@ -90,13 +90,14 @@ library BridgeLogic {
    * @param asset The address of the underlying asset to repay
    * @param amount The amount to back
    * @param fee The amount paid in fees
+   * @param premiumToProtocol The fraction of fees in basis points paid to the protocol
    **/
   function backUnbacked(
     DataTypes.ReserveData storage reserve,
     address asset,
     uint256 amount,
     uint256 fee,
-    uint256 premiumToProtocolBPs
+    uint256 premiumToProtocol
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -104,14 +105,12 @@ library BridgeLogic {
 
     uint256 backingAmount = (amount < reserve.unbacked) ? amount : reserve.unbacked;
 
-    uint256 premiumToProtocol = fee.percentMul(premiumToProtocolBPs);
-    uint256 premiumToLP = fee - premiumToProtocol;
+    uint256 feeToProtocol = fee.percentMul(premiumToProtocol);
+    uint256 feeToLP = fee - feeToProtocol;
 
-    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), premiumToLP);
+    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), feeToLP);
 
-    reserve.accruedToTreasury =
-      reserve.accruedToTreasury +
-      Helpers.castUint128(premiumToProtocol.rayDiv(reserve.liquidityIndex));
+    reserve.accruedToTreasury += Helpers.castUint128(feeToProtocol.rayDiv(reserve.liquidityIndex));
 
     reserve.unbacked = reserve.unbacked - Helpers.castUint128(backingAmount);
     reserve.updateInterestRates(reserveCache, asset, backingAmount + fee, 0);
