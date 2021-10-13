@@ -213,18 +213,21 @@ library BorrowLogic {
     if (isolationModeActive) {
       uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
         .isolationModeTotalDebt;
+
+      uint128 paybackAmountIsolationPrecision = Helpers.castUint128(
+        paybackAmount /
+          10 **
+            (reserveCache.reserveConfiguration.getDecimals() -
+              ReserveConfiguration.DEBT_CEILING_DECIMALS)
+      );
+
       // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
-      if (isolationModeTotalDebt < paybackAmount) {
+      if (isolationModeTotalDebt <= paybackAmountIsolationPrecision) {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
       } else {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
           isolationModeTotalDebt -
-          Helpers.castUint128(
-            paybackAmount /
-              10 **
-                (reserveCache.reserveConfiguration.getDecimals() -
-                  ReserveConfiguration.DEBT_CEILING_DECIMALS)
-          );
+          paybackAmountIsolationPrecision;
       }
     }
 
