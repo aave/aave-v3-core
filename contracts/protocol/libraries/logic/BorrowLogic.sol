@@ -214,7 +214,7 @@ library BorrowLogic {
       uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
         .isolationModeTotalDebt;
 
-      uint128 paybackAmountIsolationPrecision = Helpers.castUint128(
+      uint128 isolatedDebtRepaid = Helpers.castUint128(
         paybackAmount /
           10 **
             (reserveCache.reserveConfiguration.getDecimals() -
@@ -222,12 +222,12 @@ library BorrowLogic {
       );
 
       // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
-      if (isolationModeTotalDebt <= paybackAmountIsolationPrecision) {
+      if (isolationModeTotalDebt <= isolatedDebtRepaid) {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
       } else {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
           isolationModeTotalDebt -
-          paybackAmountIsolationPrecision;
+          isolatedDebtRepaid;
       }
     }
 
