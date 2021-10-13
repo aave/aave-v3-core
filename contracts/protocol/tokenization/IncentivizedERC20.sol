@@ -7,6 +7,9 @@ import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20De
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {IACLManager} from '../../interfaces/IACLManager.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
  * @title IncentivizedERC20
@@ -15,6 +18,12 @@ import {WadRayMath} from '../libraries/math/WadRayMath.sol';
  **/
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
+
+  modifier onlyPoolAdmins() {
+    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
+    _;
+  }
 
   /**
    * @dev UserState - additionalData is a flexible field.
@@ -34,12 +43,15 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   string private _symbol;
   uint8 private _decimals;
   IAaveIncentivesController internal _incentivesController;
+  IPoolAddressesProvider internal _addressesProvider;
 
   constructor(
+    IPoolAddressesProvider addressesProvider,
     string memory name,
     string memory symbol,
     uint8 decimals
   ) {
+    _addressesProvider = addressesProvider;
     _name = name;
     _symbol = symbol;
     _decimals = decimals;
@@ -76,6 +88,14 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
    **/
   function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
     return _incentivesController;
+  }
+
+  /**
+   * @notice Sets a new incentives controller
+   * @param controller the new Incentives controller
+   **/
+  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmins {
+    _incentivesController = controller;
   }
 
   /// @inheritdoc IERC20

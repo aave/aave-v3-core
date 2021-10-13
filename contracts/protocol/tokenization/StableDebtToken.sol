@@ -12,6 +12,7 @@ import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
+import {IncentivizedERC20} from './IncentivizedERC20.sol';
 
 /**
  * @title StableDebtToken
@@ -28,12 +29,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   mapping(address => uint40) internal _timestamps;
   uint40 internal _totalSupplyTimestamp;
 
-  IPool internal immutable _pool;
   address internal _underlyingAsset;
 
-  constructor(IPool pool) {
-    _pool = pool;
-  }
+  constructor(IPool pool) DebtTokenBase(pool) {}
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
@@ -321,22 +319,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     return _underlyingAsset;
   }
 
-  /**
-   * @notice Returns the address of the pool where this debtToken is used
-   * @return The address of the Pool
-   **/
-  function POOL() external view returns (IPool) {
-    return _pool;
-  }
-
   /// @inheritdoc DebtTokenBase
   function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;
-  }
-
-  /// @inheritdoc DebtTokenBase
-  function _getPool() internal view override returns (IPool) {
-    return _pool;
   }
 
   /**
