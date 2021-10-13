@@ -204,8 +204,7 @@ interface IPool {
 
   /**
    * @dev Back the current unbacked underlying with `amount` and pay `fee`.
-   *   If backing unnecessarily, excess `amount` will be added to `fee`.
-   * @param asset The address of the underlying asset to repay
+   * @param asset The address of the underlying asset to back
    * @param amount The amount to back
    * @param fee The amount paid in fees
    **/
