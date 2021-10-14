@@ -24,7 +24,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     RC_INVALID_UNBACKED_MINT_CAP,
     RC_INVALID_EMODE_CATEGORY,
     VL_INCONSISTENT_EMODE_CATEGORY,
-    PC_BRIDGE_PREMIUM_INVALID,
+    PC_BRIDGE_PROTOCOL_FEE_INVALID,
   } = ProtocolErrors;
 
   it('ReserveConfiguration setLiquidationBonus() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
@@ -91,11 +91,11 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
   });
 
-  it('Tries to update bridge premium > PERCENTAGE_FACTOR (revert expected)', async () => {
+  it('Tries to bridge protocol fee > PERCENTAGE_FACTOR (revert expected)', async () => {
     const { configurator } = testEnv;
-    const newPremiumTotal = 10001;
-    await expect(configurator.updateBridgeProtocolPremium(newPremiumTotal)).to.be.revertedWith(
-      PC_BRIDGE_PREMIUM_INVALID
+    const newProtocolFee = 10001;
+    await expect(configurator.updateBridgeProtocolFee(newProtocolFee)).to.be.revertedWith(
+      PC_BRIDGE_PROTOCOL_FEE_INVALID
     );
   });
 

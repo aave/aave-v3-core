@@ -40,5 +40,5 @@ contract PoolStorage {
 
   mapping(address => uint8) _usersEModeCategory;
 
-  uint256 internal _bridgePremiumToProtocol;
+  uint256 internal _bridgeProtocolFee;
 }

@@ -116,7 +116,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     uint256 fee
   ) external override onlyBridge {
-    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee, _bridgePremiumToProtocol);
+    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
   }
 
   /// @inheritdoc IPool
@@ -531,8 +531,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function BRIDGE_PREMIUM_TO_PROTOCOL() public view override returns (uint256) {
-    return _bridgePremiumToProtocol;
+  function BRIDGE_PROTOCOL_FEE() public view override returns (uint256) {
+    return _bridgeProtocolFee;
   }
 
   /// @inheritdoc IPool
@@ -625,12 +625,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function updateBridgeProtocolPremium(uint256 bridgePremiumToProtocol)
-    external
-    override
-    onlyPoolConfigurator
-  {
-    _bridgePremiumToProtocol = bridgePremiumToProtocol;
+  function updateBridgeProtocolFee(uint256 protocolFee) external override onlyPoolConfigurator {
+    _bridgeProtocolFee = protocolFee;
   }
 
   /// @inheritdoc IPool

@@ -233,7 +233,7 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
   scaledATokenSupply: BigNumber,
   amount: string,
   fee: string,
-  bridgeProtocolPremium: string,
+  bridgeProtocolFee: string,
   reserveDataBeforeAction: ReserveData,
   txTimestamp: BigNumber
 ): ReserveData => {
@@ -257,9 +257,9 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
 
   const feeBN = BigNumber.from(fee);
 
-  const protocolPremiumPercentage = BigNumber.from(bridgeProtocolPremium);
+  const protocolFeePercentage = BigNumber.from(bridgeProtocolFee);
 
-  const premiumToProtocol = feeBN.percentMul(protocolPremiumPercentage);
+  const premiumToProtocol = feeBN.percentMul(protocolFeePercentage);
   const premiumToLP = feeBN.sub(premiumToProtocol);
 
   const totalSupply = scaledATokenSupply.rayMul(expectedReserveData.liquidityIndex);

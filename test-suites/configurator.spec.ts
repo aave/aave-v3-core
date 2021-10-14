@@ -654,15 +654,15 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await aclManager.isFlashBorrower(authorizedFlashBorrower)).to.be.false;
   });
 
-  it('Updates bridge premium', async () => {
+  it('Updates bridge protocol fee', async () => {
     const { pool, configurator } = testEnv;
-    const newPremiumToProtocol = 2000;
+    const newProtocolFee = 2000;
 
-    expect(await configurator.updateBridgeProtocolPremium(newPremiumToProtocol))
-      .to.emit(configurator, 'BridgePremiumToProtocolUpdated')
-      .withArgs(newPremiumToProtocol);
+    expect(await configurator.updateBridgeProtocolFee(newProtocolFee))
+      .to.emit(configurator, 'BridgeProtocolFeeUpdated')
+      .withArgs(newProtocolFee);
 
-    expect(await pool.BRIDGE_PREMIUM_TO_PROTOCOL()).to.be.eq(newPremiumToProtocol);
+    expect(await pool.BRIDGE_PROTOCOL_FEE()).to.be.eq(newProtocolFee);
   });
 
   it('Updates flash loan premiums: 10 toProtocol, 40 total', async () => {

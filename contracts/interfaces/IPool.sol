@@ -579,10 +579,10 @@ interface IPool {
   function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
-   * @notice Updates part of bridge premium that is collected by the protocol reserves
-   * @param bridgePremiumToProtocol The part of the premium sent to protocol
+   * @notice Updates the protocol fee on the bridging
+   * @param bridgeProtocolFee The part of the premium sent to protocol
    */
-  function updateBridgeProtocolPremium(uint256 bridgePremiumToProtocol) external;
+  function updateBridgeProtocolFee(uint256 bridgeProtocolFee) external;
 
   /**
    * @notice Updates flash loan premiums. Flash loan premium consist in 2 parts
@@ -642,7 +642,7 @@ interface IPool {
    * @notice Returns the part of the bridge fees sent to protocol
    * @return The bridge fee sent to the protocol
    */
-  function BRIDGE_PREMIUM_TO_PROTOCOL() external view returns (uint256);
+  function BRIDGE_PROTOCOL_FEE() external view returns (uint256);
 
   /**
    * @notice Returns the part of the flashloan fees sent to protocol
