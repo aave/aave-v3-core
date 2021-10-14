@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { DRE, evmRevert, evmSnapshot, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
@@ -8,7 +8,12 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
-  const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT, HLP_UINT128_OVERFLOW } = ProtocolErrors;
+  const {
+    CT_INVALID_MINT_AMOUNT,
+    CT_INVALID_BURN_AMOUNT,
+    HLP_UINT128_OVERFLOW,
+    CALLER_NOT_POOL_ADMIN,
+  } = ProtocolErrors;
 
   it('Check getters', async () => {
     const { pool, users, dai, aDai } = testEnv;
@@ -180,5 +185,31 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(
       HLP_UINT128_OVERFLOW
     );
+  });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { deployer, poolAdmin, aWETH, aclManager } = testEnv;
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(await aWETH.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS));
+    expect(await aWETH.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      users: [user],
+      aWETH,
+    } = testEnv;
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      aWETH.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 });

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { DRE, evmRevert, evmSnapshot, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { getVariableDebtToken } from '../helpers/contracts-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
@@ -9,7 +9,12 @@ import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
+  const {
+    CT_CALLER_MUST_BE_POOL,
+    CT_INVALID_MINT_AMOUNT,
+    CT_INVALID_BURN_AMOUNT,
+    CALLER_NOT_POOL_ADMIN,
+  } = ProtocolErrors;
 
   it('Check initialization', async () => {
     const { pool, weth, dai, helpersContract, users } = testEnv;
@@ -200,5 +205,42 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
         .connect(users[0].signer)
         .transferFrom(users[0].address, users[1].address, 500)
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+  });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { dai, helpersContract, poolAdmin, aclManager, deployer } = testEnv;
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(
+      await variableDebtContract.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS)
+    );
+    expect(await variableDebtContract.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      dai,
+      helpersContract,
+      users: [user],
+    } = testEnv;
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 });

@@ -17,7 +17,7 @@ import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
+  const { CT_CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
   let snap: string;
 
   before(async () => {
@@ -200,5 +200,39 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     await increaseTime(60 * 60 * 24 * 365);
     const totalSupplyAfterTime = BigNumber.from(18798191);
     await stableDebt.connect(poolSigner).burn(users[1].address, totalSupplyAfterTime.sub(1));
+  });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { dai, helpersContract, poolAdmin, aclManager, deployer } = testEnv;
+    const config = await helpersContract.getReserveTokensAddresses(dai.address);
+    const stableDebt = StableDebtTokenFactory.connect(
+      config.stableDebtTokenAddress,
+      deployer.signer
+    );
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await stableDebt.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(await stableDebt.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS));
+    expect(await stableDebt.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      dai,
+      helpersContract,
+      users: [user],
+    } = testEnv;
+    const config = await helpersContract.getReserveTokensAddresses(dai.address);
+    const stableDebt = StableDebtTokenFactory.connect(config.stableDebtTokenAddress, user.signer);
+
+    expect(await stableDebt.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      stableDebt.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 });
