@@ -119,4 +119,5 @@ library Errors {
   string public constant VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY = '108';
   string public constant VL_DEBT_CEILING_CROSSED = '109';
   string public constant SL_USER_IN_ISOLATION_MODE = '110';
+  string public constant PC_BRIDGE_PREMIUM_INVALID = '111';
 }

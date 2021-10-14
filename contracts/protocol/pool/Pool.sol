@@ -117,7 +117,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     uint256 fee
   ) external override onlyBridge {
-    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee);
+    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee, _bridgePremiumToProtocol);
   }
 
   /// @inheritdoc IPool
@@ -551,6 +551,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
+  function BRIDGE_PREMIUM_TO_PROTOCOL() public view override returns (uint256) {
+    return _bridgePremiumToProtocol;
+  }
+
+  /// @inheritdoc IPool
   function FLASHLOAN_PREMIUM_TOTAL() public view override returns (uint256) {
     return _flashLoanPremiumTotal;
   }
@@ -637,6 +642,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     _reserves[asset].configuration.data = configuration;
+  }
+
+  /// @inheritdoc IPool
+  function updateBridgeProtocolPremium(uint256 bridgePremiumToProtocol)
+    external
+    override
+    onlyPoolConfigurator
+  {
+    _bridgePremiumToProtocol = bridgePremiumToProtocol;
   }
 
   /// @inheritdoc IPool
