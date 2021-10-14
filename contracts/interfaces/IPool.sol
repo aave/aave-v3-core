@@ -204,8 +204,7 @@ interface IPool {
 
   /**
    * @dev Back the current unbacked underlying with `amount` and pay `fee`.
-   *   If backing unnecessarily, excess `amount` will be added to `fee`.
-   * @param asset The address of the underlying asset to repay
+   * @param asset The address of the underlying asset to back
    * @param amount The amount to back
    * @param fee The amount paid in fees
    **/
@@ -580,6 +579,12 @@ interface IPool {
   function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
+   * @notice Updates the protocol fee on the bridging
+   * @param bridgeProtocolFee The part of the premium sent to protocol
+   */
+  function updateBridgeProtocolFee(uint256 bridgeProtocolFee) external;
+
+  /**
    * @notice Updates flash loan premiums. Flash loan premium consist in 2 parts
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
@@ -632,6 +637,12 @@ interface IPool {
    * @return The total fee on flashloans
    */
   function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint256);
+
+  /**
+   * @notice Returns the part of the bridge fees sent to protocol
+   * @return The bridge fee sent to the protocol
+   */
+  function BRIDGE_PROTOCOL_FEE() external view returns (uint256);
 
   /**
    * @notice Returns the part of the flashloan fees sent to protocol

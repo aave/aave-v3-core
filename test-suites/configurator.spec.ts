@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { BigNumber, BigNumberish } from 'ethers';
-import { hasUncaughtExceptionCaptureCallback } from 'process';
+import { config, hasUncaughtExceptionCaptureCallback } from 'process';
 import { MAX_UINT_AMOUNT, ONE_ADDRESS, RAY, ZERO_ADDRESS } from '../helpers/constants';
 import { deployMintableERC20 } from '../helpers/contracts-deployments';
 import { getFirstSigner } from '../helpers/contracts-getters';
@@ -652,6 +652,17 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .withArgs(authorizedFlashBorrowerRole, authorizedFlashBorrower, poolAdmin.address);
 
     expect(await aclManager.isFlashBorrower(authorizedFlashBorrower)).to.be.false;
+  });
+
+  it('Updates bridge protocol fee', async () => {
+    const { pool, configurator } = testEnv;
+    const newProtocolFee = 2000;
+
+    expect(await configurator.updateBridgeProtocolFee(newProtocolFee))
+      .to.emit(configurator, 'BridgeProtocolFeeUpdated')
+      .withArgs(newProtocolFee);
+
+    expect(await pool.BRIDGE_PROTOCOL_FEE()).to.be.eq(newProtocolFee);
   });
 
   it('Updates flash loan premiums: 10 toProtocol, 40 total', async () => {

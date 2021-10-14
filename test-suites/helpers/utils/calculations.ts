@@ -233,13 +233,10 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
   scaledATokenSupply: BigNumber,
   amount: string,
   fee: string,
+  bridgeProtocolFee: string,
   reserveDataBeforeAction: ReserveData,
   txTimestamp: BigNumber
 ): ReserveData => {
-  const expectedReserveData: ReserveData = <ReserveData>{};
-  const amountBN = BigNumber.from(amount);
-  const feeBN = BigNumber.from(fee);
-
   const cumulateToLiquidityIndex = (
     liquidityIndex: BigNumber,
     totalLiquidity: BigNumber,
@@ -248,23 +245,22 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
     const amountToLiquidityRatio = amount.wadToRay().rayDiv(totalLiquidity.wadToRay());
     return amountToLiquidityRatio.add(RAY).rayMul(liquidityIndex);
   };
-
+  const expectedReserveData: ReserveData = <ReserveData>{};
   expectedReserveData.address = reserveDataBeforeAction.address;
   expectedReserveData.reserveFactor = reserveDataBeforeAction.reserveFactor;
-
   updateState(reserveDataBeforeAction, expectedReserveData, txTimestamp);
+
+  const amountBN = BigNumber.from(amount);
   const backingAmount = amountBN.lt(reserveDataBeforeAction.unbacked)
     ? amountBN
     : reserveDataBeforeAction.unbacked;
-  const totalFee = backingAmount.lt(amountBN) ? feeBN.add(amountBN.sub(backingAmount)) : feeBN;
 
-  expectedReserveData.unbacked = reserveDataBeforeAction.unbacked.sub(backingAmount);
-  updateLiquidityAndUtils(
-    reserveDataBeforeAction,
-    expectedReserveData,
-    backingAmount.add(totalFee),
-    BigNumber.from(0)
-  );
+  const feeBN = BigNumber.from(fee);
+
+  const protocolFeePercentage = BigNumber.from(bridgeProtocolFee);
+
+  const premiumToProtocol = feeBN.percentMul(protocolFeePercentage);
+  const premiumToLP = feeBN.sub(premiumToProtocol);
 
   const totalSupply = scaledATokenSupply.rayMul(expectedReserveData.liquidityIndex);
   // The fee is added directly to total liquidity, the backing will not change this liquidity.
@@ -273,7 +269,20 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
   expectedReserveData.liquidityIndex = cumulateToLiquidityIndex(
     expectedReserveData.liquidityIndex,
     totalSupply,
-    totalFee
+    premiumToLP
+  );
+
+  expectedReserveData.accruedToTreasuryScaled = expectedReserveData.accruedToTreasuryScaled.add(
+    premiumToProtocol.rayDiv(expectedReserveData.liquidityIndex)
+  );
+
+  expectedReserveData.unbacked = reserveDataBeforeAction.unbacked.sub(backingAmount);
+
+  updateLiquidityAndUtils(
+    reserveDataBeforeAction,
+    expectedReserveData,
+    backingAmount.add(feeBN),
+    BigNumber.from(0)
   );
 
   expectedReserveData.averageStableBorrowRate = calcExpectedAverageStableBorrowRate(
@@ -283,7 +292,6 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
     reserveDataBeforeAction.stableBorrowRate
   );
 
-  // The total liquidity is not the same
   const rates = calcExpectedInterestRates(
     reserveDataBeforeAction.symbol,
     reserveDataBeforeAction.marketStableRate,
@@ -298,7 +306,6 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
   expectedReserveData.stableBorrowRate = rates[1];
   expectedReserveData.variableBorrowRate = rates[2];
 
-  //expectedReserveData.liquidityIndex = nextLiquidityIndex;
   updateTotalLiquidityAndUtil(expectedReserveData);
 
   return expectedReserveData;

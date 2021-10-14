@@ -30,23 +30,26 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
   const depositAmount = utils.parseEther('1000');
   const borrowAmount = utils.parseEther('200');
   const withdrawAmount = utils.parseEther('100');
-  const feeBP = BigNumber.from(30);
+  const feeBps = BigNumber.from(30);
   const denominatorBP = BigNumber.from(10000);
+  const bridgeProtocolFeeBps = BigNumber.from(2000);
 
-  const mintAmount = withdrawAmount.mul(denominatorBP.sub(feeBP)).div(denominatorBP);
-  const feeAmount = withdrawAmount.mul(feeBP).div(denominatorBP);
+  const mintAmount = withdrawAmount.mul(denominatorBP.sub(feeBps)).div(denominatorBP);
+  const feeAmount = withdrawAmount.mul(feeBps).div(denominatorBP);
 
   let aclManager: ACLManager;
 
   before(async () => {
     calculationsConfiguration.reservesParams = AaveConfig.ReservesConfig;
 
-    const { users } = testEnv;
+    const { users, poolAdmin, configurator } = testEnv;
 
     aclManager = await getACLManager();
 
     await aclManager.addBridge(users[2].address);
     await aclManager.addBridge(users[3].address);
+
+    await configurator.connect(poolAdmin.signer).updateBridgeProtocolFee(bridgeProtocolFeeBps);
   });
 
   it('User 0 deposit 1000 dai.', async () => {
@@ -190,6 +193,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       feeAmount.toString(),
+      bridgeProtocolFeeBps.toString(),
       reserveDataBefore,
       txTimestamp
     );
@@ -227,6 +231,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       feeAmount.toString(),
+      bridgeProtocolFeeBps.toString(),
       reserveDataBefore,
       txTimestamp
     );
@@ -253,6 +258,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       '0',
       withdrawAmount.toString(),
+      bridgeProtocolFeeBps.toString(),
       reserveDataBefore,
       txTimestamp
     );
@@ -282,6 +288,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
       await aDai.scaledTotalSupply(),
       mintAmount.toString(),
       '0',
+      bridgeProtocolFeeBps.toString(),
       reserveDataBefore,
       txTimestamp
     );

@@ -31,8 +31,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   IPoolAddressesProvider internal _addressesProvider;
   IPool internal _pool;
 
-  mapping(address => bool) private _riskAdmins;
-
   modifier onlyPoolAdmin() {
     _onlyPoolAdmin();
     _;
@@ -372,6 +370,13 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
         setReservePause(reserves[i], paused);
       }
     }
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function updateBridgeProtocolFee(uint256 protocolFee) external override onlyPoolAdmin {
+    require(protocolFee < PercentageMath.PERCENTAGE_FACTOR, Errors.PC_BRIDGE_PROTOCOL_FEE_INVALID);
+    _pool.updateBridgeProtocolFee(protocolFee);
+    emit BridgeProtocolFeeUpdated(protocolFee);
   }
 
   /// @inheritdoc IPoolConfigurator
