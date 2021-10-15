@@ -85,7 +85,7 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   let baseConfigValues: ReserveConfigurationValues;
-  const { PC_RESERVE_LIQUIDITY_NOT_0 } = ProtocolErrors;
+  const { PC_RESERVE_LIQUIDITY_NOT_0, RC_INVALID_DEBT_CEILING } = ProtocolErrors;
 
   before(() => {
     const {
@@ -747,6 +747,22 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const newCeiling = await helpersContract.getDebtCeiling(weth.address);
 
     expect(newCeiling).to.be.eq('10', 'Invalid debt ceiling');
+  });
+
+  it('Sets a debt ceiling larger than max (revert expected)', async () => {
+    const { configurator, helpersContract, weth, riskAdmin } = testEnv;
+
+    const MAX_VALID_DEBT_CEILING = BigNumber.from('1099511627775');
+    const debtCeiling = MAX_VALID_DEBT_CEILING.add(1);
+
+    const currentCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    await expect(
+      configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, debtCeiling)
+    ).to.be.revertedWith(RC_INVALID_DEBT_CEILING);
+
+    const newCeiling = await helpersContract.getDebtCeiling(weth.address);
+    expect(newCeiling).to.be.eq(currentCeiling, 'Invalid debt ceiling');
   });
 
   it('Resets the WETH debt ceiling. Tries to set debt ceiling after liquidity has been provided (revert expected)', async () => {
