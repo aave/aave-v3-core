@@ -5,7 +5,7 @@ import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
-import {ISimpleFlashLoanReceiver} from '../../../flashloan/interfaces/ISimpleFlashLoanReceiver.sol';
+import {IFlashLoanSimpleReceiver} from '../../../flashloan/interfaces/IFlashLoanSimpleReceiver.sol';
 import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
@@ -172,8 +172,8 @@ library FlashLoanLogic {
     }
   }
 
-  struct SimpleFlashLoanLocalVars {
-    ISimpleFlashLoanReceiver receiver;
+  struct FlashLoanSimpleLocalVars {
+    IFlashLoanSimpleReceiver receiver;
     uint256 totalPremium;
     uint256 premiumToLP;
     uint256 premiumToProtocol;
@@ -184,14 +184,14 @@ library FlashLoanLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.FlashloanSimpleParams memory params
   ) external {
-    SimpleFlashLoanLocalVars memory vars;
+    FlashLoanSimpleLocalVars memory vars;
 
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
     ValidationLogic.validateFlashloanSimple(reserveCache);
 
-    vars.receiver = ISimpleFlashLoanReceiver(params.receiverAddress);
+    vars.receiver = IFlashLoanSimpleReceiver(params.receiverAddress);
 
     vars.totalPremium = params.amount.percentMul(params.flashLoanPremiumTotal);
     vars.amountPlusPremium = params.amount + vars.totalPremium;

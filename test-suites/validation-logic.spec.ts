@@ -704,7 +704,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_INCONSISTENT_FLASHLOAN_PARAMS);
   });
 
-  it('validateSimpleFlashLoan() with paused reserve', async () => {
+  it('validateFlashLoanSimple() with paused reserve', async () => {
     const {
       configurator,
       poolAdmin,
