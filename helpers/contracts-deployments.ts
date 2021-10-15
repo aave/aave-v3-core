@@ -156,12 +156,32 @@ export const deployEModeLogic = async () => {
   return withSave(eModeLogic, eContractid.EModeLogic);
 };
 
+export const deployFlashLoanLogic = async (borrowLogicAddress: tEthereumAddress) => {
+  const flashLoanLogicArtifact = await readArtifact(eContractid.FlashLoanLogic);
+
+  const linkedFlashLoanLogicByteCode = linkBytecode(flashLoanLogicArtifact, {
+    [eContractid.BorrowLogic]: borrowLogicAddress,
+  });
+
+  const flashLoanLogicFactory = await DRE.ethers.getContractFactory(
+    flashLoanLogicArtifact.abi,
+    linkedFlashLoanLogicByteCode
+  );
+
+  const flashLoanLogic = await (
+    await flashLoanLogicFactory.connect(await getFirstSigner()).deploy()
+  ).deployed();
+
+  return withSave(flashLoanLogic, eContractid.FlashLoanLogic);
+};
+
 export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   const supplyLogic = await deploySupplyLogic();
   const borrowLogic = await deployBorrowLogic();
   const liquidationLogic = await deployLiquidationLogic();
   const bridgeLogic = await deployBridgeLogic();
   const eModeLogic = await deployEModeLogic();
+  const flashLoanLogic = await deployFlashLoanLogic(borrowLogic.address);
   // Hardcoded solidity placeholders, if any library changes path this will fail.
   // The '__$PLACEHOLDER$__ can be calculated via solidity keccak, but the PoolLibraryAddresses Type seems to
   // require a hardcoded string.
@@ -175,6 +195,7 @@ export const deployAaveLibraries = async (): Promise<PoolLibraryAddresses> => {
   // libName example: GenericLogic
   return {
     //    ['__$de8c0cf1a7d7c36c802af9a64fb9d86036$__']: validationLogic.address,
+    ['__$d5ddd09ae98762b8929dd85e54b218e259$__']: flashLoanLogic.address,
     ['__$b06080f092f400a43662c3f835a4d9baa8$__']: bridgeLogic.address,
     ['__$db79717e66442ee197e8271d032a066e34$__']: supplyLogic.address,
     ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: borrowLogic.address,

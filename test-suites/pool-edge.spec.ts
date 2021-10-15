@@ -12,6 +12,7 @@ import {
   getFirstSigner,
   getLiquidationLogic,
   getEModeLogic,
+  getFlashLoanLogic,
 } from '../helpers/contracts-getters';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
@@ -183,6 +184,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     // Deploy the mock Pool with a setter of `maxNumberOfReserves`
     const libraries = {
+      ['__$d5ddd09ae98762b8929dd85e54b218e259$__']: (await getFlashLoanLogic()).address,
       ['__$b06080f092f400a43662c3f835a4d9baa8$__']: (await getBridgeLogic()).address,
       ['__$db79717e66442ee197e8271d032a066e34$__']: (await getSupplyLogic()).address,
       ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: (await getBorrowLogic()).address,

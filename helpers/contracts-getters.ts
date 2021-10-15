@@ -26,6 +26,7 @@ import {
   EModeLogicFactory,
   DefaultReserveInterestRateStrategy,
   DefaultReserveInterestRateStrategyFactory,
+  FlashLoanLogicFactory,
 } from '../types';
 import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 import { getEthersSigners, MockTokenMap } from './contracts-helpers';
@@ -97,6 +98,15 @@ export const getLiquidationLogic = async (address?: tEthereumAddress) =>
 export const getEModeLogic = async (address?: tEthereumAddress) =>
   await EModeLogicFactory.connect(
     address || (await getDb().get(`${eContractid.EModeLogic}.${DRE.network.name}`).value()).address,
+    await getFirstSigner()
+  );
+
+export const getFlashLoanLogic = async (address?: tEthereumAddress) =>
+  await FlashLoanLogicFactory.connect(
+    address ||
+      (
+        await getDb().get(`${eContractid.FlashLoanLogic}.${DRE.network.name}`).value()
+      ).address,
     await getFirstSigner()
   );
 
