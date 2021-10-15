@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 import { utils } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { increaseTime } from '../helpers/misc-utils';
+import { evmRevert, evmSnapshot, increaseTime } from '../helpers/misc-utils';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { TestEnv, makeSuite } from './helpers/make-suite';
@@ -18,7 +18,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const depositAmount = utils.parseEther('1000');
   const ceilingAmount = '10000';
 
-  const { VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY, VL_DEBT_CEILING_CROSSED } = ProtocolErrors;
+  const {
+    VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY,
+    VL_DEBT_CEILING_CROSSED,
+    SL_USER_IN_ISOLATION_MODE,
+  } = ProtocolErrors;
 
   before(async () => {
     const { configurator, dai, usdc, aave } = testEnv;
@@ -64,6 +68,54 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const userData = await helpersContract.getUserReserveData(weth.address, users[1].address);
 
     expect(userData.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 1 tries to use eth as collateral (revert expected)', async () => {
+    const { users, pool, weth, helpersContract } = testEnv;
+
+    const userDataBefore = await helpersContract.getUserReserveData(weth.address, users[1].address);
+    expect(userDataBefore.usageAsCollateralEnabled).to.be.eq(false);
+
+    await expect(
+      pool.connect(users[1].signer).setUserUseReserveAsCollateral(weth.address, true)
+    ).to.be.revertedWith(SL_USER_IN_ISOLATION_MODE);
+
+    const userDataAfter = await helpersContract.getUserReserveData(weth.address, users[1].address);
+    expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 2 deposit dai and aave, then tries to use aave as collateral (revert expected)', async () => {
+    const snap = await evmSnapshot();
+    const {
+      users: [, , user2],
+      pool,
+      dai,
+      aave,
+      helpersContract,
+    } = testEnv;
+
+    await dai.connect(user2.signer).mint(utils.parseEther('1'));
+    await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user2.signer).supply(dai.address, utils.parseEther('1'), user2.address, 0);
+
+    await aave.connect(user2.signer).mint(utils.parseEther('1'));
+    await aave.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user2.signer).supply(aave.address, utils.parseEther('1'), user2.address, 0);
+
+    const userDaiDataBefore = await helpersContract.getUserReserveData(dai.address, user2.address);
+    expect(userDaiDataBefore.usageAsCollateralEnabled).to.be.eq(true);
+
+    const userAaveDataBefore = await helpersContract.getUserReserveData(
+      aave.address,
+      user2.address
+    );
+    expect(userAaveDataBefore.usageAsCollateralEnabled).to.be.eq(false);
+
+    await expect(
+      pool.connect(user2.signer).setUserUseReserveAsCollateral(aave.address, true)
+    ).to.be.revertedWith(SL_USER_IN_ISOLATION_MODE);
+
+    await evmRevert(snap);
   });
 
   it('User 2 supply 100 DAI, transfers to user 1. Checks that DAI is NOT activated as collateral for user 1', async () => {
