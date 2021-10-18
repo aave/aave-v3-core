@@ -13,9 +13,9 @@ interface IPool {
   /**
    * @notice Emitted on mintUnbacked()
    * @param reserve The address of the underlying asset of the reserve
-   * @param user The address initiating the deposit
-   * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
-   * @param amount The amount deposited
+   * @param user The address initiating the supply
+   * @param onBehalfOf The beneficiary of the supplied assets, receiving the aTokens
+   * @param amount The amount of supplied assets
    * @param referral The referral code used
    **/
   event MintUnbacked(

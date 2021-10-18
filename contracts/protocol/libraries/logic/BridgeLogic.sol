@@ -70,13 +70,13 @@ library BridgeLogic {
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
-    bool isFirstDeposit = IAToken(reserveCache.aTokenAddress).mint(
+    bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
       onBehalfOf,
       amount,
       reserveCache.nextLiquidityIndex
     );
 
-    if (isFirstDeposit) {
+    if (isFirstSupply) {
       userConfig.setUsingAsCollateral(reserve.id, true);
       emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
     }
