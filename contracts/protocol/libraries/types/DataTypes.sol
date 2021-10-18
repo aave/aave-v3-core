@@ -179,10 +179,19 @@ library DataTypes {
     uint256 flashLoanPremiumTotal;
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
-    address oracle;
+    address addressesProvider;
     uint8 userEModeCategory;
     bool isAuthorizedFlashBorrower;
-    address priceOracleSentinel;
+  }
+
+  struct FlashloanSimpleParams {
+    address receiverAddress;
+    address asset;
+    uint256 amount;
+    bytes params;
+    uint16 referralCode;
+    uint256 flashLoanPremiumToProtocol;
+    uint256 flashLoanPremiumTotal;
   }
 
   struct CalculateUserAccountDataParams {

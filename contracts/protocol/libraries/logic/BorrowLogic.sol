@@ -6,13 +6,10 @@ import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
-import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
 import {Errors} from '../helpers/Errors.sol';
-import {WadRayMath} from '../math/WadRayMath.sol';
-import {PercentageMath} from '../math/PercentageMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
@@ -28,8 +25,6 @@ library BorrowLogic {
   using SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
-  using WadRayMath for uint256;
-  using PercentageMath for uint256;
 
   // See `IPool` for descriptions
   event Borrow(
@@ -46,14 +41,6 @@ library BorrowLogic {
     address indexed user,
     address indexed repayer,
     uint256 amount
-  );
-  event FlashLoan(
-    address indexed target,
-    address indexed initiator,
-    address indexed asset,
-    uint256 amount,
-    uint256 premium,
-    uint16 referralCode
   );
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
@@ -246,133 +233,6 @@ library BorrowLogic {
     emit Repay(params.asset, params.onBehalfOf, msg.sender, paybackAmount);
 
     return paybackAmount;
-  }
-
-  struct FlashLoanLocalVars {
-    IFlashLoanReceiver receiver;
-    address oracle;
-    uint256 i;
-    address currentAsset;
-    address currentATokenAddress;
-    uint256 currentAmount;
-    uint256 currentPremiumToLP;
-    uint256 currentPremiumToProtocol;
-    uint256 currentAmountPlusPremium;
-    address debtToken;
-    address[] aTokenAddresses;
-    uint256[] totalPremiums;
-    uint256 flashloanPremiumTotal;
-    uint256 flashloanPremiumToProtocol;
-  }
-
-  function executeFlashLoan(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
-    DataTypes.UserConfigurationMap storage userConfig,
-    DataTypes.FlashloanParams memory params
-  ) external {
-    FlashLoanLocalVars memory vars;
-
-    vars.aTokenAddresses = new address[](params.assets.length);
-    vars.totalPremiums = new uint256[](params.assets.length);
-
-    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
-
-    vars.receiver = IFlashLoanReceiver(params.receiverAddress);
-    (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
-      ? (0, 0)
-      : (params.flashLoanPremiumTotal, params.flashLoanPremiumToProtocol);
-
-    for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
-      vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;
-      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(vars.flashloanPremiumTotal);
-      IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
-        params.receiverAddress,
-        params.amounts[vars.i]
-      );
-    }
-
-    require(
-      vars.receiver.executeOperation(
-        params.assets,
-        params.amounts,
-        vars.totalPremiums,
-        msg.sender,
-        params.params
-      ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
-    );
-
-    for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
-      vars.currentAsset = params.assets[vars.i];
-      vars.currentAmount = params.amounts[vars.i];
-      vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
-      vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
-      vars.currentPremiumToProtocol = params.amounts[vars.i].percentMul(
-        vars.flashloanPremiumToProtocol
-      );
-      vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
-
-      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
-        DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
-        DataTypes.ReserveCache memory reserveCache = reserve.cache();
-
-        reserve.updateState(reserveCache);
-        reserve.cumulateToLiquidityIndex(
-          IERC20(vars.currentATokenAddress).totalSupply(),
-          vars.currentPremiumToLP
-        );
-
-        reserve.accruedToTreasury =
-          reserve.accruedToTreasury +
-          Helpers.castUint128(vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex));
-
-        reserve.updateInterestRates(
-          reserveCache,
-          vars.currentAsset,
-          vars.currentAmountPlusPremium,
-          0
-        );
-
-        IERC20(vars.currentAsset).safeTransferFrom(
-          params.receiverAddress,
-          vars.currentATokenAddress,
-          vars.currentAmountPlusPremium
-        );
-      } else {
-        // If the user chose to not return the funds, the system checks if there is enough collateral and
-        // eventually opens a debt position
-        executeBorrow(
-          reserves,
-          reservesList,
-          eModeCategories,
-          userConfig,
-          DataTypes.ExecuteBorrowParams(
-            vars.currentAsset,
-            msg.sender,
-            params.onBehalfOf,
-            vars.currentAmount,
-            params.modes[vars.i],
-            params.referralCode,
-            false,
-            params.maxStableRateBorrowSizePercent,
-            params.reservesCount,
-            params.oracle,
-            params.userEModeCategory,
-            params.priceOracleSentinel
-          )
-        );
-      }
-      emit FlashLoan(
-        params.receiverAddress,
-        msg.sender,
-        vars.currentAsset,
-        vars.currentAmount,
-        vars.totalPremiums[vars.i],
-        params.referralCode
-      );
-    }
   }
 
   function rebalanceStableBorrowRate(

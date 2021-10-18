@@ -12,6 +12,7 @@ import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {EModeLogic} from '../libraries/logic/EModeLogic.sol';
 import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
+import {FlashLoanLogic} from '../libraries/logic/FlashLoanLogic.sol';
 import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
@@ -364,19 +365,38 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _flashLoanPremiumTotal,
       _maxStableRateBorrowSizePercent,
       _reservesCount,
-      _addressesProvider.getPriceOracle(),
+      address(_addressesProvider),
       _usersEModeCategory[onBehalfOf],
-      IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender),
-      _addressesProvider.getPriceOracleSentinel()
+      IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender)
     );
 
-    BorrowLogic.executeFlashLoan(
+    FlashLoanLogic.executeFlashLoan(
       _reserves,
       _reservesList,
       _eModeCategories,
       _usersConfig[onBehalfOf],
       flashParams
     );
+  }
+
+  /// @inheritdoc IPool
+  function flashLoanSimple(
+    address receiverAddress,
+    address asset,
+    uint256 amount,
+    bytes calldata params,
+    uint16 referralCode
+  ) external override {
+    DataTypes.FlashloanSimpleParams memory flashParams = DataTypes.FlashloanSimpleParams(
+      receiverAddress,
+      asset,
+      amount,
+      params,
+      referralCode,
+      _flashLoanPremiumToProtocol,
+      _flashLoanPremiumTotal
+    );
+    FlashLoanLogic.executeFlashLoanSimple(_reserves[asset], flashParams);
   }
 
   /// @inheritdoc IPool

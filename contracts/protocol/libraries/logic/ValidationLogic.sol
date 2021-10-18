@@ -462,8 +462,18 @@ library ValidationLogic {
   ) internal view {
     for (uint256 i = 0; i < assets.length; i++) {
       require(!reservesData[assets[i]].configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
+      require(reservesData[assets[i]].configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
     }
     require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
+  }
+
+  /**
+   * @notice Validates a flashloan action
+   * @param reserveCache The cached data of the reserve
+   */
+  function validateFlashloanSimple(DataTypes.ReserveCache memory reserveCache) internal view {
+    require(!reserveCache.reserveConfiguration.getPaused(), Errors.VL_RESERVE_PAUSED);
+    require(reserveCache.reserveConfiguration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
   }
 
   struct ValidateLiquidationCallLocalVars {
