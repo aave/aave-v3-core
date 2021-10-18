@@ -2,8 +2,8 @@
 pragma solidity 0.8.7;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
-import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesProviderRegistry.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesProviderRegistry.sol';
 
 /**
  * @title PoolAddressesProviderRegistry

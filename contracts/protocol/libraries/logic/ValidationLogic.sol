@@ -41,7 +41,7 @@ library ValidationLogic {
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   // for borrowings in isolation mode, we give for granted that the eMode category for stablecoins is the category with id 1.
-  // this MUST be kept into account when configuring the stablecoins eMode category, otherwise users depositing asset in isolation
+  // this MUST be kept into account when configuring the stablecoins eMode category, otherwise users suplying asset in isolation
   // mode will NOT be able to borrow.
   uint256 public constant DEFAULT_ISOLATION_MODE_BORROW_CATEGORY = 1;
 
@@ -472,7 +472,7 @@ library ValidationLogic {
    * @notice Validates a flashloan action
    * @param reserveCache The cached data of the reserve
    */
-  function validateFlashloanSimple(DataTypes.ReserveCache memory reserveCache) internal view {
+  function validateFlashloanSimple(DataTypes.ReserveCache memory reserveCache) internal pure {
     require(!reserveCache.reserveConfiguration.getPaused(), Errors.VL_RESERVE_PAUSED);
     require(reserveCache.reserveConfiguration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
   }
@@ -662,7 +662,7 @@ library ValidationLogic {
       Errors.VL_INCONSISTENT_EMODE_CATEGORY
     );
 
-    //eMode can always be enabled if the user hasn't deposited anything
+    //eMode can always be enabled if the user hasn't supplied anything
     if (userConfig.isEmpty()) {
       return;
     }

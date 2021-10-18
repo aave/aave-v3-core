@@ -4,12 +4,12 @@ pragma solidity 0.8.7;
 import {Context} from '../../dependencies/openzeppelin/contracts/Context.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
+import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
-import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
  * @title IncentivizedERC20
@@ -19,7 +19,7 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
 
-  modifier onlyPoolAdmins() {
+  modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
     _;
@@ -28,7 +28,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   /**
    * @dev UserState - additionalData is a flexible field.
    * ATokens and VariableDebtTokens use this field store the index of the
-   * user's last deposit/withdrawl/borrow/repayment. StableDebtTokens use
+   * user's last supply/withdrawl/borrow/repayment. StableDebtTokens use
    * this field to store the user's stable rate.
    */
   struct UserState {
@@ -83,18 +83,18 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @notice Returns the address of the incentives controller contract
-   * @return Incentivescontroller
+   * @notice Returns the address of the Incentives Controller contract
+   * @return The address of the Incentives Controller
    **/
   function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
     return _incentivesController;
   }
 
   /**
-   * @notice Sets a new incentives controller
+   * @notice Sets a new Incentives Controller
    * @param controller the new Incentives controller
    **/
-  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmins {
+  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmin {
     _incentivesController = controller;
   }
 

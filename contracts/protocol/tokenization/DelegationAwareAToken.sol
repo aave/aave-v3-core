@@ -16,12 +16,6 @@ import {AToken} from './AToken.sol';
 contract DelegationAwareAToken is AToken {
   constructor(IPool pool) AToken(pool) {}
 
-  modifier onlyPoolAdmin() {
-    IACLManager aclManager = IACLManager(IPool(_pool).getAddressesProvider().getACLManager());
-    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
-    _;
-  }
-
   /**
    * @notice Delegates voting power of the underlying asset to a `delegatee` address
    * @param delegatee The address that will receive the delegation
