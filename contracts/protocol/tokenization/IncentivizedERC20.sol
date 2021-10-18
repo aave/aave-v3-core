@@ -4,12 +4,12 @@ pragma solidity 0.8.7;
 import {Context} from '../../dependencies/openzeppelin/contracts/Context.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
+import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
-import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
  * @title IncentivizedERC20

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.7;
 
-import {DataTypes} from './../protocol/libraries/types/DataTypes.sol';
+import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 
 /**
  * @title IReserveInterestRateStrategy
