@@ -328,11 +328,11 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /**
-   * @notice Returns the address of the IR strategy
+   * @notice Returns the address of the Interest Rate strategy
    * @param asset The address of the underlying asset of the reserve
-   * @return irStrategyAddress The address of the IR strategy
+   * @return irStrategyAddress The address of the Interest Rate strategy
    */
-  function getIRStrategyAddress(address asset) external view returns (address irStrategyAddress) {
+  function getInterestRateStrategyAddress(address asset) external view returns (address irStrategyAddress) {
     DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
       asset
     );
