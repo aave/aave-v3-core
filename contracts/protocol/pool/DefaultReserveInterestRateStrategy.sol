@@ -28,6 +28,10 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    **/
   uint256 public immutable OPTIMAL_UTILIZATION_RATE;
 
+  /**
+   * @dev This constant represents the optimal stable debt to total debt ratio of the reserve.
+   * Expressed in ray
+   */
   uint256 public immutable OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO;
 
   /**

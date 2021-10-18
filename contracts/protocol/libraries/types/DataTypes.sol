@@ -51,6 +51,8 @@ library DataTypes {
     //bit 152-167 liquidation protocol fee
     //bit 168-175 eMode category
     //bit 176-211 unbacked mint cap, unbackedMintCap == 0 => disabled
+    //bit 212-251 debt ceiling
+
     uint256 data;
   }
 

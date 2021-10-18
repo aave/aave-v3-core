@@ -83,18 +83,18 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @notice Returns the address of the incentives controller contract
-   * @return Incentivescontroller
+   * @notice Returns the address of the Incentives Controller contract
+   * @return The address of the Incentives Controller
    **/
   function getIncentivesController() external view virtual returns (IAaveIncentivesController) {
     return _incentivesController;
   }
 
   /**
-   * @notice Sets a new incentives controller
+   * @notice Sets a new Incentives Controller
    * @param controller the new Incentives controller
    **/
-  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmins {
+  function setIncentivesController(IAaveIncentivesController controller) external onlyPoolAdmin {
     _incentivesController = controller;
   }
 
