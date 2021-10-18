@@ -471,7 +471,7 @@ library ValidationLogic {
    * @notice Validates a flashloan action
    * @param reserveCache The cached data of the reserve
    */
-  function validateFlashloanSimple(DataTypes.ReserveCache memory reserveCache) internal view {
+  function validateFlashloanSimple(DataTypes.ReserveCache memory reserveCache) internal pure {
     require(!reserveCache.reserveConfiguration.getPaused(), Errors.VL_RESERVE_PAUSED);
     require(reserveCache.reserveConfiguration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
   }
