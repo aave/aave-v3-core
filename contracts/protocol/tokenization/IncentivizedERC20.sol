@@ -19,7 +19,7 @@ import {IACLManager} from '../../interfaces/IACLManager.sol';
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
 
-  modifier onlyPoolAdmins() {
+  modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
     _;
