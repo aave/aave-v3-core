@@ -114,7 +114,6 @@ library LiquidationLogic {
         vars.debtReserveCache,
         vars.userStableDebt + vars.userVariableDebt,
         vars.healthFactor,
-        params.user,
         params.priceOracleSentinel
       )
     );

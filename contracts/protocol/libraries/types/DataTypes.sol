@@ -223,7 +223,6 @@ library DataTypes {
     DataTypes.ReserveCache debtReserveCache;
     uint256 totalDebt;
     uint256 healthFactor;
-    address user;
     address priceOracleSentinel;
   }
 
