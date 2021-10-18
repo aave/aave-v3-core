@@ -39,8 +39,8 @@ contract AaveOracle is IPriceOracleGetter {
   IPoolAddressesProvider internal _addressesProvider;
   mapping(address => IChainlinkAggregator) private assetsSources;
   IPriceOracleGetter private _fallbackOracle;
-  address public immutable BASE_CURRENCY;
-  uint256 public immutable BASE_CURRENCY_UNIT;
+  address public immutable override BASE_CURRENCY;
+  uint256 public immutable override BASE_CURRENCY_UNIT;
 
   modifier onlyAssetListingOrPoolAdmins() {
     _onlyAssetListingOrPoolAdmins();
