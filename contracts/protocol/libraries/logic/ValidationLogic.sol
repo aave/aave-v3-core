@@ -38,6 +38,7 @@ library ValidationLogic {
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
+  uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   // for borrowings in isolation mode, we give for granted that the eMode category for stablecoins is the category with id 1.
   // this MUST be kept into account when configuring the stablecoins eMode category, otherwise users depositing asset in isolation
@@ -234,7 +235,7 @@ library ValidationLogic {
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
 
     require(
-      vars.healthFactor > GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 
@@ -477,7 +478,6 @@ library ValidationLogic {
   }
 
   struct ValidateLiquidationCallLocalVars {
-    uint256 healthFactor;
     bool collateralReserveActive;
     bool collateralReservePaused;
     bool principalReserveActive;
@@ -518,13 +518,13 @@ library ValidationLogic {
 
     require(
       params.priceOracleSentinel == address(0) ||
-        vars.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
+        params.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
         IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(),
       Errors.VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
 
     require(
-      params.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      params.healthFactor < HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
     );
 
@@ -562,7 +562,7 @@ library ValidationLogic {
       );
 
     require(
-      healthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      healthFactor >= HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 

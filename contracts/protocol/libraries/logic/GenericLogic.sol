@@ -23,8 +23,6 @@ library GenericLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1 ether;
-
   struct CalculateUserAccountDataVars {
     uint256 assetPrice;
     uint256 assetUnit;
