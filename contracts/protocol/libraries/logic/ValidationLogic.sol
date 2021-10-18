@@ -477,17 +477,11 @@ library ValidationLogic {
 
   /**
    * @notice Validates the liquidation action
-   * @param reservesData The mapping of the reserves data
-   * @param reserves The list of the reserves
-   * @param eModeCategories The mapping of the eMode categories
    * @param userConfig The user configuration mapping
    * @param collateralReserve The reserve data of the collateral
    * @param params Additional parameters needed for the validation
    */
   function validateLiquidationCall(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveData storage collateralReserve,
     DataTypes.ValidateLiquidationCallParams memory params
@@ -512,19 +506,6 @@ library ValidationLogic {
       Errors.VL_RESERVE_PAUSED
     );
 
-    (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
-      reservesData,
-      reserves,
-      eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        userConfig,
-        params.reservesCount,
-        params.user,
-        params.oracle,
-        params.userEModeCategory
-      )
-    );
-
     require(
       params.priceOracleSentinel == address(0) ||
         vars.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
@@ -533,7 +514,7 @@ library ValidationLogic {
     );
 
     require(
-      vars.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      params.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
     );
 
