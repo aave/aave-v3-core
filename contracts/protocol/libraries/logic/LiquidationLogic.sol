@@ -11,6 +11,7 @@ import {Errors} from '../../libraries/helpers/Errors.sol';
 import {DataTypes} from '../../libraries/types/DataTypes.sol';
 import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
 import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
+import {GenericLogic} from '../../libraries/logic/GenericLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -45,7 +46,9 @@ library LiquidationLogic {
     bool receiveAToken
   );
 
-  uint256 internal constant LIQUIDATION_CLOSE_FACTOR_PERCENT = 5000;
+  uint256 internal constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 5000;
+  uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 10000;
+  uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95 * 1e18;
 
   struct LiquidationCallLocalVars {
     uint256 userCollateralBalance;
@@ -57,13 +60,12 @@ library LiquidationLogic {
     uint256 debtAmountNeeded;
     uint256 liquidatorPreviousATokenBalance;
     uint256 liquidationBonus;
+    uint256 healthFactor;
+    uint256 liquidationProtocolFeeAmount;
+    uint256 closeFactor;
     IAToken collateralAtoken;
     IPriceOracleGetter oracle;
-    bool isCollateralEnabled;
-    uint256 errorCode;
-    string errorMsg;
     DataTypes.ReserveCache debtReserveCache;
-    uint256 liquidationProtocolFeeAmount;
   }
 
   /**
@@ -84,6 +86,7 @@ library LiquidationLogic {
     DataTypes.ReserveData storage debtReserve = reserves[params.debtAsset];
     DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
     vars.debtReserveCache = debtReserve.cache();
+    debtReserve.updateState(vars.debtReserveCache);
 
     (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(
       params.user,
@@ -91,19 +94,26 @@ library LiquidationLogic {
     );
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
-    ValidationLogic.validateLiquidationCall(
+    (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
       reserves,
       reservesList,
       eModeCategories,
+      DataTypes.CalculateUserAccountDataParams(
+        userConfig,
+        params.reservesCount,
+        params.user,
+        params.priceOracle,
+        params.userEModeCategory
+      )
+    );
+
+    ValidationLogic.validateLiquidationCall(
       userConfig,
       collateralReserve,
       DataTypes.ValidateLiquidationCallParams(
         vars.debtReserveCache,
         vars.userStableDebt + vars.userVariableDebt,
-        params.user,
-        params.reservesCount,
-        params.priceOracle,
-        params.userEModeCategory,
+        vars.healthFactor,
         params.priceOracleSentinel
       )
     );
@@ -111,8 +121,12 @@ library LiquidationLogic {
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
     vars.userCollateralBalance = vars.collateralAtoken.balanceOf(params.user);
 
+    vars.closeFactor = vars.healthFactor > CLOSE_FACTOR_HF_THRESHOLD
+      ? DEFAULT_LIQUIDATION_CLOSE_FACTOR
+      : MAX_LIQUIDATION_CLOSE_FACTOR;
+
     vars.maxLiquidatableDebt = (vars.userStableDebt + vars.userVariableDebt).percentMul(
-      LIQUIDATION_CLOSE_FACTOR_PERCENT
+      vars.closeFactor
     );
 
     vars.actualDebtToLiquidate = params.debtToCover > vars.maxLiquidatableDebt
@@ -145,8 +159,6 @@ library LiquidationLogic {
     if (vars.debtAmountNeeded < vars.actualDebtToLiquidate) {
       vars.actualDebtToLiquidate = vars.debtAmountNeeded;
     }
-
-    debtReserve.updateState(vars.debtReserveCache);
 
     if (vars.userVariableDebt >= vars.actualDebtToLiquidate) {
       vars.debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(

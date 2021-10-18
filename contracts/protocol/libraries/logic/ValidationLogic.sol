@@ -38,6 +38,7 @@ library ValidationLogic {
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
+  uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   // for borrowings in isolation mode, we give for granted that the eMode category for stablecoins is the category with id 1.
   // this MUST be kept into account when configuring the stablecoins eMode category, otherwise users depositing asset in isolation
@@ -234,7 +235,7 @@ library ValidationLogic {
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
 
     require(
-      vars.healthFactor > GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 
@@ -477,7 +478,6 @@ library ValidationLogic {
   }
 
   struct ValidateLiquidationCallLocalVars {
-    uint256 healthFactor;
     bool collateralReserveActive;
     bool collateralReservePaused;
     bool principalReserveActive;
@@ -487,17 +487,11 @@ library ValidationLogic {
 
   /**
    * @notice Validates the liquidation action
-   * @param reservesData The mapping of the reserves data
-   * @param reserves The list of the reserves
-   * @param eModeCategories The mapping of the eMode categories
    * @param userConfig The user configuration mapping
    * @param collateralReserve The reserve data of the collateral
    * @param params Additional parameters needed for the validation
    */
   function validateLiquidationCall(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveData storage collateralReserve,
     DataTypes.ValidateLiquidationCallParams memory params
@@ -522,28 +516,15 @@ library ValidationLogic {
       Errors.VL_RESERVE_PAUSED
     );
 
-    (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
-      reservesData,
-      reserves,
-      eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        userConfig,
-        params.reservesCount,
-        params.user,
-        params.oracle,
-        params.userEModeCategory
-      )
-    );
-
     require(
       params.priceOracleSentinel == address(0) ||
-        vars.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
+        params.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
         IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(),
       Errors.VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
 
     require(
-      vars.healthFactor < GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      params.healthFactor < HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD
     );
 
@@ -581,7 +562,7 @@ library ValidationLogic {
       );
 
     require(
-      healthFactor >= GenericLogic.HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
+      healthFactor >= HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
 
