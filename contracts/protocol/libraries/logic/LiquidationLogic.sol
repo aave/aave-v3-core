@@ -46,7 +46,7 @@ library LiquidationLogic {
     bool receiveAToken
   );
 
-  uint256 internal constant LIQUIDATION_CLOSE_FACTOR_PERCENT = 5000;
+  uint256 internal constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 5000;
   uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 10000;
   uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95 * 1e18;
 
@@ -62,11 +62,9 @@ library LiquidationLogic {
     uint256 liquidationBonus;
     uint256 healthFactor;
     uint256 liquidationProtocolFeeAmount;
-    uint256 errorCode;
+    uint256 closeFactor;
     IAToken collateralAtoken;
     IPriceOracleGetter oracle;
-    bool isCollateralEnabled;
-    string errorMsg;
     DataTypes.ReserveCache debtReserveCache;
   }
 
@@ -124,8 +122,12 @@ library LiquidationLogic {
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
     vars.userCollateralBalance = vars.collateralAtoken.balanceOf(params.user);
 
+    vars.closeFactor = vars.healthFactor > CLOSE_FACTOR_HF_THRESHOLD
+      ? DEFAULT_LIQUIDATION_CLOSE_FACTOR
+      : MAX_LIQUIDATION_CLOSE_FACTOR;
+
     vars.maxLiquidatableDebt = (vars.userStableDebt + vars.userVariableDebt).percentMul(
-      LIQUIDATION_CLOSE_FACTOR_PERCENT
+      vars.closeFactor
     );
 
     vars.actualDebtToLiquidate = params.debtToCover > vars.maxLiquidatableDebt
