@@ -2,7 +2,6 @@
 pragma solidity 0.8.7;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
