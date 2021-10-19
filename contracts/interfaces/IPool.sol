@@ -631,7 +631,7 @@ interface IPool {
    * @param id The id of the category
    * @return The configuration data of the category
    */
-  function getEModeCategoryData(uint8 id) external returns (DataTypes.EModeCategory memory);
+  function getEModeCategoryData(uint8 id) external view returns (DataTypes.EModeCategory memory);
 
   /**
    * @notice Allows a user to use the protocol in eMode
