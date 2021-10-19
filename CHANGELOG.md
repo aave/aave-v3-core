@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.2.1](https://www.github.com/aave/aave-v3-core/compare/v1.2.0...v1.2.1) (2021-10-19)
+
+
+### Bug Fixes
+
+* Added view to getEModeCategoryData method in pool interface ([b3ebdcc](https://www.github.com/aave/aave-v3-core/commit/b3ebdcc53fe0220285cbd42ada2240ffbbaf9158))
+
 ## [1.2.0](https://www.github.com/aave/aave-v3-core/compare/v1.1.0...v1.2.0) (2021-10-18)
 
 
