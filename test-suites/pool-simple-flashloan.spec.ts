@@ -6,10 +6,10 @@ import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 import './helpers/utils/wadraymath';
-import { MockSimpleFlashLoanReceiver, MockSimpleFlashLoanReceiverFactory } from '../types';
+import { MockFlashLoanSimpleReceiver, MockFlashLoanSimpleReceiverFactory } from '../types';
 
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
-  let _mockSimpleFlashLoanReceiver = {} as MockSimpleFlashLoanReceiver;
+  let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
 
   const {
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
@@ -24,7 +24,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   before(async () => {
     const { addressesProvider, deployer } = testEnv;
 
-    _mockSimpleFlashLoanReceiver = await new MockSimpleFlashLoanReceiverFactory(
+    _mockFlashLoanSimpleReceiver = await new MockFlashLoanSimpleReceiverFactory(
       deployer.signer
     ).deploy(addressesProvider.address);
   });
@@ -82,7 +82,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const wethReservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
 
     await pool.flashLoanSimple(
-      _mockSimpleFlashLoanReceiver.address,
+      _mockFlashLoanSimpleReceiver.address,
       weth.address,
       wethFlashBorrowedAmount,
       '0x10',
@@ -130,7 +130,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const reservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
 
     const txResult = await pool.flashLoanSimple(
-      _mockSimpleFlashLoanReceiver.address,
+      _mockFlashLoanSimpleReceiver.address,
       weth.address,
       flashBorrowedAmount,
       '0x10',
@@ -158,13 +158,13 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   it('Takes WETH flashloan, does not return the funds (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
-    await _mockSimpleFlashLoanReceiver.setFailExecutionTransfer(true);
+    await _mockFlashLoanSimpleReceiver.setFailExecutionTransfer(true);
 
     await expect(
       pool
         .connect(caller.signer)
         .flashLoanSimple(
-          _mockSimpleFlashLoanReceiver.address,
+          _mockFlashLoanSimpleReceiver.address,
           weth.address,
           ethers.utils.parseEther('0.8'),
           '0x10',
@@ -176,14 +176,14 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   it('Takes WETH flashloan, simulating a receiver as EOA (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
     const caller = users[1];
-    await _mockSimpleFlashLoanReceiver.setFailExecutionTransfer(true);
-    await _mockSimpleFlashLoanReceiver.setSimulateEOA(true);
+    await _mockFlashLoanSimpleReceiver.setFailExecutionTransfer(true);
+    await _mockFlashLoanSimpleReceiver.setSimulateEOA(true);
 
     await expect(
       pool
         .connect(caller.signer)
         .flashLoanSimple(
-          _mockSimpleFlashLoanReceiver.address,
+          _mockFlashLoanSimpleReceiver.address,
           weth.address,
           ethers.utils.parseEther('0.8'),
           '0x10',
@@ -198,7 +198,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(caller.signer).flashLoanSimple(
-        _mockSimpleFlashLoanReceiver.address,
+        _mockFlashLoanSimpleReceiver.address,
         weth.address,
         '1004415000000000000', //slightly higher than the available liquidity
         '0x10',
@@ -233,7 +233,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   it('Takes out a 500 USDC flashloan, returns the funds correctly', async () => {
     const { usdc, aUsdc, pool, helpersContract, deployer: depositor } = testEnv;
 
-    await _mockSimpleFlashLoanReceiver.setFailExecutionTransfer(false);
+    await _mockFlashLoanSimpleReceiver.setFailExecutionTransfer(false);
 
     const flashBorrowedAmount = await convertToCurrencyDecimals(usdc.address, '500');
     const totalFees = flashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
@@ -252,7 +252,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const reservesBefore = await aUsdc.balanceOf(await aUsdc.RESERVE_TREASURY_ADDRESS());
 
     await pool.flashLoanSimple(
-      _mockSimpleFlashLoanReceiver.address,
+      _mockFlashLoanSimpleReceiver.address,
       usdc.address,
       flashBorrowedAmount,
       '0x10',
@@ -282,13 +282,13 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const flashloanAmount = await convertToCurrencyDecimals(usdc.address, '500');
 
-    await _mockSimpleFlashLoanReceiver.setFailExecutionTransfer(true);
+    await _mockFlashLoanSimpleReceiver.setFailExecutionTransfer(true);
 
     await expect(
       pool
         .connect(caller.signer)
         .flashLoanSimple(
-          _mockSimpleFlashLoanReceiver.address,
+          _mockFlashLoanSimpleReceiver.address,
           usdc.address,
           flashloanAmount,
           '0x10',
@@ -311,14 +311,14 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const flashAmount = ethers.utils.parseEther('0.8');
 
-    await _mockSimpleFlashLoanReceiver.setFailExecutionTransfer(false);
-    await _mockSimpleFlashLoanReceiver.setAmountToApprove(flashAmount.div(2));
+    await _mockFlashLoanSimpleReceiver.setFailExecutionTransfer(false);
+    await _mockFlashLoanSimpleReceiver.setAmountToApprove(flashAmount.div(2));
 
     await expect(
       pool
         .connect(caller.signer)
         .flashLoanSimple(
-          _mockSimpleFlashLoanReceiver.address,
+          _mockFlashLoanSimpleReceiver.address,
           weth.address,
           flashAmount,
           '0x10',

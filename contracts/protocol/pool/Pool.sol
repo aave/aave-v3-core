@@ -17,13 +17,13 @@ import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
+import {BridgeLogic} from '../libraries/logic/BridgeLogic.sol';
 import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
-import {BridgeLogic} from './../libraries/logic/BridgeLogic.sol';
 
 /**
  * @title Pool contract
@@ -117,7 +117,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     uint256 fee
   ) external override onlyBridge {
-    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee, _bridgePremiumToProtocol);
+    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
   }
 
   /// @inheritdoc IPool
@@ -551,8 +551,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function BRIDGE_PREMIUM_TO_PROTOCOL() public view override returns (uint256) {
-    return _bridgePremiumToProtocol;
+  function BRIDGE_PROTOCOL_FEE() public view override returns (uint256) {
+    return _bridgeProtocolFee;
   }
 
   /// @inheritdoc IPool
@@ -645,12 +645,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function updateBridgeProtocolPremium(uint256 bridgePremiumToProtocol)
-    external
-    override
-    onlyPoolConfigurator
-  {
-    _bridgePremiumToProtocol = bridgePremiumToProtocol;
+  function updateBridgeProtocolFee(uint256 protocolFee) external override onlyPoolConfigurator {
+    _bridgeProtocolFee = protocolFee;
   }
 
   /// @inheritdoc IPool

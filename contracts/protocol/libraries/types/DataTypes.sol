@@ -51,6 +51,8 @@ library DataTypes {
     //bit 152-167 liquidation protocol fee
     //bit 168-175 eMode category
     //bit 176-211 unbacked mint cap, unbackedMintCap == 0 => disabled
+    //bit 212-251 debt ceiling
+
     uint256 data;
   }
 
@@ -222,10 +224,7 @@ library DataTypes {
   struct ValidateLiquidationCallParams {
     DataTypes.ReserveCache debtReserveCache;
     uint256 totalDebt;
-    address user;
-    uint256 reservesCount;
-    address oracle;
-    uint8 userEModeCategory;
+    uint256 healthFactor;
     address priceOracleSentinel;
   }
 

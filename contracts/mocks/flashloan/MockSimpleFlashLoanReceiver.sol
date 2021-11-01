@@ -6,10 +6,10 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {SimpleFlashLoanReceiverBase} from '../../flashloan/base/SimpleFlashLoanReceiverBase.sol';
+import {FlashLoanSimpleReceiverBase} from '../../flashloan/base/FlashLoanSimpleReceiverBase.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';
 
-contract MockSimpleFlashLoanReceiver is SimpleFlashLoanReceiverBase {
+contract MockFlashLoanSimpleReceiver is FlashLoanSimpleReceiverBase {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
@@ -22,7 +22,7 @@ contract MockSimpleFlashLoanReceiver is SimpleFlashLoanReceiverBase {
   uint256 _amountToApprove;
   bool _simulateEOA;
 
-  constructor(IPoolAddressesProvider provider) SimpleFlashLoanReceiverBase(provider) {}
+  constructor(IPoolAddressesProvider provider) FlashLoanSimpleReceiverBase(provider) {}
 
   function setFailExecutionTransfer(bool fail) public {
     _failExecution = fail;

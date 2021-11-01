@@ -13,9 +13,9 @@ interface IPool {
   /**
    * @notice Emitted on mintUnbacked()
    * @param reserve The address of the underlying asset of the reserve
-   * @param user The address initiating the deposit
-   * @param onBehalfOf The beneficiary of the deposit, receiving the aTokens
-   * @param amount The amount deposited
+   * @param user The address initiating the supply
+   * @param onBehalfOf The beneficiary of the supplied assets, receiving the aTokens
+   * @param amount The amount of supplied assets
    * @param referral The referral code used
    **/
   event MintUnbacked(
@@ -446,7 +446,7 @@ interface IPool {
    * as long as the amount taken plus a fee is returned.
    * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
    * For further details please visit https://developers.aave.com
-   * @param receiverAddress The address of the contract receiving the funds, implementing the ISimpleFlashLoanReceiver interface
+   * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanSimpleReceiver interface
    * @param asset The address of the asset being flash-borrowed
    * @param amount The amount of the asset being flash-borrowed
    * @param params Variadic packed params to pass to the receiver as extra information
@@ -599,10 +599,10 @@ interface IPool {
   function getAddressesProvider() external view returns (IPoolAddressesProvider);
 
   /**
-   * @notice Updates part of bridge premium that is collected by the protocol reserves
-   * @param bridgePremiumToProtocol The part of the premium sent to protocol
+   * @notice Updates the protocol fee on the bridging
+   * @param bridgeProtocolFee The part of the premium sent to protocol
    */
-  function updateBridgeProtocolPremium(uint256 bridgePremiumToProtocol) external;
+  function updateBridgeProtocolFee(uint256 bridgeProtocolFee) external;
 
   /**
    * @notice Updates flash loan premiums. Flash loan premium consist in 2 parts
@@ -631,7 +631,7 @@ interface IPool {
    * @param id The id of the category
    * @return The configuration data of the category
    */
-  function getEModeCategoryData(uint8 id) external returns (DataTypes.EModeCategory memory);
+  function getEModeCategoryData(uint8 id) external view returns (DataTypes.EModeCategory memory);
 
   /**
    * @notice Allows a user to use the protocol in eMode
@@ -662,7 +662,7 @@ interface IPool {
    * @notice Returns the part of the bridge fees sent to protocol
    * @return The bridge fee sent to the protocol
    */
-  function BRIDGE_PREMIUM_TO_PROTOCOL() external view returns (uint256);
+  function BRIDGE_PROTOCOL_FEE() external view returns (uint256);
 
   /**
    * @notice Returns the part of the flashloan fees sent to protocol

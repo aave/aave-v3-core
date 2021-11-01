@@ -1,5 +1,79 @@
 # Changelog
 
+### [1.2.1](https://www.github.com/aave/aave-v3-core/compare/v1.2.0...v1.2.1) (2021-10-19)
+
+
+### Bug Fixes
+
+* Added view to getEModeCategoryData method in pool interface ([b3ebdcc](https://www.github.com/aave/aave-v3-core/commit/b3ebdcc53fe0220285cbd42ada2240ffbbaf9158))
+
+## [1.2.0](https://www.github.com/aave/aave-v3-core/compare/v1.1.0...v1.2.0) (2021-10-18)
+
+
+### Features
+
+* Add `onlyAssetListingOrPoolAdmins` modifier to `setAssetSources` ([6bb8a1c](https://www.github.com/aave/aave-v3-core/commit/6bb8a1c06a1167941068656fec64bfd9ea18c0ce))
+* Add bridge protocol fee + fix tests for update ([bc4b554](https://www.github.com/aave/aave-v3-core/commit/bc4b554403b245bbcb1be3d2b4546d001a9175e7))
+* Add simple flashloan of 1 asset ([dbc5c9e](https://www.github.com/aave/aave-v3-core/commit/dbc5c9e1a9f3f8913ab8f1da16844ac4e62caf86))
+* added setIncentivesController ([8c027f4](https://www.github.com/aave/aave-v3-core/commit/8c027f4048bfa8c0bd859296e441906e9f3c0de3))
+* added the data provider to the addresses provider ([5f3abbc](https://www.github.com/aave/aave-v3-core/commit/5f3abbc8eaf216603ba2dfbd007ef5452905e50d))
+* finalize implementation ([1e72d0b](https://www.github.com/aave/aave-v3-core/commit/1e72d0bcf5dd4a4facefa716f095fc3d97c02f22))
+* fixed calculations in ValidationLogic and BorrowLogic ([5b507bd](https://www.github.com/aave/aave-v3-core/commit/5b507bd8b911e1a3a5cd8529413a3c6071a0ebb7))
+* fixed setDebtCeiling, added tests ([6ef9683](https://www.github.com/aave/aave-v3-core/commit/6ef968352655ac9e958ddf53ab0748e68e2160a6))
+* increased debt ceiling field capacity ([541f970](https://www.github.com/aave/aave-v3-core/commit/541f97056bb7e4fdb1f8645c386b68b9818ae7a4))
+* refactored PoolDataProvider functions in the addresses provider, fixed _checkNoLiquidity ([10300d4](https://www.github.com/aave/aave-v3-core/commit/10300d40832cfb94df83064879036e36994b57a4))
+* refactored the pool variable to immutable in atoken/debt tokens ([8e4d226](https://www.github.com/aave/aave-v3-core/commit/8e4d2265edd7f322e785a10ae61f67ded93d6fcb))
+* renamed simpleFlashloan and data structure ([9cc4d0c](https://www.github.com/aave/aave-v3-core/commit/9cc4d0c301325d1b113fb6ebaa51a0087d811c75))
+* Uniform permission of `AaveOracle` ([f471b0f](https://www.github.com/aave/aave-v3-core/commit/f471b0f9156cb93f1ec70fc94961d900a3b6927c))
+
+
+### Bug Fixes
+
+* Add `getActive` check on assets in flashloan. ([740aeaf](https://www.github.com/aave/aave-v3-core/commit/740aeafdee25cb48fbf7a6a170ccc7893857c6ab))
+* added public vars to interface for periphery usage ([8af6d0a](https://www.github.com/aave/aave-v3-core/commit/8af6d0aed5de659676db5b920267596454d8678d))
+* added view to the getDataProvider function interface ([0e6ee36](https://www.github.com/aave/aave-v3-core/commit/0e6ee361604ad0309a1cf83abd40c82d41bb9611))
+* correct package lock ([7965e0e](https://www.github.com/aave/aave-v3-core/commit/7965e0e4c264d63b71fc357b8de16cd06d6615a4))
+* Fix 0.8.7 version throughout the contracts ([6d97be8](https://www.github.com/aave/aave-v3-core/commit/6d97be80c2ba3c9d608bb690e4b5e1dacb174c07))
+* fix calculation bug in isolation mode ([8de2424](https://www.github.com/aave/aave-v3-core/commit/8de2424d475ac707c4b51e0b7bec5674746f5049))
+* Fix convention naming for constants ([193e3ab](https://www.github.com/aave/aave-v3-core/commit/193e3ab8b4255b0f152bae2a98530b812d2b3c53))
+* Fix declaration shadowing of mock contract ([7872ecb](https://www.github.com/aave/aave-v3-core/commit/7872ecbf67db4ed2e0e2314aebdb2919b692974a))
+* Fix doc in `StableDebtToken` ([9494299](https://www.github.com/aave/aave-v3-core/commit/9494299d7f9652e2c20adf5e03f42f8dcc4cfaf1))
+* Fix inheritance of mock contracts ([5bb62ad](https://www.github.com/aave/aave-v3-core/commit/5bb62ad59ddd97c1444d6d28f9b8764889238c08))
+* Fix simple flash loan test to use new function name ([9036580](https://www.github.com/aave/aave-v3-core/commit/9036580d7e1e6d5302d984f1fc6e82ff01ee3bfe))
+* Fix stack too deep for unoptimized compile of PoolConfigurator ([ef14f03](https://www.github.com/aave/aave-v3-core/commit/ef14f031e0a20bd7284e0a5ff96c889d3a005925))
+* fixed condition on supply and transfer, added tests ([6081003](https://www.github.com/aave/aave-v3-core/commit/6081003fd6bc09c27aa5dfb7642dea3a1051b122))
+* fixed isolation mode condition ([9672442](https://www.github.com/aave/aave-v3-core/commit/96724422b59517b0307d746a71c8f609208a4317))
+* fixed the calculation for isolationModeTotalDebt ([68bf644](https://www.github.com/aave/aave-v3-core/commit/68bf644803a1d89ac5f650b2031a1896bf7fd5e0))
+* Follow `check-effects-interactions` pattern more strictly ([7e7980a](https://www.github.com/aave/aave-v3-core/commit/7e7980a19dee98ecca7f13767fcc192ae0629bfb))
+* Mark the initialization functions as `external` ([e037467](https://www.github.com/aave/aave-v3-core/commit/e037467b555dd83a3419ee0bd8f1743bfa4b1551))
+* Move flashloans to separate library ([9308e97](https://www.github.com/aave/aave-v3-core/commit/9308e9797b1097334df7cf4745a335804b229dd0))
+* package lock with correct node version ([3d2f5b6](https://www.github.com/aave/aave-v3-core/commit/3d2f5b61057f06f3990951e86cd8017b1b4fa6bf))
+* Reintroduced check for max repayment on behalf ([c351627](https://www.github.com/aave/aave-v3-core/commit/c351627cfc218b99c9f0354c58cefb9edb2e68a2))
+* Remove comment from `FlashLoanLogic` ([774c326](https://www.github.com/aave/aave-v3-core/commit/774c326a4b128f3816e6c2f4a924f6f8a5adc460))
+* Remove old call ([a82d303](https://www.github.com/aave/aave-v3-core/commit/a82d3039653ec9574a6c9ae1637307fcfb1a63da))
+* Remove unneded return value of `AToken.transferUnderlyingTo` ([5f30b38](https://www.github.com/aave/aave-v3-core/commit/5f30b38dd5b5a719c72da466ac56aac3a407fd7c))
+* Remove unneded use of `SafeMath` ([a9584f8](https://www.github.com/aave/aave-v3-core/commit/a9584f84e2acf11ec1b7cdb09b6f5fe0b1ff5873))
+* Remove unneeded check at validateRepay ([6d3d73f](https://www.github.com/aave/aave-v3-core/commit/6d3d73ff6cbde45ac13065cae1af799888ef524a))
+* Remove unneeded storage variable from PoolConfigurator ([af8f695](https://www.github.com/aave/aave-v3-core/commit/af8f695aa371cb8e6d7a3a9ac0fac53da07a412e))
+* Remove unneeded use of function params ([d0d8980](https://www.github.com/aave/aave-v3-core/commit/d0d898003791c8f3df184a12e070f25e4dbad9ff))
+* Remove unused `PC_INVALID_DEBT_CEILING_ASSET_ALREADY_SUPPLIED` ([c68b67a](https://www.github.com/aave/aave-v3-core/commit/c68b67a8843e12da02b762cff4e73935e2d42d5f))
+* Remove unused imports from BorrowLogic ([7b019c0](https://www.github.com/aave/aave-v3-core/commit/7b019c0fdbc1e5daf6e9214a03bcf43b979343c6))
+* Remove unused inports from FlashLoanLogic ([0aa3a39](https://www.github.com/aave/aave-v3-core/commit/0aa3a3926e5a0e3bc97c31d72643dd51fbdd17f1))
+* Remove unused variable + readability ([00c2e66](https://www.github.com/aave/aave-v3-core/commit/00c2e66d78451be2f0874586e9357915359ad682))
+* Rename `_checkNoLiquidity` to `_checkNoDepositors` ([95fb785](https://www.github.com/aave/aave-v3-core/commit/95fb7853a0e216e2716a5ed3cdd14eb134120ad5))
+* Rename arguments for `backUnbacked` in library ([6ca57a1](https://www.github.com/aave/aave-v3-core/commit/6ca57a1fb0067c265b2697f52721e412a2342961))
+* Rename Percentage to BPs for argument in `backUnbacked` ([94eaf83](https://www.github.com/aave/aave-v3-core/commit/94eaf83df951a134a70add4c5fdc326db806a356))
+* Replace assembly for chainId ([777d04a](https://www.github.com/aave/aave-v3-core/commit/777d04a1bd1790e768f474e9ae68590d1adf7e6e))
+* Set `MAX_VALID_DEBT_CEILING` = `2^40 - 1` ([fa4c485](https://www.github.com/aave/aave-v3-core/commit/fa4c485a53cd497cf58e5a772a171ee0fb5ecbe2))
+* Update `calculateCompoundedInterest` to increase precision ([dcbb583](https://www.github.com/aave/aave-v3-core/commit/dcbb583231d57790c1decceaa6a5f73d852734ad))
+* Update comments in FlashLoanLogic ([7fee95c](https://www.github.com/aave/aave-v3-core/commit/7fee95c0608bdf87a7535b62e5495585af2840b4))
+* Update doc for `getDebtCeiling` ([3d0e0cb](https://www.github.com/aave/aave-v3-core/commit/3d0e0cb742ec9a36782db24c0b976377c71506ce))
+* Update IPool doc for `backUnbacked` ([6ffc157](https://www.github.com/aave/aave-v3-core/commit/6ffc15703175de2974b957c98d5663f001f71251))
+* Update precision in isolationDebt check ([7fbf7b6](https://www.github.com/aave/aave-v3-core/commit/7fbf7b67080ffe54d0d235ff1a686f45ec9c530b))
+* update the max MAX_VALID_DEBT_CEILING ([16d9aa8](https://www.github.com/aave/aave-v3-core/commit/16d9aa8a0e7dae3edd59ca3012523b7eefe2ef9b))
+* Update visibility of tokenization ([128a947](https://www.github.com/aave/aave-v3-core/commit/128a947d91ccca05645e6f2a40f2917c977e7d8f))
+* updated hardhat config ([2129dc0](https://www.github.com/aave/aave-v3-core/commit/2129dc0cc45de1895a0a030e5abf9174730fd303))
+
 ## [1.1.0](https://www.github.com/aave/aave-v3-core/compare/v1.0.3...v1.1.0) (2021-09-28)
 
 
