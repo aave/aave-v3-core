@@ -29,12 +29,10 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   bytes32 public constant PERMIT_TYPEHASH =
     keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
-  uint256 public constant ATOKEN_REVISION = 0x1;
+  uint256 public constant ATOKEN_REVISION = 0x2;
 
   /// @dev owner => next valid nonce to submit with permit()
   mapping(address => uint256) public _nonces;
-
-  bytes32 public DOMAIN_SEPARATOR;
 
   IPool internal immutable _pool;
   address internal _treasury;
@@ -66,18 +64,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     string calldata aTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId = block.chainid;
-
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(aTokenName)),
-        keccak256(EIP712_REVISION),
-        chainId,
-        address(this)
-      )
-    );
-
     _setName(aTokenName);
     _setSymbol(aTokenSymbol);
     _setDecimals(aTokenDecimals);
@@ -96,6 +82,19 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
       aTokenSymbol,
       params
     );
+  }
+
+  function DOMAIN_SEPARATOR() public view returns (bytes32) {
+    return
+      keccak256(
+        abi.encode(
+          EIP712_DOMAIN,
+          keccak256(bytes(name())),
+          keccak256(EIP712_REVISION),
+          block.chainid,
+          address(this)
+        )
+      );
   }
 
   /// @inheritdoc IAToken
@@ -274,7 +273,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     bytes32 digest = keccak256(
       abi.encodePacked(
         '\x19\x01',
-        DOMAIN_SEPARATOR,
+        DOMAIN_SEPARATOR(),
         keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, currentValidNonce, deadline))
       )
     );

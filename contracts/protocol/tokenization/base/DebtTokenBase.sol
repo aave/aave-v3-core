@@ -27,7 +27,6 @@ abstract contract DebtTokenBase is
       'DelegationWithSig(address delegator,address delegatee,uint256 value,uint256 nonce,uint256 deadline)'
     );
   mapping(address => uint256) public _nonces;
-  bytes32 public DOMAIN_SEPARATOR;
   IPool internal immutable _pool;
 
   /**
@@ -42,6 +41,19 @@ abstract contract DebtTokenBase is
     IncentivizedERC20(pool.getAddressesProvider(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
   {
     _pool = pool;
+  }
+
+  function DOMAIN_SEPARATOR() public view returns (bytes32) {
+    return
+      keccak256(
+        abi.encode(
+          EIP712_DOMAIN,
+          keccak256(bytes(name())),
+          keccak256(EIP712_REVISION),
+          block.chainid,
+          address(this)
+        )
+      );
   }
 
   /// @inheritdoc ICreditDelegationToken
@@ -75,7 +87,7 @@ abstract contract DebtTokenBase is
     bytes32 digest = keccak256(
       abi.encodePacked(
         '\x19\x01',
-        DOMAIN_SEPARATOR,
+        DOMAIN_SEPARATOR(),
         keccak256(
           abi.encode(
             DELEGATION_WITH_SIG_TYPEHASH,

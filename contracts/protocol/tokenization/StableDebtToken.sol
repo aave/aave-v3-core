@@ -23,7 +23,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
 contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   using WadRayMath for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x3;
 
   uint256 internal _avgStableRate;
   mapping(address => uint40) internal _timestamps;
@@ -42,24 +42,12 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId = block.chainid;
-
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
 
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
-
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(debtTokenName)),
-        keccak256(EIP712_REVISION),
-        chainId,
-        address(this)
-      )
-    );
 
     emit Initialized(
       underlyingAsset,

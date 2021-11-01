@@ -58,7 +58,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /// @inheritdoc IERC20Detailed
-  function name() external view override returns (string memory) {
+  function name() public view override returns (string memory) {
     return _name;
   }
 
