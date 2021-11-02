@@ -115,6 +115,9 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       pool.connect(user2.signer).setUserUseReserveAsCollateral(aave.address, true)
     ).to.be.revertedWith(SL_USER_IN_ISOLATION_MODE);
 
+    const userDataAfter = await helpersContract.getUserReserveData(aave.address, user2.address);
+    expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
+
     await evmRevert(snap);
   });
 
