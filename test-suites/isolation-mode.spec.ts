@@ -18,7 +18,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const depositAmount = utils.parseEther('1000');
   const ceilingAmount = '10000';
 
-  const { VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY, VL_DEBT_CEILING_CROSSED } = ProtocolErrors;
+  const { VL_ASSET_NOT_BORROWABLE_IN_ISOLATION, VL_DEBT_CEILING_CROSSED } = ProtocolErrors;
 
   before(async () => {
     const { configurator, dai, usdc, aave } = testEnv;
@@ -26,11 +26,9 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     //set debt ceiling for aave
     await configurator.setDebtCeiling(aave.address, ceilingAmount);
 
-    await configurator.setEModeCategory('1', '9500', '9800', '10100', ZERO_ADDRESS, 'stablecoins');
-
     //set category 1 for DAI and USDC
-    await configurator.setAssetEModeCategory(dai.address, '1');
-    await configurator.setAssetEModeCategory(usdc.address, '1');
+    await configurator.setBorrowableInIsolation(dai.address, true);
+    await configurator.setBorrowableInIsolation(usdc.address, true);
   });
 
   it('User 0 supply 1000 dai.', async () => {
@@ -151,7 +149,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       pool
         .connect(users[1].signer)
         .borrow(weth.address, utils.parseEther('0.01'), '2', 0, users[1].address)
-    ).to.be.revertedWith(VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY);
+    ).to.be.revertedWith(VL_ASSET_NOT_BORROWABLE_IN_ISOLATION);
   });
 
   it('User 1 borrows 10 DAI. Check debt ceiling', async () => {

@@ -19,6 +19,7 @@ library ReserveConfiguration {
   uint256 constant BORROWING_MASK =                 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant STABLE_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 constant BORROWABLE_IN_ISOLATION_MASK =   0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -36,7 +37,9 @@ library ReserveConfiguration {
   uint256 constant BORROWING_ENABLED_START_BIT_POSITION = 58;
   uint256 constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
   uint256 constant IS_PAUSED_START_BIT_POSITION = 60;
-  /// @dev bits 61 62 63 unused yet
+  uint256 constant BORROWABLE_IN_ISOLATION_START_BIT_POSITION = 61;
+  /// @dev bits 62 63 reserved
+
   uint256 constant RESERVE_FACTOR_START_BIT_POSITION = 64;
   uint256 constant BORROW_CAP_START_BIT_POSITION = 80;
   uint256 constant SUPPLY_CAP_START_BIT_POSITION = 116;
@@ -221,6 +224,37 @@ library ReserveConfiguration {
    **/
   function getPaused(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
     return (self.data & ~PAUSED_MASK) != 0;
+  }
+
+  /**
+   * @notice Sets the borrowable in isolation flag for the reserve.
+   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed amount will be accumulated in the isolated collateral's total debt exposure.
+   * Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep consistency in the debt ceiling calculations.
+   * @param self The reserve configuration
+   * @param borrowable True if the asset is borrowable
+   **/
+  function setBorrowableInIsolation(DataTypes.ReserveConfigurationMap memory self, bool borrowable)
+    internal
+    pure
+  {
+    self.data =
+      (self.data & BORROWABLE_IN_ISOLATION_MASK) |
+      (uint256(borrowable ? 1 : 0) << BORROWABLE_IN_ISOLATION_START_BIT_POSITION);
+  }
+
+  /**
+   * @notice Gets the borrowable in isolation flag for the reserve.
+   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed amount will be accumulated in the isolated collateral's total debt exposure.
+   * Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep consistency in the debt ceiling calculations.
+   * @param self The reserve configuration
+   * @return The borrowable in isolation flag
+   **/
+  function getBorrowableInIsolation(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (bool)
+  {
+    return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
   }
 
   /**

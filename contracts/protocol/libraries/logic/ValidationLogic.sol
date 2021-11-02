@@ -40,11 +40,6 @@ library ValidationLogic {
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
-  // for borrowings in isolation mode, we give for granted that the eMode category for stablecoins is the category with id 1.
-  // this MUST be kept into account when configuring the stablecoins eMode category, otherwise users suplying asset in isolation
-  // mode will NOT be able to borrow.
-  uint256 public constant DEFAULT_ISOLATION_MODE_BORROW_CATEGORY = 1;
-
   /**
    * @notice Validates a supply action
    * @param reserveCache The cached data of the reserve
@@ -186,9 +181,8 @@ library ValidationLogic {
       // check that the asset being borrowed belongs to the stablecoin category AND
       // the total exposure is no bigger than the collateral debt ceiling
       require(
-        params.reserveCache.reserveConfiguration.getEModeCategory() ==
-          DEFAULT_ISOLATION_MODE_BORROW_CATEGORY,
-        Errors.VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY
+        params.reserveCache.reserveConfiguration.getBorrowableInIsolation(),
+        Errors.VL_ASSET_NOT_BORROWABLE_IN_ISOLATION
       );
 
       require(
