@@ -27,7 +27,7 @@ abstract contract DebtTokenBase is
       'DelegationWithSig(address delegator,address delegatee,uint256 value,uint256 nonce,uint256 deadline)'
     );
   mapping(address => uint256) public _nonces;
-  bytes32 public UNUSED_STORAGE_PLACEHOLDER; // Old DOMAIN_SEPARATOR
+  bytes32 internal UNUSED_STORAGE_PLACEHOLDER; // Old DOMAIN_SEPARATOR
   IPool internal immutable _pool;
 
   /**

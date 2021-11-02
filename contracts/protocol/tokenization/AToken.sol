@@ -34,7 +34,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   /// @dev owner => next valid nonce to submit with permit()
   mapping(address => uint256) public _nonces;
 
-  bytes32 public UNUSED_STORAGE_PLACEHOLDER; // Old DOMAIN_SEPARATOR
+  bytes32 internal UNUSED_STORAGE_PLACEHOLDER; // Old DOMAIN_SEPARATOR
 
   IPool internal immutable _pool;
   address internal _treasury;
