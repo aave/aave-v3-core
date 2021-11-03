@@ -49,6 +49,16 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
+    CACHED_DOMAIN_SEPARATOR = keccak256(
+      abi.encode(
+        EIP712_DOMAIN,
+        keccak256(bytes(name())),
+        keccak256(EIP712_REVISION),
+        block.chainid,
+        address(this)
+      )
+    );
+
     emit Initialized(
       underlyingAsset,
       address(_pool),
