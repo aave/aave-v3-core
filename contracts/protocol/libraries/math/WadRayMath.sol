@@ -46,7 +46,7 @@ library WadRayMath {
    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
    * @param a Wad
    * @param b Wad
-   * @return c The result of a*b, in wad
+   * @return c = a*b, in wad
    **/
   function wadMul(uint256 a, uint256 b) internal pure returns (uint256 c) {
     // to avoid overflow, a <= (type(uint256).max - HALF_WAD) / b
@@ -64,7 +64,7 @@ library WadRayMath {
    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
    * @param a Wad
    * @param b Wad
-   * @return c The result of a/b, in wad
+   * @return c = a/b, in wad
    **/
   function wadDiv(uint256 a, uint256 b) internal pure returns (uint256 c) {
     // to avoid overflow, a <= (type(uint256).max - halfB) / WAD
@@ -117,7 +117,7 @@ library WadRayMath {
    * @dev Casts ray down to wad
    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
    * @param a Ray
-   * @return b - a casted to wad, rounded half up to the nearest wad
+   * @return b = a converted to wad, rounded half up to the nearest wad
    **/
   function rayToWad(uint256 a) internal pure returns (uint256 b) {
     // to avoid overflow, a + HALF_RAY_RATIO >= HALF_RAY_RATIO
@@ -134,7 +134,7 @@ library WadRayMath {
    * @dev Converts wad up to ray
    * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
    * @param a Wad
-   * @return b - a converted in ray
+   * @return b = a converted in ray
    **/
   function wadToRay(uint256 a) internal pure returns (uint256 b) {
     // to avoid overflow, b/WAD_RAY_RATIO == a
