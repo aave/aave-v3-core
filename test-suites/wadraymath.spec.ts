@@ -33,7 +33,7 @@ makeSuite('WadRayMath', () => {
     expect(await wrapper.wadMul(a, 0)).to.be.eq('0');
 
     const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(HALF_WAD).div(b).add(1);
-    await expect(wrapper.wadMul(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
+    await expect(wrapper.wadMul(tooLargeA, b)).to.be.reverted;
   });
 
   it('wadDiv()', async () => {
@@ -45,7 +45,7 @@ makeSuite('WadRayMath', () => {
     const halfB = b.div(2);
     const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(halfB).div(WAD).add(1);
 
-    await expect(wrapper.wadDiv(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
+    await expect(wrapper.wadDiv(tooLargeA, b)).to.be.reverted;
   });
 
   it('rayMul()', async () => {
@@ -57,7 +57,7 @@ makeSuite('WadRayMath', () => {
     expect(await wrapper.rayMul(a, 0)).to.be.eq('0');
 
     const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(HALF_RAY).div(b).add(1);
-    await expect(wrapper.rayMul(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
+    await expect(wrapper.rayMul(tooLargeA, b)).to.be.reverted;
   });
 
   it('rayDiv()', async () => {
@@ -69,7 +69,7 @@ makeSuite('WadRayMath', () => {
     const halfB = b.div(2);
     const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(halfB).div(RAY).add(1);
 
-    await expect(wrapper.rayDiv(tooLargeA, b)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
+    await expect(wrapper.rayDiv(tooLargeA, b)).to.be.reverted;
   });
 
   it('rayToWad()', async () => {
@@ -79,7 +79,7 @@ makeSuite('WadRayMath', () => {
     const halfRatio = BigNumber.from(10).pow(9).div(2);
     const tooLarge = BigNumber.from(MAX_UINT_AMOUNT).sub(halfRatio).add(1);
 
-    await expect(wrapper.rayToWad(tooLarge)).to.be.revertedWith(MATH_ADDITION_OVERFLOW);
+    await expect(wrapper.rayToWad(tooLarge)).to.be.reverted;
   });
 
   it('wadToRay()', async () => {
@@ -88,6 +88,6 @@ makeSuite('WadRayMath', () => {
 
     const ratio = BigNumber.from(10).pow(9);
     const tooLarge = BigNumber.from(MAX_UINT_AMOUNT).div(ratio).add(1);
-    await expect(wrapper.wadToRay(tooLarge)).to.be.revertedWith(MATH_MULTIPLICATION_OVERFLOW);
+    await expect(wrapper.wadToRay(tooLarge)).to.be.reverted;
   });
 });
