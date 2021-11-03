@@ -123,7 +123,7 @@ library WadRayMath {
     // to avoid overflow, a + HALF_RAY_RATIO >= HALF_RAY_RATIO
     assembly {
       b := add(a, div(WAD_RAY_RATIO, 2))
-      if iszero(or(iszero(a), gt(b, div(WAD_RAY_RATIO, 2)))) {
+      if lt(b, div(WAD_RAY_RATIO, 2)) {
         revert(0, 0)
       }
       b := div(b, WAD_RAY_RATIO)
