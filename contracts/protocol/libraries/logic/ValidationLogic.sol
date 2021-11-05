@@ -178,7 +178,7 @@ library ValidationLogic {
     }
 
     if (params.isolationModeActive) {
-      // check that the asset being borrowed belongs to the stablecoin category AND
+      // check that the asset being borrowed is borrowable in isolation mode AND
       // the total exposure is no bigger than the collateral debt ceiling
       require(
         params.reserveCache.reserveConfiguration.getBorrowableInIsolation(),
