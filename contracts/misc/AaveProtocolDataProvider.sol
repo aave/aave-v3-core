@@ -184,6 +184,14 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /**
+   * @notice Returns the debt ceiling decimals
+   * @return The debt ceiling decimals
+   **/
+  function getDebtCeilingDecimals() external pure returns (uint256) {
+    return ReserveConfiguration.DEBT_CEILING_DECIMALS;
+  }
+
+  /**
    * @notice Returns the reserve data
    * @param asset The address of the underlying asset of the reserve
    * @return unbacked The amount of unbacked tokens
@@ -332,7 +340,11 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @param asset The address of the underlying asset of the reserve
    * @return irStrategyAddress The address of the Interest Rate strategy
    */
-  function getInterestRateStrategyAddress(address asset) external view returns (address irStrategyAddress) {
+  function getInterestRateStrategyAddress(address asset)
+    external
+    view
+    returns (address irStrategyAddress)
+  {
     DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
       asset
     );
