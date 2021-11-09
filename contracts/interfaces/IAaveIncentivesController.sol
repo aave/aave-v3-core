@@ -54,6 +54,21 @@ interface IAaveIncentivesController {
     );
 
   /**
+   * LEGACY **************************
+   * @dev Returns the configuration of the distribution for a certain asset
+   * @param asset The address of the reference asset of the distribution
+   * @return The asset index, the emission per second and the last updated timestamp
+   **/
+  function assets(address asset)
+    external
+    view
+    returns (
+      uint128,
+      uint128,
+      uint256
+    );
+
+  /**
    * @notice Whitelists an address to claim the rewards on behalf of another address
    * @param user The address of the user
    * @param claimer The address of the claimer
@@ -153,4 +168,9 @@ interface IAaveIncentivesController {
    * @return The precision used in the incentives controller
    */
   function PRECISION() external view returns (uint8);
+
+  /**
+   * @dev Gets the distribution end timestamp of the emissions
+   */
+  function DISTRIBUTION_END() external view returns (uint256);
 }

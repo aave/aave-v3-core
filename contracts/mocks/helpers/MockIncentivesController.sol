@@ -17,6 +17,19 @@ contract MockIncentivesController is IAaveIncentivesController {
     return (0, 0, 0);
   }
 
+  function assets(address)
+    external
+    pure
+    override
+    returns (
+      uint128,
+      uint128,
+      uint256
+    )
+  {
+    return (0, 0, 0);
+  }
+
   function setClaimer(address, address) external override {}
 
   function getClaimer(address) external pure override returns (address) {
@@ -65,6 +78,10 @@ contract MockIncentivesController is IAaveIncentivesController {
   }
 
   function PRECISION() external pure override returns (uint8) {
+    return 0;
+  }
+
+  function DISTRIBUTION_END() external pure override returns (uint256) {
     return 0;
   }
 }
