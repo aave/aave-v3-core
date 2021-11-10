@@ -5,10 +5,16 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { parseUnits, formatUnits, parseEther } from '@ethersproject/units';
+import { VariableDebtTokenFactory } from '../types';
+import { config } from 'process';
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
-  const { VL_INCONSISTENT_EMODE_CATEGORY, VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } =
-    ProtocolErrors;
+  const {
+    VL_INCONSISTENT_EMODE_CATEGORY,
+    VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
+    VL_COLLATERAL_CANNOT_COVER_NEW_BORROW,
+  } = ProtocolErrors;
 
   const CATEGORIES = {
     STABLECOINS: {
@@ -411,6 +417,60 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
 
     expect(await aDai.balanceOf(user0.address)).to.be.eq(balanceBeforeUser0.sub(transferAmount));
     expect(await aDai.balanceOf(user3.address)).to.be.eq(balanceBeforeUser3.add(transferAmount));
+  });
+
+  it('Credit delegation with EMode', async () => {
+    const {
+      pool,
+      helpersContract,
+      dai,
+      usdc,
+      users: [, , , user3, user4, user5],
+    } = testEnv;
+    const { id } = CATEGORIES.STABLECOINS;
+
+    expect(await helpersContract.getReserveEModeCategory(dai.address)).to.be.eq(id);
+    expect(await helpersContract.getReserveEModeCategory(usdc.address)).to.be.eq(id);
+
+    const usdcData = await pool.getReserveData(usdc.address);
+    const variableDebtUSDC = VariableDebtTokenFactory.connect(
+      usdcData.variableDebtTokenAddress,
+      user4.signer
+    );
+
+    expect(await usdc.connect(user3.signer).mint(parseUnits('100', 6)));
+    expect(await usdc.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT));
+    expect(
+      await pool.connect(user3.signer).supply(usdc.address, parseUnits('100', 6), user3.address, 0)
+    );
+
+    expect(await dai.connect(user4.signer).mint(parseUnits('100', 18)));
+    expect(await dai.connect(user4.signer).approve(pool.address, MAX_UINT_AMOUNT));
+
+    // Alice deposit 100 dai
+    expect(
+      await pool.connect(user4.signer).supply(dai.address, parseUnits('100', 18), user4.address, 0)
+    );
+
+    // Alice delegates 100 usdc with variable rate to Bob.
+    expect(
+      await variableDebtUSDC
+        .connect(user4.signer)
+        .approveDelegation(user5.address, parseUnits('100', 6))
+    );
+
+    // Bob set eMode to stablecoins
+    expect(await pool.connect(user5.signer).setUserEMode(CATEGORIES.STABLECOINS.id));
+    expect(await pool.getUserEMode(user5.address)).to.be.eq(CATEGORIES.STABLECOINS.id);
+
+    // Bob borrows 90 usdc on behalf of Alice
+    await expect(
+      pool.connect(user5.signer).borrow(usdc.address, parseUnits('90', 6), 2, 0, user4.address)
+    ).to.be.revertedWith(VL_COLLATERAL_CANNOT_COVER_NEW_BORROW);
+
+    // Alice is still in a position where she CANNOT be liquidated
+    const user4Data = await pool.getUserAccountData(user4.address);
+    expect(user4Data.healthFactor).to.be.gt(parseEther('1'));
   });
 
   it('Admin lowers LTV of stablecoins eMode category, decreasing user borrowing power', async () => {
