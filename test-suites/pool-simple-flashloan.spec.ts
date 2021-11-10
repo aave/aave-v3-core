@@ -6,7 +6,15 @@ import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 import './helpers/utils/wadraymath';
-import { MockFlashLoanSimpleReceiver, MockFlashLoanSimpleReceiverFactory } from '../types';
+import {
+  MockFlashLoanSimpleReceiver,
+  MockFlashLoanSimpleReceiverFactory,
+  FlashloanAttackerFactory,
+  Pool,
+} from '../types';
+import { parseEther, parseUnits } from '@ethersproject/units';
+import { IERC20Detailed } from '../types/IERC20Detailed';
+import { IERC20DetailedFactory } from '../types/IERC20DetailedFactory';
 
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
@@ -325,5 +333,57 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
           '0'
         )
     ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
+  });
+
+  it('Check that reentrance borrow within flashloanSimple impacts rates', async () => {
+    /**
+     * 1. FlashBorrow a tiny bit of DAI
+     * 2. As the action in the middle. Borrow ALL the DAI using eth collateral
+     * 3. Repay the tiny bit
+     * The result should be that the interest rate increase due to higher utilisation.
+     */
+
+    const {
+      deployer,
+      pool,
+      dai,
+      aDai,
+      weth,
+      addressesProvider,
+      users: [user],
+    } = testEnv;
+
+    const flashAttacker = await new FlashloanAttackerFactory(deployer.signer).deploy(
+      addressesProvider.address
+    );
+
+    await flashAttacker.connect(user.signer).supplyAsset(weth.address, parseEther('100'));
+
+    const dataBefore = await pool.getReserveData(dai.address);
+    const debtToken = IERC20DetailedFactory.connect(
+      dataBefore.variableDebtTokenAddress,
+      deployer.signer
+    );
+    const debtBefore = await debtToken.totalSupply();
+    const availableBefore = await dai.balanceOf(aDai.address);
+
+    await pool
+      .connect(user.signer)
+      .flashLoanSimple(flashAttacker.address, dai.address, parseUnits('1', 18), '0x10', 0);
+
+    const dataAfter = await pool.getReserveData(dai.address);
+    const debtAfter = await debtToken.totalSupply();
+    const availableAfter = await dai.balanceOf(aDai.address);
+
+    // More debt and less available -> higher util -> rates will increase
+    expect(debtAfter).to.be.gt(debtBefore);
+    expect(availableAfter).to.be.lt(availableBefore);
+
+    // Premium is added
+    expect(dataAfter.liquidityIndex).to.be.gt(dataBefore.liquidityIndex);
+
+    // Rates should have increased
+    expect(dataAfter.currentLiquidityRate).to.be.gt(dataBefore.currentLiquidityRate);
+    expect(dataAfter.currentVariableBorrowRate).to.be.gt(dataBefore.currentVariableBorrowRate);
   });
 });
