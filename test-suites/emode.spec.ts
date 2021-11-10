@@ -419,7 +419,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(await aDai.balanceOf(user3.address)).to.be.eq(balanceBeforeUser3.add(transferAmount));
   });
 
-  it('Credit delegation with EMode', async () => {
+  it('Credit delegation to EMode user, user tries do abuse EMode (revert expected)', async () => {
     const {
       pool,
       helpersContract,
