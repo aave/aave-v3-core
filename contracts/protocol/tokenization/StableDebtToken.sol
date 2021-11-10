@@ -225,7 +225,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
       _mint(user, amountToMint, previousSupply);
-      emit Transfer(address(0), user, balanceIncrease - amount);
+      emit Transfer(address(0), user, amountToMint);
       emit Mint(
         user,
         user,
@@ -239,7 +239,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
       _burn(user, amountToBurn, previousSupply);
-      emit Transfer(address(0), user, amount - balanceIncrease);
+      emit Transfer(user, address(0), amountToBurn);
       emit Burn(user, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
     }
 

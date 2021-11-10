@@ -98,15 +98,16 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+    uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
     _userState[user].additionalData = Helpers.castUint128(index);
 
     _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
-    emit Transfer(address(0), onBehalfOf, amount + accumulatedInterest);
-    emit Mint(user, onBehalfOf, amount + accumulatedInterest, index);
+    uint256 amountToMint = amount + balanceIncrease;
+    emit Transfer(address(0), onBehalfOf, amountToMint);
+    emit Mint(user, onBehalfOf, amountToMint, balanceIncrease, index);
 
     return (scaledBalance == 0, scaledTotalSupply());
   }
@@ -121,19 +122,21 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+    uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
     _userState[user].additionalData = Helpers.castUint128(index);
 
     _burn(user, Helpers.castUint128(amountScaled));
 
-    if (accumulatedInterest > amount) {
-      emit Transfer(address(0), user, accumulatedInterest - amount);
-      emit Mint(user, user, accumulatedInterest - amount, index);
+    if (balanceIncrease > amount) {
+      uint256 amountToMint = balanceIncrease - amount;
+      emit Transfer(address(0), user, amountToMint);
+      emit Mint(user, user, amountToMint, balanceIncrease, index);
     } else {
-      emit Transfer(user, address(0), amount - accumulatedInterest);
-      emit Burn(user, amount - accumulatedInterest, index);
+      uint256 amountToBurn = amount - balanceIncrease;
+      emit Transfer(user, address(0), amountToBurn);
+      emit Burn(user, amountToBurn, balanceIncrease, index);
     }
     return scaledTotalSupply();
   }

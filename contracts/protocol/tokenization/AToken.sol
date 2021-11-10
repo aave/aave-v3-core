@@ -109,7 +109,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+    uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
     _userState[user].additionalData = Helpers.castUint128(index);
@@ -120,11 +120,14 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
 
-    emit Transfer(user, address(0), amount);
-    if (accumulatedInterest > amount) {
-      emit Mint(user, accumulatedInterest - amount, index);
+    if (balanceIncrease > amount) {
+      uint256 netAmount = balanceIncrease - amount;
+      emit Transfer(address(0), user, netAmount);
+      emit Mint(user, netAmount, balanceIncrease, index);
     } else {
-      emit Burn(user, receiverOfUnderlying, amount - accumulatedInterest, index);
+      uint256 netAmount = amount - balanceIncrease;
+      emit Transfer(user, address(0), netAmount);
+      emit Burn(user, receiverOfUnderlying, netAmount, balanceIncrease, index);
     }
   }
 
@@ -138,15 +141,16 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+    uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
     _userState[user].additionalData = Helpers.castUint128(index);
 
     _mint(user, Helpers.castUint128(amountScaled));
 
-    emit Transfer(address(0), user, amount);
-    emit Mint(user, amount + accumulatedInterest, index);
+    uint256 amountToMint = amount + balanceIncrease;
+    emit Transfer(address(0), user, amountToMint);
+    emit Mint(user, amountToMint, balanceIncrease, index);
 
     return scaledBalance == 0;
   }
@@ -166,7 +170,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     _mint(treasury, Helpers.castUint128(amount.rayDiv(index)));
 
     emit Transfer(address(0), treasury, amount);
-    emit Mint(treasury, amount, index);
+    emit Mint(treasury, amount, 0, index);
   }
 
   /// @inheritdoc IAToken
