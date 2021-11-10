@@ -572,4 +572,11 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(userDataAfter.availableBorrowsBase).to.be.lt(userDataBefore.availableBorrowsBase);
     expect(userDataAfter.healthFactor).to.be.eq(userDataBefore.healthFactor);
   });
+
+  it('Remove dai from EMode', async () => {
+    const { configurator, poolAdmin, dai, helpersContract } = testEnv;
+    expect(await helpersContract.getReserveEModeCategory(dai.address)).to.not.be.eq(0);
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, 0));
+    expect(await helpersContract.getReserveEModeCategory(dai.address)).to.be.eq(0);
+  });
 });
