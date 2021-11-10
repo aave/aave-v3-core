@@ -1,15 +1,27 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime } from '../helpers/misc-utils';
+import { DRE, increaseTime, waitForTx } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
+import { formatEther } from '@ethersproject/units';
 
 makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;
+
+  before(async () => {
+    const { addressesProvider, oracle } = testEnv;
+
+    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+  });
+
+  after(async () => {
+    const { aaveOracle, addressesProvider } = testEnv;
+    await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
+  });
 
   it("It's not possible to liquidate on a non-active collateral or a non active principal", async () => {
     const {
@@ -46,7 +58,9 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     } = testEnv;
 
     //mints DAI to depositor
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai
+      .connect(depositor.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access depositor wallet
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -57,11 +71,13 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     await pool
       .connect(depositor.signer)
       .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
-    //user 2 deposits 1 ETH
-    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
+    //user 2 deposits  ETH
+    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.06775');
 
     //mints WETH to borrower
-    await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
+    await weth
+      .connect(borrower.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
 
     //approve protocol to access the borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -117,7 +133,9 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     } = testEnv;
 
     //mints dai to the liquidator
-    await dai.connect(liquidator.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai
+      .connect(liquidator.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
 
     //approve protocol to access the liquidator wallet
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -222,7 +240,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     );
   });
 
-  it('User 3 deposits 1000 USDC, user 4 1 WETH, user 4 borrows - drops HF, liquidates the borrow', async () => {
+  it('User 3 deposits 1000 USDC, user 4 0.06775 WETH, user 4 borrows - drops HF, liquidates the borrow', async () => {
     const {
       usdc,
       users: [, , , depositor, borrower, liquidator],
@@ -235,7 +253,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //mints USDC to depositor
     await usdc
       .connect(depositor.signer)
-      .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
     await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -247,11 +265,13 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       .connect(depositor.signer)
       .deposit(usdc.address, amountUSDCtoDeposit, depositor.address, '0');
 
-    //borrower deposits 1 ETH
-    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
+    //borrower deposits ETH
+    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.06775');
 
     //mints WETH to borrower
-    await weth.connect(borrower.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
+    await weth
+      .connect(borrower.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
 
     //approve protocol to access the borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -281,7 +301,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
 
     await usdc
       .connect(liquidator.signer)
-      .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
     await usdc.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -369,7 +389,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     );
   });
 
-  it('User 4 deposits 10 AAVE - drops HF, liquidates the AAVE, which results on a lower amount being liquidated', async () => {
+  it('User 4 deposits 0.033 AAVE - drops HF, liquidates the AAVE, which results on a lower amount being liquidated', async () => {
     const {
       aave,
       usdc,
@@ -380,13 +400,15 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     } = testEnv;
 
     //mints AAVE to borrower
-    await aave.connect(borrower.signer).mint(await convertToCurrencyDecimals(aave.address, '10'));
+    await aave
+      .connect(borrower.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(aave.address, '0.033'));
 
     //approve protocol to access the borrower wallet
     await aave.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    //borrower deposits 10 AAVE
-    const amountToDeposit = await convertToCurrencyDecimals(aave.address, '10');
+    //borrower deposits 1 AAVE
+    const amountToDeposit = await convertToCurrencyDecimals(aave.address, '0.033');
 
     await pool
       .connect(borrower.signer)
@@ -399,7 +421,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //mints usdc to the liquidator
     await usdc
       .connect(liquidator.signer)
-      .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access liquidator wallet
     await usdc.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -438,7 +460,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     const principalDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
       .decimals;
 
-    const expectedCollateralLiquidated = oneEther.mul(10);
+    const expectedCollateralLiquidated = oneEther.mul('33').div('1000');
 
     const expectedPrincipal = collateralPrice
       .mul(expectedCollateralLiquidated)

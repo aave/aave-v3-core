@@ -1,3 +1,4 @@
+import { waitForTx } from './../helpers/misc-utils';
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
@@ -15,11 +16,11 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     const daiAmount = utils.parseEther('100');
     const wethAmount = utils.parseEther('1');
-    await dai.connect(user0.signer).mint(daiAmount);
-    await weth.connect(user1.signer).mint(wethAmount);
+    await waitForTx(await dai.connect(user0.signer)['mint(uint256)'](daiAmount));
+    await waitForTx(await weth.connect(user1.signer)['mint(uint256)'](wethAmount));
 
-    await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await waitForTx(await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT));
+    await waitForTx(await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
     await expect(
       await pool.connect(user0.signer).deposit(dai.address, daiAmount, user0.address, 0)

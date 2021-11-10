@@ -2,7 +2,13 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode, ProtocolErrors } from '../helpers/types';
-import { evmRevert, evmSnapshot, setAutomine } from '../helpers/misc-utils';
+import {
+  evmRevert,
+  evmSnapshot,
+  setAutomine,
+  setAutomineEvm,
+  waitForTx,
+} from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ethers } from 'hardhat';
@@ -30,6 +36,17 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
   let snap: string;
 
+  before(async () => {
+    const { addressesProvider, oracle } = testEnv;
+
+    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+  });
+
+  after(async () => {
+    const { aaveOracle, addressesProvider } = testEnv;
+    await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
+  });
+
   beforeEach(async () => {
     snap = await evmSnapshot();
   });
@@ -51,7 +68,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isActive).to.be.eq(false);
     expect(configAfter.isFrozen).to.be.eq(false);
 
-    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await expect(
       pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0)
@@ -72,7 +89,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isActive).to.be.eq(true);
     expect(configAfter.isFrozen).to.be.eq(true);
 
-    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await expect(
       pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0)
@@ -89,7 +106,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('10000'));
     await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
     await pool
       .connect(user.signer)
@@ -106,7 +123,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isFrozen).to.be.eq(false);
 
     // Transferring directly into aDai such that we can borrow
-    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
     await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
     await expect(
@@ -120,11 +137,11 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
-    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('10000'));
     await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
     await pool
       .connect(user.signer)
@@ -160,11 +177,11 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
-    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('10000'));
     await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
     await pool
       .connect(user.signer)
@@ -190,7 +207,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
@@ -215,7 +232,9 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const user = users[0];
     const depositor = users[1];
 
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '2000'));
+    await dai
+      .connect(depositor.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '2000'));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
@@ -226,7 +245,9 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
         0
       );
 
-    await usdc.connect(user.signer).mint(await convertToCurrencyDecimals(usdc.address, '2000'));
+    await usdc
+      .connect(user.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '2000'));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -273,12 +294,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
     await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
-    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('10000'));
     await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
     await pool
       .connect(user.signer)
@@ -295,12 +316,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
     await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
-    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('10000'));
     await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
     await pool
       .connect(user.signer)
@@ -319,7 +340,9 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const depositor = users[0];
     const borrower = users[1];
 
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '500'));
+    await dai
+      .connect(depositor.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '500'));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
@@ -329,7 +352,9 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
         depositor.address,
         0
       );
-    await usdc.connect(borrower.signer).mint(await convertToCurrencyDecimals(usdc.address, '500'));
+    await usdc
+      .connect(borrower.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '500'));
     await usdc.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
@@ -387,12 +412,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const user = users[0];
 
     // We need some debt.
-    await usdc.connect(user.signer).mint(utils.parseEther('2000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
       .deposit(usdc.address, utils.parseEther('2000'), user.address, 0);
-    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('2000'));
 
     // Turn off automining - pretty sure that coverage is getting messed up here.
@@ -403,14 +428,14 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       .connect(user.signer)
       .borrow(dai.address, utils.parseEther('500'), RateMode.Variable, 0, user.address);
 
+    // Turn on automining, but not mine a new block until next tx
+    await setAutomineEvm(true);
+
     await expect(
       pool
         .connect(user.signer)
         .repay(dai.address, utils.parseEther('500'), RateMode.Variable, user.address)
     ).to.be.revertedWith(VL_SAME_BLOCK_BORROW_REPAY);
-
-    // turn on automining
-    await setAutomine(true);
   });
 
   it('validateRepay() when stable borrowing and repaying in same block (revert expected)', async () => {
@@ -420,12 +445,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const user = users[0];
 
     // We need some debt.
-    await usdc.connect(user.signer).mint(utils.parseEther('2000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
       .deposit(usdc.address, utils.parseEther('2000'), user.address, 0);
-    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('2000'));
 
     // Turn off automining - pretty sure that coverage is getting messed up here.
@@ -436,14 +461,14 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       .connect(user.signer)
       .borrow(dai.address, utils.parseEther('500'), RateMode.Stable, 0, user.address);
 
+    // Turn on automining, but not mine a new block until next tx
+    await setAutomineEvm(true);
+
     await expect(
       pool
         .connect(user.signer)
         .repay(dai.address, utils.parseEther('500'), RateMode.Stable, user.address)
     ).to.be.revertedWith(VL_SAME_BLOCK_BORROW_REPAY);
-
-    // turn on automining
-    await setAutomine(true);
   });
 
   it('validateRepay() the variable debt when is 0 (stableDebt > 0) (revert expected)', async () => {
@@ -454,12 +479,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const user = users[0];
 
     // We need some debt
-    await usdc.connect(user.signer).mint(utils.parseEther('2000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
       .deposit(usdc.address, utils.parseEther('2000'), user.address, 0);
-    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('2000'));
 
     await pool
@@ -481,7 +506,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const user = users[0];
 
     // We need some debt
-    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('2000'), user.address, 0);
 
@@ -565,7 +590,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(utils.parseEther('1000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
     await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
 
@@ -580,7 +605,9 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     // We need some variable debt, and then flip it
 
-    await dai.connect(user.signer).mint(await convertToCurrencyDecimals(dai.address, '5000'));
+    await dai
+      .connect(user.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '5000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -610,12 +637,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
-    await dai.connect(user.signer).mint(utils.parseEther('2000'));
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
     await dai.connect(user.signer).approve(pool.address, utils.parseEther('1000'));
     await pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0);
     await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('1000'));
 
-    await usdc.connect(user.signer).mint(utils.parseEther('10000'));
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('10000'));
     await usdc.connect(user.signer).approve(pool.address, utils.parseEther('10000'));
     await pool
       .connect(user.signer)
@@ -771,7 +798,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     } = testEnv;
 
     // Deposit to make sure config is not empty
-    await dai.connect(user.signer).mint(parseUnits('1000', 18));
+    await dai.connect(user.signer)['mint(uint256)'](parseUnits('1000', 18));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
 
@@ -790,13 +817,13 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       users: [user, usdcProvider],
     } = testEnv;
 
-    await usdc.connect(usdcProvider.signer).mint(parseUnits('1000', 6));
+    await usdc.connect(usdcProvider.signer)['mint(uint256)'](parseUnits('1000', 6));
     await usdc.connect(usdcProvider.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(usdcProvider.signer)
       .supply(usdc.address, parseUnits('1000', 6), usdcProvider.address, 0);
 
-    await dai.connect(user.signer).mint(parseUnits('1000', 18));
+    await dai.connect(user.signer)['mint(uint256)'](parseUnits('1000', 18));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
 
@@ -822,13 +849,13 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       users: [user, usdcProvider],
     } = testEnv;
 
-    await usdc.connect(usdcProvider.signer).mint(parseUnits('1000', 6));
+    await usdc.connect(usdcProvider.signer)['mint(uint256)'](parseUnits('1000', 6));
     await usdc.connect(usdcProvider.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(usdcProvider.signer)
       .supply(usdc.address, parseUnits('1000', 6), usdcProvider.address, 0);
 
-    await dai.connect(user.signer).mint(parseUnits('1000', 18));
+    await dai.connect(user.signer)['mint(uint256)'](parseUnits('1000', 18));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
 

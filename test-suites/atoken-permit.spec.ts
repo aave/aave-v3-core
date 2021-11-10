@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { ethers, utils } from 'ethers';
-import { DRE } from '../helpers/misc-utils';
+import { DRE, waitForTx } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
 import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contracts-helpers';
@@ -12,8 +12,18 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
   const EIP712_REVISION = '1';
 
-  before(() => {
+  before(async () => {
+    const { dai, pool, deployer } = testEnv;
+
     testWallets = getTestWallets();
+
+    // Mint DAI and deposit to Pool to for aDAI
+    await waitForTx(await dai['mint(uint256)'](utils.parseEther('20000')));
+    await waitForTx(await dai.approve(pool.address, utils.parseEther('20000')));
+
+    await waitForTx(
+      await pool.deposit(dai.address, utils.parseEther('20000'), deployer.address, 0)
+    );
   });
 
   it('Checks the domain separator', async () => {
@@ -29,15 +39,6 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const domainSeparator = utils._TypedDataEncoder.hashDomain(domain);
 
     expect(separator).to.be.equal(domainSeparator, 'Invalid domain separator');
-  });
-
-  it('Get aDAI for tests', async () => {
-    const { dai, pool, deployer } = testEnv;
-
-    await dai.mint(utils.parseEther('20000'));
-    await dai.approve(pool.address, utils.parseEther('20000'));
-
-    await pool.deposit(dai.address, utils.parseEther('20000'), deployer.address, 0);
   });
 
   it('Tries to submit a permit with 0 expiration (revert expected)', async () => {

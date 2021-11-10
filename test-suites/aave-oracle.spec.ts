@@ -1,11 +1,15 @@
+import { MOCK_CHAINLINK_AGGREGATORS_PRICES } from '@aave/deploy-v3/dist/helpers/constants';
 import { expect } from 'chai';
-import { ethers, utils } from 'ethers';
 import { oneEther, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { deployMintableERC20, deployMockAggregator } from '../helpers/contracts-deployments';
-import { MintableERC20, MockAggregator } from '../types';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import {
+  deployMintableERC20,
+  deployMockAggregator,
+  MintableERC20,
+  MockAggregator,
+} from '@aave/deploy-v3';
 
 makeSuite('AaveOracle', (testEnv: TestEnv) => {
   let snap: string;
@@ -23,7 +27,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
   before(async () => {
     mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-    assetPrice = utils.parseUnits('0.00367714136416', 18).toString();
+    assetPrice = MOCK_CHAINLINK_AGGREGATORS_PRICES.ETH;
     mockAggregator = await deployMockAggregator(assetPrice);
   });
 
@@ -32,9 +36,12 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
     // Asset has no source
     expect(await aaveOracle.getSourceOfAsset(mockToken.address)).to.be.eq(ZERO_ADDRESS);
-    expect(await aaveOracle.getAssetsPrices([mockToken.address])).to.be.eql([
-      ethers.BigNumber.from(0),
-    ]);
+    const priorSourcePrice = await aaveOracle.getAssetPrice(mockToken.address);
+    const priorSourcesPrices = (await aaveOracle.getAssetsPrices([mockToken.address])).map((x) =>
+      x.toString()
+    );
+    expect(priorSourcePrice).to.equal('0');
+    expect(priorSourcesPrices).to.eql(['0']);
 
     // Add asset source
     expect(
@@ -45,11 +52,12 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
       .to.emit(aaveOracle, 'AssetSourceUpdated')
       .withArgs(mockToken.address, mockAggregator.address);
 
+    const sourcesPrices = await (
+      await aaveOracle.getAssetsPrices([mockToken.address])
+    ).map((x) => x.toString());
     expect(await aaveOracle.getSourceOfAsset(mockToken.address)).to.be.eq(mockAggregator.address);
     expect(await aaveOracle.getAssetPrice(mockToken.address)).to.be.eq(assetPrice);
-    expect(await aaveOracle.getAssetsPrices([mockToken.address])).to.be.eql([
-      ethers.BigNumber.from(assetPrice),
-    ]);
+    expect(sourcesPrices).to.eql([assetPrice]);
   });
 
   it('Owner update an existing asset source', async () => {
@@ -81,11 +89,11 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
   });
 
   it('Get price of BASE_CURRENCY asset', async () => {
-    const { aaveOracle, weth } = testEnv;
+    const { aaveOracle } = testEnv;
 
     // Check returns the fixed price BASE_CURRENCY_UNIT
-    expect(await aaveOracle.getAssetPrice(weth.address)).to.be.eq(
-      ethers.constants.WeiPerEther.toString()
+    expect(await aaveOracle.getAssetPrice(await aaveOracle.BASE_CURRENCY())).to.be.eq(
+      await aaveOracle.BASE_CURRENCY_UNIT()
     );
   });
 
@@ -98,15 +106,6 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     await expect(
       aaveOracle.connect(user.signer).setAssetSources([mockToken.address], [mockAggregator.address])
     ).to.be.revertedWith(PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
-  });
-
-  it('Get price of BASE_CURRENCY asset', async () => {
-    const { aaveOracle, weth } = testEnv;
-
-    // Check returns the fixed price BASE_CURRENCY_UNIT
-    expect(await aaveOracle.getAssetPrice(weth.address)).to.be.eq(
-      ethers.constants.WeiPerEther.toString()
-    );
   });
 
   it('Get price of BASE_CURRENCY asset with registered asset source for its address', async () => {
@@ -123,12 +122,12 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
 
     // Check returns the fixed price BASE_CURRENCY_UNIT
     expect(await aaveOracle.getAssetPrice(weth.address)).to.be.eq(
-      ethers.constants.WeiPerEther.toString()
+      MOCK_CHAINLINK_AGGREGATORS_PRICES.WETH
     );
   });
 
   it('Get price of asset with no asset source', async () => {
-    const { poolAdmin, aaveOracle, oracle } = testEnv;
+    const { aaveOracle, oracle } = testEnv;
     const fallbackPrice = oneEther;
 
     // Register price on FallbackOracle

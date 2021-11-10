@@ -10,7 +10,9 @@ require('dotenv').config();
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-gas-reporter';
-import 'hardhat-typechain';
+import '@typechain/hardhat';
+import '@typechain/ethers-v5';
+import 'hardhat-deploy';
 import '@tenderly/hardhat-tenderly';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
@@ -47,6 +49,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
+    bail: true,
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT || '',
@@ -68,12 +71,12 @@ const hardhatConfig: HardhatUserConfig = {
       chainId: HARDHAT_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
+      forking: buildForkConfig(),
+      allowUnlimitedContractSize: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
         privateKey: secretKey,
         balance,
       })),
-      forking: buildForkConfig(),
-      allowUnlimitedContractSize: true,
     },
     ganache: {
       url: 'http://ganache:8545',
@@ -84,6 +87,37 @@ const hardhatConfig: HardhatUserConfig = {
         count: 20,
       },
     },
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
+    aclAdmin: {
+      default: 0,
+    },
+    emergencyAdmin: {
+      default: 0,
+    },
+    poolAdmin: {
+      default: 0,
+    },
+    addressesProviderRegistryOwner: {
+      default: 0,
+    },
+    treasuryProxyAdmin: {
+      default: 1,
+    },
+    incentivesProxyAdmin: {
+      default: 2,
+    },
+  },
+  external: {
+    contracts: [
+      {
+        artifacts: 'node_modules/@aave/deploy-v3/artifacts',
+        deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
+      },
+    ],
   },
 };
 

@@ -6,7 +6,7 @@ import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 import './helpers/utils/wadraymath';
-import { MockFlashLoanSimpleReceiver, MockFlashLoanSimpleReceiverFactory } from '../types';
+import { MockFlashLoanSimpleReceiver, MockFlashLoanSimpleReceiver__factory } from '../types';
 
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
@@ -24,7 +24,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   before(async () => {
     const { addressesProvider, deployer } = testEnv;
 
-    _mockFlashLoanSimpleReceiver = await new MockFlashLoanSimpleReceiverFactory(
+    _mockFlashLoanSimpleReceiver = await new MockFlashLoanSimpleReceiver__factory(
       deployer.signer
     ).deploy(addressesProvider.address);
   });
@@ -43,18 +43,18 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const userAddress = await pool.signer.getAddress();
     const amountToDeposit = ethers.utils.parseEther('1');
 
-    await weth.mint(amountToDeposit);
+    await weth['mint(uint256)'](amountToDeposit);
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
 
-    await aave.mint(amountToDeposit);
+    await aave['mint(uint256)'](amountToDeposit);
 
     await aave.approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.deposit(aave.address, amountToDeposit, userAddress, '0');
-    await dai.mint(amountToDeposit);
+    await dai['mint(uint256)'](amountToDeposit);
 
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -221,7 +221,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const { usdc, pool } = testEnv;
     const userAddress = await pool.signer.getAddress();
 
-    await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+    await usdc['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
 
     await usdc.approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -301,7 +301,9 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const { dai, pool, weth, users } = testEnv;
     const caller = users[3];
 
-    await dai.connect(caller.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai
+      .connect(caller.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
 
     await dai.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 

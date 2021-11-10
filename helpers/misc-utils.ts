@@ -66,6 +66,10 @@ export const setAutomine = async (activate: boolean) => {
   if (activate) await DRE.network.provider.send('evm_mine', []);
 };
 
+export const setAutomineEvm = async (activate: boolean) => {
+  await DRE.network.provider.send('evm_setAutomine', [activate]);
+};
+
 export const waitForTx = async (tx: ContractTransaction) => await tx.wait(1);
 
 export const filterMapBy = (raw: { [key: string]: any }, fn: (key: string) => boolean) =>

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime } from '../helpers/misc-utils';
+import { DRE, increaseTime, waitForTx } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
@@ -20,6 +20,17 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
     oracle: ZERO_ADDRESS,
     label: 'STABLECOINS',
   };
+
+  before(async () => {
+    const { addressesProvider, oracle } = testEnv;
+
+    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+  });
+
+  after(async () => {
+    const { aaveOracle, addressesProvider } = testEnv;
+    await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
+  });
 
   it('Adds category id 1 (stablecoins)', async () => {
     const { configurator, pool, poolAdmin } = testEnv;
@@ -73,7 +84,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
     } = testEnv;
     const supplyAmount = utils.parseUnits('10000', 18);
 
-    await dai.connect(daiFunder.signer).mint(supplyAmount);
+    await dai.connect(daiFunder.signer)['mint(uint256)'](supplyAmount);
     await dai.connect(daiFunder.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.connect(daiFunder.signer).supply(dai.address, supplyAmount, daiFunder.address, 0);
@@ -86,7 +97,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
       usdc,
     } = testEnv;
 
-    await usdc.connect(borrower.signer).mint(utils.parseUnits('10000', 6));
+    await usdc.connect(borrower.signer)['mint(uint256)'](utils.parseUnits('10000', 6));
     await usdc.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
@@ -141,7 +152,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
       helpersContract,
     } = testEnv;
 
-    await dai.connect(liquidator.signer).mint(utils.parseUnits('100000', 18));
+    await dai.connect(liquidator.signer)['mint(uint256)'](utils.parseUnits('100000', 18));
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);

@@ -6,8 +6,8 @@ import { tEthereumAddress, eContractid, tStringTokenSmallUnits } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { Artifact } from 'hardhat/types';
 import { Artifact as HardhatArtifact } from 'hardhat/types';
-import { getIErc20Detailed } from './contracts-getters';
 import { getDefenderRelaySigner, usingDefender } from './defender-utils';
+import { getIErc20Detailed } from './contracts-getters';
 
 export type MockTokenMap = { [symbol: string]: MintableERC20 };
 

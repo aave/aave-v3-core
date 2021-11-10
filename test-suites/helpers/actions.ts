@@ -13,7 +13,7 @@ import {
   calcExpectedUserDataAfterSwapRateMode,
   calcExpectedUserDataAfterWithdraw,
 } from './utils/calculations';
-import { getReserveAddressFromSymbol, getReserveData, getUserData } from './utils/helpers';
+import { getReserveData, getUserData } from './utils/helpers';
 import { buildPermitParams, getSignatureFromTypedData } from '../../helpers/contracts-helpers';
 
 import { convertToCurrencyDecimals } from '../../helpers/contracts-helpers';
@@ -22,8 +22,8 @@ import {
   getMintableERC20,
   getStableDebtToken,
   getVariableDebtToken,
-  getChainId,
-} from '../../helpers/contracts-getters';
+  getTestnetReserveAddressFromSymbol,
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, ONE_YEAR } from '../../helpers/constants';
 import { SignerWithAddress, TestEnv } from './make-suite';
 import { advanceTimeAndBlock, DRE, timeLatest, waitForTx } from '../../helpers/misc-utils';
@@ -33,7 +33,8 @@ import { ReserveData, UserReserveData } from './utils/interfaces';
 import { BigNumber, ContractReceipt, Wallet } from 'ethers';
 import { AToken } from '../../types/AToken';
 import { RateMode, tEthereumAddress } from '../../helpers/types';
-import { MintableERC20Factory } from '../../types';
+import { MintableERC20__factory } from '../../types';
+import { getChainId } from '../../helpers/contracts-getters';
 
 const { expect } = chai;
 
@@ -114,18 +115,20 @@ interface ActionsConfig {
 export const configuration: ActionsConfig = <ActionsConfig>{};
 
 export const mint = async (reserveSymbol: string, amount: string, user: SignerWithAddress) => {
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const token = await getMintableERC20(reserve);
 
   await waitForTx(
-    await token.connect(user.signer).mint(await convertToCurrencyDecimals(reserve, amount))
+    await token
+      .connect(user.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(reserve, amount))
   );
 };
 
 export const approve = async (reserveSymbol: string, user: SignerWithAddress, testEnv: TestEnv) => {
   const { pool } = testEnv;
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const token = await getMintableERC20(reserve);
 
@@ -146,7 +149,7 @@ export const deposit = async (
 ) => {
   const { pool } = testEnv;
 
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const amountToDeposit = await convertToCurrencyDecimals(reserve, amount);
 
@@ -297,7 +300,7 @@ export const delegateBorrowAllowance = async (
 ) => {
   const { pool } = testEnv;
 
-  const reserveAddress: tEthereumAddress = await getReserveAddressFromSymbol(reserve);
+  const reserveAddress: tEthereumAddress = await getTestnetReserveAddressFromSymbol(reserve);
 
   const amountToDelegate: string = await (
     await convertToCurrencyDecimals(reserveAddress, amount)
@@ -340,7 +343,7 @@ export const borrow = async (
 ) => {
   const { pool } = testEnv;
 
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const { reserveData: reserveDataBefore, userData: userDataBefore } = await getContractsData(
     reserve,
@@ -435,7 +438,7 @@ export const repay = async (
   revertMessage?: string
 ) => {
   const { pool } = testEnv;
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const { reserveData: reserveDataBefore, userData: userDataBefore } = await getContractsData(
     reserve,
@@ -463,7 +466,6 @@ export const repay = async (
     const secondsToTravel = BigNumber.from(timeTravel).mul(ONE_YEAR).div(365).toNumber();
     await advanceTimeAndBlock(secondsToTravel);
   }
-
 
   if (expectedResult === 'success') {
     const txResult = await waitForTx(
@@ -537,11 +539,11 @@ export const supplyWithPermit = async (
 ) => {
   const { pool } = testEnv;
 
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
   const amountToDeposit = await convertToCurrencyDecimals(reserve, amount);
 
   const chainId = await getChainId();
-  const token = new MintableERC20Factory(sender.signer).attach(reserve);
+  const token = new MintableERC20__factory(sender.signer).attach(reserve);
   const highDeadline = '100000000000000000000000000';
   const nonce = await token._nonces(sender.address);
 
@@ -656,7 +658,7 @@ export const repayWithPermit = async (
   revertMessage?: string
 ) => {
   const { pool } = testEnv;
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
   const highDeadline = '100000000000000000000000000';
 
   const { reserveData: reserveDataBefore, userData: userDataBefore } = await getContractsData(
@@ -675,7 +677,7 @@ export const repayWithPermit = async (
   amountToRepay = BigNumber.from(amountToRepay).toHexString();
 
   const chainId = await getChainId();
-  const token = new MintableERC20Factory(user.signer).attach(reserve);
+  const token = new MintableERC20__factory(user.signer).attach(reserve);
   const nonce = await token._nonces(user.address);
 
   const msgParams = buildPermitParams(
@@ -785,7 +787,7 @@ export const setUseAsCollateral = async (
 ) => {
   const { pool } = testEnv;
 
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const { reserveData: reserveDataBefore, userData: userDataBefore } = await getContractsData(
     reserve,
@@ -841,7 +843,7 @@ export const swapBorrowRateMode = async (
 ) => {
   const { pool } = testEnv;
 
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const { reserveData: reserveDataBefore, userData: userDataBefore } = await getContractsData(
     reserve,
@@ -906,7 +908,7 @@ export const rebalanceStableBorrowRate = async (
 ) => {
   const { pool } = testEnv;
 
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const { reserveData: reserveDataBefore, userData: userDataBefore } = await getContractsData(
     reserve,
@@ -982,7 +984,7 @@ const getDataBeforeAction = async (
   user: tEthereumAddress,
   testEnv: TestEnv
 ): Promise<ActionData> => {
-  const reserve = await getReserveAddressFromSymbol(reserveSymbol);
+  const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
   const { reserveData, userData } = await getContractsData(reserve, user, testEnv);
   const aTokenInstance = await getAToken(reserveData.aTokenAddress);

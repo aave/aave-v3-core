@@ -1,3 +1,4 @@
+import { waitForTx } from './../helpers/misc-utils';
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
@@ -24,17 +25,25 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     expect(scaledUserBalanceAndSupplyBefore[0]).to.be.eq(0);
     expect(scaledUserBalanceAndSupplyBefore[1]).to.be.eq(0);
 
-    await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
-    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool
-      .connect(users[0].signer)
-      .deposit(
-        dai.address,
-        await convertToCurrencyDecimals(dai.address, '1000'),
-        users[0].address,
-        0
-      );
-
+    await waitForTx(
+      await dai
+        .connect(users[0].signer)
+        ['mint(address,uint256)'](
+          users[0].address,
+          await convertToCurrencyDecimals(dai.address, '1000')
+        )
+    );
+    await waitForTx(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
+    await waitForTx(
+      await pool
+        .connect(users[0].signer)
+        .deposit(
+          dai.address,
+          await convertToCurrencyDecimals(dai.address, '1000'),
+          users[0].address,
+          0
+        )
+    );
     const scaledUserBalanceAndSupplyAfter = await aDai.getScaledUserBalanceAndSupply(
       users[0].address
     );

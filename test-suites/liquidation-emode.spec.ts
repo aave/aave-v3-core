@@ -6,6 +6,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
+import { waitForTx } from '../helpers/misc-utils';
 
 makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (testEnv: TestEnv) => {
   const { INVALID_HF } = ProtocolErrors;
@@ -19,12 +20,32 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     label: 'STABLECOINS',
   };
 
+  before(async () => {
+    const { addressesProvider, oracle } = testEnv;
+
+    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+  });
+
+  after(async () => {
+    const { aaveOracle, addressesProvider } = testEnv;
+    await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
+  });
+
   it('Adds category id 1 (stablecoins)', async () => {
     const { configurator, pool, poolAdmin } = testEnv;
 
-    expect(await configurator
-      .connect(poolAdmin.signer)
-      .setEModeCategory(1, CATEGORY.ltv, CATEGORY.lt, CATEGORY.lb, CATEGORY.oracle, CATEGORY.label));
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(
+          1,
+          CATEGORY.ltv,
+          CATEGORY.lt,
+          CATEGORY.lb,
+          CATEGORY.oracle,
+          CATEGORY.label
+        )
+    );
 
     const categoryData = await pool.getEModeCategoryData(CATEGORY.id);
 
@@ -33,7 +54,10 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       CATEGORY.lt,
       'invalid eMode category liq threshold'
     );
-    expect(categoryData.liquidationBonus).to.be.equal(CATEGORY.lb, 'invalid eMode category liq bonus');
+    expect(categoryData.liquidationBonus).to.be.equal(
+      CATEGORY.lb,
+      'invalid eMode category liq bonus'
+    );
     expect(categoryData.priceSource).to.be.equal(
       CATEGORY.oracle,
       'invalid eMode category price source'
@@ -58,7 +82,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     } = testEnv;
     const supplyAmount = utils.parseUnits('1', 36);
 
-    await dai.connect(daiFunder.signer).mint(supplyAmount);
+    await dai.connect(daiFunder.signer)['mint(uint256)'](supplyAmount);
     await dai.connect(daiFunder.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.connect(daiFunder.signer).supply(dai.address, supplyAmount, daiFunder.address, 0);
@@ -71,7 +95,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       usdc,
     } = testEnv;
 
-    await usdc.connect(depositor.signer).mint(utils.parseUnits('10000', 6));
+    await usdc.connect(depositor.signer)['mint(uint256)'](utils.parseUnits('10000', 6));
     await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
@@ -140,7 +164,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
       helpersContract,
     } = testEnv;
 
-    await dai.connect(liquidator.signer).mint(utils.parseUnits('100000', 18));
+    await dai.connect(liquidator.signer)['mint(uint256)'](utils.parseUnits('100000', 18));
     await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);

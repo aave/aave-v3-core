@@ -9,21 +9,21 @@ import {
 } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import {
-  ATokenFactory,
-  MintableERC20,
-  MockFlashLoanReceiverFactory,
-  MockReserveInterestRateStrategy,
-  MockReserveInterestRateStrategyFactory,
-  StableDebtToken,
-  StableDebtTokenFactory,
-  VariableDebtTokenFactory,
-} from '../types';
-import { getFirstSigner } from '../helpers/contracts-getters';
-import { deployMintableERC20 } from '../helpers/contracts-deployments';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import {
+  MintableERC20,
+  StableDebtToken,
+  MockReserveInterestRateStrategy,
+  MintableERC20__factory,
+  MockReserveInterestRateStrategy__factory,
+  AToken__factory,
+  VariableDebtToken__factory,
+  StableDebtToken__factory,
+  MockFlashLoanReceiver__factory,
+} from '../types';
 
 makeSuite('Interest Rate and Index Overflow', (testEnv) => {
   const { HLP_UINT128_OVERFLOW } = ProtocolErrors;
@@ -37,19 +37,23 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
   before(async () => {
     const { pool, poolAdmin, configurator, dai, helpersContract, addressesProvider } = testEnv;
 
-    mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
+    mockToken = await new MintableERC20__factory(await getFirstSigner()).deploy(
+      'MOCK',
+      'MOCK',
+      '18'
+    );
 
-    let stableDebtTokenImplementation = await new StableDebtTokenFactory(
+    let stableDebtTokenImplementation = await new StableDebtToken__factory(
       await getFirstSigner()
     ).deploy(pool.address);
-    let variableDebtTokenImplementation = await new VariableDebtTokenFactory(
+    let variableDebtTokenImplementation = await new VariableDebtToken__factory(
       await getFirstSigner()
     ).deploy(pool.address);
-    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy(
+    const aTokenImplementation = await new AToken__factory(await getFirstSigner()).deploy(
       pool.address
     );
 
-    mockRateStrategy = await new MockReserveInterestRateStrategyFactory(
+    mockRateStrategy = await new MockReserveInterestRateStrategy__factory(
       await getFirstSigner()
     ).deploy(addressesProvider.address, 0, 0, 0, 0, 0, 0);
 
@@ -149,7 +153,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
       .setReserveFactor(inputParams[i].asset, inputParams[i].reserveFactor);
 
     const reserveData = await pool.getReserveData(mockToken.address);
-    mockStableDebtToken = StableDebtTokenFactory.connect(
+    mockStableDebtToken = StableDebtToken__factory.connect(
       reserveData.stableDebtTokenAddress,
       await getFirstSigner()
     );
@@ -171,7 +175,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     await mockToken
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setLiquidityRate(MAX_UINT_AMOUNT);
@@ -196,7 +200,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     await mockToken
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setStableBorrowRate(MAX_UINT_AMOUNT);
@@ -221,7 +225,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     await mockToken
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await mockRateStrategy.setVariableBorrowRate(MAX_UINT_AMOUNT);
@@ -247,7 +251,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     await dai
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -260,7 +264,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     await mockToken
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '1000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '1000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
@@ -312,7 +316,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     await dai
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -325,7 +329,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     await mockToken
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool
@@ -374,13 +378,13 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
 
     const toBorrow = BigNumber.from(2).pow(80);
 
-    await dai.connect(user.signer).mint(toBorrow.add(1));
+    await dai.connect(user.signer)['mint(uint256)'](toBorrow.add(1));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.connect(user.signer).deposit(dai.address, 1, user.address, 0);
     await dai.connect(user.signer).transfer(aDai.address, toBorrow);
 
-    const mockFlashLoan = await new MockFlashLoanReceiverFactory(await getFirstSigner()).deploy(
+    const mockFlashLoan = await new MockFlashLoanReceiver__factory(await getFirstSigner()).deploy(
       addressesProvider.address
     );
 

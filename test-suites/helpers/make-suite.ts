@@ -1,4 +1,4 @@
-import { evmRevert, evmSnapshot, DRE } from '../../helpers/misc-utils';
+import { evmRevert, evmSnapshot, DRE, waitForTx } from '../../helpers/misc-utils';
 import { Signer } from 'ethers';
 import {
   getPool,
@@ -7,14 +7,14 @@ import {
   getAToken,
   getMintableERC20,
   getPoolConfiguratorProxy,
-  getPriceOracle,
   getPoolAddressesProviderRegistry,
   getWETHMocked,
   getVariableDebtToken,
   getStableDebtToken,
   getAaveOracle,
   getACLManager,
-} from '../../helpers/contracts-getters';
+  getFallbackOracle,
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { tEthereumAddress } from '../../helpers/types';
 import { Pool } from '../../types/Pool';
 import { AaveProtocolDataProvider } from '../../types/AaveProtocolDataProvider';
@@ -115,7 +115,6 @@ export async function initializeMakeSuite() {
   testEnv.emergencyAdmin = testEnv.users[1];
   testEnv.riskAdmin = testEnv.users[2];
   testEnv.pool = await getPool();
-
   testEnv.configurator = await getPoolConfiguratorProxy();
 
   testEnv.addressesProvider = await getPoolAddressesProvider();
@@ -123,7 +122,7 @@ export async function initializeMakeSuite() {
   testEnv.registry = await getPoolAddressesProviderRegistry();
   testEnv.aclManager = await getACLManager();
 
-  testEnv.oracle = await getPriceOracle();
+  testEnv.oracle = await getFallbackOracle();
   testEnv.aaveOracle = await getAaveOracle();
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
@@ -146,10 +145,10 @@ export async function initializeMakeSuite() {
   const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
 
   if (!aDaiAddress || !aWEthAddress) {
-    process.exit(1);
+    throw 'Missing mandatory atokens';
   }
   if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
-    process.exit(1);
+    throw 'Missing mandatory tokens';
   }
 
   testEnv.aDai = await getAToken(aDaiAddress);
@@ -159,9 +158,13 @@ export async function initializeMakeSuite() {
   testEnv.aWETH = await getAToken(aWEthAddress);
 
   testEnv.dai = await getMintableERC20(daiAddress);
-  testEnv.usdc = await getMintableERC20(usdcAddress);
   testEnv.aave = await getMintableERC20(aaveAddress);
+  testEnv.usdc = await getMintableERC20(usdcAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
+
+  // Setup admins
+  await waitForTx(await testEnv.aclManager.addRiskAdmin(testEnv.riskAdmin.address));
+  await waitForTx(await testEnv.aclManager.addEmergencyAdmin(testEnv.emergencyAdmin.address));
 }
 
 const setSnapshot = async () => {

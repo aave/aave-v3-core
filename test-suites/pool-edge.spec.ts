@@ -2,18 +2,13 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { ZERO_ADDRESS } from '../helpers/constants';
-import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { ProtocolErrors } from '../helpers/types';
-import { MockPoolInheritedFactory } from '../types';
 import {
-  getBorrowLogic,
-  getBridgeLogic,
-  getSupplyLogic,
-  getFirstSigner,
-  getLiquidationLogic,
-  getEModeLogic,
-  getFlashLoanLogic,
-} from '../helpers/contracts-getters';
+  deployMintableERC20,
+  deployMockPoolInherited,
+} from '@aave/deploy-v3/dist/helpers/contract-deployments';
+import { ProtocolErrors } from '../helpers/types';
+import { MockPoolInherited__factory } from '../types';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 
@@ -183,19 +178,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const configSigner = await DRE.ethers.getSigner(configurator.address);
 
     // Deploy the mock Pool with a setter of `maxNumberOfReserves`
-    const libraries = {
-      ['__$d5ddd09ae98762b8929dd85e54b218e259$__']: (await getFlashLoanLogic()).address,
-      ['__$b06080f092f400a43662c3f835a4d9baa8$__']: (await getBridgeLogic()).address,
-      ['__$db79717e66442ee197e8271d032a066e34$__']: (await getSupplyLogic()).address,
-      ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: (await getBorrowLogic()).address,
-      ['__$f598c634f2d943205ac23f707b80075cbb$__']: (await getLiquidationLogic()).address,
-      ['__$e4b9550ff526a295e1233dea02821b9004$__']: (await getEModeLogic()).address,
-    };
-
-    const mockPoolImpl = await (
-      await new MockPoolInheritedFactory(libraries, await getFirstSigner()).deploy()
-    ).deployed();
-
+    const mockPoolImpl = await deployMockPoolInherited();
     // Upgrade the Pool
     expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPoolImpl.address))
       .to.emit(addressesProvider, 'PoolUpdated')
@@ -203,13 +186,13 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     // Get the Pool instance
     const mockPoolAddress = await addressesProvider.getPool();
-    const mockPool = await MockPoolInheritedFactory.connect(
+    const mockPool = await MockPoolInherited__factory.connect(
       mockPoolAddress,
       await getFirstSigner()
     );
 
     // Get the current number of reserves
-    let numberOfReserves = (await mockPool.getReservesList()).length;
+    const numberOfReserves = (await mockPool.getReservesList()).length;
 
     // Set the limit
     expect(await mockPool.setMaxNumberOfReserves(numberOfReserves));

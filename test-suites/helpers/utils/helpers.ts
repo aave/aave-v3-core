@@ -7,7 +7,7 @@ import {
   getStableDebtToken,
   getVariableDebtToken,
   getIRStrategy,
-} from '../../../helpers/contracts-getters';
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { tEthereumAddress } from '../../../helpers/types';
 import { getDb, DRE } from '../../../helpers/misc-utils';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
@@ -18,13 +18,14 @@ export const getReserveData = async (
   helper: AaveProtocolDataProvider,
   reserve: tEthereumAddress
 ): Promise<ReserveData> => {
-  const [reserveData, tokenAddresses, irStrategyAddress, reserveConfiguration, token] = await Promise.all([
-    helper.getReserveData(reserve),
-    helper.getReserveTokensAddresses(reserve),
-    helper.getInterestRateStrategyAddress(reserve),
-    helper.getReserveConfigurationData(reserve),
-    getIErc20Detailed(reserve),
-  ]);
+  const [reserveData, tokenAddresses, irStrategyAddress, reserveConfiguration, token] =
+    await Promise.all([
+      helper.getReserveData(reserve),
+      helper.getReserveTokensAddresses(reserve),
+      helper.getInterestRateStrategyAddress(reserve),
+      helper.getReserveConfigurationData(reserve),
+      getIErc20Detailed(reserve),
+    ]);
 
   const stableDebtToken = await getStableDebtToken(tokenAddresses.stableDebtTokenAddress);
   const variableDebtToken = await getVariableDebtToken(tokenAddresses.variableDebtTokenAddress);

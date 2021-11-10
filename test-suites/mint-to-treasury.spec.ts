@@ -13,7 +13,7 @@ makeSuite('Mint To Treasury', (testEnv: TestEnv) => {
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
     const amountDAItoBorrow = await convertToCurrencyDecimals(dai.address, '100');
 
-    await expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
+    await expect(await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit));
 
     // user 0 deposits 1000 DAI
     await expect(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
@@ -33,7 +33,7 @@ makeSuite('Mint To Treasury', (testEnv: TestEnv) => {
 
     await advanceTimeAndBlock(parseInt(ONE_YEAR));
 
-    await expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
+    await expect(await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit));
 
     await expect(
       await pool

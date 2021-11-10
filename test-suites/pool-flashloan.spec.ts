@@ -8,7 +8,7 @@ import {
   getMockFlashLoanReceiver,
   getStableDebtToken,
   getVariableDebtToken,
-} from '../helpers/contracts-getters';
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
@@ -43,18 +43,18 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const userAddress = await pool.signer.getAddress();
     const amountToDeposit = ethers.utils.parseEther('1');
 
-    await weth.mint(amountToDeposit);
+    await weth['mint(uint256)'](amountToDeposit);
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
 
-    await aave.mint(amountToDeposit);
+    await aave['mint(uint256)'](amountToDeposit);
 
     await aave.approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.deposit(aave.address, amountToDeposit, userAddress, '0');
-    await dai.mint(amountToDeposit);
+    await dai['mint(uint256)'](amountToDeposit);
 
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -289,7 +289,9 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const caller = users[1];
 
-    await dai.connect(caller.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai
+      .connect(caller.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
 
     await dai.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -308,7 +310,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       .flashLoan(
         _mockFlashLoanReceiver.address,
         [weth.address],
-        [ethers.utils.parseEther('0.8')],
+        [ethers.utils.parseEther('0.0571')],
         [2],
         caller.address,
         '0x10',
@@ -326,9 +328,11 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const wethDebtToken = await getVariableDebtToken(variableDebtTokenAddress);
     const callerDebt = await wethDebtToken.balanceOf(caller.address);
 
-    expect(callerDebt.toString()).to.be.equal('800000000000000000', 'Invalid user debt');
+    expect(callerDebt.toString()).to.be.equal('57100000000000000', 'Invalid user debt');
     // repays debt for later, so no interest accrue
-    await weth.connect(caller.signer).mint(await convertToCurrencyDecimals(weth.address, '1000'));
+    await weth
+      .connect(caller.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
     await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(caller.signer).repay(weth.address, MAX_UINT_AMOUNT, 2, caller.address);
   });
@@ -371,7 +375,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const { usdc, pool } = testEnv;
     const userAddress = await pool.signer.getAddress();
 
-    await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+    await usdc['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
 
     await usdc.approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -456,7 +460,9 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const caller = users[2];
 
-    await weth.connect(caller.signer).mint(await convertToCurrencyDecimals(weth.address, '5'));
+    await weth
+      .connect(caller.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '5'));
 
     await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -494,7 +500,9 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const { dai, pool, weth, users } = testEnv;
     const caller = users[3];
 
-    await dai.connect(caller.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai
+      .connect(caller.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
 
     await dai.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -527,7 +535,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const caller = users[3];
 
-    const flashAmount = ethers.utils.parseEther('0.8');
+    const flashAmount = ethers.utils.parseEther('0.0571');
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
@@ -551,7 +559,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const callerDebt = await wethDebtToken.balanceOf(caller.address);
 
-    expect(callerDebt.toString()).to.be.equal('800000000000000000', 'Invalid user debt');
+    expect(callerDebt.toString()).to.be.equal('57100000000000000', 'Invalid user debt');
   });
 
   it('Caller takes a WETH flashloan with mode = 1 onBehalfOf user without allowance', async () => {
@@ -561,7 +569,9 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const onBehalfOf = users[4];
 
     // Deposit 1000 dai for onBehalfOf user
-    await dai.connect(onBehalfOf.signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai
+      .connect(onBehalfOf.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
 
     await dai.connect(onBehalfOf.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -571,7 +581,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       .connect(onBehalfOf.signer)
       .deposit(dai.address, amountToDeposit, onBehalfOf.address, '0');
 
-    const flashAmount = ethers.utils.parseEther('0.8');
+    const flashAmount = ethers.utils.parseEther('0.0571');
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
@@ -596,7 +606,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const caller = users[5];
     const onBehalfOf = users[4];
 
-    const flashAmount = ethers.utils.parseEther('0.8');
+    const flashAmount = ethers.utils.parseEther('0.0571');
 
     const reserveData = await pool.getReserveData(weth.address);
 
@@ -628,7 +638,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const onBehalfOfDebt = await wethDebtToken.balanceOf(onBehalfOf.address);
 
     expect(onBehalfOfDebt.toString()).to.be.equal(
-      '800000000000000000',
+      '57100000000000000',
       'Invalid onBehalfOf user debt'
     );
   });

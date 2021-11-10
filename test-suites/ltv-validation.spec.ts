@@ -7,7 +7,7 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 makeSuite('LTV validation', (testEnv: TestEnv) => {
   const { VL_LTV_VALIDATION_FAILED } = ProtocolErrors;
 
-  it('User 1 deposits 10 Dai, 10 USDC, user 2 deposits 1 WETH', async () => {
+  it('User 1 deposits 10 Dai, 10 USDC, user 2 deposits 0.071 WETH', async () => {
     const {
       pool,
       dai,
@@ -18,15 +18,15 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
 
     const daiAmount = await convertToCurrencyDecimals(dai.address, '10');
     const usdcAmount = await convertToCurrencyDecimals(usdc.address, '10');
-    const wethAmount = await convertToCurrencyDecimals(weth.address, '1');
+    const wethAmount = await convertToCurrencyDecimals(weth.address, '0.071');
 
     await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await usdc.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await weth.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    await dai.connect(user1.signer).mint(daiAmount);
-    await usdc.connect(user1.signer).mint(usdcAmount);
-    await weth.connect(user2.signer).mint(wethAmount);
+    await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
+    await usdc.connect(user1.signer)['mint(uint256)'](usdcAmount);
+    await weth.connect(user2.signer)['mint(uint256)'](wethAmount);
 
     await pool.connect(user1.signer).deposit(dai.address, daiAmount, user1.address, 0);
 
@@ -52,13 +52,13 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
     expect(ltv).to.be.equal(0);
   });
 
-  it('Borrows 0.01 WETH', async () => {
+  it('Borrows 0.000414 WETH', async () => {
     const {
       pool,
       weth,
       users: [user1],
     } = testEnv;
-    const borrowedAmount = await convertToCurrencyDecimals(weth.address, '0.01');
+    const borrowedAmount = await convertToCurrencyDecimals(weth.address, '0.000414');
 
     expect(
       await pool.connect(user1.signer).borrow(weth.address, borrowedAmount, 1, 0, user1.address)
