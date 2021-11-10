@@ -330,16 +330,15 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyRiskOrPoolAdmins
   {
-    DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
-
-    require(categoryData.liquidationThreshold > 0, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
-
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
-    require(
-      categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
-      Errors.VL_INCONSISTENT_EMODE_CATEGORY
-    );
+    if (categoryId > 0) {
+      DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
+      require(
+        categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
+        Errors.VL_INCONSISTENT_EMODE_CATEGORY
+      );
+    }
 
     currentConfig.setEModeCategory(categoryId);
 
