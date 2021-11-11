@@ -417,7 +417,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         reserve.accruedToTreasury = 0;
         uint256 normalizedIncome = reserve.getNormalizedIncome();
         uint256 amountToMint = accruedToTreasury.rayMul(normalizedIncome);
-        IAToken(reserve.aTokenAddress).mintToTreasury(accruedToTreasury, normalizedIncome);
+        IAToken(reserve.aTokenAddress).mintToTreasury(amountToMint, normalizedIncome);
 
         emit MintedToTreasury(assetAddress, amountToMint);
       }
