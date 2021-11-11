@@ -26,15 +26,18 @@ import {
 } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, ONE_YEAR } from '../../helpers/constants';
 import { SignerWithAddress, TestEnv } from './make-suite';
-import { advanceTimeAndBlock, DRE, timeLatest, waitForTx } from '../../helpers/misc-utils';
-
 import chai from 'chai';
 import { ReserveData, UserReserveData } from './utils/interfaces';
 import { BigNumber, ContractReceipt, Wallet } from 'ethers';
 import { AToken } from '../../types/AToken';
 import { RateMode, tEthereumAddress } from '../../helpers/types';
 import { MintableERC20__factory } from '../../types';
-import { getChainId } from '../../helpers/contracts-getters';
+import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
+import { getChainId } from 'hardhat';
+import { timeLatest } from '../../helpers/misc-utils';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 const { expect } = chai;
 
@@ -542,7 +545,7 @@ export const supplyWithPermit = async (
   const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
   const amountToDeposit = await convertToCurrencyDecimals(reserve, amount);
 
-  const chainId = await getChainId();
+  const chainId = Number(await getChainId());
   const token = new MintableERC20__factory(sender.signer).attach(reserve);
   const highDeadline = '100000000000000000000000000';
   const nonce = await token._nonces(sender.address);
@@ -676,7 +679,7 @@ export const repayWithPermit = async (
   }
   amountToRepay = BigNumber.from(amountToRepay).toHexString();
 
-  const chainId = await getChainId();
+  const chainId = Number(await getChainId());
   const token = new MintableERC20__factory(user.signer).attach(reserve);
   const nonce = await token._nonces(user.address);
 
@@ -1001,10 +1004,10 @@ export const getTxCostAndTimestamp = async (tx: ContractReceipt) => {
     throw new Error('No tx blocknumber');
   }
   const txTimestamp = BigNumber.from(
-    (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+    (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
   );
 
-  const txInfo = await DRE.ethers.provider.getTransaction(tx.transactionHash);
+  const txInfo = await hre.ethers.provider.getTransaction(tx.transactionHash);
   const gasPrice = txInfo.gasPrice ? txInfo.gasPrice : tx.effectiveGasPrice;
   const txCost = BigNumber.from(tx.cumulativeGasUsed).mul(gasPrice);
 

@@ -1,4 +1,3 @@
-import { evmRevert, evmSnapshot, DRE, waitForTx } from '../../helpers/misc-utils';
 import { Signer } from 'ethers';
 import {
   getPool,
@@ -28,12 +27,14 @@ import bignumberChai from 'chai-bignumber';
 import { PriceOracle } from '../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../types/PoolAddressesProvider';
 import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProviderRegistry';
-import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { solidity } from 'ethereum-waffle';
 import { AaveOracle, ACLManager, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
+import { getEthersSigners, waitForTx, evmSnapshot, evmRevert } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 chai.use(bignumberChai());
 chai.use(solidity);
@@ -168,7 +169,6 @@ export async function initializeMakeSuite() {
 }
 
 const setSnapshot = async () => {
-  const hre = DRE as HardhatRuntimeEnvironment;
   if (usingTenderly()) {
     setHardhatSnapshotId((await hre.tenderlyNetwork.getHead()) || '0x1');
     return;
@@ -177,7 +177,6 @@ const setSnapshot = async () => {
 };
 
 const revertHead = async () => {
-  const hre = DRE as HardhatRuntimeEnvironment;
   if (usingTenderly()) {
     await hre.tenderlyNetwork.setHead(HardhatSnapshotId);
     return;

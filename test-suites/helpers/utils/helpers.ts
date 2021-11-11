@@ -9,10 +9,10 @@ import {
   getIRStrategy,
 } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { tEthereumAddress } from '../../../helpers/types';
-import { getDb, DRE } from '../../../helpers/misc-utils';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { BigNumber } from 'ethers';
 import { AToken } from '../../../types';
+import { TESTNET_TOKEN_PREFIX } from '@aave/deploy-v3';
 
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
@@ -121,19 +121,6 @@ export const getUserData = async (
     stableRateLastUpdated: BigNumber.from(userData.stableRateLastUpdated),
     walletBalance,
   };
-};
-
-export const getReserveAddressFromSymbol = async (symbol: string) => {
-  const token = await getMintableERC20(
-    (
-      await getDb().get(`${symbol}.${DRE.network.name}`).value()
-    ).address
-  );
-
-  if (!token) {
-    throw `Could not find instance for contract ${symbol}`;
-  }
-  return token.address;
 };
 
 const getATokenUserData = async (

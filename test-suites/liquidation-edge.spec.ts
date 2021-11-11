@@ -2,11 +2,11 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode } from '../helpers/types';
-import { evmRevert, evmSnapshot, waitForTx } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 import './helpers/utils/wadraymath';
+import { evmSnapshot, evmRevert, waitForTx } from '@aave/deploy-v3';
 
 makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
   let snap: string;

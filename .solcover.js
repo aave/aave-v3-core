@@ -1,4 +1,5 @@
 const accounts = require(`./test-wallets.js`).accounts;
+const cp = require('child_process');
 
 module.exports = {
   client: require('ganache-cli'),
@@ -8,5 +9,8 @@ module.exports = {
   },
   providerOptions: {
     accounts,
+  },
+  onCompileComplete: function () {
+    cp.execSync('. ./setup-test-env.sh');
   },
 };

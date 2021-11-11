@@ -1,9 +1,7 @@
 import rawBRE from 'hardhat';
-import { getEthersSigners } from '../helpers/contracts-helpers';
 import { initializeMakeSuite } from './helpers/make-suite';
 
 before(async () => {
-  await rawBRE.run('set-DRE');
   const FORK = process.env.FORK;
 
   process.env.MARKET_NAME = 'Aave';

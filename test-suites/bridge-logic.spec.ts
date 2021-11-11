@@ -1,8 +1,6 @@
-import { waitForTx } from './../helpers/misc-utils';
 const { expect } = require('chai');
 import { BigNumber, utils } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { waitForTx, advanceTimeAndBlock } from '../helpers/misc-utils';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP } from '../helpers/constants';
@@ -18,6 +16,7 @@ import {
 } from './helpers/utils/calculations';
 import './helpers/utils/wadraymath';
 import { formatEther } from '@ethersproject/units';
+import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,

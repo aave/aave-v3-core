@@ -1,4 +1,3 @@
-import { formatUnits } from '@ethersproject/units';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
@@ -6,12 +5,10 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
-import { formatEther } from 'ethers/lib/utils';
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   const { VL_INCONSISTENT_EMODE_CATEGORY, VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } =
     ProtocolErrors;
-  let oracleBaseDecimals;
 
   const CATEGORIES = {
     STABLECOINS: {
@@ -57,8 +54,6 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     await usdc.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
-
-    oracleBaseDecimals = (await (await aaveOracle.BASE_CURRENCY_UNIT()).toString().length) - 1;
   });
 
   it('Admin adds a category for stablecoins with DAI and USDC', async () => {

@@ -1,5 +1,5 @@
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 import { expect } from 'chai';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode, ProtocolErrors } from '../helpers/types';

@@ -6,7 +6,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
-import { waitForTx } from '../helpers/misc-utils';
+import { waitForTx } from '@aave/deploy-v3';
 
 makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (testEnv: TestEnv) => {
   const { INVALID_HF } = ProtocolErrors;

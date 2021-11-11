@@ -2,7 +2,7 @@ import path from 'path';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
-import { HARDHAT_CHAINID, COVERAGE_CHAINID } from './helpers/hardhat-constants';
+import { COVERAGE_CHAINID, HARDHAT_CHAINID } from './helpers/constants';
 import { buildForkConfig } from './helper-hardhat-config';
 
 require('dotenv').config();
@@ -16,12 +16,10 @@ import 'hardhat-deploy';
 import '@tenderly/hardhat-tenderly';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
+import 'hardhat-dependency-compiler';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const HARDFORK = 'london';
-const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
-
-require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
 const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
@@ -114,7 +112,7 @@ const hardhatConfig: HardhatUserConfig = {
   external: {
     contracts: [
       {
-        artifacts: 'node_modules/@aave/deploy-v3/artifacts',
+        artifacts: './temp-artifacts',
         deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
       },
     ],

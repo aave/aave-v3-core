@@ -1,7 +1,6 @@
-import { waitForTx } from './../helpers/misc-utils';
+import { waitForTx, increaseTime } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode } from '../helpers/types';

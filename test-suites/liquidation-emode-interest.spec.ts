@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime, waitForTx } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
@@ -8,6 +7,10 @@ import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculatio
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { waitForTx, increaseTime } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (testEnv: TestEnv) => {
   const { INVALID_HF } = ProtocolErrors;
@@ -205,7 +208,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode through interest', (tes
     }
 
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const variableDebtBeforeTx = calcExpectedVariableDebtTokenBalance(

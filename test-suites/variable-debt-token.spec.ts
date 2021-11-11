@@ -1,12 +1,15 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { getVariableDebtToken } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
@@ -105,7 +108,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
@@ -126,7 +129,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)

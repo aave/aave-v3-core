@@ -1,7 +1,6 @@
 import { formatEther } from '@ethersproject/units';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime, waitForTx } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
@@ -9,6 +8,10 @@ import { AToken__factory } from '../types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { waitForTx, increaseTime } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;
@@ -217,7 +220,7 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       return;
     }
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const stableDebtBeforeTx = calcExpectedStableDebtTokenBalance(
@@ -525,7 +528,7 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const aAaveTokenAddress = await aaveTokenAddresses.aTokenAddress;
     const aAaveTokenContract = await AToken__factory.connect(
       aAaveTokenAddress,
-      DRE.ethers.provider
+      hre.ethers.provider
     );
     const aAaveTokenBalanceBefore = await aAaveTokenContract.balanceOf(liquidator.address);
     const borrowerATokenBalance = await aAaveTokenContract.balanceOf(borrower.address);

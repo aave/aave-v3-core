@@ -22,12 +22,11 @@ import {
   deployMockStableDebtToken,
   deployMockVariableDebtToken,
 } from '@aave/deploy-v3/dist/helpers/contract-deployments';
-import { getEthersSigners } from '../helpers/contracts-helpers';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import {
   InitializableImmutableAdminUpgradeabilityProxy,
   InitializableImmutableAdminUpgradeabilityProxy__factory,
 } from '../types';
+import { evmSnapshot, evmRevert, getEthersSigners } from '@aave/deploy-v3';
 
 makeSuite('Upgradeability', (testEnv: TestEnv) => {
   context('VersionedInitializable', async () => {

@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import {
   deployMintableERC20,
@@ -11,6 +11,9 @@ import { MockPoolInherited__factory } from '../types';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -77,7 +80,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     await expect(
       pool
@@ -92,7 +95,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     expect(
       await pool
@@ -110,7 +113,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     const config = await pool.getReserveData(dai.address);
 
@@ -136,7 +139,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     const config = await pool.getReserveData(dai.address);
 
@@ -175,7 +178,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate the PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     // Deploy the mock Pool with a setter of `maxNumberOfReserves`
     const mockPoolImpl = await deployMockPoolInherited();

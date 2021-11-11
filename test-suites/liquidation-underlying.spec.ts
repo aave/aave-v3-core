@@ -1,13 +1,16 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime, waitForTx } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
-import { formatEther } from '@ethersproject/units';
+import { increaseTime, waitForTx } from '@aave/deploy-v3';
+
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEnv) => {
   const { INVALID_HF } = ProtocolErrors;
@@ -187,7 +190,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       return;
     }
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const stableDebtBeforeTx = calcExpectedStableDebtTokenBalance(

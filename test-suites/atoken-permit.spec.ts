@@ -1,11 +1,13 @@
+import { waitForTx } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { ethers, utils } from 'ethers';
-import { DRE, waitForTx } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
+import { HARDHAT_CHAINID, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getTestWallets } from './helpers/utils/wallets';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('AToken: Permit', (testEnv: TestEnv) => {
   let testWallets;
@@ -33,7 +35,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const domain = {
       name: await aDai.name(),
       version: EIP712_REVISION,
-      chainId: DRE.network.config.chainId,
+      chainId: hre.network.config.chainId,
       verifyingContract: aDai.address,
     };
     const domainSeparator = utils._TypedDataEncoder.hashDomain(domain);
@@ -48,7 +50,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const tokenName = await aDai.name();
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = 0;
     const nonce = (await aDai._nonces(owner.address)).toNumber();
     const permitAmount = utils.parseEther('2').toString();
@@ -90,7 +92,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
     const nonce = (await aDai._nonces(owner.address)).toNumber();
     const permitAmount = utils.parseEther('2').toString();
@@ -129,7 +131,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
     const nonce = (await aDai._nonces(owner.address)).toNumber();
     const permitAmount = '0';
@@ -172,7 +174,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
     const nonce = 1000;
     const permitAmount = '0';
@@ -204,7 +206,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = '1';
     const nonce = (await aDai._nonces(owner.address)).toNumber();
     const permitAmount = '0';
@@ -236,7 +238,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
     const nonce = (await aDai._nonces(owner.address)).toNumber();
     const permitAmount = '0';
@@ -268,7 +270,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
     const nonce = (await aDai._nonces(owner.address)).toNumber();
     const permitAmount = '0';

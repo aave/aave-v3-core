@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime, timeLatest, waitForTx } from '../helpers/misc-utils';
+import { timeLatest } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
@@ -15,6 +15,10 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { waitForTx, increaseTime } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   const { VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED, INVALID_HF } = ProtocolErrors;
@@ -259,7 +263,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     }
 
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const variableDebtBeforeTx = calcExpectedVariableDebtTokenBalance(
@@ -504,7 +508,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     }
 
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const variableDebtBeforeTx = calcExpectedVariableDebtTokenBalance(

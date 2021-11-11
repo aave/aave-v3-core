@@ -1,10 +1,11 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { createRandomAddress, evmRevert, evmSnapshot } from '../helpers/misc-utils';
+import { createRandomAddress } from '../helpers/misc-utils';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { deployPool, deployMockPool } from '@aave/deploy-v3/dist/helpers/contract-deployments';
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 
 makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
   const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;

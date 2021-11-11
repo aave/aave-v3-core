@@ -2,17 +2,12 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode, ProtocolErrors } from '../helpers/types';
-import {
-  evmRevert,
-  evmSnapshot,
-  setAutomine,
-  setAutomineEvm,
-  waitForTx,
-} from '../helpers/misc-utils';
+import { setAutomine, setAutomineEvm } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ethers } from 'hardhat';
 import { parseUnits } from '@ethersproject/units';
+import { waitForTx, evmSnapshot, evmRevert } from '@aave/deploy-v3';
 
 makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {

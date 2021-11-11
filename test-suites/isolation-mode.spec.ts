@@ -1,11 +1,11 @@
 const { expect } = require('chai');
 import { utils } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { increaseTime } from '../helpers/misc-utils';
-import { ProtocolErrors, RateMode } from '../helpers/types';
+import { ProtocolErrors } from '../helpers/types';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { increaseTime } from '@aave/deploy-v3';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,

@@ -1,12 +1,13 @@
 import { MOCK_CHAINLINK_AGGREGATORS_PRICES } from '@aave/deploy-v3/dist/helpers/constants';
 import { expect } from 'chai';
 import { oneEther, ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import {
   deployMintableERC20,
   deployMockAggregator,
+  evmRevert,
+  evmSnapshot,
   MintableERC20,
   MockAggregator,
 } from '@aave/deploy-v3';

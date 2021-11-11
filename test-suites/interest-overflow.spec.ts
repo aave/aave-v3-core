@@ -1,12 +1,6 @@
 import { expect } from 'chai';
 import { BigNumberish, BigNumber, utils } from 'ethers';
-import {
-  DRE,
-  evmRevert,
-  evmSnapshot,
-  impersonateAccountsHardhat,
-  increaseTime,
-} from '../helpers/misc-utils';
+import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
@@ -24,7 +18,10 @@ import {
   StableDebtToken__factory,
   MockFlashLoanReceiver__factory,
 } from '../types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmSnapshot, evmRevert, increaseTime } from '@aave/deploy-v3';
 
+declare var hre: HardhatRuntimeEnvironment;
 makeSuite('Interest Rate and Index Overflow', (testEnv) => {
   const { HLP_UINT128_OVERFLOW } = ProtocolErrors;
 
@@ -413,7 +410,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
     // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const rate = BigNumber.from(2).pow(128); // Max + 1
 

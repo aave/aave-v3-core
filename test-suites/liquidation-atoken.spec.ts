@@ -1,14 +1,15 @@
-import { formatEther, formatUnits } from '@ethersproject/units';
-import { AaveOracle } from './../types/AaveOracle.d';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
-import { DRE, waitForTx } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
 import { getUserData, getReserveData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
+import { waitForTx } from '@aave/deploy-v3';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
   const {
@@ -223,7 +224,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     }
 
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const variableDebtBeforeTx = calcExpectedVariableDebtTokenBalance(

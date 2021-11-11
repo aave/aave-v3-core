@@ -1,8 +1,8 @@
-import { waitForTx } from './../helpers/misc-utils';
+import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
-import { advanceTimeAndBlock, setBlocktime, timeLatest } from '../helpers/misc-utils';
+import { setBlocktime, timeLatest } from '../helpers/misc-utils';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {

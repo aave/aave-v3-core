@@ -3,18 +3,15 @@ import { BigNumber, utils } from 'ethers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getStableDebtToken } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
-import {
-  impersonateAccountsHardhat,
-  DRE,
-  increaseTime,
-  evmSnapshot,
-  evmRevert,
-  setAutomine,
-} from '../helpers/misc-utils';
+import { impersonateAccountsHardhat, setAutomine } from '../helpers/misc-utils';
 import { StableDebtToken__factory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmRevert, evmSnapshot, increaseTime } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
@@ -180,7 +177,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
     const stableDebt = StableDebtToken__factory.connect(

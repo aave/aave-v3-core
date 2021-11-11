@@ -10,7 +10,6 @@ import {
   getPoolConfiguratorProxy,
 } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { deployMockPool } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import {
   ACLManager__factory,
@@ -19,6 +18,7 @@ import {
   PoolConfigurator__factory,
 } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 
 makeSuite('PausablePool', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
