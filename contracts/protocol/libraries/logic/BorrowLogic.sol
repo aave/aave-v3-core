@@ -153,10 +153,9 @@ library BorrowLogic {
     DataTypes.ExecuteRepayParams memory params
   ) external returns (uint256) {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
-    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(params.rateMode);
-
     reserve.updateState(reserveCache);
 
+    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(params.rateMode);
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
       params.onBehalfOf,
       reserve
