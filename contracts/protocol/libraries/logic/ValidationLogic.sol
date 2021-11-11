@@ -457,8 +457,10 @@ library ValidationLogic {
     mapping(address => DataTypes.ReserveData) storage reservesData
   ) internal view {
     for (uint256 i = 0; i < assets.length; i++) {
-      require(!reservesData[assets[i]].configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
-      require(reservesData[assets[i]].configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
+      DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
+        .configuration;
+      require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
+      require(configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
     }
     require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
   }
