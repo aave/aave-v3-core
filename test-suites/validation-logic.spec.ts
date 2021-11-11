@@ -720,19 +720,11 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_RESERVE_PAUSED);
   });
 
-  it('validateSetUserEMode() with LT == 0 (reverts)', async () => {
+  it('validateSetUserEMode() to undefined emode category (revert expected)', async () => {
     const {
-      configurator,
-      poolAdmin,
       pool,
       users: [user],
     } = testEnv;
-
-    expect(
-      await configurator
-        .connect(poolAdmin.signer)
-        .setEModeCategory('101', '9800', '0', '10100', ethers.constants.AddressZero, 'INCONSISTENT')
-    );
 
     await expect(pool.connect(user.signer).setUserEMode(101)).to.be.revertedWith(
       VL_INCONSISTENT_EMODE_CATEGORY
