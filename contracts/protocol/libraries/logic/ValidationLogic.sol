@@ -467,8 +467,9 @@ library ValidationLogic {
    * @param reserve The state of the reserve
    */
   function validateFlashloanSimple(DataTypes.ReserveData storage reserve) internal view {
-    require(!reserve.configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
-    require(reserve.configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
+    DataTypes.ReserveConfigurationMap memory configuration = reserve.configuration;
+    require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
+    require(configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
   }
 
   struct ValidateLiquidationCallLocalVars {
