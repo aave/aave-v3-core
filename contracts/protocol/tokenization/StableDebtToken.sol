@@ -23,7 +23,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
 contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   using WadRayMath for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x3;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
   uint256 internal _avgStableRate;
   mapping(address => uint40) internal _timestamps;
@@ -49,7 +49,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    CACHED_DOMAIN_SEPARATOR = keccak256(
+    _domainSeparator = keccak256(
       abi.encode(
         EIP712_DOMAIN,
         keccak256(bytes(name())),

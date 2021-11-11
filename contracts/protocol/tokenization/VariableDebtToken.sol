@@ -23,7 +23,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
 contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x3;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
   address internal _underlyingAsset;
 
   constructor(IPool pool) DebtTokenBase(pool) {}
@@ -44,7 +44,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    CACHED_DOMAIN_SEPARATOR = keccak256(
+    _domainSeparator = keccak256(
       abi.encode(
         EIP712_DOMAIN,
         keccak256(bytes(name())),

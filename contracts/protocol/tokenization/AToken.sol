@@ -34,8 +34,8 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   /// @dev owner => next valid nonce to submit with permit()
   mapping(address => uint256) public _nonces;
 
-  bytes32 internal CACHED_DOMAIN_SEPARATOR;
-  uint256 internal immutable CACHED_CHAIN_ID;
+  bytes32 internal _domainSeparator;
+  uint256 internal immutable _chainId;
 
   IPool internal immutable _pool;
   address internal _treasury;
@@ -55,7 +55,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     IncentivizedERC20(pool.getAddressesProvider(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
   {
     _pool = pool;
-    CACHED_CHAIN_ID = block.chainid;
+    _chainId = block.chainid;
   }
 
   /// @inheritdoc IInitializableAToken
@@ -76,7 +76,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    CACHED_DOMAIN_SEPARATOR = keccak256(
+    _domainSeparator = keccak256(
       abi.encode(
         EIP712_DOMAIN,
         keccak256(bytes(name())),
@@ -99,8 +99,8 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   }
 
   function DOMAIN_SEPARATOR() public view returns (bytes32) {
-    if (block.chainid == CACHED_CHAIN_ID) {
-      return CACHED_DOMAIN_SEPARATOR;
+    if (block.chainid == _chainId) {
+      return _domainSeparator;
     }
     return
       keccak256(
