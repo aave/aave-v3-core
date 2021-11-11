@@ -184,6 +184,10 @@ library FlashLoanLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.FlashloanSimpleParams memory params
   ) external {
+    // The usual action flow (cache -> updateState -> validation -> changeState -> updateRates)
+    // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
+    // This is done to protect against reentrance and rate manipulation within the user specified payload.
+
     ValidationLogic.validateFlashloanSimple(reserve);
     FlashLoanSimpleLocalVars memory vars;
 
