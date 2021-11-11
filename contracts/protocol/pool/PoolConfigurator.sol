@@ -230,6 +230,18 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setBorrowableInIsolation(address asset, bool borrowable)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    currentConfig.setBorrowableInIsolation(borrowable);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit BorrowableInIsolationChanged(asset, borrowable);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setReservePause(address asset, bool paused) public override onlyEmergencyOrPoolAdmin {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setPaused(paused);

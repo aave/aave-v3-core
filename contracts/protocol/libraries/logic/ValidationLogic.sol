@@ -40,11 +40,6 @@ library ValidationLogic {
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
-  // for borrowings in isolation mode, we give for granted that the eMode category for stablecoins is the category with id 1.
-  // this MUST be kept into account when configuring the stablecoins eMode category, otherwise users suplying asset in isolation
-  // mode will NOT be able to borrow.
-  uint256 public constant DEFAULT_ISOLATION_MODE_BORROW_CATEGORY = 1;
-
   /**
    * @notice Validates a supply action
    * @param reserveCache The cached data of the reserve
@@ -121,6 +116,7 @@ library ValidationLogic {
    * @notice Validates a borrow action
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
+   * @param eModeCategories The configuration for all efficiency mode categories
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
@@ -183,12 +179,11 @@ library ValidationLogic {
     }
 
     if (params.isolationModeActive) {
-      // check that the asset being borrowed belongs to the stablecoin category AND
+      // check that the asset being borrowed is borrowable in isolation mode AND
       // the total exposure is no bigger than the collateral debt ceiling
       require(
-        params.reserveCache.reserveConfiguration.getEModeCategory() ==
-          DEFAULT_ISOLATION_MODE_BORROW_CATEGORY,
-        Errors.VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY
+        params.reserveCache.reserveConfiguration.getBorrowableInIsolation(),
+        Errors.VL_ASSET_NOT_BORROWABLE_IN_ISOLATION
       );
 
       require(
@@ -537,6 +532,17 @@ library ValidationLogic {
     require(params.totalDebt > 0, Errors.VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   }
 
+  /**
+   * @notice Validates the health factor of a user
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param userConfig The state of the user for the specific reserve
+   * @param user The user to validate health factor of
+   * @param userEModeCategory The users active efficiency mode category
+   * @param reservesCount The number of available reserves
+   * @param oracle The price oracle
+   */
   function validateHealthFactor(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
@@ -579,13 +585,15 @@ library ValidationLogic {
 
   /**
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred
-   * @param reservesData The state of all the reserves
-   * @param userConfig The state of the user for the specific reserve
-   * @param reserves The addresses of all the active reserves
    * @param reservesCount The number of available reserves
    * @param oracle The price oracle
+   * @param userEModeCategory The users active efficiency mode category
    */
   function validateHFAndLtv(
     mapping(address => DataTypes.ReserveData) storage reservesData,
@@ -641,9 +649,10 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a drop reserve action
+   * @notice Validates the action of setting efficiency mode
    * @param reservesData the data mapping of the reserves
    * @param reserves a mapping storing the list of reserves
+   * @param eModeCategories a mapping storing configurations for all efficiency mode categories
    * @param userConfig the user configuration
    * @param reservesCount The total number of valid reserves
    * @param categoryId The id of the category
