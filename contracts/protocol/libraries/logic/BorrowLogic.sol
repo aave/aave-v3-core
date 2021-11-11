@@ -241,6 +241,7 @@ library BorrowLogic {
     address user
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
+    reserve.updateState(reserveCache);
 
     IERC20 stableDebtToken = IERC20(reserveCache.stableDebtTokenAddress);
     IERC20 variableDebtToken = IERC20(reserveCache.variableDebtTokenAddress);
@@ -254,8 +255,6 @@ library BorrowLogic {
       variableDebtToken,
       reserveCache.aTokenAddress
     );
-
-    reserve.updateState(reserveCache);
 
     IStableDebtToken(address(stableDebtToken)).burn(user, stableDebt);
 
