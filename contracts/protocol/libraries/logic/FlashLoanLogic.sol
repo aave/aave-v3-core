@@ -66,6 +66,10 @@ library FlashLoanLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory params
   ) external {
+    // The usual action flow (cache -> updateState -> validation -> changeState -> updateRates)
+    // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
+    // This is done to protect against reentrance and rate manipulation within the user specified payload.
+
     FlashLoanLocalVars memory vars;
 
     vars.aTokenAddresses = new address[](params.assets.length);
