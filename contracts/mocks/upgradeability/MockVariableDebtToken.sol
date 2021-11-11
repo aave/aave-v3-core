@@ -8,6 +8,6 @@ contract MockVariableDebtToken is VariableDebtToken {
   constructor(IPool pool) VariableDebtToken(pool) {}
 
   function getRevision() internal pure override returns (uint256) {
-    return 0x4;
+    return 0x3;
   }
 }
