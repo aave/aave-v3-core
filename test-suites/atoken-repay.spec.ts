@@ -1,7 +1,8 @@
+import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
-import { advanceTimeAndBlock, setBlocktime, timeLatest } from '../helpers/misc-utils';
+import { setBlocktime, timeLatest } from '../helpers/misc-utils';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
@@ -15,11 +16,11 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     const daiAmount = utils.parseEther('100');
     const wethAmount = utils.parseEther('1');
-    await dai.connect(user0.signer).mint(daiAmount);
-    await weth.connect(user1.signer).mint(wethAmount);
+    await waitForTx(await dai.connect(user0.signer)['mint(uint256)'](daiAmount));
+    await waitForTx(await weth.connect(user1.signer)['mint(uint256)'](wethAmount));
 
-    await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await waitForTx(await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT));
+    await waitForTx(await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
     await expect(
       await pool.connect(user0.signer).deposit(dai.address, daiAmount, user0.address, 0)

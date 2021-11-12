@@ -1,5 +1,58 @@
 # Changelog
 
+### [1.5.2](https://www.github.com/aave/aave-v3-core/compare/v1.5.1...v1.5.2) (2021-11-12)
+
+
+### Bug Fixes
+
+* fix releasepipeline ([5dc309d](https://www.github.com/aave/aave-v3-core/commit/5dc309d08120d3cf2ddea44e53f56b6c29fdfca6))
+
+### [1.5.1](https://www.github.com/aave/aave-v3-core/compare/v1.5.0...v1.5.1) (2021-11-12)
+
+
+### Bug Fixes
+
+* fix ci workflow file ([5520c8f](https://www.github.com/aave/aave-v3-core/commit/5520c8fb3ab959f3167755cee7642e3ea184eac9))
+
+## [1.5.0](https://www.github.com/aave/aave-v3-core/compare/v1.4.0...v1.5.0) (2021-11-12)
+
+
+### Features
+
+* updated solidity version ([7891ac6](https://www.github.com/aave/aave-v3-core/commit/7891ac6a9063e9d042333aa16589126e10fcb67d))
+
+
+### Bug Fixes
+
+* Add comment + gasoptimization for flashloans ([546fe84](https://www.github.com/aave/aave-v3-core/commit/546fe84771345d612d42a91ef434188194b26a3b))
+* Add comment to elaborate on unusual flow in flashloan simple ([5f41c07](https://www.github.com/aave/aave-v3-core/commit/5f41c07c19e36e195114c63702808607de6a5f9c))
+* Add configuration cache to save gas ([e5b9c2a](https://www.github.com/aave/aave-v3-core/commit/e5b9c2a8e52084f58548d11609ccebdf0e40bf52))
+* Fix reentrance attack in `flashLoanSimple` ([1e98320](https://www.github.com/aave/aave-v3-core/commit/1e98320efce9e4a2de8da59c6c416e49a10d9ce5))
+* Move `interestRateMode` cast below state update ([9732e6f](https://www.github.com/aave/aave-v3-core/commit/9732e6f1e61fa010401126651c615e911da2af57))
+* Simplify flow for `mintToTreasury` ([8385f6b](https://www.github.com/aave/aave-v3-core/commit/8385f6b6c6dfd2e3e0b02b09ca7a8b6970ba6868))
+
+## [1.4.0](https://www.github.com/aave/aave-v3-core/compare/v1.3.0...v1.4.0) (2021-11-09)
+
+
+### Features
+
+* added public debt ceiling decimal constant, added getter to DataProvider ([52918e2](https://www.github.com/aave/aave-v3-core/commit/52918e2f98e3e9ce65fca8df19596ec577213b26))
+
+## [1.3.0](https://www.github.com/aave/aave-v3-core/compare/v1.2.1...v1.3.0) (2021-11-09)
+
+
+### Features
+
+* added borrowable in isolation configuration, fixed tests ([8755279](https://www.github.com/aave/aave-v3-core/commit/87552797a8776f38e869aff7e0c3a1f9d70a7950))
+* Added missing legacy methods ([3a2fc3f](https://www.github.com/aave/aave-v3-core/commit/3a2fc3f50dbcc7f3552554b04f6b33f51657a107))
+* finalized implementation, fixed tests ([c9bb800](https://www.github.com/aave/aave-v3-core/commit/c9bb8002498e8638b63528d63cea4d8fefcbcdb2))
+* initial implementation ([043bcde](https://www.github.com/aave/aave-v3-core/commit/043bcdec992a7196348881fa3bfef1ac8cb9e0b7))
+
+
+### Bug Fixes
+
+* improved condition in rayToWad() ([3eec7b3](https://www.github.com/aave/aave-v3-core/commit/3eec7b3093249e6d07861434298ff0e9716c3c44))
+
 ### [1.2.1](https://www.github.com/aave/aave-v3-core/compare/v1.2.0...v1.2.1) (2021-10-19)
 
 

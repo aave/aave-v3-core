@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';

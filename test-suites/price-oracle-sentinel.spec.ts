@@ -1,20 +1,24 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime, timeLatest, waitForTx } from '../helpers/misc-utils';
+import { timeLatest } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
   PriceOracleSentinel,
-  PriceOracleSentinelFactory,
+  PriceOracleSentinel__factory,
   SequencerOracle,
-  SequencerOracleFactory,
+  SequencerOracle__factory,
 } from '../types';
-import { getFirstSigner } from '../helpers/contracts-getters';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import './helpers/utils/wadraymath';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { waitForTx, increaseTime } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   const { VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED, INVALID_HF } = ProtocolErrors;
@@ -25,22 +29,31 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   const GRACE_PERIOD = BigNumber.from(60 * 60);
 
   before(async () => {
-    const { addressesProvider, deployer } = testEnv;
+    const { addressesProvider, deployer, oracle } = testEnv;
 
     // Deploy SequencerOracle
-    sequencerOracle = await (await new SequencerOracleFactory(deployer.signer).deploy()).deployed();
+    sequencerOracle = await (
+      await new SequencerOracle__factory(deployer.signer).deploy()
+    ).deployed();
 
     priceOracleSentinel = await (
-      await new PriceOracleSentinelFactory(await getFirstSigner()).deploy(
+      await new PriceOracleSentinel__factory(await getFirstSigner()).deploy(
         addressesProvider.address,
         sequencerOracle.address,
         GRACE_PERIOD
       )
     ).deployed();
+
+    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+  });
+
+  after(async () => {
+    const { aaveOracle, addressesProvider } = testEnv;
+    await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
   });
 
   it('Admin sets a PriceOracleSentinel and activate it for DAI and WETH', async () => {
-    const { addressesProvider, configurator, helpersContract, poolAdmin, dai, weth } = testEnv;
+    const { addressesProvider, poolAdmin } = testEnv;
 
     expect(
       await addressesProvider
@@ -67,7 +80,9 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     } = testEnv;
 
     //mints DAI to depositor
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '2000'));
+    await dai
+      .connect(depositor.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '2000'));
 
     //approve protocol to access depositor wallet
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -78,13 +93,13 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       .connect(depositor.signer)
       .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
 
-    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
+    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.06775');
 
     for (let i = 0; i < 2; i++) {
       const borrowers = [borrower, borrower2];
       const currBorrower = borrowers[i];
       //mints WETH to borrower
-      await weth.connect(currBorrower.signer).mint(amountETHtoDeposit);
+      await weth.connect(currBorrower.signer)['mint(uint256)'](amountETHtoDeposit);
 
       //approve protocol to access borrower wallet
       await weth.connect(currBorrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -135,7 +150,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       helpersContract,
     } = testEnv;
 
-    await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const userReserveDataBefore = await getUserData(
@@ -177,7 +192,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       deployer,
     } = testEnv;
 
-    await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -248,7 +263,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     }
 
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const variableDebtBeforeTx = calcExpectedVariableDebtTokenBalance(
@@ -302,11 +317,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       oracle,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
+    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
+      .supply(weth.address, utils.parseUnits('0.06775', 18), user.address, 0);
 
     await expect(
       pool
@@ -327,11 +342,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
+    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
+      .supply(weth.address, utils.parseUnits('0.06775', 18), user.address, 0);
 
     await expect(
       pool
@@ -354,11 +369,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
+    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
+      .supply(weth.address, utils.parseUnits('0.06775', 18), user.address, 0);
 
     await expect(
       pool
@@ -380,11 +395,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool,
     } = testEnv;
 
-    await weth.connect(user.signer).mint(utils.parseUnits('1', 18));
+    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
-      .supply(weth.address, utils.parseUnits('1', 18), user.address, 0);
+      .supply(weth.address, utils.parseUnits('0.06775', 18), user.address, 0);
 
     await waitForTx(
       await pool
@@ -419,7 +434,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       deployer,
     } = testEnv;
 
-    await dai.mint(await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
 
     const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -493,7 +508,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     }
 
     const txTimestamp = BigNumber.from(
-      (await DRE.ethers.provider.getBlock(tx.blockNumber)).timestamp
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
     );
 
     const variableDebtBeforeTx = calcExpectedVariableDebtTokenBalance(

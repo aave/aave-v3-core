@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
@@ -118,7 +118,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     address user,
     uint256 amount,
     uint256 index
-  ) external override onlyPool returns (bool) {
+  ) public override onlyPool returns (bool) {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
@@ -141,17 +141,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     if (amount == 0) {
       return;
     }
-
-    address treasury = _treasury;
-
-    // Compared to the normal mint, we don't check for rounding errors.
-    // The amount to mint can easily be very small since it is a fraction of the interest ccrued.
-    // In that case, the treasury will experience a (very small) loss, but it
-    // wont cause potentially valid transactions to fail.
-    _mint(treasury, Helpers.castUint128(amount.rayDiv(index)));
-
-    emit Transfer(address(0), treasury, amount);
-    emit Mint(treasury, amount, index);
+    mint(_treasury, amount, index);
   }
 
   /// @inheritdoc IAToken

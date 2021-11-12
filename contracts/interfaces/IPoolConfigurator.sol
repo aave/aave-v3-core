@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {ConfiguratorInputTypes} from '../protocol/libraries/types/ConfiguratorInputTypes.sol';
 
@@ -253,6 +253,13 @@ interface IPoolConfigurator {
   event FlashloanPremiumToProtocolUpdated(uint256 flashloanPremiumToProtocol);
 
   /**
+   * @notice Emitted when the reserve is set as borrowable/non borrowable in isolation mode.
+   * @param asset The address of the underlying asset of the reserve
+   * @param borrowable True if the reserve is borrowable in isolation, false otherwise
+   **/
+  event BorrowableInIsolationChanged(address asset, bool borrowable);
+
+  /**
    * @notice Initializes multiple reserves
    * @param input The array of initialization parameters
    **/
@@ -348,6 +355,15 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    **/
   function unfreezeReserve(address asset) external;
+
+  /**
+   * @notice Sets the borrowable in isolation flag for the reserve
+   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed amount will be accumulated in the isolated collateral's total debt exposure.
+   * Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep consistency in the debt ceiling calculations.
+   * @param asset The address of the underlying asset of the reserve
+   * @param borrowable True if the asset should be borrowable in isolation, false otherwise
+   **/
+  function setBorrowableInIsolation(address asset, bool borrowable) external;
 
   /**
    * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay, swap interestrate, liquidate, atoken transfers)

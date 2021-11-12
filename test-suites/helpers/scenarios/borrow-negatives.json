@@ -3,13 +3,13 @@
   "description": "Test cases for the deposit function.",
   "stories": [
     {
-      "description": "User 0 deposits 1000 DAI, user 1 deposits 1 WETH as collateral and tries to borrow 100 DAI with rate mode NONE (revert expected)",
+      "description": "User 0 deposits 14760.147 DAI, user 1 deposits 1 WETH as collateral and tries to borrow 1476.01 DAI with rate mode NONE (revert expected)",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -26,7 +26,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -61,7 +61,7 @@
           "name": "borrow",
           "args": {
             "reserve": "DAI",
-            "amount": "100",
+            "amount": "1476.01",
             "borrowRateMode": "none",
             "user": "1"
           },
@@ -71,13 +71,13 @@
       ]
     },
     {
-      "description": "User 0 deposits 1000 DAI, user 1 deposits 1 WETH as collateral and tries to borrow 100 DAI with an invalid rate mode (revert expected)",
+      "description": "User 0 deposits 14760.147 DAI, user 1 deposits 1 WETH as collateral and tries to borrow 1476.01 DAI with an invalid rate mode (revert expected)",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -94,7 +94,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -129,7 +129,7 @@
           "name": "borrow",
           "args": {
             "reserve": "DAI",
-            "amount": "100",
+            "amount": "1476.01",
             "borrowRateMode": "invalid",
             "user": "1"
           },

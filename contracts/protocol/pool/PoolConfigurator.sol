@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
@@ -227,6 +227,18 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     currentConfig.setFrozen(false);
     _pool.setConfiguration(asset, currentConfig.data);
     emit ReserveUnfrozen(asset);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setBorrowableInIsolation(address asset, bool borrowable)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    currentConfig.setBorrowableInIsolation(borrowable);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit BorrowableInIsolationChanged(asset, borrowable);
   }
 
   /// @inheritdoc IPoolConfigurator

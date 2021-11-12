@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 /**
  * @title IAaveIncentivesController
@@ -50,6 +50,21 @@ interface IAaveIncentivesController {
     returns (
       uint256,
       uint256,
+      uint256
+    );
+
+  /**
+   * LEGACY **************************
+   * @dev Returns the configuration of the distribution for a certain asset
+   * @param asset The address of the reference asset of the distribution
+   * @return The asset index, the emission per second and the last updated timestamp
+   **/
+  function assets(address asset)
+    external
+    view
+    returns (
+      uint128,
+      uint128,
       uint256
     );
 
@@ -153,4 +168,9 @@ interface IAaveIncentivesController {
    * @return The precision used in the incentives controller
    */
   function PRECISION() external view returns (uint8);
+
+  /**
+   * @dev Gets the distribution end timestamp of the emissions
+   */
+  function DISTRIBUTION_END() external view returns (uint256);
 }
