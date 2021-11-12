@@ -31,8 +31,8 @@ const hardhatConfig: HardhatUserConfig = {
     disambiguatePaths: false,
   },
   solidity: {
-    // Docs for the compiler https://docs.soliditylang.org/en/v0.8.7/using-the-compiler.html
-    version: '0.8.7',
+    // Docs for the compiler https://docs.soliditylang.org/en/v0.8.10/using-the-compiler.html
+    version: '0.8.10',
     settings: {
       optimizer: {
         enabled: true,

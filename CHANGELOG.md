@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://www.github.com/aave/aave-v3-core/compare/v1.3.0...v1.4.0) (2021-11-09)
+
+
+### Features
+
+* added public debt ceiling decimal constant, added getter to DataProvider ([52918e2](https://www.github.com/aave/aave-v3-core/commit/52918e2f98e3e9ce65fca8df19596ec577213b26))
+
 ## [1.3.0](https://www.github.com/aave/aave-v3-core/compare/v1.2.1...v1.3.0) (2021-11-09)
 
 

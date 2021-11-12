@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -153,13 +153,13 @@ library BorrowLogic {
     DataTypes.ExecuteRepayParams memory params
   ) external returns (uint256) {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
+    reserve.updateState(reserveCache);
+
+    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(params.rateMode);
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
       params.onBehalfOf,
       reserve
     );
-    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(params.rateMode);
-
-    reserve.updateState(reserveCache);
 
     ValidationLogic.validateRepay(
       reserveCache,
