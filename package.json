@@ -45,7 +45,7 @@
     "ethereumjs-util": "7.0.2",
     "ethers": "^5.4.7",
     "globby": "^11.0.1",
-    "hardhat": "^2.6.1",
+    "hardhat": "^2.6.8",
     "hardhat-contract-sizer": "^2.0.3",
     "hardhat-dependency-compiler": "^1.1.2",
     "hardhat-deploy": "^0.9.4",
