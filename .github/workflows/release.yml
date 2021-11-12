@@ -28,7 +28,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
         if: ${{ steps.release.outputs.release_created }}
-      - run: npm ci:test
+      - run: npm run ci:test
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
         if: ${{ steps.release.outputs.release_created }}
