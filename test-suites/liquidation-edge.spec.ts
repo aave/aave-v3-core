@@ -35,7 +35,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
     const depositor = users[0];
     const borrower = users[1];
 
-    // Deposit 1000 dai
+    // Deposit dai
     await dai
       .connect(depositor.signer)
       ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000000'));
