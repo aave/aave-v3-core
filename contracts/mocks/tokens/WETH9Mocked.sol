@@ -10,4 +10,10 @@ contract WETH9Mocked is WETH9 {
     emit Transfer(address(0), msg.sender, value);
     return true;
   }
+
+  function mint(address account, uint256 value) public returns (bool) {
+    balanceOf[account] += value;
+    emit Transfer(address(0), account, value);
+    return true;
+  }
 }

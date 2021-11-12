@@ -72,4 +72,15 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
     _mint(_msgSender(), value);
     return true;
   }
+
+  /**
+   * @dev Function to mint tokens to address
+   * @param account The account to mint tokens.
+   * @param value The amount of tokens to mint.
+   * @return A boolean that indicates if the operation was successful.
+   */
+  function mint(address account, uint256 value) public returns (bool) {
+    _mint(account, value);
+    return true;
+  }
 }

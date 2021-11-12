@@ -3,7 +3,7 @@ import { utils } from 'ethers';
 import { ProtocolErrors } from '../helpers/types';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
-import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
+import { getMockFlashLoanReceiver } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
@@ -31,12 +31,12 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
     // setting reserve factor to 0 to ease tests, no aToken accrued in reserve
     await configurator.setReserveFactor(dai.address, 0);
 
-    await dai.mint(depositedAmount);
+    await dai['mint(uint256)'](depositedAmount);
     await dai.approve(pool.address, depositedAmount);
-    await dai.connect(user1.signer).mint(depositedAmount);
+    await dai.connect(user1.signer)['mint(uint256)'](depositedAmount);
     await dai.connect(user1.signer).approve(pool.address, depositedAmount);
 
-    await weth.connect(user1.signer).mint(depositedAmount);
+    await weth.connect(user1.signer)['mint(uint256)'](depositedAmount);
     await weth.connect(user1.signer).approve(pool.address, depositedAmount);
 
     await pool.deposit(dai.address, depositedAmount, deployer.address, 0);

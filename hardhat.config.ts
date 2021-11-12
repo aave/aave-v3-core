@@ -2,7 +2,7 @@ import path from 'path';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
 import { accounts } from './test-wallets.js';
-import { HARDHAT_CHAINID, COVERAGE_CHAINID } from './helpers/hardhat-constants';
+import { COVERAGE_CHAINID, HARDHAT_CHAINID } from './helpers/constants';
 import { buildForkConfig } from './helper-hardhat-config';
 
 require('dotenv').config();
@@ -10,16 +10,16 @@ require('dotenv').config();
 import '@nomiclabs/hardhat-ethers';
 import '@nomiclabs/hardhat-etherscan';
 import 'hardhat-gas-reporter';
-import 'hardhat-typechain';
+import '@typechain/hardhat';
+import '@typechain/ethers-v5';
+import 'hardhat-deploy';
 import '@tenderly/hardhat-tenderly';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
+import 'hardhat-dependency-compiler';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const HARDFORK = 'london';
-const ETHERSCAN_KEY = process.env.ETHERSCAN_KEY || '';
-
-require(`${path.join(__dirname, 'tasks/misc')}/set-bre.ts`);
 
 const hardhatConfig: HardhatUserConfig = {
   gasReporter: {
@@ -47,6 +47,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
+    bail: true,
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT || '',
@@ -68,12 +69,12 @@ const hardhatConfig: HardhatUserConfig = {
       chainId: HARDHAT_CHAINID,
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
+      forking: buildForkConfig(),
+      allowUnlimitedContractSize: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
         privateKey: secretKey,
         balance,
       })),
-      forking: buildForkConfig(),
-      allowUnlimitedContractSize: true,
     },
     ganache: {
       url: 'http://ganache:8545',
@@ -84,6 +85,37 @@ const hardhatConfig: HardhatUserConfig = {
         count: 20,
       },
     },
+  },
+  namedAccounts: {
+    deployer: {
+      default: 0,
+    },
+    aclAdmin: {
+      default: 0,
+    },
+    emergencyAdmin: {
+      default: 0,
+    },
+    poolAdmin: {
+      default: 0,
+    },
+    addressesProviderRegistryOwner: {
+      default: 0,
+    },
+    treasuryProxyAdmin: {
+      default: 1,
+    },
+    incentivesProxyAdmin: {
+      default: 2,
+    },
+  },
+  external: {
+    contracts: [
+      {
+        artifacts: './temp-artifacts',
+        deploy: 'node_modules/@aave/deploy-v3/dist/deploy',
+      },
+    ],
   },
 };
 

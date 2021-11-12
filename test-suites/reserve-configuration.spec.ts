@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { deployMockReserveConfiguration } from '../helpers/contracts-deployments';
-import { MockReserveConfiguration } from '../types';
+import { deployMockReserveConfiguration } from '@aave/deploy-v3/dist/helpers/contract-deployments';
+import { MockReserveConfiguration } from '@aave/deploy-v3/dist/types/typechain';
 import { ProtocolErrors } from '../helpers/types';
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 
 describe('ReserveConfiguration', async () => {
   let snap: string;
@@ -36,51 +36,77 @@ describe('ReserveConfiguration', async () => {
     configMock = await deployMockReserveConfiguration();
   });
 
+  const bigNumbersToArrayString = (arr: BigNumber[]): string[] => arr.map((x) => x.toString());
+
   it('getLtv()', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLtv()).to.be.eq(ZERO);
     expect(await configMock.setLtv(LTV));
     // LTV is the 1st param
-    expect(await configMock.getParams()).to.be.eql([LTV, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([LTV, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLtv()).to.be.eq(LTV);
     expect(await configMock.setLtv(0));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLtv()).to.be.eq(ZERO);
   });
 
   it('getLiquidationBonus()', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLiquidationBonus()).to.be.eq(ZERO);
     expect(await configMock.setLiquidationBonus(LB));
     // LB is the 3rd param
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, LB, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, LB, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLiquidationBonus()).to.be.eq(LB);
     expect(await configMock.setLiquidationBonus(0));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLiquidationBonus()).to.be.eq(ZERO);
   });
 
   it('getDecimals()', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
     expect(await configMock.setDecimals(DECIMALS));
     // decimals is the 4th param
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, DECIMALS, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, DECIMALS, ZERO, ZERO])
+    );
     expect(await configMock.getDecimals()).to.be.eq(DECIMALS);
     expect(await configMock.setDecimals(0));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
   });
 
   it('getEModeCategory()', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
     expect(await configMock.setEModeCategory(EMODE_CATEGORY));
     // eMode category is the 6th param
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, EMODE_CATEGORY]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, EMODE_CATEGORY])
+    );
     expect(await configMock.getEModeCategory()).to.be.eq(EMODE_CATEGORY);
     expect(await configMock.setEModeCategory(0));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
   });
 
@@ -121,38 +147,56 @@ describe('ReserveConfiguration', async () => {
   });
 
   it('getReserveFactor()', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getReserveFactor()).to.be.eq(ZERO);
     expect(await configMock.setReserveFactor(RESERVE_FACTOR));
     // reserve factor is the 5th param
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, RESERVE_FACTOR, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, RESERVE_FACTOR, ZERO])
+    );
     expect(await configMock.getReserveFactor()).to.be.eq(RESERVE_FACTOR);
     expect(await configMock.setReserveFactor(ZERO));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getReserveFactor()).to.be.eq(ZERO);
   });
 
   it('getBorrowCap()', async () => {
-    expect(await configMock.getCaps()).to.be.eql([ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getCaps())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO])
+    );
     expect(await configMock.getBorrowCap()).to.be.eq(ZERO);
     expect(await configMock.setBorrowCap(BORROW_CAP));
     // borrow cap is the 1st cap
-    expect(await configMock.getCaps()).to.be.eql([BORROW_CAP, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getCaps())).to.be.eql(
+      bigNumbersToArrayString([BORROW_CAP, ZERO])
+    );
     expect(await configMock.getBorrowCap()).to.be.eq(BORROW_CAP);
     expect(await configMock.setBorrowCap(ZERO));
-    expect(await configMock.getCaps()).to.be.eql([ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getCaps())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO])
+    );
     expect(await configMock.getBorrowCap()).to.be.eq(ZERO);
   });
 
   it('getSupplyCap()', async () => {
-    expect(await configMock.getCaps()).to.be.eql([ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getCaps())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO])
+    );
     expect(await configMock.getSupplyCap()).to.be.eq(ZERO);
     expect(await configMock.setSupplyCap(SUPPLY_CAP));
     // supply cap is the 2nd cap
-    expect(await configMock.getCaps()).to.be.eql([ZERO, SUPPLY_CAP]);
+    expect(bigNumbersToArrayString(await configMock.getCaps())).to.be.eql(
+      bigNumbersToArrayString([ZERO, SUPPLY_CAP])
+    );
     expect(await configMock.getSupplyCap()).to.be.eq(SUPPLY_CAP);
     expect(await configMock.setSupplyCap(ZERO));
-    expect(await configMock.getCaps()).to.be.eql([ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getCaps())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO])
+    );
     expect(await configMock.getSupplyCap()).to.be.eq(ZERO);
   });
 
@@ -165,14 +209,20 @@ describe('ReserveConfiguration', async () => {
   });
 
   it('setLtv() with ltv = MAX_VALID_LTV', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLtv()).to.be.eq(ZERO);
     expect(await configMock.setLtv(MAX_VALID_LTV));
     // LTV is the 1st param
-    expect(await configMock.getParams()).to.be.eql([MAX_VALID_LTV, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([MAX_VALID_LTV, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLtv()).to.be.eq(MAX_VALID_LTV);
     expect(await configMock.setLtv(0));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLtv()).to.be.eq(ZERO);
   });
 
@@ -187,21 +237,20 @@ describe('ReserveConfiguration', async () => {
   });
 
   it('setLiquidationThreshold() with threshold = MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
     expect(await configMock.setLiquidationThreshold(MAX_VALID_LIQUIDATION_THRESHOLD));
     // LIQ_THRESHOLD is the 2nd param
-    expect(await configMock.getParams()).to.be.eql([
-      ZERO,
-      MAX_VALID_LIQUIDATION_THRESHOLD,
-      ZERO,
-      ZERO,
-      ZERO,
-      ZERO,
-    ]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, MAX_VALID_LIQUIDATION_THRESHOLD, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLiquidationThreshold()).to.be.eq(MAX_VALID_LIQUIDATION_THRESHOLD);
     expect(await configMock.setLiquidationThreshold(0));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
   });
 
@@ -218,21 +267,20 @@ describe('ReserveConfiguration', async () => {
   });
 
   it('setDecimals() with decimals = MAX_VALID_DECIMALS', async () => {
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
     expect(await configMock.setDecimals(MAX_VALID_DECIMALS));
     // Decimals is the 4th param
-    expect(await configMock.getParams()).to.be.eql([
-      ZERO,
-      ZERO,
-      ZERO,
-      MAX_VALID_DECIMALS,
-      ZERO,
-      ZERO,
-    ]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, MAX_VALID_DECIMALS, ZERO, ZERO])
+    );
     expect(await configMock.getDecimals()).to.be.eq(MAX_VALID_DECIMALS);
     expect(await configMock.setDecimals(0));
-    expect(await configMock.getParams()).to.be.eql([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]);
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
   });
 
