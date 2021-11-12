@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.5.1](https://www.github.com/aave/aave-v3-core/compare/v1.5.0...v1.5.1) (2021-11-12)
+
+
+### Bug Fixes
+
+* fix ci workflow file ([5520c8f](https://www.github.com/aave/aave-v3-core/commit/5520c8fb3ab959f3167755cee7642e3ea184eac9))
+
 ## [1.5.0](https://www.github.com/aave/aave-v3-core/compare/v1.4.0...v1.5.0) (2021-11-12)
 
 
