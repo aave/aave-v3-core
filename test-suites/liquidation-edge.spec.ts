@@ -35,7 +35,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
     const depositor = users[0];
     const borrower = users[1];
 
-    // Deposit 1000 dai
+    // Deposit dai
     await dai
       .connect(depositor.signer)
       ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000000'));
@@ -60,7 +60,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
 
     await oracle.setAssetPrice(dai.address, daiPrice.percentDiv('2700'));
 
-    // Borrow 500 dai stable
+    // Borrow
     await pool
       .connect(borrower.signer)
       .borrow(
@@ -71,7 +71,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
         borrower.address
       );
 
-    // Borrow 200 dai variable
+    // Borrow
     await pool
       .connect(borrower.signer)
       .borrow(
