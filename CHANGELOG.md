@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.5.0](https://www.github.com/aave/aave-v3-core/compare/v1.4.0...v1.5.0) (2021-11-12)
+
+
+### Features
+
+* updated solidity version ([7891ac6](https://www.github.com/aave/aave-v3-core/commit/7891ac6a9063e9d042333aa16589126e10fcb67d))
+
+
+### Bug Fixes
+
+* Add comment + gasoptimization for flashloans ([546fe84](https://www.github.com/aave/aave-v3-core/commit/546fe84771345d612d42a91ef434188194b26a3b))
+* Add comment to elaborate on unusual flow in flashloan simple ([5f41c07](https://www.github.com/aave/aave-v3-core/commit/5f41c07c19e36e195114c63702808607de6a5f9c))
+* Add configuration cache to save gas ([e5b9c2a](https://www.github.com/aave/aave-v3-core/commit/e5b9c2a8e52084f58548d11609ccebdf0e40bf52))
+* Fix reentrance attack in `flashLoanSimple` ([1e98320](https://www.github.com/aave/aave-v3-core/commit/1e98320efce9e4a2de8da59c6c416e49a10d9ce5))
+* Move `interestRateMode` cast below state update ([9732e6f](https://www.github.com/aave/aave-v3-core/commit/9732e6f1e61fa010401126651c615e911da2af57))
+* Simplify flow for `mintToTreasury` ([8385f6b](https://www.github.com/aave/aave-v3-core/commit/8385f6b6c6dfd2e3e0b02b09ca7a8b6970ba6868))
+
 ## [1.4.0](https://www.github.com/aave/aave-v3-core/compare/v1.3.0...v1.4.0) (2021-11-09)
 
 
