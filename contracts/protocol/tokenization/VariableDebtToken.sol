@@ -44,15 +44,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    _domainSeparator = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(name())),
-        keccak256(EIP712_REVISION),
-        block.chainid,
-        address(this)
-      )
-    );
+    _domainSeparator = _calculateDomainSeparator();
 
     emit Initialized(
       underlyingAsset,

@@ -45,6 +45,13 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   IAaveIncentivesController internal _incentivesController;
   IPoolAddressesProvider internal _addressesProvider;
 
+  bytes public constant EIP712_REVISION = bytes('1');
+  bytes32 internal constant EIP712_DOMAIN =
+    keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
+
+  bytes32 internal _domainSeparator;
+  uint256 internal immutable _chainId;
+
   constructor(
     IPoolAddressesProvider addressesProvider,
     string memory name,
@@ -55,6 +62,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     _name = name;
     _symbol = symbol;
     _decimals = decimals;
+    _chainId = block.chainid;
   }
 
   /// @inheritdoc IERC20Detailed
@@ -227,5 +235,25 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   function _setDecimals(uint8 newDecimals) internal {
     _decimals = newDecimals;
+  }
+
+  function DOMAIN_SEPARATOR() public view returns (bytes32) {
+    if (block.chainid == _chainId) {
+      return _domainSeparator;
+    }
+    return _calculateDomainSeparator();
+  }
+
+  function _calculateDomainSeparator() internal view returns (bytes32) {
+    return
+      keccak256(
+        abi.encode(
+          EIP712_DOMAIN,
+          keccak256(bytes(name())),
+          keccak256(EIP712_REVISION),
+          block.chainid,
+          address(this)
+        )
+      );
   }
 }

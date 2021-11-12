@@ -23,9 +23,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   using WadRayMath for uint256;
   using SafeERC20 for IERC20;
 
-  bytes public constant EIP712_REVISION = bytes('1');
-  bytes32 internal constant EIP712_DOMAIN =
-    keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
   bytes32 public constant PERMIT_TYPEHASH =
     keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
@@ -33,9 +30,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
   /// @dev owner => next valid nonce to submit with permit()
   mapping(address => uint256) public _nonces;
-
-  bytes32 internal _domainSeparator;
-  uint256 internal immutable _chainId;
 
   IPool internal immutable _pool;
   address internal _treasury;
@@ -55,7 +49,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     IncentivizedERC20(pool.getAddressesProvider(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
   {
     _pool = pool;
-    _chainId = block.chainid;
   }
 
   /// @inheritdoc IInitializableAToken
@@ -76,15 +69,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    _domainSeparator = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(name())),
-        keccak256(EIP712_REVISION),
-        block.chainid,
-        address(this)
-      )
-    );
+    _domainSeparator = _calculateDomainSeparator();
 
     emit Initialized(
       underlyingAsset,
@@ -96,22 +81,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
       aTokenSymbol,
       params
     );
-  }
-
-  function DOMAIN_SEPARATOR() public view returns (bytes32) {
-    if (block.chainid == _chainId) {
-      return _domainSeparator;
-    }
-    return
-      keccak256(
-        abi.encode(
-          EIP712_DOMAIN,
-          keccak256(bytes(name())),
-          keccak256(EIP712_REVISION),
-          block.chainid,
-          address(this)
-        )
-      );
   }
 
   /// @inheritdoc IAToken
