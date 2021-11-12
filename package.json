@@ -16,7 +16,7 @@
     "console:fork": "FORK=main hardhat console",
     "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
     "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
-    "coverage": "npx hardhat coverage --temp temp-artifacts --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test-suites/*.spec.ts'",
+    "coverage": "COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test-suites/*.spec.ts'",
     "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/*.spec.ts",
     "test-scenarios": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
     "test-subgraph:scenarios": ". ./setup-test-env.sh  && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",

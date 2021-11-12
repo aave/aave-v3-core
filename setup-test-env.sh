@@ -9,16 +9,18 @@
 # due at running tests all external artifacts
 # located at /artifacts are deleted,  causing
 # the deploy library to not find the external
-# artifact dependencies. 
+# artifacts. 
 
 echo "[BASH] Setting up testnet enviroment"
 
-if [ "$COVERAGE" == false ]; then
+if [ ! "$COVERAGE" = true ]; then
     # remove hardhat and artifacts cache
     npm run ci:clean
 
     # compile @aave/core-v3 contracts
     npm run compile
+else
+    echo "[BASH] Skipping compilation to keep coverage artifacts"
 fi
 
 # Copy artifacts into separate directory to allow

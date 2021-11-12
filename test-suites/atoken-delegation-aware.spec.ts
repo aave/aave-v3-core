@@ -1,8 +1,7 @@
-import { MintableDelegationERC20 } from './../types/MintableDelegationERC20.d';
+import { DelegationAwareAToken, MintableDelegationERC20 } from '../types';
 import { expect } from 'chai';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import { DelegationAwareAToken } from '../types/DelegationAwareAToken';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import {
   deployMintableDelegationERC20,

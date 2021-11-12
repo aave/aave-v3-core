@@ -1,4 +1,4 @@
-import { MockPool } from './../types/MockPool.d';
+import { MockPool } from '../types/MockPool';
 import { expect } from 'chai';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import hre from 'hardhat';
