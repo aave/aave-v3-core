@@ -1,7 +1,8 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { DRE } from './misc-utils';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 export const usingTenderly = () =>
-  DRE &&
-  ((DRE as HardhatRuntimeEnvironment).network.name.includes('tenderly') ||
+  hre &&
+  ((hre as HardhatRuntimeEnvironment).network.name.includes('tenderly') ||
     process.env.TENDERLY === 'true');

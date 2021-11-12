@@ -23,7 +23,14 @@ jobs:
           node-version: ${{ matrix.node-version }}
           # Use the Github Package registry
           registry-url: https://npm.pkg.github.com/
+          scope: '@aave'
       - run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
+        if: ${{ steps.release.outputs.release_created }}
+        - run: npm ci:test
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
         if: ${{ steps.release.outputs.release_created }}
       - run: npm publish
         if: ${{ steps.release.outputs.release_created }}

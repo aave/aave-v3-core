@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 /**
  * @title Errors library
@@ -115,7 +115,7 @@ library Errors {
   string public constant VL_UNBACKED_MINT_CAP_EXCEEDED = '104';
   string public constant VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED = '105';
   string public constant RC_INVALID_DEBT_CEILING = '106';
-  string public constant VL_INVALID_ISOLATION_MODE_BORROW_CATEGORY = '107';
+  string public constant VL_ASSET_NOT_BORROWABLE_IN_ISOLATION = '107';
   string public constant VL_DEBT_CEILING_CROSSED = '108';
   string public constant SL_USER_IN_ISOLATION_MODE = '109';
   string public constant PC_BRIDGE_PROTOCOL_FEE_INVALID = '110';

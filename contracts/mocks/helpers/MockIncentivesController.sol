@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 
@@ -11,6 +11,19 @@ contract MockIncentivesController is IAaveIncentivesController {
     returns (
       uint256,
       uint256,
+      uint256
+    )
+  {
+    return (0, 0, 0);
+  }
+
+  function assets(address)
+    external
+    pure
+    override
+    returns (
+      uint128,
+      uint128,
       uint256
     )
   {
@@ -65,6 +78,10 @@ contract MockIncentivesController is IAaveIncentivesController {
   }
 
   function PRECISION() external pure override returns (uint8) {
+    return 0;
+  }
+
+  function DISTRIBUTION_END() external pure override returns (uint256) {
     return 0;
   }
 }

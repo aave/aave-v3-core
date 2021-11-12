@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.4.0](https://www.github.com/aave/aave-v3-core/compare/v1.3.0...v1.4.0) (2021-11-09)
+
+
+### Features
+
+* added public debt ceiling decimal constant, added getter to DataProvider ([52918e2](https://www.github.com/aave/aave-v3-core/commit/52918e2f98e3e9ce65fca8df19596ec577213b26))
+
+## [1.3.0](https://www.github.com/aave/aave-v3-core/compare/v1.2.1...v1.3.0) (2021-11-09)
+
+
+### Features
+
+* added borrowable in isolation configuration, fixed tests ([8755279](https://www.github.com/aave/aave-v3-core/commit/87552797a8776f38e869aff7e0c3a1f9d70a7950))
+* Added missing legacy methods ([3a2fc3f](https://www.github.com/aave/aave-v3-core/commit/3a2fc3f50dbcc7f3552554b04f6b33f51657a107))
+* finalized implementation, fixed tests ([c9bb800](https://www.github.com/aave/aave-v3-core/commit/c9bb8002498e8638b63528d63cea4d8fefcbcdb2))
+* initial implementation ([043bcde](https://www.github.com/aave/aave-v3-core/commit/043bcdec992a7196348881fa3bfef1ac8cb9e0b7))
+
+
+### Bug Fixes
+
+* improved condition in rayToWad() ([3eec7b3](https://www.github.com/aave/aave-v3-core/commit/3eec7b3093249e6d07861434298ff0e9716c3c44))
+
 ### [1.2.1](https://www.github.com/aave/aave-v3-core/compare/v1.2.0...v1.2.1) (2021-10-19)
 
 

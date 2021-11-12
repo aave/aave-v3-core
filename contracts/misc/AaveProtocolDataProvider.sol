@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
 import {ReserveConfiguration} from '../protocol/libraries/configuration/ReserveConfiguration.sol';
@@ -181,6 +181,14 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    **/
   function getDebtCeiling(address asset) external view returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getDebtCeiling();
+  }
+
+  /**
+   * @notice Returns the debt ceiling decimals
+   * @return The debt ceiling decimals
+   **/
+  function getDebtCeilingDecimals() external pure returns (uint256) {
+    return ReserveConfiguration.DEBT_CEILING_DECIMALS;
   }
 
   /**
