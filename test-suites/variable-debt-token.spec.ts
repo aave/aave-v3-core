@@ -8,6 +8,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 

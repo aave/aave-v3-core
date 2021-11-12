@@ -5,7 +5,7 @@ import { ProtocolErrors } from '../helpers/types';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
-import { increaseTime } from '@aave/deploy-v3';
+import { increaseTime, evmRevert, evmSnapshot } from '@aave/deploy-v3';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,
@@ -92,11 +92,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       helpersContract,
     } = testEnv;
 
-    await dai.connect(user2.signer).mint(utils.parseEther('1'));
+    await dai.connect(user2.signer)['mint(uint256)'](utils.parseEther('1'));
     await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user2.signer).supply(dai.address, utils.parseEther('1'), user2.address, 0);
 
-    await aave.connect(user2.signer).mint(utils.parseEther('1'));
+    await aave.connect(user2.signer)['mint(uint256)'](utils.parseEther('1'));
     await aave.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user2.signer).supply(aave.address, utils.parseEther('1'), user2.address, 0);
 

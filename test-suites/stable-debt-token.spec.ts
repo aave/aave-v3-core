@@ -205,7 +205,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const snapshot = await evmSnapshot();
     const { dai, helpersContract, poolAdmin, aclManager, deployer } = testEnv;
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
-    const stableDebt = StableDebtTokenFactory.connect(
+    const stableDebt = StableDebtToken__factory.connect(
       config.stableDebtTokenAddress,
       deployer.signer
     );
@@ -226,7 +226,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       users: [user],
     } = testEnv;
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
-    const stableDebt = StableDebtTokenFactory.connect(config.stableDebtTokenAddress, user.signer);
+    const stableDebt = StableDebtToken__factory.connect(config.stableDebtTokenAddress, user.signer);
 
     expect(await stableDebt.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
 
