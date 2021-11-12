@@ -9,6 +9,7 @@ build/
 .vscode
 .idea
 /types
+contracts/hardhat-dependency-compiler
 
 deployed-contracts.json
 
