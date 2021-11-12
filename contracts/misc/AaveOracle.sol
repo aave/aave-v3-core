@@ -36,7 +36,7 @@ contract AaveOracle is IPriceOracleGetter {
    */
   event FallbackOracleUpdated(address indexed fallbackOracle);
 
-  IPoolAddressesProvider internal _addressesProvider;
+  IPoolAddressesProvider internal immutable _addressesProvider;
   mapping(address => IChainlinkAggregator) private assetsSources;
   IPriceOracleGetter private _fallbackOracle;
   address public immutable override BASE_CURRENCY;

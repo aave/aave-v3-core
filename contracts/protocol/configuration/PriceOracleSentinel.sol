@@ -12,9 +12,9 @@ import {ISequencerOracle} from '../../interfaces/ISequencerOracle.sol';
  * @dev After a PriceOracle downtime, once it gets up, users can make their positions healthy during a grace period.
  */
 contract PriceOracleSentinel is IPriceOracleSentinel {
-  IPoolAddressesProvider public _addressesProvider;
-  ISequencerOracle public _oracle;
-  uint256 public _gracePeriod;
+  IPoolAddressesProvider public immutable _addressesProvider;
+  ISequencerOracle public immutable _oracle;
+  uint256 public immutable _gracePeriod;
 
   /**
    * @notice Constructor
