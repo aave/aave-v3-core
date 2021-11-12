@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.5.2](https://www.github.com/aave/aave-v3-core/compare/v1.5.1...v1.5.2) (2021-11-12)
+
+
+### Bug Fixes
+
+* fix releasepipeline ([5dc309d](https://www.github.com/aave/aave-v3-core/commit/5dc309d08120d3cf2ddea44e53f56b6c29fdfca6))
+
 ### [1.5.1](https://www.github.com/aave/aave-v3-core/compare/v1.5.0...v1.5.1) (2021-11-12)
 
 
