@@ -240,7 +240,7 @@ library ValidationLogic {
       ) *
       params.amount;
     unchecked {
-      vars.amountInBaseCurrency /= 10**vars.reserveDecimals;
+      vars.amountInBaseCurrency /= vars.assetUnit;
     }
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
