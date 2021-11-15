@@ -1,11 +1,12 @@
 const { expect } = require('chai');
-import { utils } from 'ethers';
+import { BigNumber, utils } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { ProtocolErrors } from '../helpers/types';
+import { ProtocolErrors, RateMode } from '../helpers/types';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 import { increaseTime } from '@aave/deploy-v3';
+import { parseEther } from '@ethersproject/units';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,
@@ -212,5 +213,67 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const reserveData = await pool.getReserveData(aave.address);
 
     expect(reserveData.isolationModeTotalDebt).to.be.eq('0');
+  });
+
+  it('Perform liquidation of isolation mode asset', async () => {
+    // We need to look at how the user getting liquidated was positioned. If the asset is isolation mode, then it needs to impact that as well
+    const {
+      dai,
+      aave,
+      oracle,
+      aaveOracle,
+      addressesProvider,
+      helpersContract,
+      users: [, , , , borrower, liquidator],
+      pool,
+    } = testEnv;
+
+    await addressesProvider.setPriceOracle(oracle.address);
+
+    // Fund depositor and liquidator
+    const liquidatorAmount = utils.parseUnits('1000', 18);
+    await dai.connect(liquidator.signer)['mint(uint256)'](liquidatorAmount.mul(2));
+    await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(liquidator.signer)
+      .supply(dai.address, liquidatorAmount, liquidator.address, 0);
+
+    const userGlobalDataBefore = await pool.getUserAccountData(borrower.address);
+    expect(userGlobalDataBefore.totalCollateralBase).to.be.eq(0);
+
+    const depositAmount = utils.parseUnits('1', 18);
+    await aave.connect(borrower.signer)['mint(uint256)'](depositAmount);
+    await aave.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(borrower.signer).supply(aave.address, depositAmount, borrower.address, 0);
+
+    const userData = await helpersContract.getUserReserveData(aave.address, borrower.address);
+    expect(userData.usageAsCollateralEnabled).to.be.eq(true);
+
+    const borrowAmount = utils.parseUnits('50', 18);
+    await pool
+      .connect(borrower.signer)
+      .borrow(dai.address, borrowAmount, RateMode.Variable, '0', borrower.address);
+
+    const daiPrice = await oracle.getAssetPrice(dai.address);
+    await oracle.setAssetPrice(dai.address, daiPrice.mul(10));
+
+    const userGlobalData = await pool.getUserAccountData(borrower.address);
+
+    expect(userGlobalData.healthFactor).to.be.lt(parseEther('1'));
+
+    const isolationModeTotalDebtBefore = (await pool.getReserveData(aave.address))
+      .isolationModeTotalDebt;
+
+    await pool
+      .connect(liquidator.signer)
+      .liquidationCall(aave.address, dai.address, borrower.address, borrowAmount.div(2), false);
+
+    const isolationModeTotalDebtAfter = (await pool.getReserveData(aave.address))
+      .isolationModeTotalDebt;
+    const expectedAmountAfter = isolationModeTotalDebtBefore.sub(
+      borrowAmount.div(2).div(BigNumber.from(10).pow(16))
+    );
+
+    expect(isolationModeTotalDebtAfter).to.be.eq(expectedAmountAfter);
   });
 });
