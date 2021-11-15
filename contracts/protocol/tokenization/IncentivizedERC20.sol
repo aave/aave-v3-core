@@ -66,7 +66,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /// @inheritdoc IERC20Detailed
-  function name() public view override returns (string memory) {
+  function name() external view override returns (string memory) {
     return _name;
   }
 
@@ -249,7 +249,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
       keccak256(
         abi.encode(
           EIP712_DOMAIN,
-          keccak256(bytes(name())),
+          keccak256(bytes(_name)),
           keccak256(EIP712_REVISION),
           block.chainid,
           address(this)
