@@ -90,7 +90,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
    **/
-  function initialize() external initializer {
+  function initialize(IPoolAddressesProvider provider) external initializer {
+    require(provider == _addressesProvider, Errors.PC_INVALID_CONFIGURATION);
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
     _maxNumberOfReserves = 128;
