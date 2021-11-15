@@ -198,6 +198,28 @@ library LiquidationLogic {
       );
     }
 
+    (bool isolationModeActive, address isolationModeCollateralAddress, ) = userConfig
+      .getIsolationModeState(reserves, reservesList);
+
+    if (isolationModeActive) {
+      uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+        .isolationModeTotalDebt;
+
+      uint128 isolatedDebtRepaid = Helpers.castUint128(
+        vars.actualDebtToLiquidate /
+          10**(debtReserve.configuration.getDecimals() - ReserveConfiguration.DEBT_CEILING_DECIMALS)
+      );
+
+      // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
+      if (isolationModeTotalDebt <= isolatedDebtRepaid) {
+        reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
+      } else {
+        reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
+          isolationModeTotalDebt -
+          isolatedDebtRepaid;
+      }
+    }
+
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
       vars.collateralAtoken.transferOnLiquidation(
