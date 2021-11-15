@@ -456,13 +456,13 @@ library ValidationLogic {
     uint256[] memory amounts,
     mapping(address => DataTypes.ReserveData) storage reservesData
   ) internal view {
+    require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
     for (uint256 i = 0; i < assets.length; i++) {
       DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
         .configuration;
       require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
       require(configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
     }
-    require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
   }
 
   /**
