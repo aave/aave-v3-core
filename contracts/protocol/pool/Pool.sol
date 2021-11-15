@@ -90,7 +90,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _addressesProvider = provider;
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
-    _maxNumberOfReserves = 128;
     _flashLoanPremiumToProtocol = 0;
   }
 
@@ -566,8 +565,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function MAX_NUMBER_RESERVES() public view override returns (uint256) {
-    return _maxNumberOfReserves;
+  function MAX_NUMBER_RESERVES() public view virtual override returns (uint256) {
+    return ReserveConfiguration.MAX_RESERVES_COUNT;
   }
 
   /// @inheritdoc IPool
@@ -700,10 +699,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersEModeCategory[user];
   }
 
-  function _addReserveToList(address asset) internal {
+  function _addReserveToList(address asset) internal virtual {
     uint256 reservesCount = _reservesCount;
 
-    require(reservesCount < _maxNumberOfReserves, Errors.P_NO_MORE_RESERVES_ALLOWED);
+    require(
+      reservesCount < ReserveConfiguration.MAX_RESERVES_COUNT,
+      Errors.P_NO_MORE_RESERVES_ALLOWED
+    );
 
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
 

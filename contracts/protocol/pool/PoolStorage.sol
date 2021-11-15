@@ -32,8 +32,6 @@ contract PoolStorage {
 
   uint256 internal _flashLoanPremiumTotal;
 
-  uint256 internal _maxNumberOfReserves;
-
   uint256 internal _flashLoanPremiumToProtocol;
 
   mapping(uint8 => DataTypes.EModeCategory) _eModeCategories;
