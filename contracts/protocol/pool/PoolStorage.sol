@@ -18,8 +18,6 @@ contract PoolStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  IPoolAddressesProvider internal _addressesProvider;
-
   mapping(address => DataTypes.ReserveData) internal _reserves;
   mapping(address => DataTypes.UserConfigurationMap) internal _usersConfig;
 

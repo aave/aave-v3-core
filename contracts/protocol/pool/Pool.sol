@@ -49,6 +49,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   uint256 public constant POOL_REVISION = 0x2;
+  IPoolAddressesProvider internal immutable _addressesProvider;
 
   modifier onlyPoolConfigurator() {
     _onlyPoolConfigurator();
@@ -78,16 +79,18 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return POOL_REVISION;
   }
 
+  constructor(IPoolAddressesProvider provider) {
+    _addressesProvider = provider;
+  }
+
   /**
    * @notice Initializes the Pool.
    * @dev Function is invoked by the proxy contract when the Pool contract is added to the
    * PoolAddressesProvider of the market.
    * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption
    *   on subsequent operations
-   * @param provider The address of the PoolAddressesProvider
    **/
-  function initialize(IPoolAddressesProvider provider) external initializer {
-    _addressesProvider = provider;
+  function initialize() external initializer {
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
     _maxNumberOfReserves = 128;
