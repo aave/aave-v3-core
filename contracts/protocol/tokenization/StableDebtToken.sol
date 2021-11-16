@@ -23,11 +23,16 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
 contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   using WadRayMath for uint256;
 
+  struct RateAndTime {
+    uint40 _totalSupplyTimestamp;
+    uint128 _avgStableRate;
+  }
+
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
-  uint256 internal _avgStableRate;
   mapping(address => uint40) internal _timestamps;
-  uint40 internal _totalSupplyTimestamp;
+
+  RateAndTime internal _rateAndTime;
 
   address internal _underlyingAsset;
 
@@ -69,7 +74,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   /// @inheritdoc IStableDebtToken
   function getAverageStableRate() external view virtual override returns (uint256) {
-    return _avgStableRate;
+    return _rateAndTime._avgStableRate;
   }
 
   /// @inheritdoc IStableDebtToken
@@ -130,7 +135,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(onBehalfOf);
 
     vars.previousSupply = totalSupply();
-    vars.currentAvgStableRate = _avgStableRate;
+    vars.currentAvgStableRate = _rateAndTime._avgStableRate;
     vars.nextSupply = _totalSupply = vars.previousSupply + amount;
 
     vars.amountInRay = amount.wadToRay();
@@ -142,12 +147,13 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     _userState[onBehalfOf].additionalData = Helpers.castUint128(vars.nextStableRate);
 
     //solium-disable-next-line
-    _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
+    _rateAndTime._totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
 
     // Calculates the updated average stable rate
-    vars.currentAvgStableRate = _avgStableRate = (vars.currentAvgStableRate.rayMul(
-      vars.previousSupply.wadToRay()
-    ) + rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay());
+    vars.currentAvgStableRate = _rateAndTime._avgStableRate = Helpers.castUint128(
+      (vars.currentAvgStableRate.rayMul(vars.previousSupply.wadToRay()) +
+        rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay())
+    );
 
     _mint(onBehalfOf, amount + balanceIncrease, vars.previousSupply);
 
@@ -185,20 +191,22 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     // mght actually try to repay more than the available debt supply.
     // In this case we simply set the total supply and the avg stable rate to 0
     if (previousSupply <= amount) {
-      _avgStableRate = 0;
+      _rateAndTime._avgStableRate = 0;
       _totalSupply = 0;
     } else {
       nextSupply = _totalSupply = previousSupply - amount;
-      uint256 firstTerm = _avgStableRate.rayMul(previousSupply.wadToRay());
+      uint256 firstTerm = uint256(_rateAndTime._avgStableRate).rayMul(previousSupply.wadToRay());
       uint256 secondTerm = userStableRate.rayMul(amount.wadToRay());
 
       // For the same reason described above, when the last user is repaying it might
       // happen that user rate * user balance > avg rate * total supply. In that case,
       // we simply set the avg rate to 0
       if (secondTerm >= firstTerm) {
-        nextAvgStableRate = _avgStableRate = _totalSupply = 0;
+        nextAvgStableRate = _totalSupply = _rateAndTime._avgStableRate = 0;
       } else {
-        nextAvgStableRate = _avgStableRate = (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay());
+        nextAvgStableRate = _rateAndTime._avgStableRate = Helpers.castUint128(
+          (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay())
+        );
       }
     }
 
@@ -210,7 +218,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       _timestamps[user] = uint40(block.timestamp);
     }
     //solium-disable-next-line
-    _totalSupplyTimestamp = uint40(block.timestamp);
+    _rateAndTime._totalSupplyTimestamp = uint40(block.timestamp);
 
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
@@ -276,24 +284,29 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       uint40
     )
   {
-    uint256 avgRate = _avgStableRate;
-    return (super.totalSupply(), _calcTotalSupply(avgRate), avgRate, _totalSupplyTimestamp);
+    uint256 avgRate = _rateAndTime._avgStableRate;
+    return (
+      super.totalSupply(),
+      _calcTotalSupply(avgRate),
+      avgRate,
+      _rateAndTime._totalSupplyTimestamp
+    );
   }
 
   /// @inheritdoc IStableDebtToken
   function getTotalSupplyAndAvgRate() external view override returns (uint256, uint256) {
-    uint256 avgRate = _avgStableRate;
+    uint256 avgRate = _rateAndTime._avgStableRate;
     return (_calcTotalSupply(avgRate), avgRate);
   }
 
   /// @inheritdoc IERC20
   function totalSupply() public view override returns (uint256) {
-    return _calcTotalSupply(_avgStableRate);
+    return _calcTotalSupply(_rateAndTime._avgStableRate);
   }
 
   /// @inheritdoc IStableDebtToken
   function getTotalSupplyLastUpdated() external view override returns (uint40) {
-    return _totalSupplyTimestamp;
+    return _rateAndTime._totalSupplyTimestamp;
   }
 
   /// @inheritdoc IStableDebtToken
@@ -328,7 +341,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     uint256 cumulatedInterest = MathUtils.calculateCompoundedInterest(
       avgRate,
-      _totalSupplyTimestamp
+      _rateAndTime._totalSupplyTimestamp
     );
 
     return principalSupply.rayMul(cumulatedInterest);
