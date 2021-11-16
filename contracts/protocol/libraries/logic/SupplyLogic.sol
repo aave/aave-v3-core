@@ -146,6 +146,9 @@ library SupplyLogic {
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
     DataTypes.FinalizeTransferParams memory params
   ) external {
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
+    DataTypes.ReserveCache memory reserveCache = reserve.cache();
+
     ValidationLogic.validateTransfer(reserves[params.asset]);
 
     uint256 reserveId = reserves[params.asset].id;
@@ -176,8 +179,11 @@ library SupplyLogic {
       if (params.balanceToBefore == 0 && params.amount != 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         (bool isolationModeActive, , ) = toConfig.getIsolationModeState(reserves, reservesList);
-        if (!isolationModeActive) {
-          toConfig.setUsingAsCollateral(reserveId, true);
+        if (
+          ((!isolationModeActive && (reserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
+            !toConfig.isUsingAsCollateralAny())
+        ) {
+          toConfig.setUsingAsCollateral(reserve.id, true);
           emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
         }
       }

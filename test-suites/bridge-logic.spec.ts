@@ -15,7 +15,6 @@ import {
   configuration as calculationsConfiguration,
 } from './helpers/utils/calculations';
 import './helpers/utils/wadraymath';
-import { formatEther } from '@ethersproject/units';
 import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 
 const expectEqual = (

@@ -45,6 +45,8 @@ library BridgeLogic {
    *   0 if the action is executed directly by the user, without any middle-man
    **/
   function mintUnbacked(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
@@ -77,8 +79,14 @@ library BridgeLogic {
     );
 
     if (isFirstSupply) {
-      userConfig.setUsingAsCollateral(reserve.id, true);
-      emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
+      if (
+        ((!isolationModeActive && (reserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
+          !userConfig.isUsingAsCollateralAny())
+      ) {
+        userConfig.setUsingAsCollateral(reserve.id, true);
+        emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+      }
     }
 
     emit MintUnbacked(asset, msg.sender, onBehalfOf, amount, referralCode);
