@@ -50,7 +50,7 @@ library DataTypes {
     //bit 152-167 liquidation protocol fee
     //bit 168-175 eMode category
     //bit 176-211 unbacked mint cap in whole tokens, unbackedMintCap == 0 => minting disabled
-    //bit 212-251 debt ceiling for isolation mode
+    //bit 212-251 debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
     //bit 252-255 unused
 
     uint256 data;
