@@ -29,7 +29,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   uint256 public constant ATOKEN_REVISION = 0x1;
 
   /// @dev owner => next valid nonce to submit with permit()
-  mapping(address => uint256) public _nonces;
+  mapping(address => uint256) internal _nonces;
 
   IPool internal immutable _pool;
   address internal _treasury;
@@ -300,5 +300,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint128 amount
   ) internal override {
     _transfer(from, to, amount, true);
+  }
+
+  function nonces(address owner) public view virtual returns (uint256) {
+    return _nonces[owner];
   }
 }
