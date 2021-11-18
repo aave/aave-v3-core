@@ -5,10 +5,14 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
+import { parseUnits } from '@ethersproject/units';
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   const { VL_INCONSISTENT_EMODE_CATEGORY, VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } =
     ProtocolErrors;
+
+  let snapSetup: string;
 
   const CATEGORIES = {
     STABLECOINS: {
@@ -54,6 +58,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     await usdc.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    snapSetup = await evmSnapshot();
   });
 
   it('Admin adds a category for stablecoins with DAI and USDC', async () => {
@@ -574,5 +580,50 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(userDataAfter.totalCollateralBase).to.be.eq(userDataBefore.totalCollateralBase);
     expect(userDataAfter.availableBorrowsBase).to.be.lt(userDataBefore.availableBorrowsBase);
     expect(userDataAfter.healthFactor).to.be.eq(userDataBefore.healthFactor);
+  });
+
+  it('Issue case', async () => {
+    await evmRevert(snapSetup);
+
+    const {
+      configurator,
+      helpersContract,
+      weth,
+      usdc,
+      poolAdmin,
+      pool,
+      users: [user],
+    } = testEnv;
+
+    // Setup eMode category for eth, use weth price as oracle price.
+    const { id, ltv, lt, lb, label } = CATEGORIES.ETHEREUM;
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(id, ltv, lt, lb, weth.address, label)
+    );
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(weth.address, id));
+    expect(await helpersContract.getReserveEModeCategory(weth.address)).to.be.eq(id);
+    const data = await pool.getEModeCategoryData(id);
+    expect(data.priceSource).to.be.eq(weth.address);
+
+    // Deposit USDC
+    expect(
+      await pool.connect(user.signer).supply(usdc.address, parseUnits('100', 6), user.address, 0)
+    );
+
+    // Look at power
+    const baseUnit = parseUnits('1', 8);
+    const userDataBefore = await pool.getUserAccountData(user.address);
+    expect(userDataBefore.totalCollateralBase).to.be.eq(baseUnit.mul(100));
+
+    // Activate eMode for ETH
+    expect(await pool.connect(user.signer).setUserEMode(id));
+
+    // Look at power
+    const userDataAfter = await pool.getUserAccountData(user.address);
+
+    // Expect collateral to have equal value
+    expect(userDataAfter.totalCollateralBase).to.be.eq(userDataBefore.totalCollateralBase);
   });
 });
