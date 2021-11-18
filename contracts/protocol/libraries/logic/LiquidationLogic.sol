@@ -208,8 +208,21 @@ library LiquidationLogic {
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
-        liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
-        emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
+        DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
+        collateralReserve.updateState(collateralReserveCache);
+
+        (bool isolationModeActive, , ) = liquidatorConfig.getIsolationModeState(
+          reserves,
+          reservesList
+        );
+        if (
+          ((!isolationModeActive &&
+            (collateralReserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
+            !liquidatorConfig.isUsingAsCollateralAny())
+        ) {
+          liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
+          emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
+        }
       }
     } else {
       DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();

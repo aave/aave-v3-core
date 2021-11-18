@@ -3,10 +3,17 @@ import { utils, BigNumber } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP } from '../helpers/constants';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
-import { increaseTime, waitForTx } from '@aave/deploy-v3';
-import { getReserveData } from './helpers/utils/helpers';
+import {
+  increaseTime,
+  waitForTx,
+  evmSnapshot,
+  evmRevert,
+  advanceTimeAndBlock,
+} from '@aave/deploy-v3';
+import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { getTxCostAndTimestamp } from './helpers/actions';
 import AaveConfig from '@aave/deploy-v3/dist/markets/aave';
 import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
@@ -36,6 +43,8 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const { VL_ASSET_NOT_BORROWABLE_IN_ISOLATION, VL_DEBT_CEILING_CROSSED } = ProtocolErrors;
 
   let aclManager;
+  let oracleBaseDecimals;
+  let snapshot;
 
   before(async () => {
     const { configurator, dai, usdc, aave, users, poolAdmin } = testEnv;
@@ -48,13 +57,20 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await configurator.setBorrowableInIsolation(dai.address, true);
     await configurator.setBorrowableInIsolation(usdc.address, true);
 
-    //configure bridge
+    // configure bridge
     aclManager = await getACLManager();
     await waitForTx(await aclManager.addBridge(users[2].address));
 
     await waitForTx(
       await configurator.connect(poolAdmin.signer).updateBridgeProtocolFee(bridgeProtocolFeeBps)
     );
+
+    // configure oracle
+    const { aaveOracle, addressesProvider, oracle } = testEnv;
+    oracleBaseDecimals = (await (await aaveOracle.BASE_CURRENCY_UNIT()).toString().length) - 1;
+    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+
+    snapshot = await evmSnapshot();
   });
 
   it('User 0 supply 1000 dai.', async () => {
@@ -289,5 +305,50 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     expect(daiUserData.usageAsCollateralEnabled).to.be.eq(true);
     expect(wethUserData.usageAsCollateralEnabled).to.be.eq(true);
     expect(aaveUserData.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 5s isolation mode asset is liquidated by User 6', async () => {
+    const { weth, dai, aave, aAave, users, pool, helpersContract, oracle } = testEnv;
+
+    await evmRevert(snapshot);
+
+    const daiAmount = utils.parseEther('700');
+    await dai.connect(users[5].signer)['mint(uint256)'](daiAmount);
+    await dai.connect(users[5].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[5].signer).supply(dai.address, daiAmount, users[5].address, 0);
+
+    const aaveAmount = utils.parseEther('.3');
+    await aave.connect(users[6].signer)['mint(uint256)'](aaveAmount);
+    await aave.connect(users[6].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[6].signer).supply(aave.address, aaveAmount, users[6].address, 0);
+    await aAave.connect(users[6].signer).transfer(users[6].address, aaveAmount);
+
+    const userGlobalData = await pool.getUserAccountData(users[6].address);
+    const daiPrice = await oracle.getAssetPrice(dai.address);
+    let amountDAIToBorrow = await convertToCurrencyDecimals(
+      dai.address,
+      userGlobalData.availableBorrowsBase.div(daiPrice.toString()).percentMul(9999).toString()
+    );
+
+    await pool
+      .connect(users[6].signer)
+      .borrow(dai.address, amountDAIToBorrow, RateMode.Variable, 0, users[6].address);
+    await advanceTimeAndBlock(86400 * 365 * 100);
+
+    const userDaiReserveDataBefore = await getUserData(
+      pool,
+      helpersContract,
+      dai.address,
+      users[6].address
+    );
+    const amountToLiquidate = userDaiReserveDataBefore.currentVariableDebt.div(2);
+    await dai.connect(users[5].signer)['mint(uint256)'](daiAmount);
+    const tx = await pool
+      .connect(users[5].signer)
+      .liquidationCall(aave.address, dai.address, users[6].address, amountToLiquidate, true);
+    await tx.wait();
+
+    const userData = await helpersContract.getUserReserveData(aave.address, users[5].address);
+    expect(userData.usageAsCollateralEnabled).to.be.eq(false);
   });
 });
