@@ -235,7 +235,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
     // Top up user
-    expect(await dai.mint(amountDAItoDeposit));
+    expect(await dai['mint(uint256)'](amountDAItoDeposit));
 
     // Approve protocol to access depositor wallet
     expect(await dai.approve(pool.address, MAX_UINT_AMOUNT));

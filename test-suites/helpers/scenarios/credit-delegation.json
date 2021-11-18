@@ -3,13 +3,13 @@
   "description": "Test cases for the credit delegation related functions.",
   "stories": [
     {
-      "description": "User 3 deposits 1000 WETH. User 0 deposits 1000 DAI, user 0 delegates borrowing of 1 WETH on variable to user 4, user 4 borrows 1 WETH variable on behalf of user 0",
+      "description": "User 3 deposits 1476.010 WETH. User 0 deposits 14760.147 DAI, user 0 delegates borrowing of 1 WETH on variable to user 4, user 4 borrows 1 WETH variable on behalf of user 0",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "WETH",
-            "amount": "1000",
+            "amount": "1476.010",
             "user": "3"
           },
           "expected": "success"
@@ -26,7 +26,7 @@
           "name": "deposit",
           "args": {
             "reserve": "WETH",
-            "amount": "1000",
+            "amount": "1476.010",
             "user": "3"
           },
           "expected": "success"
@@ -35,7 +35,7 @@
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -52,7 +52,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"

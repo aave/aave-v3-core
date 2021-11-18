@@ -36,15 +36,16 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       usdc,
       weth,
       users: [user0, user1, user2],
+      aaveOracle,
     } = testEnv;
     const mintAmount = utils.parseEther('10000');
 
-    await dai.connect(user0.signer).mint(mintAmount);
-    await usdc.connect(user0.signer).mint(mintAmount);
-    await weth.connect(user0.signer).mint(mintAmount);
-    await usdc.connect(user1.signer).mint(mintAmount);
-    await weth.connect(user1.signer).mint(mintAmount);
-    await dai.connect(user2.signer).mint(mintAmount);
+    await dai.connect(user0.signer)['mint(uint256)'](mintAmount);
+    await usdc.connect(user0.signer)['mint(uint256)'](mintAmount);
+    await weth.connect(user0.signer)['mint(uint256)'](mintAmount);
+    await usdc.connect(user1.signer)['mint(uint256)'](mintAmount);
+    await weth.connect(user1.signer)['mint(uint256)'](mintAmount);
+    await dai.connect(user2.signer)['mint(uint256)'](mintAmount);
 
     await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await usdc.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -232,7 +233,9 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       helpersContract,
       weth,
       users: [, user1],
+      oracle,
     } = testEnv;
+    const wethPrice = await oracle.getAssetPrice(weth.address);
 
     const userDataBeforeSupply = await pool.getUserAccountData(user1.address);
 
@@ -246,7 +249,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(usageAsCollateralEnabled).to.be.true;
     const userDataAfterSupply = await pool.getUserAccountData(user1.address);
     expect(userDataBeforeSupply.totalCollateralBase).to.be.eq(
-      userDataAfterSupply.totalCollateralBase.sub(wethToSupply)
+      userDataAfterSupply.totalCollateralBase.sub(wethToSupply.wadMul(wethPrice))
     );
 
     // Activate EMode, increasing availableBorrowsBase

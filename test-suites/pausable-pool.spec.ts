@@ -5,21 +5,20 @@ import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import {
-  getACLManager,
-  getFirstSigner,
   getMockFlashLoanReceiver,
   getMockPool,
   getPoolConfiguratorProxy,
-} from '../helpers/contracts-getters';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
-import { deployMockPool } from '../helpers/contracts-deployments';
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
+import { deployMockPool } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import {
-  ACLManagerFactory,
-  ConfiguratorLogicFactory,
-  PoolAddressesProviderFactory,
-  PoolConfiguratorFactory,
+  ACLManager__factory,
+  ConfiguratorLogic__factory,
+  PoolAddressesProvider__factory,
+  PoolConfigurator__factory,
 } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 
 makeSuite('PausablePool', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
@@ -39,7 +38,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
-    await dai.connect(users[0].signer).mint(amountDAItoDeposit);
+    await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -94,7 +93,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
-    await dai.connect(users[0].signer).mint(amountDAItoDeposit);
+    await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -114,7 +113,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
-    await dai.connect(users[0].signer).mint(amountDAItoDeposit);
+    await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -204,7 +203,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     //mints USDC to depositor
     await usdc
       .connect(depositor.signer)
-      .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
     await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -216,11 +215,11 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
       .connect(depositor.signer)
       .deposit(usdc.address, amountUSDCtoDeposit, depositor.address, '0');
 
-    //user 4 deposits 1 ETH
-    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
+    //user 4 deposits ETH
+    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.06775');
 
     //mints WETH to borrower
-    await weth.connect(borrower.signer).mint(amountETHtoDeposit);
+    await weth.connect(borrower.signer)['mint(uint256)'](amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -247,7 +246,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     await oracle.setAssetPrice(usdc.address, usdcPrice.percentMul(12000));
 
     //mints dai to the liquidator
-    await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+    await usdc['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
     await usdc.approve(pool.address, MAX_UINT_AMOUNT);
 
     const userReserveDataBefore = await helpersContract.getUserReserveData(
@@ -276,11 +275,11 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     const amountDAIToDeposit = utils.parseEther('120');
     const amountToBorrow = utils.parseUnits('65', 6);
 
-    await weth.connect(user.signer).mint(amountWETHToDeposit);
+    await weth.connect(user.signer)['mint(uint256)'](amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 
-    await dai.connect(user.signer).mint(amountDAIToDeposit);
+    await dai.connect(user.signer)['mint(uint256)'](amountDAIToDeposit);
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(dai.address, amountDAIToDeposit, user.address, '0');
 
@@ -317,7 +316,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     const user = users[1];
 
     const amountWETHToDeposit = utils.parseEther('1');
-    await weth.connect(user.signer).mint(amountWETHToDeposit);
+    await weth.connect(user.signer)['mint(uint256)'](amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 
@@ -342,11 +341,14 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     // Deploy a new PoolConfigurator
     const configuratorLogic = await (
-      await new ConfiguratorLogicFactory(await getFirstSigner()).deploy()
+      await new ConfiguratorLogic__factory(await getFirstSigner()).deploy()
     ).deployed();
     const poolConfigurator = await (
-      await new PoolConfiguratorFactory(
-        { ['__$3ddc574512022f331a6a4c7e4bbb5c67b6$__']: configuratorLogic.address },
+      await new PoolConfigurator__factory(
+        {
+          ['contracts/protocol/libraries/logic/ConfiguratorLogic.sol:ConfiguratorLogic']:
+            configuratorLogic.address,
+        },
         await getFirstSigner()
       ).deploy()
     ).deployed();
@@ -354,7 +356,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // Deploy a new PoolAddressesProvider
     const MARKET_ID = '1';
     const poolAddressesProvider = await (
-      await new PoolAddressesProviderFactory(await getFirstSigner()).deploy(MARKET_ID)
+      await new PoolAddressesProvider__factory(await getFirstSigner()).deploy(MARKET_ID)
     ).deployed();
 
     // Set the ACL admin
@@ -362,7 +364,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     // Update the ACLManager
     const aclManager = await (
-      await new ACLManagerFactory(await getFirstSigner()).deploy(poolAddressesProvider.address)
+      await new ACLManager__factory(await getFirstSigner()).deploy(poolAddressesProvider.address)
     ).deployed();
     expect(await poolAddressesProvider.setACLManager(aclManager.address))
       .to.emit(poolAddressesProvider, 'ACLManagerUpdated')

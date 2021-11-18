@@ -4,14 +4,14 @@ import { ProtocolErrors } from '../helpers/types';
 import { ONE_ADDRESS, ZERO_ADDRESS } from '../helpers/constants';
 import {
   getAToken,
-  getFirstSigner,
   getMockInitializableImple,
   getMockInitializableImpleV2,
   getMockStableDebtToken,
   getMockVariableDebtToken,
   getStableDebtToken,
   getVariableDebtToken,
-} from '../helpers/contracts-getters';
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import {
   deployInitializableImmutableAdminUpgradeabilityProxy,
   deployMockAToken,
@@ -21,13 +21,12 @@ import {
   deployMockReentrantInitializableImple,
   deployMockStableDebtToken,
   deployMockVariableDebtToken,
-} from '../helpers/contracts-deployments';
-import { getEthersSigners } from '../helpers/contracts-helpers';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
+} from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import {
   InitializableImmutableAdminUpgradeabilityProxy,
-  InitializableImmutableAdminUpgradeabilityProxyFactory,
+  InitializableImmutableAdminUpgradeabilityProxy__factory,
 } from '../types';
+import { evmSnapshot, evmRevert, getEthersSigners } from '@aave/deploy-v3';
 
 makeSuite('Upgradeability', (testEnv: TestEnv) => {
   context('VersionedInitializable', async () => {
@@ -141,7 +140,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
 
     it('initialize() deploy a proxy and call to initialize() with no initialization data', async () => {
       proxy = await (
-        await new InitializableImmutableAdminUpgradeabilityProxyFactory(
+        await new InitializableImmutableAdminUpgradeabilityProxy__factory(
           await getFirstSigner()
         ).deploy(proxyAdminOwner.address)
       ).deployed();
@@ -150,7 +149,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
 
     it('initialize() while calling initialize() with wrong initialization data (revert expected)', async () => {
       proxy = await (
-        await new InitializableImmutableAdminUpgradeabilityProxyFactory(
+        await new InitializableImmutableAdminUpgradeabilityProxy__factory(
           await getFirstSigner()
         ).deploy(proxyAdminOwner.address)
       ).deployed();

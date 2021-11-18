@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -66,6 +66,10 @@ library FlashLoanLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory params
   ) external {
+    // The usual action flow (cache -> updateState -> validation -> changeState -> updateRates)
+    // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
+    // This is done to protect against reentrance and rate manipulation within the user specified payload.
+
     FlashLoanLocalVars memory vars;
 
     vars.aTokenAddresses = new address[](params.assets.length);
@@ -184,18 +188,17 @@ library FlashLoanLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.FlashloanSimpleParams memory params
   ) external {
+    // The usual action flow (cache -> updateState -> validation -> changeState -> updateRates)
+    // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
+    // This is done to protect against reentrance and rate manipulation within the user specified payload.
+
+    ValidationLogic.validateFlashloanSimple(reserve);
     FlashLoanSimpleLocalVars memory vars;
 
-    DataTypes.ReserveCache memory reserveCache = reserve.cache();
-    reserve.updateState(reserveCache);
-
-    ValidationLogic.validateFlashloanSimple(reserveCache);
-
     vars.receiver = IFlashLoanSimpleReceiver(params.receiverAddress);
-
     vars.totalPremium = params.amount.percentMul(params.flashLoanPremiumTotal);
     vars.amountPlusPremium = params.amount + vars.totalPremium;
-    IAToken(reserveCache.aTokenAddress).transferUnderlyingTo(params.receiverAddress, params.amount);
+    IAToken(reserve.aTokenAddress).transferUnderlyingTo(params.receiverAddress, params.amount);
 
     require(
       vars.receiver.executeOperation(
@@ -211,6 +214,8 @@ library FlashLoanLogic {
     vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
     vars.premiumToLP = vars.totalPremium - vars.premiumToProtocol;
 
+    DataTypes.ReserveCache memory reserveCache = reserve.cache();
+    reserve.updateState(reserveCache);
     reserve.cumulateToLiquidityIndex(
       IERC20(reserveCache.aTokenAddress).totalSupply(),
       vars.premiumToLP
