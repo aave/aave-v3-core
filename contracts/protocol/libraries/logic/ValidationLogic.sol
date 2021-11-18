@@ -696,4 +696,15 @@ library ValidationLogic {
       }
     }
   }
+
+  function validateUseAsCollateral(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
+    DataTypes.UserConfigurationMap storage userConfig,
+    DataTypes.ReserveCache memory reserveCache
+  ) internal view returns (bool) {
+    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
+    return ((!isolationModeActive && (reserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
+      !userConfig.isUsingAsCollateralAny());
+  }
 }

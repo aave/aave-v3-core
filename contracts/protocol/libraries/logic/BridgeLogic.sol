@@ -79,10 +79,8 @@ library BridgeLogic {
     );
 
     if (isFirstSupply) {
-      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
       if (
-        ((!isolationModeActive && (reserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
-          !userConfig.isUsingAsCollateralAny())
+        ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, reserveCache)
       ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);

@@ -67,10 +67,8 @@ library SupplyLogic {
     );
 
     if (isFirstSupply) {
-      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
       if (
-        ((!isolationModeActive && (reserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
-          !userConfig.isUsingAsCollateralAny())
+        ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, reserveCache)
       ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
@@ -178,10 +176,8 @@ library SupplyLogic {
 
       if (params.balanceToBefore == 0 && params.amount != 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
-        (bool isolationModeActive, , ) = toConfig.getIsolationModeState(reserves, reservesList);
         if (
-          ((!isolationModeActive && (reserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
-            !toConfig.isUsingAsCollateralAny())
+          ValidationLogic.validateUseAsCollateral(reserves, reservesList, toConfig, reserveCache)
         ) {
           toConfig.setUsingAsCollateral(reserve.id, true);
           emit ReserveUsedAsCollateralEnabled(params.asset, params.to);

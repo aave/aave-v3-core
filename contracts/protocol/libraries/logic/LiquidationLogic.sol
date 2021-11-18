@@ -209,16 +209,13 @@ library LiquidationLogic {
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
         DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
-        collateralReserve.updateState(collateralReserveCache);
-
-        (bool isolationModeActive, , ) = liquidatorConfig.getIsolationModeState(
-          reserves,
-          reservesList
-        );
         if (
-          ((!isolationModeActive &&
-            (collateralReserveCache.reserveConfiguration.getDebtCeiling() == 0)) ||
-            !liquidatorConfig.isUsingAsCollateralAny())
+          ValidationLogic.validateUseAsCollateral(
+            reserves,
+            reservesList,
+            liquidatorConfig,
+            collateralReserveCache
+          )
         ) {
           liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
           emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
