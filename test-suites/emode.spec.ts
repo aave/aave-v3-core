@@ -5,6 +5,8 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
+import { formatUnits, parseUnits } from '@ethersproject/units';
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   const { VL_INCONSISTENT_EMODE_CATEGORY, VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } =
@@ -28,6 +30,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       label: 'ETHEREUM',
     },
   };
+
+  let snapSetup: string;
 
   before(async () => {
     const {
@@ -54,6 +58,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     await usdc.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    snapSetup = await evmSnapshot();
   });
 
   it('Admin adds a category for stablecoins with DAI and USDC', async () => {
@@ -581,5 +587,66 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(await helpersContract.getReserveEModeCategory(dai.address)).to.not.be.eq(0);
     expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, 0));
     expect(await helpersContract.getReserveEModeCategory(dai.address)).to.be.eq(0);
+  });
+
+  // Can we have someone that we can liquidate afterwards
+  it('Drop USDC from EMode while borrowed', async () => {
+    await evmRevert(snapSetup);
+    snapSetup = await evmSnapshot();
+    const {
+      configurator,
+      helpersContract,
+      dai,
+      usdc,
+      poolAdmin,
+      pool,
+      users: [user, user2],
+    } = testEnv;
+    const { id, ltv, lt, lb, oracle, label } = CATEGORIES.STABLECOINS;
+
+    // Add stable coin category
+    expect(
+      await configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
+    );
+
+    // Add dai and usdc to category
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, id));
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, id));
+    expect(await helpersContract.getReserveEModeCategory(dai.address)).to.be.eq(id);
+    expect(await helpersContract.getReserveEModeCategory(usdc.address)).to.be.eq(id);
+
+    // Fund usdc to borrow
+    expect(
+      await pool.connect(user2.signer).supply(usdc.address, parseUnits('100', 6), user2.address, 0)
+    );
+
+    // Fund dai collateral
+    expect(
+      await pool.connect(user.signer).supply(dai.address, parseUnits('100', 18), user.address, 0)
+    );
+
+    // Turn on EMode
+    expect(await pool.connect(user.signer).setUserEMode(id));
+    expect(await pool.getUserEMode(user.address)).to.be.eq(id);
+
+    // Borrow
+    expect(
+      await pool
+        .connect(user.signer)
+        .borrow(usdc.address, parseUnits('95', 6), RateMode.Variable, 0, user.address)
+    );
+
+    const userData1 = await pool.getUserAccountData(user.address);
+    console.log(`HF: ${formatUnits(userData1.healthFactor)}`);
+
+    // Drop usdc
+    expect(await helpersContract.getReserveEModeCategory(usdc.address)).to.not.be.eq(0);
+    expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, 0));
+    expect(await helpersContract.getReserveEModeCategory(usdc.address)).to.be.eq(0);
+
+    const userData3 = await pool.getUserAccountData(user.address);
+    console.log(`HF: ${formatUnits(userData3.healthFactor)}`);
+
+    // We need both the case were we remove the borrowed and where we removed the collateral. Will both of them fuck us up? Would be good to have
   });
 });
