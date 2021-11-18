@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
@@ -59,7 +59,8 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_EMODE_CATEGORY = 255;
   uint256 constant MAX_VALID_UNBACKED_MINT_CAP = 68719476735;
   uint256 constant MAX_VALID_DEBT_CEILING = 1099511627775;
-  uint256 constant DEBT_CEILING_DECIMALS = 2;
+
+  uint256 public constant DEBT_CEILING_DECIMALS = 2;
 
   /**
    * @notice Sets the Loan to Value of the reserve

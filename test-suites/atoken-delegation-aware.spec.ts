@@ -1,14 +1,12 @@
+import { DelegationAwareAToken, MintableDelegationERC20 } from '../types';
 import { expect } from 'chai';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import {
-  deployDelegationAwareAToken,
-  deployMintableDelegationERC20,
-} from '../helpers/contracts-deployments';
-import { DelegationAwareAToken } from '../types/DelegationAwareAToken';
-import { MintableDelegationERC20 } from '../types/MintableDelegationERC20';
-import AaveConfig from '../market-config';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import {
+  deployMintableDelegationERC20,
+  deployDelegationAwareAToken,
+} from '@aave/deploy-v3/dist/helpers/contract-deployments';
 
 makeSuite('AToken: DelegationAwareAToken', (testEnv: TestEnv) => {
   let delegationAToken = <DelegationAwareAToken>{};
@@ -22,7 +20,7 @@ makeSuite('AToken: DelegationAwareAToken', (testEnv: TestEnv) => {
     delegationAToken = await deployDelegationAwareAToken([
       pool.address,
       delegationERC20.address,
-      AaveConfig.ReserveFactorTreasuryAddress,
+      ZERO_ADDRESS,
       ZERO_ADDRESS,
       'aDEL',
       'aDEL',

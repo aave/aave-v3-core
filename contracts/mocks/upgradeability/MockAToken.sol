@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {AToken} from '../../protocol/tokenization/AToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';

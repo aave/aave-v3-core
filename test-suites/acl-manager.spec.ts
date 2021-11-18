@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { constants, utils } from 'ethers';
 import { ZERO_ADDRESS } from '../helpers/constants';
-import { ACLManager, ACLManagerFactory } from '../types';
+import { ACLManager, ACLManager__factory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
@@ -13,7 +13,7 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
 
   before(async () => {
     const { deployer, addressesProvider } = testEnv;
-    aclManager = await new ACLManagerFactory(deployer.signer).deploy(addressesProvider.address);
+    aclManager = await new ACLManager__factory(deployer.signer).deploy(addressesProvider.address);
   });
 
   it('Check DEFAULT_ADMIN_ROLE', async () => {
@@ -265,7 +265,7 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     const { deployer, addressesProvider } = testEnv;
 
     expect(await addressesProvider.setACLAdmin(ZERO_ADDRESS));
-    const deployTx = new ACLManagerFactory(deployer.signer).deploy(addressesProvider.address);
+    const deployTx = new ACLManager__factory(deployer.signer).deploy(addressesProvider.address);
     await expect(deployTx).to.be.revertedWith('ACL admin cannot be the zero address');
   });
 });

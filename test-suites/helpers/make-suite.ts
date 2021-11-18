@@ -1,4 +1,3 @@
-import { evmRevert, evmSnapshot, DRE } from '../../helpers/misc-utils';
 import { Signer } from 'ethers';
 import {
   getPool,
@@ -7,14 +6,14 @@ import {
   getAToken,
   getMintableERC20,
   getPoolConfiguratorProxy,
-  getPriceOracle,
   getPoolAddressesProviderRegistry,
   getWETHMocked,
   getVariableDebtToken,
   getStableDebtToken,
   getAaveOracle,
   getACLManager,
-} from '../../helpers/contracts-getters';
+  getFallbackOracle,
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { tEthereumAddress } from '../../helpers/types';
 import { Pool } from '../../types/Pool';
 import { AaveProtocolDataProvider } from '../../types/AaveProtocolDataProvider';
@@ -28,12 +27,14 @@ import bignumberChai from 'chai-bignumber';
 import { PriceOracle } from '../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../types/PoolAddressesProvider';
 import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProviderRegistry';
-import { getEthersSigners } from '../../helpers/contracts-helpers';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { solidity } from 'ethereum-waffle';
 import { AaveOracle, ACLManager, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
+import { getEthersSigners, waitForTx, evmSnapshot, evmRevert } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 chai.use(bignumberChai());
 chai.use(solidity);
@@ -115,7 +116,6 @@ export async function initializeMakeSuite() {
   testEnv.emergencyAdmin = testEnv.users[1];
   testEnv.riskAdmin = testEnv.users[2];
   testEnv.pool = await getPool();
-
   testEnv.configurator = await getPoolConfiguratorProxy();
 
   testEnv.addressesProvider = await getPoolAddressesProvider();
@@ -123,7 +123,7 @@ export async function initializeMakeSuite() {
   testEnv.registry = await getPoolAddressesProviderRegistry();
   testEnv.aclManager = await getACLManager();
 
-  testEnv.oracle = await getPriceOracle();
+  testEnv.oracle = await getFallbackOracle();
   testEnv.aaveOracle = await getAaveOracle();
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
@@ -146,10 +146,10 @@ export async function initializeMakeSuite() {
   const wethAddress = reservesTokens.find((token) => token.symbol === 'WETH')?.tokenAddress;
 
   if (!aDaiAddress || !aWEthAddress) {
-    process.exit(1);
+    throw 'Missing mandatory atokens';
   }
   if (!daiAddress || !usdcAddress || !aaveAddress || !wethAddress) {
-    process.exit(1);
+    throw 'Missing mandatory tokens';
   }
 
   testEnv.aDai = await getAToken(aDaiAddress);
@@ -159,13 +159,16 @@ export async function initializeMakeSuite() {
   testEnv.aWETH = await getAToken(aWEthAddress);
 
   testEnv.dai = await getMintableERC20(daiAddress);
-  testEnv.usdc = await getMintableERC20(usdcAddress);
   testEnv.aave = await getMintableERC20(aaveAddress);
+  testEnv.usdc = await getMintableERC20(usdcAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
+
+  // Setup admins
+  await waitForTx(await testEnv.aclManager.addRiskAdmin(testEnv.riskAdmin.address));
+  await waitForTx(await testEnv.aclManager.addEmergencyAdmin(testEnv.emergencyAdmin.address));
 }
 
 const setSnapshot = async () => {
-  const hre = DRE as HardhatRuntimeEnvironment;
   if (usingTenderly()) {
     setHardhatSnapshotId((await hre.tenderlyNetwork.getHead()) || '0x1');
     return;
@@ -174,7 +177,6 @@ const setSnapshot = async () => {
 };
 
 const revertHead = async () => {
-  const hre = DRE as HardhatRuntimeEnvironment;
   if (usingTenderly()) {
     await hre.tenderlyNetwork.setHead(HardhatSnapshotId);
     return;
