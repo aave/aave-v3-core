@@ -351,21 +351,30 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate the PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
-    // Deploy the mock Pool with a setter of `maxNumberOfReserves`
-    const libraries = {
-      ['__$d5ddd09ae98762b8929dd85e54b218e259$__']: (await getFlashLoanLogic()).address,
-      ['__$b06080f092f400a43662c3f835a4d9baa8$__']: (await getBridgeLogic()).address,
-      ['__$db79717e66442ee197e8271d032a066e34$__']: (await getSupplyLogic()).address,
-      ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: (await getBorrowLogic()).address,
-      ['__$f598c634f2d943205ac23f707b80075cbb$__']: (await getLiquidationLogic()).address,
-      ['__$e4b9550ff526a295e1233dea02821b9004$__']: (await getEModeLogic()).address,
-    };
+    const { deployer: deployerNamed } = await hre.getNamedAccounts();
 
-    const mockPoolImpl = await (
-      await new MockPoolInherited__factory(libraries, await getFirstSigner()).deploy()
-    ).deployed();
+    const supplyLibraryArtifact = await hre.deployments.get('SupplyLogic');
+    const borrowLibraryArtifact = await hre.deployments.get('BorrowLogic');
+    const liquidationLibraryArtifact = await hre.deployments.get('LiquidationLogic');
+    const eModeLibraryArtifact = await hre.deployments.get('EModeLogic');
+    const bridgeLibraryArtifact = await hre.deployments.get('BridgeLogic');
+    const flashLoanLogicArtifact = await hre.deployments.get('FlashLoanLogic');
+
+    const mockPoolImpl = await hre.deployments.deploy('Pool', {
+      contract: 'MockPoolInherited',
+      from: deployerNamed,
+      libraries: {
+        SupplyLogic: supplyLibraryArtifact.address,
+        BorrowLogic: borrowLibraryArtifact.address,
+        LiquidationLogic: liquidationLibraryArtifact.address,
+        EModeLogic: eModeLibraryArtifact.address,
+        BridgeLogic: bridgeLibraryArtifact.address,
+        FlashLoanLogic: flashLoanLogicArtifact.address,
+      },
+      log: false,
+    });
 
     // Upgrade the Pool
     expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPoolImpl.address))
