@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
@@ -153,7 +153,6 @@ library ReserveLogic {
     uint256 nextLiquidityRate;
     uint256 nextStableRate;
     uint256 nextVariableRate;
-    uint256 avgStableRate;
     uint256 totalVariableDebt;
   }
 
@@ -214,11 +213,9 @@ library ReserveLogic {
     uint256 prevTotalStableDebt;
     uint256 prevTotalVariableDebt;
     uint256 currTotalVariableDebt;
-    uint256 avgStableRate;
     uint256 cumulatedStableInterest;
     uint256 totalDebtAccrued;
     uint256 amountToMint;
-    uint40 stableSupplyUpdatedTimestamp;
   }
 
   /**

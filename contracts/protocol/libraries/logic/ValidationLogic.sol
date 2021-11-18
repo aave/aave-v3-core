@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
@@ -116,6 +116,7 @@ library ValidationLogic {
    * @notice Validates a borrow action
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
+   * @param eModeCategories The configuration for all efficiency mode categories
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
@@ -456,19 +457,22 @@ library ValidationLogic {
     mapping(address => DataTypes.ReserveData) storage reservesData
   ) internal view {
     for (uint256 i = 0; i < assets.length; i++) {
-      require(!reservesData[assets[i]].configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
-      require(reservesData[assets[i]].configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
+      DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
+        .configuration;
+      require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
+      require(configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
     }
     require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
   }
 
   /**
    * @notice Validates a flashloan action
-   * @param reserveCache The cached data of the reserve
+   * @param reserve The state of the reserve
    */
-  function validateFlashloanSimple(DataTypes.ReserveCache memory reserveCache) internal pure {
-    require(!reserveCache.reserveConfiguration.getPaused(), Errors.VL_RESERVE_PAUSED);
-    require(reserveCache.reserveConfiguration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
+  function validateFlashloanSimple(DataTypes.ReserveData storage reserve) internal view {
+    DataTypes.ReserveConfigurationMap memory configuration = reserve.configuration;
+    require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
+    require(configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
   }
 
   struct ValidateLiquidationCallLocalVars {
@@ -531,6 +535,17 @@ library ValidationLogic {
     require(params.totalDebt > 0, Errors.VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   }
 
+  /**
+   * @notice Validates the health factor of a user
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param userConfig The state of the user for the specific reserve
+   * @param user The user to validate health factor of
+   * @param userEModeCategory The users active efficiency mode category
+   * @param reservesCount The number of available reserves
+   * @param oracle The price oracle
+   */
   function validateHealthFactor(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
@@ -573,13 +588,15 @@ library ValidationLogic {
 
   /**
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred
-   * @param reservesData The state of all the reserves
-   * @param userConfig The state of the user for the specific reserve
-   * @param reserves The addresses of all the active reserves
    * @param reservesCount The number of available reserves
    * @param oracle The price oracle
+   * @param userEModeCategory The users active efficiency mode category
    */
   function validateHFAndLtv(
     mapping(address => DataTypes.ReserveData) storage reservesData,
@@ -635,9 +652,10 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a drop reserve action
+   * @notice Validates the action of setting efficiency mode
    * @param reservesData the data mapping of the reserves
    * @param reserves a mapping storing the list of reserves
+   * @param eModeCategories a mapping storing configurations for all efficiency mode categories
    * @param userConfig the user configuration
    * @param reservesCount The total number of valid reserves
    * @param categoryId The id of the category

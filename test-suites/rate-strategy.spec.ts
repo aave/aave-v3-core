@@ -1,13 +1,13 @@
 import { expect } from 'chai';
 import { BigNumber, BigNumberish, utils } from 'ethers';
-import { deployDefaultReserveInterestRateStrategy } from '../helpers/contracts-deployments';
+import { deployDefaultReserveInterestRateStrategy } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { PERCENTAGE_FACTOR } from '../helpers/constants';
 import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';
-import { strategyDAI } from '../market-config/reservesConfigs';
-import { rateStrategyStableTwo } from '../market-config/rateStrategies';
+import { strategyDAI } from '@aave/deploy-v3/dist/markets/aave/reservesConfigs';
+import { rateStrategyStableTwo } from '@aave/deploy-v3/dist/markets/aave/rateStrategies';
 import { TestEnv, makeSuite } from './helpers/make-suite';
-import './helpers/utils/wadraymath';
 import { formatUnits } from '@ethersproject/units';
+import './helpers/utils/wadraymath';
 
 const DEBUG = false;
 
@@ -191,9 +191,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       .add(rateStrategyStableTwo.variableRateSlope1)
       .add(rateStrategyStableTwo.variableRateSlope2);
 
-    const expectedLiquidityRate = currentVariableBorrowRate
+    const expectedLiquidityRate = BigNumber.from(currentVariableBorrowRate)
       .add(utils.parseUnits('0.1', 27))
-      .div(2)
+      .div('2')
       .percentMul(BigNumber.from(PERCENTAGE_FACTOR).sub(strategyDAI.reserveFactor));
 
     expect(currentVariableBorrowRate).to.be.equal(expectedVariableRate, 'Invalid variable rate');

@@ -3,15 +3,15 @@ import { BigNumberish } from 'ethers';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { RateMode } from '../helpers/types';
 import {
-  ATokenFactory,
+  AToken__factory,
   ERC20,
-  ERC20Factory,
+  ERC20__factory,
   MintableERC20,
-  StableDebtTokenFactory,
-  VariableDebtTokenFactory,
+  MintableERC20__factory,
+  StableDebtToken__factory,
+  VariableDebtToken__factory,
 } from '../types';
-import { getFirstSigner } from '../helpers/contracts-getters';
-import { deployMintableERC20 } from '../helpers/contracts-deployments';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { makeSuite } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { setBlocktime, timeLatest } from '../helpers/misc-utils';
@@ -25,15 +25,19 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
   before(async () => {
     const { pool, poolAdmin, configurator, dai, helpersContract } = testEnv;
 
-    mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
+    mockToken = await new MintableERC20__factory(await getFirstSigner()).deploy(
+      'MOCK',
+      'MOCK',
+      '18'
+    );
 
-    const stableDebtTokenImplementation = await new StableDebtTokenFactory(
+    const stableDebtTokenImplementation = await new StableDebtToken__factory(
       await getFirstSigner()
     ).deploy(pool.address);
-    const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
+    const variableDebtTokenImplementation = await new VariableDebtToken__factory(
       await getFirstSigner()
     ).deploy(pool.address);
-    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy(
+    const aTokenImplementation = await new AToken__factory(await getFirstSigner()).deploy(
       pool.address
     );
 
@@ -137,12 +141,12 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
       .setReserveFactor(inputParams[i].asset, inputParams[i].reserveFactor);
 
     const reserveData = await pool.getReserveData(mockToken.address);
-    aMockToken = ERC20Factory.connect(reserveData.aTokenAddress, await getFirstSigner());
-    mockStableDebt = ERC20Factory.connect(
+    aMockToken = ERC20__factory.connect(reserveData.aTokenAddress, await getFirstSigner());
+    mockStableDebt = ERC20__factory.connect(
       reserveData.stableDebtTokenAddress,
       await getFirstSigner()
     );
-    mockVariableDebt = ERC20Factory.connect(
+    mockVariableDebt = ERC20__factory.connect(
       reserveData.variableDebtTokenAddress,
       await getFirstSigner()
     );
@@ -158,7 +162,7 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
 
     await mockToken
       .connect(user.signer)
-      .mint(await convertToCurrencyDecimals(mockToken.address, '10000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(mockToken.address, '10000'));
     await mockToken.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -205,7 +209,9 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
     expect(await mockVariableDebt.balanceOf(user.address)).to.be.eq(0);
     expect(await mockStableDebt.balanceOf(user.address)).to.be.eq(0);
 
-    await dai.connect(user.signer).mint(await convertToCurrencyDecimals(dai.address, '10000'));
+    await dai
+      .connect(user.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '10000'));
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -237,7 +243,7 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
     } = testEnv;
 
     const mintAmount = await convertToCurrencyDecimals(mockToken.address, '100');
-    await mockToken.connect(user.signer).mint(mintAmount);
+    await mockToken.connect(user.signer)['mint(uint256)'](mintAmount);
 
     const expectedMockTokenBalance = mintAmount.add(
       await convertToCurrencyDecimals(mockToken.address, '100')

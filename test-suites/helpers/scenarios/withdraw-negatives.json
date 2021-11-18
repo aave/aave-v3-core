@@ -3,13 +3,13 @@
   "description": "Redeem function.",
   "stories": [
     {
-      "description": "Users 0 Deposits 1000 DAI and tries to redeem 0 DAI (revert expected)",
+      "description": "Users 0 Deposits 14760.147 DAI and tries to redeem 0 DAI (revert expected)",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -26,7 +26,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -45,13 +45,13 @@
       ]
     },
     {
-      "description": "Users 0 tries to redeem 1100 DAI from the 1000 DAI deposited (revert expected)",
+      "description": "Users 0 tries to redeem 16236.16 DAI from the 14760.147 DAI deposited (revert expected)",
       "actions": [
         {
           "name": "withdraw",
           "args": {
             "reserve": "DAI",
-            "amount": "1100",
+            "amount": "16236.16",
             "user": "0"
           },
           "expected": "revert",

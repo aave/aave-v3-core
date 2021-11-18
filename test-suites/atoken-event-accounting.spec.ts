@@ -1,6 +1,6 @@
+import { waitForTx, increaseTime } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { DRE, increaseTime } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode } from '../helpers/types';
@@ -37,10 +37,14 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     } = testEnv;
 
     // mints DAI to depositor
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '10000'));
+    await waitForTx(
+      await dai
+        .connect(depositor.signer)
+        ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '10000'))
+    );
 
     // approve protocol to access depositor wallet
-    await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await waitForTx(await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
     const daiReserveData = await helpersContract.getReserveData(dai.address);
 
@@ -68,23 +72,29 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '20000');
 
     //mints WETH to borrower
-    await weth
-      .connect(borrower.signer)
-      .mint(await convertToCurrencyDecimals(weth.address, '20000'));
+    await waitForTx(
+      await weth
+        .connect(borrower.signer)
+        ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '20000'))
+    );
 
     //approve protocol to access the borrower wallet
-    await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await waitForTx(await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
-    await pool
-      .connect(borrower.signer)
-      .deposit(weth.address, amountETHtoDeposit, borrower.address, '0');
+    await waitForTx(
+      await pool
+        .connect(borrower.signer)
+        .deposit(weth.address, amountETHtoDeposit, borrower.address, '0')
+    );
 
     // Borrow dai
     firstDaiBorrow = await convertToCurrencyDecimals(dai.address, '5000');
 
-    await pool
-      .connect(borrower.signer)
-      .borrow(dai.address, firstDaiBorrow, RateMode.Variable, '0', borrower.address);
+    await waitForTx(
+      await pool
+        .connect(borrower.signer)
+        .borrow(dai.address, firstDaiBorrow, RateMode.Variable, '0', borrower.address)
+    );
 
     const borrowerWethData = await helpersContract.getUserReserveData(
       weth.address,
@@ -142,19 +152,24 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     await increaseTime(86400);
 
     //mints DAI to depositor
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '20000'));
+    await waitForTx(
+      await dai
+        .connect(depositor.signer)
+        ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '20000'))
+    );
 
     //user 1 deposits 2000 DAI
-    const depositTx = await pool
-      .connect(depositor.signer)
-      .deposit(dai.address, secondDaiDeposit, depositor.address, '0');
 
-    const depositReceipt = await depositTx.wait();
+    const depositTx = await waitForTx(
+      await pool
+        .connect(depositor.signer)
+        .deposit(dai.address, secondDaiDeposit, depositor.address, '0')
+    );
 
     const aDaiBalance = await aDai.balanceOf(depositor.address);
 
     const mintEventSignature = utils.keccak256(utils.toUtf8Bytes('Mint(address,uint256,uint256)'));
-    const rawMintEvents = depositReceipt.logs.filter((log) => log.topics[0] === mintEventSignature);
+    const rawMintEvents = depositTx.logs.filter((log) => log.topics[0] === mintEventSignature);
 
     expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
     const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
@@ -179,7 +194,11 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     await increaseTime(86400);
 
     //mints DAI to depositor
-    await dai.connect(depositor.signer).mint(await convertToCurrencyDecimals(dai.address, '50000'));
+    await waitForTx(
+      await dai
+        .connect(depositor.signer)
+        ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '50000'))
+    );
 
     //user 1 deposits 2000 DAI
     const depositTx = await pool
@@ -220,10 +239,14 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     await increaseTime(86400);
 
     //mints DAI to borrower
-    await dai.connect(borrower.signer).mint(await convertToCurrencyDecimals(dai.address, '50000'));
+    await waitForTx(
+      await dai
+        .connect(borrower.signer)
+        ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '50000'))
+    );
 
     // approve protocol to access depositor wallet
-    await dai.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await waitForTx(await dai.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
     const daiBalanceBefore = await dai.balanceOf(borrower.address);
 
@@ -310,15 +333,20 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
       pool,
     } = testEnv;
     // User 1 - Deposit dai
-    await pool
-      .connect(depositor.signer)
-      .deposit(dai.address, firstDaiDeposit, depositor.address, '0');
+    await waitForTx(
+      await pool
+        .connect(depositor.signer)
+        .deposit(dai.address, firstDaiDeposit, depositor.address, '0')
+    );
 
     // User 2 - Borrow dai
     const borrowAmount = await convertToCurrencyDecimals(dai.address, '8000');
-    await pool
-      .connect(borrower.signer)
-      .borrow(dai.address, borrowAmount, RateMode.Variable, '0', borrower.address);
+
+    await waitForTx(
+      await pool
+        .connect(borrower.signer)
+        .borrow(dai.address, borrowAmount, RateMode.Variable, '0', borrower.address)
+    );
 
     const debtBalanceBefore = await variableDebtDai.balanceOf(borrower.address);
 
@@ -328,7 +356,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const smallRepay = BigNumber.from('100000');
 
     // approve protocol to access depositor wallet
-    await dai.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await waitForTx(await dai.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
     // repay dai loan
     const repayTx = await pool
