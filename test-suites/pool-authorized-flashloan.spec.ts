@@ -4,7 +4,7 @@ import {
   getMockFlashLoanReceiver,
   getStableDebtToken,
   getVariableDebtToken,
-} from '../helpers/contracts-getters';
+} from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { ProtocolErrors } from '../helpers/types';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
@@ -39,7 +39,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const userAddress = await pool.signer.getAddress();
     const amountToDeposit = utils.parseEther('1');
 
-    expect(await weth.mint(amountToDeposit));
+    expect(await weth['mint(uint256)'](amountToDeposit));
 
     expect(await weth.approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -49,6 +49,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
   it('Takes WETH flash loan with mode = 0, returns the funds correctly', async () => {
     const { pool, helpersContract, weth } = testEnv;
 
+    console.log('priorr');
     expect(
       await pool.flashLoan(
         _mockFlashLoanReceiver.address,
@@ -174,7 +175,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
     // Top up user
-    expect(await dai.connect(caller.signer).mint(amountToDeposit));
+    expect(await dai.connect(caller.signer)['mint(uint256)'](amountToDeposit));
 
     expect(await dai.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -190,7 +191,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
         .flashLoan(
           _mockFlashLoanReceiver.address,
           [weth.address],
-          [utils.parseEther('0.8')],
+          [utils.parseEther('0.0571')],
           [2],
           caller.address,
           '0x10',
@@ -205,7 +206,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
 
     const callerDebt = await wethDebtToken.balanceOf(caller.address);
 
-    expect(callerDebt.toString()).to.be.equal('800000000000000000', 'Invalid user debt');
+    expect(callerDebt.toString()).to.be.equal('57100000000000000', 'Invalid user debt');
   });
 
   it('Tries to take a flashloan that is bigger than the available liquidity (revert expected)', async () => {
@@ -250,7 +251,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const amountToDeposit = await convertToCurrencyDecimals(usdc.address, '1000');
 
     // Top up user
-    expect(await usdc.mint(amountToDeposit));
+    expect(await usdc['mint(uint256)'](amountToDeposit));
 
     expect(await usdc.approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -325,7 +326,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const amountToDeposit = await convertToCurrencyDecimals(weth.address, '5');
 
     // Top up user
-    expect(await weth.connect(caller.signer).mint(amountToDeposit));
+    expect(await weth.connect(caller.signer)['mint(uint256)'](amountToDeposit));
 
     expect(await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -368,7 +369,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
     // Top up user
-    expect(await dai.connect(caller.signer).mint(amountToDeposit));
+    expect(await dai.connect(caller.signer)['mint(uint256)'](amountToDeposit));
 
     expect(await dai.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -401,7 +402,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
 
     const caller = users[3];
 
-    const flashAmount = utils.parseEther('0.8');
+    const flashAmount = utils.parseEther('0.0571');
 
     expect(await _mockFlashLoanReceiver.setFailExecutionTransfer(true));
 
@@ -439,7 +440,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const amountToDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
     // Top up user
-    expect(await dai.connect(onBehalfOf.signer).mint(amountToDeposit));
+    expect(await dai.connect(onBehalfOf.signer)['mint(uint256)'](amountToDeposit));
 
     // Deposit 1000 dai for onBehalfOf user
     expect(await dai.connect(onBehalfOf.signer).approve(pool.address, MAX_UINT_AMOUNT));
@@ -450,7 +451,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
         .deposit(dai.address, amountToDeposit, onBehalfOf.address, '0')
     );
 
-    const flashAmount = utils.parseEther('0.8');
+    const flashAmount = utils.parseEther('0.0571');
 
     expect(await _mockFlashLoanReceiver.setFailExecutionTransfer(true));
 
@@ -475,7 +476,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const caller = users[5];
     const onBehalfOf = users[4];
 
-    const flashAmount = utils.parseEther('0.8');
+    const flashAmount = utils.parseEther('0.0571');
 
     const reserveData = await pool.getReserveData(weth.address);
 
@@ -513,7 +514,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const onBehalfOfDebt = await wethDebtToken.balanceOf(onBehalfOf.address);
 
     expect(onBehalfOfDebt.toString()).to.be.equal(
-      '800000000000000000',
+      '57100000000000000',
       'Invalid onBehalfOf user debt'
     );
   });

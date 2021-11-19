@@ -6,7 +6,9 @@
     "esModuleInterop": true,
     "outDir": "dist",
     "noImplicitAny": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationDir": "./types"
   },
   "include": ["./scripts", "./test-suites", "./tasks", "./helpers"],
   "files": [

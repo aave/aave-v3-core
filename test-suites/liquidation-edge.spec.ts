@@ -2,9 +2,11 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode } from '../helpers/types';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+
+import './helpers/utils/wadraymath';
+import { evmSnapshot, evmRevert, waitForTx } from '@aave/deploy-v3';
 
 makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
   let snap: string;
@@ -16,16 +18,27 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
+  before(async () => {
+    const { addressesProvider, oracle } = testEnv;
+
+    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+  });
+
+  after(async () => {
+    const { aaveOracle, addressesProvider } = testEnv;
+    await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
+  });
+
   it('ValidationLogic `executeLiquidationCall` where user has variable and stable debt, but variable debt is insufficient to cover the full liquidation amount', async () => {
     const { pool, users, dai, weth, oracle } = testEnv;
 
     const depositor = users[0];
     const borrower = users[1];
 
-    // Deposit 1000 dai
+    // Deposit dai
     await dai
       .connect(depositor.signer)
-      .mint(await convertToCurrencyDecimals(dai.address, '1000000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000000'));
     await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
@@ -37,15 +50,17 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
       );
 
     // Deposit eth, borrow dai
-    await weth.connect(borrower.signer).mint(utils.parseEther('1'));
+    await weth.connect(borrower.signer)['mint(uint256)'](utils.parseEther('0.9'));
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
-      .deposit(weth.address, utils.parseEther('1'), borrower.address, 0);
+      .deposit(weth.address, utils.parseEther('0.9'), borrower.address, 0);
 
-    await oracle.setAssetPrice(dai.address, utils.parseUnits('0.001', 18));
+    const daiPrice = await oracle.getAssetPrice(dai.address);
 
-    // Borrow 500 dai stable
+    await oracle.setAssetPrice(dai.address, daiPrice.percentDiv('2700'));
+
+    // Borrow
     await pool
       .connect(borrower.signer)
       .borrow(
@@ -56,18 +71,18 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
         borrower.address
       );
 
-    // Borrow 200 dai variable
+    // Borrow
     await pool
       .connect(borrower.signer)
       .borrow(
         dai.address,
-        await convertToCurrencyDecimals(dai.address, '200'),
+        await convertToCurrencyDecimals(dai.address, '220'),
         RateMode.Variable,
         0,
         borrower.address
       );
 
-    await oracle.setAssetPrice(dai.address, utils.parseUnits('0.002', 18));
+    await oracle.setAssetPrice(dai.address, daiPrice.percentMul(600_00));
 
     expect(
       await pool

@@ -1,12 +1,11 @@
 const { expect } = require('chai');
 import { BigNumber, utils } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { waitForTx, advanceTimeAndBlock } from '../helpers/misc-utils';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { getACLManager } from '../helpers/contracts-getters';
+import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP } from '../helpers/constants';
 import { ACLManager } from '../types';
-import AaveConfig from '../market-config';
+import AaveConfig from '@aave/deploy-v3/dist/markets/aave';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { getReserveData } from './helpers/utils/helpers';
 import { getTxCostAndTimestamp } from './helpers/actions';
@@ -16,6 +15,8 @@ import {
   configuration as calculationsConfiguration,
 } from './helpers/utils/calculations';
 import './helpers/utils/wadraymath';
+import { formatEther } from '@ethersproject/units';
+import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,
@@ -46,40 +47,50 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
 
     aclManager = await getACLManager();
 
-    await aclManager.addBridge(users[2].address);
-    await aclManager.addBridge(users[3].address);
+    await waitForTx(await aclManager.addBridge(users[2].address));
+    await waitForTx(await aclManager.addBridge(users[3].address));
 
-    await configurator.connect(poolAdmin.signer).updateBridgeProtocolFee(bridgeProtocolFeeBps);
+    await waitForTx(
+      await configurator.connect(poolAdmin.signer).updateBridgeProtocolFee(bridgeProtocolFeeBps)
+    );
   });
 
   it('User 0 deposit 1000 dai.', async () => {
     const { users, pool, dai } = testEnv;
-    await dai.connect(users[0].signer).mint(depositAmount);
-    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(users[0].signer).deposit(dai.address, depositAmount, users[0].address, 0);
+    await waitForTx(await dai.connect(users[0].signer)['mint(uint256)'](depositAmount));
+    await waitForTx(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
+    await waitForTx(
+      await pool.connect(users[0].signer).deposit(dai.address, depositAmount, users[0].address, 0)
+    );
   });
 
   it('User 1 deposit 2 eth', async () => {
     const { users, pool, weth } = testEnv;
-    await weth.connect(users[1].signer).deposit({ value: utils.parseEther('2') });
-    await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool
-      .connect(users[1].signer)
-      .deposit(weth.address, utils.parseEther('2'), users[1].address, 0);
+    await waitForTx(await weth.connect(users[1].signer).deposit({ value: utils.parseEther('2') }));
+    await waitForTx(await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT));
+    await waitForTx(
+      await pool
+        .connect(users[1].signer)
+        .deposit(weth.address, utils.parseEther('2'), users[1].address, 0)
+    );
   });
 
   it('User 1 borrows 200 dai with variable debt', async () => {
     const { users, pool, dai } = testEnv;
-    await pool
-      .connect(users[1].signer)
-      .borrow(dai.address, borrowAmount, RateMode.Variable, 0, users[1].address);
+    await waitForTx(
+      await pool
+        .connect(users[1].signer)
+        .borrow(dai.address, borrowAmount, RateMode.Variable, 0, users[1].address)
+    );
   });
 
   it('User 1 borrows 200 dai with stable debt', async () => {
     const { users, pool, dai } = testEnv;
-    await pool
-      .connect(users[1].signer)
-      .borrow(dai.address, borrowAmount, RateMode.Stable, 0, users[1].address);
+    await waitForTx(
+      await pool
+        .connect(users[1].signer)
+        .borrow(dai.address, borrowAmount, RateMode.Stable, 0, users[1].address)
+    );
   });
 
   it('User 1 tries to perform fast withdraw 100 aDai from L2 (revert expected)', async () => {
@@ -176,8 +187,8 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
   it('100 bridged dai used to back unbacked', async () => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
-    await dai.connect(users[3].signer).mint(withdrawAmount);
-    await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await waitForTx(await dai.connect(users[3].signer)['mint(uint256)'](withdrawAmount));
+    await waitForTx(await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT));
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);
 
@@ -203,7 +214,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
 
   it('user 1 performs unauthorized backing', async () => {
     const { users, pool, dai } = testEnv;
-    await dai.connect(users[1].signer).mint(withdrawAmount);
+    await dai.connect(users[1].signer)['mint(uint256)'](withdrawAmount);
     await dai.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await expect(
@@ -214,7 +225,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
   it('100 bridged dai used to back unbacked', async () => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
-    await dai.connect(users[3].signer).mint(withdrawAmount);
+    await dai.connect(users[3].signer)['mint(uint256)'](withdrawAmount);
     await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -242,7 +253,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
   it('User donates 100 dai to aDai holders', async () => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
-    await dai.connect(users[3].signer).mint(withdrawAmount);
+    await dai.connect(users[3].signer)['mint(uint256)'](withdrawAmount);
     await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);
@@ -272,7 +283,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
   it('Safety module cover 100 unbacked dai', async () => {
     // Let user 3 be bridge for now
     const { users, pool, dai, aDai, helpersContract } = testEnv;
-    await dai.connect(users[3].signer).mint(withdrawAmount);
+    await dai.connect(users[3].signer)['mint(uint256)'](withdrawAmount);
     await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     const reserveDataBefore = await getReserveData(helpersContract, dai.address);

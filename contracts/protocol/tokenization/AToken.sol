@@ -23,9 +23,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   using WadRayMath for uint256;
   using SafeERC20 for IERC20;
 
-  bytes public constant EIP712_REVISION = bytes('1');
-  bytes32 internal constant EIP712_DOMAIN =
-    keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
   bytes32 public constant PERMIT_TYPEHASH =
     keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
@@ -33,8 +30,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
   /// @dev owner => next valid nonce to submit with permit()
   mapping(address => uint256) public _nonces;
-
-  bytes32 public DOMAIN_SEPARATOR;
 
   IPool internal immutable _pool;
   address internal _treasury;
@@ -66,18 +61,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     string calldata aTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId = block.chainid;
-
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(aTokenName)),
-        keccak256(EIP712_REVISION),
-        chainId,
-        address(this)
-      )
-    );
-
     _setName(aTokenName);
     _setSymbol(aTokenSymbol);
     _setDecimals(aTokenDecimals);
@@ -85,6 +68,8 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     _treasury = treasury;
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
+
+    _domainSeparator = _calculateDomainSeparator();
 
     emit Initialized(
       underlyingAsset,
@@ -268,7 +253,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     bytes32 digest = keccak256(
       abi.encodePacked(
         '\x19\x01',
-        DOMAIN_SEPARATOR,
+        DOMAIN_SEPARATOR(),
         keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, currentValidNonce, deadline))
       )
     );

@@ -11,9 +11,9 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
     const { weth, pool, dai, usdc } = testEnv;
 
     const mintedAmount = utils.parseEther('1000000000');
-    await dai.mint(mintedAmount);
-    await weth.mint(mintedAmount);
-    await usdc.mint(mintedAmount);
+    await dai['mint(uint256)'](mintedAmount);
+    await weth['mint(uint256)'](mintedAmount);
+    await usdc['mint(uint256)'](mintedAmount);
 
     await dai.approve(pool.address, MAX_UINT_AMOUNT);
     await weth.approve(pool.address, MAX_UINT_AMOUNT);

@@ -37,8 +37,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId = block.chainid;
-
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
@@ -46,15 +44,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(debtTokenName)),
-        keccak256(EIP712_REVISION),
-        chainId,
-        address(this)
-      )
-    );
+    _domainSeparator = _calculateDomainSeparator();
 
     emit Initialized(
       underlyingAsset,
