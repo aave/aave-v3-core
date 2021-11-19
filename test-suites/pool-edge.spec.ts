@@ -152,7 +152,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
   });
 
-  it('Init reserve with ZERO_ADDRESS as aToken twice, to enter `_addReserveToList()` already added', async () => {
+  it('Init reserve with ZERO_ADDRESS as aToken twice, to enter `_addReserveToList()` already added (revert expected)', async () => {
     /**
      * To get into this case, we need to init a reserve with `aTokenAddress = address(0)` twice.
      * `_addReserveToList()` is called from `initReserve`. However, in `initReserve` we run `init` before the `_addReserveToList()`,
@@ -170,27 +170,31 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const poolListBefore = await pool.getReservesList();
 
     expect(
-      await pool.connect(configSigner).initReserve(
-        config.aTokenAddress, // simulating asset address, just need a non-used reserve token
-        ZERO_ADDRESS,
-        config.stableDebtTokenAddress,
-        config.variableDebtTokenAddress,
-        ZERO_ADDRESS
-      )
+      await pool
+        .connect(configSigner)
+        .initReserve(
+          config.aTokenAddress,
+          ZERO_ADDRESS,
+          config.stableDebtTokenAddress,
+          config.variableDebtTokenAddress,
+          ZERO_ADDRESS
+        )
     );
     const poolListMid = await pool.getReservesList();
     expect(poolListBefore.length + 1).to.be.eq(poolListMid.length);
 
     // Add it again.
-    expect(
-      await pool.connect(configSigner).initReserve(
-        config.aTokenAddress, // simulating asset address, just need a non-used reserve token
-        ZERO_ADDRESS,
-        config.stableDebtTokenAddress,
-        config.variableDebtTokenAddress,
-        ZERO_ADDRESS
-      )
-    );
+    await expect(
+      pool
+        .connect(configSigner)
+        .initReserve(
+          config.aTokenAddress,
+          ZERO_ADDRESS,
+          config.stableDebtTokenAddress,
+          config.variableDebtTokenAddress,
+          ZERO_ADDRESS
+        )
+    ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
     const poolListAfter = await pool.getReservesList();
     expect(poolListAfter.length).to.be.eq(poolListMid.length);
   });
@@ -249,7 +253,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     const reservesListBefore = await pool.connect(configurator.signer).getReservesList();
 
-    // Remove first 2 assets that has no borrows but still has aTokens specified.
+    // Remove first 2 assets that has no borrows
     let dropped = 0;
     for (let i = 0; i < reservesListBefore.length; i++) {
       if (dropped == 2) {

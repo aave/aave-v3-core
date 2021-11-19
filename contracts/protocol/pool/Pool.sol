@@ -702,9 +702,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
-    if (reserveAlreadyAdded) {
-      return;
-    }
+    require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
     uint256 reservesCount = _reservesCount;
 
