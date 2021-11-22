@@ -7,6 +7,9 @@
     "artifacts",
     "types"
   ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
     "auth-registry": "npx dotenv-cli -- bash -c 'npm config set //npm.pkg.github.com/:_authToken \"$NODE_AUTH_TOKEN\"'",
