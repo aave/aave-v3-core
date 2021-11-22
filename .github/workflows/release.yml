@@ -24,6 +24,9 @@ jobs:
           # Use the Github Package registry
           registry-url: https://npm.pkg.github.com/
           scope: '@aave'
+      # Generate a random SSH key at runtime due ethereumjs-abi https://github.com/ethereumjs/ethereumjs-abi/issues/67#issuecomment-681944008
+      - name: Generate SSH key for Github authentication
+        run: ssh-keygen -q -t rsa -N '' <<< $'\ny' >/dev/null 2>&1
       - run: npm ci
         env:
           NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
