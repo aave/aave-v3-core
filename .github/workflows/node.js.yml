@@ -30,6 +30,9 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+      # Generate a random SSH key at runtime due ethereumjs-abi https://github.com/ethereumjs/ethereumjs-abi/issues/67#issuecomment-681944008
+      - name: Generate SSH key for Github authentication
+      - run: ssh-keygen -q -t rsa -N '' <<< $'\ny' >/dev/null 2>&1
       - name: Install dependencies
         run: npm ci
         env:
