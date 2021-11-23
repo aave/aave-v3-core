@@ -64,7 +64,7 @@ library BridgeLogic {
     uint256 unbacked = reserve.unbacked = reserve.unbacked + Helpers.castUint128(amount);
 
     require(
-      unbackedMintCap > 0 && unbacked <= unbackedMintCap * (10**reserveDecimals),
+      unbacked <= unbackedMintCap * (10**reserveDecimals),
       Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
     );
 
