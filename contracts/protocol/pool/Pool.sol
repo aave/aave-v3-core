@@ -210,7 +210,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _maxStableRateBorrowSizePercent,
         _reservesCount,
         _addressesProvider.getPriceOracle(),
-        _usersEModeCategory[msg.sender],
+        _usersEModeCategory[onBehalfOf],
         _addressesProvider.getPriceOracleSentinel()
       )
     );
