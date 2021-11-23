@@ -1,5 +1,18 @@
 # Changelog
 
+### [1.5.3](https://www.github.com/aave/aave-v3-core/compare/v1.5.2...v1.5.3) (2021-11-23)
+
+
+### Bug Fixes
+
+* Add natspec comments to IncentivizedERC20 ([722a8e7](https://www.github.com/aave/aave-v3-core/commit/722a8e7b5c3a2e14f639e6491cb264b8d305508a))
+* Bumped Node JS version of Dockerfile to 16 stable version. Update package-lock. ([f0c8787](https://www.github.com/aave/aave-v3-core/commit/f0c8787725ff3fc77b02cf92928f6e79207a93ff))
+* Change visibility of `name()` in IncentivizedERC20 ([467a5c1](https://www.github.com/aave/aave-v3-core/commit/467a5c110552bf4ec71449cccc2bb8fd9201806b))
+* Refactor tokens, move domain separator function to IncentivizedERC20 ([c033f9d](https://www.github.com/aave/aave-v3-core/commit/c033f9d4d83c08f75b63b972ca02fca27d6afc45))
+* setup npm registry without file ([91fdc99](https://www.github.com/aave/aave-v3-core/commit/91fdc99b02dffb4924c5078d894f2ca180d8e23c))
+* source setup env for coverage ([fd7de34](https://www.github.com/aave/aave-v3-core/commit/fd7de34862f678aeac426634ba48b1c0afd65f7d))
+* update v3 dev dependencies ([9cb6a47](https://www.github.com/aave/aave-v3-core/commit/9cb6a47393d676d16bd928e8cce5f90db14892ad))
+
 ### [1.5.2](https://www.github.com/aave/aave-v3-core/compare/v1.5.1...v1.5.2) (2021-11-12)
 
 
