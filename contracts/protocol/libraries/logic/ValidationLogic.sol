@@ -102,7 +102,6 @@ library ValidationLogic {
     uint256 reserveDecimals;
     uint256 borrowCap;
     uint256 amountInBaseCurrency;
-    uint256 assetUnit;
     address eModePriceSource;
     bool isActive;
     bool isFrozen;
