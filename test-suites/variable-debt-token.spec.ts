@@ -8,6 +8,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -205,5 +206,131 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
         .connect(users[0].signer)
         .transferFrom(users[0].address, users[1].address, 500)
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+  });
+
+  it.only('Pool mints 10 debtTokens to a user (with ongoing borrowing)', async () => {
+    const { deployer, pool, weth, dai, helpersContract, users } = testEnv;
+
+    const snapId = await evmSnapshot();
+    // User2 supplies DAI
+    await dai.connect(users[2].signer)['mint(uint256)'](utils.parseUnits('1000', 18));
+    await dai.connect(users[2].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[2].signer)
+      .deposit(dai.address, utils.parseEther('1000'), users[2].address, 0);
+
+    await weth.connect(users[0].signer)['mint(uint256)'](utils.parseEther('100'));
+    await weth.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[0].signer)
+      .deposit(weth.address, utils.parseEther('10'), users[0].address, 0);
+    await pool
+      .connect(users[0].signer)
+      .borrow(dai.address, utils.parseUnits('10', 18), RateMode.Variable, 0, users[0].address);
+
+    // Impersonate the Pool
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([pool.address]);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
+
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    // inputs
+    const requester = users[0].address;
+    const onBehalfOf = users[0].address;
+    const amount = utils.parseUnits('10', 18);
+    const reserveIndex = utils.parseUnits('10', 27);
+
+    // accounting
+    const scaledBalance = await variableDebtContract.scaledBalanceOf(onBehalfOf);
+    const previousIndex = await variableDebtContract.getPreviousIndex(onBehalfOf);
+    const currentBalance = scaledBalance.rayMul(reserveIndex);
+    const previousBalance = scaledBalance.rayMul(previousIndex);
+    const interests = currentBalance.sub(previousBalance);
+
+    expect(
+      await variableDebtContract
+        .connect(poolSigner)
+        .mint(requester, onBehalfOf, amount, reserveIndex)
+    )
+      .to.emit(variableDebtContract, 'Transfer')
+      .withArgs(ZERO_ADDRESS, onBehalfOf, amount.add(interests))
+      .to.emit(variableDebtContract, 'Mint')
+      .withArgs(requester, onBehalfOf, amount.add(interests), reserveIndex);
+
+    await evmRevert(snapId);
+  });
+
+  it.only('Pool mints 10 debtTokens on behalf of a user (with ongoing borrowing)', async () => {
+    const { deployer, pool, weth, dai, helpersContract, users } = testEnv;
+
+    const snapId = await evmSnapshot();
+    // User2 supplies DAI
+    await dai.connect(users[2].signer)['mint(uint256)'](utils.parseUnits('1000', 18));
+    await dai.connect(users[2].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[2].signer)
+      .deposit(dai.address, utils.parseEther('1000'), users[2].address, 0);
+    // User0 supplies 10 WETH and borrows 10 DAI
+    await weth.connect(users[0].signer)['mint(uint256)'](utils.parseEther('100'));
+    await weth.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[0].signer)
+      .deposit(weth.address, utils.parseEther('10'), users[0].address, 0);
+    await pool
+      .connect(users[0].signer)
+      .borrow(dai.address, utils.parseUnits('10', 18), RateMode.Variable, 0, users[0].address);
+    // User1 supplies 1 WETH and borrows 100 DAI
+    await weth.connect(users[1].signer)['mint(uint256)'](utils.parseEther('100'));
+    await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[1].signer)
+      .deposit(weth.address, utils.parseEther('10'), users[1].address, 0);
+
+    // Impersonate the Pool
+    await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([pool.address]);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
+
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    // Approve borrow: user0 delegates credit to user1
+    await variableDebtContract
+      .connect(users[0].signer)
+      .approveDelegation(users[1].address, utils.parseUnits('10', 18));
+
+    // inputs
+    const requester = users[1].address;
+    const onBehalfOf = users[0].address;
+    const amount = utils.parseUnits('10', 18);
+    const reserveIndex = utils.parseUnits('10', 27);
+
+    // accounting
+    const scaledBalance = await variableDebtContract.scaledBalanceOf(onBehalfOf);
+    const previousIndex = await variableDebtContract.getPreviousIndex(onBehalfOf);
+    const currentBalance = scaledBalance.rayMul(reserveIndex);
+    const previousBalance = scaledBalance.rayMul(previousIndex);
+    const interests = currentBalance.sub(previousBalance);
+
+    expect(
+      await variableDebtContract
+        .connect(poolSigner)
+        .mint(requester, onBehalfOf, amount, reserveIndex)
+    )
+      .to.emit(variableDebtContract, 'Transfer')
+      .withArgs(ZERO_ADDRESS, onBehalfOf, amount.add(interests))
+      .to.emit(variableDebtContract, 'Mint')
+      .withArgs(requester, onBehalfOf, amount.add(interests), reserveIndex);
+
+
+    await evmRevert(snapId);
   });
 });
