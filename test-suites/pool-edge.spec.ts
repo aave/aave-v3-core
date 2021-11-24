@@ -25,7 +25,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   } = ProtocolErrors;
 
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
-  const MAX_NUMBER_RESERVES = '128';
+  const MAX_NUMBER_RESERVES = '256';
 
   it('Check initialization', async () => {
     const { pool } = testEnv;

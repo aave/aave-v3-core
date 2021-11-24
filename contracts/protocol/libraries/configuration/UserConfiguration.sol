@@ -18,6 +18,9 @@ library UserConfiguration {
   uint256 internal constant COLLATERAL_MASK =
     0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA;
 
+  uint256 internal constant _maxReserves = 256;
+  uint256 internal constant _indexCount = _maxReserves / 128 + ((_maxReserves % 128 > 0) ? 1 : 0);
+
   /**
    * @notice Sets if the user is borrowing the reserve identified by reserveIndex
    * @param self The configuration object
@@ -31,8 +34,10 @@ library UserConfiguration {
   ) internal {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      self.data =
-        (self.data & ~(1 << (reserveIndex * 2))) |
+      uint256 index = reserveIndex / 128;
+      reserveIndex = reserveIndex % 128;
+      self.data[index] =
+        (self.data[index] & ~(1 << (reserveIndex * 2))) |
         (uint256(borrowing ? 1 : 0) << (reserveIndex * 2));
     }
   }
@@ -50,8 +55,10 @@ library UserConfiguration {
   ) internal {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      self.data =
-        (self.data & ~(1 << (reserveIndex * 2 + 1))) |
+      uint256 index = reserveIndex / 128;
+      reserveIndex = reserveIndex % 128;
+      self.data[index] =
+        (self.data[index] & ~(1 << (reserveIndex * 2 + 1))) |
         (uint256(usingAsCollateral ? 1 : 0) << (reserveIndex * 2 + 1));
     }
   }
@@ -68,7 +75,9 @@ library UserConfiguration {
   ) internal pure returns (bool) {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      return (self.data >> (reserveIndex * 2)) & 3 != 0;
+      uint256 index = reserveIndex / 128;
+      reserveIndex = reserveIndex % 128;
+      return (self.data[index] >> (reserveIndex * 2)) & 3 != 0;
     }
   }
 
@@ -85,7 +94,9 @@ library UserConfiguration {
   {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      return (self.data >> (reserveIndex * 2)) & 1 != 0;
+      uint256 index = reserveIndex / 128;
+      reserveIndex = reserveIndex % 128;
+      return (self.data[index] >> (reserveIndex * 2)) & 1 != 0;
     }
   }
 
@@ -102,7 +113,9 @@ library UserConfiguration {
   {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      return (self.data >> (reserveIndex * 2 + 1)) & 1 != 0;
+      uint256 index = reserveIndex / 128;
+      reserveIndex = reserveIndex % 128;
+      return (self.data[index] >> (reserveIndex * 2 + 1)) & 1 != 0;
     }
   }
 
@@ -117,8 +130,20 @@ library UserConfiguration {
     pure
     returns (bool)
   {
-    uint256 collateralData = self.data & COLLATERAL_MASK;
-    return collateralData & (collateralData - 1) == 0;
+    bool used;
+    for (uint8 i = 0; i < _indexCount; i++) {
+      uint256 temp = self.data[i] & COLLATERAL_MASK;
+      if (temp > 0) {
+        if (used) {
+          return false;
+        }
+        if (temp & (temp - 1) != 0) {
+          return false;
+        }
+        used = true;
+      }
+    }
+    return used;
   }
 
   /**
@@ -131,7 +156,12 @@ library UserConfiguration {
     pure
     returns (bool)
   {
-    return self.data & COLLATERAL_MASK != 0;
+    for (uint8 i = 0; i < _indexCount; i++) {
+      if (self.data[i] & COLLATERAL_MASK != 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -140,7 +170,12 @@ library UserConfiguration {
    * @return True if the user has been borrowing any reserve, false otherwise
    **/
   function isBorrowingAny(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
-    return self.data & BORROWING_MASK != 0;
+    for (uint8 i = 0; i < _indexCount; i++) {
+      if (self.data[i] & BORROWING_MASK != 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -149,7 +184,12 @@ library UserConfiguration {
    * @return True if the user has been borrowing any reserve, false otherwise
    **/
   function isEmpty(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
-    return self.data == 0;
+    for (uint8 i = 0; i < _indexCount; i++) {
+      if (self.data[i] != 0) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /**
@@ -200,14 +240,20 @@ library UserConfiguration {
     returns (uint256)
   {
     unchecked {
-      uint256 collateralData = self.data & COLLATERAL_MASK;
-      uint256 firstCollateralPosition = collateralData & ~(collateralData - 1);
-      uint256 id;
+      for (uint8 i = 0; i < _indexCount; i++) {
+        uint256 collateralData = self.data[i] & COLLATERAL_MASK;
+        if (collateralData == 0) {
+          continue;
+        }
+        uint256 firstCollateralPosition = collateralData & ~(collateralData - 1);
+        uint256 id;
 
-      while ((firstCollateralPosition >>= 2) > 0) {
-        id += 2;
+        while ((firstCollateralPosition >>= 2) > 0) {
+          id += 2;
+        }
+        return id / 2;
       }
-      return id / 2;
     }
+    return 0;
   }
 }

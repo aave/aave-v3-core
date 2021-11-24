@@ -57,7 +57,7 @@ library DataTypes {
   }
 
   struct UserConfigurationMap {
-    uint256 data;
+    uint256[2] data;
   }
 
   struct EModeCategory {
