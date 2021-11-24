@@ -87,11 +87,11 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint256 scaledBalance = super.balanceOf(user);
+    uint256 scaledBalance = super.balanceOf(onBehalfOf);
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
-      scaledBalance.rayMul(_userState[user].additionalData);
+      scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[onBehalfOf].additionalData = Helpers.castUint128(index);
 
     _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
