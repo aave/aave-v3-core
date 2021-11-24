@@ -24,6 +24,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 
 /**
  * @title Pool contract
@@ -210,7 +211,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _maxStableRateBorrowSizePercent,
         _reservesCount,
         _addressesProvider.getPriceOracle(),
-        _usersEModeCategory[msg.sender],
+        _usersEModeCategory[onBehalfOf],
         _addressesProvider.getPriceOracleSentinel()
       )
     );
@@ -654,8 +655,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = flashLoanPremiumTotal;
-    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
+    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
+    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
   }
 
   /// @inheritdoc IPool
@@ -716,7 +717,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     require(reservesCount < _maxNumberOfReserves, Errors.P_NO_MORE_RESERVES_ALLOWED);
     _reserves[asset].id = uint8(reservesCount);
     _reservesList[reservesCount] = asset;
-    _reservesCount = reservesCount + 1;
+    // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
+    _reservesCount = uint16(reservesCount + 1);
   }
 
   /// @inheritdoc IPool

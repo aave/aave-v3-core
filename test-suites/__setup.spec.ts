@@ -2,8 +2,6 @@ import rawBRE from 'hardhat';
 import { initializeMakeSuite } from './helpers/make-suite';
 
 before(async () => {
-  process.env.MARKET_NAME = 'Aave';
-
   await rawBRE.deployments.fixture(['market']);
 
   console.log('-> Deployed market');
