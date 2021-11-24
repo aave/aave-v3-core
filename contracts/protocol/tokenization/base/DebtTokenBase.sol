@@ -19,15 +19,11 @@ abstract contract DebtTokenBase is
   ICreditDelegationToken
 {
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
-  bytes public constant EIP712_REVISION = bytes('1');
-  bytes32 internal constant EIP712_DOMAIN =
-    keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
   bytes32 public constant DELEGATION_WITH_SIG_TYPEHASH =
     keccak256(
       'DelegationWithSig(address delegator,address delegatee,uint256 value,uint256 nonce,uint256 deadline)'
     );
   mapping(address => uint256) public _nonces;
-  bytes32 public DOMAIN_SEPARATOR;
   IPool internal immutable _pool;
 
   /**
@@ -75,7 +71,7 @@ abstract contract DebtTokenBase is
     bytes32 digest = keccak256(
       abi.encodePacked(
         '\x19\x01',
-        DOMAIN_SEPARATOR,
+        DOMAIN_SEPARATOR(),
         keccak256(
           abi.encode(
             DELEGATION_WITH_SIG_TYPEHASH,
