@@ -18,27 +18,23 @@ contract PoolStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  IPoolAddressesProvider internal _addressesProvider;
 
   mapping(address => DataTypes.ReserveData) internal _reserves;
   mapping(address => DataTypes.UserConfigurationMap) internal _usersConfig;
 
   // the list of the available reserves, structured as a mapping for gas savings reasons
   mapping(uint256 => address) internal _reservesList;
-
-  uint256 internal _reservesCount;
-
-  uint256 internal _maxStableRateBorrowSizePercent;
-
-  uint256 internal _flashLoanPremiumTotal;
-
-  uint256 internal _maxNumberOfReserves;
-
-  uint256 internal _flashLoanPremiumToProtocol;
-
   mapping(uint8 => DataTypes.EModeCategory) _eModeCategories;
-
   mapping(address => uint8) _usersEModeCategory;
-
+  uint256 internal _maxNumberOfReserves;
   uint256 internal _bridgeProtocolFee;
+  uint128 internal _flashLoanPremiumTotal;
+  uint128 internal _flashLoanPremiumToProtocol;
+
+  IPoolAddressesProvider internal _addressesProvider;
+  uint64 internal _maxStableRateBorrowSizePercent;
+  uint16 internal _reservesCount;
+
+
+
 }
