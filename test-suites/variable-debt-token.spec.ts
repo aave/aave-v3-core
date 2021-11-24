@@ -8,7 +8,16 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
+import {
+  evmRevert,
+  evmSnapshot,
+  increaseTime,
+  VariableDebtToken__factory,
+  waitForTx,
+} from '@aave/deploy-v3';
+import { parseUnits } from '@ethersproject/units';
+import './helpers/utils/wadraymath';
+import { parseTransaction } from 'ethers/lib/utils';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -208,6 +217,75 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
+  it.only('Check mint and transfer events when borrowing on behalf', async () => {
+    const snapId = await evmSnapshot();
+    const {
+      pool,
+      weth,
+      dai,
+      users: [user1, user2, user3],
+    } = testEnv;
+
+    await dai.connect(user3.signer)['mint(uint256)'](parseUnits('1000', 18));
+    await dai.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user3.signer).supply(dai.address, parseUnits('1000', 18), user3.address, 0);
+
+    await weth.connect(user1.signer)['mint(uint256)'](parseUnits('10', 18));
+    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user1.signer).supply(weth.address, parseUnits('10', 18), user1.address, 0);
+
+    const borrowAmount = parseUnits('100', 18);
+    await pool
+      .connect(user1.signer)
+      .borrow(dai.address, borrowAmount, RateMode.Variable, 0, user1.address);
+
+    const daiData = await pool.getReserveData(dai.address);
+
+    const variableDebtToken = VariableDebtToken__factory.connect(
+      daiData.variableDebtTokenAddress,
+      user1.signer
+    );
+
+    await variableDebtToken
+      .connect(user1.signer)
+      .approveDelegation(user2.address, parseUnits('1000', 18));
+
+    await increaseTime(24 * 3600);
+
+    const borrowOnBehalfAmount = parseUnits('100', 18);
+
+    const tx = await waitForTx(
+      await pool
+        .connect(user2.signer)
+        .borrow(dai.address, borrowOnBehalfAmount, RateMode.Variable, 0, user1.address)
+    );
+
+    const expectedIncrease = (await variableDebtToken.balanceOf(user1.address)).sub(
+      borrowOnBehalfAmount.add(borrowAmount)
+    );
+
+    const transferEventSignature = utils.keccak256(
+      utils.toUtf8Bytes('Transfer(address,address,uint256)')
+    );
+    const rawTransferEvents = tx.logs.filter(
+      (log) => log.topics[0] === transferEventSignature && log.address == variableDebtToken.address
+    );
+    const parsedTransferEvent = variableDebtToken.interface.parseLog(rawTransferEvents[0]);
+
+    const mintEventSignature = utils.keccak256(
+      utils.toUtf8Bytes('Mint(address,address,uint256,uint256)')
+    );
+    const rawMintEvents = tx.logs.filter(
+      (log) => log.topics[0] === mintEventSignature && log.address == variableDebtToken.address
+    );
+    const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
+
+    expect(expectedIncrease.add(borrowOnBehalfAmount)).to.be.eq(parsedTransferEvent.args.value);
+    expect(expectedIncrease.add(borrowOnBehalfAmount)).to.be.eq(parsedMintEvent.args.value);
+
+    await evmRevert(snapId);
+  });
+
   it.only('Pool mints 10 debtTokens to a user (with ongoing borrowing)', async () => {
     const { deployer, pool, weth, dai, helpersContract, users } = testEnv;
 
@@ -329,7 +407,6 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       .withArgs(ZERO_ADDRESS, onBehalfOf, amount.add(interests))
       .to.emit(variableDebtContract, 'Mint')
       .withArgs(requester, onBehalfOf, amount.add(interests), reserveIndex);
-
 
     await evmRevert(snapId);
   });
