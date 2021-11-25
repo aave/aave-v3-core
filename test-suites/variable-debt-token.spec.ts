@@ -8,16 +8,8 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {
-  evmRevert,
-  evmSnapshot,
-  increaseTime,
-  VariableDebtToken__factory,
-  waitForTx,
-} from '@aave/deploy-v3';
-import { parseUnits } from '@ethersproject/units';
+import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
 import './helpers/utils/wadraymath';
-import { parseTransaction } from 'ethers/lib/utils';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -217,7 +209,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
-  it('Check mint and transfer events when borrowing on behalf', async () => {
+  it('Check Mint and Transfer events when borrowing on behalf', async () => {
     const snapId = await evmSnapshot();
     const {
       pool,
@@ -226,62 +218,80 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       users: [user1, user2, user3],
     } = testEnv;
 
-    await dai.connect(user3.signer)['mint(uint256)'](parseUnits('1000', 18));
+    // Add liquidity
+    await dai.connect(user3.signer)['mint(uint256)'](utils.parseUnits('1000', 18));
     await dai.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user3.signer).supply(dai.address, parseUnits('1000', 18), user3.address, 0);
+    await pool
+      .connect(user3.signer)
+      .supply(dai.address, utils.parseUnits('1000', 18), user3.address, 0);
 
-    await weth.connect(user1.signer)['mint(uint256)'](parseUnits('10', 18));
+    // User1 supplies 10 WETH
+    await weth.connect(user1.signer)['mint(uint256)'](utils.parseUnits('10', 18));
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(user1.signer).supply(weth.address, parseUnits('10', 18), user1.address, 0);
-
-    const borrowAmount = parseUnits('100', 18);
     await pool
       .connect(user1.signer)
-      .borrow(dai.address, borrowAmount, RateMode.Variable, 0, user1.address);
+      .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
 
     const daiData = await pool.getReserveData(dai.address);
+    const variableDebtToken = await getVariableDebtToken(daiData.variableDebtTokenAddress);
+    const beforeDebtBalanceUser2 = await variableDebtToken.balanceOf(user2.address);
 
-    const variableDebtToken = VariableDebtToken__factory.connect(
-      daiData.variableDebtTokenAddress,
-      user1.signer
+    // User1 borrows 100 DAI
+    const borrowAmount = utils.parseUnits('100', 18);
+    expect(
+      await pool
+        .connect(user1.signer)
+        .borrow(dai.address, borrowAmount, RateMode.Variable, 0, user1.address)
     );
 
-    await variableDebtToken
-      .connect(user1.signer)
-      .approveDelegation(user2.address, parseUnits('1000', 18));
+    // User1 approves user2 to borrow 1000 DAI
+    expect(
+      await variableDebtToken
+        .connect(user1.signer)
+        .approveDelegation(user2.address, utils.parseUnits('1000', 18))
+    );
 
+    // Increase time so interests accrue
     await increaseTime(24 * 3600);
 
-    const borrowOnBehalfAmount = parseUnits('100', 18);
-
+    // User2 borrows 1000 DAI on behalf of user1
+    const borrowOnBehalfAmount = utils.parseUnits('100', 18);
     const tx = await waitForTx(
       await pool
         .connect(user2.signer)
         .borrow(dai.address, borrowOnBehalfAmount, RateMode.Variable, 0, user1.address)
     );
 
-    const expectedIncrease = (await variableDebtToken.balanceOf(user1.address)).sub(
+    const afterDebtBalanceUser2 = await variableDebtToken.balanceOf(user2.address);
+    const afterDebtBalanceUser1 = await variableDebtToken.balanceOf(user1.address);
+
+    // Calculate debt + interests
+    const expectedDebtIncreaseUser1 = afterDebtBalanceUser1.sub(
       borrowOnBehalfAmount.add(borrowAmount)
     );
 
-    const transferEventSignature = utils.keccak256(
+    const transferEventSig = utils.keccak256(
       utils.toUtf8Bytes('Transfer(address,address,uint256)')
     );
-    const rawTransferEvents = tx.logs.filter(
-      (log) => log.topics[0] === transferEventSignature && log.address == variableDebtToken.address
-    );
-    const parsedTransferEvent = variableDebtToken.interface.parseLog(rawTransferEvents[0]);
-
-    const mintEventSignature = utils.keccak256(
+    const mintEventSig = utils.keccak256(
       utils.toUtf8Bytes('Mint(address,address,uint256,uint256)')
     );
-    const rawMintEvents = tx.logs.filter(
-      (log) => log.topics[0] === mintEventSignature && log.address == variableDebtToken.address
-    );
-    const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
 
-    expect(expectedIncrease.add(borrowOnBehalfAmount)).to.be.eq(parsedTransferEvent.args.value);
-    expect(expectedIncrease.add(borrowOnBehalfAmount)).to.be.eq(parsedMintEvent.args.value);
+    const rawTransferEvents = tx.logs.filter(
+      ({ topics, address }) =>
+        topics[0] === transferEventSig && address == variableDebtToken.address
+    );
+    const transferAmount = variableDebtToken.interface.parseLog(rawTransferEvents[0]).args.value;
+
+    const rawMintEvents = tx.logs.filter(
+      ({ topics, address }) => topics[0] === mintEventSig && address == variableDebtToken.address
+    );
+    const mintAmount = variableDebtToken.interface.parseLog(rawMintEvents[0]).args.value;
+
+    expect(transferAmount).to.be.eq(mintAmount);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(mintAmount);
+    expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
 
     await evmRevert(snapId);
   });
