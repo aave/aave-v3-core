@@ -24,6 +24,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 
 /**
  * @title Pool contract
@@ -214,7 +215,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _maxStableRateBorrowSizePercent,
         _reservesCount,
         _addressesProvider.getPriceOracle(),
-        _usersEModeCategory[msg.sender],
+        _usersEModeCategory[onBehalfOf],
         _addressesProvider.getPriceOracleSentinel()
       )
     );
@@ -658,8 +659,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = flashLoanPremiumTotal;
-    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
+    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
+    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
   }
 
   /// @inheritdoc IPool
@@ -716,7 +717,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         if (_reservesList[i] == address(0)) {
           _reserves[asset].id = i;
           _reservesList[i] = asset;
-          _reservesCount = reservesCount + 1;
+          _reservesCount = uint16(reservesCount + 1);
         }
       }
     }

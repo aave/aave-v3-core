@@ -23,20 +23,16 @@ contract PoolStorage {
 
   // the list of the available reserves, structured as a mapping for gas savings reasons
   mapping(uint256 => address) internal _reservesList;
-
-  uint256 internal _reservesCount;
-
-  uint256 internal _maxStableRateBorrowSizePercent;
-
-  uint256 internal _flashLoanPremiumTotal;
-
-  uint256 internal _maxNumberOfReserves;
-
-  uint256 internal _flashLoanPremiumToProtocol;
-
   mapping(uint8 => DataTypes.EModeCategory) _eModeCategories;
-
   mapping(address => uint8) _usersEModeCategory;
-
+  uint256 internal _maxNumberOfReserves;
   uint256 internal _bridgeProtocolFee;
+  uint128 internal _flashLoanPremiumTotal;
+  uint128 internal _flashLoanPremiumToProtocol;
+
+  uint64 internal _maxStableRateBorrowSizePercent;
+  uint16 internal _reservesCount;
+
+
+
 }
