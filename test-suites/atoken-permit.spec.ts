@@ -52,7 +52,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = 0;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = utils.parseEther('2').toString();
     const msgParams = buildPermitParams(
       chainId,
@@ -94,7 +94,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = utils.parseEther('2').toString();
     const msgParams = buildPermitParams(
       chainId,
@@ -123,7 +123,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
         .permit(owner.address, spender.address, permitAmount, deadline, v, r, s)
     );
 
-    expect((await aDai._nonces(owner.address)).toNumber()).to.be.equal(1);
+    expect((await aDai.nonces(owner.address)).toNumber()).to.be.equal(1);
   });
 
   it('Cancels the previous permit', async () => {
@@ -133,7 +133,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,
@@ -166,7 +166,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       'INVALID_ALLOWANCE_AFTER_PERMIT'
     );
 
-    expect((await aDai._nonces(owner.address)).toNumber()).to.be.equal(2);
+    expect((await aDai.nonces(owner.address)).toNumber()).to.be.equal(2);
   });
 
   it('Tries to submit a permit with invalid nonce (revert expected)', async () => {
@@ -208,7 +208,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = '1';
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,
@@ -240,7 +240,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,
@@ -272,7 +272,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,
