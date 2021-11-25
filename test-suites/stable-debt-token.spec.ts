@@ -4,7 +4,6 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getStableDebtToken } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
 import { impersonateAccountsHardhat, setAutomine } from '../helpers/misc-utils';
-import { StableDebtToken__factory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
@@ -115,7 +114,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       weth,
       dai,
       usdc,
-      users: [user1, user2, user3]
+      users: [user1, user2, user3],
     } = testEnv;
 
     // Add USDC liquidity
@@ -269,10 +268,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
-    const stableDebt = StableDebtToken__factory.connect(
-      config.stableDebtTokenAddress,
-      deployer.signer
-    );
+    const stableDebt = await getStableDebtToken(config.stableDebtTokenAddress);
 
     // Next two txs should be mined in the same block
     await setAutomine(false);
