@@ -12,9 +12,9 @@ import {ISequencerOracle} from '../../interfaces/ISequencerOracle.sol';
  * @dev After a PriceOracle downtime, once it gets up, users can make their positions healthy during a grace period.
  */
 contract PriceOracleSentinel is IPriceOracleSentinel {
-  IPoolAddressesProvider public immutable _addressesProvider;
-  ISequencerOracle public immutable _oracle;
-  uint256 public immutable _gracePeriod;
+  IPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
+  ISequencerOracle public immutable override ORACLE;
+  uint256 public immutable override GRACE_PERIOD;
 
   /**
    * @notice Constructor
@@ -27,9 +27,9 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
     ISequencerOracle oracle,
     uint256 gracePeriod
   ) {
-    _addressesProvider = provider;
-    _oracle = oracle;
-    _gracePeriod = gracePeriod;
+    ADDRESSES_PROVIDER = provider;
+    ORACLE = oracle;
+    GRACE_PERIOD = gracePeriod;
   }
 
   /// @inheritdoc IPriceOracleSentinel
@@ -43,7 +43,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   }
 
   function _isUpAndGracePeriodPassed() internal view returns (bool) {
-    (bool isDown, uint256 timestampGotUp) = _oracle.latestAnswer();
-    return !isDown && block.timestamp - timestampGotUp > _gracePeriod;
+    (bool isDown, uint256 timestampGotUp) = ORACLE.latestAnswer();
+    return !isDown && block.timestamp - timestampGotUp > GRACE_PERIOD;
   }
 }

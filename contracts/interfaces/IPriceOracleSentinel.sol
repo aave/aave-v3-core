@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
+import {ISequencerOracle} from './ISequencerOracle.sol';
+
 /**
  * @title IPriceOracleSentinel
  * @author Aave
@@ -20,4 +23,10 @@ interface IPriceOracleSentinel {
    * @return True if the `liquidation` operation is allowed, false otherwise.
    */
   function isLiquidationAllowed() external view returns (bool);
+
+  function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
+
+  function ORACLE() external view returns (ISequencerOracle);
+
+  function GRACE_PERIOD() external view returns (uint256);
 }

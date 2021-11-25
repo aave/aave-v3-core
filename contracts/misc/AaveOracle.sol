@@ -36,7 +36,7 @@ contract AaveOracle is IPriceOracleGetter {
    */
   event FallbackOracleUpdated(address indexed fallbackOracle);
 
-  IPoolAddressesProvider internal immutable _addressesProvider;
+  IPoolAddressesProvider internal immutable ADDRESSES_PROVIDER;
   mapping(address => IChainlinkAggregator) private assetsSources;
   IPriceOracleGetter private _fallbackOracle;
   address public immutable override BASE_CURRENCY;
@@ -65,7 +65,7 @@ contract AaveOracle is IPriceOracleGetter {
     address baseCurrency,
     uint256 baseCurrencyUnit
   ) {
-    _addressesProvider = provider;
+    ADDRESSES_PROVIDER = provider;
     _setFallbackOracle(fallbackOracle);
     _setAssetsSources(assets, sources);
     BASE_CURRENCY = baseCurrency;
@@ -165,7 +165,7 @@ contract AaveOracle is IPriceOracleGetter {
   }
 
   function _onlyAssetListingOrPoolAdmins() internal view {
-    IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
+    IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(
       aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
       Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
