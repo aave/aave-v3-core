@@ -18,7 +18,6 @@ contract PoolStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-
   mapping(address => DataTypes.ReserveData) internal _reserves;
   mapping(address => DataTypes.UserConfigurationMap) internal _usersConfig;
 
@@ -31,7 +30,6 @@ contract PoolStorage {
   uint128 internal _flashLoanPremiumTotal;
   uint128 internal _flashLoanPremiumToProtocol;
 
-  IPoolAddressesProvider internal _addressesProvider;
   uint64 internal _maxStableRateBorrowSizePercent;
   uint16 internal _reservesCount;
 
