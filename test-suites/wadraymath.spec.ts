@@ -2,8 +2,8 @@ import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { MAX_UINT_AMOUNT, RAY, WAD, HALF_RAY, HALF_WAD } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
-import { WadRayMathWrapper, WadRayMathWrapperFactory } from '../types';
-import { getFirstSigner } from '../helpers/contracts-getters';
+import { WadRayMathWrapper, WadRayMathWrapper__factory } from '../types';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
@@ -13,7 +13,7 @@ makeSuite('WadRayMath', () => {
   let wrapper: WadRayMathWrapper;
 
   before('setup', async () => {
-    const factory = new WadRayMathWrapperFactory(await getFirstSigner());
+    const factory = new WadRayMathWrapper__factory(await getFirstSigner());
     wrapper = await ((await factory.deploy()) as WadRayMathWrapper).deployed();
   });
 

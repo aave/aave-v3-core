@@ -1,11 +1,15 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { waitForTx } from '@aave/deploy-v3';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
   const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT, HLP_UINT128_OVERFLOW } = ProtocolErrors;
@@ -24,17 +28,25 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     expect(scaledUserBalanceAndSupplyBefore[0]).to.be.eq(0);
     expect(scaledUserBalanceAndSupplyBefore[1]).to.be.eq(0);
 
-    await dai.connect(users[0].signer).mint(await convertToCurrencyDecimals(dai.address, '1000'));
-    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool
-      .connect(users[0].signer)
-      .deposit(
-        dai.address,
-        await convertToCurrencyDecimals(dai.address, '1000'),
-        users[0].address,
-        0
-      );
-
+    await waitForTx(
+      await dai
+        .connect(users[0].signer)
+        ['mint(address,uint256)'](
+          users[0].address,
+          await convertToCurrencyDecimals(dai.address, '1000')
+        )
+    );
+    await waitForTx(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
+    await waitForTx(
+      await pool
+        .connect(users[0].signer)
+        .deposit(
+          dai.address,
+          await convertToCurrencyDecimals(dai.address, '1000'),
+          users[0].address,
+          0
+        )
+    );
     const scaledUserBalanceAndSupplyAfter = await aDai.getScaledUserBalanceAndSupply(
       users[0].address
     );
@@ -106,7 +118,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     // Impersonate Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     await expect(
       aDai.connect(poolSigner).mint(users[0].address, 0, utils.parseUnits('1', 27))
@@ -119,7 +131,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     // Impersonate Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const mintingAmount = await convertToCurrencyDecimals(aDai.address, '100');
     expect(aDai.connect(poolSigner).mint(ZERO_ADDRESS, mintingAmount, utils.parseUnits('1', 27)))
@@ -133,7 +145,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     // Impersonate Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     await expect(
       aDai
@@ -148,7 +160,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     // Impersonate Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const burnAmount = await convertToCurrencyDecimals(aDai.address, '100');
     expect(
@@ -166,7 +178,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     // Impersonate Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = await DRE.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
 
     expect(await aDai.connect(poolSigner).mintToTreasury(0, utils.parseUnits('1', 27)));
   });

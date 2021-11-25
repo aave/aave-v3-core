@@ -4,7 +4,7 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
-import { getMockFlashLoanReceiver } from '../helpers/contracts-getters';
+import { getMockFlashLoanReceiver } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
@@ -26,7 +26,7 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
 
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
-    await dai.connect(users[0].signer).mint(amountDAItoDeposit);
+    await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -81,7 +81,7 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
 
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
-    await dai.connect(users[0].signer).mint(amountDAItoDeposit);
+    await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -101,7 +101,7 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
 
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
 
-    await dai.connect(users[0].signer).mint(amountDAItoDeposit);
+    await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit);
 
     // user 0 deposits 1000 DAI
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -191,7 +191,7 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
     //mints USDC to depositor
     await usdc
       .connect(depositor.signer)
-      .mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
 
     //approve protocol to access depositor wallet
     await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -203,11 +203,11 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
       .connect(depositor.signer)
       .deposit(usdc.address, amountUSDCtoDeposit, depositor.address, '0');
 
-    //user 4 deposits 1 ETH
-    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
+    //user 4 deposits ETH
+    const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.06775');
 
     //mints WETH to borrower
-    await weth.connect(borrower.signer).mint(amountETHtoDeposit);
+    await weth.connect(borrower.signer)['mint(uint256)'](amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -234,7 +234,7 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
     await oracle.setAssetPrice(usdc.address, usdcPrice.percentMul(12000));
 
     //mints dai to the liquidator
-    await usdc.mint(await convertToCurrencyDecimals(usdc.address, '1000'));
+    await usdc['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
     await usdc.approve(pool.address, MAX_UINT_AMOUNT);
 
     const userReserveDataBefore = await helpersContract.getUserReserveData(
@@ -263,11 +263,11 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
     const amountDAIToDeposit = utils.parseEther('120');
     const amountToBorrow = await convertToCurrencyDecimals(usdc.address, '65');
 
-    await weth.connect(user.signer).mint(amountWETHToDeposit);
+    await weth.connect(user.signer)['mint(uint256)'](amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 
-    await dai.connect(user.signer).mint(amountDAIToDeposit);
+    await dai.connect(user.signer)['mint(uint256)'](amountDAIToDeposit);
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(dai.address, amountDAIToDeposit, user.address, '0');
 
@@ -304,7 +304,7 @@ makeSuite('PausableReserve', (testEnv: TestEnv) => {
     const user = users[1];
 
     const amountWETHToDeposit = utils.parseEther('1');
-    await weth.connect(user.signer).mint(amountWETHToDeposit);
+    await weth.connect(user.signer)['mint(uint256)'](amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 

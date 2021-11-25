@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
@@ -42,8 +42,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId = block.chainid;
-
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
@@ -51,15 +49,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(debtTokenName)),
-        keccak256(EIP712_REVISION),
-        chainId,
-        address(this)
-      )
-    );
+    _domainSeparator = _calculateDomainSeparator();
 
     emit Initialized(
       underlyingAsset,

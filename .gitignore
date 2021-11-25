@@ -2,12 +2,14 @@
 #Hardhat files
 cache
 artifacts
+temp-artifacts
 node_modules
 dist/
 build/
 .vscode
 .idea
 /types
+contracts/hardhat-dependency-compiler
 
 deployed-contracts.json
 
