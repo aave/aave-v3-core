@@ -317,6 +317,23 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address oracle,
     string calldata label
   ) external override onlyRiskOrPoolAdmins {
+    // validation of the parameters: the LTV can
+    // only be lower or equal than the liquidation threshold
+    // (otherwise a loan against the asset would cause instantaneous liquidation)
+    require(ltv <= liquidationThreshold, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
+    require(
+      liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
+
+    // if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
+    // a loan is taken there is enough collateral available to cover the liquidation bonus
+    require(
+      uint256(liquidationThreshold).percentMul(liquidationBonus) <=
+        PercentageMath.PERCENTAGE_FACTOR,
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
+
     _pool.configureEModeCategory(
       categoryId,
       DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
