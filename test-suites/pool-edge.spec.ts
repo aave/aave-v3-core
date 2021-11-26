@@ -12,6 +12,7 @@ import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmRevert, evmSnapshot, Pool__factory } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -22,10 +23,50 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     P_NOT_CONTRACT,
     P_CALLER_NOT_POOL_CONFIGURATOR,
     RL_RESERVE_ALREADY_INITIALIZED,
+    PC_INVALID_CONFIGURATION,
   } = ProtocolErrors;
 
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
   const MAX_NUMBER_RESERVES = '128';
+
+  it('Initialize fresh deployment with incorrect addresses provider (revert expected)', async () => {
+    const {
+      addressesProvider,
+      users: [user_deployer],
+    } = testEnv;
+    const { deployer } = await hre.getNamedAccounts();
+    const snap = await evmSnapshot();
+
+    const supplyLibraryArtifact = await hre.deployments.get('SupplyLogic');
+    const borrowLibraryArtifact = await hre.deployments.get('BorrowLogic');
+    const liquidationLibraryArtifact = await hre.deployments.get('LiquidationLogic');
+    const eModeLibraryArtifact = await hre.deployments.get('EModeLogic');
+    const bridgeLibraryArtifact = await hre.deployments.get('BridgeLogic');
+    const flashLoanLogicArtifact = await hre.deployments.get('FlashLoanLogic');
+
+    const NEW_POOL_IMPL_ARTIFACT = await hre.deployments.deploy('Pool', {
+      contract: 'Pool',
+      from: deployer,
+      args: [addressesProvider.address],
+      libraries: {
+        SupplyLogic: supplyLibraryArtifact.address,
+        BorrowLogic: borrowLibraryArtifact.address,
+        LiquidationLogic: liquidationLibraryArtifact.address,
+        EModeLogic: eModeLibraryArtifact.address,
+        BridgeLogic: bridgeLibraryArtifact.address,
+        FlashLoanLogic: flashLoanLogicArtifact.address,
+      },
+      log: false,
+    });
+
+    const freshPool = Pool__factory.connect(NEW_POOL_IMPL_ARTIFACT.address, user_deployer.signer);
+
+    await expect(freshPool.initialize(user_deployer.address)).to.be.revertedWith(
+      PC_INVALID_CONFIGURATION
+    );
+
+    await evmRevert(snap);
+  });
 
   it('Check initialization', async () => {
     const { pool } = testEnv;

@@ -23,7 +23,6 @@ abstract contract DebtTokenBase is
     keccak256(
       'DelegationWithSig(address delegator,address delegatee,uint256 value,uint256 nonce,uint256 deadline)'
     );
-  mapping(address => uint256) public _nonces;
   IPool internal immutable _pool;
 
   /**
