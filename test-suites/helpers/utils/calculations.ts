@@ -1291,9 +1291,9 @@ export const calcExpectedInterestRates = (
       );
   } else {
     stableBorrowRate = stableBorrowRate.add(
-      BigNumber.from(reserveConfiguration.strategy.stableRateSlope1).rayMul(
-        borrowUtilizationRate.rayDiv(BigNumber.from(optimalRate))
-      )
+      BigNumber.from(reserveConfiguration.strategy.stableRateSlope1)
+        .rayMul(borrowUtilizationRate)
+        .rayDiv(BigNumber.from(optimalRate))
     );
     variableBorrowRate = variableBorrowRate.add(
       BigNumber.from(reserveConfiguration.strategy.variableRateSlope1)

@@ -37,8 +37,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
-    uint256 chainId = block.chainid;
-
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
@@ -46,15 +44,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     _underlyingAsset = underlyingAsset;
     _incentivesController = incentivesController;
 
-    DOMAIN_SEPARATOR = keccak256(
-      abi.encode(
-        EIP712_DOMAIN,
-        keccak256(bytes(debtTokenName)),
-        keccak256(EIP712_REVISION),
-        chainId,
-        address(this)
-      )
-    );
+    _domainSeparator = _calculateDomainSeparator();
 
     emit Initialized(
       underlyingAsset,
@@ -97,11 +87,11 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint256 scaledBalance = super.balanceOf(user);
+    uint256 scaledBalance = super.balanceOf(onBehalfOf);
     uint256 accumulatedInterest = scaledBalance.rayMul(index) -
-      scaledBalance.rayMul(_userState[user].additionalData);
+      scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[onBehalfOf].additionalData = Helpers.castUint128(index);
 
     _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
