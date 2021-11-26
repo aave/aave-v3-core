@@ -197,7 +197,15 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
           RateMode.Variable,
           user0.address
         )
-    );
+    )
+      .to.emit(pool, 'Repay')
+      .withArgs(
+        usdc.address,
+        user0.address,
+        user0.address,
+        await convertToCurrencyDecimals(usdc.address, '50'),
+        false
+      );
     expect(
       await pool
         .connect(user0.signer)
