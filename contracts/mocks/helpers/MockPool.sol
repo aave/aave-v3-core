@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+import {Errors} from '../../protocol/libraries/helpers/Errors.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 
 contract MockPool {
@@ -56,7 +57,7 @@ contract MockPoolInherited is Pool {
         if (_reservesList[i] == address(0)) {
           _reserves[asset].id = i;
           _reservesList[i] = asset;
-          _reservesCount = reservesCount + 1;
+          _reservesCount = uint16(reservesCount + 1);
         }
       }
     }
