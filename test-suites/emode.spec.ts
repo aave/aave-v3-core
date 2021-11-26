@@ -6,7 +6,6 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
-import { parseUnits } from '@ethersproject/units';
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   const { VL_INCONSISTENT_EMODE_CATEGORY, VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } =
@@ -253,9 +252,9 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       user1.address
     );
     expect(usageAsCollateralEnabled).to.be.true;
-    const userDataAfterSupply = await pool.getUserAccountData(user1.address);
+    const userDataBeforeEMode = await pool.getUserAccountData(user1.address);
     expect(userDataBeforeSupply.totalCollateralBase).to.be.eq(
-      userDataAfterSupply.totalCollateralBase.sub(wethToSupply.wadMul(wethPrice))
+      userDataBeforeEMode.totalCollateralBase.sub(wethToSupply.wadMul(wethPrice))
     );
 
     // Activate EMode, increasing availableBorrowsBase
@@ -265,10 +264,10 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(await pool.getUserEMode(user1.address)).to.be.eq(CATEGORIES.ETHEREUM.id);
 
     const userDataAfterEMode = await pool.getUserAccountData(user1.address);
-    expect(userDataAfterSupply.totalCollateralBase).to.be.eq(
+    expect(userDataBeforeEMode.totalCollateralBase).to.be.eq(
       userDataAfterEMode.totalCollateralBase
     );
-    expect(userDataAfterSupply.availableBorrowsBase).to.be.lt(
+    expect(userDataBeforeEMode.availableBorrowsBase).to.be.lt(
       userDataAfterEMode.availableBorrowsBase
     );
   });
@@ -582,7 +581,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(userDataAfter.healthFactor).to.be.eq(userDataBefore.healthFactor);
   });
 
-  it('Issue case', async () => {
+  it('User supplies USDC, activates eMode for ethereum category and borrowing power keeps the same', async () => {
     await evmRevert(snapSetup);
 
     const {
@@ -595,7 +594,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       users: [user],
     } = testEnv;
 
-    // Setup eMode category for eth, use weth price as oracle price.
+    // Setup eMode category for eth, use weth oracle as price source.
     const { id, ltv, lt, lb, label } = CATEGORIES.ETHEREUM;
     expect(
       await configurator
@@ -609,11 +608,13 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
 
     // Deposit USDC
     expect(
-      await pool.connect(user.signer).supply(usdc.address, parseUnits('100', 6), user.address, 0)
+      await pool
+        .connect(user.signer)
+        .supply(usdc.address, utils.parseUnits('100', 6), user.address, 0)
     );
 
     // Look at power
-    const baseUnit = parseUnits('1', 8);
+    const baseUnit = utils.parseUnits('1', 8);
     const userDataBefore = await pool.getUserAccountData(user.address);
     expect(userDataBefore.totalCollateralBase).to.be.eq(baseUnit.mul(100));
 
@@ -625,5 +626,11 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
 
     // Expect collateral to have equal value
     expect(userDataAfter.totalCollateralBase).to.be.eq(userDataBefore.totalCollateralBase);
+    expect(userDataAfter.availableBorrowsBase).to.be.eq(userDataBefore.availableBorrowsBase);
+    expect(userDataAfter.currentLiquidationThreshold).to.be.eq(
+      userDataBefore.currentLiquidationThreshold
+    );
+    expect(userDataAfter.ltv).to.be.eq(userDataBefore.ltv);
+    expect(userDataAfter.healthFactor).to.be.eq(userDataBefore.healthFactor);
   });
 });
