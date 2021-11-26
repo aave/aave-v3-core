@@ -42,7 +42,7 @@ contract MockPoolInherited is Pool {
   }
 
   function MAX_NUMBER_RESERVES() public view override returns (uint256) {
-    return ReserveConfiguration.MAX_RESERVES_COUNT;
+    return _maxNumberOfReserves;
   }
 
   function _addReserveToList(address asset) internal override {
