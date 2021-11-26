@@ -223,7 +223,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const NEW_POOL_IMPL_ARTIFACT = await hre.deployments.deploy('MockPoolInherited', {
       contract: 'MockPoolInherited',
       from: deployerName,
-      args: [],
+      args: [addressesProvider.address],
       libraries: {
         SupplyLogic: (await hre.deployments.get('SupplyLogic')).address,
         BorrowLogic: (await hre.deployments.get('BorrowLogic')).address,
