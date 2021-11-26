@@ -205,9 +205,9 @@ library UserConfiguration {
       uint256 id;
 
       while ((firstCollateralPosition >>= 2) > 0) {
-        id += 2;
+        id += 1;
       }
-      return id / 2;
+      return id;
     }
   }
 }

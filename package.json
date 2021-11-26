@@ -7,6 +7,9 @@
     "artifacts",
     "types"
   ],
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "size": "npm run compile && npm run hardhat size-contracts",
     "auth-registry": "npx dotenv-cli -- bash -c 'npm config set //npm.pkg.github.com/:_authToken \"$NODE_AUTH_TOKEN\"'",
@@ -17,7 +20,7 @@
     "console:fork": "FORK=main hardhat console",
     "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
     "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
-    "coverage": "COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test-suites/*.spec.ts'",
+    "coverage": ". ./setup-test-env.sh && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test-suites/*.spec.ts'",
     "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/*.spec.ts",
     "test-scenarios": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
     "test-subgraph:scenarios": ". ./setup-test-env.sh  && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
@@ -26,8 +29,8 @@
     "prepublish": "npm run compile"
   },
   "devDependencies": {
-    "@aave/deploy-v3": "^1.0.3",
-    "@aave/periphery-v3": "^1.4.2",
+    "@aave/deploy-v3": "^1.5.0-beta.1",
+    "@aave/periphery-v3": "^1.5.0",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.11",
     "@openzeppelin/contracts": "4.2.0",
     "@tenderly/hardhat-tenderly": "^1.1.0-beta.5",

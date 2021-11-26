@@ -548,7 +548,7 @@ export const supplyWithPermit = async (
   const chainId = Number(await getChainId());
   const token = new MintableERC20__factory(sender.signer).attach(reserve);
   const highDeadline = '100000000000000000000000000';
-  const nonce = await token._nonces(sender.address);
+  const nonce = await token.nonces(sender.address);
 
   const msgParams = buildPermitParams(
     chainId,
@@ -681,7 +681,7 @@ export const repayWithPermit = async (
 
   const chainId = Number(await getChainId());
   const token = new MintableERC20__factory(user.signer).attach(reserve);
-  const nonce = await token._nonces(user.address);
+  const nonce = await token.nonces(user.address);
 
   const msgParams = buildPermitParams(
     chainId,

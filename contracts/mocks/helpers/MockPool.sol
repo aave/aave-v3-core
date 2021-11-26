@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+
 contract MockPool {
   // Reserved storage space to avoid layout collisions.
   uint256[100] private ______gap;
@@ -31,6 +33,8 @@ contract MockPoolInherited is Pool {
   function getRevision() internal pure override returns (uint256) {
     return 0x3;
   }
+
+  constructor(IPoolAddressesProvider provider) Pool(provider) {}
 
   function setMaxNumberOfReserves(uint256 newMaxNumberOfReserves) public {
     _maxNumberOfReserves = newMaxNumberOfReserves;
