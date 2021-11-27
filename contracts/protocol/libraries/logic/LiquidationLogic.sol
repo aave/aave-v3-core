@@ -265,8 +265,6 @@ library LiquidationLogic {
   }
 
   struct AvailableCollateralToLiquidateLocalVars {
-    uint256 userCompoundedBorrowBalance;
-    uint256 liquidationBonus;
     uint256 collateralPrice;
     uint256 debtAssetPrice;
     uint256 maxCollateralToLiquidate;
