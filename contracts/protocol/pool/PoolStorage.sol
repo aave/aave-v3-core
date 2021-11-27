@@ -25,14 +25,11 @@ contract PoolStorage {
   mapping(uint256 => address) internal _reservesList;
   mapping(uint8 => DataTypes.EModeCategory) _eModeCategories;
   mapping(address => uint8) _usersEModeCategory;
-  uint256 internal _maxNumberOfReserves;
+
   uint256 internal _bridgeProtocolFee;
   uint128 internal _flashLoanPremiumTotal;
   uint128 internal _flashLoanPremiumToProtocol;
 
   uint64 internal _maxStableRateBorrowSizePercent;
   uint16 internal _reservesCount;
-
-
-
 }
