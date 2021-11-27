@@ -708,7 +708,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 reservesCount = _reservesCount;
 
     require(
-      reservesCount < ReserveConfiguration.MAX_RESERVES_COUNT,
+      reservesCount < MAX_NUMBER_RESERVES(),
       Errors.P_NO_MORE_RESERVES_ALLOWED
     );
 
