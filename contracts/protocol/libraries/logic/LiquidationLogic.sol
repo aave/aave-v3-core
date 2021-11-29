@@ -208,13 +208,12 @@ library LiquidationLogic {
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
-        DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
         if (
           ValidationLogic.validateUseAsCollateral(
             reserves,
             reservesList,
             liquidatorConfig,
-            collateralReserveCache
+            params.collateralAsset
           )
         ) {
           liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);

@@ -68,7 +68,7 @@ library SupplyLogic {
 
     if (isFirstSupply) {
       if (
-        ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, reserveCache)
+        ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, params.asset)
       ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(params.asset, params.onBehalfOf);
@@ -145,7 +145,6 @@ library SupplyLogic {
     DataTypes.FinalizeTransferParams memory params
   ) external {
     DataTypes.ReserveData storage reserve = reserves[params.asset];
-    DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     ValidationLogic.validateTransfer(reserves[params.asset]);
 
@@ -177,7 +176,7 @@ library SupplyLogic {
       if (params.balanceToBefore == 0 && params.amount != 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         if (
-          ValidationLogic.validateUseAsCollateral(reserves, reservesList, toConfig, reserveCache)
+          ValidationLogic.validateUseAsCollateral(reserves, reservesList, toConfig, params.asset)
         ) {
           toConfig.setUsingAsCollateral(reserve.id, true);
           emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
