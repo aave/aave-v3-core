@@ -178,54 +178,96 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(RC_INVALID_EMODE_CATEGORY);
   });
 
-  it('Set a eMode category to DAI with zero LT (revert expected)', async () => {
-    const { configurator, poolAdmin, dai } = testEnv;
+  it('Tries to add an eMode category with ltv > liquidation threshold (revert expected)', async () => {
+    const { configurator, poolAdmin } = testEnv;
 
-    expect(
-      await configurator
-        .connect(poolAdmin.signer)
-        .setEModeCategory('100', '9800', '0', '10100', ZERO_ADDRESS, 'INCONSISTENT')
-    );
+    const id = BigNumber.from('16');
+    const ltv = BigNumber.from('9900');
+    const lt = BigNumber.from('9800');
+    const lb = BigNumber.from('10100');
+    const oracle = ZERO_ADDRESS;
+    const label = 'STABLECOINS';
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('Tries to add an eMode category with no liquidation bonus (revert expected)', async () => {
+    const { configurator, poolAdmin } = testEnv;
+
+    const id = BigNumber.from('16');
+    const ltv = BigNumber.from('9800');
+    const lt = BigNumber.from('9800');
+    const lb = BigNumber.from('10000');
+    const oracle = ZERO_ADDRESS;
+    const label = 'STABLECOINS';
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('Tries to add an eMode category with too large liquidation bonus (revert expected)', async () => {
+    const { configurator, poolAdmin } = testEnv;
+
+    const id = BigNumber.from('16');
+    const ltv = BigNumber.from('9800');
+    const lt = BigNumber.from('9800');
+    const lb = BigNumber.from('11000');
+    const oracle = ZERO_ADDRESS;
+    const label = 'STABLECOINS';
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('Tries to add an eMode category with liquidation threshold > 1 (revert expected)', async () => {
+    const { configurator, poolAdmin } = testEnv;
+
+    const id = BigNumber.from('16');
+    const ltv = BigNumber.from('9800');
+    const lt = BigNumber.from('10100');
+    const lb = BigNumber.from('10100');
+    const oracle = ZERO_ADDRESS;
+    const label = 'STABLECOINS';
+
+    await expect(
+      configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
+    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+  });
+
+  it('Tries to set DAI eMode category to undefined category (revert expected)', async () => {
+    const { configurator, poolAdmin, dai } = testEnv;
 
     await expect(
       configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
     ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
   });
 
-  it('Set a eMode category to DAI with fewer LT (revert expected)', async () => {
+  it('Tries to set DAI eMode category to category with too low LT (revert expected)', async () => {
     const { configurator, helpersContract, poolAdmin, dai } = testEnv;
 
-    const { liquidationThreshold } = await helpersContract.getReserveConfigurationData(dai.address);
+    const { liquidationThreshold, ltv } = await helpersContract.getReserveConfigurationData(
+      dai.address
+    );
 
     expect(
       await configurator
         .connect(poolAdmin.signer)
         .setEModeCategory(
           '100',
-          '9800',
+          ltv,
           liquidationThreshold.sub(1),
           '10100',
           ZERO_ADDRESS,
-          'INCONSISTENT'
+          'LT_TOO_LOW_FOR_DAI'
         )
     );
 
     await expect(
       configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
-  });
-
-  it('Set a eMode category to DAI with 0 LT (revert expected)', async () => {
-    const { configurator, poolAdmin, dai } = testEnv;
-
-    expect(
-      await configurator
-        .connect(poolAdmin.signer)
-        .setEModeCategory('101', '9800', '0', '10100', ZERO_ADDRESS, 'INCONSISTENT')
-    );
-
-    await expect(
-      configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '101')
     ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
   });
 

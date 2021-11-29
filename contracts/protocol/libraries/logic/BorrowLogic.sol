@@ -40,7 +40,8 @@ library BorrowLogic {
     address indexed reserve,
     address indexed user,
     address indexed repayer,
-    uint256 amount
+    uint256 amount,
+    bool useATokens
   );
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
@@ -230,7 +231,7 @@ library BorrowLogic {
       IAToken(reserveCache.aTokenAddress).handleRepayment(msg.sender, paybackAmount);
     }
 
-    emit Repay(params.asset, params.onBehalfOf, msg.sender, paybackAmount);
+    emit Repay(params.asset, params.onBehalfOf, msg.sender, paybackAmount, params.useATokens);
 
     return paybackAmount;
   }
@@ -241,6 +242,7 @@ library BorrowLogic {
     address user
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
+    reserve.updateState(reserveCache);
 
     IERC20 stableDebtToken = IERC20(reserveCache.stableDebtTokenAddress);
     IERC20 variableDebtToken = IERC20(reserveCache.variableDebtTokenAddress);
@@ -254,8 +256,6 @@ library BorrowLogic {
       variableDebtToken,
       reserveCache.aTokenAddress
     );
-
-    reserve.updateState(reserveCache);
 
     IStableDebtToken(address(stableDebtToken)).burn(user, stableDebt);
 
