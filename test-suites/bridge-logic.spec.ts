@@ -211,9 +211,9 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
 
     expectEqual(reserveDataAfter, expectedReserveDataAfter);
 
-    // Check event values
+    // Check event values for `ReserveDataUpdated`
     const reserveDataUpdatedEvent = tx.events?.find(
-      ({ event }) => (event = 'ReserveDataUpdated')
+      ({ event }) => (event === 'ReserveDataUpdated')
     ) as Event;
     if (reserveDataUpdatedEvent) {
       const {
