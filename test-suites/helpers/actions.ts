@@ -344,7 +344,7 @@ export const borrow = async (
   testEnv: TestEnv,
   revertMessage?: string
 ) => {
-  const { pool } = testEnv;
+  const { pool, helpersContract } = testEnv;
 
   const reserve = await getTestnetReserveAddressFromSymbol(reserveSymbol);
 
@@ -355,14 +355,22 @@ export const borrow = async (
     user.address
   );
 
+  const reserveTokens = await helpersContract.getReserveTokensAddresses(reserve);
+  const debtToken =
+    interestRateMode === '1'
+      ? await getStableDebtToken(reserveTokens.stableDebtTokenAddress)
+      : await getVariableDebtToken(reserveTokens.variableDebtTokenAddress);
+
+  const borrowAllowanceBefore = await debtToken.borrowAllowance(onBehalfOf, user.address);
+
   const amountToBorrow = await convertToCurrencyDecimals(reserve, amount);
 
+  const tx = pool
+    .connect(user.signer)
+    .borrow(reserve, amountToBorrow, interestRateMode, '0', onBehalfOf);
+
   if (expectedResult === 'success') {
-    const txResult = await waitForTx(
-      await pool
-        .connect(user.signer)
-        .borrow(reserve, amountToBorrow, interestRateMode, '0', onBehalfOf)
-    );
+    const txResult = await waitForTx(await tx);
 
     const { txCost, txTimestamp } = await getTxCostAndTimestamp(txResult);
 
@@ -400,6 +408,14 @@ export const borrow = async (
     expectEqual(reserveDataAfter, expectedReserveData);
     expectEqual(userDataAfter, expectedUserData);
 
+    if (user.address !== onBehalfOf) {
+      const borrowAllowanceAfter = await debtToken.borrowAllowance(onBehalfOf, user.address);
+      expect(borrowAllowanceAfter).to.be.equal(
+        borrowAllowanceBefore.sub(amountToBorrow),
+        'borrowAllowance is updated incorrectly'
+      );
+    }
+
     // truffleAssert.eventEmitted(txResult, "Borrow", (ev: any) => {
     //   const {
     //     _reserve,
@@ -421,10 +437,7 @@ export const borrow = async (
     //   );
     // });
   } else if (expectedResult === 'revert') {
-    await expect(
-      pool.connect(user.signer).borrow(reserve, amountToBorrow, interestRateMode, '0', onBehalfOf),
-      revertMessage
-    ).to.be.reverted;
+    await expect(tx, revertMessage).to.be.reverted;
   }
 };
 
