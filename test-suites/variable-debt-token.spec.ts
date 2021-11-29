@@ -210,7 +210,6 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
-    const snapId = await evmSnapshot();
     const {
       pool,
       weth,
@@ -234,7 +233,6 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     const daiData = await pool.getReserveData(dai.address);
     const variableDebtToken = await getVariableDebtToken(daiData.variableDebtTokenAddress);
-    const beforeDebtBalanceUser2 = await variableDebtToken.balanceOf(user2.address);
 
     // User1 borrows 100 DAI
     const borrowAmount = utils.parseUnits('100', 18);
@@ -254,7 +252,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     // Increase time so interests accrue
     await increaseTime(24 * 3600);
 
-    // User2 borrows 1000 DAI on behalf of user1
+    // User2 borrows 100 DAI on behalf of user1
     const borrowOnBehalfAmount = utils.parseUnits('100', 18);
     const tx = await waitForTx(
       await pool
@@ -262,37 +260,31 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
         .borrow(dai.address, borrowOnBehalfAmount, RateMode.Variable, 0, user1.address)
     );
 
-    const afterDebtBalanceUser2 = await variableDebtToken.balanceOf(user2.address);
     const afterDebtBalanceUser1 = await variableDebtToken.balanceOf(user1.address);
-
-    // Calculate debt + interests
-    const expectedDebtIncreaseUser1 = afterDebtBalanceUser1.sub(
-      borrowOnBehalfAmount.add(borrowAmount)
-    );
+    const interest = afterDebtBalanceUser1.sub(borrowAmount).sub(borrowOnBehalfAmount);
 
     const transferEventSig = utils.keccak256(
       utils.toUtf8Bytes('Transfer(address,address,uint256)')
-    );
-    const mintEventSig = utils.keccak256(
-      utils.toUtf8Bytes('Mint(address,address,uint256,uint256)')
     );
 
     const rawTransferEvents = tx.logs.filter(
       ({ topics, address }) =>
         topics[0] === transferEventSig && address == variableDebtToken.address
     );
-    const transferAmount = variableDebtToken.interface.parseLog(rawTransferEvents[0]).args.value;
+    const parsedTransferEvent = variableDebtToken.interface.parseLog(rawTransferEvents[0]);
+    const transferAmount = parsedTransferEvent.args.value;
 
+    expect(transferAmount).to.be.eq(borrowOnBehalfAmount.add(interest));
+
+    const mintEventSig = utils.keccak256(
+      utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256)')
+    );
     const rawMintEvents = tx.logs.filter(
       ({ topics, address }) => topics[0] === mintEventSig && address == variableDebtToken.address
     );
-    const mintAmount = variableDebtToken.interface.parseLog(rawMintEvents[0]).args.value;
+    const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
 
-    expect(transferAmount).to.be.eq(mintAmount);
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(mintAmount);
-    expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
-
-    await evmRevert(snapId);
+    expect(parsedMintEvent.args.value).to.be.eq(borrowOnBehalfAmount.add(interest));
+    expect(parsedMintEvent.args.balanceIncrease).to.be.eq(interest);
   });
 });

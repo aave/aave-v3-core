@@ -91,9 +91,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
 
-    /*uint256 scaledBalance = super.balanceOf(onBehalfOf);
-    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
-      scaledBalance.rayMul(_userState[onBehalfOf].additionalData);*/
     _userState[onBehalfOf].additionalData = Helpers.castUint128(index);
 
     _mint(onBehalfOf, Helpers.castUint128(amountScaled));
