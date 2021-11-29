@@ -204,7 +204,7 @@ library ReserveLogic {
       vars.nextLiquidityRate,
       vars.nextStableRate,
       vars.nextVariableRate,
-      reserveCache.nextLiquidityIndex,
+      reserve.liquidityIndex,
       reserveCache.nextVariableBorrowIndex
     );
   }
