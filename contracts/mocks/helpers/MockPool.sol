@@ -46,20 +46,4 @@ contract MockPoolInherited is Pool {
   function MAX_NUMBER_RESERVES() public view override returns (uint256) {
     return _maxNumberOfReserves;
   }
-
-  function _addReserveToList(address asset) internal override {
-    uint256 reservesCount = _reservesCount;
-    require(reservesCount < _maxNumberOfReserves, Errors.P_NO_MORE_RESERVES_ALLOWED);
-    bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
-
-    if (!reserveAlreadyAdded) {
-      for (uint8 i = 0; i <= reservesCount; i++) {
-        if (_reservesList[i] == address(0)) {
-          _reserves[asset].id = i;
-          _reservesList[i] = asset;
-          _reservesCount = uint16(reservesCount + 1);
-        }
-      }
-    }
-  }
 }
