@@ -30,7 +30,6 @@ contract PoolStorage {
   uint128 internal _flashLoanPremiumTotal;
   uint128 internal _flashLoanPremiumToProtocol;
 
-  IPoolAddressesProvider internal _addressesProvider;
   uint64 internal _maxStableRateBorrowSizePercent;
   uint16 internal _reservesCount;
 }
