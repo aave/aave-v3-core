@@ -139,6 +139,11 @@ library FlashLoanLogic {
           vars.currentATokenAddress,
           vars.currentAmountPlusPremium
         );
+
+        IAToken(reserveCache.aTokenAddress).handleRepayment(
+          params.receiverAddress,
+          vars.currentAmountPlusPremium
+        );
       } else {
         // If the user chose to not return the funds, the system checks if there is enough collateral and
         // eventually opens a debt position
@@ -231,11 +236,6 @@ library FlashLoanLogic {
     IERC20(params.asset).safeTransferFrom(
       params.receiverAddress,
       reserveCache.aTokenAddress,
-      vars.amountPlusPremium
-    );
-
-    IAToken(reserveCache.aTokenAddress).handleRepayment(
-      params.receiverAddress,
       vars.amountPlusPremium
     );
 
