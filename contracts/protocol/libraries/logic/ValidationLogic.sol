@@ -102,6 +102,7 @@ library ValidationLogic {
     uint256 reserveDecimals;
     uint256 borrowCap;
     uint256 amountInBaseCurrency;
+    uint256 assetUnit;
     address eModePriceSource;
     bool isActive;
     bool isFrozen;
@@ -156,6 +157,10 @@ library ValidationLogic {
     );
 
     vars.borrowCap = params.reserveCache.reserveConfiguration.getBorrowCap();
+    unchecked {
+      vars.assetUnit = 10**vars.reserveDecimals;
+    }
+
     if (vars.borrowCap != 0) {
       vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
         params.reserveCache.nextVariableBorrowIndex
@@ -167,10 +172,7 @@ library ValidationLogic {
         params.amount;
 
       unchecked {
-        require(
-          vars.totalDebt <= vars.borrowCap * (10**vars.reserveDecimals),
-          Errors.VL_BORROW_CAP_EXCEEDED
-        );
+        require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.VL_BORROW_CAP_EXCEEDED);
       }
     }
 
