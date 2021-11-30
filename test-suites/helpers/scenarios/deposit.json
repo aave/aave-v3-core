@@ -3,13 +3,13 @@
   "description": "Test cases for the deposit function.",
   "stories": [
     {
-      "description": "User 0 Deposits 1000 DAI in an empty reserve",
+      "description": "User 0 Deposits 14760.147 DAI in an empty reserve",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -26,7 +26,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -34,13 +34,13 @@
       ]
     },
     {
-      "description": "User 1 deposits 1000 DAI after user 0",
+      "description": "User 1 deposits 14760.147 DAI after user 0",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "1"
           },
           "expected": "success"
@@ -57,7 +57,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "1"
           },
           "expected": "success"
@@ -65,13 +65,13 @@
       ]
     },
     {
-      "description": "User 0 deposits 1000 USDC in an empty reserve",
+      "description": "User 0 deposits 14760.147 USDC in an empty reserve",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "USDC",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -88,7 +88,7 @@
           "name": "deposit",
           "args": {
             "reserve": "USDC",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -96,13 +96,13 @@
       ]
     },
     {
-      "description": "User 1 deposits 1000 USDC after user 0",
+      "description": "User 1 deposits 14760.147 USDC after user 0",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "USDC",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "1"
           },
           "expected": "success"
@@ -119,7 +119,7 @@
           "name": "deposit",
           "args": {
             "reserve": "USDC",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "1"
           },
           "expected": "success"
@@ -229,13 +229,13 @@
       ]
     },
     {
-      "description": "User 1 deposits 100 DAI on behalf of user 2, user 2 tries to borrow 0.1 WETH",
+      "description": "User 1 deposits 1476.01 DAI on behalf of user 2, user 2 tries to borrow 0.1 WETH",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "100",
+            "amount": "1476.01",
             "user": "1"
           },
           "expected": "success"
@@ -244,7 +244,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "100",
+            "amount": "1476.01",
             "user": "1",
             "onBehalfOf": "2"
           },

@@ -1,15 +1,18 @@
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
+import { HARDHAT_CHAINID, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import {
   buildDelegationWithSigParams,
   convertToCurrencyDecimals,
   getSignatureFromTypedData,
 } from '../helpers/contracts-helpers';
-import { DRE, evmRevert, evmSnapshot, timeLatest } from '../helpers/misc-utils';
+import { timeLatest } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getTestWallets } from './helpers/utils/wallets';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
   let snapId;
@@ -42,10 +45,10 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     daiMintedAmount = await convertToCurrencyDecimals(dai.address, MINT_AMOUNT);
     wethMintedAmount = await convertToCurrencyDecimals(weth.address, MINT_AMOUNT);
 
-    expect(await dai.mint(daiMintedAmount));
+    expect(await dai['mint(uint256)'](daiMintedAmount));
     expect(await dai.approve(pool.address, daiMintedAmount));
     expect(await pool.deposit(dai.address, daiMintedAmount, user1.address, 0));
-    expect(await weth.connect(user2.signer).mint(wethMintedAmount));
+    expect(await weth.connect(user2.signer)['mint(uint256)'](wethMintedAmount));
     expect(await weth.connect(user2.signer).approve(pool.address, wethMintedAmount));
     expect(
       await pool.connect(user2.signer).deposit(weth.address, wethMintedAmount, user2.address, 0)
@@ -60,13 +63,13 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     const variableDomain = {
       name: await variableDebtDai.name(),
       version: EIP712_REVISION,
-      chainId: DRE.network.config.chainId,
+      chainId: hre.network.config.chainId,
       verifyingContract: variableDebtDai.address,
     };
     const stableDomain = {
       name: await stableDebtDai.name(),
       version: EIP712_REVISION,
-      chainId: DRE.network.config.chainId,
+      chainId: hre.network.config.chainId,
       verifyingContract: stableDebtDai.address,
     };
     const variableDomainSeparator = utils._TypedDataEncoder.hashDomain(variableDomain);
@@ -88,9 +91,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await variableDebtDai.nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
       chainId,
@@ -136,9 +139,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await stableDebtDai.nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
       chainId,
@@ -185,9 +188,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await stableDebtDai.nonces(user2.address)).toNumber();
     const EIP712_REVISION = await stableDebtDai.EIP712_REVISION();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
@@ -227,9 +230,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = (await timeLatest()).sub(500).toString();
-    const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await stableDebtDai.nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
       chainId,
@@ -268,9 +271,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await stableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await stableDebtDai.nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
       chainId,
@@ -309,9 +312,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await variableDebtDai.nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
       chainId,
@@ -350,9 +353,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = (await timeLatest()).sub(500).toString();
-    const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await variableDebtDai.nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
       chainId,
@@ -391,9 +394,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       users: [user2, user3],
     } = testEnv;
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await variableDebtDai._nonces(user2.address)).toNumber();
+    const nonce = (await variableDebtDai.nonces(user2.address)).toNumber();
     const permitAmount = daiMintedAmount.div(3);
     const msgParams = buildDelegationWithSigParams(
       chainId,

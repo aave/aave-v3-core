@@ -1,5 +1,5 @@
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 import { expect } from 'chai';
-import { evmRevert, evmSnapshot } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode, ProtocolErrors } from '../helpers/types';
@@ -22,7 +22,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, DAI_AMOUNT_TO_DEPOSIT);
 
     // Top up user
-    expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
+    expect(await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit));
 
     expect(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -59,7 +59,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, DAI_AMOUNT_TO_DEPOSIT);
 
     // Top up user
-    expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
+    expect(await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit));
 
     expect(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -97,7 +97,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
     expect(
       await dai
         .connect(users[0].signer)
-        .mint(await convertToCurrencyDecimals(dai.address, DAI_AMOUNT_TO_DEPOSIT))
+        ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, DAI_AMOUNT_TO_DEPOSIT))
     );
 
     expect(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
@@ -158,7 +158,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
     const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, DAI_AMOUNT_TO_DEPOSIT);
 
     // Top up user
-    expect(await dai.connect(users[0].signer).mint(amountDAItoDeposit));
+    expect(await dai.connect(users[0].signer)['mint(uint256)'](amountDAItoDeposit));
 
     expect(await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -193,7 +193,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
     const amountWETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
     const amountWETHtoBorrow = await convertToCurrencyDecimals(weth.address, '0.1');
 
-    expect(await weth.connect(users[0].signer).mint(amountWETHtoDeposit));
+    expect(await weth.connect(users[0].signer)['mint(uint256)'](amountWETHtoDeposit));
 
     expect(await weth.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
 

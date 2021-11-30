@@ -1,21 +1,17 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { DRE, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { ZERO_ADDRESS } from '../helpers/constants';
-import { deployMintableERC20 } from '../helpers/contracts-deployments';
+import { deployMintableERC20 } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { ProtocolErrors } from '../helpers/types';
-import { MockPoolInheritedFactory } from '../types';
-import {
-  getBorrowLogic,
-  getBridgeLogic,
-  getSupplyLogic,
-  getFirstSigner,
-  getLiquidationLogic,
-  getEModeLogic,
-  getFlashLoanLogic,
-} from '../helpers/contracts-getters';
+import { MockPoolInherited__factory } from '../types/factories/MockPoolInherited__factory';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmRevert, evmSnapshot, Pool__factory } from '@aave/deploy-v3';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -24,10 +20,50 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     P_NOT_CONTRACT,
     P_CALLER_NOT_POOL_CONFIGURATOR,
     RL_RESERVE_ALREADY_INITIALIZED,
+    PC_INVALID_CONFIGURATION,
   } = ProtocolErrors;
 
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
   const MAX_NUMBER_RESERVES = '128';
+
+  it('Initialize fresh deployment with incorrect addresses provider (revert expected)', async () => {
+    const {
+      addressesProvider,
+      users: [user_deployer],
+    } = testEnv;
+    const { deployer } = await hre.getNamedAccounts();
+    const snap = await evmSnapshot();
+
+    const supplyLibraryArtifact = await hre.deployments.get('SupplyLogic');
+    const borrowLibraryArtifact = await hre.deployments.get('BorrowLogic');
+    const liquidationLibraryArtifact = await hre.deployments.get('LiquidationLogic');
+    const eModeLibraryArtifact = await hre.deployments.get('EModeLogic');
+    const bridgeLibraryArtifact = await hre.deployments.get('BridgeLogic');
+    const flashLoanLogicArtifact = await hre.deployments.get('FlashLoanLogic');
+
+    const NEW_POOL_IMPL_ARTIFACT = await hre.deployments.deploy('Pool', {
+      contract: 'Pool',
+      from: deployer,
+      args: [addressesProvider.address],
+      libraries: {
+        SupplyLogic: supplyLibraryArtifact.address,
+        BorrowLogic: borrowLibraryArtifact.address,
+        LiquidationLogic: liquidationLibraryArtifact.address,
+        EModeLogic: eModeLibraryArtifact.address,
+        BridgeLogic: bridgeLibraryArtifact.address,
+        FlashLoanLogic: flashLoanLogicArtifact.address,
+      },
+      log: false,
+    });
+
+    const freshPool = Pool__factory.connect(NEW_POOL_IMPL_ARTIFACT.address, user_deployer.signer);
+
+    await expect(freshPool.initialize(user_deployer.address)).to.be.revertedWith(
+      PC_INVALID_CONFIGURATION
+    );
+
+    await evmRevert(snap);
+  });
 
   it('Check initialization', async () => {
     const { pool } = testEnv;
@@ -82,7 +118,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     await expect(
       pool
@@ -97,7 +133,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     expect(
       await pool
@@ -115,7 +151,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     const config = await pool.getReserveData(dai.address);
 
@@ -141,7 +177,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     // Impersonate PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     const config = await pool.getReserveData(dai.address);
 
@@ -176,26 +212,34 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   it('Initialize reserves until max, then add one more (revert expected)', async () => {
     // Upgrade the Pool to update the maximum number of reserves
     const { addressesProvider, poolAdmin, pool, dai, deployer, configurator } = testEnv;
+    const { deployer: deployerName } = await hre.getNamedAccounts();
 
     // Impersonate the PoolConfigurator
     await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
     await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await DRE.ethers.getSigner(configurator.address);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
 
     // Deploy the mock Pool with a setter of `maxNumberOfReserves`
-    const libraries = {
-      ['__$d5ddd09ae98762b8929dd85e54b218e259$__']: (await getFlashLoanLogic()).address,
-      ['__$b06080f092f400a43662c3f835a4d9baa8$__']: (await getBridgeLogic()).address,
-      ['__$db79717e66442ee197e8271d032a066e34$__']: (await getSupplyLogic()).address,
-      ['__$c3724b8d563dc83a94e797176cddecb3b9$__']: (await getBorrowLogic()).address,
-      ['__$f598c634f2d943205ac23f707b80075cbb$__']: (await getLiquidationLogic()).address,
-      ['__$e4b9550ff526a295e1233dea02821b9004$__']: (await getEModeLogic()).address,
-    };
+    const NEW_POOL_IMPL_ARTIFACT = await hre.deployments.deploy('MockPoolInherited', {
+      contract: 'MockPoolInherited',
+      from: deployerName,
+      args: [addressesProvider.address],
+      libraries: {
+        SupplyLogic: (await hre.deployments.get('SupplyLogic')).address,
+        BorrowLogic: (await hre.deployments.get('BorrowLogic')).address,
+        LiquidationLogic: (await hre.deployments.get('LiquidationLogic')).address,
+        EModeLogic: (await hre.deployments.get('EModeLogic')).address,
+        BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
+        FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+      },
+      log: false,
+    });
 
-    const mockPoolImpl = await (
-      await new MockPoolInheritedFactory(libraries, await getFirstSigner()).deploy()
-    ).deployed();
-
+    const mockPoolImpl = MockPoolInherited__factory.connect(
+      NEW_POOL_IMPL_ARTIFACT.address,
+      deployer.signer
+    );
+    //const mockPoolImpl = await deployMockPoolInherited();
     // Upgrade the Pool
     expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPoolImpl.address))
       .to.emit(addressesProvider, 'PoolUpdated')
@@ -203,13 +247,13 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     // Get the Pool instance
     const mockPoolAddress = await addressesProvider.getPool();
-    const mockPool = await MockPoolInheritedFactory.connect(
+    const mockPool = await MockPoolInherited__factory.connect(
       mockPoolAddress,
       await getFirstSigner()
     );
 
     // Get the current number of reserves
-    let numberOfReserves = (await mockPool.getReservesList()).length;
+    const numberOfReserves = (await mockPool.getReservesList()).length;
 
     // Set the limit
     expect(await mockPool.setMaxNumberOfReserves(numberOfReserves));

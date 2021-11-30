@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 library DataTypes {
   // refer to the whitepaper, section 1.1 basic concepts for a formal description of these properties.
@@ -42,16 +42,16 @@ library DataTypes {
     //bit 58: borrowing is enabled
     //bit 59: stable rate borrowing enabled
     //bit 60: asset is paused
-    //bit 61-63: reserved
+    //bit 61: borrowing in isolation mode is enabled
+    //bit 62-63: reserved
     //bit 64-79: reserve factor
-    //bit 80-115 borrow cap, borrowCap == 0 => disabled
-    //bit 116-151 supply cap, supplyCap == 0 => disabled
-    //bit 80-115 borrow cap, borrowCap == 0 => disabled
-    //bit 116-151 supply cap, supplyCap == 0 => disabled
+    //bit 80-115 borrow cap in whole tokens, borrowCap == 0 => no cap
+    //bit 116-151 supply cap in whole tokens, supplyCap == 0 => no cap
     //bit 152-167 liquidation protocol fee
     //bit 168-175 eMode category
-    //bit 176-211 unbacked mint cap, unbackedMintCap == 0 => disabled
-    //bit 212-251 debt ceiling
+    //bit 176-211 unbacked mint cap in whole tokens, unbackedMintCap == 0 => minting disabled
+    //bit 212-251 debt ceiling for isolation mode with (ReserveConfiguration::DEBT_CEILING_DECIMALS) decimals
+    //bit 252-255 unused
 
     uint256 data;
   }

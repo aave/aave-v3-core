@@ -1,5 +1,5 @@
 import { BigNumber, Signer } from 'ethers';
-import { SelfdestructTransferFactory } from '../../../types';
+import { SelfdestructTransfer__factory } from '../../../types';
 
 export const topUpNonPayableWithEther = async (
   holder: Signer,
@@ -7,7 +7,7 @@ export const topUpNonPayableWithEther = async (
   amount: BigNumber
 ) => {
   let selfdestructContract;
-  let factory = new SelfdestructTransferFactory(holder);
+  let factory = new SelfdestructTransfer__factory(holder);
   for (const account of accounts) {
     selfdestructContract = await factory.deploy();
     await selfdestructContract.deployed();
@@ -16,18 +16,3 @@ export const topUpNonPayableWithEther = async (
     });
   }
 };
-
-// const topUpWalletsWithEther = async (
-//     holder: JsonRpcSigner,
-//     wallets: string[],
-//     amount: string
-//   ) => {
-//     for (const wallet of wallets) {
-//      await waitForTx(
-//       await holder.sendTransaction({
-//         to: wallet,
-//         value: amount,
-//       })
-//      )
-//     }
-// };

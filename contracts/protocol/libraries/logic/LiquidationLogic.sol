@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts//IERC20.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
@@ -265,8 +265,6 @@ library LiquidationLogic {
   }
 
   struct AvailableCollateralToLiquidateLocalVars {
-    uint256 userCompoundedBorrowBalance;
-    uint256 liquidationBonus;
     uint256 collateralPrice;
     uint256 debtAssetPrice;
     uint256 maxCollateralToLiquidate;

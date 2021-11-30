@@ -1,19 +1,31 @@
+import { waitForTx } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { ethers, utils } from 'ethers';
-import { DRE } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
-import { HARDHAT_CHAINID } from '../helpers/hardhat-constants';
+import { HARDHAT_CHAINID, MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getTestWallets } from './helpers/utils/wallets';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('AToken: Permit', (testEnv: TestEnv) => {
   let testWallets;
 
   const EIP712_REVISION = '1';
 
-  before(() => {
+  before(async () => {
+    const { dai, pool, deployer } = testEnv;
+
     testWallets = getTestWallets();
+
+    // Mint DAI and deposit to Pool to for aDAI
+    await waitForTx(await dai['mint(uint256)'](utils.parseEther('20000')));
+    await waitForTx(await dai.approve(pool.address, utils.parseEther('20000')));
+
+    await waitForTx(
+      await pool.deposit(dai.address, utils.parseEther('20000'), deployer.address, 0)
+    );
   });
 
   it('Checks the domain separator', async () => {
@@ -23,21 +35,12 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const domain = {
       name: await aDai.name(),
       version: EIP712_REVISION,
-      chainId: DRE.network.config.chainId,
+      chainId: hre.network.config.chainId,
       verifyingContract: aDai.address,
     };
     const domainSeparator = utils._TypedDataEncoder.hashDomain(domain);
 
     expect(separator).to.be.equal(domainSeparator, 'Invalid domain separator');
-  });
-
-  it('Get aDAI for tests', async () => {
-    const { dai, pool, deployer } = testEnv;
-
-    await dai.mint(utils.parseEther('20000'));
-    await dai.approve(pool.address, utils.parseEther('20000'));
-
-    await pool.deposit(dai.address, utils.parseEther('20000'), deployer.address, 0);
   });
 
   it('Tries to submit a permit with 0 expiration (revert expected)', async () => {
@@ -47,9 +50,9 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
 
     const tokenName = await aDai.name();
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = 0;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = utils.parseEther('2').toString();
     const msgParams = buildPermitParams(
       chainId,
@@ -89,9 +92,9 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = utils.parseEther('2').toString();
     const msgParams = buildPermitParams(
       chainId,
@@ -120,7 +123,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
         .permit(owner.address, spender.address, permitAmount, deadline, v, r, s)
     );
 
-    expect((await aDai._nonces(owner.address)).toNumber()).to.be.equal(1);
+    expect((await aDai.nonces(owner.address)).toNumber()).to.be.equal(1);
   });
 
   it('Cancels the previous permit', async () => {
@@ -128,9 +131,9 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,
@@ -163,7 +166,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       'INVALID_ALLOWANCE_AFTER_PERMIT'
     );
 
-    expect((await aDai._nonces(owner.address)).toNumber()).to.be.equal(2);
+    expect((await aDai.nonces(owner.address)).toNumber()).to.be.equal(2);
   });
 
   it('Tries to submit a permit with invalid nonce (revert expected)', async () => {
@@ -171,7 +174,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
     const nonce = 1000;
     const permitAmount = '0';
@@ -203,9 +206,9 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = '1';
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,
@@ -235,9 +238,9 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const deadline = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,
@@ -267,9 +270,9 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
     const owner = deployer;
     const spender = users[1];
 
-    const chainId = DRE.network.config.chainId || HARDHAT_CHAINID;
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
     const expiration = MAX_UINT_AMOUNT;
-    const nonce = (await aDai._nonces(owner.address)).toNumber();
+    const nonce = (await aDai.nonces(owner.address)).toNumber();
     const permitAmount = '0';
     const msgParams = buildPermitParams(
       chainId,

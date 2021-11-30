@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
@@ -240,7 +240,7 @@ library ValidationLogic {
       ) *
       params.amount;
     unchecked {
-      vars.amountInBaseCurrency /= 10**vars.reserveDecimals;
+      vars.amountInBaseCurrency /= vars.assetUnit;
     }
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
@@ -456,13 +456,13 @@ library ValidationLogic {
     uint256[] memory amounts,
     mapping(address => DataTypes.ReserveData) storage reservesData
   ) internal view {
+    require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
     for (uint256 i = 0; i < assets.length; i++) {
       DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
         .configuration;
       require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
       require(configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
     }
-    require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
   }
 
   /**

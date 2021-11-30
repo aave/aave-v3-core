@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: agpl-3.0
-pragma solidity 0.8.7;
+pragma solidity 0.8.10;
 
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -105,14 +105,15 @@ library FlashLoanLogic {
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.currentAsset = params.assets[vars.i];
       vars.currentAmount = params.amounts[vars.i];
-      vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
-      vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
-      vars.currentPremiumToProtocol = params.amounts[vars.i].percentMul(
-        vars.flashloanPremiumToProtocol
-      );
-      vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
 
       if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
+        vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
+        vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
+        vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
+          vars.flashloanPremiumToProtocol
+        );
+        vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
+
         DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
         DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
