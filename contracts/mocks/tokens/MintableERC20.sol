@@ -15,7 +15,7 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
   bytes32 public constant PERMIT_TYPEHASH =
     keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
-  mapping(address => uint256) public _nonces;
+  mapping(address => uint256) internal _nonces;
 
   bytes32 public DOMAIN_SEPARATOR;
 
@@ -82,5 +82,9 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
   function mint(address account, uint256 value) public returns (bool) {
     _mint(account, value);
     return true;
+  }
+
+  function nonces(address owner) public view virtual returns (uint256) {
+    return _nonces[owner];
   }
 }

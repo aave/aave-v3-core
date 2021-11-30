@@ -4,12 +4,11 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getStableDebtToken } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
 import { impersonateAccountsHardhat, setAutomine } from '../helpers/misc-utils';
-import { StableDebtToken__factory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { evmRevert, evmSnapshot, increaseTime } from '@aave/deploy-v3';
+import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -108,6 +107,95 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
+  it('Check Mint and Transfer events when borrowing on behalf', async () => {
+    const snapId = await evmSnapshot();
+    const {
+      pool,
+      weth,
+      dai,
+      usdc,
+      users: [user1, user2, user3],
+    } = testEnv;
+
+    // Add USDC liquidity
+    await usdc.connect(user3.signer)['mint(uint256)'](utils.parseUnits('1000', 6));
+    await usdc.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user3.signer)
+      .supply(usdc.address, utils.parseUnits('1000', 6), user3.address, 0);
+
+    // User1 supplies 10 WETH
+    await weth.connect(user1.signer)['mint(uint256)'](utils.parseUnits('10', 18));
+    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user1.signer)
+      .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
+
+    const usdcData = await pool.getReserveData(usdc.address);
+    const stableDebtToken = await getStableDebtToken(usdcData.stableDebtTokenAddress);
+    const beforeDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
+
+    // User1 borrows 100 USDC
+    const borrowAmount = utils.parseUnits('100', 6);
+    expect(
+      await pool
+        .connect(user1.signer)
+        .borrow(usdc.address, borrowAmount, RateMode.Stable, 0, user1.address)
+    );
+
+    // User1 approves user2 to borrow 1000 USDC
+    expect(
+      await stableDebtToken
+        .connect(user1.signer)
+        .approveDelegation(user2.address, utils.parseUnits('1000', 6))
+    );
+
+    // Increase time so interests accrue
+    await increaseTime(24 * 3600);
+
+    // User2 borrows 1000 USDC on behalf of user1
+    const borrowOnBehalfAmount = utils.parseUnits('100', 6);
+    const tx = await waitForTx(
+      await pool
+        .connect(user2.signer)
+        .borrow(usdc.address, borrowOnBehalfAmount, RateMode.Stable, 0, user1.address)
+    );
+
+    const afterDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
+    const afterDebtBalanceUser1 = await stableDebtToken.balanceOf(user1.address);
+
+    // Calculate debt + interests
+    const expectedDebtIncreaseUser1 = afterDebtBalanceUser1.sub(
+      borrowOnBehalfAmount.add(borrowAmount)
+    );
+
+    const transferEventSig = utils.keccak256(
+      utils.toUtf8Bytes('Transfer(address,address,uint256)')
+    );
+    const mintEventSig = utils.keccak256(
+      utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256,uint256,uint256,uint256)')
+    );
+
+    const rawTransferEvents = tx.logs.filter(
+      ({ topics, address }) => topics[0] === transferEventSig && address == stableDebtToken.address
+    );
+    const transferAmount = stableDebtToken.interface.parseLog(rawTransferEvents[0]).args.value;
+
+    const rawMintEvents = tx.logs.filter(
+      ({ topics, address }) => topics[0] === mintEventSig && address == stableDebtToken.address
+    );
+    const { amount: mintAmount, balanceIncrease } = stableDebtToken.interface.parseLog(
+      rawMintEvents[0]
+    ).args;
+
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
+    expect(borrowOnBehalfAmount).to.be.eq(mintAmount);
+    expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
+    expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
+
+    await evmRevert(snapId);
+  });
+
   it('Tries to approve debt tokens (revert expected)', async () => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
@@ -180,10 +268,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
-    const stableDebt = StableDebtToken__factory.connect(
-      config.stableDebtTokenAddress,
-      deployer.signer
-    );
+    const stableDebt = await getStableDebtToken(config.stableDebtTokenAddress);
 
     // Next two txs should be mined in the same block
     await setAutomine(false);

@@ -86,12 +86,14 @@ interface IPool {
    * @param user The beneficiary of the repayment, getting his debt reduced
    * @param repayer The address of the user initiating the repay(), providing the funds
    * @param amount The amount repaid
+   * @param useATokens True if the repayment is done using aTokens, `false` if done with underlying asset directly
    **/
   event Repay(
     address indexed reserve,
     address indexed user,
     address indexed repayer,
-    uint256 amount
+    uint256 amount,
+    bool useATokens
   );
 
   /**
