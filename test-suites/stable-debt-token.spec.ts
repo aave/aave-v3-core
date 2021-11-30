@@ -1,14 +1,19 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { getStableDebtToken } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
 import { impersonateAccountsHardhat, setAutomine } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
+import {
+  evmRevert,
+  evmSnapshot,
+  increaseTime,
+  StableDebtToken__factory,
+  waitForTx,
+} from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -24,7 +29,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const { pool, weth, dai, helpersContract, users } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      users[0].signer
+    );
 
     expect(await stableDebtContract.UNDERLYING_ASSET_ADDRESS()).to.be.eq(dai.address);
     expect(await stableDebtContract.POOL()).to.be.eq(pool.address);
@@ -73,7 +81,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
 
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      deployer.signer
+    );
 
     await expect(
       stableDebtContract.mint(deployer.address, deployer.address, '1', '1')
@@ -86,7 +97,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
 
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      deployer.signer
+    );
 
     const name = await stableDebtContract.name();
 
@@ -100,7 +114,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       stableDebtContract.connect(users[0].signer).transfer(users[1].address, 500)
@@ -132,7 +149,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
 
     const usdcData = await pool.getReserveData(usdc.address);
-    const stableDebtToken = await getStableDebtToken(usdcData.stableDebtTokenAddress);
+    const stableDebtToken = StableDebtToken__factory.connect(
+      usdcData.stableDebtTokenAddress,
+      user1.signer
+    );
     const beforeDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
 
     // User1 borrows 100 USDC
@@ -200,7 +220,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       stableDebtContract.connect(users[0].signer).approve(users[1].address, 500)
@@ -214,7 +237,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       stableDebtContract.connect(users[0].signer).increaseAllowance(users[1].address, 500)
@@ -225,7 +251,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       stableDebtContract.connect(users[0].signer).decreaseAllowance(users[1].address, 500)
@@ -236,7 +265,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const { users, dai, helpersContract } = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
-    const stableDebtContract = await getStableDebtToken(daiStableDebtTokenAddress);
+    const stableDebtContract = StableDebtToken__factory.connect(
+      daiStableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       stableDebtContract
@@ -268,7 +300,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
-    const stableDebt = await getStableDebtToken(config.stableDebtTokenAddress);
+    const stableDebt = StableDebtToken__factory.connect(
+      config.stableDebtTokenAddress,
+      deployer.signer
+    );
 
     // Next two txs should be mined in the same block
     await setAutomine(false);

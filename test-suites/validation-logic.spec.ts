@@ -745,7 +745,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
         .flashLoan(
           aDai.address,
           [dai.address, usdc.address],
-          [0],
+          [0, 0],
           [RateMode.Variable, RateMode.Variable],
           user.address,
           '0x00',

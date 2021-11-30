@@ -1,14 +1,19 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { impersonateAccountsHardhat } from '../helpers/misc-utils';
-import { getVariableDebtToken } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
+import {
+  evmRevert,
+  evmSnapshot,
+  increaseTime,
+  VariableDebtToken__factory,
+  waitForTx,
+} from '@aave/deploy-v3';
 import './helpers/utils/wadraymath';
 
 declare var hre: HardhatRuntimeEnvironment;
@@ -27,7 +32,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
 
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = await VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      users[0].signer
+    );
 
     expect(await variableDebtContract.UNDERLYING_ASSET_ADDRESS()).to.be.eq(dai.address);
     expect(await variableDebtContract.POOL()).to.be.eq(pool.address);
@@ -88,7 +96,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
 
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      deployer.signer
+    );
 
     await expect(
       variableDebtContract.mint(deployer.address, deployer.address, '1', '1')
@@ -102,7 +113,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
 
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      deployer.signer
+    );
 
     await expect(variableDebtContract.burn(deployer.address, '1', '1')).to.be.revertedWith(
       CT_CALLER_MUST_BE_POOL
@@ -121,7 +135,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
 
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      deployer.signer
+    );
 
     await expect(
       variableDebtContract
@@ -142,7 +159,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
 
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      deployer.signer
+    );
 
     await expect(
       variableDebtContract.connect(poolSigner).burn(users[0].address, 0, utils.parseUnits('1', 27))
@@ -154,7 +174,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       variableDebtContract.connect(users[0].signer).transfer(users[1].address, 500)
@@ -166,7 +189,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       variableDebtContract.connect(users[0].signer).approve(users[1].address, 500)
@@ -181,7 +207,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       variableDebtContract.connect(users[0].signer).increaseAllowance(users[1].address, 500)
@@ -193,7 +222,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       variableDebtContract.connect(users[0].signer).decreaseAllowance(users[1].address, 500)
@@ -205,7 +237,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      users[0].signer
+    );
 
     await expect(
       variableDebtContract
@@ -220,7 +255,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      deployer.signer
+    );
 
     expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
 
@@ -242,13 +280,18 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const daiVariableDebtTokenAddress = (
       await helpersContract.getReserveTokensAddresses(dai.address)
     ).variableDebtTokenAddress;
-    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+    const variableDebtContract = VariableDebtToken__factory.connect(
+      daiVariableDebtTokenAddress,
+      user.signer
+    );
 
     expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
 
     await expect(
       variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
     ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  });
+
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
     const snapId = await evmSnapshot();
     const {
@@ -273,7 +316,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
 
     const daiData = await pool.getReserveData(dai.address);
-    const variableDebtToken = await getVariableDebtToken(daiData.variableDebtTokenAddress);
+    const variableDebtToken = VariableDebtToken__factory.connect(
+      daiData.variableDebtTokenAddress,
+      user1.signer
+    );
     const beforeDebtBalanceUser2 = await variableDebtToken.balanceOf(user2.address);
 
     // User1 borrows 100 DAI
