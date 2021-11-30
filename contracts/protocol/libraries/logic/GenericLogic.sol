@@ -131,7 +131,8 @@ library GenericLogic {
       unchecked {
         vars.assetUnit = 10**vars.decimals;
       }
-      vars.assetPrice = vars.eModeAssetPrice > 0
+      vars.assetPrice = vars.eModeAssetPrice > 0 &&
+        params.userEModeCategory == vars.eModeAssetCategory
         ? vars.eModeAssetPrice
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
