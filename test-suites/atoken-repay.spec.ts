@@ -68,8 +68,10 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
     const debtBefore = await variableDebtDai.balanceOf(user1.address, { blockTag: 'pending' });
 
     await expect(
-      await pool.connect(user1.signer).repayWithATokens(dai.address, repayAmount, 2, user1.address)
-    );
+      pool.connect(user1.signer).repayWithATokens(dai.address, repayAmount, 2, user1.address)
+    )
+      .to.emit(pool, 'Repay')
+      .withArgs(dai.address, user1.address, user1.address, repayAmount, true);
     const balanceAfter = await aDai.balanceOf(user1.address);
     const debtAfter = await variableDebtDai.balanceOf(user1.address);
 
