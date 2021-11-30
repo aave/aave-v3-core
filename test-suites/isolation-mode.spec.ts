@@ -1,11 +1,11 @@
 const { expect } = require('chai');
 import { utils } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
-import { increaseTime } from '../helpers/misc-utils';
-import { ProtocolErrors, RateMode } from '../helpers/types';
+import { ProtocolErrors } from '../helpers/types';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { increaseTime } from '@aave/deploy-v3';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,
@@ -33,14 +33,14 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
   it('User 0 supply 1000 dai.', async () => {
     const { users, pool, dai } = testEnv;
-    await dai.connect(users[0].signer).mint(depositAmount);
+    await dai.connect(users[0].signer)['mint(uint256)'](depositAmount);
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[0].signer).supply(dai.address, depositAmount, users[0].address, 0);
   });
 
   it('User 1 supply 2 aave. Checks that aave is activated as collateral ', async () => {
     const { users, pool, aave, helpersContract } = testEnv;
-    await aave.connect(users[1].signer).mint(utils.parseEther('2'));
+    await aave.connect(users[1].signer)['mint(uint256)'](utils.parseEther('2'));
     await aave.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[1].signer)
@@ -53,7 +53,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
   it('User 1 supply 1 eth. Checks that eth is NOT activated as collateral ', async () => {
     const { users, pool, weth, helpersContract } = testEnv;
-    await weth.connect(users[1].signer).mint(utils.parseEther('1'));
+    await weth.connect(users[1].signer)['mint(uint256)'](utils.parseEther('1'));
     await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[1].signer)
@@ -68,7 +68,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const { dai, aDai, users, pool, helpersContract } = testEnv;
 
     const amount = utils.parseEther('100');
-    await dai.connect(users[2].signer).mint(amount);
+    await dai.connect(users[2].signer)['mint(uint256)'](amount);
     await dai.connect(users[2].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[2].signer).supply(dai.address, amount, users[2].address, 0);
 
@@ -109,7 +109,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const { dai, aDai, users, pool, helpersContract } = testEnv;
 
     const amount = utils.parseEther('100');
-    await dai.connect(users[2].signer).mint(amount);
+    await dai.connect(users[2].signer)['mint(uint256)'](amount);
     await pool.connect(users[2].signer).supply(dai.address, amount, users[2].address, 0);
 
     await aDai.connect(users[2].signer).transfer(users[1].address, amount);
@@ -136,12 +136,12 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     const wethAmount = utils.parseEther('1');
 
-    await weth.connect(users[2].signer).mint(wethAmount);
+    await weth.connect(users[2].signer)['mint(uint256)'](wethAmount);
     await weth.connect(users[2].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[2].signer).supply(weth.address, wethAmount, users[2].address, 0);
 
     const aaveAmount = utils.parseEther('100');
-    await aave.connect(users[1].signer).mint(aaveAmount);
+    await aave.connect(users[1].signer)['mint(uint256)'](aaveAmount);
     await aave.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[1].signer).supply(aave.address, aaveAmount, users[1].address, 0);
 
@@ -167,7 +167,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const { dai, aave, users, pool } = testEnv;
 
     const aaveAmount = utils.parseEther('100');
-    await aave.connect(users[3].signer).mint(aaveAmount);
+    await aave.connect(users[3].signer)['mint(uint256)'](aaveAmount);
     await aave.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[3].signer).supply(aave.address, aaveAmount, users[3].address, 0);
 
@@ -183,7 +183,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const { dai, aave, users, pool } = testEnv;
 
     const aaveAmount = utils.parseEther('500');
-    await aave.connect(users[3].signer).mint(aaveAmount);
+    await aave.connect(users[3].signer)['mint(uint256)'](aaveAmount);
     await aave.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[3].signer).supply(aave.address, aaveAmount, users[3].address, 0);
 
@@ -199,12 +199,12 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await increaseTime(60 * 60 * 24 * 365);
 
     const mintAmount = utils.parseEther('100');
-    await dai.connect(users[3].signer).mint(mintAmount);
+    await dai.connect(users[3].signer)['mint(uint256)'](mintAmount);
     await dai.connect(users[3].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.connect(users[3].signer).repay(dai.address, MAX_UINT_AMOUNT, '2', users[3].address);
 
-    await dai.connect(users[1].signer).mint(mintAmount);
+    await dai.connect(users[1].signer)['mint(uint256)'](mintAmount);
     await dai.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await pool.connect(users[1].signer).repay(dai.address, MAX_UINT_AMOUNT, '2', users[1].address);

@@ -1,17 +1,16 @@
 import { expect } from 'chai';
 import { BigNumber, BigNumberish } from 'ethers';
-import { config, hasUncaughtExceptionCaptureCallback } from 'process';
+import { strategyWETH } from '@aave/deploy-v3/dist/markets/aave/reservesConfigs';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { MAX_UINT_AMOUNT, ONE_ADDRESS, RAY, ZERO_ADDRESS } from '../helpers/constants';
-import { deployMintableERC20 } from '../helpers/contracts-deployments';
-import { getFirstSigner } from '../helpers/contracts-getters';
 import { ProtocolErrors } from '../helpers/types';
-import { strategyWETH } from '../market-config/reservesConfigs';
 import {
   AaveProtocolDataProvider,
-  ATokenFactory,
-  MockReserveInterestRateStrategyFactory,
-  StableDebtTokenFactory,
-  VariableDebtTokenFactory,
+  AToken__factory,
+  MintableERC20__factory,
+  MockReserveInterestRateStrategy__factory,
+  StableDebtToken__factory,
+  VariableDebtToken__factory,
 } from '../types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
@@ -128,17 +127,21 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     );
 
     // Deploy mock `InitReserveInput`
-    const mockToken = await deployMintableERC20(['MOCK', 'MOCK', '18']);
-    const stableDebtTokenImplementation = await new StableDebtTokenFactory(
+    const mockToken = await new MintableERC20__factory(await getFirstSigner()).deploy(
+      'MOCK',
+      'MOCK',
+      '18'
+    );
+    const stableDebtTokenImplementation = await new StableDebtToken__factory(
       await getFirstSigner()
     ).deploy(pool.address);
-    const variableDebtTokenImplementation = await new VariableDebtTokenFactory(
+    const variableDebtTokenImplementation = await new VariableDebtToken__factory(
       await getFirstSigner()
     ).deploy(pool.address);
-    const aTokenImplementation = await new ATokenFactory(await getFirstSigner()).deploy(
+    const aTokenImplementation = await new AToken__factory(await getFirstSigner()).deploy(
       pool.address
     );
-    const mockRateStrategy = await new MockReserveInterestRateStrategyFactory(
+    const mockRateStrategy = await new MockReserveInterestRateStrategy__factory(
       await getFirstSigner()
     ).deploy(addressesProvider.address, 0, 0, 0, 0, 0, 0);
 
@@ -761,7 +764,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, '0');
 
     // user 1 deposits
-    await weth.connect(user1.signer).mint('100');
+    await weth.connect(user1.signer)['mint(uint256)']('100');
 
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
 

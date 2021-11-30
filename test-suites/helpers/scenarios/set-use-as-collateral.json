@@ -3,13 +3,13 @@
   "description": "Test cases for the setUserUseReserveAsCollateral() function.",
   "stories": [
     {
-      "description": "User 0 Deposits 1000 DAI, disables DAI as collateral",
+      "description": "User 0 Deposits 14760.147 DAI, disables DAI as collateral",
       "actions": [
         {
           "name": "mint",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -26,7 +26,7 @@
           "name": "deposit",
           "args": {
             "reserve": "DAI",
-            "amount": "1000",
+            "amount": "14760.147",
             "user": "0"
           },
           "expected": "success"
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "description": "User 1 Deposits 2 WETH, disables WETH as collateral, borrows 400 DAI (revert expected)",
+      "description": "User 1 Deposits 2 WETH, disables WETH as collateral, borrows 5904.05 DAI (revert expected)",
       "actions": [
         {
           "name": "mint",
@@ -84,7 +84,7 @@
           "name": "borrow",
           "args": {
             "reserve": "DAI",
-            "amount": "400",
+            "amount": "5904.05",
             "borrowRateMode": "variable",
             "user": "1"
           },
@@ -94,7 +94,7 @@
       ]
     },
     {
-      "description": "User 1 enables WETH as collateral, borrows 400 DAI",
+      "description": "User 1 enables WETH as collateral, borrows 5904.05 DAI",
       "actions": [
         {
           "name": "setUseAsCollateral",
@@ -109,7 +109,7 @@
           "name": "borrow",
           "args": {
             "reserve": "DAI",
-            "amount": "400",
+            "amount": "5904.05",
             "borrowRateMode": "variable",
             "user": "1"
           },
