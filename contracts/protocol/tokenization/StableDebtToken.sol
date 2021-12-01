@@ -151,7 +151,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     );
 
     uint256 amountToMint = amount + balanceIncrease;
-    _mint(onBehalfOf, amount + balanceIncrease, vars.previousSupply);
+    _mint(onBehalfOf, amountToMint, vars.previousSupply);
 
     emit Transfer(address(0), onBehalfOf, amountToMint);
     emit Mint(
