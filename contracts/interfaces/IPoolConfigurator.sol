@@ -320,41 +320,26 @@ interface IPoolConfigurator {
   ) external;
 
   /**
-   * @notice Enable stable rate borrowing on a reserve
+   * @notice Enable or disable stable rate borrowing on a reserve
    * @param asset The address of the underlying asset of the reserve
+   * @param enabled True if stable rate borrowing needs to be enabled, false otherwise
    **/
-  function enableReserveStableRate(address asset) external;
+  function enableStableRateBorrowingReserve(address asset, bool enabled) external;
 
   /**
-   * @notice Disable stable rate borrowing on a reserve
+   * @notice Activate or deactivate a reserve
    * @param asset The address of the underlying asset of the reserve
+   * @param active True if the reserve needs to be active, false otherwise
    **/
-  function disableReserveStableRate(address asset) external;
+  function activateReserve(address asset, bool active) external;
 
   /**
-   * @notice Activates a reserve
+   * @notice Freeze or unfreeze a reserve. A frozen reserve doesn't allow any new supply, borrow
+   * or rate swap but allows repayments, liquidations, rate rebalances and withdrawals
    * @param asset The address of the underlying asset of the reserve
+   * @param freeze True if the reserve needs to be frozen, false otherwise
    **/
-  function activateReserve(address asset) external;
-
-  /**
-   * @notice Deactivates a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function deactivateReserve(address asset) external;
-
-  /**
-   * @notice Freezes a reserve. A frozen reserve doesn't allow any new supply, borrow or rate swap
-   *  but allows repayments, liquidations, rate rebalances and withdrawals
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function freezeReserve(address asset) external;
-
-  /**
-   * @notice Unfreezes a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function unfreezeReserve(address asset) external;
+  function freezeReserve(address asset, bool freeze) external;
 
   /**
    * @notice Sets the borrowable in isolation flag for the reserve
