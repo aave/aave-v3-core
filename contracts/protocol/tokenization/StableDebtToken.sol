@@ -150,13 +150,14 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
         rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay())
     );
 
+    uint256 amountToMint = amount + balanceIncrease;
     _mint(onBehalfOf, amount + balanceIncrease, vars.previousSupply);
 
-    emit Transfer(address(0), onBehalfOf, amount + balanceIncrease);
+    emit Transfer(address(0), onBehalfOf, amountToMint);
     emit Mint(
       user,
       onBehalfOf,
-      amount,
+      amountToMint,
       currentBalance,
       balanceIncrease,
       vars.nextStableRate,

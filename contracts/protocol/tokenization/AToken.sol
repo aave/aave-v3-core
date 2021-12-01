@@ -103,13 +103,13 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     }
 
     if (balanceIncrease > amount) {
-      uint256 netAmount = balanceIncrease - amount;
-      emit Transfer(address(0), user, netAmount);
-      emit Mint(user, netAmount, balanceIncrease, index);
+      uint256 amountToMint = balanceIncrease - amount;
+      emit Transfer(address(0), user, amountToMint);
+      emit Mint(user, amountToMint, balanceIncrease, index);
     } else {
-      uint256 netAmount = amount - balanceIncrease;
-      emit Transfer(user, address(0), netAmount);
-      emit Burn(user, receiverOfUnderlying, netAmount, balanceIncrease, index);
+      uint256 amountToBurn = amount - balanceIncrease;
+      emit Transfer(user, address(0), amountToBurn);
+      emit Burn(user, receiverOfUnderlying, amountToBurn, balanceIncrease, index);
     }
   }
 

@@ -161,13 +161,14 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
         .borrow(usdc.address, borrowOnBehalfAmount, RateMode.Stable, 0, user1.address)
     );
 
-    const afterDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
     const afterDebtBalanceUser1 = await stableDebtToken.balanceOf(user1.address);
 
     // Calculate debt + interests
     const expectedDebtIncreaseUser1 = afterDebtBalanceUser1.sub(
       borrowOnBehalfAmount.add(borrowAmount)
     );
+
+    console.log(`expectedDebtIncreaseUser1 : ${expectedDebtIncreaseUser1}`);
 
     const transferEventSig = utils.keccak256(
       utils.toUtf8Bytes('Transfer(address,address,uint256)')
@@ -189,9 +190,8 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).args;
 
     expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
-    expect(borrowOnBehalfAmount).to.be.eq(mintAmount);
+    expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);
     expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
-    expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
 
     await evmRevert(snapId);
   });
