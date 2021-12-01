@@ -108,9 +108,14 @@ library BridgeLogic {
     uint256 feeToProtocol = fee.percentMul(protocolFeeBps);
     uint256 feeToLP = fee - feeToProtocol;
 
-    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), feeToLP);
+    reserveCache.nextLiquidityIndex = reserve.cumulateToLiquidityIndex(
+      IERC20(reserve.aTokenAddress).totalSupply(),
+      feeToLP
+    );
 
-    reserve.accruedToTreasury += Helpers.castUint128(feeToProtocol.rayDiv(reserve.liquidityIndex));
+    reserve.accruedToTreasury += Helpers.castUint128(
+      feeToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
+    );
 
     reserve.unbacked = reserve.unbacked - Helpers.castUint128(backingAmount);
     reserve.updateInterestRates(reserveCache, asset, backingAmount + fee, 0);

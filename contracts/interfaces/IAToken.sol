@@ -101,7 +101,10 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   function transferUnderlyingTo(address user, uint256 amount) external;
 
   /**
-   * @notice Invoked to execute actions on the aToken side after a repayment.
+   * @notice Handles the underlying received by the aToken after the transfer has been completed.
+   * @dev The default implementation is empty as with standard ERC20 tokens, nothing needs to be done after the transfer is concluded.
+   * However in the future there may be aTokens that allow for example to stake the underlying to receive LM rewards. In that case,
+   * `handleRepayment()` would perform the staking of the underlying asset.
    * @param user The user executing the repayment
    * @param amount The amount getting repaid
    **/

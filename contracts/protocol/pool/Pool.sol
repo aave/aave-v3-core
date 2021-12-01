@@ -282,16 +282,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode,
-    address onBehalfOf
+    uint256 rateMode
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
         _reserves,
         _reservesList,
         _reserves[asset],
-        _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, true)
+        _usersConfig[msg.sender],
+        DataTypes.ExecuteRepayParams(asset, amount, rateMode, msg.sender, true)
       );
   }
 

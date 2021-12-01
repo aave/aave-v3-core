@@ -252,6 +252,9 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     // Increase time so interests accrue
     await increaseTime(24 * 3600);
 
+    const previousIndexUser1Before = await variableDebtToken.getPreviousIndex(user1.address);
+    const previousIndexUser2Before = await variableDebtToken.getPreviousIndex(user2.address);
+
     // User2 borrows 100 DAI on behalf of user1
     const borrowOnBehalfAmount = utils.parseUnits('100', 18);
     const tx = await waitForTx(
@@ -260,6 +263,14 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
         .borrow(dai.address, borrowOnBehalfAmount, RateMode.Variable, 0, user1.address)
     );
 
+    const previousIndexUser1After = await variableDebtToken.getPreviousIndex(user1.address);
+    const previousIndexUser2After = await variableDebtToken.getPreviousIndex(user2.address);
+
+    // User2 index should be the same
+    expect(previousIndexUser1Before).to.be.not.eq(previousIndexUser1After);
+    expect(previousIndexUser2Before).to.be.eq(previousIndexUser2After);
+
+    const afterDebtBalanceUser2 = await variableDebtToken.balanceOf(user2.address);
     const afterDebtBalanceUser1 = await variableDebtToken.balanceOf(user1.address);
     const interest = afterDebtBalanceUser1.sub(borrowAmount).sub(borrowOnBehalfAmount);
 
