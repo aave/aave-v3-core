@@ -286,7 +286,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     expect(await pool.deposit(dai.address, amountDAItoDeposit, userAddress, '0'));
 
     await expect(
-      configurator.activateReserve(dai.address, false),
+      configurator.setReserveActive(dai.address, false),
       PC_RESERVE_LIQUIDITY_NOT_0
     ).to.be.revertedWith(PC_RESERVE_LIQUIDITY_NOT_0);
   });

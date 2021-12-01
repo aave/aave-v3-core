@@ -189,14 +189,14 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Deactivates the ETH reserve', async () => {
     const { configurator, weth, helpersContract } = testEnv;
-    expect(await configurator.activateReserve(weth.address, false));
+    expect(await configurator.setReserveActive(weth.address, false));
     const { isActive } = await helpersContract.getReserveConfigurationData(weth.address);
     expect(isActive).to.be.equal(false);
   });
 
   it('Reactivates the ETH reserve', async () => {
     const { configurator, weth, helpersContract } = testEnv;
-    expect(await configurator.activateReserve(weth.address, true));
+    expect(await configurator.setReserveActive(weth.address, true));
     const { isActive } = await helpersContract.getReserveConfigurationData(weth.address);
     expect(isActive).to.be.equal(true);
   });
@@ -246,7 +246,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Freezes the ETH reserve by pool Admin', async () => {
     const { configurator, weth, helpersContract } = testEnv;
 
-    expect(await configurator.freezeReserve(weth.address, true))
+    expect(await configurator.setReseveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address);
 
@@ -258,7 +258,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Unfreezes the ETH reserve by Pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
-    expect(await configurator.freezeReserve(weth.address, false))
+    expect(await configurator.setReseveFreeze(weth.address, false))
       .to.emit(configurator, 'ReserveUnfrozen')
       .withArgs(weth.address);
 
@@ -267,7 +267,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Freezes the ETH reserve by Risk Admin', async () => {
     const { configurator, weth, helpersContract, riskAdmin } = testEnv;
-    expect(await configurator.connect(riskAdmin.signer).freezeReserve(weth.address, true))
+    expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address);
 
@@ -279,7 +279,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Unfreezes the ETH reserve by Risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
-    expect(await configurator.connect(riskAdmin.signer).freezeReserve(weth.address, false))
+    expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, false))
       .to.emit(configurator, 'ReserveUnfrozen')
       .withArgs(weth.address);
 
@@ -408,7 +408,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Disable stable borrow rate on the ETH reserve via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
-    expect(await configurator.enableStableRateBorrowingReserve(weth.address, false))
+    expect(await configurator.setReserveStableRateEnabled(weth.address, false))
       .to.emit(configurator, 'StableRateDisabledOnReserve')
       .withArgs(weth.address);
 
@@ -420,7 +420,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Enables stable borrow rate on the ETH reserve via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
-    expect(await configurator.enableStableRateBorrowingReserve(weth.address, true))
+    expect(await configurator.setReserveStableRateEnabled(weth.address, true))
       .to.emit(configurator, 'StableRateEnabledOnReserve')
       .withArgs(weth.address);
 
@@ -432,9 +432,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Disable stable borrow rate on the ETH reserve risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
     expect(
-      await configurator
-        .connect(riskAdmin.signer)
-        .enableStableRateBorrowingReserve(weth.address, false)
+      await configurator.connect(riskAdmin.signer).setReserveStableRateEnabled(weth.address, false)
     )
       .to.emit(configurator, 'StableRateDisabledOnReserve')
       .withArgs(weth.address);
@@ -448,9 +446,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Enables stable borrow rate on the ETH reserve risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
     expect(
-      await configurator
-        .connect(riskAdmin.signer)
-        .enableStableRateBorrowingReserve(weth.address, true)
+      await configurator.connect(riskAdmin.signer).setReserveStableRateEnabled(weth.address, true)
     )
       .to.emit(configurator, 'StableRateEnabledOnReserve')
       .withArgs(weth.address);
