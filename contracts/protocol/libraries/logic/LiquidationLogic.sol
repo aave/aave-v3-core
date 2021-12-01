@@ -253,6 +253,11 @@ library LiquidationLogic {
       vars.actualDebtToLiquidate
     );
 
+    IAToken(vars.debtReserveCache.aTokenAddress).handleRepayment(
+      msg.sender,
+      vars.actualDebtToLiquidate
+    );
+
     emit LiquidationCall(
       params.collateralAsset,
       params.debtAsset,
