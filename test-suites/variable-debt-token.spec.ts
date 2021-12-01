@@ -14,7 +14,12 @@ import './helpers/utils/wadraymath';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
+  const {
+    CT_CALLER_MUST_BE_POOL,
+    CT_INVALID_MINT_AMOUNT,
+    CT_INVALID_BURN_AMOUNT,
+    CALLER_NOT_POOL_ADMIN,
+  } = ProtocolErrors;
 
   it('Check initialization', async () => {
     const { pool, weth, dai, helpersContract, users } = testEnv;
@@ -209,6 +214,42 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
   });
 
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { dai, helpersContract, poolAdmin, aclManager, deployer } = testEnv;
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(
+      await variableDebtContract.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS)
+    );
+    expect(await variableDebtContract.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      dai,
+      helpersContract,
+      users: [user],
+    } = testEnv;
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  });
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
     const snapId = await evmSnapshot();
     const {
@@ -298,9 +339,9 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     );
     const mintAmount = variableDebtToken.interface.parseLog(rawMintEvents[0]).args.value;
 
-    expect(transferAmount).to.be.eq(mintAmount);
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(mintAmount);
+    expect(transferAmount).to.be.closeTo(mintAmount,2);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(transferAmount,2);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(mintAmount,2);
     expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
 
     await evmRevert(snapId);
