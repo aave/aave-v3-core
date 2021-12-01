@@ -168,8 +168,6 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       borrowOnBehalfAmount.add(borrowAmount)
     );
 
-    console.log(`expectedDebtIncreaseUser1 : ${expectedDebtIncreaseUser1}`);
-
     const transferEventSig = utils.keccak256(
       utils.toUtf8Bytes('Transfer(address,address,uint256)')
     );
