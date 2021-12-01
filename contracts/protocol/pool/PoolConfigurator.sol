@@ -125,7 +125,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     currentConfig.setStableRateBorrowingEnabled(stableBorrowRateEnabled);
     _pool.setConfiguration(asset, currentConfig.data);
 
-    emit BorrowingEnabledOnReserve(asset, stableBorrowRateEnabled);
+    emit BorrowingOnReserve(asset, true, stableBorrowRateEnabled);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -133,7 +133,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setBorrowingEnabled(false);
     _pool.setConfiguration(asset, currentConfig.data);
-    emit BorrowingDisabledOnReserve(asset);
+    emit BorrowingOnReserve(asset, false, false);
   }
 
   /// @inheritdoc IPoolConfigurator

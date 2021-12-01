@@ -26,17 +26,12 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when borrowing is enabled on a reserve
+   * @notice Emitted when borrowing is enabled or disabled on a reserve
    * @param asset The address of the underlying asset of the reserve
+   * @param enabled True if borrowing is enabled, false otherwise
    * @param stableRateEnabled True if stable rate borrowing is enabled, false otherwise
    **/
-  event BorrowingEnabledOnReserve(address indexed asset, bool stableRateEnabled);
-
-  /**
-   * @notice Emitted when borrowing is disabled on a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event BorrowingDisabledOnReserve(address indexed asset);
+  event BorrowingOnReserve(address indexed asset, bool enabled, bool stableRateEnabled);
 
   /**
    * @notice Emitted when the collateralization risk parameters for the specified asset are updated.
