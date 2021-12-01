@@ -34,21 +34,21 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
       users: [, user],
       dai,
     } = testEnv;
-    await configurator.deactivateReserve(weth.address);
+    await configurator.activateReserve(weth.address, false);
 
     await expect(
       pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
     ).to.be.revertedWith('2');
 
-    await configurator.activateReserve(weth.address);
+    await configurator.activateReserve(weth.address, true);
 
-    await configurator.deactivateReserve(dai.address);
+    await configurator.activateReserve(dai.address, false);
 
     await expect(
       pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
     ).to.be.revertedWith('2');
 
-    await configurator.activateReserve(dai.address);
+    await configurator.activateReserve(dai.address, true);
   });
 
   it('Deposits WETH, borrows DAI', async () => {
