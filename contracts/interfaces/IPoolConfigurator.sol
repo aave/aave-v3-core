@@ -324,14 +324,14 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if stable rate borrowing needs to be enabled, false otherwise
    **/
-  function enableStableRateBorrowingReserve(address asset, bool enabled) external;
+  function setReserveStableRateEnabled(address asset, bool enabled) external;
 
   /**
    * @notice Activate or deactivate a reserve
    * @param asset The address of the underlying asset of the reserve
    * @param active True if the reserve needs to be active, false otherwise
    **/
-  function activateReserve(address asset, bool active) external;
+  function setReserveActive(address asset, bool active) external;
 
   /**
    * @notice Freeze or unfreeze a reserve. A frozen reserve doesn't allow any new supply, borrow
@@ -339,7 +339,7 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    * @param freeze True if the reserve needs to be frozen, false otherwise
    **/
-  function freezeReserve(address asset, bool freeze) external;
+  function setReseveFreeze(address asset, bool freeze) external;
 
   /**
    * @notice Sets the borrowable in isolation flag for the reserve

@@ -179,7 +179,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function enableStableRateBorrowingReserve(address asset, bool enabled)
+  function setReserveStableRateEnabled(address asset, bool enabled)
     external
     override
     onlyRiskOrPoolAdmins
@@ -196,7 +196,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function activateReserve(address asset, bool active) external override onlyPoolAdmin {
+  function setReserveActive(address asset, bool active) external override onlyPoolAdmin {
     if (!active) _checkNoDepositors(asset);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setActive(active);
@@ -209,7 +209,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function freezeReserve(address asset, bool freeze) external override onlyRiskOrPoolAdmins {
+  function setReseveFreeze(address asset, bool freeze) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setFrozen(freeze);
     _pool.setConfiguration(asset, currentConfig.data);
