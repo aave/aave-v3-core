@@ -24,7 +24,7 @@ library DataTypes {
     //address of the interest rate strategy
     address interestRateStrategyAddress;
     //the id of the reserve. Represents the position in the list of the active reserves
-    uint8 id;
+    uint16 id;
     //the current treasury balance, scaled
     uint128 accruedToTreasury;
     //the quickwithdraw balance waiting for underlying to be backed
