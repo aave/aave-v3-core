@@ -202,6 +202,8 @@ library SupplyLogic {
 
     ValidationLogic.validateSetUseReserveAsCollateral(reserveCache, userBalance);
 
+    if (useAsCollateral == userConfig.isUsingAsCollateral(reserve.id)) return;
+
     if (useAsCollateral) {
       (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
       require(
