@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, Event, utils } from 'ethers';
 import AaveConfig from '@aave/deploy-v3/dist/markets/aave';
 import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
@@ -222,6 +222,27 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     );
 
     expectEqual(reserveDataAfter, expectedReserveDataAfter);
+
+    // Check event values for `ReserveDataUpdated`
+    const reserveDataUpdatedEvent = tx.events?.find(
+      ({ event }) => (event === 'ReserveDataUpdated')
+    ) as Event;
+    if (reserveDataUpdatedEvent) {
+      const {
+        reserve: eventReserve,
+        liquidityRate: eventLiquidityRate,
+        stableBorrowRate: eventStableBorrowRate,
+        variableBorrowRate: eventVariableBorrowRate,
+        liquidityIndex: eventLiquidityIndex,
+        variableBorrowIndex: eventVariableBorrowIndex,
+      } = reserveDataUpdatedEvent.args as utils.Result;
+      expect(expectedReserveDataAfter.address).to.be.eq(eventReserve);
+      expect(expectedReserveDataAfter.liquidityRate).to.be.eq(eventLiquidityRate);
+      expect(expectedReserveDataAfter.stableBorrowRate).to.be.eq(eventStableBorrowRate);
+      expect(expectedReserveDataAfter.variableBorrowRate).to.be.eq(eventVariableBorrowRate);
+      expect(expectedReserveDataAfter.liquidityIndex).to.be.eq(eventLiquidityIndex);
+      expect(expectedReserveDataAfter.variableBorrowIndex).to.be.eq(eventVariableBorrowIndex);
+    }
   });
 
   it('user 1 performs unauthorized backing', async () => {

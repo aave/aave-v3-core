@@ -118,14 +118,14 @@ library FlashLoanLogic {
         DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
         reserve.updateState(reserveCache);
-        reserve.cumulateToLiquidityIndex(
+        reserveCache.nextLiquidityIndex = reserve.cumulateToLiquidityIndex(
           IERC20(vars.currentATokenAddress).totalSupply(),
           vars.currentPremiumToLP
         );
 
         reserve.accruedToTreasury =
           reserve.accruedToTreasury +
-          Helpers.castUint128(vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex));
+          Helpers.castUint128(vars.currentPremiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex));
 
         reserve.updateInterestRates(
           reserveCache,
@@ -137,6 +137,11 @@ library FlashLoanLogic {
         IERC20(vars.currentAsset).safeTransferFrom(
           params.receiverAddress,
           vars.currentATokenAddress,
+          vars.currentAmountPlusPremium
+        );
+
+        IAToken(reserveCache.aTokenAddress).handleRepayment(
+          params.receiverAddress,
           vars.currentAmountPlusPremium
         );
       } else {
@@ -217,20 +222,25 @@ library FlashLoanLogic {
 
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
-    reserve.cumulateToLiquidityIndex(
+    reserveCache.nextLiquidityIndex = reserve.cumulateToLiquidityIndex(
       IERC20(reserveCache.aTokenAddress).totalSupply(),
       vars.premiumToLP
     );
 
     reserve.accruedToTreasury =
       reserve.accruedToTreasury +
-      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserve.liquidityIndex));
+      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex));
 
     reserve.updateInterestRates(reserveCache, params.asset, vars.amountPlusPremium, 0);
 
     IERC20(params.asset).safeTransferFrom(
       params.receiverAddress,
       reserveCache.aTokenAddress,
+      vars.amountPlusPremium
+    );
+
+    IAToken(reserveCache.aTokenAddress).handleRepayment(
+      params.receiverAddress,
       vars.amountPlusPremium
     );
 
