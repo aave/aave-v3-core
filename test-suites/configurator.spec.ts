@@ -289,8 +289,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Deactivates the ETH reserve for borrowing via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     expect(await configurator.disableBorrowingOnReserve(weth.address))
-      .to.emit(configurator, 'BorrowingDisabledOnReserve')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'BorrowingOnReserve')
+      .withArgs(weth.address, false, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -301,8 +301,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Activates the ETH reserve for borrowing via pool admin', async () => {
     const { configurator, weth, helpersContract } = testEnv;
     expect(await configurator.enableBorrowingOnReserve(weth.address, '0', true))
-      .to.emit(configurator, 'BorrowingEnabledOnReserve')
-      .withArgs(weth.address, true);
+      .to.emit(configurator, 'BorrowingOnReserve')
+      .withArgs(weth.address, true, true);
 
     const { variableBorrowIndex } = await helpersContract.getReserveData(weth.address);
 
@@ -315,8 +315,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Deactivates the ETH reserve for borrowing via risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
     expect(await configurator.connect(riskAdmin.signer).disableBorrowingOnReserve(weth.address))
-      .to.emit(configurator, 'BorrowingDisabledOnReserve')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'BorrowingOnReserve')
+      .withArgs(weth.address, false, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -329,8 +329,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(
       await configurator.connect(riskAdmin.signer).enableBorrowingOnReserve(weth.address, '0', true)
     )
-      .to.emit(configurator, 'BorrowingEnabledOnReserve')
-      .withArgs(weth.address, true);
+      .to.emit(configurator, 'BorrowingOnReserve')
+      .withArgs(weth.address, true, true);
 
     const { variableBorrowIndex } = await helpersContract.getReserveData(weth.address);
 
