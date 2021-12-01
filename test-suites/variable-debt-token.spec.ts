@@ -270,7 +270,6 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     expect(previousIndexUser1Before).to.be.not.eq(previousIndexUser1After);
     expect(previousIndexUser2Before).to.be.eq(previousIndexUser2After);
 
-    const afterDebtBalanceUser2 = await variableDebtToken.balanceOf(user2.address);
     const afterDebtBalanceUser1 = await variableDebtToken.balanceOf(user1.address);
     const interest = afterDebtBalanceUser1.sub(borrowAmount).sub(borrowOnBehalfAmount);
 
