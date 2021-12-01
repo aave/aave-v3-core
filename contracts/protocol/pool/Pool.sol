@@ -708,9 +708,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
     require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
-    uint256 reservesCount = _reservesCount;
+    uint16 reservesCount = _reservesCount;
 
-    for (uint8 i = 0; i < reservesCount; i++) {
+    for (uint16 i = 0; i < reservesCount; i++) {
       if (_reservesList[i] == address(0)) {
         _reserves[asset].id = i;
         _reservesList[i] = asset;
@@ -718,7 +718,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       }
     }
     require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
-    _reserves[asset].id = uint8(reservesCount);
+    _reserves[asset].id = uint16(reservesCount);
     _reservesList[reservesCount] = asset;
     // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
     _reservesCount = uint16(reservesCount + 1);
