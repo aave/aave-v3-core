@@ -205,7 +205,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const { configurator, weth, helpersContract } = testEnv;
     expect(await configurator.setReservePause(weth.address, true))
       .to.emit(configurator, 'ReservePaused')
-      .withArgs(weth.address);
+      .withArgs(weth.address, true);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -216,8 +216,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Unpauses the ETH reserve by pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     expect(await configurator.setReservePause(weth.address, false))
-      .to.emit(configurator, 'ReserveUnpaused')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'ReservePaused')
+      .withArgs(weth.address, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
   });
@@ -226,7 +226,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const { configurator, weth, helpersContract, emergencyAdmin } = testEnv;
     expect(await configurator.connect(emergencyAdmin.signer).setReservePause(weth.address, true))
       .to.emit(configurator, 'ReservePaused')
-      .withArgs(weth.address);
+      .withArgs(weth.address, true);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -237,8 +237,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Unpauses the ETH reserve by emergency admin', async () => {
     const { configurator, helpersContract, weth, emergencyAdmin } = testEnv;
     expect(await configurator.connect(emergencyAdmin.signer).setReservePause(weth.address, false))
-      .to.emit(configurator, 'ReserveUnpaused')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'ReservePaused')
+      .withArgs(weth.address, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
   });
@@ -248,7 +248,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
     expect(await configurator.setReseveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
-      .withArgs(weth.address);
+      .withArgs(weth.address, true);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -259,8 +259,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Unfreezes the ETH reserve by Pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     expect(await configurator.setReseveFreeze(weth.address, false))
-      .to.emit(configurator, 'ReserveUnfrozen')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'ReserveFrozen')
+      .withArgs(weth.address, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
   });
@@ -269,7 +269,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const { configurator, weth, helpersContract, riskAdmin } = testEnv;
     expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
-      .withArgs(weth.address);
+      .withArgs(weth.address, true);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -280,8 +280,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Unfreezes the ETH reserve by Risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
     expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, false))
-      .to.emit(configurator, 'ReserveUnfrozen')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'ReserveFrozen')
+      .withArgs(weth.address, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
   });
@@ -409,8 +409,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Disable stable borrow rate on the ETH reserve via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     expect(await configurator.setReserveStableRateEnabled(weth.address, false))
-      .to.emit(configurator, 'StableRateDisabledOnReserve')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'StableRateBorrowingOnReserve')
+      .withArgs(weth.address, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -421,8 +421,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Enables stable borrow rate on the ETH reserve via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     expect(await configurator.setReserveStableRateEnabled(weth.address, true))
-      .to.emit(configurator, 'StableRateEnabledOnReserve')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'StableRateBorrowingOnReserve')
+      .withArgs(weth.address, true);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -434,8 +434,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(
       await configurator.connect(riskAdmin.signer).setReserveStableRateEnabled(weth.address, false)
     )
-      .to.emit(configurator, 'StableRateDisabledOnReserve')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'StableRateBorrowingOnReserve')
+      .withArgs(weth.address, false);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -448,8 +448,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(
       await configurator.connect(riskAdmin.signer).setReserveStableRateEnabled(weth.address, true)
     )
-      .to.emit(configurator, 'StableRateEnabledOnReserve')
-      .withArgs(weth.address);
+      .to.emit(configurator, 'StableRateBorrowingOnReserve')
+      .withArgs(weth.address, true);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
