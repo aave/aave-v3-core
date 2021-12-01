@@ -188,11 +188,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     currentConfig.setStableRateBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig.data);
 
-    if (enabled) {
-      emit StableRateEnabledOnReserve(asset);
-    } else {
-      emit StableRateDisabledOnReserve(asset);
-    }
+    emit StableRateBorrowingOnReserve(asset, enabled);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -201,11 +197,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setActive(active);
     _pool.setConfiguration(asset, currentConfig.data);
-    if (active) {
-      emit ReserveActivated(asset);
-    } else {
-      emit ReserveDeactivated(asset);
-    }
+    emit ReserveActive(asset, active);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -213,11 +205,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setFrozen(freeze);
     _pool.setConfiguration(asset, currentConfig.data);
-    if (freeze) {
-      emit ReserveFrozen(asset);
-    } else {
-      emit ReserveUnfrozen(asset);
-    }
+    emit ReserveFrozen(asset, freeze);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -236,14 +224,8 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function setReservePause(address asset, bool paused) public override onlyEmergencyOrPoolAdmin {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setPaused(paused);
-
     _pool.setConfiguration(asset, currentConfig.data);
-
-    if (paused) {
-      emit ReservePaused(asset);
-    } else {
-      emit ReserveUnpaused(asset);
-    }
+    emit ReservePaused(asset, paused);
   }
 
   /// @inheritdoc IPoolConfigurator

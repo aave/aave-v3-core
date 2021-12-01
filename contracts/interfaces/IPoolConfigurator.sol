@@ -53,52 +53,32 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when stable rate borrowing is enabled on a reserve
+   * @notice Emitted when stable rate borrowing state is changed on a reserve
    * @param asset The address of the underlying asset of the reserve
+   * @param enabled True if stable rate borrowing is enabled, false otherwise
    **/
-  event StableRateEnabledOnReserve(address indexed asset);
+  event StableRateBorrowingOnReserve(address indexed asset, bool enabled);
 
   /**
-   * @notice Emitted when stable rate borrowing is disabled on a reserve
+   * @notice Emitted when a reserve is activated or deactivated
    * @param asset The address of the underlying asset of the reserve
+   * @param active True if reserve is active, false otherwise
    **/
-  event StableRateDisabledOnReserve(address indexed asset);
+  event ReserveActive(address indexed asset, bool active);
 
   /**
-   * @notice Emitted when a reserve is activated
+   * @notice Emitted when a reserve is frozen or unfrozen
    * @param asset The address of the underlying asset of the reserve
+   * @param frozen True if reserve is frozen, false otherwise
    **/
-  event ReserveActivated(address indexed asset);
+  event ReserveFrozen(address indexed asset, bool frozen);
 
   /**
-   * @notice Emitted when a reserve is deactivated
+   * @notice Emitted when a reserve is paused or unpaused
    * @param asset The address of the underlying asset of the reserve
+   * @param paused True if reserve is paused, false otherwise
    **/
-  event ReserveDeactivated(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is frozen
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReserveFrozen(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is unfrozen
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReserveUnfrozen(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is paused
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReservePaused(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is unpaused
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReserveUnpaused(address indexed asset);
+  event ReservePaused(address indexed asset, bool paused);
 
   /**
    * @notice Emitted when a reserve is dropped
