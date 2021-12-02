@@ -717,10 +717,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       }
     }
     require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
-    _reserves[asset].id = uint16(reservesCount);
+    _reserves[asset].id = reservesCount;
     _reservesList[reservesCount] = asset;
     // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
-    _reservesCount = uint16(reservesCount + 1);
+    _reservesCount = reservesCount + 1;
   }
 
   /// @inheritdoc IPool
