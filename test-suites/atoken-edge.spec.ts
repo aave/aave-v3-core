@@ -6,13 +6,18 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
-import { waitForTx } from '@aave/deploy-v3';
+import { evmRevert, evmSnapshot, waitForTx } from '@aave/deploy-v3';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
-  const { CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT, HLP_UINT128_OVERFLOW } = ProtocolErrors;
+  const {
+    CT_INVALID_MINT_AMOUNT,
+    CT_INVALID_BURN_AMOUNT,
+    HLP_UINT128_OVERFLOW,
+    CALLER_NOT_POOL_ADMIN,
+  } = ProtocolErrors;
 
   it('Check getters', async () => {
     const { pool, users, dai, aDai } = testEnv;
@@ -181,6 +186,32 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     expect(await aDai.connect(poolSigner).mintToTreasury(0, utils.parseUnits('1', 27)));
+  });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { deployer, poolAdmin, aWETH, aclManager } = testEnv;
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(await aWETH.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS));
+    expect(await aWETH.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      users: [user],
+      aWETH,
+    } = testEnv;
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      aWETH.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 
   it('transfer() amount > MAX_UINT_128', async () => {

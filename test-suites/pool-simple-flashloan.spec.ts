@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers, Event } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ProtocolErrors } from '../helpers/types';
@@ -13,6 +13,7 @@ import {
   IERC20Detailed__factory,
 } from '../types';
 import { parseEther, parseUnits } from '@ethersproject/units';
+import { waitForTx } from '@aave/deploy-v3';
 
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
@@ -87,12 +88,14 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const wethReservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
 
-    await pool.flashLoanSimple(
-      _mockFlashLoanSimpleReceiver.address,
-      weth.address,
-      wethFlashBorrowedAmount,
-      '0x10',
-      '0'
+    const tx = await waitForTx(
+      await pool.flashLoanSimple(
+        _mockFlashLoanSimpleReceiver.address,
+        weth.address,
+        wethFlashBorrowedAmount,
+        '0x10',
+        '0'
+      )
     );
 
     await pool.mintToTreasury([weth.address]);
@@ -112,6 +115,25 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
       wethLiquidityIndexBefore.add(wethLiquidityIndexAdded)
     );
     expect(wethReservesAfter).to.be.equal(wethReservesBefore.add(wethFeesToProtocol));
+
+    // Check event values for `ReserveDataUpdated`
+    const reserveDataUpdatedEvents = tx.events?.filter(
+      ({ event }) => event === 'ReserveDataUpdated'
+    ) as Event[];
+    for (const reserveDataUpdatedEvent of reserveDataUpdatedEvents) {
+      const reserveData = await helpersContract.getReserveData(
+        reserveDataUpdatedEvent.args?.reserve
+      );
+      expect(reserveData.liquidityRate).to.be.eq(reserveDataUpdatedEvent.args?.liquidityRate);
+      expect(reserveData.stableBorrowRate).to.be.eq(reserveDataUpdatedEvent.args?.stableBorrowRate);
+      expect(reserveData.variableBorrowRate).to.be.eq(
+        reserveDataUpdatedEvent.args?.variableBorrowRate
+      );
+      expect(reserveData.liquidityIndex).to.be.eq(reserveDataUpdatedEvent.args?.liquidityIndex);
+      expect(reserveData.variableBorrowIndex).to.be.eq(
+        reserveDataUpdatedEvent.args?.variableBorrowIndex
+      );
+    }
   });
 
   it('Takes a simple ETH flashloan as big as the available liquidity', async () => {
