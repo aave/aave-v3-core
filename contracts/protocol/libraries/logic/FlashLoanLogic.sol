@@ -125,7 +125,9 @@ library FlashLoanLogic {
 
         reserve.accruedToTreasury =
           reserve.accruedToTreasury +
-          Helpers.castUint128(vars.currentPremiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex));
+          Helpers.castUint128(
+            vars.currentPremiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
+          );
 
         reserve.updateInterestRates(
           reserveCache,
