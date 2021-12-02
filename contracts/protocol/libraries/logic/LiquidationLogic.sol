@@ -299,7 +299,7 @@ library LiquidationLogic {
    * @param liquidationBonus The collateral bonus percentage to receive as result of the liquidation
    * @return The maximum amount that is possible to liquidate given all the liquidation constraints (user balance, close factor)
    * @return The amount to repay with the liquidation
-   * @return The fee taken fro the liquidation bonus amount to be paid to the protocol
+   * @return The fee taken from the liquidation bonus amount to be paid to the protocol
    **/
   function _calculateAvailableCollateralToLiquidate(
     DataTypes.ReserveData storage collateralReserve,
