@@ -168,13 +168,6 @@ library LiquidationLogic {
           vars.actualDebtToLiquidate,
           vars.debtReserveCache.nextVariableBorrowIndex
         );
-
-      debtReserve.updateInterestRates(
-        vars.debtReserveCache,
-        params.debtAsset,
-        vars.actualDebtToLiquidate,
-        0
-      );
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -189,14 +182,13 @@ library LiquidationLogic {
         params.user,
         vars.actualDebtToLiquidate - vars.userVariableDebt
       );
-
-      debtReserve.updateInterestRates(
-        vars.debtReserveCache,
-        params.debtAsset,
-        vars.actualDebtToLiquidate,
-        0
-      );
     }
+    debtReserve.updateInterestRates(
+      vars.debtReserveCache,
+      params.debtAsset,
+      vars.actualDebtToLiquidate,
+      0
+    );
 
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
