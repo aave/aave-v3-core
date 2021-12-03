@@ -54,7 +54,15 @@ interface IPriceOracleSentinel {
    */
   function setGracePeriod(uint256 newGracePeriod) external;
 
+  /**
+   * @notice Returns the SequencerOracle
+   * @return The address of the sequencer oracle contract
+   */
   function getSequencerOracle() external view returns (address);
 
+  /**
+   * @notice Returns the grace period
+   * @return The duration of the grace period
+   */
   function getGracePeriod() external view returns (uint256);
 }

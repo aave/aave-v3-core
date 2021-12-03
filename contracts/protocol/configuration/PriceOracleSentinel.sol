@@ -20,6 +20,15 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
     _;
   }
 
+  modifier onlyRiskOrPoolAdmins() {
+    IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
+    require(
+      aclManager.isRiskAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
+      Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
+    );
+    _;
+  }
+
   IPoolAddressesProvider public immutable override ADDRESSES_PROVIDER;
 
   ISequencerOracle internal _sequencerOracle;
@@ -64,7 +73,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   }
 
   /// @inheritdoc IPriceOracleSentinel
-  function setGracePeriod(uint256 newGracePeriod) public onlyPoolAdmin {
+  function setGracePeriod(uint256 newGracePeriod) public onlyRiskOrPoolAdmins {
     _gracePeriod = newGracePeriod;
     emit GracePeriodUpdated(newGracePeriod);
   }
