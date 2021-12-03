@@ -118,7 +118,7 @@ library UserConfiguration {
     returns (bool)
   {
     uint256 collateralData = self.data & COLLATERAL_MASK;
-    return collateralData & (collateralData - 1) == 0;
+    return collateralData > 0 && (collateralData & (collateralData - 1) == 0);
   }
 
   /**

@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://www.github.com/aave/aave-v3-core/compare/v1.6.0...v1.7.0) (2021-12-01)
+
+
+### Features
+
+* Add decimals to MockAggregator to match Chainlink Aggregator interface ([4cf1dac](https://www.github.com/aave/aave-v3-core/commit/4cf1dacd70f11a0c7103ade68bb05c907e846b2d))
+* added handleRepayment() in flashloan and liqCall ([6c43820](https://www.github.com/aave/aave-v3-core/commit/6c438201c6ee95b6dc3895b904213b975ce3905d))
+
+
+### Bug Fixes
+
+* fixed handleRepayment() in flashloan ([80a19bb](https://www.github.com/aave/aave-v3-core/commit/80a19bb7e0d92af0604e67dc6586a0f376bf91a4))
+
 ## [1.6.0](https://www.github.com/aave/aave-v3-core/compare/v1.5.2...v1.6.0) (2021-11-27)
 
 
