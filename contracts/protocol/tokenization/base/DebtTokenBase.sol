@@ -34,7 +34,7 @@ abstract contract DebtTokenBase is
   }
 
   constructor(IPool pool)
-    IncentivizedERC20(pool.getAddressesProvider(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
+    IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
   {
     POOL = pool;
   }

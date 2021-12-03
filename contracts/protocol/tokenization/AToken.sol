@@ -43,7 +43,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   }
 
   constructor(IPool pool)
-    IncentivizedERC20(pool.getAddressesProvider(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
+    IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
   {
     POOL = pool;
   }
