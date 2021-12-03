@@ -15,7 +15,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
    * @notice Emitted after the mint action
    * @param from The address performing the mint
-   * @param value The amount being
+   * @param value The amount being minted (user entered amount + balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
    **/
@@ -38,7 +38,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @notice Emitted after aTokens are burned
    * @param from The owner of the aTokens, getting them burned
    * @param target The address that will receive the underlying
-   * @param value The amount being burned
+   * @param value The amount being burned (user entered amount - balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
    **/
@@ -61,6 +61,8 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
 
   /**
    * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
+   * @dev In some instances, the mint event could be emitted from a burn transaction
+   * if the amount to burn is less than the interest the user earned
    * @param user The owner of the aTokens, getting them burned
    * @param receiverOfUnderlying The address that will receive the underlying
    * @param amount The amount being burned
