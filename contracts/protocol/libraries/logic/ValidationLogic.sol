@@ -710,11 +710,14 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     address asset
   ) internal view returns (bool) {
-    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reserves);
+
     if (!userConfig.isUsingAsCollateralAny()) {
       return true;
     }
+
+    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reserves);
     DataTypes.ReserveConfigurationMap memory configuration = reservesData[asset].configuration;
+
     return (!isolationModeActive && configuration.getDebtCeiling() == 0);
   }
 }
