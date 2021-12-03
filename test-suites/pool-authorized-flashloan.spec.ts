@@ -49,7 +49,6 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
   it('Takes WETH flash loan with mode = 0, returns the funds correctly', async () => {
     const { pool, helpersContract, weth } = testEnv;
 
-    console.log('priorr');
     expect(
       await pool.flashLoan(
         _mockFlashLoanReceiver.address,

@@ -88,8 +88,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @notice Initializes the Pool.
    * @dev Function is invoked by the proxy contract when the Pool contract is added to the
    * PoolAddressesProvider of the market.
-   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption
-   *   on subsequent operations
+   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption on subsequent operations
+   * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == _addressesProvider, Errors.PC_INVALID_CONFIGURATION);
@@ -703,22 +703,24 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersEModeCategory[user];
   }
 
-  function _addReserveToList(address asset) internal virtual {
-    uint256 reservesCount = _reservesCount;
-
-    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
-
+  function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
+    require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
-    if (!reserveAlreadyAdded) {
-      for (uint8 i = 0; i <= reservesCount; i++) {
-        if (_reservesList[i] == address(0)) {
-          _reserves[asset].id = i;
-          _reservesList[i] = asset;
-          _reservesCount = uint16(reservesCount + 1);
-        }
+    uint16 reservesCount = _reservesCount;
+
+    for (uint16 i = 0; i < reservesCount; i++) {
+      if (_reservesList[i] == address(0)) {
+        _reserves[asset].id = i;
+        _reservesList[i] = asset;
+        return;
       }
     }
+    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
+    _reserves[asset].id = reservesCount;
+    _reservesList[reservesCount] = asset;
+    // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
+    _reservesCount = reservesCount + 1;
   }
 
   /// @inheritdoc IPool
