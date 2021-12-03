@@ -50,7 +50,7 @@ library EModeLogic {
     uint8 prevCategoryId = usersEModeCategory[msg.sender];
     usersEModeCategory[msg.sender] = params.categoryId;
 
-    if (prevCategoryId != 0 && params.categoryId == 0) {
+    if (prevCategoryId != 0) {
       ValidationLogic.validateHealthFactor(
         reserves,
         reservesList,

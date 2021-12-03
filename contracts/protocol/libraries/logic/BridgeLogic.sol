@@ -45,6 +45,8 @@ library BridgeLogic {
    *   0 if the action is executed directly by the user, without any middle-man
    **/
   function mintUnbacked(
+    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
@@ -64,7 +66,7 @@ library BridgeLogic {
     uint256 unbacked = reserve.unbacked = reserve.unbacked + Helpers.castUint128(amount);
 
     require(
-      unbackedMintCap > 0 && unbacked / (10**reserveDecimals) < unbackedMintCap,
+      unbacked <= unbackedMintCap * (10**reserveDecimals),
       Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
     );
 
@@ -77,8 +79,10 @@ library BridgeLogic {
     );
 
     if (isFirstSupply) {
-      userConfig.setUsingAsCollateral(reserve.id, true);
-      emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+      if (ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, asset)) {
+        userConfig.setUsingAsCollateral(reserve.id, true);
+        emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
+      }
     }
 
     emit MintUnbacked(asset, msg.sender, onBehalfOf, amount, referralCode);
@@ -107,15 +111,21 @@ library BridgeLogic {
 
     uint256 feeToProtocol = fee.percentMul(protocolFeeBps);
     uint256 feeToLP = fee - feeToProtocol;
+    uint256 added = backingAmount + fee;
 
-    reserve.cumulateToLiquidityIndex(IERC20(reserve.aTokenAddress).totalSupply(), feeToLP);
+    reserveCache.nextLiquidityIndex = reserve.cumulateToLiquidityIndex(
+      IERC20(reserveCache.aTokenAddress).totalSupply(),
+      feeToLP
+    );
 
-    reserve.accruedToTreasury += Helpers.castUint128(feeToProtocol.rayDiv(reserve.liquidityIndex));
+    reserve.accruedToTreasury += Helpers.castUint128(
+      feeToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
+    );
 
-    reserve.unbacked = reserve.unbacked - Helpers.castUint128(backingAmount);
-    reserve.updateInterestRates(reserveCache, asset, backingAmount + fee, 0);
+    reserve.unbacked -= Helpers.castUint128(backingAmount);
+    reserve.updateInterestRates(reserveCache, asset, added, 0);
 
-    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, backingAmount + fee);
+    IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, added);
 
     emit BackUnbacked(asset, msg.sender, backingAmount, fee);
   }

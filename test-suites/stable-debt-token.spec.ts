@@ -9,11 +9,10 @@ import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
-
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
+  const { CT_CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
   let snap: string;
 
   before(async () => {
@@ -161,10 +160,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
         .borrow(usdc.address, borrowOnBehalfAmount, RateMode.Stable, 0, user1.address)
     );
 
-    const afterDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
     const afterDebtBalanceUser1 = await stableDebtToken.balanceOf(user1.address);
+    const afterDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
 
-    // Calculate debt + interests
+    // Calculate interests
     const expectedDebtIncreaseUser1 = afterDebtBalanceUser1.sub(
       borrowOnBehalfAmount.add(borrowAmount)
     );
@@ -189,9 +188,9 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     ).args;
 
     expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
-    expect(borrowOnBehalfAmount).to.be.eq(mintAmount);
+    expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);
     expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
-    expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
+    expect(afterDebtBalanceUser2).to.be.eq(beforeDebtBalanceUser2);
 
     await evmRevert(snapId);
   });
@@ -284,5 +283,36 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     await increaseTime(60 * 60 * 24 * 365);
     const totalSupplyAfterTime = BigNumber.from(18798191);
     await stableDebt.connect(poolSigner).burn(users[1].address, totalSupplyAfterTime.sub(1));
+  });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { dai, helpersContract, poolAdmin, aclManager, deployer } = testEnv;
+    const config = await helpersContract.getReserveTokensAddresses(dai.address);
+    const stableDebt = await getStableDebtToken(config.stableDebtTokenAddress);
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await stableDebt.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(await stableDebt.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS));
+    expect(await stableDebt.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      dai,
+      helpersContract,
+      users: [user],
+    } = testEnv;
+    const config = await helpersContract.getReserveTokensAddresses(dai.address);
+    const stableDebt = await getStableDebtToken(config.stableDebtTokenAddress);
+
+    expect(await stableDebt.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      stableDebt.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 });
