@@ -18,7 +18,7 @@ library DataTypes {
     uint128 currentStableBorrowRate;
     uint40 lastUpdateTimestamp;
     //the id of the reserve. Represents the position in the list of the active reserves
-    uint8 id;
+    uint16 id;
     //tokens addresses
     address aTokenAddress;
     address stableDebtTokenAddress;

@@ -1,8 +1,9 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
+import { advanceTimeAndBlock } from '@aave/deploy-v3';
 import { MAX_UINT_AMOUNT, MAX_BORROW_CAP } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { ProtocolErrors } from '../helpers/types';
+import { ProtocolErrors, RateMode } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
@@ -46,7 +47,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     expect(daiBorrowCap).to.be.equal('0');
   });
 
-  it('Borrows 10 Dai stable, 10 USDC variable', async () => {
+  it('Borrows 10 stable DAI, 10 variable USDC', async () => {
     const {
       weth,
       pool,
@@ -112,7 +113,8 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
       )
     );
   });
-  it('Sets the borrow cap for WETH and DAI to 10 Units', async () => {
+
+  it('Sets the borrow cap for DAI and USDC to 10 Units', async () => {
     const { configurator, dai, usdc, helpersContract } = testEnv;
 
     const newCap = 10;
@@ -167,7 +169,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     );
   });
 
-  it('Sets the borrow cap for USDC and DAI to 120 Units', async () => {
+  it('Sets the borrow cap for DAI and USDC to 120 Units', async () => {
     const { configurator, usdc, dai, helpersContract } = testEnv;
     const newCap = '120';
 
@@ -209,30 +211,62 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
       )
     );
   });
-  it('Tries to borrow 100 variable DAI and 100 stable USDC (= BORROW_CAP) (revert expected)', async () => {
-    const { usdc, pool, dai, deployer } = testEnv;
-    const borrowedAmount = '100';
 
+  it('Sets the borrow cap for WETH to 2 Units', async () => {
+    const { configurator, weth, helpersContract } = testEnv;
+
+    const newCap = 2;
+    expect(await configurator.setBorrowCap(weth.address, newCap))
+      .to.emit(configurator, 'BorrowCapChanged')
+      .withArgs(weth.address, newCap);
+
+    const wethBorrowCap = (await helpersContract.getReserveCaps(weth.address)).borrowCap;
+
+    expect(wethBorrowCap).to.be.equal(newCap);
+  });
+
+  it('Borrows 2 variable WETH (= BORROW_CAP)', async () => {
+    const { weth, pool, deployer, helpersContract } = testEnv;
+
+    const borrowedAmount = '2';
+
+    await pool.borrow(
+      weth.address,
+      await convertToCurrencyDecimals(weth.address, borrowedAmount),
+      RateMode.Variable,
+      0,
+      deployer.address
+    );
+  });
+
+  it('Time flies and ETH debt amount goes above the limit due to accrued interests', async () => {
+    const { weth, helpersContract } = testEnv;
+
+    // Advance blocks
+    await advanceTimeAndBlock(3600);
+
+    const wethData = await helpersContract.getReserveData(weth.address);
+    const totalDebt = wethData.totalVariableDebt.add(wethData.totalStableDebt);
+    const wethCaps = await helpersContract.getReserveCaps(weth.address);
+
+    expect(totalDebt).gt(wethCaps.borrowCap);
+  });
+
+  it('Tries to borrow any variable ETH (> BORROW_CAP) (revert expected)', async () => {
+    const { weth, pool, deployer } = testEnv;
+
+    const borrowedAmount = '1';
     await expect(
       pool.borrow(
-        usdc.address,
-        await convertToCurrencyDecimals(usdc.address, borrowedAmount),
-        1,
-        0,
-        deployer.address
-      )
-    ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
-
-    await expect(
-      pool.borrow(
-        dai.address,
-        await convertToCurrencyDecimals(dai.address, borrowedAmount),
-        2,
+        weth.address,
+        await convertToCurrencyDecimals(weth.address, borrowedAmount),
+        RateMode.Variable,
         0,
         deployer.address
       )
     ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
   });
+
   it('Borrows 99 variable DAI and 99 stable USDC (< BORROW_CAP)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
 
@@ -257,6 +291,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
       )
     );
   });
+
   it('Raises the borrow cap for USDC and DAI to 1000 Units', async () => {
     const { configurator, usdc, dai, helpersContract } = testEnv;
 

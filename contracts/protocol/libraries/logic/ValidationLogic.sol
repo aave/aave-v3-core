@@ -64,9 +64,8 @@ library ValidationLogic {
       supplyCap == 0 ||
         (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
           reserveCache.nextLiquidityIndex
-        ) + amount) /
-          (10**reserveDecimals) <
-        supplyCap,
+        ) + amount) <=
+        supplyCap * (10**reserveDecimals),
       Errors.VL_SUPPLY_CAP_EXCEEDED
     );
   }
@@ -163,18 +162,17 @@ library ValidationLogic {
     }
 
     if (vars.borrowCap != 0) {
-      {
-        vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
-          params.reserveCache.nextVariableBorrowIndex
-        );
+      vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
+        params.reserveCache.nextVariableBorrowIndex
+      );
 
-        vars.totalDebt =
-          params.reserveCache.currTotalStableDebt +
-          vars.totalSupplyVariableDebt +
-          params.amount;
-        unchecked {
-          require(vars.totalDebt / vars.assetUnit < vars.borrowCap, Errors.VL_BORROW_CAP_EXCEEDED);
-        }
+      vars.totalDebt =
+        params.reserveCache.currTotalStableDebt +
+        vars.totalSupplyVariableDebt +
+        params.amount;
+
+      unchecked {
+        require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.VL_BORROW_CAP_EXCEEDED);
       }
     }
 
