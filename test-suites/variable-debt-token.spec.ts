@@ -250,6 +250,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
     ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
+  
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
     const {
       pool,
@@ -334,6 +335,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const rawMintEvents = tx.logs.filter(
       ({ topics, address }) => topics[0] === mintEventSig && address == variableDebtToken.address
     );
+
     const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
 
     expect(parsedMintEvent.args.value).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
