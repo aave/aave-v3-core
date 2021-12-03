@@ -9,9 +9,10 @@ import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {DataTypes} from '../../libraries/types/DataTypes.sol';
-import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
-import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
-import {GenericLogic} from '../../libraries/logic/GenericLogic.sol';
+import {ReserveLogic} from './ReserveLogic.sol';
+import {ValidationLogic} from './ValidationLogic.sol';
+import {GenericLogic} from './GenericLogic.sol';
+import {IsolationModeLogic} from './IsolationModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -198,27 +199,13 @@ library LiquidationLogic {
       );
     }
 
-    (bool isolationModeActive, address isolationModeCollateralAddress, ) = userConfig
-      .getIsolationModeState(reserves, reservesList);
-
-    if (isolationModeActive) {
-      uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
-        .isolationModeTotalDebt;
-
-      uint128 isolatedDebtRepaid = Helpers.castUint128(
-        vars.actualDebtToLiquidate /
-          10**(debtReserve.configuration.getDecimals() - ReserveConfiguration.DEBT_CEILING_DECIMALS)
-      );
-
-      // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
-      if (isolationModeTotalDebt <= isolatedDebtRepaid) {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
-      } else {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
-          isolationModeTotalDebt -
-          isolatedDebtRepaid;
-      }
-    }
+    IsolationModeLogic.executeIsolationModeRepayment(
+      reserves,
+      reservesList,
+      userConfig,
+      vars.debtReserveCache,
+      vars.actualDebtToLiquidate
+    );
 
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
