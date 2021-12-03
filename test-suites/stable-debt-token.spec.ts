@@ -190,10 +190,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
     expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);
     expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
-<<<<<<< HEAD
-=======
     expect(afterDebtBalanceUser2).to.be.eq(beforeDebtBalanceUser2);
->>>>>>> 0df5e80a4a7e983231b7cb23be458f53b3f572b6
 
     await evmRevert(snapId);
   });
