@@ -88,8 +88,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @notice Initializes the Pool.
    * @dev Function is invoked by the proxy contract when the Pool contract is added to the
    * PoolAddressesProvider of the market.
-   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption
-   *   on subsequent operations
+   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption on subsequent operations
+   * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == _addressesProvider, Errors.PC_INVALID_CONFIGURATION);
@@ -282,16 +282,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode,
-    address onBehalfOf
+    uint256 rateMode
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
         _reserves,
         _reservesList,
         _reserves[asset],
-        _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, true)
+        _usersConfig[msg.sender],
+        DataTypes.ExecuteRepayParams(asset, amount, rateMode, msg.sender, true)
       );
   }
 

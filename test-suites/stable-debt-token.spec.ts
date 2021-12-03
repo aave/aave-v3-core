@@ -7,14 +7,8 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {
-  evmRevert,
-  evmSnapshot,
-  increaseTime,
-  StableDebtToken__factory,
-  waitForTx,
-} from '@aave/deploy-v3';
-
+import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
+import { StableDebtToken__factory } from '../types';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
@@ -208,9 +202,9 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       rawMintEvents[0]
     ).args;
 
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
-    expect(borrowOnBehalfAmount).to.be.eq(mintAmount);
-    expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(transferAmount, 2);
+    expect(borrowOnBehalfAmount).to.be.closeTo(mintAmount, 2);
+    expect(expectedDebtIncreaseUser1).to.be.closeTo(balanceIncrease, 2);
     expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
 
     await evmRevert(snapId);

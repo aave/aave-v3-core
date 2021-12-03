@@ -7,7 +7,7 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { ethers } from 'hardhat';
 import { parseUnits } from '@ethersproject/units';
-import { waitForTx, evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import { waitForTx, evmSnapshot, evmRevert, getVariableDebtToken } from '@aave/deploy-v3';
 
 makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -430,6 +430,66 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .repay(dai.address, utils.parseEther('500'), RateMode.Variable, user.address)
+    ).to.be.revertedWith(VL_SAME_BLOCK_BORROW_REPAY);
+  });
+
+  it('validateRepay() when variable borrowing and repaying in same block using credit delegation (revert expected)', async () => {
+    const {
+      pool,
+      dai,
+      weth,
+      users: [user1, user2, user3],
+    } = testEnv;
+
+    // Add liquidity
+    await dai.connect(user3.signer)['mint(uint256)'](utils.parseUnits('1000', 18));
+    await dai.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user3.signer)
+      .supply(dai.address, utils.parseUnits('1000', 18), user3.address, 0);
+
+    // User1 supplies 10 WETH
+    await dai.connect(user1.signer)['mint(uint256)'](utils.parseUnits('100', 18));
+    await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await weth.connect(user1.signer)['mint(uint256)'](utils.parseUnits('10', 18));
+    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user1.signer)
+      .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
+
+    const daiData = await pool.getReserveData(dai.address);
+    const variableDebtToken = await getVariableDebtToken(daiData.variableDebtTokenAddress);
+
+    // User1 approves User2 to borrow 1000 DAI
+    expect(
+      await variableDebtToken
+        .connect(user1.signer)
+        .approveDelegation(user2.address, utils.parseUnits('1000', 18))
+    );
+
+    // User2 borrows on behalf of User1
+    const borrowOnBehalfAmount = utils.parseUnits('100', 18);
+    expect(
+      await pool
+        .connect(user2.signer)
+        .borrow(dai.address, borrowOnBehalfAmount, RateMode.Variable, 0, user1.address)
+    );
+
+    // Turn off automining to simulate actions in same block
+    await setAutomine(false);
+
+    // User2 borrows 2 DAI on behalf of User1
+    await pool
+      .connect(user2.signer)
+      .borrow(dai.address, utils.parseEther('2'), RateMode.Variable, 0, user1.address);
+
+    // Turn on automining, but not mine a new block until next tx
+    await setAutomineEvm(true);
+
+    await expect(
+      pool
+        .connect(user1.signer)
+        .repay(dai.address, utils.parseEther('2'), RateMode.Variable, user1.address)
     ).to.be.revertedWith(VL_SAME_BLOCK_BORROW_REPAY);
   });
 
