@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, ethers, Event, utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
@@ -11,6 +11,7 @@ import {
 } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { waitForTx } from '@aave/deploy-v3';
 
 makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
@@ -94,14 +95,16 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const wethReservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
     const daiReservesBefore = await aDai.balanceOf(await aDai.RESERVE_TREASURY_ADDRESS());
 
-    await pool.flashLoan(
-      _mockFlashLoanReceiver.address,
-      [weth.address, dai.address],
-      [wethFlashBorrowedAmount, daiFlashBorrowedAmount],
-      [0, 0],
-      _mockFlashLoanReceiver.address,
-      '0x10',
-      '0'
+    const tx = await waitForTx(
+      await pool.flashLoan(
+        _mockFlashLoanReceiver.address,
+        [weth.address, dai.address],
+        [wethFlashBorrowedAmount, daiFlashBorrowedAmount],
+        [0, 0],
+        _mockFlashLoanReceiver.address,
+        '0x10',
+        '0'
+      )
     );
 
     await pool.mintToTreasury([weth.address, dai.address]);
@@ -134,6 +137,25 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       daiLiquidityIndexBefore.add(daiLiquidityIndexAdded)
     );
     expect(daiReservesAfter).to.be.equal(daiReservesBefore.add(daiFeesToProtocol));
+
+    // Check event values for `ReserveDataUpdated`
+    const reserveDataUpdatedEvents = tx.events?.filter(
+      ({ event }) => event === 'ReserveDataUpdated'
+    ) as Event[];
+    for (const reserveDataUpdatedEvent of reserveDataUpdatedEvents) {
+      const reserveData = await helpersContract.getReserveData(
+        reserveDataUpdatedEvent.args?.reserve
+      );
+      expect(reserveData.liquidityRate).to.be.eq(reserveDataUpdatedEvent.args?.liquidityRate);
+      expect(reserveData.stableBorrowRate).to.be.eq(reserveDataUpdatedEvent.args?.stableBorrowRate);
+      expect(reserveData.variableBorrowRate).to.be.eq(
+        reserveDataUpdatedEvent.args?.variableBorrowRate
+      );
+      expect(reserveData.liquidityIndex).to.be.eq(reserveDataUpdatedEvent.args?.liquidityIndex);
+      expect(reserveData.variableBorrowIndex).to.be.eq(
+        reserveDataUpdatedEvent.args?.variableBorrowIndex
+      );
+    }
   });
 
   it('Takes an authorized AAVE flash loan with mode = 0, returns the funds correctly', async () => {
