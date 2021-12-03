@@ -15,7 +15,15 @@ library IsolationModeLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  function executeIsolationModeRepayment(
+  /**
+   * @notice updated the isolated debt whenever a position collateralized by an isolated asset is repaid
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param userConfig The user configuration mapping
+   * @param reserveCache The cached data of the reserve
+   * @param repayAmount The amount being repaid
+   */
+  function updateIsolatedDebtIfIsolated(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,

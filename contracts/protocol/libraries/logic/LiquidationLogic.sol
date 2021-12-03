@@ -199,7 +199,7 @@ library LiquidationLogic {
       );
     }
 
-    IsolationModeLogic.executeIsolationModeRepayment(
+    IsolationModeLogic.updateIsolatedDebtIfIsolated(
       reserves,
       reservesList,
       userConfig,

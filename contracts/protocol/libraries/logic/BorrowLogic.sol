@@ -196,7 +196,7 @@ library BorrowLogic {
       userConfig.setBorrowing(reserve.id, false);
     }
 
-    IsolationModeLogic.executeIsolationModeRepayment(
+    IsolationModeLogic.updateIsolatedDebtIfIsolated(
       reserves,
       reservesList,
       userConfig,
