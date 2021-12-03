@@ -200,8 +200,17 @@ library LiquidationLogic {
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
-        liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
-        emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
+        if (
+          ValidationLogic.validateUseAsCollateral(
+            reserves,
+            reservesList,
+            liquidatorConfig,
+            params.collateralAsset
+          )
+        ) {
+          liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
+          emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
+        }
       }
     } else {
       DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
