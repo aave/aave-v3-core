@@ -43,11 +43,13 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   string private _symbol;
   uint8 private _decimals;
   IAaveIncentivesController internal _incentivesController;
-  IPoolAddressesProvider internal _addressesProvider;
+  IPoolAddressesProvider internal immutable _addressesProvider;
 
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
     keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
+
+  mapping(address => uint256) internal _nonces;
 
   bytes32 internal _domainSeparator;
   uint256 internal immutable _chainId;
@@ -298,5 +300,9 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
           address(this)
         )
       );
+  }
+
+  function nonces(address owner) external view virtual returns (uint256) {
+    return _nonces[owner];
   }
 }

@@ -61,6 +61,7 @@ library ReserveConfiguration {
   uint256 constant MAX_VALID_DEBT_CEILING = 1099511627775;
 
   uint256 public constant DEBT_CEILING_DECIMALS = 2;
+  uint16 public constant MAX_RESERVES_COUNT = 128;
 
   /**
    * @notice Sets the Loan to Value of the reserve

@@ -8,11 +8,18 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
+import './helpers/utils/wadraymath';
 
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL, CT_INVALID_MINT_AMOUNT, CT_INVALID_BURN_AMOUNT } = ProtocolErrors;
+  const {
+    CT_CALLER_MUST_BE_POOL,
+    CT_INVALID_MINT_AMOUNT,
+    CT_INVALID_BURN_AMOUNT,
+    CALLER_NOT_POOL_ADMIN,
+  } = ProtocolErrors;
 
   it('Check initialization', async () => {
     const { pool, weth, dai, helpersContract, users } = testEnv;
@@ -205,5 +212,131 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
         .connect(users[0].signer)
         .transferFrom(users[0].address, users[1].address, 500)
     ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+  });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { dai, helpersContract, poolAdmin, aclManager, deployer } = testEnv;
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(
+      await variableDebtContract.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS)
+    );
+    expect(await variableDebtContract.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      dai,
+      helpersContract,
+      users: [user],
+    } = testEnv;
+    const daiVariableDebtTokenAddress = (
+      await helpersContract.getReserveTokensAddresses(dai.address)
+    ).variableDebtTokenAddress;
+    const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
+
+    expect(await variableDebtContract.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  });
+  it('Check Mint and Transfer events when borrowing on behalf', async () => {
+    const {
+      pool,
+      weth,
+      dai,
+      users: [user1, user2, user3],
+    } = testEnv;
+
+    // Add liquidity
+    await dai.connect(user3.signer)['mint(uint256)'](utils.parseUnits('1000', 18));
+    await dai.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user3.signer)
+      .supply(dai.address, utils.parseUnits('1000', 18), user3.address, 0);
+
+    // User1 supplies 10 WETH
+    await weth.connect(user1.signer)['mint(uint256)'](utils.parseUnits('10', 18));
+    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user1.signer)
+      .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
+
+    const daiData = await pool.getReserveData(dai.address);
+    const variableDebtToken = await getVariableDebtToken(daiData.variableDebtTokenAddress);
+
+    // User1 borrows 100 DAI
+    const borrowAmount = utils.parseUnits('100', 18);
+    expect(
+      await pool
+        .connect(user1.signer)
+        .borrow(dai.address, borrowAmount, RateMode.Variable, 0, user1.address)
+    );
+
+    // User1 approves user2 to borrow 1000 DAI
+    expect(
+      await variableDebtToken
+        .connect(user1.signer)
+        .approveDelegation(user2.address, utils.parseUnits('1000', 18))
+    );
+
+    // Increase time so interests accrue
+    await increaseTime(24 * 3600);
+
+    const previousIndexUser1Before = await variableDebtToken.getPreviousIndex(user1.address);
+    const previousIndexUser2Before = await variableDebtToken.getPreviousIndex(user2.address);
+
+    // User2 borrows 100 DAI on behalf of user1
+    const borrowOnBehalfAmount = utils.parseUnits('100', 18);
+    const tx = await waitForTx(
+      await pool
+        .connect(user2.signer)
+        .borrow(dai.address, borrowOnBehalfAmount, RateMode.Variable, 0, user1.address)
+    );
+
+    const previousIndexUser1After = await variableDebtToken.getPreviousIndex(user1.address);
+    const previousIndexUser2After = await variableDebtToken.getPreviousIndex(user2.address);
+
+    // User2 index should be the same
+    expect(previousIndexUser1Before).to.be.not.eq(previousIndexUser1After);
+    expect(previousIndexUser2Before).to.be.eq(previousIndexUser2After);
+
+    const afterDebtBalanceUser1 = await variableDebtToken.balanceOf(user1.address);
+
+    const interest = afterDebtBalanceUser1.sub(borrowAmount).sub(borrowOnBehalfAmount);
+
+    const transferEventSig = utils.keccak256(
+      utils.toUtf8Bytes('Transfer(address,address,uint256)')
+    );
+
+    const rawTransferEvents = tx.logs.filter(
+      ({ topics, address }) =>
+        topics[0] === transferEventSig && address == variableDebtToken.address
+    );
+    const parsedTransferEvent = variableDebtToken.interface.parseLog(rawTransferEvents[0]);
+    const transferAmount = parsedTransferEvent.args.value;
+
+    expect(transferAmount).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
+
+    const mintEventSig = utils.keccak256(
+      utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256)')
+    );
+    const rawMintEvents = tx.logs.filter(
+      ({ topics, address }) => topics[0] === mintEventSig && address == variableDebtToken.address
+    );
+    const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
+
+    expect(parsedMintEvent.args.value).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
+    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(interest, 2);
   });
 });

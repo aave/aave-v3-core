@@ -168,13 +168,6 @@ library LiquidationLogic {
           vars.actualDebtToLiquidate,
           vars.debtReserveCache.nextVariableBorrowIndex
         );
-
-      debtReserve.updateInterestRates(
-        vars.debtReserveCache,
-        params.debtAsset,
-        vars.actualDebtToLiquidate,
-        0
-      );
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -189,14 +182,13 @@ library LiquidationLogic {
         params.user,
         vars.actualDebtToLiquidate - vars.userVariableDebt
       );
-
-      debtReserve.updateInterestRates(
-        vars.debtReserveCache,
-        params.debtAsset,
-        vars.actualDebtToLiquidate,
-        0
-      );
     }
+    debtReserve.updateInterestRates(
+      vars.debtReserveCache,
+      params.debtAsset,
+      vars.actualDebtToLiquidate,
+      0
+    );
 
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
@@ -262,6 +254,11 @@ library LiquidationLogic {
       vars.actualDebtToLiquidate
     );
 
+    IAToken(vars.debtReserveCache.aTokenAddress).handleRepayment(
+      msg.sender,
+      vars.actualDebtToLiquidate
+    );
+
     emit LiquidationCall(
       params.collateralAsset,
       params.debtAsset,
@@ -274,8 +271,6 @@ library LiquidationLogic {
   }
 
   struct AvailableCollateralToLiquidateLocalVars {
-    uint256 userCompoundedBorrowBalance;
-    uint256 liquidationBonus;
     uint256 collateralPrice;
     uint256 debtAssetPrice;
     uint256 maxCollateralToLiquidate;
@@ -302,8 +297,10 @@ library LiquidationLogic {
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
    * @param userCollateralBalance The collateral balance for the specific `collateralAsset` of the user being liquidated
+   * @param liquidationBonus The collateral bonus percentage to receive as result of the liquidation
    * @return The maximum amount that is possible to liquidate given all the liquidation constraints (user balance, close factor)
    * @return The amount to repay with the liquidation
+   * @return The fee taken from the liquidation bonus amount to be paid to the protocol
    **/
   function _calculateAvailableCollateralToLiquidate(
     DataTypes.ReserveData storage collateralReserve,

@@ -25,9 +25,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
-  uint256 internal _avgStableRate;
   mapping(address => uint40) internal _timestamps;
-  uint40 internal _totalSupplyTimestamp;
+  uint128 _avgStableRate;
+  uint40 _totalSupplyTimestamp;
 
   address internal _underlyingAsset;
 
@@ -145,17 +145,19 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
 
     // Calculates the updated average stable rate
-    vars.currentAvgStableRate = _avgStableRate = (vars.currentAvgStableRate.rayMul(
-      vars.previousSupply.wadToRay()
-    ) + rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay());
+    vars.currentAvgStableRate = _avgStableRate = Helpers.castUint128(
+      (vars.currentAvgStableRate.rayMul(vars.previousSupply.wadToRay()) +
+        rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay())
+    );
 
-    _mint(onBehalfOf, amount + balanceIncrease, vars.previousSupply);
+    uint256 amountToMint = amount + balanceIncrease;
+    _mint(onBehalfOf, amountToMint, vars.previousSupply);
 
-    emit Transfer(address(0), onBehalfOf, amount + balanceIncrease);
+    emit Transfer(address(0), onBehalfOf, amountToMint);
     emit Mint(
       user,
       onBehalfOf,
-      amount,
+      amountToMint,
       currentBalance,
       balanceIncrease,
       vars.nextStableRate,
@@ -189,16 +191,18 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       _totalSupply = 0;
     } else {
       nextSupply = _totalSupply = previousSupply - amount;
-      uint256 firstTerm = _avgStableRate.rayMul(previousSupply.wadToRay());
+      uint256 firstTerm = uint256(_avgStableRate).rayMul(previousSupply.wadToRay());
       uint256 secondTerm = userStableRate.rayMul(amount.wadToRay());
 
       // For the same reason described above, when the last user is repaying it might
       // happen that user rate * user balance > avg rate * total supply. In that case,
       // we simply set the avg rate to 0
       if (secondTerm >= firstTerm) {
-        nextAvgStableRate = _avgStableRate = _totalSupply = 0;
+        nextAvgStableRate = _totalSupply = _avgStableRate = 0;
       } else {
-        nextAvgStableRate = _avgStableRate = (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay());
+        nextAvgStableRate = _avgStableRate = Helpers.castUint128(
+          (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay())
+        );
       }
     }
 
@@ -215,7 +219,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
       _mint(user, amountToMint, previousSupply);
-      emit Transfer(address(0), user, balanceIncrease - amount);
+      emit Transfer(address(0), user, amountToMint);
       emit Mint(
         user,
         user,
@@ -229,7 +233,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
       _burn(user, amountToBurn, previousSupply);
-      emit Transfer(address(0), user, amount - balanceIncrease);
+      emit Transfer(user, address(0), amountToBurn);
       emit Burn(user, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
     }
 

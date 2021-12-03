@@ -24,6 +24,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
+import {Helpers} from '../libraries/helpers/Helpers.sol';
 
 /**
  * @title Pool contract
@@ -49,6 +50,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   uint256 public constant POOL_REVISION = 0x2;
+  IPoolAddressesProvider internal immutable _addressesProvider;
 
   modifier onlyPoolConfigurator() {
     _onlyPoolConfigurator();
@@ -78,19 +80,21 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return POOL_REVISION;
   }
 
+  constructor(IPoolAddressesProvider provider) {
+    _addressesProvider = provider;
+  }
+
   /**
    * @notice Initializes the Pool.
    * @dev Function is invoked by the proxy contract when the Pool contract is added to the
    * PoolAddressesProvider of the market.
-   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption
-   *   on subsequent operations
+   * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption on subsequent operations
    * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
-    _addressesProvider = provider;
+    require(provider == _addressesProvider, Errors.PC_INVALID_CONFIGURATION);
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
-    _maxNumberOfReserves = 128;
     _flashLoanPremiumToProtocol = 0;
   }
 
@@ -212,7 +216,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _maxStableRateBorrowSizePercent,
         _reservesCount,
         _addressesProvider.getPriceOracle(),
-        _usersEModeCategory[msg.sender],
+        _usersEModeCategory[onBehalfOf],
         _addressesProvider.getPriceOracleSentinel()
       )
     );
@@ -280,16 +284,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode,
-    address onBehalfOf
+    uint256 rateMode
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
         _reserves,
         _reservesList,
         _reserves[asset],
-        _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, true)
+        _usersConfig[msg.sender],
+        DataTypes.ExecuteRepayParams(asset, amount, rateMode, msg.sender, true)
       );
   }
 
@@ -568,8 +571,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function MAX_NUMBER_RESERVES() public view override returns (uint256) {
-    return _maxNumberOfReserves;
+  function MAX_NUMBER_RESERVES() public view virtual override returns (uint256) {
+    return ReserveConfiguration.MAX_RESERVES_COUNT;
   }
 
   /// @inheritdoc IPool
@@ -656,8 +659,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = flashLoanPremiumTotal;
-    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
+    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
+    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
   }
 
   /// @inheritdoc IPool
@@ -703,21 +706,23 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   function _addReserveToList(address asset) internal {
-    uint256 reservesCount = _reservesCount;
-
-    require(reservesCount < _maxNumberOfReserves, Errors.P_NO_MORE_RESERVES_ALLOWED);
-
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
+    require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
-    if (!reserveAlreadyAdded) {
-      for (uint8 i = 0; i <= reservesCount; i++) {
-        if (_reservesList[i] == address(0)) {
-          _reserves[asset].id = i;
-          _reservesList[i] = asset;
-          _reservesCount = reservesCount + 1;
-        }
+    uint16 reservesCount = _reservesCount;
+
+    for (uint16 i = 0; i < reservesCount; i++) {
+      if (_reservesList[i] == address(0)) {
+        _reserves[asset].id = i;
+        _reservesList[i] = asset;
+        return;
       }
     }
+    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
+    _reserves[asset].id = reservesCount;
+    _reservesList[reservesCount] = asset;
+    // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
+    _reservesCount = reservesCount + 1;
   }
 
   /// @inheritdoc IPool

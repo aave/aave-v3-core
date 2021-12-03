@@ -64,9 +64,8 @@ library ValidationLogic {
       supplyCap == 0 ||
         (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
           reserveCache.nextLiquidityIndex
-        ) + amount) /
-          (10**reserveDecimals) <
-        supplyCap,
+        ) + amount) <=
+        supplyCap * (10**reserveDecimals),
       Errors.VL_SUPPLY_CAP_EXCEEDED
     );
   }
@@ -163,18 +162,17 @@ library ValidationLogic {
     }
 
     if (vars.borrowCap != 0) {
-      {
-        vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
-          params.reserveCache.nextVariableBorrowIndex
-        );
+      vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
+        params.reserveCache.nextVariableBorrowIndex
+      );
 
-        vars.totalDebt =
-          params.reserveCache.currTotalStableDebt +
-          vars.totalSupplyVariableDebt +
-          params.amount;
-        unchecked {
-          require(vars.totalDebt / vars.assetUnit < vars.borrowCap, Errors.VL_BORROW_CAP_EXCEEDED);
-        }
+      vars.totalDebt =
+        params.reserveCache.currTotalStableDebt +
+        vars.totalSupplyVariableDebt +
+        params.amount;
+
+      unchecked {
+        require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.VL_BORROW_CAP_EXCEEDED);
       }
     }
 
@@ -240,7 +238,7 @@ library ValidationLogic {
       ) *
       params.amount;
     unchecked {
-      vars.amountInBaseCurrency /= 10**vars.reserveDecimals;
+      vars.amountInBaseCurrency /= vars.assetUnit;
     }
 
     //add the current already borrowed amount to the amount requested to calculate the total collateral needed.
@@ -456,13 +454,13 @@ library ValidationLogic {
     uint256[] memory amounts,
     mapping(address => DataTypes.ReserveData) storage reservesData
   ) internal view {
+    require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
     for (uint256 i = 0; i < assets.length; i++) {
       DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
         .configuration;
       require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
       require(configuration.getActive(), Errors.VL_NO_ACTIVE_RESERVE);
     }
-    require(assets.length == amounts.length, Errors.VL_INCONSISTENT_FLASHLOAN_PARAMS);
   }
 
   /**

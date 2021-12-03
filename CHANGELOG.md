@@ -1,5 +1,65 @@
 # Changelog
 
+## [1.7.0](https://www.github.com/aave/aave-v3-core/compare/v1.6.0...v1.7.0) (2021-12-01)
+
+
+### Features
+
+* Add decimals to MockAggregator to match Chainlink Aggregator interface ([4cf1dac](https://www.github.com/aave/aave-v3-core/commit/4cf1dacd70f11a0c7103ade68bb05c907e846b2d))
+* added handleRepayment() in flashloan and liqCall ([6c43820](https://www.github.com/aave/aave-v3-core/commit/6c438201c6ee95b6dc3895b904213b975ce3905d))
+
+
+### Bug Fixes
+
+* fixed handleRepayment() in flashloan ([80a19bb](https://www.github.com/aave/aave-v3-core/commit/80a19bb7e0d92af0604e67dc6586a0f376bf91a4))
+
+## [1.6.0](https://www.github.com/aave/aave-v3-core/compare/v1.5.2...v1.6.0) (2021-11-27)
+
+
+### Features
+
+* reduced the number of optimizer runs ([8562a91](https://www.github.com/aave/aave-v3-core/commit/8562a911d04ede756a703be60f985d1916805d46))
+* reorganized PoolStorage for gas savings ([87776f7](https://www.github.com/aave/aave-v3-core/commit/87776f757d58ddf20b99cdce752e068602f38389))
+
+
+### Bug Fixes
+
+* Add `useATokens` param to `Repay` event ([beec3f8](https://www.github.com/aave/aave-v3-core/commit/beec3f86bf1e4024dc74583bb386851b3d212963))
+* Add additional constraint to use `eModeAssetPrice` ([ec42295](https://www.github.com/aave/aave-v3-core/commit/ec422953ca60110d98aa3c7c8930f70d88d5b294))
+* Add check to `Pool::initializer()` ([8f2b426](https://www.github.com/aave/aave-v3-core/commit/8f2b426962a11c3e289301a341bcdf170b3e763f))
+* Add clean ups to VariableDebtToken test ([bc4f314](https://www.github.com/aave/aave-v3-core/commit/bc4f314c85ac59ea84244108e6fc6f7c22d3fb74))
+* Add cleanup to StableDebtToken test ([d1eeaa5](https://www.github.com/aave/aave-v3-core/commit/d1eeaa51d19b1e45bfa564fb51e5bd69623450db))
+* Add cleanups in eMode tests ([fbf80a8](https://www.github.com/aave/aave-v3-core/commit/fbf80a8092c5807a281ab95b6e54f85790dda9b4))
+* Add extra input to MockPoolInherited test deployment ([e7944dc](https://www.github.com/aave/aave-v3-core/commit/e7944dc1f92ea6fada5a31031d3628c7682da0d7))
+* Add minor gas optimization for executeFlashLoan ([0d737f5](https://www.github.com/aave/aave-v3-core/commit/0d737f5041649a27a2d97148e625e1d3b211d0e3))
+* Add natspec comments to IncentivizedERC20 ([722a8e7](https://www.github.com/aave/aave-v3-core/commit/722a8e7b5c3a2e14f639e6491cb264b8d305508a))
+* Add precision to debt ceiling comment ([3d43c02](https://www.github.com/aave/aave-v3-core/commit/3d43c02a8d014e33619ad5d375d1baeac4448cb8))
+* Add test exploiting pricing issue ([3457fb8](https://www.github.com/aave/aave-v3-core/commit/3457fb829d094a45f6d056c9893ad0c3b1bef465))
+* Add test for incorrect init of pool ([b3cebaf](https://www.github.com/aave/aave-v3-core/commit/b3cebaf6180340378e37257c6ac4e4adab444e2f))
+* Bumped Node JS version of Dockerfile to 16 stable version. Update package-lock. ([f0c8787](https://www.github.com/aave/aave-v3-core/commit/f0c8787725ff3fc77b02cf92928f6e79207a93ff))
+* Change visibility of `name()` in IncentivizedERC20 ([467a5c1](https://www.github.com/aave/aave-v3-core/commit/467a5c110552bf4ec71449cccc2bb8fd9201806b))
+* Do multiplication before devision for `currentStableBorrowRate` ([ca177fb](https://www.github.com/aave/aave-v3-core/commit/ca177fbe5860ae360e4ebf8e93712fa84b1ab2e4))
+* Fix typo on credit delegation test case ([0b6a65b](https://www.github.com/aave/aave-v3-core/commit/0b6a65bb109665b1d74bcdc5c5fd04c38dfa4721))
+* Handle minor merge issue ([36488c9](https://www.github.com/aave/aave-v3-core/commit/36488c9e86a15bc66047ddf09505dbcf29f79324))
+* Make `_addressesProvider` immutable in `Pool` ([b41feab](https://www.github.com/aave/aave-v3-core/commit/b41feabd504c8da527db7fc1e3867519b2c7334e))
+* Make `_nonces` internal and add `nonces` getter ([f3d1817](https://www.github.com/aave/aave-v3-core/commit/f3d18176f6250ac255287acaf86aae8f04c22e77))
+* Make `MAX_RESERVES_COUNT` constant ([04ced7f](https://www.github.com/aave/aave-v3-core/commit/04ced7fd5582af588ebdcf4d2f755db8998d1b75))
+* MockPoolInherited wrong return value on `MAX_NUMBER_RESERVES` ([b724a73](https://www.github.com/aave/aave-v3-core/commit/b724a73790b8fcad67e33df10217da448a4cf953))
+* Move `_nonces` to IncentivizedERC20 ([54eb024](https://www.github.com/aave/aave-v3-core/commit/54eb024bef45a8d77a5f856cf1866024d282da7e))
+* Move list length check to front of `validateFlashloan` function ([f485be5](https://www.github.com/aave/aave-v3-core/commit/f485be5d9f87d85cef65d816e708741437586280))
+* Pair `_avgStableBorrowRate` and `_totalSupplyTimestamp` ([b6c9372](https://www.github.com/aave/aave-v3-core/commit/b6c937292dd7bb2c91eec05940170ac902701a09))
+* Refactor tokens, move domain separator function to IncentivizedERC20 ([c033f9d](https://www.github.com/aave/aave-v3-core/commit/c033f9d4d83c08f75b63b972ca02fca27d6afc45))
+* Removal of unneeded struct ([262dc7a](https://www.github.com/aave/aave-v3-core/commit/262dc7a525b3e6794b96b904189696773e3787c5))
+* Remove unneeded fields from `AvailableCollateralToLiquidateLocalVars` ([f9088b6](https://www.github.com/aave/aave-v3-core/commit/f9088b65a6b3a5c6875f0176f32bda99caf63ee9))
+* setup npm registry without file ([91fdc99](https://www.github.com/aave/aave-v3-core/commit/91fdc99b02dffb4924c5078d894f2ca180d8e23c))
+* Simplify `_getFirstAssetAsCollateralId()` ([dffc2f6](https://www.github.com/aave/aave-v3-core/commit/dffc2f63275c6d4be780dc4199adace662afb585))
+* source setup env for coverage ([fd7de34](https://www.github.com/aave/aave-v3-core/commit/fd7de34862f678aeac426634ba48b1c0afd65f7d))
+* Update `user` to `onBehalfOf` for VariabelDebtToken ([7ff840f](https://www.github.com/aave/aave-v3-core/commit/7ff840f36a12ae19372c1f83b9d2ee01ae30de5b))
+* Update package.json ([49a8c39](https://www.github.com/aave/aave-v3-core/commit/49a8c39e6137f31aa7a4e05a6ca2556532ddab20))
+* update v3 deploy dev dependency to latest deployment scripts ([2aa8f5c](https://www.github.com/aave/aave-v3-core/commit/2aa8f5c3364c518890a12366f4ed6c8747dfe4bc))
+* update v3 dev dependencies ([9cb6a47](https://www.github.com/aave/aave-v3-core/commit/9cb6a47393d676d16bd928e8cce5f90db14892ad))
+* Use cached value for asset unit instead of recomputation ([335927c](https://www.github.com/aave/aave-v3-core/commit/335927c0493772f68968feb0477d0fad348e5b59))
+
 ### [1.5.2](https://www.github.com/aave/aave-v3-core/compare/v1.5.1...v1.5.2) (2021-11-12)
 
 

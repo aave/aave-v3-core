@@ -105,26 +105,29 @@ library FlashLoanLogic {
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.currentAsset = params.assets[vars.i];
       vars.currentAmount = params.amounts[vars.i];
-      vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
-      vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
-      vars.currentPremiumToProtocol = params.amounts[vars.i].percentMul(
-        vars.flashloanPremiumToProtocol
-      );
-      vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
 
       if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
+        vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
+        vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
+        vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
+          vars.flashloanPremiumToProtocol
+        );
+        vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
+
         DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
         DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
         reserve.updateState(reserveCache);
-        reserve.cumulateToLiquidityIndex(
+        reserveCache.nextLiquidityIndex = reserve.cumulateToLiquidityIndex(
           IERC20(vars.currentATokenAddress).totalSupply(),
           vars.currentPremiumToLP
         );
 
         reserve.accruedToTreasury =
           reserve.accruedToTreasury +
-          Helpers.castUint128(vars.currentPremiumToProtocol.rayDiv(reserve.liquidityIndex));
+          Helpers.castUint128(
+            vars.currentPremiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
+          );
 
         reserve.updateInterestRates(
           reserveCache,
@@ -136,6 +139,11 @@ library FlashLoanLogic {
         IERC20(vars.currentAsset).safeTransferFrom(
           params.receiverAddress,
           vars.currentATokenAddress,
+          vars.currentAmountPlusPremium
+        );
+
+        IAToken(reserveCache.aTokenAddress).handleRepayment(
+          params.receiverAddress,
           vars.currentAmountPlusPremium
         );
       } else {
@@ -216,20 +224,25 @@ library FlashLoanLogic {
 
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
-    reserve.cumulateToLiquidityIndex(
+    reserveCache.nextLiquidityIndex = reserve.cumulateToLiquidityIndex(
       IERC20(reserveCache.aTokenAddress).totalSupply(),
       vars.premiumToLP
     );
 
     reserve.accruedToTreasury =
       reserve.accruedToTreasury +
-      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserve.liquidityIndex));
+      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex));
 
     reserve.updateInterestRates(reserveCache, params.asset, vars.amountPlusPremium, 0);
 
     IERC20(params.asset).safeTransferFrom(
       params.receiverAddress,
       reserveCache.aTokenAddress,
+      vars.amountPlusPremium
+    );
+
+    IAToken(reserveCache.aTokenAddress).handleRepayment(
+      params.receiverAddress,
       vars.amountPlusPremium
     );
 

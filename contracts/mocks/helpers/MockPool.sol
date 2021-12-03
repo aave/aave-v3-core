@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+import {Errors} from '../../protocol/libraries/helpers/Errors.sol';
+import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+
 contract MockPool {
   // Reserved storage space to avoid layout collisions.
   uint256[100] private ______gap;
@@ -28,11 +31,19 @@ contract MockPool {
 import {Pool} from '../../protocol/pool/Pool.sol';
 
 contract MockPoolInherited is Pool {
+  uint16 internal _maxNumberOfReserves = 128;
+
   function getRevision() internal pure override returns (uint256) {
     return 0x3;
   }
 
-  function setMaxNumberOfReserves(uint256 newMaxNumberOfReserves) public {
+  constructor(IPoolAddressesProvider provider) Pool(provider) {}
+
+  function setMaxNumberOfReserves(uint16 newMaxNumberOfReserves) public {
     _maxNumberOfReserves = newMaxNumberOfReserves;
+  }
+
+  function MAX_NUMBER_RESERVES() public view override returns (uint256) {
+    return _maxNumberOfReserves;
   }
 }

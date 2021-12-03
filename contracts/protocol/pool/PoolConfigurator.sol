@@ -166,7 +166,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
       //we need to ensure no liquidity is supplied
-      _checkNoDepositors(asset);
+      _checkNoSuppliers(asset);
     }
 
     currentConfig.setLtv(ltv);
@@ -205,7 +205,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /// @inheritdoc IPoolConfigurator
   function deactivateReserve(address asset) external override onlyPoolAdmin {
-    _checkNoDepositors(asset);
+    _checkNoSuppliers(asset);
 
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setActive(false);
@@ -271,7 +271,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function setDebtCeiling(address asset, uint256 ceiling) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     if (currentConfig.getDebtCeiling() == 0) {
-      _checkNoDepositors(asset);
+      _checkNoSuppliers(asset);
     }
     currentConfig.setDebtCeiling(ceiling);
     _pool.setConfiguration(asset, currentConfig.data);
@@ -317,6 +317,23 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address oracle,
     string calldata label
   ) external override onlyRiskOrPoolAdmins {
+    // validation of the parameters: the LTV can
+    // only be lower or equal than the liquidation threshold
+    // (otherwise a loan against the asset would cause instantaneous liquidation)
+    require(ltv <= liquidationThreshold, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
+    require(
+      liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
+
+    // if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
+    // a loan is taken there is enough collateral available to cover the liquidation bonus
+    require(
+      uint256(liquidationThreshold).percentMul(liquidationBonus) <=
+        PercentageMath.PERCENTAGE_FACTOR,
+      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+    );
+
     _pool.configureEModeCategory(
       categoryId,
       DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
@@ -330,16 +347,15 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyRiskOrPoolAdmins
   {
-    DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
-
-    require(categoryData.liquidationThreshold > 0, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
-
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
-    require(
-      categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
-      Errors.VL_INCONSISTENT_EMODE_CATEGORY
-    );
+    if (categoryId > 0) {
+      DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
+      require(
+        categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
+        Errors.VL_INCONSISTENT_EMODE_CATEGORY
+      );
+    }
 
     currentConfig.setEModeCategory(categoryId);
 
@@ -427,7 +443,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     emit FlashloanPremiumToProtocolUpdated(flashloanPremiumToProtocol);
   }
 
-  function _checkNoDepositors(address asset) internal view {
+  function _checkNoSuppliers(address asset) internal view {
     uint256 totalATokens = IPoolDataProvider(_addressesProvider.getPoolDataProvider())
       .getATokenTotalSupply(asset);
     require(totalATokens == 0, Errors.PC_RESERVE_LIQUIDITY_NOT_0);

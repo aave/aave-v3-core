@@ -30,7 +30,7 @@ library UserConfiguration {
     bool borrowing
   ) internal {
     unchecked {
-      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
       self.data =
         (self.data & ~(1 << (reserveIndex * 2))) |
         (uint256(borrowing ? 1 : 0) << (reserveIndex * 2));
@@ -49,7 +49,7 @@ library UserConfiguration {
     bool usingAsCollateral
   ) internal {
     unchecked {
-      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
       self.data =
         (self.data & ~(1 << (reserveIndex * 2 + 1))) |
         (uint256(usingAsCollateral ? 1 : 0) << (reserveIndex * 2 + 1));
@@ -67,7 +67,7 @@ library UserConfiguration {
     uint256 reserveIndex
   ) internal pure returns (bool) {
     unchecked {
-      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
       return (self.data >> (reserveIndex * 2)) & 3 != 0;
     }
   }
@@ -84,7 +84,7 @@ library UserConfiguration {
     returns (bool)
   {
     unchecked {
-      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
       return (self.data >> (reserveIndex * 2)) & 1 != 0;
     }
   }
@@ -101,7 +101,7 @@ library UserConfiguration {
     returns (bool)
   {
     unchecked {
-      require(reserveIndex < 128, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
       return (self.data >> (reserveIndex * 2 + 1)) & 1 != 0;
     }
   }
@@ -118,7 +118,7 @@ library UserConfiguration {
     returns (bool)
   {
     uint256 collateralData = self.data & COLLATERAL_MASK;
-    return collateralData & (collateralData - 1) == 0;
+    return collateralData > 0 && (collateralData & (collateralData - 1) == 0);
   }
 
   /**
@@ -205,9 +205,9 @@ library UserConfiguration {
       uint256 id;
 
       while ((firstCollateralPosition >>= 2) > 0) {
-        id += 2;
+        id += 1;
       }
-      return id / 2;
+      return id;
     }
   }
 }

@@ -15,10 +15,11 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
    * @notice Emitted after the mint action
    * @param from The address performing the mint
-   * @param value The amount being
+   * @param value The amount being minted (user entered amount + balance increase from interest)
+   * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
    **/
-  event Mint(address indexed from, uint256 value, uint256 index);
+  event Mint(address indexed from, uint256 value, uint256 balanceIncrease, uint256 index);
 
   /**
    * @notice Mints `amount` aTokens to `user`
@@ -37,10 +38,17 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @notice Emitted after aTokens are burned
    * @param from The owner of the aTokens, getting them burned
    * @param target The address that will receive the underlying
-   * @param value The amount being burned
+   * @param value The amount being burned (user entered amount - balance increase from interest)
+   * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
    **/
-  event Burn(address indexed from, address indexed target, uint256 value, uint256 index);
+  event Burn(
+    address indexed from,
+    address indexed target,
+    uint256 value,
+    uint256 balanceIncrease,
+    uint256 index
+  );
 
   /**
    * @notice Emitted during the transfer action
@@ -53,6 +61,8 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
 
   /**
    * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
+   * @dev In some instances, the mint event could be emitted from a burn transaction
+   * if the amount to burn is less than the interest the user earned
    * @param user The owner of the aTokens, getting them burned
    * @param receiverOfUnderlying The address that will receive the underlying
    * @param amount The amount being burned
@@ -93,7 +103,10 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   function transferUnderlyingTo(address user, uint256 amount) external;
 
   /**
-   * @notice Invoked to execute actions on the aToken side after a repayment.
+   * @notice Handles the underlying received by the aToken after the transfer has been completed.
+   * @dev The default implementation is empty as with standard ERC20 tokens, nothing needs to be done after the transfer is concluded.
+   * However in the future there may be aTokens that allow for example to stake the underlying to receive LM rewards. In that case,
+   * `handleRepayment()` would perform the staking of the underlying asset.
    * @param user The user executing the repayment
    * @param amount The amount getting repaid
    **/

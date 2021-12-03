@@ -28,9 +28,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
   uint256 public constant ATOKEN_REVISION = 0x1;
 
-  /// @dev owner => next valid nonce to submit with permit()
-  mapping(address => uint256) public _nonces;
-
   IPool internal immutable _pool;
   address internal _treasury;
   address internal _underlyingAsset;
@@ -94,7 +91,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+    uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
     _userState[user].additionalData = Helpers.castUint128(index);
@@ -105,11 +102,14 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
 
-    emit Transfer(user, address(0), amount);
-    if (accumulatedInterest > amount) {
-      emit Mint(user, accumulatedInterest - amount, index);
+    if (balanceIncrease > amount) {
+      uint256 amountToMint = balanceIncrease - amount;
+      emit Transfer(address(0), user, amountToMint);
+      emit Mint(user, amountToMint, balanceIncrease, index);
     } else {
-      emit Burn(user, receiverOfUnderlying, amount - accumulatedInterest, index);
+      uint256 amountToBurn = amount - balanceIncrease;
+      emit Transfer(user, address(0), amountToBurn);
+      emit Burn(user, receiverOfUnderlying, amountToBurn, balanceIncrease, index);
     }
   }
 
@@ -123,15 +123,16 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-    uint256 accumulatedInterest = scaledBalance.rayMul(index) -
+    uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
     _userState[user].additionalData = Helpers.castUint128(index);
 
     _mint(user, Helpers.castUint128(amountScaled));
 
-    emit Transfer(address(0), user, amount);
-    emit Mint(user, amount + accumulatedInterest, index);
+    uint256 amountToMint = amount + balanceIncrease;
+    emit Transfer(address(0), user, amountToMint);
+    emit Mint(user, amountToMint, balanceIncrease, index);
 
     return scaledBalance == 0;
   }
