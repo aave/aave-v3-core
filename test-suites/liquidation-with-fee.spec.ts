@@ -576,7 +576,7 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const bonusCollateral = borrowerATokenBalance.sub(
       borrowerATokenBalance.percentDiv(liquidationBonus)
     );
-    const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee); // This is made on top of the fee, should it not be smaller?
+    const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee);
     const expectedLiquidationReward = borrowerATokenBalance.sub(liquidationProtocolFee);
 
     const aAaveTokenBalanceAfter = await aAaveTokenContract.balanceOf(liquidator.address);
@@ -739,7 +739,7 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     const bonusCollateral = borrowerATokenBalance.sub(
       borrowerATokenBalance.percentDiv(liquidationBonus)
     );
-    const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee); // This is made on top of the fee, should it not be smaller?
+    const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee);
     const expectedLiquidationReward = borrowerATokenBalance.sub(liquidationProtocolFee);
 
     const aAaveTokenBalanceAfter = await aAaveTokenContract.balanceOf(liquidator.address);
