@@ -1,5 +1,26 @@
 # Changelog
 
+### [1.7.1](https://www.github.com/aave/aave-v3-core/compare/v1.7.0...v1.7.1) (2021-12-03)
+
+
+### Bug Fixes
+
+* Add comments about BaseCurrency to IPriceOracleGetter ([60ff953](https://www.github.com/aave/aave-v3-core/commit/60ff953ba9b4bdacb9a2acf5bbfcefd69e87e84d))
+* Add IAaveOracle interface ([ed03e30](https://www.github.com/aave/aave-v3-core/commit/ed03e3097aaae33c202d042bd6bb0f1d9a03eb26))
+* additional check in isUsingAsCollateralOne() to avoid revert if collateralData == 0 ([49638cb](https://www.github.com/aave/aave-v3-core/commit/49638cb0874050443281c6cb30959891b6d32268))
+* Fix typo in `IAaveOracle` natspec ([1f02c09](https://www.github.com/aave/aave-v3-core/commit/1f02c090b7922f9a08ad6e5bc29d350b2736060b))
+* Fix typo in `LiquidationLogic` natspec ([3729466](https://www.github.com/aave/aave-v3-core/commit/37294662bbb6a8ff77c0c48ad3d0d09e554ade8f))
+* Fix typos in natspec docs ([e29d46f](https://www.github.com/aave/aave-v3-core/commit/e29d46f9ff816f085140a70fcb41d4785a1c85fd))
+* Format public immutable variable name with MACRO case ([c90b040](https://www.github.com/aave/aave-v3-core/commit/c90b04093f770e32febb3fb88e26a199c0b2316b))
+* increased the data size of id and i to uint16 ([3d7fc2b](https://www.github.com/aave/aave-v3-core/commit/3d7fc2bf8ff001d203e64bde826f3f77da552cea))
+* Move the optimization after the operation condition ([c6a785f](https://www.github.com/aave/aave-v3-core/commit/c6a785f2cd1f93f147a9c5a799648b61f4381541))
+* Optimize setUseReserveAsCollateral whenthere is no state change ([55445f2](https://www.github.com/aave/aave-v3-core/commit/55445f21ea27d8248ecad60a3230d28c48c9581a))
+* Remove duplicated code in LiquidationLogic ([2189ba4](https://www.github.com/aave/aave-v3-core/commit/2189ba4446e843645ed3b2add8153881088bfbb4))
+* Unify reserveCount and maxReserve to uint16 ([b6e2b35](https://www.github.com/aave/aave-v3-core/commit/b6e2b351f15cad9de45dcd3cf1e6a0686b64aad9))
+* Update variable packing of `ReserveData` ([7765624](https://www.github.com/aave/aave-v3-core/commit/77656242fd9e61c2080f938e7514d719c0015a91))
+* Use `checkNoSuppliers` instead of `CheckNoDepositors` ([88aff43](https://www.github.com/aave/aave-v3-core/commit/88aff43cebb660689c6fcdd84560a5ebe9f98911))
+* Use cache to get `aTokenAddress` in bridge logic ([e41ec39](https://www.github.com/aave/aave-v3-core/commit/e41ec395182296ee1226ed4b57914abdd3321fa0))
+
 ## [1.7.0](https://www.github.com/aave/aave-v3-core/compare/v1.6.0...v1.7.0) (2021-12-01)
 
 
