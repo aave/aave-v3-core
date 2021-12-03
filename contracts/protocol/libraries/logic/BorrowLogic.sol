@@ -13,6 +13,7 @@ import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
+import {IsolationModeLogic} from './IsolationModeLogic.sol';
 
 /**
  * @title BorrowLogic library
@@ -195,29 +196,13 @@ library BorrowLogic {
       userConfig.setBorrowing(reserve.id, false);
     }
 
-    (bool isolationModeActive, address isolationModeCollateralAddress, ) = userConfig
-      .getIsolationModeState(reserves, reservesList);
-
-    if (isolationModeActive) {
-      uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
-        .isolationModeTotalDebt;
-
-      uint128 isolatedDebtRepaid = Helpers.castUint128(
-        paybackAmount /
-          10 **
-            (reserveCache.reserveConfiguration.getDecimals() -
-              ReserveConfiguration.DEBT_CEILING_DECIMALS)
-      );
-
-      // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
-      if (isolationModeTotalDebt <= isolatedDebtRepaid) {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
-      } else {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
-          isolationModeTotalDebt -
-          isolatedDebtRepaid;
-      }
-    }
+    IsolationModeLogic.updateIsolatedDebtIfIsolated(
+      reserves,
+      reservesList,
+      userConfig,
+      reserveCache,
+      paybackAmount
+    );
 
     if (params.useATokens) {
       IAToken(reserveCache.aTokenAddress).burn(

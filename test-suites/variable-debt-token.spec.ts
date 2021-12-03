@@ -250,7 +250,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
     ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
-  
+
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
     const {
       pool,

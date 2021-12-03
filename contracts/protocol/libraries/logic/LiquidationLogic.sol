@@ -9,9 +9,10 @@ import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {DataTypes} from '../../libraries/types/DataTypes.sol';
-import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
-import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
-import {GenericLogic} from '../../libraries/logic/GenericLogic.sol';
+import {ReserveLogic} from './ReserveLogic.sol';
+import {ValidationLogic} from './ValidationLogic.sol';
+import {GenericLogic} from './GenericLogic.sol';
+import {IsolationModeLogic} from './IsolationModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -188,6 +189,14 @@ library LiquidationLogic {
       params.debtAsset,
       vars.actualDebtToLiquidate,
       0
+    );
+
+    IsolationModeLogic.updateIsolatedDebtIfIsolated(
+      reserves,
+      reservesList,
+      userConfig,
+      vars.debtReserveCache,
+      vars.actualDebtToLiquidate
     );
 
     if (params.receiveAToken) {

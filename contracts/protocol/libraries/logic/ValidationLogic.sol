@@ -710,7 +710,6 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     address asset
   ) internal view returns (bool) {
-
     if (!userConfig.isUsingAsCollateralAny()) {
       return true;
     }
