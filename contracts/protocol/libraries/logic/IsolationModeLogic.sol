@@ -16,7 +16,7 @@ library IsolationModeLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
   /**
-   * @notice updated the isolated debt whenever a position collateralized by an isolated asset is repaid
+   * @notice updated the isolated debt whenever a position collateralized by an isolated asset is repaid or liquidated
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig The user configuration mapping
