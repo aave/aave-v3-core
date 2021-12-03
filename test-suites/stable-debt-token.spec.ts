@@ -190,7 +190,6 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
     expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);
     expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
-    // He should not have any debt? he is borrowing on behalf of someone else
     expect(afterDebtBalanceUser2).to.be.eq(beforeDebtBalanceUser2);
 
     await evmRevert(snapId);

@@ -325,7 +325,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const parsedTransferEvent = variableDebtToken.interface.parseLog(rawTransferEvents[0]);
     const transferAmount = parsedTransferEvent.args.value;
 
-    expect(transferAmount).to.be.eq(borrowOnBehalfAmount.add(interest));
+    expect(transferAmount).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
 
     const mintEventSig = utils.keccak256(
       utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256)')
@@ -335,7 +335,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     );
     const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
 
-    expect(parsedMintEvent.args.value).to.be.eq(borrowOnBehalfAmount.add(interest));
-    expect(parsedMintEvent.args.balanceIncrease).to.be.eq(interest);
+    expect(parsedMintEvent.args.value).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
+    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(interest, 2);
   });
 });
