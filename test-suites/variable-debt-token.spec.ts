@@ -334,7 +334,6 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const rawMintEvents = tx.logs.filter(
       ({ topics, address }) => topics[0] === mintEventSig && address == variableDebtToken.address
     );
-
     const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
 
     expect(parsedMintEvent.args.value).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
