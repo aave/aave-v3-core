@@ -13,10 +13,8 @@ contract MockFlashLoanSimpleReceiver is FlashLoanSimpleReceiverBase {
   using SafeERC20 for IERC20;
   using SafeMath for uint256;
 
-  IPoolAddressesProvider internal _provider;
-
-  event ExecutedWithFail(address _asset, uint256 _amount, uint256 _premium);
-  event ExecutedWithSuccess(address _asset, uint256 _amount, uint256 _premium);
+  event ExecutedWithFail(address asset, uint256 amount, uint256 premium);
+  event ExecutedWithSuccess(address asset, uint256 amount, uint256 premium);
 
   bool _failExecution;
   uint256 _amountToApprove;
@@ -36,7 +34,7 @@ contract MockFlashLoanSimpleReceiver is FlashLoanSimpleReceiverBase {
     _simulateEOA = flag;
   }
 
-  function amountToApprove() public view returns (uint256) {
+  function getAmountToApprove() public view returns (uint256) {
     return _amountToApprove;
   }
 
@@ -48,12 +46,9 @@ contract MockFlashLoanSimpleReceiver is FlashLoanSimpleReceiverBase {
     address asset,
     uint256 amount,
     uint256 premium,
-    address initiator,
-    bytes memory params
+    address, // initiator
+    bytes memory // params
   ) public override returns (bool) {
-    params;
-    initiator;
-
     if (_failExecution) {
       emit ExecutedWithFail(asset, amount, premium);
       return !_simulateEOA;
