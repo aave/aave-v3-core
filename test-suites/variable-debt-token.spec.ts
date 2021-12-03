@@ -339,9 +339,9 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     );
     const mintAmount = variableDebtToken.interface.parseLog(rawMintEvents[0]).args.value;
 
-    expect(transferAmount).to.be.closeTo(mintAmount,2);
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(transferAmount,2);
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(mintAmount,2);
+    expect(transferAmount).to.be.closeTo(mintAmount, 2);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(transferAmount, 2);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(mintAmount, 2);
     expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
 
     await evmRevert(snapId);
