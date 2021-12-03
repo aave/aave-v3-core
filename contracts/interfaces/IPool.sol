@@ -223,7 +223,7 @@ interface IPool {
    **/
   event UserEModeSet(address indexed user, uint8 categoryId);
 
-  /*
+  /**
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
    * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
    * @param asset The address of the underlying asset to supply

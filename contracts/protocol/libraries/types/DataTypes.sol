@@ -17,14 +17,14 @@ library DataTypes {
     //the current stable borrow rate. Expressed in ray
     uint128 currentStableBorrowRate;
     uint40 lastUpdateTimestamp;
+    //the id of the reserve. Represents the position in the list of the active reserves
+    uint8 id;
     //tokens addresses
     address aTokenAddress;
     address stableDebtTokenAddress;
     address variableDebtTokenAddress;
     //address of the interest rate strategy
     address interestRateStrategyAddress;
-    //the id of the reserve. Represents the position in the list of the active reserves
-    uint8 id;
     //the current treasury balance, scaled
     uint128 accruedToTreasury;
     //the quickwithdraw balance waiting for underlying to be backed

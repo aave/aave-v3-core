@@ -9,13 +9,15 @@ pragma solidity 0.8.10;
 interface IPriceOracleGetter {
   /**
    * @notice Returns the base currency address
-   * @return Returns the base currency address. MOCK_USD_ADDRESS if usd market
+   * @dev Address 0x0 is reserved for USD as base currency.
+   * @return Returns the base currency address.
    **/
   function BASE_CURRENCY() external view returns (address);
 
   /**
    * @notice Returns the base currency unit
-   * @return Returns the base currency unit. 1 ether if eth market and 100000000 if usd market
+   * @dev 1 ether for ETH, 1e8 for USD.
+   * @return Returns the base currency unit.
    **/
   function BASE_CURRENCY_UNIT() external view returns (uint256);
 

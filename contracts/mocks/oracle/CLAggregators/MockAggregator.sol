@@ -18,4 +18,8 @@ contract MockAggregator {
   function getTokenType() external pure returns (uint256) {
     return 1;
   }
+
+  function decimals() external pure returns (uint8) {
+    return 8;
+  }
 }
