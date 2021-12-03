@@ -41,7 +41,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   uint256 public immutable EXCESS_UTILIZATION_RATE;
 
-  IPoolAddressesProvider public immutable addressesProvider;
+  IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   // Base variable borrow rate when Utilization rate = 0. Expressed in ray
   uint256 internal immutable _baseVariableBorrowRate;
@@ -77,7 +77,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
     EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
     OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = optimalStableToTotalDebtRatio;
-    addressesProvider = provider;
+    ADDRESSES_PROVIDER = provider;
     _baseVariableBorrowRate = baseVariableBorrowRate;
     _variableRateSlope1 = variableRateSlope1;
     _variableRateSlope2 = variableRateSlope2;

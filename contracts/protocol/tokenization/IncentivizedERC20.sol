@@ -43,7 +43,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   string private _symbol;
   uint8 private _decimals;
   IAaveIncentivesController internal _incentivesController;
-  IPoolAddressesProvider internal _addressesProvider;
+  IPoolAddressesProvider internal immutable _addressesProvider;
 
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
