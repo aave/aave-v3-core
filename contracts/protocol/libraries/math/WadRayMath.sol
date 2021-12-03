@@ -12,10 +12,10 @@ import {Errors} from '../helpers/Errors.sol';
 library WadRayMath {
   // HALF_WAD and HALF_RAY expressed with extended notation as constant with operations are not supported in Yul assembly
   uint256 internal constant WAD = 1e18;
-  uint256 internal constant HALF_WAD = 500000000000000000;
+  uint256 internal constant HALF_WAD = 5e17;
 
   uint256 public constant RAY = 1e27;
-  uint256 internal constant HALF_RAY = 500000000000000000000000000;
+  uint256 internal constant HALF_RAY = 5e26;
 
   uint256 internal constant WAD_RAY_RATIO = 1e9;
 
