@@ -78,10 +78,12 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
     emit GracePeriodUpdated(newGracePeriod);
   }
 
+  /// @inheritdoc IPriceOracleSentinel
   function getSequencerOracle() public view returns (address) {
     return address(_sequencerOracle);
   }
 
+  /// @inheritdoc IPriceOracleSentinel
   function getGracePeriod() public view returns (uint256) {
     return _gracePeriod;
   }
