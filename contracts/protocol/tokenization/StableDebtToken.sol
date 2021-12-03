@@ -53,7 +53,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     emit Initialized(
       underlyingAsset,
-      address(_pool),
+      address(POOL),
       address(incentivesController),
       debtTokenDecimals,
       debtTokenName,

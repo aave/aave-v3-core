@@ -23,20 +23,20 @@ abstract contract DebtTokenBase is
     keccak256(
       'DelegationWithSig(address delegator,address delegatee,uint256 value,uint256 nonce,uint256 deadline)'
     );
-  IPool internal immutable _pool;
+  IPool public immutable POOL;
 
   /**
    * @dev Only pool can call functions marked by this modifier
    **/
   modifier onlyPool() {
-    require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
+    require(_msgSender() == address(POOL), Errors.CT_CALLER_MUST_BE_POOL);
     _;
   }
 
   constructor(IPool pool)
     IncentivizedERC20(pool.getAddressesProvider(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
   {
-    _pool = pool;
+    POOL = pool;
   }
 
   /// @inheritdoc ICreditDelegationToken
@@ -104,14 +104,6 @@ abstract contract DebtTokenBase is
    * @return The address of the underlying asset
    **/
   function _getUnderlyingAssetAddress() internal view virtual returns (address);
-
-  /**
-   * @notice Returns the address of the pool where this debtToken is used
-   * @return The address of the Pool
-   **/
-  function POOL() external view returns (IPool) {
-    return _pool;
-  }
 
   /**
    * @dev Being non transferrable, the debt token does not implement any of the

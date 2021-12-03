@@ -48,7 +48,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
     emit Initialized(
       underlyingAsset,
-      address(_pool),
+      address(POOL),
       address(incentivesController),
       debtTokenDecimals,
       debtTokenName,
@@ -70,7 +70,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
       return 0;
     }
 
-    return scaledBalance.rayMul(_pool.getReserveNormalizedVariableDebt(_underlyingAsset));
+    return scaledBalance.rayMul(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
   /// @inheritdoc IVariableDebtToken
@@ -135,7 +135,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
 
   /// @inheritdoc IERC20
   function totalSupply() public view virtual override returns (uint256) {
-    return super.totalSupply().rayMul(_pool.getReserveNormalizedVariableDebt(_underlyingAsset));
+    return super.totalSupply().rayMul(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
   /// @inheritdoc IScaledBalanceToken
