@@ -66,6 +66,7 @@ library FlashLoanLogic {
    * @dev For authorized flashborrowers the fee is waived
    * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
    * if the receiver have not approved the pool the transaction will revert.
+   * @dev Emits the `FlashLoan()` event
    * @param reserves The state of all the reserves
    * @param reservesList The list of addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -212,6 +213,7 @@ library FlashLoanLogic {
    * @dev Does not waive fee for approved flashborrowers nor allow taking on debt instead of repaying to save gas
    * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
    * if the receiver have not approved the pool the transaction will revert.
+   * @dev Emits the `FlashLoan()` event
    * @param reserve The state of the flashloaned reserve
    * @param params The additional parameters needed to execute the simple flashloan function
    */
