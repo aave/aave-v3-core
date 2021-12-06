@@ -1,4 +1,3 @@
-import { formatEther } from '@ethersproject/units';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
@@ -9,7 +8,7 @@ import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { makeSuite } from './helpers/make-suite';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { waitForTx, increaseTime } from '@aave/deploy-v3';
+import { waitForTx, increaseTime, evmSnapshot, evmRevert } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -475,6 +474,7 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
   });
 
   it('User 4 deposits 0.03 AAVE - drops HF, liquidates the AAVE, which results on a lower amount being liquidated', async () => {
+    const snap = await evmSnapshot();
     const {
       aave,
       usdc,
@@ -573,7 +573,172 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       .div(principalPrice.mul(BigNumber.from(10).pow(collateralDecimals)))
       .percentDiv(liquidationBonus);
 
-    const bonusCollateral = borrowerATokenBalance.percentDiv(liquidationBonus);
+    const bonusCollateral = borrowerATokenBalance.sub(
+      borrowerATokenBalance.percentDiv(liquidationBonus)
+    );
+    const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee);
+    const expectedLiquidationReward = borrowerATokenBalance.sub(liquidationProtocolFee);
+
+    const aAaveTokenBalanceAfter = await aAaveTokenContract.balanceOf(liquidator.address);
+
+    const treasuryDataAfter = await helpersContract.getUserReserveData(
+      aave.address,
+      treasuryAddress
+    );
+    const treasuryBalanceAfter = treasuryDataAfter.currentATokenBalance;
+
+    expect(userGlobalDataAfter.healthFactor).to.be.gt(oneEther, 'Invalid health factor');
+
+    expect(userReserveDataAfter.currentStableDebt).to.be.closeTo(
+      userReserveDataBefore.currentStableDebt.sub(expectedPrincipal),
+      2,
+      'Invalid user borrow balance after liquidation'
+    );
+
+    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.availableLiquidity.add(expectedPrincipal),
+      2,
+      'Invalid principal available liquidity'
+    );
+
+    expect(aaveReserveDataAfter.availableLiquidity).to.be.closeTo(
+      aaveReserveDataBefore.availableLiquidity,
+      2,
+      'Invalid collateral available liquidity'
+    );
+
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.add(expectedPrincipal),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(aaveReserveDataAfter.totalLiquidity).to.be.closeTo(
+      aaveReserveDataBefore.totalLiquidity,
+      2,
+      'Invalid collateral total liquidity'
+    );
+
+    expect(aAaveTokenBalanceBefore).to.be.equal(
+      aAaveTokenBalanceAfter.sub(expectedLiquidationReward),
+      'Liquidator aToken balance incorrect'
+    );
+
+    expect(treasuryBalanceBefore).to.be.equal(
+      treasuryBalanceAfter.sub(liquidationProtocolFee),
+      'Treasury aToken balance incorrect'
+    );
+
+    await evmRevert(snap);
+  });
+
+  it('Set liquidationProtocolFee to 0. User 4 deposits 0.03 AAVE - drops HF, liquidates the AAVE, which results on a lower amount being liquidated', async () => {
+    const {
+      aave,
+      usdc,
+      users: [, , , , borrower, liquidator],
+      pool,
+      oracle,
+      helpersContract,
+      configurator,
+    } = testEnv;
+
+    expect(await configurator.setLiquidationProtocolFee(aave.address, 0))
+      .to.emit(configurator, 'LiquidationProtocolFeeChanged')
+      .withArgs(aave.address, 0);
+
+    //mints AAVE to borrower
+    await aave
+      .connect(borrower.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(aave.address, '0.03'));
+
+    //approve protocol to access the borrower wallet
+    await aave.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    //borrower deposits AAVE
+    const amountToDeposit = await convertToCurrencyDecimals(aave.address, '0.03');
+
+    await pool
+      .connect(borrower.signer)
+      .deposit(aave.address, amountToDeposit, borrower.address, '0');
+    const usdcPrice = await oracle.getAssetPrice(usdc.address);
+
+    //drops HF below 1
+    await oracle.setAssetPrice(usdc.address, usdcPrice.percentMul(11400));
+
+    //mints usdc to the liquidator
+    await usdc
+      .connect(liquidator.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
+
+    //approve protocol to access liquidator wallet
+    await usdc.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    const userReserveDataBefore = await helpersContract.getUserReserveData(
+      usdc.address,
+      borrower.address
+    );
+
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+    const aaveReserveDataBefore = await getReserveData(helpersContract, aave.address);
+
+    const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
+
+    const collateralPrice = await oracle.getAssetPrice(aave.address);
+    const principalPrice = await oracle.getAssetPrice(usdc.address);
+
+    const aaveTokenAddresses = await helpersContract.getReserveTokensAddresses(aave.address);
+    const aAaveTokenAddress = await aaveTokenAddresses.aTokenAddress;
+    const aAaveTokenContract = await AToken__factory.connect(
+      aAaveTokenAddress,
+      hre.ethers.provider
+    );
+    const aAaveTokenBalanceBefore = await aAaveTokenContract.balanceOf(liquidator.address);
+    const borrowerATokenBalance = await aAaveTokenContract.balanceOf(borrower.address);
+
+    const treasuryAddress = await aAaveTokenContract.RESERVE_TREASURY_ADDRESS();
+    const treasuryDataBefore = await helpersContract.getUserReserveData(
+      aave.address,
+      treasuryAddress
+    );
+    const treasuryBalanceBefore = treasuryDataBefore.currentATokenBalance;
+
+    await pool
+      .connect(liquidator.signer)
+      .liquidationCall(aave.address, usdc.address, borrower.address, amountToLiquidate, true);
+
+    const userReserveDataAfter = await helpersContract.getUserReserveData(
+      usdc.address,
+      borrower.address
+    );
+
+    const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
+
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+    const aaveReserveDataAfter = await getReserveData(helpersContract, aave.address);
+
+    const aaveConfiguration = await helpersContract.getReserveConfigurationData(aave.address);
+    const collateralDecimals = aaveConfiguration.decimals;
+    const liquidationBonus = aaveConfiguration.liquidationBonus;
+
+    const principalDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
+      .decimals;
+
+    const expectedCollateralLiquidated = oneEther.mul(30).div(1000);
+
+    const aaveLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      aave.address
+    );
+
+    const expectedPrincipal = collateralPrice
+      .mul(expectedCollateralLiquidated)
+      .mul(BigNumber.from(10).pow(principalDecimals))
+      .div(principalPrice.mul(BigNumber.from(10).pow(collateralDecimals)))
+      .percentDiv(liquidationBonus);
+
+    const bonusCollateral = borrowerATokenBalance.sub(
+      borrowerATokenBalance.percentDiv(liquidationBonus)
+    );
     const liquidationProtocolFee = bonusCollateral.percentMul(aaveLiquidationProtocolFee);
     const expectedLiquidationReward = borrowerATokenBalance.sub(liquidationProtocolFee);
 
