@@ -30,6 +30,17 @@ library EModeLogic {
   // See `IPool` for descriptions
   event UserEModeSet(address indexed user, uint8 categoryId);
 
+  /**
+   * @notice Updates the user efficiency mode category
+   * @dev Will revert if user is borrowing non-compatible asset or change will drop HF < HEALTH_FACTOR_LIQUIDATION_THRESHOLD
+   * @dev Emits the `UserEModeSet` event
+   * @param reserves The state of all the reserves
+   * @param reservesList The list of the addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param usersEModeCategory The state of all users efficiency mode category
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the setUserEMode function
+   */
   function executeSetUserEMode(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
