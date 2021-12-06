@@ -190,7 +190,12 @@ library BorrowLogic {
       ).burn(params.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
     }
 
-    reserve.updateInterestRates(reserveCache, params.asset, paybackAmount, 0);
+    reserve.updateInterestRates(
+      reserveCache,
+      params.asset,
+      params.useATokens ? 0 : paybackAmount,
+      0
+    );
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
