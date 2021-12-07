@@ -48,6 +48,17 @@ library BorrowLogic {
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
   event Swap(address indexed reserve, address indexed user, uint256 rateMode);
 
+
+  /**
+   * @notice Implements the borrow feature. Borrowing allows users that provided collateral to draw liquidity from the
+   * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the isolated debt.
+   * @dev  Emits the `Borrow()` event
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the borrow function
+   */
   function executeBorrow(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -147,6 +158,16 @@ library BorrowLogic {
     );
   }
 
+  /**
+   * @notice Implements the repay feature. Repaying transfers the underlying back to the aToken and clears the equivalent amount
+   * of debt for the user by burning the corresponding debt token. For isolated positions, it also reduces the isolated debt.
+   * @dev  Emits the `Repay()` event
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param reserve The data of the reserve of the asset being repaid
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the repay function
+   */
   function executeRepay(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -221,6 +242,14 @@ library BorrowLogic {
     return paybackAmount;
   }
 
+  /**
+   * @notice Implements the rebalance stable borrow rate feature. In case of liquidity crunches on the protocol, stable rate borrows might need to be rebalanced
+   * to bring back equilibrium between the borrow and supply APYs. 
+   * @dev The rules that define if a position can be rebalanced are implemented in `ValidationLogic.validateRebalanceStableBorrowRate()`. Emits the `RebalanceStableBorrowRate()` event
+   * @param reserve The data of the reserve of the asset being repaid
+   * @param asset The asset of the position being rebalanced
+   * @param user The user being rebalanced
+   */
   function rebalanceStableBorrowRate(
     DataTypes.ReserveData storage reserve,
     address asset,
@@ -253,6 +282,14 @@ library BorrowLogic {
     emit RebalanceStableBorrowRate(asset, user);
   }
 
+  /**
+   * @notice Implements the swap borrow rate feature. Borrowers can swap from variable to stable positions at any time.
+   * @dev Emits the `Swap()` event
+   * @param reserve The data of the reserve of the asset being repaid
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param asset The asset of the position being swapped
+   * @param rateMode The current interest rate mode of the position being swapped. If `rateMode == InterestRateMode.STABLE`, user must have stable debt
+   */
   function swapBorrowRateMode(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
