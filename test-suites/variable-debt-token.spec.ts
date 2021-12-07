@@ -7,13 +7,8 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {
-  evmRevert,
-  evmSnapshot,
-  increaseTime,
-  VariableDebtToken__factory,
-  waitForTx,
-} from '@aave/deploy-v3';
+import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
+import { VariableDebtToken__factory } from '../types';
 import './helpers/utils/wadraymath';
 
 declare var hre: HardhatRuntimeEnvironment;
