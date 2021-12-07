@@ -137,7 +137,7 @@ library SupplyLogic {
     return amountToWithdraw;
   }
 
-  function finalizeTransfer(
+  function executeFinalizeTransfer(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,

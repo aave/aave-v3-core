@@ -105,7 +105,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode
   ) external override onlyBridge {
-    BridgeLogic.mintUnbacked(
+    BridgeLogic.executeMintUnbacked(
       _reserves,
       _reservesList,
       _reserves[asset],
@@ -123,7 +123,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     uint256 fee
   ) external override onlyBridge {
-    BridgeLogic.backUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
+    BridgeLogic.executeBackUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
   }
 
   /// @inheritdoc IPool
@@ -298,12 +298,17 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function swapBorrowRateMode(address asset, uint256 rateMode) external override {
-    BorrowLogic.swapBorrowRateMode(_reserves[asset], _usersConfig[msg.sender], asset, rateMode);
+    BorrowLogic.executeSwapBorrowRateMode(
+      _reserves[asset],
+      _usersConfig[msg.sender],
+      asset,
+      rateMode
+    );
   }
 
   /// @inheritdoc IPool
   function rebalanceStableBorrowRate(address asset, address user) external override {
-    BorrowLogic.rebalanceStableBorrowRate(_reserves[asset], asset, user);
+    BorrowLogic.executeRebalanceStableBorrowRate(_reserves[asset], asset, user);
   }
 
   /// @inheritdoc IPool
@@ -585,7 +590,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceToBefore
   ) external override {
     require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
-    SupplyLogic.finalizeTransfer(
+    SupplyLogic.executeFinalizeTransfer(
       _reserves,
       _reservesList,
       _eModeCategories,

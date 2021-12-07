@@ -76,7 +76,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
-      ConfiguratorLogic.initReserve(cachedPool, input[i]);
+      ConfiguratorLogic.executeInitReserve(cachedPool, input[i]);
     }
   }
 
@@ -92,7 +92,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ConfiguratorLogic.updateAToken(_pool, input);
+    ConfiguratorLogic.executeUpdateAToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -101,7 +101,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ConfiguratorLogic.updateStableDebtToken(_pool, input);
+    ConfiguratorLogic.executeUpdateStableDebtToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -110,7 +110,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ConfiguratorLogic.updateVariableDebtToken(_pool, input);
+    ConfiguratorLogic.executeUpdateVariableDebtToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
