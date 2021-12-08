@@ -26,17 +26,11 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when borrowing is enabled on a reserve
+   * @notice Emitted when borrowing is enabled or disabled on a reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param stableRateEnabled True if stable rate borrowing is enabled, false otherwise
+   * @param enabled True if borrowing is enabled, false otherwise
    **/
-  event BorrowingEnabledOnReserve(address indexed asset, bool stableRateEnabled);
-
-  /**
-   * @notice Emitted when borrowing is disabled on a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event BorrowingDisabledOnReserve(address indexed asset);
+  event ReserveBorrowing(address indexed asset, bool enabled);
 
   /**
    * @notice Emitted when the collateralization risk parameters for the specified asset are updated.
@@ -53,52 +47,32 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when stable rate borrowing is enabled on a reserve
+   * @notice Emitted when stable rate borrowing state is changed on a reserve
    * @param asset The address of the underlying asset of the reserve
+   * @param enabled True if stable rate borrowing is enabled, false otherwise
    **/
-  event StableRateEnabledOnReserve(address indexed asset);
+  event ReserveStableRateBorrowing(address indexed asset, bool enabled);
 
   /**
-   * @notice Emitted when stable rate borrowing is disabled on a reserve
+   * @notice Emitted when a reserve is activated or deactivated
    * @param asset The address of the underlying asset of the reserve
+   * @param active True if reserve is active, false otherwise
    **/
-  event StableRateDisabledOnReserve(address indexed asset);
+  event ReserveActive(address indexed asset, bool active);
 
   /**
-   * @notice Emitted when a reserve is activated
+   * @notice Emitted when a reserve is frozen or unfrozen
    * @param asset The address of the underlying asset of the reserve
+   * @param frozen True if reserve is frozen, false otherwise
    **/
-  event ReserveActivated(address indexed asset);
+  event ReserveFrozen(address indexed asset, bool frozen);
 
   /**
-   * @notice Emitted when a reserve is deactivated
+   * @notice Emitted when a reserve is paused or unpaused
    * @param asset The address of the underlying asset of the reserve
+   * @param paused True if reserve is paused, false otherwise
    **/
-  event ReserveDeactivated(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is frozen
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReserveFrozen(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is unfrozen
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReserveUnfrozen(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is paused
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReservePaused(address indexed asset);
-
-  /**
-   * @notice Emitted when a reserve is unpaused
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  event ReserveUnpaused(address indexed asset);
+  event ReservePaused(address indexed asset, bool paused);
 
   /**
    * @notice Emitted when a reserve is dropped
@@ -286,22 +260,14 @@ interface IPoolConfigurator {
     external;
 
   /**
-   * @notice Enables borrowing on a reserve
+   * @notice Configures borrowing on a reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param borrowCap The borrow cap for this specific asset, in absolute units of tokens
-   * @param stableBorrowRateEnabled True if stable borrow rate needs to be enabled by default on this reserve
+   * @param enabled True if borrowing needs to be enabled, false otherwise
    **/
-  function enableBorrowingOnReserve(
+  function setReserveBorrowing(
     address asset,
-    uint256 borrowCap,
-    bool stableBorrowRateEnabled
+    bool enabled
   ) external;
-
-  /**
-   * @notice Disables borrowing on a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function disableBorrowingOnReserve(address asset) external;
 
   /**
    * @notice Configures the reserve collateralization parameters
@@ -320,41 +286,26 @@ interface IPoolConfigurator {
   ) external;
 
   /**
-   * @notice Enable stable rate borrowing on a reserve
+   * @notice Enable or disable stable rate borrowing on a reserve
    * @param asset The address of the underlying asset of the reserve
+   * @param enabled True if stable rate borrowing needs to be enabled, false otherwise
    **/
-  function enableReserveStableRate(address asset) external;
+  function setReserveStableRateBorrowing(address asset, bool enabled) external;
 
   /**
-   * @notice Disable stable rate borrowing on a reserve
+   * @notice Activate or deactivate a reserve
    * @param asset The address of the underlying asset of the reserve
+   * @param active True if the reserve needs to be active, false otherwise
    **/
-  function disableReserveStableRate(address asset) external;
+  function setReserveActive(address asset, bool active) external;
 
   /**
-   * @notice Activates a reserve
+   * @notice Freeze or unfreeze a reserve. A frozen reserve doesn't allow any new supply, borrow
+   * or rate swap but allows repayments, liquidations, rate rebalances and withdrawals
    * @param asset The address of the underlying asset of the reserve
+   * @param freeze True if the reserve needs to be frozen, false otherwise
    **/
-  function activateReserve(address asset) external;
-
-  /**
-   * @notice Deactivates a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function deactivateReserve(address asset) external;
-
-  /**
-   * @notice Freezes a reserve. A frozen reserve doesn't allow any new supply, borrow or rate swap
-   *  but allows repayments, liquidations, rate rebalances and withdrawals
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function freezeReserve(address asset) external;
-
-  /**
-   * @notice Unfreezes a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function unfreezeReserve(address asset) external;
+  function setReseveFreeze(address asset, bool freeze) external;
 
   /**
    * @notice Sets the borrowable in isolation flag for the reserve

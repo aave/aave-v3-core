@@ -57,7 +57,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
@@ -78,7 +78,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).freezeReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReseveFreeze(dai.address, true);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(true);
@@ -111,7 +111,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
@@ -146,7 +146,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).freezeReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReseveFreeze(dai.address, true);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(true);
@@ -186,7 +186,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.borrowingEnabled).to.be.eq(true);
 
     // Disable borrowing
-    await configurator.connect(poolAdmin.signer).disableBorrowingOnReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReserveBorrowing(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.borrowingEnabled).to.be.eq(false);
@@ -209,8 +209,8 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.stableBorrowRateEnabled).to.be.eq(true);
 
-    // Disable borrowing
-    await configurator.connect(poolAdmin.signer).disableReserveStableRate(dai.address);
+    // Disable stable rate borrowing
+    await configurator.connect(poolAdmin.signer).setReserveStableRateBorrowing(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.stableBorrowRateEnabled).to.be.eq(false);
@@ -387,7 +387,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
@@ -585,7 +585,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
@@ -611,7 +611,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).freezeReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReseveFreeze(dai.address, true);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(true);
@@ -652,8 +652,8 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.stableBorrowRateEnabled).to.be.eq(true);
 
-    // Disable borrowing
-    await configurator.connect(poolAdmin.signer).disableReserveStableRate(dai.address);
+    // Disable stable rate borrowing
+    await configurator.connect(poolAdmin.signer).setReserveStableRateBorrowing(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.stableBorrowRateEnabled).to.be.eq(false);
@@ -720,7 +720,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
@@ -739,7 +739,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address);
+    await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);

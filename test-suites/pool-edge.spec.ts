@@ -179,7 +179,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const { pool, poolAdmin, dai, users, configurator } = testEnv;
 
     // Deactivate reserve
-    expect(await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address));
+    expect(await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false));
 
     // MintToTreasury
     expect(await pool.connect(users[0].signer).mintToTreasury([dai.address]));

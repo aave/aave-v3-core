@@ -42,9 +42,11 @@ contract ReservesSetupHelper is Ownable {
       );
 
       if (inputParams[i].borrowingEnabled) {
-        configurator.enableBorrowingOnReserve(
+        configurator.setReserveBorrowing(inputParams[i].asset, true);
+
+        configurator.setBorrowCap(inputParams[i].asset, inputParams[i].borrowCap);
+        configurator.setReserveStableRateBorrowing(
           inputParams[i].asset,
-          inputParams[i].borrowCap,
           inputParams[i].stableBorrowingEnabled
         );
       }
