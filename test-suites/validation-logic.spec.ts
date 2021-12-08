@@ -209,7 +209,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.stableBorrowRateEnabled).to.be.eq(true);
 
-    // Disable borrowing
+    // Disable stable rate borrowing
     await configurator.connect(poolAdmin.signer).setReserveStableRateBorrowing(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
@@ -652,7 +652,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.stableBorrowRateEnabled).to.be.eq(true);
 
-    // Disable borrowing
+    // Disable stable rate borrowing
     await configurator.connect(poolAdmin.signer).setReserveStableRateBorrowing(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
