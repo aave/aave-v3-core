@@ -150,13 +150,14 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
         rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay())
     );
 
-    _mint(onBehalfOf, amount + balanceIncrease, vars.previousSupply);
+    uint256 amountToMint = amount + balanceIncrease;
+    _mint(onBehalfOf, amountToMint, vars.previousSupply);
 
-    emit Transfer(address(0), onBehalfOf, amount + balanceIncrease);
+    emit Transfer(address(0), onBehalfOf, amountToMint);
     emit Mint(
       user,
       onBehalfOf,
-      amount,
+      amountToMint,
       currentBalance,
       balanceIncrease,
       vars.nextStableRate,
@@ -218,7 +219,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
       _mint(user, amountToMint, previousSupply);
-      emit Transfer(address(0), user, balanceIncrease - amount);
+      emit Transfer(address(0), user, amountToMint);
       emit Mint(
         user,
         user,
@@ -232,7 +233,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
       _burn(user, amountToBurn, previousSupply);
-      emit Transfer(address(0), user, amount - balanceIncrease);
+      emit Transfer(user, address(0), amountToBurn);
       emit Burn(user, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
     }
 

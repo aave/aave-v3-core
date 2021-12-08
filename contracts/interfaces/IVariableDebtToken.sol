@@ -15,10 +15,17 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
    * @notice Emitted after the mint action
    * @param from The address performing the mint
    * @param onBehalfOf The address of the user on which behalf minting has been performed
-   * @param value The amount to be minted
+   * @param value The amount to be minted (user entered amount + balance increase from interest)
+   * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The last index of the reserve
    **/
-  event Mint(address indexed from, address indexed onBehalfOf, uint256 value, uint256 index);
+  event Mint(
+    address indexed from,
+    address indexed onBehalfOf,
+    uint256 value,
+    uint256 balanceIncrease,
+    uint256 index
+  );
 
   /**
    * @notice Mints debt token to the `onBehalfOf` address
@@ -40,13 +47,16 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
   /**
    * @notice Emitted when variable debt is burnt
    * @param user The user which debt has been burned
-   * @param amount The amount of debt being burned
+   * @param amount The amount of debt being burned (user entered amount - balance increase from interest)
+   * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The index of the user
    **/
-  event Burn(address indexed user, uint256 amount, uint256 index);
+  event Burn(address indexed user, uint256 amount, uint256 balanceIncrease, uint256 index);
 
   /**
    * @notice Burns user variable debt
+   * @dev In some instances, a burn transaction will emit a mint event
+   * if the amount to burn is less than the interest the user earned
    * @param user The user which debt is burnt
    * @param amount The amount getting burned
    * @param index The variable debt index of the reserve

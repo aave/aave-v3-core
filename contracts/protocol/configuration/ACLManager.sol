@@ -19,7 +19,7 @@ contract ACLManager is AccessControl, IACLManager {
   bytes32 public constant override BRIDGE_ROLE = keccak256('BRIDGE');
   bytes32 public constant override ASSET_LISTING_ADMIN_ROLE = keccak256('ASSET_LISTING_ADMIN');
 
-  IPoolAddressesProvider public _addressesProvider;
+  IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   /**
    * @notice Constructor
@@ -27,7 +27,7 @@ contract ACLManager is AccessControl, IACLManager {
    * @param provider The address of the PoolAddressesProvider
    */
   constructor(IPoolAddressesProvider provider) {
-    _addressesProvider = provider;
+    ADDRESSES_PROVIDER = provider;
     address aclAdmin = provider.getACLAdmin();
     require(aclAdmin != address(0), 'ACL admin cannot be the zero address');
     _setupRole(DEFAULT_ADMIN_ROLE, aclAdmin);

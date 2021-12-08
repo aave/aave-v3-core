@@ -9,9 +9,10 @@ import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {DataTypes} from '../../libraries/types/DataTypes.sol';
-import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
-import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
-import {GenericLogic} from '../../libraries/logic/GenericLogic.sol';
+import {ReserveLogic} from './ReserveLogic.sol';
+import {ValidationLogic} from './ValidationLogic.sol';
+import {GenericLogic} from './GenericLogic.sol';
+import {IsolationModeLogic} from './IsolationModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -190,6 +191,14 @@ library LiquidationLogic {
       0
     );
 
+    IsolationModeLogic.updateIsolatedDebtIfIsolated(
+      reserves,
+      reservesList,
+      userConfig,
+      vars.debtReserveCache,
+      vars.actualDebtToLiquidate
+    );
+
     if (params.receiveAToken) {
       vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
       vars.collateralAtoken.transferOnLiquidation(
@@ -200,8 +209,17 @@ library LiquidationLogic {
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
-        liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
-        emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
+        if (
+          ValidationLogic.validateUseAsCollateral(
+            reserves,
+            reservesList,
+            liquidatorConfig,
+            params.collateralAsset
+          )
+        ) {
+          liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
+          emit ReserveUsedAsCollateralEnabled(params.collateralAsset, msg.sender);
+        }
       }
     } else {
       DataTypes.ReserveCache memory collateralReserveCache = collateralReserve.cache();
@@ -333,27 +351,26 @@ library LiquidationLogic {
       ((vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit)) /
       (vars.collateralPrice * vars.debtAssetUnit);
 
-    vars.bonusCollateral = vars.baseCollateral.percentMul(liquidationBonus) - vars.baseCollateral;
-
-    vars.maxCollateralToLiquidate = vars.baseCollateral + vars.bonusCollateral;
+    vars.maxCollateralToLiquidate = vars.baseCollateral.percentMul(liquidationBonus);
 
     if (vars.maxCollateralToLiquidate > userCollateralBalance) {
       vars.collateralAmount = userCollateralBalance;
       vars.debtAmountNeeded = ((vars.collateralPrice * vars.collateralAmount * vars.debtAssetUnit) /
         (vars.debtAssetPrice * vars.collateralAssetUnit)).percentDiv(liquidationBonus);
-
-      if (vars.liquidationProtocolFeePercentage > 0) {
-        vars.bonusCollateral = vars.collateralAmount.percentDiv(liquidationBonus);
-      }
     } else {
       vars.collateralAmount = vars.maxCollateralToLiquidate;
       vars.debtAmountNeeded = debtToCover;
     }
 
     if (vars.liquidationProtocolFeePercentage > 0) {
+      vars.bonusCollateral =
+        vars.collateralAmount -
+        vars.collateralAmount.percentDiv(liquidationBonus);
+
       vars.liquidationProtocolFee = vars.bonusCollateral.percentMul(
         vars.liquidationProtocolFeePercentage
       );
+
       return (
         vars.collateralAmount - vars.liquidationProtocolFee,
         vars.debtAmountNeeded,

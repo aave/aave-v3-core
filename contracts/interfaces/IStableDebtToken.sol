@@ -15,7 +15,7 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @notice Emitted when new stable debt is minted
    * @param user The address of the user who triggered the minting
    * @param onBehalfOf The recipient of stable debt tokens
-   * @param amount The amount minted
+   * @param amount The amount minted (user entered amount + balance increase from interest)
    * @param currentBalance The current balance of the user
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param newRate The rate of the debt after the minting
@@ -36,7 +36,7 @@ interface IStableDebtToken is IInitializableDebtToken {
   /**
    * @notice Emitted when new stable debt is burned
    * @param user The address of the user
-   * @param amount The amount being burned
+   * @param amount The amount being burned (user entered amount - balance increase from interest)
    * @param currentBalance The current balance of the user
    * @param balanceIncrease The the increase in balance since the last action of the user
    * @param avgStableRate The next average stable rate after the burning
@@ -81,6 +81,8 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @notice Burns debt of `user`
    * @dev The resulting rate is the weighted average between the rate of the new debt
    * and the rate of the previous debt
+   * @dev In some instances, a burn transaction will emit a mint event
+   * if the amount to burn is less than the interest the user earned
    * @param user The address of the user getting his debt burned
    * @param amount The amount of debt tokens getting burned
    * @return The total stable debt

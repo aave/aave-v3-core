@@ -1,17 +1,20 @@
 import {
   waitForTx,
-  advanceTimeAndBlock,
   evmSnapshot,
   evmRevert,
   ProtocolErrors,
+  DefaultReserveInterestRateStrategy__factory,
+  IStableDebtToken__factory,
+  IVariableDebtToken__factory,
 } from '@aave/deploy-v3';
-import { parseUnits } from '@ethersproject/units';
+import { formatUnits, parseUnits } from '@ethersproject/units';
 import { expect } from 'chai';
-import { BigNumber, utils } from 'ethers';
+import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { setBlocktime, timeLatest } from '../helpers/misc-utils';
 import { RateMode } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import './helpers/utils/wadraymath';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   const { VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } = ProtocolErrors;
@@ -86,5 +89,73 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     expect(balanceAfter).to.be.closeTo(balanceBefore.sub(repayAmount), 2);
     expect(debtAfter).to.be.closeTo(debtBefore.sub(repayAmount), 2);
+  });
+
+  it('Check interest rates after repaying with aTokens', async () => {
+    await evmRevert(snapFresh);
+    const {
+      weth,
+      dai,
+      aDai,
+      pool,
+      helpersContract,
+      users: [user],
+    } = testEnv;
+
+    const depositAmount = parseUnits('1000', 18);
+    await dai.connect(user.signer)['mint(uint256)'](depositAmount);
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user.signer).supply(dai.address, depositAmount, user.address, 0);
+
+    const collateralAmount = parseUnits('100', 18);
+    await weth.connect(user.signer)['mint(uint256)'](collateralAmount);
+    await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user.signer).supply(weth.address, collateralAmount, user.address, 0);
+
+    const borrowAmount = parseUnits('500', 18);
+    await pool
+      .connect(user.signer)
+      .borrow(dai.address, borrowAmount, RateMode.Variable, 0, user.address);
+
+    // Now we repay 250 with aTokens
+    const repayAmount = parseUnits('250', 18);
+    await pool.connect(user.signer).repayWithATokens(dai.address, repayAmount, RateMode.Variable);
+
+    const reserveData = await pool.getReserveData(dai.address);
+    const strategy = DefaultReserveInterestRateStrategy__factory.connect(
+      reserveData.interestRateStrategyAddress,
+      user.signer
+    );
+
+    const stableDebtToken = IStableDebtToken__factory.connect(
+      reserveData.stableDebtTokenAddress,
+      user.signer
+    );
+    const stableDebtData = await stableDebtToken.getSupplyData();
+
+    const variableDebtToken = IVariableDebtToken__factory.connect(
+      reserveData.variableDebtTokenAddress,
+      user.signer
+    );
+    const scaledTotalSupply = await variableDebtToken.scaledTotalSupply();
+    const variableDebt = scaledTotalSupply.rayMul(
+      await pool.getReserveNormalizedVariableDebt(dai.address)
+    );
+
+    const expectedRates = await strategy.calculateInterestRates({
+      unbacked: 0,
+      liquidityAdded: 0,
+      liquidityTaken: 0,
+      totalStableDebt: stableDebtData[1],
+      totalVariableDebt: variableDebt,
+      aToken: aDai.address,
+      reserve: dai.address,
+      reserveFactor: (await helpersContract.getReserveConfigurationData(dai.address)).reserveFactor,
+      averageStableBorrowRate: stableDebtData[2],
+    });
+
+    expect(reserveData.currentLiquidityRate).to.be.eq(expectedRates[0]);
+    expect(reserveData.currentStableBorrowRate).to.be.eq(expectedRates[1]);
+    expect(reserveData.currentVariableBorrowRate).to.be.eq(expectedRates[2]);
   });
 });
