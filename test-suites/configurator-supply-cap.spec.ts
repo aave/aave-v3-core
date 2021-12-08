@@ -1,3 +1,4 @@
+import { advanceTimeAndBlock } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT, MAX_SUPPLY_CAP } from '../helpers/constants';
@@ -57,7 +58,7 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
     );
   });
 
-  it('Sets the supply cap for WETH and DAI to 1000 Unit, leaving 0 Units to reach the limit', async () => {
+  it('Sets the supply cap for DAI and USDC to 1000 Unit, leaving 0 Units to reach the limit', async () => {
     const { configurator, dai, usdc, helpersContract } = testEnv;
 
     const newCap = '1000';
@@ -143,10 +144,10 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to supply 100 DAI and 100 USDC (= SUPPLY_CAP) (revert expected)', async () => {
+  it('Tries to supply 101 DAI and 101 USDC (> SUPPLY_CAP) 1 unit above the limit (revert expected)', async () => {
     const { usdc, pool, dai, deployer } = testEnv;
 
-    const suppliedAmount = '100';
+    const suppliedAmount = '101';
 
     await expect(
       pool.deposit(
@@ -184,6 +185,40 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
       deployer.address,
       0
     );
+  });
+
+  it('Supply 1 DAI and 1 USDC (= SUPPLY_CAP), reaching the limit', async () => {
+    const { usdc, pool, dai, deployer } = testEnv;
+
+    const suppliedAmount = '1';
+    await pool.deposit(
+      usdc.address,
+      await convertToCurrencyDecimals(usdc.address, suppliedAmount),
+      deployer.address,
+      0
+    );
+
+    await pool.deposit(
+      dai.address,
+      await convertToCurrencyDecimals(dai.address, suppliedAmount),
+      deployer.address,
+      0
+    );
+  });
+
+  it('Time flies and DAI and USDC supply amount goes above the limit due to accrued interests', async () => {
+    const { usdc, pool, dai, deployer, helpersContract } = testEnv;
+
+    // Advance blocks
+    await advanceTimeAndBlock(3600);
+
+    const daiData = await helpersContract.getReserveData(dai.address);
+    const daiCaps = await helpersContract.getReserveCaps(dai.address);
+    const usdcData = await helpersContract.getReserveData(usdc.address);
+    const usdcCaps = await helpersContract.getReserveCaps(usdc.address);
+
+    expect(daiData.totalAToken).gt(daiCaps.supplyCap);
+    expect(usdcData.totalAToken).gt(usdcCaps.supplyCap);
   });
 
   it('Raises the supply cap for USDC and DAI to 2000 Units, leaving 800 Units to reach the limit', async () => {

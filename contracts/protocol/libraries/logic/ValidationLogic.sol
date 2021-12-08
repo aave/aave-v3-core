@@ -64,9 +64,8 @@ library ValidationLogic {
       supplyCap == 0 ||
         (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
           reserveCache.nextLiquidityIndex
-        ) + amount) /
-          (10**reserveDecimals) <
-        supplyCap,
+        ) + amount) <=
+        supplyCap * (10**reserveDecimals),
       Errors.VL_SUPPLY_CAP_EXCEEDED
     );
   }
@@ -163,18 +162,17 @@ library ValidationLogic {
     }
 
     if (vars.borrowCap != 0) {
-      {
-        vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
-          params.reserveCache.nextVariableBorrowIndex
-        );
+      vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
+        params.reserveCache.nextVariableBorrowIndex
+      );
 
-        vars.totalDebt =
-          params.reserveCache.currTotalStableDebt +
-          vars.totalSupplyVariableDebt +
-          params.amount;
-        unchecked {
-          require(vars.totalDebt / vars.assetUnit < vars.borrowCap, Errors.VL_BORROW_CAP_EXCEEDED);
-        }
+      vars.totalDebt =
+        params.reserveCache.currTotalStableDebt +
+        vars.totalSupplyVariableDebt +
+        params.amount;
+
+      unchecked {
+        require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.VL_BORROW_CAP_EXCEEDED);
       }
     }
 
@@ -695,5 +693,30 @@ library ValidationLogic {
         }
       }
     }
+  }
+
+  /**
+   * @notice Validates if an asset can be activated as collateral in supply/transfer/set as collateral/mint unbacked/liquidate
+   * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that generate transfers of aTokens
+   * @param reservesData the data mapping of the reserves
+   * @param reserves a mapping storing the list of reserves
+   * @param userConfig the user configuration
+   * @param asset The address of the asset being validated as collateral
+   * @return True if the asset can be activated as collateral, false otherwise
+   **/
+  function validateUseAsCollateral(
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reserves,
+    DataTypes.UserConfigurationMap storage userConfig,
+    address asset
+  ) internal view returns (bool) {
+    if (!userConfig.isUsingAsCollateralAny()) {
+      return true;
+    }
+
+    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reserves);
+    DataTypes.ReserveConfigurationMap memory configuration = reservesData[asset].configuration;
+
+    return (!isolationModeActive && configuration.getDebtCeiling() == 0);
   }
 }

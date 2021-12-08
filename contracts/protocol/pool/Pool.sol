@@ -106,6 +106,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint16 referralCode
   ) external override onlyBridge {
     BridgeLogic.mintUnbacked(
+      _reserves,
+      _reservesList,
       _reserves[asset],
       _usersConfig[onBehalfOf],
       asset,
@@ -703,22 +705,24 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersEModeCategory[user];
   }
 
-  function _addReserveToList(address asset) internal virtual {
-    uint256 reservesCount = _reservesCount;
-
-    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
-
+  function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
+    require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
-    if (!reserveAlreadyAdded) {
-      for (uint8 i = 0; i <= reservesCount; i++) {
-        if (_reservesList[i] == address(0)) {
-          _reserves[asset].id = i;
-          _reservesList[i] = asset;
-          _reservesCount = uint16(reservesCount + 1);
-        }
+    uint16 reservesCount = _reservesCount;
+
+    for (uint16 i = 0; i < reservesCount; i++) {
+      if (_reservesList[i] == address(0)) {
+        _reserves[asset].id = i;
+        _reservesList[i] = asset;
+        return;
       }
     }
+    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
+    _reserves[asset].id = reservesCount;
+    _reservesList[reservesCount] = asset;
+    // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
+    _reservesCount = reservesCount + 1;
   }
 
   /// @inheritdoc IPool

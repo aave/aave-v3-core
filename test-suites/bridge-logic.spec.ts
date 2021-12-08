@@ -1,11 +1,12 @@
 const { expect } = require('chai');
 import { BigNumber, Event, utils } from 'ethers';
+import AaveConfig from '@aave/deploy-v3/dist/markets/aave';
+import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
+import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP } from '../helpers/constants';
 import { ACLManager } from '../types';
-import AaveConfig from '@aave/deploy-v3/dist/markets/aave';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { getReserveData } from './helpers/utils/helpers';
 import { getTxCostAndTimestamp } from './helpers/actions';
@@ -15,8 +16,6 @@ import {
   configuration as calculationsConfiguration,
 } from './helpers/utils/calculations';
 import './helpers/utils/wadraymath';
-import { formatEther } from '@ethersproject/units';
-import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 
 const expectEqual = (
   actual: UserReserveData | ReserveData,
@@ -26,7 +25,7 @@ const expectEqual = (
 };
 
 makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
-  const { P_CALLER_NOT_BRIDGE, VL_UNBACKED_MINT_CAP_EXCEEDED } = ProtocolErrors;
+  const { VL_INVALID_AMOUNT, P_CALLER_NOT_BRIDGE, VL_UNBACKED_MINT_CAP_EXCEEDED } = ProtocolErrors;
 
   const depositAmount = utils.parseEther('1000');
   const borrowAmount = utils.parseEther('200');
@@ -98,6 +97,19 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     await expect(
       pool.connect(users[1].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
     ).to.be.revertedWith(P_CALLER_NOT_BRIDGE);
+  });
+
+  it('User 2 tries to perform fast withdraw from L2 with no unbackedMintCap (revert expected)', async () => {
+    const { users, pool, dai } = testEnv;
+    // fast withdraw a100 DAI
+    await expect(
+      pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
+    ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
+
+    // fast withdraw 0 aDAI
+    await expect(
+      pool.connect(users[2].signer).mintUnbacked(dai.address, 0, users[0].address, 0)
+    ).to.be.revertedWith(VL_INVALID_AMOUNT);
   });
 
   it('RiskAdmin updates the unbackedMintCap to 10 aDai (10 left) and user 1 tries to perform fast withdraw 100 aDai from L2 (revert expected)', async () => {
@@ -213,7 +225,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
 
     // Check event values for `ReserveDataUpdated`
     const reserveDataUpdatedEvent = tx.events?.find(
-      ({ event }) => (event === 'ReserveDataUpdated')
+      ({ event }) => event === 'ReserveDataUpdated'
     ) as Event;
     if (reserveDataUpdatedEvent) {
       const {

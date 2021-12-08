@@ -129,7 +129,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
-  function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory params)
+  function calculateInterestRates(DataTypes.CalculateInterestRatesParams calldata params)
     external
     view
     override

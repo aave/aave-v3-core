@@ -160,10 +160,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
         .borrow(usdc.address, borrowOnBehalfAmount, RateMode.Stable, 0, user1.address)
     );
 
-    const afterDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
     const afterDebtBalanceUser1 = await stableDebtToken.balanceOf(user1.address);
+    const afterDebtBalanceUser2 = await stableDebtToken.balanceOf(user2.address);
 
-    // Calculate debt + interests
+    // Calculate interests
     const expectedDebtIncreaseUser1 = afterDebtBalanceUser1.sub(
       borrowOnBehalfAmount.add(borrowAmount)
     );
@@ -187,10 +187,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       rawMintEvents[0]
     ).args;
 
-    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.closeTo(transferAmount, 2);
-    expect(borrowOnBehalfAmount).to.be.closeTo(mintAmount, 2);
-    expect(expectedDebtIncreaseUser1).to.be.closeTo(balanceIncrease, 2);
-    expect(afterDebtBalanceUser2.sub(beforeDebtBalanceUser2)).to.be.lt(transferAmount);
+    expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
+    expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);
+    expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
+    expect(afterDebtBalanceUser2).to.be.eq(beforeDebtBalanceUser2);
 
     await evmRevert(snapId);
   });
