@@ -97,14 +97,14 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     const randomNumber = '0';
 
     const calls = [
-      { fn: 'enableBorrowingOnReserve', args: [randomAddress, randomNumber, false] },
-      { fn: 'disableBorrowingOnReserve', args: [randomAddress] },
+      { fn: 'setReserveBorrowing', args: [randomAddress, false] },
+      { fn: 'setReserveBorrowing', args: [randomAddress, true] },
       {
         fn: 'configureReserveAsCollateral',
         args: [randomAddress, randomNumber, randomNumber, randomNumber],
       },
-      { fn: 'setReserveStableRateEnabled', args: [randomAddress, true] },
-      { fn: 'setReserveStableRateEnabled', args: [randomAddress, false] },
+      { fn: 'setReserveStableRateBorrowing', args: [randomAddress, true] },
+      { fn: 'setReserveStableRateBorrowing', args: [randomAddress, false] },
       { fn: 'setReseveFreeze', args: [randomAddress, true] },
       { fn: 'setReseveFreeze', args: [randomAddress, false] },
       { fn: 'setReserveFactor', args: [randomAddress, randomNumber] },

@@ -29,9 +29,8 @@ interface IPoolConfigurator {
    * @notice Emitted when borrowing is enabled or disabled on a reserve
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if borrowing is enabled, false otherwise
-   * @param stableRateEnabled True if stable rate borrowing is enabled, false otherwise
    **/
-  event BorrowingOnReserve(address indexed asset, bool enabled, bool stableRateEnabled);
+  event ReserveBorrowing(address indexed asset, bool enabled);
 
   /**
    * @notice Emitted when the collateralization risk parameters for the specified asset are updated.
@@ -52,7 +51,7 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if stable rate borrowing is enabled, false otherwise
    **/
-  event StableRateBorrowingOnReserve(address indexed asset, bool enabled);
+  event ReserveStableRateBorrowing(address indexed asset, bool enabled);
 
   /**
    * @notice Emitted when a reserve is activated or deactivated
@@ -261,22 +260,14 @@ interface IPoolConfigurator {
     external;
 
   /**
-   * @notice Enables borrowing on a reserve
+   * @notice Configures borrowing on a reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param borrowCap The borrow cap for this specific asset, in absolute units of tokens
-   * @param stableBorrowRateEnabled True if stable borrow rate needs to be enabled by default on this reserve
+   * @param enabled True if borrowing needs to be enabled, false otherwise
    **/
-  function enableBorrowingOnReserve(
+  function setReserveBorrowing(
     address asset,
-    uint256 borrowCap,
-    bool stableBorrowRateEnabled
+    bool enabled
   ) external;
-
-  /**
-   * @notice Disables borrowing on a reserve
-   * @param asset The address of the underlying asset of the reserve
-   **/
-  function disableBorrowingOnReserve(address asset) external;
 
   /**
    * @notice Configures the reserve collateralization parameters
@@ -299,7 +290,7 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if stable rate borrowing needs to be enabled, false otherwise
    **/
-  function setReserveStableRateEnabled(address asset, bool enabled) external;
+  function setReserveStableRateBorrowing(address asset, bool enabled) external;
 
   /**
    * @notice Activate or deactivate a reserve

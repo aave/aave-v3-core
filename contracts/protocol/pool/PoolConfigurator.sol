@@ -114,26 +114,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function enableBorrowingOnReserve(
-    address asset,
-    uint256 borrowCap,
-    bool stableBorrowRateEnabled
-  ) external override onlyRiskOrPoolAdmins {
+  function setReserveBorrowing(address asset, bool enabled) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setBorrowingEnabled(true);
-    currentConfig.setBorrowCap(borrowCap);
-    currentConfig.setStableRateBorrowingEnabled(stableBorrowRateEnabled);
+    currentConfig.setBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig.data);
-
-    emit BorrowingOnReserve(asset, true, stableBorrowRateEnabled);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function disableBorrowingOnReserve(address asset) external override onlyRiskOrPoolAdmins {
-    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setBorrowingEnabled(false);
-    _pool.setConfiguration(asset, currentConfig.data);
-    emit BorrowingOnReserve(asset, false, false);
+    emit ReserveBorrowing(asset, enabled);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -179,7 +164,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setReserveStableRateEnabled(address asset, bool enabled)
+  function setReserveStableRateBorrowing(address asset, bool enabled)
     external
     override
     onlyRiskOrPoolAdmins
@@ -187,7 +172,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setStableRateBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig.data);
-    emit StableRateBorrowingOnReserve(asset, enabled);
+    emit ReserveStableRateBorrowing(asset, enabled);
   }
 
   /// @inheritdoc IPoolConfigurator

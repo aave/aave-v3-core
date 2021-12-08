@@ -15,6 +15,7 @@ import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { makeSuite } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { setBlocktime, timeLatest } from '../helpers/misc-utils';
+import { config } from 'process';
 
 makeSuite('Reserve Without Incentives Controller', (testEnv) => {
   let mockToken: MintableERC20;
@@ -125,13 +126,13 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
         inputParams[i].liquidationThreshold,
         inputParams[i].liquidationBonus
       );
-    await configurator
-      .connect(poolAdmin.signer)
-      .enableBorrowingOnReserve(
-        inputParams[i].asset,
-        inputParams[i].borrowCap,
-        inputParams[i].stableBorrowingEnabled
-      );
+    await configurator.connect(poolAdmin.signer).setReserveBorrowing(inputParams[i].asset, true);
+
+    await configurator.setBorrowCap(inputParams[i].asset, inputParams[i].borrowCap);
+    await configurator.setReserveStableRateBorrowing(
+      inputParams[i].asset,
+      inputParams[i].stableBorrowingEnabled
+    );
 
     await configurator
       .connect(poolAdmin.signer)
