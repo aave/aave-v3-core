@@ -54,7 +54,9 @@ library ConfiguratorLogic {
    * @param pool The Pool in which the reserve will be initialized
    * @param input The needed parameters for the initialization
    */
-  function initReserve(IPool pool, ConfiguratorInputTypes.InitReserveInput calldata input) public {
+  function executeInitReserve(IPool pool, ConfiguratorInputTypes.InitReserveInput calldata input)
+    public
+  {
     address aTokenProxyAddress = _initTokenWithProxy(
       input.aTokenImpl,
       abi.encodeWithSelector(
@@ -130,9 +132,10 @@ library ConfiguratorLogic {
    * @param cachedPool The Pool containing the reserve with the aToken
    * @param input The parameters needed for the initialize call
    */
-  function updateAToken(IPool cachedPool, ConfiguratorInputTypes.UpdateATokenInput calldata input)
-    public
-  {
+  function executeUpdateAToken(
+    IPool cachedPool,
+    ConfiguratorInputTypes.UpdateATokenInput calldata input
+  ) public {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
     (, , , uint256 decimals, , ) = cachedPool.getConfiguration(input.asset).getParams();
@@ -159,7 +162,7 @@ library ConfiguratorLogic {
    * @param cachedPool The Pool containing the reserve with the stable debt token
    * @param input The parameters needed for the initialize call
    */
-  function updateStableDebtToken(
+  function executeUpdateStableDebtToken(
     IPool cachedPool,
     ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
   ) public {
@@ -196,7 +199,7 @@ library ConfiguratorLogic {
    * @param cachedPool The Pool containing the reserve with the variable debt token
    * @param input The parameters needed for the initialize call
    */
-  function updateVariableDebtToken(
+  function executeUpdateVariableDebtToken(
     IPool cachedPool,
     ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
   ) public {

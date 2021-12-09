@@ -43,6 +43,14 @@ library SupplyLogic {
     uint16 indexed referralCode
   );
 
+  /**
+   * @notice Implements the supply feature. Through `supply()`, users supply assets to the Aave protocol.
+   * @dev  Emits the `Supply()` event. In the first supply action, `ReserveUsedAsCollateralEnabled()` is emitted, if the asset can be enabled as collateral.
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the supply function
+   */
   function executeSupply(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -78,6 +86,16 @@ library SupplyLogic {
     emit Supply(params.asset, msg.sender, params.onBehalfOf, params.amount, params.referralCode);
   }
 
+  /**
+   * @notice Implements the withdraw feature. Through `withdraw()`, users redeem their aTokens for the underlying asset previously supplied in the Aave protocol.
+   * @dev  Emits the `Withdraw()` event. If the user withdraws everything, `ReserveUsedAsCollateralDisabled()` is emitted.
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the withdraw function
+   * @return The actual amount withdrawn
+   */
   function executeWithdraw(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -137,7 +155,16 @@ library SupplyLogic {
     return amountToWithdraw;
   }
 
-  function finalizeTransfer(
+  /**
+   * @notice Validates a transfer of aTokens. The sender is subjected to health factor validation to avoid collateralization constraints violation.
+   * @dev  Emits the `ReserveUsedAsCollateralEnabled()` event for the `to` account, if the asset can be activated as collateral. In case the `from` user transfers everything, `ReserveUsedAsCollateralDisabled()` is emitted for `from`.
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the finalizeTransfer function
+   */
+  function executeFinalizeTransfer(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
@@ -185,6 +212,20 @@ library SupplyLogic {
     }
   }
 
+  /**
+   * @notice Executes the 'set as collateral' feature. A user can choose to activate or deactivate an asset as collateral at any point in time. Deactivating an asset as collateral
+   * is subjected to the usual health factor checks to ensure collateralization.
+   * @dev  Emits the `ReserveUsedAsCollateralEnabled()` event if the asset can be activated as collateral. In case the asset is being deactivated as collateral, `ReserveUsedAsCollateralDisabled()` is emitted.
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param userConfig The users configuration mapping that track the supplied/borrowed assets
+   * @param asset The address of the asset being configured as collateral
+   * @param useAsCollateral True if the user wants to set the asset as collateral, false otherwise
+   * @param reservesCount The number of initialized reserves
+   * @param priceOracle The address of the price oracle
+   * @param userEModeCategory The eMode category chosen by the user
+   */
   function executeUseReserveAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,

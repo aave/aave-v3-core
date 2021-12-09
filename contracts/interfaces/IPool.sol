@@ -100,7 +100,7 @@ interface IPool {
    * @notice Emitted on swapBorrowRateMode()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user swapping his rate mode
-   * @param rateMode The rate mode that the user wants to swap to
+   * @param rateMode The current interest rate mode of the position being swapped.
    **/
   event Swap(address indexed reserve, address indexed user, uint256 rateMode);
 
@@ -591,10 +591,10 @@ interface IPool {
   function getReservesList() external view returns (address[] memory);
 
   /**
-   * @notice Returns the cached PoolAddressesProvider connected to this contract
+   * @notice Returns the PoolAddressesProvider connected to this contract
    * @return The address of the PoolAddressesProvider
    **/
-  function getAddressesProvider() external view returns (IPoolAddressesProvider);
+  function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
 
   /**
    * @notice Updates the protocol fee on the bridging

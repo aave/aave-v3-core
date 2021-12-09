@@ -351,27 +351,26 @@ library LiquidationLogic {
       ((vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit)) /
       (vars.collateralPrice * vars.debtAssetUnit);
 
-    vars.bonusCollateral = vars.baseCollateral.percentMul(liquidationBonus) - vars.baseCollateral;
-
-    vars.maxCollateralToLiquidate = vars.baseCollateral + vars.bonusCollateral;
+    vars.maxCollateralToLiquidate = vars.baseCollateral.percentMul(liquidationBonus);
 
     if (vars.maxCollateralToLiquidate > userCollateralBalance) {
       vars.collateralAmount = userCollateralBalance;
       vars.debtAmountNeeded = ((vars.collateralPrice * vars.collateralAmount * vars.debtAssetUnit) /
         (vars.debtAssetPrice * vars.collateralAssetUnit)).percentDiv(liquidationBonus);
-
-      if (vars.liquidationProtocolFeePercentage > 0) {
-        vars.bonusCollateral = vars.collateralAmount.percentDiv(liquidationBonus);
-      }
     } else {
       vars.collateralAmount = vars.maxCollateralToLiquidate;
       vars.debtAmountNeeded = debtToCover;
     }
 
     if (vars.liquidationProtocolFeePercentage > 0) {
+      vars.bonusCollateral =
+        vars.collateralAmount -
+        vars.collateralAmount.percentDiv(liquidationBonus);
+
       vars.liquidationProtocolFee = vars.bonusCollateral.percentMul(
         vars.liquidationProtocolFeePercentage
       );
+
       return (
         vars.collateralAmount - vars.liquidationProtocolFee,
         vars.debtAmountNeeded,

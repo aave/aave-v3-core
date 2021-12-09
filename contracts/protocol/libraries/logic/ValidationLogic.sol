@@ -115,7 +115,7 @@ library ValidationLogic {
    * @notice Validates a borrow action
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
@@ -537,7 +537,7 @@ library ValidationLogic {
    * @notice Validates the health factor of a user
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param user The user to validate health factor of
    * @param userEModeCategory The users active efficiency mode category
@@ -588,7 +588,7 @@ library ValidationLogic {
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred
