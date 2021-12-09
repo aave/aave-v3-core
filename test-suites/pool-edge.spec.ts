@@ -9,15 +9,14 @@ import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 import {
-  evmSnapshot,
-  evmRevert,
+  MockReserveInterestRateStrategy__factory,
   StableDebtToken__factory,
   VariableDebtToken__factory,
   AToken__factory,
   Pool__factory,
-} from '@aave/deploy-v3';
-import { MockReserveInterestRateStrategy__factory } from '../types';
+} from '../types';
 
 declare var hre: HardhatRuntimeEnvironment;
 

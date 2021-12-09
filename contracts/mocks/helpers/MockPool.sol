@@ -15,8 +15,8 @@ contract MockPool {
     _addressesProvider = provider;
   }
 
-  function addReserveToReservesList(address _reserve) external {
-    _reserveList.push(_reserve);
+  function addReserveToReservesList(address reserve) external {
+    _reserveList.push(reserve);
   }
 
   function getReservesList() external view returns (address[] memory) {

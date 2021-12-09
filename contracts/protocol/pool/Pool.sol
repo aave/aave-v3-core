@@ -50,7 +50,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   uint256 public constant POOL_REVISION = 0x2;
-  IPoolAddressesProvider internal immutable _addressesProvider;
+  IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   modifier onlyPoolConfigurator() {
     _onlyPoolConfigurator();
@@ -64,14 +64,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   function _onlyPoolConfigurator() internal view {
     require(
-      _addressesProvider.getPoolConfigurator() == msg.sender,
+      ADDRESSES_PROVIDER.getPoolConfigurator() == msg.sender,
       Errors.P_CALLER_NOT_POOL_CONFIGURATOR
     );
   }
 
   function _onlyBridge() internal view {
     require(
-      IACLManager(_addressesProvider.getACLManager()).isBridge(msg.sender),
+      IACLManager(ADDRESSES_PROVIDER.getACLManager()).isBridge(msg.sender),
       Errors.P_CALLER_NOT_BRIDGE
     );
   }
@@ -81,7 +81,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   constructor(IPoolAddressesProvider provider) {
-    _addressesProvider = provider;
+    ADDRESSES_PROVIDER = provider;
   }
 
   /**
@@ -92,7 +92,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
-    require(provider == _addressesProvider, Errors.PC_INVALID_CONFIGURATION);
+    require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
     _flashLoanPremiumToProtocol = 0;
@@ -186,7 +186,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           amount,
           to,
           _reservesCount,
-          _addressesProvider.getPriceOracle(),
+          ADDRESSES_PROVIDER.getPriceOracle(),
           _usersEModeCategory[msg.sender]
         )
       );
@@ -215,9 +215,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         true,
         _maxStableRateBorrowSizePercent,
         _reservesCount,
-        _addressesProvider.getPriceOracle(),
+        ADDRESSES_PROVIDER.getPriceOracle(),
         _usersEModeCategory[onBehalfOf],
-        _addressesProvider.getPriceOracleSentinel()
+        ADDRESSES_PROVIDER.getPriceOracleSentinel()
       )
     );
   }
@@ -321,7 +321,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       asset,
       useAsCollateral,
       _reservesCount,
-      _addressesProvider.getPriceOracle(),
+      ADDRESSES_PROVIDER.getPriceOracle(),
       _usersEModeCategory[msg.sender]
     );
   }
@@ -346,9 +346,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         debtAsset,
         user,
         receiveAToken,
-        _addressesProvider.getPriceOracle(),
+        ADDRESSES_PROVIDER.getPriceOracle(),
         _usersEModeCategory[user],
-        _addressesProvider.getPriceOracleSentinel()
+        ADDRESSES_PROVIDER.getPriceOracleSentinel()
       )
     );
   }
@@ -375,9 +375,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _flashLoanPremiumTotal,
       _maxStableRateBorrowSizePercent,
       _reservesCount,
-      address(_addressesProvider),
+      address(ADDRESSES_PROVIDER),
       _usersEModeCategory[onBehalfOf],
-      IACLManager(_addressesProvider.getACLManager()).isFlashBorrower(msg.sender)
+      IACLManager(ADDRESSES_PROVIDER.getACLManager()).isFlashBorrower(msg.sender)
     );
 
     FlashLoanLogic.executeFlashLoan(
@@ -473,7 +473,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _usersConfig[user],
         _reservesCount,
         user,
-        _addressesProvider.getPriceOracle(),
+        ADDRESSES_PROVIDER.getPriceOracle(),
         _usersEModeCategory[user]
       )
     );
@@ -551,11 +551,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function getAddressesProvider() external view override returns (IPoolAddressesProvider) {
-    return _addressesProvider;
-  }
-
-  /// @inheritdoc IPool
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() public view override returns (uint256) {
     return _maxStableRateBorrowSizePercent;
   }
@@ -603,7 +598,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         balanceFromBefore,
         balanceToBefore,
         _reservesCount,
-        _addressesProvider.getPriceOracle(),
+        ADDRESSES_PROVIDER.getPriceOracle(),
         _usersEModeCategory[from],
         _usersEModeCategory[to]
       )
@@ -699,7 +694,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _usersConfig[msg.sender],
       DataTypes.ExecuteSetUserEModeParams(
         _reservesCount,
-        _addressesProvider.getPriceOracle(),
+        ADDRESSES_PROVIDER.getPriceOracle(),
         categoryId
       )
     );

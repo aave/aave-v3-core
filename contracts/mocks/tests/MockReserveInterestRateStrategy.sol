@@ -9,7 +9,7 @@ import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   uint256 public immutable OPTIMAL_UTILIZATION_RATE;
   uint256 public immutable EXCESS_UTILIZATION_RATE;
-  IPoolAddressesProvider public immutable addressesProvider;
+  IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
   uint256 internal immutable _baseVariableBorrowRate;
   uint256 internal immutable _variableRateSlope1;
   uint256 internal immutable _variableRateSlope2;
@@ -31,7 +31,7 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   ) {
     OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
     EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
-    addressesProvider = provider;
+    ADDRESSES_PROVIDER = provider;
     _baseVariableBorrowRate = baseVariableBorrowRate;
     _variableRateSlope1 = variableRateSlope1;
     _variableRateSlope2 = variableRateSlope2;

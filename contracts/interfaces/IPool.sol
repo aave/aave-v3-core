@@ -591,10 +591,10 @@ interface IPool {
   function getReservesList() external view returns (address[] memory);
 
   /**
-   * @notice Returns the cached PoolAddressesProvider connected to this contract
+   * @notice Returns the PoolAddressesProvider connected to this contract
    * @return The address of the PoolAddressesProvider
    **/
-  function getAddressesProvider() external view returns (IPoolAddressesProvider);
+  function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
 
   /**
    * @notice Updates the protocol fee on the bridging
