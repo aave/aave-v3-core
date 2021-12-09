@@ -54,7 +54,7 @@ library BorrowLogic {
    * @dev  Emits the `Borrow()` event
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the borrow function
    */

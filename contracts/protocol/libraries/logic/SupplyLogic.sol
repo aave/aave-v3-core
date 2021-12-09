@@ -91,7 +91,7 @@ library SupplyLogic {
    * @dev  Emits the `Withdraw()` event. If the user withdraws everything, `ReserveUsedAsCollateralDisabled()` is emitted.
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the withdraw function
    * @return The actual amount withdrawn
@@ -160,7 +160,7 @@ library SupplyLogic {
    * @dev  Emits the `ReserveUsedAsCollateralEnabled()` event for the `to` account, if the asset can be activated as collateral. In case the `from` user transfers everything, `ReserveUsedAsCollateralDisabled()` is emitted for `from`.
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
    * @param params The additional parameters needed to execute the finalizeTransfer function
    */
@@ -218,7 +218,7 @@ library SupplyLogic {
    * @dev  Emits the `ReserveUsedAsCollateralEnabled()` event if the asset can be activated as collateral. In case the asset is being deactivated as collateral, `ReserveUsedAsCollateralDisabled()` is emitted.
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The users configuration mapping that track the supplied/borrowed assets
    * @param asset The address of the asset being configured as collateral
    * @param useAsCollateral True if the user wants to set the asset as collateral, false otherwise
