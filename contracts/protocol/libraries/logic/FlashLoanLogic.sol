@@ -70,7 +70,7 @@ library FlashLoanLogic {
    * @param reserves The state of all the reserves
    * @param reservesList The list of addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
-   * @param userConfig The user configuration mapping that tracts the supplied/borrowed assets
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the flashloan function
    */
   function executeFlashLoan(
