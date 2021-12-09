@@ -14,12 +14,12 @@ import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
 interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
    * @notice Emitted after the mint action
-   * @param from The address performing the mint
+   * @param to The address that receive the minted aTokens
    * @param value The amount being minted (user entered amount + balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
    **/
-  event Mint(address indexed from, uint256 value, uint256 balanceIncrease, uint256 index);
+  event Mint(address indexed to, uint256 value, uint256 balanceIncrease, uint256 index);
 
   /**
    * @notice Mints `amount` aTokens to `user`
