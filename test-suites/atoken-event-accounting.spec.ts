@@ -82,7 +82,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(aDaiBalance).to.be.equal(firstDaiDeposit);
   });
 
-  it('User 1 - Deposit eth on behalf of user 2', async () => {
+  it('User 1 - Deposit dai on behalf of user 2', async () => {
     const {
       dai,
       aDai,
