@@ -76,8 +76,8 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
       { fn: 'updateAToken', args: [randomUpdateAToken] },
       { fn: 'updateStableDebtToken', args: [randomUpdateDebtToken] },
       { fn: 'updateVariableDebtToken', args: [randomUpdateDebtToken] },
-      { fn: 'activateReserve', args: [randomAddress] },
-      { fn: 'deactivateReserve', args: [randomAddress] },
+      { fn: 'setReserveActive', args: [randomAddress, true] },
+      { fn: 'setReserveActive', args: [randomAddress, false] },
       { fn: 'updateFlashloanPremiumTotal', args: [randomNumber] },
       { fn: 'updateFlashloanPremiumToProtocol', args: [randomNumber] },
       { fn: 'updateFlashloanPremiumToProtocol', args: [randomNumber] },
@@ -97,16 +97,16 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     const randomNumber = '0';
 
     const calls = [
-      { fn: 'enableBorrowingOnReserve', args: [randomAddress, randomNumber, false] },
-      { fn: 'disableBorrowingOnReserve', args: [randomAddress] },
+      { fn: 'setReserveBorrowing', args: [randomAddress, false] },
+      { fn: 'setReserveBorrowing', args: [randomAddress, true] },
       {
         fn: 'configureReserveAsCollateral',
         args: [randomAddress, randomNumber, randomNumber, randomNumber],
       },
-      { fn: 'enableReserveStableRate', args: [randomAddress] },
-      { fn: 'disableReserveStableRate', args: [randomAddress] },
-      { fn: 'freezeReserve', args: [randomAddress] },
-      { fn: 'unfreezeReserve', args: [randomAddress] },
+      { fn: 'setReserveStableRateBorrowing', args: [randomAddress, true] },
+      { fn: 'setReserveStableRateBorrowing', args: [randomAddress, false] },
+      { fn: 'setReseveFreeze', args: [randomAddress, true] },
+      { fn: 'setReseveFreeze', args: [randomAddress, false] },
       { fn: 'setReserveFactor', args: [randomAddress, randomNumber] },
       { fn: 'setBorrowCap', args: [randomAddress, randomNumber] },
       { fn: 'setSupplyCap', args: [randomAddress, randomNumber] },

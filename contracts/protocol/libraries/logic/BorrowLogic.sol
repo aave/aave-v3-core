@@ -48,7 +48,6 @@ library BorrowLogic {
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
   event Swap(address indexed reserve, address indexed user, uint256 rateMode);
 
-
   /**
    * @notice Implements the borrow feature. Borrowing allows users that provided collateral to draw liquidity from the
    * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the isolated debt.
@@ -211,7 +210,12 @@ library BorrowLogic {
       ).burn(params.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
     }
 
-    reserve.updateInterestRates(reserveCache, params.asset, paybackAmount, 0);
+    reserve.updateInterestRates(
+      reserveCache,
+      params.asset,
+      params.useATokens ? 0 : paybackAmount,
+      0
+    );
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
@@ -244,13 +248,13 @@ library BorrowLogic {
 
   /**
    * @notice Implements the rebalance stable borrow rate feature. In case of liquidity crunches on the protocol, stable rate borrows might need to be rebalanced
-   * to bring back equilibrium between the borrow and supply APYs. 
+   * to bring back equilibrium between the borrow and supply APYs.
    * @dev The rules that define if a position can be rebalanced are implemented in `ValidationLogic.validateRebalanceStableBorrowRate()`. Emits the `RebalanceStableBorrowRate()` event
    * @param reserve The data of the reserve of the asset being repaid
    * @param asset The asset of the position being rebalanced
    * @param user The user being rebalanced
    */
-  function rebalanceStableBorrowRate(
+  function executeRebalanceStableBorrowRate(
     DataTypes.ReserveData storage reserve,
     address asset,
     address user
@@ -290,7 +294,7 @@ library BorrowLogic {
    * @param asset The asset of the position being swapped
    * @param rateMode The current interest rate mode of the position being swapped. If `rateMode == InterestRateMode.STABLE`, user must have stable debt
    */
-  function swapBorrowRateMode(
+  function executeSwapBorrowRateMode(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,

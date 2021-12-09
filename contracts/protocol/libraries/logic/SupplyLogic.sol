@@ -164,7 +164,7 @@ library SupplyLogic {
    * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
    * @param params The additional parameters needed to execute the finalizeTransfer function
    */
-  function finalizeTransfer(
+  function executeFinalizeTransfer(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,

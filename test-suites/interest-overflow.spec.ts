@@ -136,10 +136,9 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
       );
     await configurator
       .connect(poolAdmin.signer)
-      .enableBorrowingOnReserve(
+      .setReserveBorrowing(
         inputParams[i].asset,
-        inputParams[i].borrowCap,
-        inputParams[i].stableBorrowingEnabled
+        true
       );
 
     await configurator

@@ -44,7 +44,7 @@ library BridgeLogic {
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    **/
-  function mintUnbacked(
+  function executeMintUnbacked(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
     DataTypes.ReserveData storage reserve,
@@ -96,7 +96,7 @@ library BridgeLogic {
    * @param fee The amount paid in fees
    * @param protocolFeeBps The fraction of fees in basis points paid to the protocol
    **/
-  function backUnbacked(
+  function executeBackUnbacked(
     DataTypes.ReserveData storage reserve,
     address asset,
     uint256 amount,
