@@ -797,7 +797,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       users: [user],
     } = testEnv;
 
-    expect(await configurator.connect(poolAdmin.signer).deactivateReserve(dai.address));
+    expect(await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false));
 
     await expect(
       pool
@@ -839,7 +839,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       users: [user],
     } = testEnv;
 
-    expect(await configurator.connect(poolAdmin.signer).deactivateReserve(weth.address));
+    expect(await configurator.connect(poolAdmin.signer).setReserveActive(weth.address, false));
 
     await expect(
       pool.connect(user.signer).flashLoanSimple(user.address, weth.address, 0, '0x10', 0)
