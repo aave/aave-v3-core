@@ -125,7 +125,7 @@ library ConfiguratorLogic {
   }
 
   /**
-   * @notice Updates aToken implementation and initialize new implementation
+   * @notice Updates the aToken implementation and initializes it
    * @dev Emits the `ATokenUpgraded` event
    * @param cachedPool The Pool containing the reserve with the aToken
    * @param input The parameters needed for the initialize call
@@ -154,7 +154,7 @@ library ConfiguratorLogic {
   }
 
   /**
-   * @notice Updates stable debt token implementation and initialize new implementation
+   * @notice Updates the stable debt token implementation and initializes it
    * @dev Emits the `StableDebtTokenUpgraded` event
    * @param cachedPool The Pool containing the reserve with the stable debt token
    * @param input The parameters needed for the initialize call
@@ -191,7 +191,7 @@ library ConfiguratorLogic {
   }
 
   /**
-   * @notice Updates variable debt token implementation and initialize new implementation
+   * @notice Updates the variable debt token implementation and initializes it
    * @dev Emits the `VariableDebtTokenUpgraded` event
    * @param cachedPool The Pool containing the reserve with the variable debt token
    * @param input The parameters needed for the initialize call
