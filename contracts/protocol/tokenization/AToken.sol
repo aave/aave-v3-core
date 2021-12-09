@@ -105,7 +105,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
       emit Transfer(address(0), user, amountToMint);
-      emit Mint(user, amountToMint, balanceIncrease, index);
+      emit Mint(user, user, amountToMint, balanceIncrease, index);
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
       emit Transfer(user, address(0), amountToBurn);
@@ -116,23 +116,24 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   /// @inheritdoc IAToken
   function mint(
     address user,
+    address onBehalfOf,
     uint256 amount,
     uint256 index
   ) public override onlyPool returns (bool) {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
 
-    uint256 scaledBalance = super.balanceOf(user);
+    uint256 scaledBalance = super.balanceOf(onBehalfOf);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
-      scaledBalance.rayMul(_userState[user].additionalData);
+      scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[onBehalfOf].additionalData = Helpers.castUint128(index);
 
-    _mint(user, Helpers.castUint128(amountScaled));
+    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
 
     uint256 amountToMint = amount + balanceIncrease;
-    emit Transfer(address(0), user, amountToMint);
-    emit Mint(user, amountToMint, balanceIncrease, index);
+    emit Transfer(address(0), onBehalfOf, amountToMint);
+    emit Mint(user, onBehalfOf, amountToMint, balanceIncrease, index);
 
     return scaledBalance == 0;
   }
@@ -142,7 +143,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     if (amount == 0) {
       return;
     }
-    mint(_treasury, amount, index);
+    mint(address(POOL), _treasury, amount, index);
   }
 
   /// @inheritdoc IAToken
