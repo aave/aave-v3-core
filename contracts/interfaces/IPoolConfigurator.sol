@@ -264,10 +264,7 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if borrowing needs to be enabled, false otherwise
    **/
-  function setReserveBorrowing(
-    address asset,
-    bool enabled
-  ) external;
+  function setReserveBorrowing(address asset, bool enabled) external;
 
   /**
    * @notice Configures the reserve collateralization parameters

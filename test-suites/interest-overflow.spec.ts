@@ -134,12 +134,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
         inputParams[i].liquidationThreshold,
         inputParams[i].liquidationBonus
       );
-    await configurator
-      .connect(poolAdmin.signer)
-      .setReserveBorrowing(
-        inputParams[i].asset,
-        true
-      );
+    await configurator.connect(poolAdmin.signer).setReserveBorrowing(inputParams[i].asset, true);
 
     await configurator
       .connect(poolAdmin.signer)

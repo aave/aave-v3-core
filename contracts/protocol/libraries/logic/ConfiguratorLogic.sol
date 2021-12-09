@@ -48,6 +48,12 @@ library ConfiguratorLogic {
     address indexed implementation
   );
 
+  /**
+   * @notice Initialize a reserve by creating and initializing aToken, stable debt token and variable debt token
+   * @dev Emits the `ReserveInitialized` event
+   * @param pool The Pool in which the reserve will be initialized
+   * @param input The needed parameters for the initialization
+   */
   function executeInitReserve(IPool pool, ConfiguratorInputTypes.InitReserveInput calldata input)
     public
   {
@@ -120,6 +126,12 @@ library ConfiguratorLogic {
     );
   }
 
+  /**
+   * @notice Updates the aToken implementation and initializes it
+   * @dev Emits the `ATokenUpgraded` event
+   * @param cachedPool The Pool containing the reserve with the aToken
+   * @param input The parameters needed for the initialize call
+   */
   function executeUpdateAToken(
     IPool cachedPool,
     ConfiguratorInputTypes.UpdateATokenInput calldata input
@@ -144,6 +156,12 @@ library ConfiguratorLogic {
     emit ATokenUpgraded(input.asset, reserveData.aTokenAddress, input.implementation);
   }
 
+  /**
+   * @notice Updates the stable debt token implementation and initializes it
+   * @dev Emits the `StableDebtTokenUpgraded` event
+   * @param cachedPool The Pool containing the reserve with the stable debt token
+   * @param input The parameters needed for the initialize call
+   */
   function executeUpdateStableDebtToken(
     IPool cachedPool,
     ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
@@ -175,6 +193,12 @@ library ConfiguratorLogic {
     );
   }
 
+  /**
+   * @notice Updates the variable debt token implementation and initializes it
+   * @dev Emits the `VariableDebtTokenUpgraded` event
+   * @param cachedPool The Pool containing the reserve with the variable debt token
+   * @param input The parameters needed for the initialize call
+   */
   function executeUpdateVariableDebtToken(
     IPool cachedPool,
     ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
@@ -206,6 +230,12 @@ library ConfiguratorLogic {
     );
   }
 
+  /**
+   * @notice Creates a new proxy and initializes the implementation
+   * @param implementation The address of the implementation
+   * @param initParams The parameters that is passed to the implementation to initialize
+   * @return The address of initialized proxy
+   */
   function _initTokenWithProxy(address implementation, bytes memory initParams)
     internal
     returns (address)
@@ -219,6 +249,13 @@ library ConfiguratorLogic {
     return address(proxy);
   }
 
+  /**
+   * @notice Upgrades the implementation and makes call to the proxy
+   * @dev In the current plementation the call is used to initialize the new implementation.
+   * @param proxyAddress The address of the proxy
+   * @param implementation The address of the new implementation
+   * @param  initParams The parameters to the call after the upgrade
+   */
   function _upgradeTokenImplementation(
     address proxyAddress,
     address implementation,
