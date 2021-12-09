@@ -166,6 +166,7 @@ library BorrowLogic {
    * @param reserve The data of the reserve of the asset being repaid
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the repay function
+   * @return The actual amount being repaid
    */
   function executeRepay(
     mapping(address => DataTypes.ReserveData) storage reserves,
