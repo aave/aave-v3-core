@@ -19,16 +19,24 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
-    address[] memory addressesProvidersList = _addressesProvidersList;
+    uint256 providersListCount = _addressesProvidersList.length;
+    uint256 removedProvidersCount = 0;
 
-    uint256 maxLength = addressesProvidersList.length;
+    address[] memory providers = new address[](providersListCount);
 
-    address[] memory activeProviders = new address[](maxLength);
-
-    for (uint256 i = 0; i < maxLength; i++) {
-      if (_addressesProviders[addressesProvidersList[i]] > 0) {
-        activeProviders[i] = addressesProvidersList[i];
+    for (uint256 i = 0; i < providersListCount; i++) {
+      if (_addressesProviders[_addressesProvidersList[i]] > 0) {
+        providers[i - removedProvidersCount] = _addressesProvidersList[i];
+      } else {
+        removedProvidersCount++;
       }
+    }
+
+    if (removedProvidersCount == 0) return providers;
+
+    address[] memory activeProviders = new address[](providersListCount - removedProvidersCount);
+    for (uint256 i = 0; i < activeProviders.length; i++) {
+      activeProviders[i] = providers[i];
     }
 
     return activeProviders;
