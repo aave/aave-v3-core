@@ -326,9 +326,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Activates the ETH reserve for borrowing via risk admin', async () => {
     const { configurator, weth, helpersContract, riskAdmin } = testEnv;
-    expect(
-      await configurator.connect(riskAdmin.signer).setReserveBorrowing(weth.address, true)
-    )
+    expect(await configurator.connect(riskAdmin.signer).setReserveBorrowing(weth.address, true))
       .to.emit(configurator, 'ReserveBorrowing')
       .withArgs(weth.address, true);
 
@@ -432,7 +430,9 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Disable stable borrow rate on the ETH reserve risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
     expect(
-      await configurator.connect(riskAdmin.signer).setReserveStableRateBorrowing(weth.address, false)
+      await configurator
+        .connect(riskAdmin.signer)
+        .setReserveStableRateBorrowing(weth.address, false)
     )
       .to.emit(configurator, 'ReserveStableRateBorrowing')
       .withArgs(weth.address, false);
@@ -831,5 +831,10 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const newCeiling = await helpersContract.getDebtCeiling(weth.address);
 
     expect(newCeiling).to.be.eq('200');
+  });
+
+  it('Read debt ceiling decimals', async () => {
+    const { helpersContract } = testEnv;
+    expect(await helpersContract.getDebtCeilingDecimals()).to.be.eq(2);
   });
 });
