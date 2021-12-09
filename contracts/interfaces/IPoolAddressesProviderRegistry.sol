@@ -7,8 +7,17 @@ pragma solidity 0.8.10;
  * @notice Defines the basic interface for an Aave Pool Addresses Provider Registry.
  **/
 interface IPoolAddressesProviderRegistry {
-  event AddressesProviderRegistered(address indexed newAddress);
-  event AddressesProviderUnregistered(address indexed newAddress);
+  /**
+   * Emitted when a new AddressesProvider is registered.
+   * @param addressesProvider The address of the new PoolAddresesProvider
+   */
+  event AddressesProviderRegistered(address indexed addressesProvider);
+
+  /**
+   * Emitted when a new AddressesProvider is unregistered.
+   * @param addressesProvider The address of the PoolAddresesProvider
+   */
+  event AddressesProviderUnregistered(address indexed addressesProvider);
 
   /**
    * @notice Returns the list of registered addresses provider
