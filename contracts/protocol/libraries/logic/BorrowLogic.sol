@@ -226,7 +226,7 @@ library BorrowLogic {
     return paybackAmount;
   }
 
-  function rebalanceStableBorrowRate(
+  function executeRebalanceStableBorrowRate(
     DataTypes.ReserveData storage reserve,
     address asset,
     address user
@@ -258,7 +258,7 @@ library BorrowLogic {
     emit RebalanceStableBorrowRate(asset, user);
   }
 
-  function swapBorrowRateMode(
+  function executeSwapBorrowRateMode(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,

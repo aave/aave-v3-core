@@ -76,7 +76,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
-      ConfiguratorLogic.initReserve(cachedPool, input[i]);
+      ConfiguratorLogic.executeInitReserve(cachedPool, input[i]);
     }
   }
 
@@ -92,7 +92,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ConfiguratorLogic.updateAToken(_pool, input);
+    ConfiguratorLogic.executeUpdateAToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -101,7 +101,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ConfiguratorLogic.updateStableDebtToken(_pool, input);
+    ConfiguratorLogic.executeUpdateStableDebtToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -110,30 +110,15 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyPoolAdmin
   {
-    ConfiguratorLogic.updateVariableDebtToken(_pool, input);
+    ConfiguratorLogic.executeUpdateVariableDebtToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
-  function enableBorrowingOnReserve(
-    address asset,
-    uint256 borrowCap,
-    bool stableBorrowRateEnabled
-  ) external override onlyRiskOrPoolAdmins {
+  function setReserveBorrowing(address asset, bool enabled) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setBorrowingEnabled(true);
-    currentConfig.setBorrowCap(borrowCap);
-    currentConfig.setStableRateBorrowingEnabled(stableBorrowRateEnabled);
+    currentConfig.setBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig.data);
-
-    emit BorrowingEnabledOnReserve(asset, stableBorrowRateEnabled);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function disableBorrowingOnReserve(address asset) external override onlyRiskOrPoolAdmins {
-    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setBorrowingEnabled(false);
-    _pool.setConfiguration(asset, currentConfig.data);
-    emit BorrowingDisabledOnReserve(asset);
+    emit ReserveBorrowing(asset, enabled);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -179,54 +164,32 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function enableReserveStableRate(address asset) external override onlyRiskOrPoolAdmins {
+  function setReserveStableRateBorrowing(address asset, bool enabled)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setStableRateBorrowingEnabled(true);
+    currentConfig.setStableRateBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig.data);
-
-    emit StableRateEnabledOnReserve(asset);
+    emit ReserveStableRateBorrowing(asset, enabled);
   }
 
   /// @inheritdoc IPoolConfigurator
-  function disableReserveStableRate(address asset) external override onlyRiskOrPoolAdmins {
+  function setReserveActive(address asset, bool active) external override onlyPoolAdmin {
+    if (!active) _checkNoSuppliers(asset);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setStableRateBorrowingEnabled(false);
+    currentConfig.setActive(active);
     _pool.setConfiguration(asset, currentConfig.data);
-    emit StableRateDisabledOnReserve(asset);
+    emit ReserveActive(asset, active);
   }
 
   /// @inheritdoc IPoolConfigurator
-  function activateReserve(address asset) external override onlyPoolAdmin {
+  function setReseveFreeze(address asset, bool freeze) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setActive(true);
+    currentConfig.setFrozen(freeze);
     _pool.setConfiguration(asset, currentConfig.data);
-    emit ReserveActivated(asset);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function deactivateReserve(address asset) external override onlyPoolAdmin {
-    _checkNoSuppliers(asset);
-
-    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setActive(false);
-    _pool.setConfiguration(asset, currentConfig.data);
-    emit ReserveDeactivated(asset);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function freezeReserve(address asset) external override onlyRiskOrPoolAdmins {
-    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setFrozen(true);
-    _pool.setConfiguration(asset, currentConfig.data);
-    emit ReserveFrozen(asset);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function unfreezeReserve(address asset) external override onlyRiskOrPoolAdmins {
-    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setFrozen(false);
-    _pool.setConfiguration(asset, currentConfig.data);
-    emit ReserveUnfrozen(asset);
+    emit ReserveFrozen(asset, freeze);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -245,14 +208,8 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function setReservePause(address asset, bool paused) public override onlyEmergencyOrPoolAdmin {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setPaused(paused);
-
     _pool.setConfiguration(asset, currentConfig.data);
-
-    if (paused) {
-      emit ReservePaused(asset);
-    } else {
-      emit ReserveUnpaused(asset);
-    }
+    emit ReservePaused(asset, paused);
   }
 
   /// @inheritdoc IPoolConfigurator

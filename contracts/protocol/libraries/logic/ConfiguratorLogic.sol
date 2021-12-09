@@ -48,7 +48,9 @@ library ConfiguratorLogic {
     address indexed implementation
   );
 
-  function initReserve(IPool pool, ConfiguratorInputTypes.InitReserveInput calldata input) public {
+  function executeInitReserve(IPool pool, ConfiguratorInputTypes.InitReserveInput calldata input)
+    public
+  {
     address aTokenProxyAddress = _initTokenWithProxy(
       input.aTokenImpl,
       abi.encodeWithSelector(
@@ -118,9 +120,10 @@ library ConfiguratorLogic {
     );
   }
 
-  function updateAToken(IPool cachedPool, ConfiguratorInputTypes.UpdateATokenInput calldata input)
-    public
-  {
+  function executeUpdateAToken(
+    IPool cachedPool,
+    ConfiguratorInputTypes.UpdateATokenInput calldata input
+  ) public {
     DataTypes.ReserveData memory reserveData = cachedPool.getReserveData(input.asset);
 
     (, , , uint256 decimals, , ) = cachedPool.getConfiguration(input.asset).getParams();
@@ -141,7 +144,7 @@ library ConfiguratorLogic {
     emit ATokenUpgraded(input.asset, reserveData.aTokenAddress, input.implementation);
   }
 
-  function updateStableDebtToken(
+  function executeUpdateStableDebtToken(
     IPool cachedPool,
     ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
   ) public {
@@ -172,7 +175,7 @@ library ConfiguratorLogic {
     );
   }
 
-  function updateVariableDebtToken(
+  function executeUpdateVariableDebtToken(
     IPool cachedPool,
     ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
   ) public {

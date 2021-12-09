@@ -28,12 +28,12 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
   uint256 public constant ATOKEN_REVISION = 0x1;
 
-  IPool internal immutable _pool;
+  IPool public immutable POOL;
   address internal _treasury;
   address internal _underlyingAsset;
 
   modifier onlyPool() {
-    require(_msgSender() == address(_pool), Errors.CT_CALLER_MUST_BE_POOL);
+    require(_msgSender() == address(POOL), Errors.CT_CALLER_MUST_BE_POOL);
     _;
   }
 
@@ -43,9 +43,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   }
 
   constructor(IPool pool)
-    IncentivizedERC20(pool.getAddressesProvider(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
+    IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
   {
-    _pool = pool;
+    POOL = pool;
   }
 
   /// @inheritdoc IInitializableAToken
@@ -70,7 +70,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
     emit Initialized(
       underlyingAsset,
-      address(_pool),
+      address(POOL),
       treasury,
       address(incentivesController),
       aTokenDecimals,
@@ -165,7 +165,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     override(IncentivizedERC20, IERC20)
     returns (uint256)
   {
-    return super.balanceOf(user).rayMul(_pool.getReserveNormalizedIncome(_underlyingAsset));
+    return super.balanceOf(user).rayMul(POOL.getReserveNormalizedIncome(_underlyingAsset));
   }
 
   /// @inheritdoc IScaledBalanceToken
@@ -191,7 +191,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
       return 0;
     }
 
-    return currentSupplyScaled.rayMul(_pool.getReserveNormalizedIncome(_underlyingAsset));
+    return currentSupplyScaled.rayMul(POOL.getReserveNormalizedIncome(_underlyingAsset));
   }
 
   /// @inheritdoc IScaledBalanceToken
@@ -215,14 +215,6 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   /// @inheritdoc IAToken
   function UNDERLYING_ASSET_ADDRESS() external view override returns (address) {
     return _underlyingAsset;
-  }
-
-  /**
-   * @notice Returns the address of the pool where this aToken is used
-   * @return Address of the pool
-   **/
-  function POOL() external view returns (IPool) {
-    return _pool;
   }
 
   /// @inheritdoc IAToken
@@ -275,7 +267,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   ) internal {
     address underlyingAsset = _underlyingAsset;
 
-    uint256 index = _pool.getReserveNormalizedIncome(underlyingAsset);
+    uint256 index = POOL.getReserveNormalizedIncome(underlyingAsset);
 
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
@@ -283,7 +275,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     super._transfer(from, to, Helpers.castUint128(amount.rayDiv(index)));
 
     if (validate) {
-      _pool.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
+      POOL.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
     }
 
     emit BalanceTransfer(from, to, amount, index);
