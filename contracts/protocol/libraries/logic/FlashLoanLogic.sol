@@ -41,6 +41,7 @@ library FlashLoanLogic {
     uint16 referralCode
   );
 
+  // Helper struct for internal variables used in the `executeFlashLoan` function
   struct FlashLoanLocalVars {
     IFlashLoanReceiver receiver;
     address oracle;
@@ -59,6 +60,19 @@ library FlashLoanLogic {
     uint256 flashloanPremiumToProtocol;
   }
 
+  /**
+   * @notice Implements the flashloan feature that allow users to access liquidity of the pool for one transaction
+   * as long as the amount taken plus fee is returned or debt is opened.
+   * @dev For authorized flashborrowers the fee is waived
+   * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
+   * if the receiver have not approved the pool the transaction will revert.
+   * @dev Emits the `FlashLoan()` event
+   * @param reserves The state of all the reserves
+   * @param reservesList The list of addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the flashloan function
+   */
   function executeFlashLoan(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -184,6 +198,7 @@ library FlashLoanLogic {
     }
   }
 
+  // Helper struct for internal variables used in the `executeFlashLoanSimple` function
   struct FlashLoanSimpleLocalVars {
     IFlashLoanSimpleReceiver receiver;
     uint256 totalPremium;
@@ -192,6 +207,16 @@ library FlashLoanLogic {
     uint256 amountPlusPremium;
   }
 
+  /**
+   * @notice Implements the simple flashloan feature that allow users to access liquidity of ONE reserve for one transaction
+   * as long as the amount taken plus fee is returned.
+   * @dev Does not waive fee for approved flashborrowers nor allow taking on debt instead of repaying to save gas
+   * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
+   * if the receiver have not approved the pool the transaction will revert.
+   * @dev Emits the `FlashLoan()` event
+   * @param reserve The state of the flashloaned reserve
+   * @param params The additional parameters needed to execute the simple flashloan function
+   */
   function executeFlashLoanSimple(
     DataTypes.ReserveData storage reserve,
     DataTypes.FlashloanSimpleParams memory params
