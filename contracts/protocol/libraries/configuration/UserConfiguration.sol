@@ -192,7 +192,7 @@ library UserConfiguration {
   /**
    * @notice Returns the address of the first asset used as collateral by the user
    * @param self The configuration object
-   * @return The index of the collateral asset inside the list of reserves
+   * @return The index of the first collateral asset inside the list of reserves
    */
   function _getFirstAssetAsCollateralId(DataTypes.UserConfigurationMap memory self)
     internal
