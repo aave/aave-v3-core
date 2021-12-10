@@ -247,11 +247,8 @@ library SupplyLogic {
     if (useAsCollateral == userConfig.isUsingAsCollateral(reserve.id)) return;
 
     if (useAsCollateral) {
-      (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reserves, reservesList);
       require(
-        !isolationModeActive &&
-          (reserveCache.reserveConfiguration.getDebtCeiling() == 0 ||
-            !userConfig.isUsingAsCollateralAny()),
+        ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, asset),
         Errors.SL_USER_IN_ISOLATION_MODE
       );
 
