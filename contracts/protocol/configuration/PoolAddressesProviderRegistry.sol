@@ -61,9 +61,9 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   }
 
   /**
-   * @notice Add te addresses provider address to the list.
+   * @notice Add the addresses provider address to the list.
    * @dev It is not added if the address already exists.
-   * @param provider The address of the PoolAddresesProvider
+   * @param provider The address of the PoolAddressesProvider
    */
   function _addToAddressesProvidersList(address provider) internal {
     uint256 providersCount = _addressesProvidersList.length;
