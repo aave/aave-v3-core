@@ -133,21 +133,21 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     //validation of the parameters: the LTV can
     //only be lower or equal than the liquidation threshold
     //(otherwise a loan against the asset would cause instantaneous liquidation)
-    require(ltv <= liquidationThreshold, Errors.PC_INVALID_CONFIGURATION);
+    require(ltv <= liquidationThreshold, Errors.PC_INVALID_PARAMS_RESERVE);
 
     if (liquidationThreshold != 0) {
       //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
       //collateral than needed to cover the debt
-      require(liquidationBonus > PercentageMath.PERCENTAGE_FACTOR, Errors.PC_INVALID_CONFIGURATION);
+      require(liquidationBonus > PercentageMath.PERCENTAGE_FACTOR, Errors.PC_INVALID_PARAMS_RESERVE);
 
       //if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
       //a loan is taken there is enough collateral available to cover the liquidation bonus
       require(
         liquidationThreshold.percentMul(liquidationBonus) <= PercentageMath.PERCENTAGE_FACTOR,
-        Errors.PC_INVALID_CONFIGURATION
+        Errors.PC_INVALID_PARAMS_RESERVE
       );
     } else {
-      require(liquidationBonus == 0, Errors.PC_INVALID_CONFIGURATION);
+      require(liquidationBonus == 0, Errors.PC_INVALID_PARAMS_RESERVE);
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
       //we need to ensure no liquidity is supplied
@@ -277,10 +277,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     // validation of the parameters: the LTV can
     // only be lower or equal than the liquidation threshold
     // (otherwise a loan against the asset would cause instantaneous liquidation)
-    require(ltv <= liquidationThreshold, Errors.VL_INCONSISTENT_EMODE_CATEGORY);
+    require(ltv <= liquidationThreshold, Errors.PC_INVALID_PARAMS_EMODE_CATEGORY);
     require(
       liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
-      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+      Errors.PC_INVALID_PARAMS_EMODE_CATEGORY
     );
 
     // if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
@@ -288,7 +288,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(
       uint256(liquidationThreshold).percentMul(liquidationBonus) <=
         PercentageMath.PERCENTAGE_FACTOR,
-      Errors.VL_INCONSISTENT_EMODE_CATEGORY
+      Errors.PC_INVALID_PARAMS_EMODE_CATEGORY
     );
 
     _pool.configureEModeCategory(
@@ -310,7 +310,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(categoryId);
       require(
         categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
-        Errors.VL_INCONSISTENT_EMODE_CATEGORY
+        Errors.P_INVALID_EMODE_CATEGORY_ASSIGNMENT
       );
     }
 
@@ -403,24 +403,24 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   function _checkNoSuppliers(address asset) internal view {
     uint256 totalATokens = IPoolDataProvider(_addressesProvider.getPoolDataProvider())
       .getATokenTotalSupply(asset);
-    require(totalATokens == 0, Errors.PC_RESERVE_LIQUIDITY_NOT_0);
+    require(totalATokens == 0, Errors.PC_RESERVE_LIQUIDITY_NOT_ZERO);
   }
 
   function _onlyPoolAdmin() internal view {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
-    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
+    require(aclManager.isPoolAdmin(msg.sender), Errors.ACL_CALLER_NOT_POOL_ADMIN);
   }
 
   function _onlyEmergencyAdmin() internal view {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
-    require(aclManager.isEmergencyAdmin(msg.sender), Errors.PC_CALLER_NOT_EMERGENCY_ADMIN);
+    require(aclManager.isEmergencyAdmin(msg.sender), Errors.ACL_CALLER_NOT_EMERGENCY_ADMIN);
   }
 
   function _onlyPoolOrEmergencyAdmin() internal view {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(
       aclManager.isPoolAdmin(msg.sender) || aclManager.isEmergencyAdmin(msg.sender),
-      Errors.PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN
+      Errors.ACL_CALLER_NOT_POOL_OR_EMERGENCY_ADMIN
     );
   }
 
@@ -428,7 +428,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(
       aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
-      Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
+      Errors.ACL_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
     );
   }
 
@@ -436,7 +436,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(
       aclManager.isRiskAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
-      Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
+      Errors.ACL_CALLER_NOT_RISK_OR_POOL_ADMIN
     );
   }
 }

@@ -21,7 +21,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
-    require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
+    require(aclManager.isPoolAdmin(msg.sender), Errors.ACL_CALLER_NOT_POOL_ADMIN);
     _;
   }
 

@@ -113,7 +113,7 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.P_INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
@@ -241,7 +241,7 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.P_INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);

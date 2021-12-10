@@ -140,7 +140,7 @@ contract AaveOracle is IAaveOracle {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(
       aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
-      Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
+      Errors.ACL_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
     );
   }
 }
