@@ -49,7 +49,7 @@ library Errors {
   string public constant CT_INVALID_MINT_AMOUNT = '25'; // 'Invalid amount to mint'
   string public constant CT_INVALID_BURN_AMOUNT = '26'; // 'Invalid amount to burn'
   string public constant VL_INVALID_AMOUNT = '27'; // 'Amount must be greater than 0'
-  string public constant VL_RESERVE_NO_ACTIVE = '28'; // 'Action requires an active reserve'
+  string public constant VL_RESERVE_INACTIVE = '28'; // 'Action requires an active reserve'
   string public constant VL_RESERVE_FROZEN = '29'; // 'Action cannot be performed because the reserve is frozen'
   string public constant VL_RESERVE_PAUSED = '30'; // 'Action cannot be performed because the reserve is paused'
   string public constant VL_BORROWING_NOT_ENABLED = '31'; // 'Borrowing is not enabled'

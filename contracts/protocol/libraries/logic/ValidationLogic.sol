@@ -57,7 +57,7 @@ library ValidationLogic {
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
 
     require(amount != 0, Errors.VL_INVALID_AMOUNT);
-    require(isActive, Errors.VL_RESERVE_NO_ACTIVE);
+    require(isActive, Errors.VL_RESERVE_INACTIVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(!isFrozen, Errors.VL_RESERVE_FROZEN);
     require(
@@ -85,7 +85,7 @@ library ValidationLogic {
     require(amount <= userBalance, Errors.VL_NOT_ENOUGH_AVAILABLE_USER_BALANCE);
 
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
-    require(isActive, Errors.VL_RESERVE_NO_ACTIVE);
+    require(isActive, Errors.VL_RESERVE_INACTIVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
   }
 
@@ -136,7 +136,7 @@ library ValidationLogic {
       vars.isPaused
     ) = params.reserveCache.reserveConfiguration.getFlags();
 
-    require(vars.isActive, Errors.VL_RESERVE_NO_ACTIVE);
+    require(vars.isActive, Errors.VL_RESERVE_INACTIVE);
     require(!vars.isPaused, Errors.VL_RESERVE_PAUSED);
     require(!vars.isFrozen, Errors.VL_RESERVE_FROZEN);
     require(params.amount != 0, Errors.VL_INVALID_AMOUNT);
@@ -301,7 +301,7 @@ library ValidationLogic {
     uint256 variableDebt
   ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
-    require(isActive, Errors.VL_RESERVE_NO_ACTIVE);
+    require(isActive, Errors.VL_RESERVE_INACTIVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
     require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
@@ -355,7 +355,7 @@ library ValidationLogic {
       .reserveConfiguration
       .getFlags();
 
-    require(isActive, Errors.VL_RESERVE_NO_ACTIVE);
+    require(isActive, Errors.VL_RESERVE_INACTIVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(!isFrozen, Errors.VL_RESERVE_FROZEN);
 
@@ -402,7 +402,7 @@ library ValidationLogic {
   ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
 
-    require(isActive, Errors.VL_RESERVE_NO_ACTIVE);
+    require(isActive, Errors.VL_RESERVE_INACTIVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
     //if the usage ratio is below 95%, no rebalances are needed
@@ -438,7 +438,7 @@ library ValidationLogic {
   ) internal pure {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
 
-    require(isActive, Errors.VL_RESERVE_NO_ACTIVE);
+    require(isActive, Errors.VL_RESERVE_INACTIVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(userBalance > 0, Errors.VL_UNDERLYING_BALANCE_ZERO);
   }
@@ -459,7 +459,7 @@ library ValidationLogic {
       DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
         .configuration;
       require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
-      require(configuration.getActive(), Errors.VL_RESERVE_NO_ACTIVE);
+      require(configuration.getActive(), Errors.VL_RESERVE_INACTIVE);
     }
   }
 
@@ -470,7 +470,7 @@ library ValidationLogic {
   function validateFlashloanSimple(DataTypes.ReserveData storage reserve) internal view {
     DataTypes.ReserveConfigurationMap memory configuration = reserve.configuration;
     require(!configuration.getPaused(), Errors.VL_RESERVE_PAUSED);
-    require(configuration.getActive(), Errors.VL_RESERVE_NO_ACTIVE);
+    require(configuration.getActive(), Errors.VL_RESERVE_INACTIVE);
   }
 
   struct ValidateLiquidationCallLocalVars {
@@ -505,7 +505,7 @@ library ValidationLogic {
 
     require(
       vars.collateralReserveActive && vars.principalReserveActive,
-      Errors.VL_RESERVE_NO_ACTIVE
+      Errors.VL_RESERVE_INACTIVE
     );
     require(
       !vars.collateralReservePaused && !vars.principalReservePaused,

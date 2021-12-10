@@ -112,7 +112,7 @@ export enum ProtocolErrors {
   CT_INVALID_MINT_AMOUNT = '25', // 'Invalid amount to mint'
   CT_INVALID_BURN_AMOUNT = '26', // 'Invalid amount to burn'
   VL_INVALID_AMOUNT = '27', // 'Amount must be greater than 0'
-  VL_RESERVE_NO_ACTIVE = '28', // 'Action requires an active reserve'
+  VL_RESERVE_INACTIVE = '28', // 'Action requires an active reserve'
   VL_RESERVE_FROZEN = '29', // 'Action cannot be performed because the reserve is frozen'
   VL_RESERVE_PAUSED = '30', // 'Action cannot be performed because the reserve is paused'
   VL_BORROWING_NOT_ENABLED = '31', // 'Borrowing is not enabled'

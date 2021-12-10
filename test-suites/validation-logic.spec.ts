@@ -11,7 +11,7 @@ import { waitForTx, evmSnapshot, evmRevert, getVariableDebtToken } from '@aave/d
 
 makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {
-    VL_RESERVE_NO_ACTIVE,
+    VL_RESERVE_INACTIVE,
     VL_RESERVE_FROZEN,
     VL_RESERVE_PAUSED,
     VL_INVALID_AMOUNT,
@@ -67,7 +67,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await expect(
       pool.connect(user.signer).deposit(dai.address, utils.parseEther('1000'), user.address, 0)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
   });
 
   it('validateDeposit() when reserve is frozen (revert expected)', async () => {
@@ -125,7 +125,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseEther('1000'), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
   });
 
   it('validateBorrow() when reserve is frozen (revert expected)', async () => {
@@ -397,7 +397,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .repay(dai.address, utils.parseEther('1'), RateMode.Variable, user.address)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
   });
 
   it('validateRepay() when variable borrowing and repaying in same block (revert expected)', async () => {
@@ -593,13 +593,13 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(dai.address, RateMode.Stable)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(dai.address, RateMode.Variable)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(dai.address, RateMode.None)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
   });
 
   it('validateSwapRateMode() when reserve is frozen', async () => {
@@ -728,7 +728,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).rebalanceStableBorrowRate(dai.address, user.address)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
   });
 
   it('validateSetUseReserveAsCollateral() when reserve is not active (revert expected)', async () => {
@@ -747,11 +747,11 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(dai.address, true)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(dai.address, false)
-    ).to.be.revertedWith(VL_RESERVE_NO_ACTIVE);
+    ).to.be.revertedWith(VL_RESERVE_INACTIVE);
   });
 
   it('validateSetUseReserveAsCollateral() with userBalance == 0 (revert expected)', async () => {
