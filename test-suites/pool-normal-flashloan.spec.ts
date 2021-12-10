@@ -16,7 +16,6 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const {
-    VL_COLLATERAL_BALANCE_IS_ZERO,
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
     SAFEERC20_LOWLEVEL_CALL,
     P_INVALID_FLASHLOAN_EXECUTOR_RETURN,

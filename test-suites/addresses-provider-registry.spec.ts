@@ -6,6 +6,8 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   const NEW_ADDRESSES_PROVIDER_ID = 2;
 
+  const { PAPR_INVALID_ADDRESSES_PROVIDER_ID, PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
+
   it('Checks the addresses provider is added to the registry', async () => {
     const { addressesProvider, registry } = testEnv;
 
@@ -20,7 +22,6 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
   it('Tries to register an addresses provider with id 0 (revert expected)', async () => {
     const { users, registry } = testEnv;
-    const { PAPR_INVALID_ADDRESSES_PROVIDER_ID } = ProtocolErrors;
 
     await expect(registry.registerAddressesProvider(users[2].address, '0')).to.be.revertedWith(
       PAPR_INVALID_ADDRESSES_PROVIDER_ID
@@ -69,8 +70,6 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   });
 
   it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
-    const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
-
     const { users, registry } = testEnv;
 
     await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(
@@ -79,8 +78,6 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   });
 
   it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
-    const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
-
     const { users, registry } = testEnv;
 
     await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(

@@ -1,15 +1,12 @@
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { MAX_UINT_AMOUNT, RAY, WAD, HALF_RAY, HALF_WAD } from '../helpers/constants';
-import { ProtocolErrors } from '../helpers/types';
 import { WadRayMathWrapper, WadRayMathWrapper__factory } from '../types';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
 makeSuite('WadRayMath', () => {
-  const { MATH_MULTIPLICATION_OVERFLOW, MATH_ADDITION_OVERFLOW } = ProtocolErrors;
-
   let wrapper: WadRayMathWrapper;
 
   before('setup', async () => {
