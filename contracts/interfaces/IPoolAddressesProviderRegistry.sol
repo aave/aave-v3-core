@@ -12,7 +12,7 @@ interface IPoolAddressesProviderRegistry {
 
   /**
    * @notice Returns the list of registered addresses provider
-   * @return The list of addresses provider, potentially containing address(0) elements
+   * @return The list of addresses providers
    **/
   function getAddressesProvidersList() external view returns (address[] memory);
 
