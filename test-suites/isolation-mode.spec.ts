@@ -40,7 +40,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const mintAmount = withdrawAmount.mul(denominatorBP.sub(feeBps)).div(denominatorBP);
   const bridgeProtocolFeeBps = BigNumber.from(2000);
 
-  const { VL_ASSET_NOT_BORROWABLE_IN_ISOLATION, VL_DEBT_CEILING_CROSSED } = ProtocolErrors;
+  const { VL_ASSET_NOT_BORROWABLE_IN_ISOLATION, VL_DEBT_CEILING_EXCEEDED } = ProtocolErrors;
 
   let aclManager;
   let oracleBaseDecimals;
@@ -256,7 +256,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const borrowAmount = utils.parseEther('100');
     await expect(
       pool.connect(users[3].signer).borrow(dai.address, borrowAmount, '2', 0, users[3].address)
-    ).to.be.revertedWith(VL_DEBT_CEILING_CROSSED);
+    ).to.be.revertedWith(VL_DEBT_CEILING_EXCEEDED);
   });
 
   it('Push time forward one year. User 1, User 3 repay debt. Ensure debt ceiling is 0', async () => {

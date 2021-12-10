@@ -84,7 +84,7 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   let baseConfigValues: ReserveConfigurationValues;
-  const { PC_RESERVE_LIQUIDITY_NOT_0 } = ProtocolErrors;
+  const { PC_RESERVE_LIQUIDITY_NOT_ZERO } = ProtocolErrors;
 
   before(() => {
     const {
@@ -775,7 +775,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     await pool.connect(user1.signer).supply(weth.address, '100', user1.address, '0');
 
     await expect(configurator.setDebtCeiling(weth.address, '100')).to.be.revertedWith(
-      PC_RESERVE_LIQUIDITY_NOT_0
+      PC_RESERVE_LIQUIDITY_NOT_ZERO
     );
   });
 

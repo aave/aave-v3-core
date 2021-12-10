@@ -16,7 +16,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     CT_INVALID_MINT_AMOUNT,
     CT_INVALID_BURN_AMOUNT,
     HLP_UINT128_OVERFLOW,
-    CALLER_NOT_POOL_ADMIN,
+    ACL_CALLER_NOT_POOL_ADMIN,
   } = ProtocolErrors;
 
   it('Check getters', async () => {
@@ -211,7 +211,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       aWETH.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+    ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
   });
 
   it('transfer() amount > MAX_UINT_128', async () => {

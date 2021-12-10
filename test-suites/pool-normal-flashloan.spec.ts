@@ -16,10 +16,10 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const {
-    VL_COLLATERAL_BALANCE_IS_0,
+    VL_COLLATERAL_BALANCE_IS_ZERO,
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
     SAFEERC20_LOWLEVEL_CALL,
-    P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
+    P_INVALID_FLASHLOAN_EXECUTOR_RETURN,
   } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
@@ -196,7 +196,7 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(P_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
+    ).to.be.revertedWith(P_INVALID_FLASHLOAN_EXECUTOR_RETURN);
   });
 
   it('Tries to take a flashloan that is bigger than the available liquidity (revert expected)', async () => {
@@ -315,7 +315,7 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(P_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
+    ).to.be.revertedWith(P_INVALID_FLASHLOAN_EXECUTOR_RETURN);
   });
 
   it('Caller deposits 1000 DAI as collateral, Takes a WETH flashloan with mode = 0, does not approve the transfer of the funds', async () => {

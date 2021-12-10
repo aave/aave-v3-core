@@ -18,7 +18,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     CT_CALLER_MUST_BE_POOL,
     CT_INVALID_MINT_AMOUNT,
     CT_INVALID_BURN_AMOUNT,
-    CALLER_NOT_POOL_ADMIN,
+    ACL_CALLER_NOT_POOL_ADMIN,
   } = ProtocolErrors;
 
   it('Check initialization', async () => {
@@ -248,7 +248,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+    ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
   });
 
   it('Check Mint and Transfer events when borrowing on behalf', async () => {

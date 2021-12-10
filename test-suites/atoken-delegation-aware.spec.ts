@@ -32,7 +32,7 @@ makeSuite('AToken: DelegationAwareAToken', (testEnv: TestEnv) => {
 
     await expect(
       delegationAToken.connect(users[1].signer).delegateUnderlyingTo(users[2].address)
-    ).to.be.revertedWith(ProtocolErrors.CALLER_NOT_POOL_ADMIN);
+    ).to.be.revertedWith(ProtocolErrors.ACL_CALLER_NOT_POOL_ADMIN);
   });
 
   it('Delegates to user 2', async () => {

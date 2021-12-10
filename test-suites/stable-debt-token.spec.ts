@@ -12,7 +12,7 @@ import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
+  const { CT_CALLER_MUST_BE_POOL, ACL_CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
   let snap: string;
 
   before(async () => {
@@ -313,6 +313,6 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebt.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
-    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+    ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
   });
 });

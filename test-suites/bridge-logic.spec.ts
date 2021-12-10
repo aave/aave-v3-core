@@ -25,7 +25,7 @@ const expectEqual = (
 };
 
 makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
-  const { VL_INVALID_AMOUNT, P_CALLER_NOT_BRIDGE, VL_UNBACKED_MINT_CAP_EXCEEDED } = ProtocolErrors;
+  const { VL_INVALID_AMOUNT, ACL_CALLER_NOT_BRIDGE, VL_UNBACKED_MINT_CAP_EXCEEDED } = ProtocolErrors;
 
   const depositAmount = utils.parseEther('1000');
   const borrowAmount = utils.parseEther('200');
@@ -96,7 +96,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     const { users, pool, dai } = testEnv;
     await expect(
       pool.connect(users[1].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
-    ).to.be.revertedWith(P_CALLER_NOT_BRIDGE);
+    ).to.be.revertedWith(ACL_CALLER_NOT_BRIDGE);
   });
 
   it('User 2 tries to perform fast withdraw from L2 with no unbackedMintCap (revert expected)', async () => {
@@ -252,7 +252,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(users[1].signer).backUnbacked(dai.address, mintAmount, feeAmount)
-    ).to.be.revertedWith(P_CALLER_NOT_BRIDGE);
+    ).to.be.revertedWith(ACL_CALLER_NOT_BRIDGE);
   });
 
   it('100 bridged dai used to back unbacked', async () => {

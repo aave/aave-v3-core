@@ -14,15 +14,17 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
   const {
     RC_INVALID_RESERVE_FACTOR,
-    PC_INVALID_CONFIGURATION,
+    PC_INVALID_PARAMS_RESERVE,
     RC_INVALID_LIQ_BONUS,
     PC_FLASHLOAN_PREMIUMS_MISMATCH,
     PC_FLASHLOAN_PREMIUM_INVALID,
-    PC_RESERVE_LIQUIDITY_NOT_0,
+    PC_RESERVE_LIQUIDITY_NOT_ZERO,
     RC_INVALID_BORROW_CAP,
     RC_INVALID_SUPPLY_CAP,
     RC_INVALID_UNBACKED_MINT_CAP,
-    RC_INVALID_EMODE_CATEGORY,
+    P_EMODE_CATEGORY_RESERVED,
+    PC_INVALID_PARAMS_EMODE_CATEGORY,
+    P_INVALID_EMODE_CATEGORY_ASSIGNMENT,
     VL_INCONSISTENT_EMODE_CATEGORY,
     PC_BRIDGE_PROTOCOL_FEE_INVALID,
   } = ProtocolErrors;
@@ -58,7 +60,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
           config.liquidationThreshold,
           config.liquidationBonus
         )
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_RESERVE);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationBonus < 10000', async () => {
@@ -70,7 +72,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, config.ltv, config.liquidationThreshold, 10000)
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_RESERVE);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationThreshold.percentMul(liquidationBonus) > PercentageMath.PERCENTAGE_FACTOR', async () => {
@@ -80,7 +82,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, 10001, 10001, 10001)
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_RESERVE);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationThreshold == 0 && liquidationBonus > 0', async () => {
@@ -88,7 +90,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).configureReserveAsCollateral(dai.address, 0, 0, 10500)
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_RESERVE);
   });
 
   it('Tries to bridge protocol fee > PERCENTAGE_FACTOR (revert expected)', async () => {
@@ -175,7 +177,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .setEModeCategory(0, '9800', '9800', '10100', ZERO_ADDRESS, 'INVALID_ID_CATEGORY')
-    ).to.be.revertedWith(RC_INVALID_EMODE_CATEGORY);
+    ).to.be.revertedWith(P_EMODE_CATEGORY_RESERVED);
   });
 
   it('Tries to add an eMode category with ltv > liquidation threshold (revert expected)', async () => {
@@ -190,7 +192,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_EMODE_CATEGORY);
   });
 
   it('Tries to add an eMode category with no liquidation bonus (revert expected)', async () => {
@@ -205,7 +207,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_EMODE_CATEGORY);
   });
 
   it('Tries to add an eMode category with too large liquidation bonus (revert expected)', async () => {
@@ -220,7 +222,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_EMODE_CATEGORY);
   });
 
   it('Tries to add an eMode category with liquidation threshold > 1 (revert expected)', async () => {
@@ -235,7 +237,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(PC_INVALID_PARAMS_EMODE_CATEGORY);
   });
 
   it('Tries to set DAI eMode category to undefined category (revert expected)', async () => {
@@ -243,7 +245,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(P_INVALID_EMODE_CATEGORY_ASSIGNMENT);
   });
 
   it('Tries to set DAI eMode category to category with too low LT (revert expected)', async () => {
@@ -268,7 +270,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(P_INVALID_EMODE_CATEGORY_ASSIGNMENT);
   });
 
   it('Tries to disable the DAI reserve with liquidity on it (revert expected)', async () => {
@@ -287,7 +289,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.setReserveActive(dai.address, false),
-      PC_RESERVE_LIQUIDITY_NOT_0
-    ).to.be.revertedWith(PC_RESERVE_LIQUIDITY_NOT_0);
+      PC_RESERVE_LIQUIDITY_NOT_ZERO
+    ).to.be.revertedWith(PC_RESERVE_LIQUIDITY_NOT_ZERO);
   });
 });
