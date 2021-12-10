@@ -8,7 +8,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   const NEW_ADDRESES_PROVIDER_ADDRESS = ONE_ADDRESS;
   const NEW_ADDRESSES_PROVIDER_ID = 2;
 
-  it.only('Checks the addresses provider is added to the registry', async () => {
+  it('Checks the addresses provider is added to the registry', async () => {
     const { addressesProvider, registry } = testEnv;
 
     const providers = await registry.getAddressesProvidersList();
@@ -20,7 +20,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it.only('Tries to register an addresses provider with id 0 (revert expected)', async () => {
+  it('Tries to register an addresses provider with id 0 (revert expected)', async () => {
     const { registry } = testEnv;
     const { PAPR_INVALID_ADDRESSES_PROVIDER_ID } = ProtocolErrors;
 
@@ -29,7 +29,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PAPR_INVALID_ADDRESSES_PROVIDER_ID);
   });
 
-  it.only('Registers a new mock addresses provider', async () => {
+  it('Registers a new mock addresses provider', async () => {
     const { registry } = testEnv;
 
     const providersBefore = await registry.getAddressesProvidersList();
@@ -58,7 +58,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it.only('Removes the mock addresses provider', async () => {
+  it('Removes the mock addresses provider', async () => {
     const { users, registry, addressesProvider } = testEnv;
 
     const providersBefore = await registry.getAddressesProvidersList();
@@ -83,7 +83,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it.only('Tries to remove an unregistered addressesProvider (revert expected)', async () => {
+  it('Tries to remove an unregistered addressesProvider (revert expected)', async () => {
     const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
 
     const { users, registry } = testEnv;
@@ -93,7 +93,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it.only('Add an already added addressesProvider with a different id, overwriting the previous id', async () => {
+  it('Add an already added addressesProvider with a different id, overwriting the previous id', async () => {
     const { registry, addressesProvider } = testEnv;
 
     const oldId = await registry.getAddressesProviderIdByAddress(addressesProvider.address);
