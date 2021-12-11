@@ -80,22 +80,22 @@ library BorrowLogic {
       reserves,
       reservesList,
       eModeCategories,
-      DataTypes.ValidateBorrowParams(
-        reserveCache,
-        userConfig,
-        params.asset,
-        params.onBehalfOf,
-        params.amount,
-        params.interestRateMode,
-        params.maxStableRateBorrowSizePercent,
-        params.reservesCount,
-        params.oracle,
-        params.userEModeCategory,
-        params.priceOracleSentinel,
-        isolationModeActive,
-        isolationModeCollateralAddress,
-        isolationModeDebtCeiling
-      )
+      DataTypes.ValidateBorrowParams({
+        reserveCache: reserveCache,
+        userConfig: userConfig,
+        asset: params.asset,
+        userAddress: params.onBehalfOf,
+        amount: params.amount,
+        interestRateMode: params.interestRateMode,
+        maxStableLoanPercent: params.maxStableRateBorrowSizePercent,
+        reservesCount: params.reservesCount,
+        oracle: params.oracle,
+        userEModeCategory: params.userEModeCategory,
+        priceOracleSentinel: params.priceOracleSentinel,
+        isolationModeActive: isolationModeActive,
+        isolationModeCollateralAddress: isolationModeCollateralAddress,
+        isolationModeDebtCeiling: isolationModeDebtCeiling
+      })
     );
 
     uint256 currentStableRate = 0;

@@ -184,17 +184,17 @@ library ReserveLogic {
       vars.nextStableRate,
       vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
-      DataTypes.CalculateInterestRatesParams(
-        reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
-        liquidityAdded,
-        liquidityTaken,
-        reserveCache.nextTotalStableDebt,
-        vars.totalVariableDebt,
-        reserveCache.nextAvgStableBorrowRate,
-        reserveCache.reserveFactor,
-        reserveAddress,
-        reserveCache.aTokenAddress
-      )
+      DataTypes.CalculateInterestRatesParams({
+        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
+        liquidityAdded: liquidityAdded,
+        liquidityTaken: liquidityTaken,
+        totalStableDebt: reserveCache.nextTotalStableDebt,
+        totalVariableDebt: vars.totalVariableDebt,
+        averageStableBorrowRate: reserveCache.nextAvgStableBorrowRate,
+        reserveFactor: reserveCache.reserveFactor,
+        reserve: reserveAddress,
+        aToken: reserveCache.aTokenAddress
+      })
     );
 
     reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);

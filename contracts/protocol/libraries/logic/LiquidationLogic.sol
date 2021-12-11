@@ -99,24 +99,24 @@ library LiquidationLogic {
       reserves,
       reservesList,
       eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        userConfig,
-        params.reservesCount,
-        params.user,
-        params.priceOracle,
-        params.userEModeCategory
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: userConfig,
+        reservesCount: params.reservesCount,
+        user: params.user,
+        oracle: params.priceOracle,
+        userEModeCategory: params.userEModeCategory
+      })
     );
 
     ValidationLogic.validateLiquidationCall(
       userConfig,
       collateralReserve,
-      DataTypes.ValidateLiquidationCallParams(
-        vars.debtReserveCache,
-        vars.userStableDebt + vars.userVariableDebt,
-        vars.healthFactor,
-        params.priceOracleSentinel
-      )
+      DataTypes.ValidateLiquidationCallParams({
+        debtReserveCache: vars.debtReserveCache,
+        totalDebt: vars.userStableDebt + vars.userVariableDebt,
+        healthFactor: vars.healthFactor,
+        priceOracleSentinel: params.priceOracleSentinel
+      })
     );
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);

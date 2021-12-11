@@ -293,7 +293,13 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
     _pool.configureEModeCategory(
       categoryId,
-      DataTypes.EModeCategory(ltv, liquidationThreshold, liquidationBonus, oracle, label)
+      DataTypes.EModeCategory({
+        ltv: ltv,
+        liquidationThreshold: liquidationThreshold,
+        liquidationBonus: liquidationBonus,
+        priceSource: oracle,
+        label: label
+      })
     );
     emit EModeCategoryAdded(categoryId, ltv, liquidationThreshold, liquidationBonus, oracle, label);
   }
