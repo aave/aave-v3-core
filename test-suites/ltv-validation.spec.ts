@@ -5,7 +5,7 @@ import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('LTV validation', (testEnv: TestEnv) => {
-  const { VL_LTV_VALIDATION_FAILED } = ProtocolErrors;
+  const { LTV_VALIDATION_FAILED } = ProtocolErrors;
 
   it('User 1 deposits 10 Dai, 10 USDC, user 2 deposits 0.071 WETH', async () => {
     const {
@@ -76,7 +76,7 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user1.signer).withdraw(usdc.address, withdrawnAmount, user1.address)
-    ).to.be.revertedWith(VL_LTV_VALIDATION_FAILED);
+    ).to.be.revertedWith(LTV_VALIDATION_FAILED);
   });
 
   it('Withdraws DAI', async () => {

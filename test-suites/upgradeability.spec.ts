@@ -336,7 +336,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
   });
 
   context('PoolConfigurator upgrade ability', () => {
-    const { ACL_CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
+    const { CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
     let newATokenAddress: string;
     let newStableTokenAddress: string;
     let newVariableTokenAddress: string;
@@ -401,7 +401,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
       };
       await expect(
         configurator.connect(users[1].signer).updateAToken(updateATokenInputParams)
-      ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
     });
 
     it('Upgrades the DAI Atoken implementation ', async () => {
@@ -458,7 +458,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
 
       await expect(
         configurator.connect(users[1].signer).updateStableDebtToken(updateDebtTokenInput)
-      ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
     });
 
     it('Upgrades the DAI stable debt token implementation ', async () => {
@@ -520,7 +520,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
 
       await expect(
         configurator.connect(users[1].signer).updateVariableDebtToken(updateDebtTokenInput)
-      ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
     });
 
     it('Upgrades the DAI variable debt token implementation ', async () => {

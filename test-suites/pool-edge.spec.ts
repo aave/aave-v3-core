@@ -22,13 +22,13 @@ declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   const {
-    P_NO_MORE_RESERVES_ALLOWED,
-    P_CALLER_NOT_ATOKEN,
-    P_NOT_CONTRACT,
-    P_CALLER_NOT_POOL_CONFIGURATOR,
-    RL_RESERVE_ALREADY_INITIALIZED,
-    P_INCORRECT_ADDRESSES_PROVIDER,
-    P_RESERVE_ALREADY_ADDED,
+    NO_MORE_RESERVES_ALLOWED,
+    CALLER_NOT_ATOKEN,
+    NOT_CONTRACT,
+    CALLER_NOT_POOL_CONFIGURATOR,
+    RESERVE_ALREADY_INITIALIZED,
+    INCORRECT_ADDRESSES_PROVIDER,
+    RESERVE_ALREADY_ADDED,
   } = ProtocolErrors;
 
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
@@ -69,7 +69,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const freshPool = Pool__factory.connect(NEW_POOL_IMPL_ARTIFACT.address, deployer.signer);
 
     await expect(freshPool.initialize(deployer.address)).to.be.revertedWith(
-      P_INCORRECT_ADDRESSES_PROVIDER
+      INCORRECT_ADDRESSES_PROVIDER
     );
   });
 
@@ -97,7 +97,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
           config.variableDebtTokenAddress,
           ZERO_ADDRESS
         )
-    ).to.be.revertedWith(P_CALLER_NOT_POOL_CONFIGURATOR);
+    ).to.be.revertedWith(CALLER_NOT_POOL_CONFIGURATOR);
   });
 
   it('Call `setUserUseReserveAsCollateral()` to use an asset as collateral when the asset is already set as collateral', async () => {
@@ -192,7 +192,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       pool
         .connect(users[0].signer)
         .finalizeTransfer(dai.address, users[0].address, users[1].address, 0, 0, 0)
-    ).to.be.revertedWith(P_CALLER_NOT_ATOKEN);
+    ).to.be.revertedWith(CALLER_NOT_ATOKEN);
   });
 
   it('Tries to call `initReserve()` with an EOA as reserve (revert expected)', async () => {
@@ -207,7 +207,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       pool
         .connect(configSigner)
         .initReserve(users[0].address, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS)
-    ).to.be.revertedWith(P_NOT_CONTRACT);
+    ).to.be.revertedWith(NOT_CONTRACT);
   });
 
   it('PoolConfigurator updates the ReserveInterestRateStrategy address', async () => {
@@ -246,7 +246,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         config.variableDebtTokenAddress,
         ZERO_ADDRESS
       )
-    ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
+    ).to.be.revertedWith(RESERVE_ALREADY_INITIALIZED);
   });
 
   it('Init reserve with ZERO_ADDRESS as aToken twice, to enter `_addReserveToList()` already added (revert expected)', async () => {
@@ -291,7 +291,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
           config.variableDebtTokenAddress,
           ZERO_ADDRESS
         )
-    ).to.be.revertedWith(P_RESERVE_ALREADY_ADDED);
+    ).to.be.revertedWith(RESERVE_ALREADY_ADDED);
     const poolListAfter = await pool.getReservesList();
     expect(poolListAfter.length).to.be.eq(poolListMid.length);
   });
@@ -353,7 +353,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         config.variableDebtTokenAddress,
         ZERO_ADDRESS
       )
-    ).to.be.revertedWith(P_NO_MORE_RESERVES_ALLOWED);
+    ).to.be.revertedWith(NO_MORE_RESERVES_ALLOWED);
   });
 
   it('Add asset after multiple drops', async () => {

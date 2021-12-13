@@ -15,10 +15,10 @@ declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
   const {
-    CT_CALLER_MUST_BE_POOL,
-    CT_INVALID_MINT_AMOUNT,
-    CT_INVALID_BURN_AMOUNT,
-    ACL_CALLER_NOT_POOL_ADMIN,
+    CALLER_MUST_BE_POOL,
+    INVALID_MINT_AMOUNT,
+    INVALID_BURN_AMOUNT,
+    CALLER_NOT_POOL_ADMIN,
   } = ProtocolErrors;
 
   it('Check initialization', async () => {
@@ -92,7 +92,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.mint(deployer.address, deployer.address, '1', '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
+    ).to.be.revertedWith(CALLER_MUST_BE_POOL);
   });
 
   it('Tries to burn not being the Pool (revert expected)', async () => {
@@ -105,7 +105,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
     const variableDebtContract = await getVariableDebtToken(daiVariableDebtTokenAddress);
 
     await expect(variableDebtContract.burn(deployer.address, '1', '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
+      CALLER_MUST_BE_POOL
     );
   });
 
@@ -127,7 +127,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       variableDebtContract
         .connect(poolSigner)
         .mint(users[0].address, users[0].address, 0, utils.parseUnits('1', 27))
-    ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
+    ).to.be.revertedWith(INVALID_MINT_AMOUNT);
   });
 
   it('Tries to burn with amountScaled == 0 (revert expected)', async () => {
@@ -146,7 +146,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(poolSigner).burn(users[0].address, 0, utils.parseUnits('1', 27))
-    ).to.be.revertedWith(CT_INVALID_BURN_AMOUNT);
+    ).to.be.revertedWith(INVALID_BURN_AMOUNT);
   });
 
   it('Tries to transfer debt tokens (revert expected)', async () => {
@@ -248,7 +248,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
-    ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 
   it('Check Mint and Transfer events when borrowing on behalf', async () => {

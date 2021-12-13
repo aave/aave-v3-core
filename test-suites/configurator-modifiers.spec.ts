@@ -5,11 +5,11 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
   const {
-    ACL_CALLER_NOT_POOL_ADMIN,
-    ACL_CALLER_NOT_POOL_OR_EMERGENCY_ADMIN,
-    ACL_CALLER_NOT_RISK_OR_POOL_ADMIN,
-    ACL_CALLER_NOT_EMERGENCY_ADMIN,
-    ACL_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN,
+    CALLER_NOT_POOL_ADMIN,
+    CALLER_NOT_POOL_OR_EMERGENCY_ADMIN,
+    CALLER_NOT_RISK_OR_POOL_ADMIN,
+    CALLER_NOT_EMERGENCY_ADMIN,
+    CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN,
   } = ProtocolErrors;
 
   it('Test the accessibility of onlyAssetListingOrPoolAdmins modified functions', async () => {
@@ -43,7 +43,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     for (const call of calls) {
       await expect(
         configurator.connect(nonPoolAdmin.signer)[call.fn](...call.args)
-      ).to.be.revertedWith(ACL_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
     }
   });
 
@@ -85,7 +85,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     for (const call of calls) {
       await expect(
         configurator.connect(nonPoolAdmin.signer)[call.fn](...call.args)
-      ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
     }
   });
 
@@ -121,7 +121,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     for (const call of calls) {
       await expect(
         configurator.connect(nonRiskOrPoolAdmins.signer)[call.fn](...call.args)
-      ).to.be.revertedWith(ACL_CALLER_NOT_RISK_OR_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_RISK_OR_POOL_ADMIN);
     }
   });
 
@@ -129,22 +129,22 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     const { configurator, weth, riskAdmin } = testEnv;
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, true),
-      ACL_CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(ACL_CALLER_NOT_POOL_OR_EMERGENCY_ADMIN);
+      CALLER_NOT_POOL_ADMIN
+    ).to.be.revertedWith(CALLER_NOT_POOL_OR_EMERGENCY_ADMIN);
   });
 
   it('Tries to unpause reserve with non-emergency-admin account (revert expected)', async () => {
     const { configurator, weth, riskAdmin } = testEnv;
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, false),
-      ACL_CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(ACL_CALLER_NOT_POOL_OR_EMERGENCY_ADMIN);
+      CALLER_NOT_POOL_ADMIN
+    ).to.be.revertedWith(CALLER_NOT_POOL_OR_EMERGENCY_ADMIN);
   });
 
   it('Tries to pause pool with not emergency admin (revert expected)', async () => {
     const { users, configurator } = testEnv;
     await expect(configurator.connect(users[0].signer).setPoolPause(true)).to.be.revertedWith(
-      ACL_CALLER_NOT_EMERGENCY_ADMIN
+      CALLER_NOT_EMERGENCY_ADMIN
     );
   });
 });

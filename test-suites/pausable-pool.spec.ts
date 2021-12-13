@@ -24,7 +24,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const {
-    VL_RESERVE_PAUSED,
+    RESERVE_PAUSED,
     INVALID_FROM_BALANCE_AFTER_TRANSFER,
     INVALID_TO_BALANCE_AFTER_TRANSFER,
   } = ProtocolErrors;
@@ -55,7 +55,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // User 0 tries the transfer to User 1
     await expect(
       aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoDeposit)
-    ).to.revertedWith(VL_RESERVE_PAUSED);
+    ).to.revertedWith(RESERVE_PAUSED);
 
     const pausedFromBalance = await aDai.balanceOf(users[0].address);
     const pausedToBalance = await aDai.balanceOf(users[1].address);
@@ -102,7 +102,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     await configurator.connect(users[1].signer).setPoolPause(true);
     await expect(
       pool.connect(users[0].signer).deposit(dai.address, amountDAItoDeposit, users[0].address, '0')
-    ).to.revertedWith(VL_RESERVE_PAUSED);
+    ).to.revertedWith(RESERVE_PAUSED);
 
     // Configurator unpauses the pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -127,7 +127,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // user tries to burn
     await expect(
       pool.connect(users[0].signer).withdraw(dai.address, amountDAItoDeposit, users[0].address)
-    ).to.revertedWith(VL_RESERVE_PAUSED);
+    ).to.revertedWith(RESERVE_PAUSED);
 
     // Configurator unpauses the pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -143,7 +143,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // Try to execute liquidation
     await expect(
       pool.connect(user.signer).borrow(dai.address, '1', '1', '0', user.address)
-    ).to.be.revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(RESERVE_PAUSED);
 
     // Unpause the pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -159,7 +159,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // Try to execute liquidation
     await expect(
       pool.connect(user.signer).repay(dai.address, '1', '1', user.address)
-    ).to.be.revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(RESERVE_PAUSED);
 
     // Unpause the pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -189,7 +189,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -262,7 +262,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // Do liquidation
     await expect(
       pool.liquidationCall(weth.address, usdc.address, borrower.address, amountToLiquidate, true)
-    ).to.be.revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -291,7 +291,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // Try to repay
     await expect(
       pool.connect(user.signer).swapBorrowRateMode(usdc.address, RateMode.Stable)
-    ).to.be.revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -305,7 +305,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).rebalanceStableBorrowRate(dai.address, user.address)
-    ).to.be.revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setPoolPause(false);
@@ -325,7 +325,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(weth.address, false)
-    ).to.be.revertedWith(VL_RESERVE_PAUSED);
+    ).to.be.revertedWith(RESERVE_PAUSED);
 
     // Unpause pool
     await configurator.connect(users[1].signer).setPoolPause(false);

@@ -12,7 +12,7 @@ import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL, ACL_CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
+  const { CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
   let snap: string;
 
   before(async () => {
@@ -76,7 +76,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.mint(deployer.address, deployer.address, '1', '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
+    ).to.be.revertedWith(CALLER_MUST_BE_POOL);
   });
 
   it('Tries to burn not being the Pool (revert expected)', async () => {
@@ -91,7 +91,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     expect(name).to.be.equal('Aave stable debt bearing DAI');
     await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
+      CALLER_MUST_BE_POOL
     );
   });
 
@@ -313,6 +313,6 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebt.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
-    ).to.be.revertedWith(ACL_CALLER_NOT_POOL_ADMIN);
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 });

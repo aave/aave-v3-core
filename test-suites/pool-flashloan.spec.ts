@@ -17,10 +17,10 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const {
-    VL_COLLATERAL_BALANCE_IS_ZERO,
+    COLLATERAL_BALANCE_IS_ZERO,
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
     SAFEERC20_LOWLEVEL_CALL,
-    P_INVALID_FLASHLOAN_EXECUTOR_RETURN,
+    INVALID_FLASHLOAN_EXECUTOR_RETURN,
   } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
@@ -282,7 +282,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(P_INVALID_FLASHLOAN_EXECUTOR_RETURN);
+    ).to.be.revertedWith(INVALID_FLASHLOAN_EXECUTOR_RETURN);
   });
 
   it('Takes a WETH flashloan with an invalid mode (revert expected)', async () => {
@@ -474,7 +474,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(VL_COLLATERAL_BALANCE_IS_ZERO);
+    ).to.be.revertedWith(COLLATERAL_BALANCE_IS_ZERO);
   });
 
   it('Caller deposits 5 WETH as collateral, Takes a USDC flashloan with mode = 2, does not return the funds. A loan for caller is created', async () => {
