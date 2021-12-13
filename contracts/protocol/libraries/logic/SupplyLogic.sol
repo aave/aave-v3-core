@@ -252,7 +252,7 @@ library SupplyLogic {
         !isolationModeActive &&
           (reserveCache.reserveConfiguration.getDebtCeiling() == 0 ||
             !userConfig.isUsingAsCollateralAny()),
-        Errors.SL_USER_IN_ISOLATION_MODE
+        Errors.USER_IN_ISOLATION_MODE
       );
 
       userConfig.setUsingAsCollateral(reserve.id, true);
