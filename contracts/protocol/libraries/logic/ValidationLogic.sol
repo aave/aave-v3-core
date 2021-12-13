@@ -216,13 +216,13 @@ library ValidationLogic {
       reservesData,
       reserves,
       eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        params.userConfig,
-        params.reservesCount,
-        params.userAddress,
-        params.oracle,
-        params.userEModeCategory
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: params.userConfig,
+        reservesCount: params.reservesCount,
+        user: params.userAddress,
+        oracle: params.oracle,
+        userEModeCategory: params.userEModeCategory
+      })
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
@@ -559,13 +559,13 @@ library ValidationLogic {
         reservesData,
         reserves,
         eModeCategories,
-        DataTypes.CalculateUserAccountDataParams(
-          userConfig,
-          reservesCount,
-          user,
-          oracle,
-          userEModeCategory
-        )
+        DataTypes.CalculateUserAccountDataParams({
+          userConfig: userConfig,
+          reservesCount: reservesCount,
+          user: user,
+          oracle: oracle,
+          userEModeCategory: userEModeCategory
+        })
       );
 
     require(

@@ -11,7 +11,8 @@ import {IACLManager} from '../../interfaces/IACLManager.sol';
  * @title PriceOracleSentinel
  * @author Aave
  * @notice It validates if operations are allowed depending on the PriceOracle health.
- * @dev After a PriceOracle downtime, once it gets up, users can make their positions healthy during a grace period.
+ * @dev Once the PriceOracle gets up after an outage/downtime, users can make their positions healthy during a grace
+ *  period. So the PriceOracle is considered completely up once its up and the grace period passed.
  */
 contract PriceOracleSentinel is IPriceOracleSentinel {
   modifier onlyPoolAdmin() {
@@ -61,6 +62,10 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
     return _isUpAndGracePeriodPassed();
   }
 
+  /**
+   * @notice Checks the sequencer oracle is healthy: is up and grace period passed.
+   * @return True if the SequencerOracle is up and the grace period passed, false otherwise
+   */
   function _isUpAndGracePeriodPassed() internal view returns (bool) {
     (bool isDown, uint256 timestampGotUp) = _sequencerOracle.latestAnswer();
     return !isDown && block.timestamp - timestampGotUp > _gracePeriod;

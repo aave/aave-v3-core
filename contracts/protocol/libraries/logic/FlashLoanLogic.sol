@@ -171,20 +171,20 @@ library FlashLoanLogic {
           reservesList,
           eModeCategories,
           userConfig,
-          DataTypes.ExecuteBorrowParams(
-            vars.currentAsset,
-            msg.sender,
-            params.onBehalfOf,
-            vars.currentAmount,
-            params.modes[vars.i],
-            params.referralCode,
-            false,
-            params.maxStableRateBorrowSizePercent,
-            params.reservesCount,
-            vars.oracle,
-            params.userEModeCategory,
-            vars.oracleSentinel
-          )
+          DataTypes.ExecuteBorrowParams({
+            asset: vars.currentAsset,
+            user: msg.sender,
+            onBehalfOf: params.onBehalfOf,
+            amount: vars.currentAmount,
+            interestRateMode: params.modes[vars.i],
+            referralCode: params.referralCode,
+            releaseUnderlying: false,
+            maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,
+            reservesCount: params.reservesCount,
+            oracle: vars.oracle,
+            userEModeCategory: params.userEModeCategory,
+            priceOracleSentinel: vars.oracleSentinel
+          })
         );
       }
       emit FlashLoan(
