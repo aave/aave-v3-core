@@ -47,6 +47,7 @@ library BorrowLogic {
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
   event Swap(address indexed reserve, address indexed user, uint256 rateMode);
+  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
    * @notice Implements the borrow feature. Borrowing allows users that provided collateral to draw liquidity from the
@@ -125,12 +126,14 @@ library BorrowLogic {
     }
 
     if (isolationModeActive) {
-      reserves[isolationModeCollateralAddress].isolationModeTotalDebt += Helpers.castUint128(
+      uint256 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+        .isolationModeTotalDebt += Helpers.castUint128(
         params.amount /
           10 **
             (reserveCache.reserveConfiguration.getDecimals() -
               ReserveConfiguration.DEBT_CEILING_DECIMALS)
       );
+      emit IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, isolationModeTotalDebt);
     }
 
     reserve.updateInterestRates(

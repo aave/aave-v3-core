@@ -105,6 +105,13 @@ interface IPool {
   event Swap(address indexed reserve, address indexed user, uint256 rateMode);
 
   /**
+   * @notice Emitted on borrow(), repay() and liquidationCall() when using isolated assets
+   * @param asset The address of the underlying asset of the reserve
+   * @param totalDebt The total isolation mode debt for the reserve
+   */
+  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
+
+  /**
    * @notice Emitted on setUserUseReserveAsCollateral()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user enabling the usage as collateral
