@@ -15,6 +15,7 @@ library IsolationModeLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
+  // See `IPool` for descriptions
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
