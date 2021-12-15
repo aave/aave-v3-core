@@ -55,8 +55,7 @@ library GenericLogic {
    * @notice Calculates the user data across the reserves.
    * @dev It includes the total liquidity/collateral/borrow balances in the base currency used by the price feed,
    * the average Loan To Value, the average Liquidation Ratio, and the Health factor.
-   * @param reservesData The data of all the reserves
-   * @param reserves The list of the available reserves
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param params Additional parameters needed for the calculation
    * @return The total collateral of the user in the base currency used by the price feed
    * @return The total debt of the user in the base currency used by the price feed
@@ -66,9 +65,7 @@ library GenericLogic {
    * @return True if the ltv is zero, false otherwise
    **/
   function calculateUserAccountData(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.CalculateUserAccountDataParams memory params
   )
     internal
@@ -89,9 +86,11 @@ library GenericLogic {
     CalculateUserAccountDataVars memory vars;
 
     if (params.userEModeCategory != 0) {
-      vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
-      vars.eModeLtv = eModeCategories[params.userEModeCategory].ltv;
-      vars.eModeLiqThreshold = eModeCategories[params.userEModeCategory].liquidationThreshold;
+      vars.eModePriceSource = poolData.eModeCategories[params.userEModeCategory].priceSource;
+      vars.eModeLtv = poolData.eModeCategories[params.userEModeCategory].ltv;
+      vars.eModeLiqThreshold = poolData
+        .eModeCategories[params.userEModeCategory]
+        .liquidationThreshold;
 
       if (vars.eModePriceSource != address(0)) {
         vars.eModeAssetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(
@@ -108,7 +107,7 @@ library GenericLogic {
         continue;
       }
 
-      vars.currentReserveAddress = reserves[vars.i];
+      vars.currentReserveAddress = poolData.reservesList[vars.i];
 
       if (vars.currentReserveAddress == address(0)) {
         unchecked {
@@ -117,7 +116,7 @@ library GenericLogic {
         continue;
       }
 
-      DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
+      DataTypes.ReserveData storage currentReserve = poolData.reserves[vars.currentReserveAddress];
 
       (
         vars.ltv,

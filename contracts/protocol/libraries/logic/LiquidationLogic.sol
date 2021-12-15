@@ -94,9 +94,7 @@ library LiquidationLogic {
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
     (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
-      poolData.reserves,
-      poolData.reservesList,
-      poolData.eModeCategories,
+      poolData,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: userConfig,
         reservesCount: params.reservesCount,

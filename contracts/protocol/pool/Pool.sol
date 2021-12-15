@@ -475,9 +475,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
-      _poolData.reserves,
-      _poolData.reservesList,
-      _poolData.eModeCategories,
+      _poolData,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: _poolData.usersConfig[user],
         reservesCount: _reservesCount,

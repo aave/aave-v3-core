@@ -209,9 +209,7 @@ library ValidationLogic {
       vars.healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
-      poolData.reserves,
-      poolData.reservesList,
-      poolData.eModeCategories,
+      poolData,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: params.userConfig,
         reservesCount: params.reservesCount,
@@ -548,9 +546,7 @@ library ValidationLogic {
   ) internal view returns (uint256, bool) {
     (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) = GenericLogic
       .calculateUserAccountData(
-        poolData.reserves,
-        poolData.reservesList,
-        poolData.eModeCategories,
+        poolData,
         DataTypes.CalculateUserAccountDataParams({
           userConfig: userConfig,
           reservesCount: reservesCount,
