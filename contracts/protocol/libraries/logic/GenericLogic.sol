@@ -137,6 +137,8 @@ library GenericLogic {
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
+        // Fetching normalized income directly from storage and then performing the multiplication
+        // here, saves a call from the IScaledBalanceToken to get the normalized income.
         vars.normalizedIncome = currentReserve.getNormalizedIncome();
         vars.userBalance = IScaledBalanceToken(currentReserve.aTokenAddress).scaledBalanceOf(
           params.user
