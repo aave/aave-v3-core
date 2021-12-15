@@ -14,7 +14,7 @@ import {BaseUpgradeabilityProxy} from '../../../dependencies/openzeppelin/upgrad
  * feature proposal that would enable this to be done automatically.
  */
 contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
-  address immutable ADMIN;
+  address private immutable ADMIN;
 
   constructor(address admin) {
     ADMIN = admin;
