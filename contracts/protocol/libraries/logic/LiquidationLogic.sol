@@ -134,7 +134,8 @@ library LiquidationLogic {
       ? vars.maxLiquidatableDebt
       : params.debtToCover;
 
-    vars.liquidationBonus = params.userEModeCategory == 0
+    vars.liquidationBonus = params.userEModeCategory == 0 ||
+      params.userEModeCategory != collateralReserve.configuration.getEModeCategory()
       ? collateralReserve.configuration.getLiquidationBonus()
       : eModeCategories[params.userEModeCategory].liquidationBonus;
 
