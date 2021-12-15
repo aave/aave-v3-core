@@ -32,6 +32,15 @@ library DataTypes {
     uint128 isolationModeTotalDebt;
   }
 
+  struct PoolData {
+    mapping(address => DataTypes.ReserveData) reserves;
+    mapping(address => DataTypes.UserConfigurationMap) usersConfig;
+    // the list of the available reserves, structured as a mapping for gas savings reasons
+    mapping(uint256 => address) reservesList;
+    mapping(uint8 => DataTypes.EModeCategory) eModeCategories;
+    mapping(address => uint8) usersEModeCategory;
+  }
+
   struct ReserveConfigurationMap {
     //bit 0-15: LTV
     //bit 16-31: Liq. threshold

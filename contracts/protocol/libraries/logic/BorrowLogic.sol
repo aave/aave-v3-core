@@ -52,20 +52,16 @@ library BorrowLogic {
    * @notice Implements the borrow feature. Borrowing allows users that provided collateral to draw liquidity from the
    * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the isolated debt.
    * @dev  Emits the `Borrow()` event
-   * @param reserves The state of all the reserves
-   * @param reservesList The addresses of all the active reserves
-   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the borrow function
    */
   function executeBorrow(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteBorrowParams memory params
   ) public {
-    DataTypes.ReserveData storage reserve = reserves[params.asset];
+    DataTypes.ReserveData storage reserve = poolData.reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
@@ -74,12 +70,10 @@ library BorrowLogic {
       bool isolationModeActive,
       address isolationModeCollateralAddress,
       uint256 isolationModeDebtCeiling
-    ) = userConfig.getIsolationModeState(reserves, reservesList);
+    ) = userConfig.getIsolationModeState(poolData.reserves, poolData.reservesList);
 
     ValidationLogic.validateBorrow(
-      reserves,
-      reservesList,
-      eModeCategories,
+      poolData,
       DataTypes.ValidateBorrowParams({
         reserveCache: reserveCache,
         userConfig: userConfig,
@@ -125,12 +119,13 @@ library BorrowLogic {
     }
 
     if (isolationModeActive) {
-      reserves[isolationModeCollateralAddress].isolationModeTotalDebt += Helpers.castUint128(
-        params.amount /
-          10 **
-            (reserveCache.reserveConfiguration.getDecimals() -
-              ReserveConfiguration.DEBT_CEILING_DECIMALS)
-      );
+      poolData.reserves[isolationModeCollateralAddress].isolationModeTotalDebt += Helpers
+        .castUint128(
+          params.amount /
+            10 **
+              (reserveCache.reserveConfiguration.getDecimals() -
+                ReserveConfiguration.DEBT_CEILING_DECIMALS)
+        );
     }
 
     reserve.updateInterestRates(
@@ -161,16 +156,16 @@ library BorrowLogic {
    * @notice Implements the repay feature. Repaying transfers the underlying back to the aToken and clears the equivalent amount
    * of debt for the user by burning the corresponding debt token. For isolated positions, it also reduces the isolated debt.
    * @dev  Emits the `Repay()` event
-   * @param reserves The state of all the reserves
-   * @param reservesList The addresses of all the active reserves
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param reserve The data of the reserve of the asset being repaid
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the repay function
    * @return The actual amount being repaid
    */
   function executeRepay(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(uint256 => address) storage reservesList,
+    // mapping(address => DataTypes.ReserveData) storage reserves,
+    // mapping(uint256 => address) storage reservesList,
+    DataTypes.PoolData storage poolData,
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory params
@@ -223,8 +218,8 @@ library BorrowLogic {
     }
 
     IsolationModeLogic.updateIsolatedDebtIfIsolated(
-      reserves,
-      reservesList,
+      poolData.reserves,
+      poolData.reservesList,
       userConfig,
       reserveCache,
       paybackAmount

@@ -34,38 +34,28 @@ library EModeLogic {
    * @notice Updates the user efficiency mode category
    * @dev Will revert if user is borrowing non-compatible asset or change will drop HF < HEALTH_FACTOR_LIQUIDATION_THRESHOLD
    * @dev Emits the `UserEModeSet` event
-   * @param reserves The state of all the reserves
-   * @param reservesList The list of the addresses of all the active reserves
-   * @param eModeCategories The configuration of all the efficiency mode categories
-   * @param usersEModeCategory The state of all users efficiency mode category
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the setUserEMode function
    */
   function executeSetUserEMode(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
-    mapping(address => uint8) storage usersEModeCategory,
+    DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteSetUserEModeParams memory params
   ) external {
     ValidationLogic.validateSetUserEMode(
-      reserves,
-      reservesList,
-      eModeCategories,
+      poolData,
       userConfig,
       params.reservesCount,
       params.categoryId
     );
 
-    uint8 prevCategoryId = usersEModeCategory[msg.sender];
-    usersEModeCategory[msg.sender] = params.categoryId;
+    uint8 prevCategoryId = poolData.usersEModeCategory[msg.sender];
+    poolData.usersEModeCategory[msg.sender] = params.categoryId;
 
     if (prevCategoryId != 0) {
       ValidationLogic.validateHealthFactor(
-        reserves,
-        reservesList,
-        eModeCategories,
+        poolData,
         userConfig,
         msg.sender,
         params.categoryId,

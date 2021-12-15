@@ -67,16 +67,12 @@ library FlashLoanLogic {
    * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
    * if the receiver have not approved the pool the transaction will revert.
    * @dev Emits the `FlashLoan()` event
-   * @param reserves The state of all the reserves
-   * @param reservesList The list of addresses of all the active reserves
-   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the flashloan function
    */
   function executeFlashLoan(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory params
   ) external {
@@ -89,7 +85,7 @@ library FlashLoanLogic {
     vars.aTokenAddresses = new address[](params.assets.length);
     vars.totalPremiums = new uint256[](params.assets.length);
 
-    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
+    ValidationLogic.validateFlashloan(params.assets, params.amounts, poolData.reserves);
 
     vars.receiver = IFlashLoanReceiver(params.receiverAddress);
     (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
@@ -97,7 +93,7 @@ library FlashLoanLogic {
       : (params.flashLoanPremiumTotal, params.flashLoanPremiumToProtocol);
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
-      vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;
+      vars.aTokenAddresses[vars.i] = poolData.reserves[params.assets[vars.i]].aTokenAddress;
       vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(vars.flashloanPremiumTotal);
       IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
         params.receiverAddress,
@@ -128,7 +124,7 @@ library FlashLoanLogic {
         );
         vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
 
-        DataTypes.ReserveData storage reserve = reserves[vars.currentAsset];
+        DataTypes.ReserveData storage reserve = poolData.reserves[vars.currentAsset];
         DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
         reserve.updateState(reserveCache);
@@ -167,9 +163,7 @@ library FlashLoanLogic {
         vars.oracleSentinel = IPoolAddressesProvider(params.addressesProvider)
           .getPriceOracleSentinel();
         BorrowLogic.executeBorrow(
-          reserves,
-          reservesList,
-          eModeCategories,
+          poolData,
           userConfig,
           DataTypes.ExecuteBorrowParams({
             asset: vars.currentAsset,

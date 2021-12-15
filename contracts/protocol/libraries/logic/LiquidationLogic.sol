@@ -73,19 +73,17 @@ library LiquidationLogic {
    * @dev Function to liquidate a position if its Health Factor drops below 1. The caller (liquidator)
    * covers `debtToCover` amount of debt of the user getting liquidated, and receives
    * a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    **/
   function executeLiquidationCall(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
-    mapping(uint256 => address) storage reservesList,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.ExecuteLiquidationCallParams memory params
   ) external {
     LiquidationCallLocalVars memory vars;
 
-    DataTypes.ReserveData storage collateralReserve = reserves[params.collateralAsset];
-    DataTypes.ReserveData storage debtReserve = reserves[params.debtAsset];
-    DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
+    DataTypes.ReserveData storage collateralReserve = poolData.reserves[params.collateralAsset];
+    DataTypes.ReserveData storage debtReserve = poolData.reserves[params.debtAsset];
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[params.user];
     vars.debtReserveCache = debtReserve.cache();
     debtReserve.updateState(vars.debtReserveCache);
 
@@ -96,9 +94,9 @@ library LiquidationLogic {
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
     (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
-      reserves,
-      reservesList,
-      eModeCategories,
+      poolData.reserves,
+      poolData.reservesList,
+      poolData.eModeCategories,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: userConfig,
         reservesCount: params.reservesCount,
@@ -136,7 +134,7 @@ library LiquidationLogic {
 
     vars.liquidationBonus = params.userEModeCategory == 0
       ? collateralReserve.configuration.getLiquidationBonus()
-      : eModeCategories[params.userEModeCategory].liquidationBonus;
+      : poolData.eModeCategories[params.userEModeCategory].liquidationBonus;
 
     (
       vars.maxCollateralToLiquidate,
@@ -192,8 +190,8 @@ library LiquidationLogic {
     );
 
     IsolationModeLogic.updateIsolatedDebtIfIsolated(
-      reserves,
-      reservesList,
+      poolData.reserves,
+      poolData.reservesList,
       userConfig,
       vars.debtReserveCache,
       vars.actualDebtToLiquidate
@@ -208,11 +206,10 @@ library LiquidationLogic {
       );
 
       if (vars.liquidatorPreviousATokenBalance == 0) {
-        DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
+        DataTypes.UserConfigurationMap storage liquidatorConfig = poolData.usersConfig[msg.sender];
         if (
           ValidationLogic.validateUseAsCollateral(
-            reserves,
-            reservesList,
+            poolData,
             liquidatorConfig,
             params.collateralAsset
           )

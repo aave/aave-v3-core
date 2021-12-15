@@ -113,15 +113,11 @@ library ValidationLogic {
 
   /**
    * @notice Validates a borrow action
-   * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.ValidateBorrowParams memory params
   ) internal view {
     ValidateBorrowLocalVars memory vars;
@@ -185,7 +181,7 @@ library ValidationLogic {
       );
 
       require(
-        reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt +
+        poolData.reserves[params.isolationModeCollateralAddress].isolationModeTotalDebt +
           Helpers.castUint128(
             params.amount /
               10 **
@@ -202,7 +198,7 @@ library ValidationLogic {
         params.reserveCache.reserveConfiguration.getEModeCategory() == params.userEModeCategory,
         Errors.VL_INCONSISTENT_EMODE_CATEGORY
       );
-      vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
+      vars.eModePriceSource = poolData.eModeCategories[params.userEModeCategory].priceSource;
     }
 
     (
@@ -213,9 +209,9 @@ library ValidationLogic {
       vars.healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
-      reservesData,
-      reserves,
-      eModeCategories,
+      poolData.reserves,
+      poolData.reservesList,
+      poolData.eModeCategories,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: params.userConfig,
         reservesCount: params.reservesCount,
@@ -264,7 +260,7 @@ library ValidationLogic {
       require(vars.stableRateBorrowingEnabled, Errors.VL_STABLE_BORROWING_NOT_ENABLED);
 
       require(
-        !params.userConfig.isUsingAsCollateral(reservesData[params.asset].id) ||
+        !params.userConfig.isUsingAsCollateral(poolData.reserves[params.asset].id) ||
           params.reserveCache.reserveConfiguration.getLtv() == 0 ||
           params.amount > IERC20(params.reserveCache.aTokenAddress).balanceOf(params.userAddress),
         Errors.VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY
@@ -535,9 +531,7 @@ library ValidationLogic {
 
   /**
    * @notice Validates the health factor of a user
-   * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig The state of the user for the specific reserve
    * @param user The user to validate health factor of
    * @param userEModeCategory The users active efficiency mode category
@@ -545,9 +539,7 @@ library ValidationLogic {
    * @param oracle The price oracle
    */
   function validateHealthFactor(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap memory userConfig,
     address user,
     uint8 userEModeCategory,
@@ -556,9 +548,9 @@ library ValidationLogic {
   ) internal view returns (uint256, bool) {
     (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) = GenericLogic
       .calculateUserAccountData(
-        reservesData,
-        reserves,
-        eModeCategories,
+        poolData.reserves,
+        poolData.reservesList,
+        poolData.eModeCategories,
         DataTypes.CalculateUserAccountDataParams({
           userConfig: userConfig,
           reservesCount: reservesCount,
@@ -586,9 +578,7 @@ library ValidationLogic {
 
   /**
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
-   * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred
@@ -597,9 +587,7 @@ library ValidationLogic {
    * @param userEModeCategory The users active efficiency mode category
    */
   function validateHFAndLtv(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap memory userConfig,
     address asset,
     address from,
@@ -608,11 +596,9 @@ library ValidationLogic {
     uint8 userEModeCategory
   ) internal view {
     validateHFAndLtvLocalVars memory vars;
-    DataTypes.ReserveData memory reserve = reservesData[asset];
+    DataTypes.ReserveData memory reserve = poolData.reserves[asset];
     (vars.healthFactor, vars.hasZeroLtvCollateral) = validateHealthFactor(
-      reservesData,
-      reserves,
-      eModeCategories,
+      poolData,
       userConfig,
       from,
       userEModeCategory,
@@ -651,24 +637,20 @@ library ValidationLogic {
 
   /**
    * @notice Validates the action of setting efficiency mode
-   * @param reservesData the data mapping of the reserves
-   * @param reserves a mapping storing the list of reserves
-   * @param eModeCategories a mapping storing configurations for all efficiency mode categories
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig the user configuration
    * @param reservesCount The total number of valid reserves
    * @param categoryId The id of the category
    **/
   function validateSetUserEMode(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap memory userConfig,
     uint256 reservesCount,
     uint8 categoryId
   ) internal view {
     // category is invalid if the liq threshold is not set
     require(
-      categoryId == 0 || eModeCategories[categoryId].liquidationThreshold > 0,
+      categoryId == 0 || poolData.eModeCategories[categoryId].liquidationThreshold > 0,
       Errors.VL_INCONSISTENT_EMODE_CATEGORY
     );
 
@@ -683,7 +665,8 @@ library ValidationLogic {
       unchecked {
         for (uint256 i = 0; i < reservesCount; i++) {
           if (userConfig.isBorrowing(i)) {
-            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reserves[i]]
+            DataTypes.ReserveConfigurationMap memory configuration = poolData
+              .reserves[poolData.reservesList[i]]
               .configuration;
             require(
               configuration.getEModeCategory() == categoryId,
@@ -698,15 +681,13 @@ library ValidationLogic {
   /**
    * @notice Validates if an asset can be activated as collateral in supply/transfer/set as collateral/mint unbacked/liquidate
    * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that generate transfers of aTokens
-   * @param reservesData the data mapping of the reserves
-   * @param reserves a mapping storing the list of reserves
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig the user configuration
    * @param asset The address of the asset being validated as collateral
    * @return True if the asset can be activated as collateral, false otherwise
    **/
   function validateUseAsCollateral(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset
   ) internal view returns (bool) {
@@ -714,8 +695,11 @@ library ValidationLogic {
       return true;
     }
 
-    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reserves);
-    DataTypes.ReserveConfigurationMap memory configuration = reservesData[asset].configuration;
+    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(
+      poolData.reserves,
+      poolData.reservesList
+    );
+    DataTypes.ReserveConfigurationMap memory configuration = poolData.reserves[asset].configuration;
 
     return (!isolationModeActive && configuration.getDebtCeiling() == 0);
   }

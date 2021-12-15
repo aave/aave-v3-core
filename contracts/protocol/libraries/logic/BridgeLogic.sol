@@ -39,8 +39,7 @@ library BridgeLogic {
    * @dev Essentially a supply without transferring the underlying.
    * @dev Emits the `MintUnbacked` event
    * @dev Emits the `ReserveUsedAsCollateralEnabled` if asset is set as collateral
-   * @param reserves The state of all the reserves
-   * @param reservesList The list of the addresses of all the active reserves
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param reserve The reserve to mint to
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param asset The address of the asset
@@ -50,8 +49,7 @@ library BridgeLogic {
    *   0 if the action is executed directly by the user, without any middle-man
    **/
   function executeMintUnbacked(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(uint256 => address) storage reservesList,
+    DataTypes.PoolData storage poolData,
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
@@ -84,7 +82,7 @@ library BridgeLogic {
     );
 
     if (isFirstSupply) {
-      if (ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, asset)) {
+      if (ValidationLogic.validateUseAsCollateral(poolData, userConfig, asset)) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
       }
