@@ -218,8 +218,7 @@ library BorrowLogic {
     }
 
     IsolationModeLogic.updateIsolatedDebtIfIsolated(
-      poolData.reserves,
-      poolData.reservesList,
+      poolData,
       userConfig,
       reserveCache,
       paybackAmount

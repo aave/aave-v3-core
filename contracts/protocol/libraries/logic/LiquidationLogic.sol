@@ -188,8 +188,7 @@ library LiquidationLogic {
     );
 
     IsolationModeLogic.updateIsolatedDebtIfIsolated(
-      poolData.reserves,
-      poolData.reservesList,
+      poolData,
       userConfig,
       vars.debtReserveCache,
       vars.actualDebtToLiquidate
