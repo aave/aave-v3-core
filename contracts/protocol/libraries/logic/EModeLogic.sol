@@ -43,12 +43,7 @@ library EModeLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteSetUserEModeParams memory params
   ) external {
-    ValidationLogic.validateSetUserEMode(
-      poolData,
-      userConfig,
-      params.reservesCount,
-      params.categoryId
-    );
+    ValidationLogic.validateSetUserEMode(poolData, userConfig, params.categoryId);
 
     uint8 prevCategoryId = poolData.usersEModeCategory[msg.sender];
     poolData.usersEModeCategory[msg.sender] = params.categoryId;
@@ -59,7 +54,6 @@ library EModeLogic {
         userConfig,
         msg.sender,
         params.categoryId,
-        params.reservesCount,
         params.oracle
       );
     }

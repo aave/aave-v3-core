@@ -19,8 +19,4 @@ contract PoolStorage {
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
   DataTypes.PoolData internal _poolData;
-
-  uint256 internal _bridgeProtocolFee;
-  uint64 internal _maxStableRateBorrowSizePercent;
-  uint16 internal _reservesCount;
 }

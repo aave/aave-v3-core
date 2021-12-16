@@ -173,8 +173,6 @@ library FlashLoanLogic {
             interestRateMode: params.modes[vars.i],
             referralCode: params.referralCode,
             releaseUnderlying: false,
-            maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,
-            reservesCount: params.reservesCount,
             oracle: vars.oracle,
             userEModeCategory: params.userEModeCategory,
             priceOracleSentinel: vars.oracleSentinel

@@ -41,6 +41,9 @@ library DataTypes {
     mapping(address => uint8) usersEModeCategory;
     uint128 flashLoanPremiumTotal;
     uint128 flashLoanPremiumToProtocol;
+    uint64 maxStableRateBorrowSizePercent;
+    uint16 reservesCount;
+    uint256 bridgeProtocolFee;
   }
 
   struct ReserveConfigurationMap {
@@ -111,7 +114,6 @@ library DataTypes {
   }
 
   struct ExecuteLiquidationCallParams {
-    uint256 reservesCount;
     uint256 debtToCover;
     address collateralAsset;
     address debtAsset;
@@ -137,8 +139,6 @@ library DataTypes {
     uint256 interestRateMode;
     uint16 referralCode;
     bool releaseUnderlying;
-    uint256 maxStableRateBorrowSizePercent;
-    uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
     address priceOracleSentinel;
@@ -156,13 +156,11 @@ library DataTypes {
     address asset;
     uint256 amount;
     address to;
-    uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
   }
 
   struct ExecuteSetUserEModeParams {
-    uint256 reservesCount;
     address oracle;
     uint8 categoryId;
   }
@@ -174,7 +172,6 @@ library DataTypes {
     uint256 amount;
     uint256 balanceFromBefore;
     uint256 balanceToBefore;
-    uint256 reservesCount;
     address oracle;
     uint8 fromEModeCategory;
     uint8 toEModeCategory;
@@ -188,8 +185,6 @@ library DataTypes {
     address onBehalfOf;
     bytes params;
     uint16 referralCode;
-    uint256 maxStableRateBorrowSizePercent;
-    uint256 reservesCount;
     address addressesProvider;
     uint8 userEModeCategory;
     bool isAuthorizedFlashBorrower;
@@ -207,7 +202,6 @@ library DataTypes {
 
   struct CalculateUserAccountDataParams {
     UserConfigurationMap userConfig;
-    uint256 reservesCount;
     address user;
     address oracle;
     uint8 userEModeCategory;
@@ -220,8 +214,6 @@ library DataTypes {
     address userAddress;
     uint256 amount;
     uint256 interestRateMode;
-    uint256 maxStableLoanPercent;
-    uint256 reservesCount;
     address oracle;
     uint8 userEModeCategory;
     address priceOracleSentinel;

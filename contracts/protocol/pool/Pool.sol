@@ -93,7 +93,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
-    _maxStableRateBorrowSizePercent = 2500;
+    _poolData.maxStableRateBorrowSizePercent = 2500;
     _poolData.flashLoanPremiumTotal = 9;
     _poolData.flashLoanPremiumToProtocol = 0;
   }
@@ -127,7 +127,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       asset,
       amount,
       fee,
-      _bridgeProtocolFee
+      _poolData.bridgeProtocolFee
     );
   }
 
@@ -196,7 +196,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
           asset: asset,
           amount: amount,
           to: to,
-          reservesCount: _reservesCount,
           oracle: ADDRESSES_PROVIDER.getPriceOracle(),
           userEModeCategory: _poolData.usersEModeCategory[msg.sender]
         })
@@ -222,8 +221,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         interestRateMode: interestRateMode,
         referralCode: referralCode,
         releaseUnderlying: true,
-        maxStableRateBorrowSizePercent: _maxStableRateBorrowSizePercent,
-        reservesCount: _reservesCount,
         oracle: ADDRESSES_PROVIDER.getPriceOracle(),
         userEModeCategory: _poolData.usersEModeCategory[onBehalfOf],
         priceOracleSentinel: ADDRESSES_PROVIDER.getPriceOracleSentinel()
@@ -336,7 +333,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _poolData.usersConfig[msg.sender],
       asset,
       useAsCollateral,
-      _reservesCount,
       ADDRESSES_PROVIDER.getPriceOracle(),
       _poolData.usersEModeCategory[msg.sender]
     );
@@ -353,7 +349,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     LiquidationLogic.executeLiquidationCall(
       _poolData,
       DataTypes.ExecuteLiquidationCallParams({
-        reservesCount: _reservesCount,
         debtToCover: debtToCover,
         collateralAsset: collateralAsset,
         debtAsset: debtAsset,
@@ -384,8 +379,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       onBehalfOf: onBehalfOf,
       params: params,
       referralCode: referralCode,
-      maxStableRateBorrowSizePercent: _maxStableRateBorrowSizePercent,
-      reservesCount: _reservesCount,
       addressesProvider: address(ADDRESSES_PROVIDER),
       userEModeCategory: _poolData.usersEModeCategory[onBehalfOf],
       isAuthorizedFlashBorrower: IACLManager(ADDRESSES_PROVIDER.getACLManager()).isFlashBorrower(
@@ -476,7 +469,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _poolData,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: _poolData.usersConfig[user],
-        reservesCount: _reservesCount,
         user: user,
         oracle: ADDRESSES_PROVIDER.getPriceOracle(),
         userEModeCategory: _poolData.usersEModeCategory[user]
@@ -533,7 +525,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function getReservesList() external view override returns (address[] memory) {
-    uint256 reserveListCount = _reservesCount;
+    uint256 reserveListCount = _poolData.reservesCount;
     uint256 droppedReservesCount = 0;
     address[] memory reserves = new address[](reserveListCount);
 
@@ -557,12 +549,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() public view override returns (uint256) {
-    return _maxStableRateBorrowSizePercent;
+    return _poolData.maxStableRateBorrowSizePercent;
   }
 
   /// @inheritdoc IPool
   function BRIDGE_PROTOCOL_FEE() public view override returns (uint256) {
-    return _bridgeProtocolFee;
+    return _poolData.bridgeProtocolFee;
   }
 
   /// @inheritdoc IPool
@@ -602,7 +594,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         amount: amount,
         balanceFromBefore: balanceFromBefore,
         balanceToBefore: balanceToBefore,
-        reservesCount: _reservesCount,
         oracle: ADDRESSES_PROVIDER.getPriceOracle(),
         fromEModeCategory: _poolData.usersEModeCategory[from],
         toEModeCategory: _poolData.usersEModeCategory[to]
@@ -656,7 +647,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function updateBridgeProtocolFee(uint256 protocolFee) external override onlyPoolConfigurator {
-    _bridgeProtocolFee = protocolFee;
+    _poolData.bridgeProtocolFee = protocolFee;
   }
 
   /// @inheritdoc IPool
@@ -695,7 +686,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _poolData,
       _poolData.usersConfig[msg.sender],
       DataTypes.ExecuteSetUserEModeParams({
-        reservesCount: _reservesCount,
         oracle: ADDRESSES_PROVIDER.getPriceOracle(),
         categoryId: categoryId
       })
@@ -712,7 +702,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _poolData.reservesList[0] == asset;
     require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
-    uint16 reservesCount = _reservesCount;
+    uint16 reservesCount = _poolData.reservesCount;
 
     for (uint16 i = 0; i < reservesCount; i++) {
       if (_poolData.reservesList[i] == address(0)) {
@@ -725,7 +715,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _poolData.reserves[asset].id = reservesCount;
     _poolData.reservesList[reservesCount] = asset;
     // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
-    _reservesCount = reservesCount + 1;
+    _poolData.reservesCount = reservesCount + 1;
   }
 
   /// @inheritdoc IPool
