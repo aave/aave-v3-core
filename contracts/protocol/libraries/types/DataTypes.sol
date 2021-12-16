@@ -39,6 +39,8 @@ library DataTypes {
     mapping(uint256 => address) reservesList;
     mapping(uint8 => DataTypes.EModeCategory) eModeCategories;
     mapping(address => uint8) usersEModeCategory;
+    uint128 flashLoanPremiumTotal;
+    uint128 flashLoanPremiumToProtocol;
   }
 
   struct ReserveConfigurationMap {
@@ -186,8 +188,6 @@ library DataTypes {
     address onBehalfOf;
     bytes params;
     uint16 referralCode;
-    uint256 flashLoanPremiumToProtocol;
-    uint256 flashLoanPremiumTotal;
     uint256 maxStableRateBorrowSizePercent;
     uint256 reservesCount;
     address addressesProvider;

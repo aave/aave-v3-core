@@ -94,8 +94,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
     _maxStableRateBorrowSizePercent = 2500;
-    _flashLoanPremiumTotal = 9;
-    _flashLoanPremiumToProtocol = 0;
+    _poolData.flashLoanPremiumTotal = 9;
+    _poolData.flashLoanPremiumToProtocol = 0;
   }
 
   ///@inheritdoc IPool
@@ -384,8 +384,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       onBehalfOf: onBehalfOf,
       params: params,
       referralCode: referralCode,
-      flashLoanPremiumToProtocol: _flashLoanPremiumToProtocol,
-      flashLoanPremiumTotal: _flashLoanPremiumTotal,
       maxStableRateBorrowSizePercent: _maxStableRateBorrowSizePercent,
       reservesCount: _reservesCount,
       addressesProvider: address(ADDRESSES_PROVIDER),
@@ -412,8 +410,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       amount: amount,
       params: params,
       referralCode: referralCode,
-      flashLoanPremiumToProtocol: _flashLoanPremiumToProtocol,
-      flashLoanPremiumTotal: _flashLoanPremiumTotal
+      flashLoanPremiumToProtocol: _poolData.flashLoanPremiumToProtocol,
+      flashLoanPremiumTotal: _poolData.flashLoanPremiumTotal
     });
     FlashLoanLogic.executeFlashLoanSimple(_poolData.reserves[asset], flashParams);
   }
@@ -569,12 +567,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function FLASHLOAN_PREMIUM_TOTAL() public view override returns (uint256) {
-    return _flashLoanPremiumTotal;
+    return _poolData.flashLoanPremiumTotal;
   }
 
   /// @inheritdoc IPool
   function FLASHLOAN_PREMIUM_TO_PROTOCOL() public view override returns (uint256) {
-    return _flashLoanPremiumToProtocol;
+    return _poolData.flashLoanPremiumToProtocol;
   }
 
   /// @inheritdoc IPool
@@ -666,8 +664,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
-    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
+    _poolData.flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
+    _poolData.flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
   }
 
   /// @inheritdoc IPool

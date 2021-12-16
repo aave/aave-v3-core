@@ -21,9 +21,6 @@ contract PoolStorage {
   DataTypes.PoolData internal _poolData;
 
   uint256 internal _bridgeProtocolFee;
-  uint128 internal _flashLoanPremiumTotal;
-  uint128 internal _flashLoanPremiumToProtocol;
-
   uint64 internal _maxStableRateBorrowSizePercent;
   uint16 internal _reservesCount;
 }
