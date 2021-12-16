@@ -1,7 +1,7 @@
-import { MockPool } from '../types/MockPool';
-import { expect } from 'chai';
-import { makeSuite, TestEnv } from './helpers/make-suite';
 import hre from 'hardhat';
+import { expect } from 'chai';
+import { utils } from 'ethers';
+import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getMockPool } from '@aave/deploy-v3';
 
 makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
@@ -15,10 +15,14 @@ makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
     // Deploy a mock Pool
     const mockPool = await hre.deployments.deploy('MockPool', { from: deployer });
 
+    const oldPoolImpl = await addressesProvider.getProxyImplementation(
+      await addressesProvider.getPool()
+    );
+
     // Update the addressesProvider with a mock pool
     expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPool.address))
       .to.emit(addressesProvider, 'PoolUpdated')
-      .withArgs(mockPool.address);
+      .withArgs(oldPoolImpl, mockPool.address);
 
     // Add MKR and ETH addresses
     const proxiedMockPoolAddress = await addressesProvider.getPool();

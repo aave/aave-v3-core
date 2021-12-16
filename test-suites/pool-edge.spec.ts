@@ -321,12 +321,16 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
+    const oldPoolImpl = await addressesProvider.getProxyImplementation(
+      await addressesProvider.getPool()
+    );
+
     // Upgrade the Pool
     expect(
       await addressesProvider.connect(poolAdmin.signer).setPoolImpl(NEW_POOL_IMPL_ARTIFACT.address)
     )
       .to.emit(addressesProvider, 'PoolUpdated')
-      .withArgs(NEW_POOL_IMPL_ARTIFACT.address);
+      .withArgs(oldPoolImpl, NEW_POOL_IMPL_ARTIFACT.address);
 
     // Get the Pool instance
     const mockPoolAddress = await addressesProvider.getPool();
@@ -487,12 +491,16 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
+    const poolAddressId = utils.formatBytes32String('POOL');
+    const proxyAddress = await addressesProvider.getAddress(poolAddressId);
+    const implementationAddress = await addressesProvider.getProxyImplementation(proxyAddress);
+
     // Upgrade the Pool
     expect(
       await addressesProvider.connect(poolAdmin.signer).setPoolImpl(NEW_POOL_IMPL_ARTIFACT.address)
     )
       .to.emit(addressesProvider, 'PoolUpdated')
-      .withArgs(NEW_POOL_IMPL_ARTIFACT.address);
+      .withArgs(implementationAddress, NEW_POOL_IMPL_ARTIFACT.address);
 
     // Get the Pool instance
     const mockPoolAddress = await addressesProvider.getPool();

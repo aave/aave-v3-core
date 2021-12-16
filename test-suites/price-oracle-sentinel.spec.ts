@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { timeLatest } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
   PriceOracleSentinel,
@@ -61,7 +61,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
         .setPriceOracleSentinel(priceOracleSentinel.address)
     )
       .to.emit(addressesProvider, 'PriceOracleSentinelUpdated')
-      .withArgs(priceOracleSentinel.address);
+      .withArgs(ZERO_ADDRESS, priceOracleSentinel.address);
 
     expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(priceOracleSentinel.address);
 
