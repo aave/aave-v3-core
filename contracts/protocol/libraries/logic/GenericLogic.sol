@@ -44,7 +44,7 @@ library GenericLogic {
     uint256 eModeAssetCategory;
     address currentReserveAddress;
     bool hasZeroLtvCollateral;
-    bool eModeActive;
+    bool useEModeConfig;
   }
 
   /**
@@ -141,20 +141,20 @@ library GenericLogic {
           vars.totalCollateralInBaseCurrency +
           vars.userBalanceInBaseCurrency;
 
-        vars.eModeActive = EModeLogic.isEModeActive(
+        vars.useEModeConfig = EModeLogic.useEModeConfig(
           params.userEModeCategory,
           vars.eModeAssetCategory
         );
         vars.avgLtv = vars.ltv != 0
           ? vars.avgLtv +
             vars.userBalanceInBaseCurrency *
-            (vars.eModeActive ? vars.eModeLtv : vars.ltv)
+            (vars.useEModeConfig ? vars.eModeLtv : vars.ltv)
           : vars.avgLtv;
 
         vars.avgLiquidationThreshold =
           vars.avgLiquidationThreshold +
           vars.userBalanceInBaseCurrency *
-          (vars.eModeActive ? vars.eModeLiqThreshold : vars.liquidationThreshold);
+          (vars.useEModeConfig ? vars.eModeLiqThreshold : vars.liquidationThreshold);
 
         vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
       }
