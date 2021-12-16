@@ -44,7 +44,7 @@ library GenericLogic {
     uint256 eModeAssetCategory;
     address currentReserveAddress;
     bool hasZeroLtvCollateral;
-    bool useEModeConfig;
+    bool isInEModeCategory;
   }
 
   /**
@@ -141,22 +141,24 @@ library GenericLogic {
           vars.totalCollateralInBaseCurrency +
           vars.userBalanceInBaseCurrency;
 
-        vars.useEModeConfig = EModeLogic.useEModeConfig(
+        vars.isInEModeCategory = EModeLogic.isInEModeCategory(
           params.userEModeCategory,
           vars.eModeAssetCategory
         );
-        vars.avgLtv = vars.ltv != 0
-          ? vars.avgLtv +
+
+        if (vars.ltv != 0) {
+          vars.avgLtv =
+            vars.avgLtv +
             vars.userBalanceInBaseCurrency *
-            (vars.useEModeConfig ? vars.eModeLtv : vars.ltv)
-          : vars.avgLtv;
+            (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
+        } else {
+          vars.hasZeroLtvCollateral = true;
+        }
 
         vars.avgLiquidationThreshold =
           vars.avgLiquidationThreshold +
           vars.userBalanceInBaseCurrency *
-          (vars.useEModeConfig ? vars.eModeLiqThreshold : vars.liquidationThreshold);
-
-        vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
+          (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
       }
 
       if (params.userConfig.isBorrowing(vars.i)) {
