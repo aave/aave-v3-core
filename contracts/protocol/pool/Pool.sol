@@ -183,7 +183,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return
       SupplyLogic.executeWithdraw(
         _poolData,
-        _poolData.usersConfig[msg.sender],
         DataTypes.ExecuteWithdrawParams({
           asset: asset,
           amount: amount,
@@ -297,12 +296,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function swapBorrowRateMode(address asset, uint256 rateMode) external override {
-    BorrowLogic.executeSwapBorrowRateMode(
-      _poolData.reserves[asset],
-      _poolData.usersConfig[msg.sender],
-      asset,
-      rateMode
-    );
+    BorrowLogic.executeSwapBorrowRateMode(_poolData, asset, rateMode);
   }
 
   /// @inheritdoc IPool

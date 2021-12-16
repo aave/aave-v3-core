@@ -283,17 +283,17 @@ library BorrowLogic {
   /**
    * @notice Implements the swap borrow rate feature. Borrowers can swap from variable to stable positions at any time.
    * @dev Emits the `Swap()` event
-   * @param reserve The data of the reserve of the asset being repaid
-   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param asset The asset of the position being swapped
    * @param rateMode The current interest rate mode of the position being swapped. If `rateMode == InterestRateMode.STABLE`, user must have stable debt
    */
   function executeSwapBorrowRateMode(
-    DataTypes.ReserveData storage reserve,
-    DataTypes.UserConfigurationMap storage userConfig,
+    DataTypes.PoolData storage poolData,
     address asset,
     uint256 rateMode
   ) external {
+    DataTypes.ReserveData storage reserve = poolData.reserves[asset];
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[msg.sender];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);

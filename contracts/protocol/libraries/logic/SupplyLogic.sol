@@ -85,16 +85,15 @@ library SupplyLogic {
   /**
    * @notice Implements the withdraw feature. Through `withdraw()`, users redeem their aTokens for the underlying asset previously supplied in the Aave protocol.
    * @dev  Emits the `Withdraw()` event. If the user withdraws everything, `ReserveUsedAsCollateralDisabled()` is emitted.
-   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
-   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory
    * @param params The additional parameters needed to execute the withdraw function
    * @return The actual amount withdrawn
    */
   function executeWithdraw(
     DataTypes.PoolData storage poolData,
-    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteWithdrawParams memory params
   ) external returns (uint256) {
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[msg.sender];
     DataTypes.ReserveData storage reserve = poolData.reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
