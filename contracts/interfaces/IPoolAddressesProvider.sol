@@ -68,7 +68,7 @@ interface IPoolAddressesProvider {
    * @param id The identifier of the proxy
    * @param proxyAddress The address of the created proxy contract
    */
-  event ProxyCreated(bytes32 id, address indexed proxyAddress);
+  event ProxyCreated(bytes32 indexed id, address indexed proxyAddress);
 
   /**
    * @notice Emitted when a new contract address is registered
@@ -76,7 +76,7 @@ interface IPoolAddressesProvider {
    * @param implementationAddress The address of the implementation contract
    * @param hasProxy True if the address is registered behind a proxy, false otherwise
    */
-  event AddressSet(bytes32 id, address indexed implementationAddress, bool hasProxy);
+  event AddressSet(bytes32 indexed id, address indexed implementationAddress, bool hasProxy);
 
   /**
    * @notice Emitted when a new proxy implementation address is registered
