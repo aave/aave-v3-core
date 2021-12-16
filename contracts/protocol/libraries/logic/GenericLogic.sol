@@ -137,9 +137,7 @@ library GenericLogic {
           vars.assetUnit
         );
 
-        vars.totalCollateralInBaseCurrency =
-          vars.totalCollateralInBaseCurrency +
-          vars.userBalanceInBaseCurrency;
+        vars.totalCollateralInBaseCurrency += vars.userBalanceInBaseCurrency;
 
         vars.isInEModeCategory = EModeLogic.isInEModeCategory(
           params.userEModeCategory,
@@ -147,16 +145,14 @@ library GenericLogic {
         );
 
         if (vars.ltv != 0) {
-          vars.avgLtv =
-            vars.avgLtv +
+          vars.avgLtv +=
             vars.userBalanceInBaseCurrency *
             (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
         } else {
           vars.hasZeroLtvCollateral = true;
         }
 
-        vars.avgLiquidationThreshold =
-          vars.avgLiquidationThreshold +
+        vars.avgLiquidationThreshold +=
           vars.userBalanceInBaseCurrency *
           (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
       }
@@ -169,7 +165,7 @@ library GenericLogic {
           vars.assetUnit
         );
 
-        vars.totalDebtInBaseCurrency = vars.totalDebtInBaseCurrency + vars.userDebtInBaseCurrency;
+        vars.totalDebtInBaseCurrency += vars.userDebtInBaseCurrency;
       }
 
       unchecked {
