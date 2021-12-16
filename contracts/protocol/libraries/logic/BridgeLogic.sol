@@ -40,8 +40,6 @@ library BridgeLogic {
    * @dev Emits the `MintUnbacked` event
    * @dev Emits the `ReserveUsedAsCollateralEnabled` if asset is set as collateral
    * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
-   * @param reserve The reserve to mint to
-   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param asset The address of the asset
    * @param amount The amount to mint
    * @param onBehalfOf The address that will receive the aTokens
@@ -50,13 +48,13 @@ library BridgeLogic {
    **/
   function executeMintUnbacked(
     DataTypes.PoolData storage poolData,
-    DataTypes.ReserveData storage reserve,
-    DataTypes.UserConfigurationMap storage userConfig,
     address asset,
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
   ) external {
+    DataTypes.ReserveData storage reserve = poolData.reserves[asset];
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[onBehalfOf];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);

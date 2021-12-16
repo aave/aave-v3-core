@@ -105,15 +105,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     uint16 referralCode
   ) external override onlyBridge {
-    BridgeLogic.executeMintUnbacked(
-      _poolData,
-      _poolData.reserves[asset],
-      _poolData.usersConfig[onBehalfOf],
-      asset,
-      amount,
-      onBehalfOf,
-      referralCode
-    );
+    BridgeLogic.executeMintUnbacked(_poolData, asset, amount, onBehalfOf, referralCode);
   }
 
   ///@inheritdoc IPool
