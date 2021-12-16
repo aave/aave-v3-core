@@ -53,6 +53,7 @@ library GenericLogic {
    * the average Loan To Value, the average Liquidation Ratio, and the Health factor.
    * @param reservesData The data of all the reserves
    * @param reserves The list of the available reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional parameters needed for the calculation
    * @return The total collateral of the user in the base currency used by the price feed
    * @return The total debt of the user in the base currency used by the price feed
