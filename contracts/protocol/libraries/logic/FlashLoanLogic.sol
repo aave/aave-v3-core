@@ -88,7 +88,7 @@ library FlashLoanLogic {
     vars.receiver = IFlashLoanReceiver(params.receiverAddress);
     (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
       ? (0, 0)
-      : (params.flashLoanPremiumTotal, params.flashLoanPremiumToProtocol);
+      : (poolData.flashLoanPremiumTotal, poolData.flashLoanPremiumToProtocol);
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.aTokenAddresses[vars.i] = poolData.reserves[params.assets[vars.i]].aTokenAddress;
@@ -170,8 +170,6 @@ library FlashLoanLogic {
             interestRateMode: params.modes[vars.i],
             referralCode: params.referralCode,
             releaseUnderlying: false,
-            maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,
-            reservesCount: params.reservesCount,
             oracle: vars.oracle,
             userEModeCategory: params.userEModeCategory,
             priceOracleSentinel: vars.oracleSentinel

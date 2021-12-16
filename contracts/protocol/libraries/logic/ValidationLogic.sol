@@ -212,7 +212,6 @@ library ValidationLogic {
       poolData,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: params.userConfig,
-        reservesCount: params.reservesCount,
         user: params.userAddress,
         oracle: params.oracle,
         userEModeCategory: params.userEModeCategory
@@ -268,7 +267,9 @@ library ValidationLogic {
 
       //calculate the max available loan size in stable rate mode as a percentage of the
       //available liquidity
-      uint256 maxLoanSizeStable = vars.availableLiquidity.percentMul(params.maxStableLoanPercent);
+      uint256 maxLoanSizeStable = vars.availableLiquidity.percentMul(
+        poolData.maxStableRateBorrowSizePercent
+      );
 
       require(
         params.amount <= maxLoanSizeStable,
@@ -533,7 +534,6 @@ library ValidationLogic {
    * @param userConfig The state of the user for the specific reserve
    * @param user The user to validate health factor of
    * @param userEModeCategory The users active efficiency mode category
-   * @param reservesCount The number of available reserves
    * @param oracle The price oracle
    */
   function validateHealthFactor(
@@ -541,7 +541,6 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap memory userConfig,
     address user,
     uint8 userEModeCategory,
-    uint256 reservesCount,
     address oracle
   ) internal view returns (uint256, bool) {
     (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) = GenericLogic
@@ -549,7 +548,6 @@ library ValidationLogic {
         poolData,
         DataTypes.CalculateUserAccountDataParams({
           userConfig: userConfig,
-          reservesCount: reservesCount,
           user: user,
           oracle: oracle,
           userEModeCategory: userEModeCategory
@@ -578,7 +576,6 @@ library ValidationLogic {
    * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred
-   * @param reservesCount The number of available reserves
    * @param oracle The price oracle
    * @param userEModeCategory The users active efficiency mode category
    */
@@ -587,7 +584,6 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap memory userConfig,
     address asset,
     address from,
-    uint256 reservesCount,
     address oracle,
     uint8 userEModeCategory
   ) internal view {
@@ -598,7 +594,6 @@ library ValidationLogic {
       userConfig,
       from,
       userEModeCategory,
-      reservesCount,
       oracle
     );
 
@@ -635,13 +630,11 @@ library ValidationLogic {
    * @notice Validates the action of setting efficiency mode
    * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
    * @param userConfig the user configuration
-   * @param reservesCount The total number of valid reserves
    * @param categoryId The id of the category
    **/
   function validateSetUserEMode(
     DataTypes.PoolData storage poolData,
     DataTypes.UserConfigurationMap memory userConfig,
-    uint256 reservesCount,
     uint8 categoryId
   ) internal view {
     // category is invalid if the liq threshold is not set
@@ -659,7 +652,7 @@ library ValidationLogic {
     // either the user is not borrowing, or it's borrowing assets of categoryId
     if (categoryId > 0) {
       unchecked {
-        for (uint256 i = 0; i < reservesCount; i++) {
+        for (uint256 i = 0; i < poolData.reservesCount; i++) {
           if (userConfig.isBorrowing(i)) {
             DataTypes.ReserveConfigurationMap memory configuration = poolData
               .reserves[poolData.reservesList[i]]

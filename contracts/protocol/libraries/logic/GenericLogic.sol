@@ -99,7 +99,7 @@ library GenericLogic {
       }
     }
 
-    while (vars.i < params.reservesCount) {
+    while (vars.i < poolData.reservesCount) {
       if (!params.userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
         unchecked {
           ++vars.i;

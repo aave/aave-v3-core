@@ -83,8 +83,6 @@ library BorrowLogic {
         userAddress: params.onBehalfOf,
         amount: params.amount,
         interestRateMode: params.interestRateMode,
-        maxStableLoanPercent: params.maxStableRateBorrowSizePercent,
-        reservesCount: params.reservesCount,
         oracle: params.oracle,
         userEModeCategory: params.userEModeCategory,
         priceOracleSentinel: params.priceOracleSentinel,

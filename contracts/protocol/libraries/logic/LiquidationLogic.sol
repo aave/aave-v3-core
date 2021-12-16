@@ -97,7 +97,6 @@ library LiquidationLogic {
       poolData,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: userConfig,
-        reservesCount: params.reservesCount,
         user: params.user,
         oracle: params.priceOracle,
         userEModeCategory: params.userEModeCategory
