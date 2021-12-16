@@ -35,14 +35,13 @@ library EModeLogic {
    * @dev Will revert if user is borrowing non-compatible asset or change will drop HF < HEALTH_FACTOR_LIQUIDATION_THRESHOLD
    * @dev Emits the `UserEModeSet` event
    * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
-   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the setUserEMode function
    */
   function executeSetUserEMode(
     DataTypes.PoolData storage poolData,
-    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteSetUserEModeParams memory params
   ) external {
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[msg.sender];
     ValidationLogic.validateSetUserEMode(
       poolData,
       userConfig,

@@ -197,22 +197,19 @@ library SupplyLogic {
    * is subjected to the usual health factor checks to ensure collateralization.
    * @dev  Emits the `ReserveUsedAsCollateralEnabled()` event if the asset can be activated as collateral. In case the asset is being deactivated as collateral, `ReserveUsedAsCollateralDisabled()` is emitted.
    * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
-   * @param userConfig The users configuration mapping that track the supplied/borrowed assets
    * @param asset The address of the asset being configured as collateral
    * @param useAsCollateral True if the user wants to set the asset as collateral, false otherwise
    * @param reservesCount The number of initialized reserves
    * @param priceOracle The address of the price oracle
-   * @param userEModeCategory The eMode category chosen by the user
    */
   function executeUseReserveAsCollateral(
     DataTypes.PoolData storage poolData,
-    DataTypes.UserConfigurationMap storage userConfig,
     address asset,
     bool useAsCollateral,
     uint256 reservesCount,
-    address priceOracle,
-    uint8 userEModeCategory
+    address priceOracle
   ) external {
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[msg.sender];
     DataTypes.ReserveData storage reserve = poolData.reserves[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
@@ -239,7 +236,7 @@ library SupplyLogic {
         msg.sender,
         reservesCount,
         priceOracle,
-        userEModeCategory
+        poolData.usersEModeCategory[msg.sender]
       );
 
       emit ReserveUsedAsCollateralDisabled(asset, msg.sender);

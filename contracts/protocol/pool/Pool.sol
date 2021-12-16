@@ -314,12 +314,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral) external override {
     SupplyLogic.executeUseReserveAsCollateral(
       _poolData,
-      _poolData.usersConfig[msg.sender],
       asset,
       useAsCollateral,
       _reservesCount,
-      ADDRESSES_PROVIDER.getPriceOracle(),
-      _poolData.usersEModeCategory[msg.sender]
+      ADDRESSES_PROVIDER.getPriceOracle()
     );
   }
 
@@ -676,7 +674,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function setUserEMode(uint8 categoryId) external virtual override {
     EModeLogic.executeSetUserEMode(
       _poolData,
-      _poolData.usersConfig[msg.sender],
       DataTypes.ExecuteSetUserEModeParams({
         reservesCount: _reservesCount,
         oracle: ADDRESSES_PROVIDER.getPriceOracle(),
