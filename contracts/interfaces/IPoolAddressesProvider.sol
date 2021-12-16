@@ -9,57 +9,59 @@ pragma solidity 0.8.10;
 interface IPoolAddressesProvider {
   /**
    * @notice Emitted when the market identifier is updated.
+   * @param oldMarketId The old id of the market
    * @param newMarketId The new id of the market
    */
-  event MarketIdSet(string newMarketId);
+  event MarketIdSet(string oldMarketId, string newMarketId);
 
   /**
    * @notice Emitted when the pool is updated.
+   * @param oldAddress The old address of the Pool
    * @param newAddress The new address of the Pool
    */
-  event PoolUpdated(address indexed newAddress);
+  event PoolUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @notice Emitted when the pool configurator is updated.
+   * @param oldAddress The old address of the PoolConfigurator
    * @param newAddress The new address of the PoolConfigurator
    */
-  event PoolConfiguratorUpdated(address indexed newAddress);
+  event PoolConfiguratorUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @notice Emitted when the price oracle is updated.
+   * @param oldAddress The old address of the PriceOracle
    * @param newAddress The new address of the PriceOracle
    */
-  event PriceOracleUpdated(address indexed newAddress);
+  event PriceOracleUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @notice Emitted when the ACL manager is updated.
+   * @param oldAddress The old address of the ACLManager
    * @param newAddress The new address of the ACLManager
    */
-  event ACLManagerUpdated(address indexed newAddress);
+  event ACLManagerUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @notice Emitted when the ACL admin is updated.
+   * @param oldAddress The old address of the ACLAdmin
    * @param newAddress The new address of the ACLAdmin
    */
-  event ACLAdminUpdated(address indexed newAddress);
+  event ACLAdminUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @notice Emitted when the price oracle sentinel is updated.
+   * @param oldAddress The old address of the PriceOracleSentinel
    * @param newAddress The new address of the PriceOracleSentinel
    */
-  event PriceOracleSentinelUpdated(address indexed newAddress);
+  event PriceOracleSentinelUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @notice Emitted when the pool data provider is updated.
+   * @param oldAddress The old address of the PoolDataProvider
    * @param newAddress The new address of the PoolDataProvider
    */
-  event PoolDataProviderUpdated(address indexed newAddress);
-
-  /**
-   * @notice Emitted when the bridge access control is updated.
-   * @param newAddress The new address of the BridgeAccessControl
-   */
-  event BridgeAccessControlUpdated(address indexed newAddress);
+  event PoolDataProviderUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @notice Emitted when a new proxy is created
@@ -69,12 +71,19 @@ interface IPoolAddressesProvider {
   event ProxyCreated(bytes32 id, address indexed proxyAddress);
 
   /**
-   * @notice Emitted when a new contract address if registered
+   * @notice Emitted when a new contract address is registered
    * @param id The identifier of the contract
    * @param implementationAddress The address of the implementation contract
    * @param hasProxy True if the address is registered behind a proxy, false otherwise
    */
   event AddressSet(bytes32 id, address indexed implementationAddress, bool hasProxy);
+
+  /**
+   * @notice Emitted when a new proxy implementation address is registered
+   * @param proxyAddress The address of the proxy contract
+   * @param implementationAddress The address of the implementation contract
+   */
+  event ProxyImplementationSet(address indexed proxyAddress, address indexed implementationAddress);
 
   /**
    * @notice Returns the id of the Aave market to which this contract points to
@@ -84,17 +93,30 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Allows to set the market which this PoolAddressesProvider represents
-   * @param marketId The market id
+   * @param newMarketId The market id
    */
-  function setMarketId(string calldata marketId) external;
+  function setMarketId(string calldata newMarketId) external;
 
   /**
-   * @notice Sets an address for an id replacing the address saved in the addresses map
-   * @dev IMPORTANT Use this function carefully, as it will do a hard replacement
-   * @param id The id
-   * @param newAddress The address to set
+   * @notice Returns an address by id
+   * @dev It returns the proxy address if the address is behind a proxy.
+   * @return The address of the registered contract
    */
-  function setAddress(bytes32 id, address newAddress) external;
+  function getAddress(bytes32 id) external view returns (address);
+
+  /**
+   * @notice Returns the implementation address of the proxy contract
+   * @return The implementation address of the proxy, or ZERO address if it is not a proxy
+   */
+  function getProxyImplementation(address proxyAddress) external view returns (address);
+
+  /**
+   * @notice Sets an implementation address for a proxy saved in the proxies map
+   * @dev IMPORTANT Use this function carefully, as it will do a hard replacement
+   * @param proxyAddress The address of the proxy contract
+   * @param implementationAddress The address of the implementation contract
+   */
+  function setProxyImplementation(address proxyAddress, address implementationAddress) external;
 
   /**
    * @notice General function to update the implementation of a proxy registered with
@@ -108,10 +130,12 @@ interface IPoolAddressesProvider {
   function setAddressAsProxy(bytes32 id, address impl) external;
 
   /**
-   * @notice Returns an address by id
-   * @return The address
+   * @notice Sets an address for an id replacing the address saved in the addresses map
+   * @dev IMPORTANT Use this function carefully, as it will do a hard replacement
+   * @param id The id
+   * @param newAddress The address to set
    */
-  function getAddress(bytes32 id) external view returns (address);
+  function setAddress(bytes32 id, address newAddress) external;
 
   /**
    * @notice Returns the address of the Pool proxy
@@ -122,9 +146,9 @@ interface IPoolAddressesProvider {
   /**
    * @notice Updates the implementation of the Pool, or creates the proxy
    * setting the new `pool` implementation on the first time calling it
-   * @param pool The new Pool implementation
+   * @param newPoolImpl The new Pool implementation
    **/
-  function setPoolImpl(address pool) external;
+  function setPoolImpl(address newPoolImpl) external;
 
   /**
    * @notice Returns the address of the PoolConfigurator proxy
@@ -135,9 +159,9 @@ interface IPoolAddressesProvider {
   /**
    * @notice Updates the implementation of the PoolConfigurator, or creates the proxy
    * setting the new `configurator` implementation on the first time calling it
-   * @param configurator The new PoolConfigurator implementation
+   * @param newPoolConfiguratorImpl The new PoolConfigurator implementation
    **/
-  function setPoolConfiguratorImpl(address configurator) external;
+  function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external;
 
   /**
    * @notice Returns the address of the price oracle
@@ -147,9 +171,9 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Updates the address of the price oracle
-   * @param priceOracle The address of the new PriceOracle
+   * @param newPriceOracle The address of the new PriceOracle
    */
-  function setPriceOracle(address priceOracle) external;
+  function setPriceOracle(address newPriceOracle) external;
 
   /**
    * @notice Returns the address of the ACL manager proxy
@@ -159,9 +183,9 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Updates the address of the ACL manager
-   * @param aclManager The address of the new ACLManager
+   * @param newAclManager The address of the new ACLManager
    **/
-  function setACLManager(address aclManager) external;
+  function setACLManager(address newAclManager) external;
 
   /**
    * @notice Returns the address of the ACL admin
@@ -171,9 +195,9 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Updates the address of the ACL admin
-   * @param aclAdmin The address of the new ACL admin
+   * @param newAclAdmin The address of the new ACL admin
    */
-  function setACLAdmin(address aclAdmin) external;
+  function setACLAdmin(address newAclAdmin) external;
 
   /**
    * @notice Returns the address of the PriceOracleSentinel
@@ -183,19 +207,19 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Updates the address of the PriceOracleSentinel
-   * @param oracleSentinel The address of the new PriceOracleSentinel
+   * @param newPriceOracleSentinel The address of the new PriceOracleSentinel
    **/
-  function setPriceOracleSentinel(address oracleSentinel) external;
-
-  /**
-   * @notice Updates the address of the DataProvider
-   * @param dataProvider The address of the new DataProvider
-   **/
-  function setPoolDataProvider(address dataProvider) external;
+  function setPriceOracleSentinel(address newPriceOracleSentinel) external;
 
   /**
    * @notice Returns the address of the DataProvider
    * @return The DataProvider address
    */
   function getPoolDataProvider() external view returns (address);
+
+  /**
+   * @notice Updates the address of the DataProvider
+   * @param newDataProvider The address of the new DataProvider
+   **/
+  function setPoolDataProvider(address newDataProvider) external;
 }
