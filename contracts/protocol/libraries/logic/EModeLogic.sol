@@ -98,16 +98,14 @@ library EModeLogic {
       uint256
     )
   {
-    address eModePriceSource = category.priceSource;
-    uint256 eModeLtv = category.ltv;
-    uint256 eModeLiqThreshold = category.liquidationThreshold;
     uint256 eModeAssetPrice = 0;
+    address eModePriceSource = category.priceSource;
 
     if (eModePriceSource != address(0)) {
       eModeAssetPrice = oracle.getAssetPrice(eModePriceSource);
     }
 
-    return (eModeLtv, eModeLiqThreshold, eModeAssetPrice);
+    return (category.ltv, category.liquidationThreshold, eModeAssetPrice);
   }
 
   /**
