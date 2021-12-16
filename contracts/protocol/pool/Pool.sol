@@ -232,8 +232,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return
       BorrowLogic.executeRepay(
         _poolData,
-        _poolData.reserves[asset],
-        _poolData.usersConfig[onBehalfOf],
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,
@@ -274,13 +272,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         onBehalfOf: onBehalfOf,
         useATokens: false
       });
-      return
-        BorrowLogic.executeRepay(
-          _poolData,
-          _poolData.reserves[asset],
-          _poolData.usersConfig[onBehalfOf],
-          params
-        );
+      return BorrowLogic.executeRepay(_poolData, params);
     }
   }
 
@@ -293,8 +285,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return
       BorrowLogic.executeRepay(
         _poolData,
-        _poolData.reserves[asset],
-        _poolData.usersConfig[msg.sender],
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,

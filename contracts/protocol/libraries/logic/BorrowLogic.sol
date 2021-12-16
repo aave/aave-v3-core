@@ -159,17 +159,16 @@ library BorrowLogic {
    * of debt for the user by burning the corresponding debt token. For isolated positions, it also reduces the isolated debt.
    * @dev  Emits the `Repay()` event
    * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
-   * @param reserve The data of the reserve of the asset being repaid
-   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the repay function
    * @return The actual amount being repaid
    */
   function executeRepay(
     DataTypes.PoolData storage poolData,
-    DataTypes.ReserveData storage reserve,
-    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory params
   ) external returns (uint256) {
+    DataTypes.ReserveData storage reserve = poolData.reserves[params.asset];
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[params.onBehalfOf];
+
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
