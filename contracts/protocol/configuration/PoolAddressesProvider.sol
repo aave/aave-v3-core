@@ -98,7 +98,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
   /// @inheritdoc IPoolAddressesProvider
   function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external override onlyOwner {
-    address oldPoolConfiguratorImpl =  _proxyToImplementation[_addresses[POOL_CONFIGURATOR]];
+    address oldPoolConfiguratorImpl = _proxyToImplementation[_addresses[POOL_CONFIGURATOR]];
     _updateImpl(POOL_CONFIGURATOR, newPoolConfiguratorImpl);
     emit PoolConfiguratorUpdated(oldPoolConfiguratorImpl, newPoolConfiguratorImpl);
   }
@@ -164,7 +164,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /**
-   * @notice Internal function to update the implementation of a specific proxied component of the protocol
+   * @notice Internal function to update the implementation of a specific proxied component of the protocol.
    * @dev If there is no proxy registered with the given identifier, it creates the proxy setting `newAddress`
    *   as implementation and calls the initialize() function on the proxy
    * @dev If there is already a proxy registered, it just updates the implementation to `newAddress` and
@@ -185,7 +185,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
       _addresses[id] = address(proxy);
       _setProxyImplementation(address(proxy), newAddress);
       proxy.initialize(newAddress, params);
-      
+
       emit ProxyCreated(id, address(proxy));
     } else {
       proxy.upgradeToAndCall(newAddress, params);
@@ -193,13 +193,18 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     }
   }
 
+  /**
+   * @notice Sets an implementation address for a proxy saved in the proxies map.
+   * @param proxyAddress The address of the proxy contract
+   * @param implementationAddress The address of the implementation contract
+   */
   function _setProxyImplementation(address proxyAddress, address implementationAddress) internal {
     _proxyToImplementation[proxyAddress] = implementationAddress;
     emit ProxyImplementationSet(proxyAddress, implementationAddress);
   }
 
   /**
-   * @notice Updates the identifier of the Aave market
+   * @notice Updates the identifier of the Aave market.
    * @param newMarketId The new id of the market
    **/
   function _setMarketId(string memory newMarketId) internal {
