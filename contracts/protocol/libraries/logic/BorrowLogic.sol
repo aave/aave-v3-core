@@ -163,8 +163,6 @@ library BorrowLogic {
    * @return The actual amount being repaid
    */
   function executeRepay(
-    // mapping(address => DataTypes.ReserveData) storage reserves,
-    // mapping(uint256 => address) storage reservesList,
     DataTypes.PoolData storage poolData,
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
