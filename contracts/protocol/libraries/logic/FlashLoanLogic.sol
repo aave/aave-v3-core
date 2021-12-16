@@ -68,12 +68,10 @@ library FlashLoanLogic {
    * if the receiver have not approved the pool the transaction will revert.
    * @dev Emits the `FlashLoan()` event
    * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
-   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the flashloan function
    */
   function executeFlashLoan(
     DataTypes.PoolData storage poolData,
-    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.FlashloanParams memory params
   ) external {
     // The usual action flow (cache -> updateState -> validation -> changeState -> updateRates)
@@ -164,7 +162,6 @@ library FlashLoanLogic {
           .getPriceOracleSentinel();
         BorrowLogic.executeBorrow(
           poolData,
-          userConfig,
           DataTypes.ExecuteBorrowParams({
             asset: vars.currentAsset,
             user: msg.sender,

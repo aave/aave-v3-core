@@ -213,7 +213,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   ) external override {
     BorrowLogic.executeBorrow(
       _poolData,
-      _poolData.usersConfig[onBehalfOf],
       DataTypes.ExecuteBorrowParams({
         asset: asset,
         user: msg.sender,
@@ -395,7 +394,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       )
     });
 
-    FlashLoanLogic.executeFlashLoan(_poolData, _poolData.usersConfig[onBehalfOf], flashParams);
+    FlashLoanLogic.executeFlashLoan(_poolData, flashParams);
   }
 
   /// @inheritdoc IPool

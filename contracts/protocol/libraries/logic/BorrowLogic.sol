@@ -53,19 +53,21 @@ library BorrowLogic {
    * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the isolated debt.
    * @dev  Emits the `Borrow()` event
    * @param poolData Pool storage data mappings (reserves, usersConfig, reservesList, eModeCategories, usersEModeCategory)
-   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the borrow function
    */
   function executeBorrow(
     DataTypes.PoolData storage poolData,
-    DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteBorrowParams memory params
   ) public {
+    DataTypes.UserConfigurationMap storage userConfig = poolData.usersConfig[params.onBehalfOf];
     DataTypes.ReserveData storage reserve = poolData.reserves[params.asset];
-    DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
+    DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
+    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(
+      params.interestRateMode
+    );
     (
       bool isolationModeActive,
       address isolationModeCollateralAddress,
@@ -95,7 +97,7 @@ library BorrowLogic {
     uint256 currentStableRate = 0;
     bool isFirstBorrowing = false;
 
-    if (DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
+    if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
       currentStableRate = reserve.currentStableBorrowRate;
 
       (
@@ -145,7 +147,7 @@ library BorrowLogic {
       params.onBehalfOf,
       params.amount,
       params.interestRateMode,
-      DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE
+      interestRateMode == DataTypes.InterestRateMode.STABLE
         ? currentStableRate
         : reserve.currentVariableBorrowRate,
       params.referralCode
