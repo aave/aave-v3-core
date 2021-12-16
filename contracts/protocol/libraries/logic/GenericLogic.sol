@@ -86,7 +86,7 @@ library GenericLogic {
 
     if (params.userEModeCategory != 0) {
       (vars.eModeLtv, vars.eModeLiqThreshold, vars.eModeAssetPrice) = EModeLogic
-        .fetchEModeConfiguration(
+        .getEModeConfiguration(
           eModeCategories[params.userEModeCategory],
           IPriceOracleGetter(params.oracle)
         );

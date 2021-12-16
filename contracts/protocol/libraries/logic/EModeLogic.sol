@@ -78,7 +78,7 @@ library EModeLogic {
   }
 
   /**
-   * @notice Fetches the eMode configuration and calculates the eMode asset price if a custom oracle is configured
+   * @notice Gets the eMode configuration and calculates the eMode asset price if a custom oracle is configured
    * @dev The eMode asset price returned is 0 if no oracle is specified
    * @param category The user eMode category
    * @param oracle The price oracle
@@ -86,7 +86,7 @@ library EModeLogic {
    * @return The eMode liquidation threshold
    * @return The eMode asset price
    **/
-  function fetchEModeConfiguration(
+  function getEModeConfiguration(
     DataTypes.EModeCategory storage category,
     IPriceOracleGetter oracle
   )
