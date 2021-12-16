@@ -130,7 +130,7 @@ library GenericLogic {
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
-        vars.userBalanceInBaseCurrency = _getBalanceInBaseCurrency(
+        vars.userBalanceInBaseCurrency = _getUserBalanceInBaseCurrency(
           params.user,
           currentReserve,
           vars.assetPrice,
@@ -160,7 +160,7 @@ library GenericLogic {
       }
 
       if (params.userConfig.isBorrowing(vars.i)) {
-        vars.userDebtInBaseCurrency = _getDebtInBaseCurrency(
+        vars.userDebtInBaseCurrency = _getUserDebtInBaseCurrency(
           params.user,
           currentReserve,
           vars.assetPrice,
@@ -232,7 +232,7 @@ library GenericLogic {
    * @param assetUnit The value representing one full unit of the asset (10^decimals)
    * @return The total debt of the user normalized to the base currency
    **/
-  function _getDebtInBaseCurrency(
+  function _getUserDebtInBaseCurrency(
     address user,
     DataTypes.ReserveData storage reserve,
     uint256 assetPrice,
@@ -264,7 +264,7 @@ library GenericLogic {
    * @param assetUnit The value representing one full unit of the asset (10^decimals)
    * @return The total aToken balance of the user normalized to the base currency of the price oracle
    **/
-  function _getBalanceInBaseCurrency(
+  function _getUserBalanceInBaseCurrency(
     address user,
     DataTypes.ReserveData storage reserve,
     uint256 assetPrice,
