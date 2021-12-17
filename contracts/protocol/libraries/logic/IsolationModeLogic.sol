@@ -52,12 +52,11 @@ library IsolationModeLogic {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
         emit IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, 0);
       } else {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
-          isolationModeTotalDebt -
-          isolatedDebtRepaid;
+        uint256 nextIsolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+          .isolationModeTotalDebt = isolationModeTotalDebt - isolatedDebtRepaid;
         emit IsolationModeTotalDebtUpdated(
           isolationModeCollateralAddress,
-          isolationModeTotalDebt - isolatedDebtRepaid
+          nextIsolationModeTotalDebt
         );
       }
     }
