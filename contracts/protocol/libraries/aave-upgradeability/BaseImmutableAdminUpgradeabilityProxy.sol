@@ -70,14 +70,14 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
   {
     _upgradeTo(newImplementation);
     (bool success, ) = newImplementation.delegatecall(data);
-    require(success, Errors.UPGRADE_TO_CALL_FAILURE);
+    require(success);
   }
 
   /**
    * @notice Only fall back when the sender is not the admin.
    */
   function _willFallback() internal virtual override {
-    require(msg.sender != ADMIN, Errors.CANNOT_CALL_FALLBACK_FUNC_FROM_PROXY_ADMIN);
+    require(msg.sender != ADMIN, 'Cannot call fallback function from the proxy admin');
     super._willFallback();
   }
 }

@@ -154,9 +154,7 @@ export enum ProtocolErrors {
   INVALID_SIGNATURE = '81', // 'Invalid signature'
   INVALID_DELEGATOR = '82', // 'Invalid delegator'
   OPERATION_NOT_SUPPORTED = '83', // 'Operation not supported'
-  CANNOT_CALL_FALLBACK_FUNC_FROM_PROXY_ADMIN = '84', // 'Cannot call fallback function from the proxy admin'
-  UPGRADE_TO_CALL_FAILURE = '85', // 'The delegatecall in upgradeToAndCall function failed.
-  CONTRACT_ALREADY_INITIALIZED = '86', // 'The contract instance has already been initialized'
+  CONTRACT_ALREADY_INITIALIZED = '84', // 'The contract instance has already been initialized'
 
   // old
 

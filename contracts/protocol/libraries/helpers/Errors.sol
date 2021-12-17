@@ -90,7 +90,5 @@ library Errors {
   string public constant INVALID_SIGNATURE = '81'; // 'Invalid signature'
   string public constant INVALID_DELEGATOR = '82'; // 'Invalid delegator'
   string public constant OPERATION_NOT_SUPPORTED = '83'; // 'Transfer not supported'
-  string public constant CANNOT_CALL_FALLBACK_FUNC_FROM_PROXY_ADMIN = '84'; // 'Cannot call fallback function from the proxy admin'
-  string public constant UPGRADE_TO_CALL_FAILURE = '85'; // 'The delegatecall in upgradeToAndCall function failed.
-  string public constant CONTRACT_ALREADY_INITIALIZED = '86'; // 'The contract instance has already been initialized'
+  string public constant CONTRACT_ALREADY_INITIALIZED = '84'; // 'The contract instance has already been initialized'
 }

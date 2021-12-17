@@ -135,7 +135,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith(ProtocolErrors.CANNOT_CALL_FALLBACK_FUNC_FROM_PROXY_ADMIN);
+      ).to.be.revertedWith('Cannot call fallback function from the proxy admin');
     });
 
     it('initialize() deploy a proxy and call to initialize() with no initialization data', async () => {
@@ -296,9 +296,8 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
     it('upgradeToAndCall() for a new proxied contract with no initialize function (revert expected)', async () => {
       const impl = await deployMockInitializableImple();
       const encodedInitialize = Buffer.from('');
-      await expect(
-        proxy.connect(proxyAdminOwner).upgradeToAndCall(impl.address, encodedInitialize)
-      ).revertedWith(ProtocolErrors.UPGRADE_TO_CALL_FAILURE);
+      await expect(proxy.connect(proxyAdminOwner).upgradeToAndCall(impl.address, encodedInitialize))
+        .reverted;
     });
 
     it('upgradeToAndCall() when initializing the new impl from admin address once it is already initialized (revert expected)', async () => {
