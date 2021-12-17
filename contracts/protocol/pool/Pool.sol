@@ -206,7 +206,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function borrow(
     address asset,
     uint256 amount,
-    uint256 interestRateMode,
+    DataTypes.InterestRateMode interestRateMode,
     uint16 referralCode,
     address onBehalfOf
   ) external override {
@@ -236,7 +236,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repay(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    DataTypes.InterestRateMode interestRateMode,
     address onBehalfOf
   ) external override returns (uint256) {
     return
@@ -248,7 +248,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,
-          rateMode: rateMode,
+          interestRateMode: interestRateMode,
           onBehalfOf: onBehalfOf,
           useATokens: false
         })
@@ -259,7 +259,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithPermit(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    DataTypes.InterestRateMode interestRateMode,
     address onBehalfOf,
     uint256 deadline,
     uint8 permitV,
@@ -281,7 +281,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       DataTypes.ExecuteRepayParams memory params = DataTypes.ExecuteRepayParams({
         asset: asset,
         amount: amount,
-        rateMode: rateMode,
+        interestRateMode: interestRateMode,
         onBehalfOf: onBehalfOf,
         useATokens: false
       });
@@ -300,7 +300,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode
+    DataTypes.InterestRateMode interestRateMode
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
@@ -311,7 +311,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,
-          rateMode: rateMode,
+        interestRateMode: interestRateMode,
           onBehalfOf: msg.sender,
           useATokens: true
         })
@@ -319,12 +319,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function swapBorrowRateMode(address asset, uint256 rateMode) external override {
+  function swapBorrowRateMode(address asset, DataTypes.InterestRateMode interestRateMode) external override {
     BorrowLogic.executeSwapBorrowRateMode(
       _reserves[asset],
       _usersConfig[msg.sender],
       asset,
-      rateMode
+      interestRateMode
     );
   }
 
@@ -380,7 +380,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address receiverAddress,
     address[] calldata assets,
     uint256[] calldata amounts,
-    uint256[] calldata modes,
+    DataTypes.InterestRateMode[] calldata interestRateModes,
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode
@@ -389,7 +389,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       receiverAddress: receiverAddress,
       assets: assets,
       amounts: amounts,
-      modes: modes,
+      interestRateModes: interestRateModes,
       onBehalfOf: onBehalfOf,
       params: params,
       referralCode: referralCode,

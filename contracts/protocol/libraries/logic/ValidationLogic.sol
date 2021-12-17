@@ -151,8 +151,8 @@ library ValidationLogic {
 
     //validate interest rate mode
     require(
-      uint256(DataTypes.InterestRateMode.VARIABLE) == params.interestRateMode ||
-        uint256(DataTypes.InterestRateMode.STABLE) == params.interestRateMode,
+      params.interestRateMode == DataTypes.InterestRateMode.VARIABLE ||
+        params.interestRateMode == DataTypes.InterestRateMode.STABLE,
       Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
     );
 
@@ -255,7 +255,7 @@ library ValidationLogic {
      * 3. Users will be able to borrow only a portion of the total available liquidity
      **/
 
-    if (params.interestRateMode == uint256(DataTypes.InterestRateMode.STABLE)) {
+    if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       //check if the borrow mode is stable and if stable rate borrowing is enabled on this reserve
 
       require(vars.stableRateBorrowingEnabled, Errors.VL_STABLE_BORROWING_NOT_ENABLED);
@@ -284,7 +284,7 @@ library ValidationLogic {
    * @notice Validates a repay action
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
-   * @param rateMode The interest rate mode of the debt being repaid
+   * @param interestRateMode The interest rate mode of the debt being repaid
    * @param onBehalfOf The address of the user msg.sender is repaying for
    * @param stableDebt The borrow balance of the user
    * @param variableDebt The borrow balance of the user
@@ -292,7 +292,7 @@ library ValidationLogic {
   function validateRepay(
     DataTypes.ReserveCache memory reserveCache,
     uint256 amountSent,
-    DataTypes.InterestRateMode rateMode,
+    DataTypes.InterestRateMode interestRateMode,
     address onBehalfOf,
     uint256 stableDebt,
     uint256 variableDebt
@@ -311,17 +311,15 @@ library ValidationLogic {
 
     require(
       (stableRatePreviousTimestamp < uint40(block.timestamp) &&
-        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
+        interestRateMode == DataTypes.InterestRateMode.STABLE) ||
         (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
-          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
+          interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_SAME_BLOCK_BORROW_REPAY
     );
 
     require(
-      (stableDebt > 0 &&
-        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebt > 0 &&
-          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
+      (stableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
+        (variableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_NO_DEBT_OF_SELECTED_TYPE
     );
 

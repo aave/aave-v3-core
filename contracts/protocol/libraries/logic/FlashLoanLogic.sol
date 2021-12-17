@@ -120,7 +120,7 @@ library FlashLoanLogic {
       vars.currentAsset = params.assets[vars.i];
       vars.currentAmount = params.amounts[vars.i];
 
-      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
+      if (params.interestRateModes[vars.i] == DataTypes.InterestRateMode.NONE) {
         vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
         vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
         vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
@@ -176,7 +176,7 @@ library FlashLoanLogic {
             user: msg.sender,
             onBehalfOf: params.onBehalfOf,
             amount: vars.currentAmount,
-            interestRateMode: params.modes[vars.i],
+            interestRateMode: params.interestRateModes[vars.i],
             referralCode: params.referralCode,
             releaseUnderlying: false,
             maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,

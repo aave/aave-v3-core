@@ -123,7 +123,7 @@ library DataTypes {
     address user;
     address onBehalfOf;
     uint256 amount;
-    uint256 interestRateMode;
+    DataTypes.InterestRateMode interestRateMode;
     uint16 referralCode;
     bool releaseUnderlying;
     uint256 maxStableRateBorrowSizePercent;
@@ -136,7 +136,7 @@ library DataTypes {
   struct ExecuteRepayParams {
     address asset;
     uint256 amount;
-    uint256 rateMode;
+    DataTypes.InterestRateMode interestRateMode;
     address onBehalfOf;
     bool useATokens;
   }
@@ -173,7 +173,7 @@ library DataTypes {
     address receiverAddress;
     address[] assets;
     uint256[] amounts;
-    uint256[] modes;
+    DataTypes.InterestRateMode[] interestRateModes;
     address onBehalfOf;
     bytes params;
     uint16 referralCode;
@@ -210,7 +210,7 @@ library DataTypes {
     address asset;
     address userAddress;
     uint256 amount;
-    uint256 interestRateMode;
+    DataTypes.InterestRateMode interestRateMode;
     uint256 maxStableLoanPercent;
     uint256 reservesCount;
     address oracle;
