@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import {BaseUpgradeabilityProxy} from '../../../dependencies/openzeppelin/upgradeability/BaseUpgradeabilityProxy.sol';
+import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
 
 /**
  * @title BaseImmutableAdminUpgradeabilityProxy
@@ -68,8 +69,9 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
     ifAdmin
   {
     _upgradeTo(newImplementation);
-    (bool success, ) = newImplementation.delegatecall(data);
-    require(success);
+    if (data.length > 0) {
+      Address.functionDelegateCall(newImplementation, data);
+    }
   }
 
   /**
