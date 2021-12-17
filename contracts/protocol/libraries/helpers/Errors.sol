@@ -83,4 +83,13 @@ library Errors {
   string public constant INVALID_DEBT_CEILING = '74'; // 'Invalid debt ceiling for the reserve
   string public constant INVALID_RESERVE_INDEX = '75'; // 'Invalid reserve index'
   string public constant UINT128_OVERFLOW = '76'; // 'Uint128 overflow'
+  string public constant ACL_ADMIN_CANNOT_BE_ZERO = '77'; // 'ACL admin cannot be set to the zero address'
+  string public constant INCONSISTENT_PARAMS_LENGTH = '78'; // 'Array parameters that should be equal length are not'
+  string public constant INVALID_OWNER = '79'; // 'Invalid owner'
+  string public constant INVALID_EXPIRATION = '80'; // 'Invalid expiration'
+  string public constant INVALID_SIGNATURE = '81'; // 'Invalid signature'
+  string public constant INVALID_DELEGATOR = '82'; // 'Invalid delegator'
+  string public constant TRANSFER_NOT_SUPPORTED = '83'; // 'Transfer not supported'
+  string public constant ALLOWANCE_NOT_SUPPORTED = '84'; // 'Allowance not supported'
+  string public constant APPROVAL_NOT_SUPPORTED = '85'; // 'Approval not supported'
 }

@@ -235,9 +235,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     bytes32 r,
     bytes32 s
   ) external override {
-    require(owner != address(0), 'INVALID_OWNER');
+    require(owner != address(0), Errors.INVALID_OWNER);
     //solium-disable-next-line
-    require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
+    require(block.timestamp <= deadline, Errors.INVALID_EXPIRATION);
     uint256 currentValidNonce = _nonces[owner];
     bytes32 digest = keccak256(
       abi.encodePacked(
@@ -246,7 +246,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
         keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, currentValidNonce, deadline))
       )
     );
-    require(owner == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
+    require(owner == ecrecover(digest, v, r, s), Errors.INVALID_SIGNATURE);
     _nonces[owner] = currentValidNonce + 1;
     _approve(owner, spender, value);
   }
