@@ -108,7 +108,7 @@ library ReserveLogic {
    * the flashloan fee to the reserve, and spread it between all the suppliers
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
-   * @param amount The amount to accomulate
+   * @param amount The amount to accumulate
    * @return The next liquidity index of the reserve
    **/
   function cumulateToLiquidityIndex(
@@ -222,7 +222,7 @@ library ReserveLogic {
   /**
    * @notice Mints part of the repaid interest to the reserve treasury as a function of the reserveFactor for the
    * specific asset.
-   * @param reserve The reserve reserve to be updated
+   * @param reserve The reserve to be updated
    * @param reserveCache The caching layer for the reserve data
    **/
   function _accrueToTreasury(
