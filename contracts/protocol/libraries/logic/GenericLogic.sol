@@ -10,6 +10,7 @@ import {PercentageMath} from '../math/PercentageMath.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
+import {EModeLogic} from './EModeLogic.sol';
 
 /**
  * @title GenericLogic library
@@ -26,11 +27,7 @@ library GenericLogic {
   struct CalculateUserAccountDataVars {
     uint256 assetPrice;
     uint256 assetUnit;
-    uint256 userBalance;
     uint256 userBalanceInBaseCurrency;
-    uint256 userDebt;
-    uint256 userStableDebt;
-    uint256 userDebtInBaseCurrency;
     uint256 decimals;
     uint256 ltv;
     uint256 liquidationThreshold;
@@ -40,15 +37,13 @@ library GenericLogic {
     uint256 totalDebtInBaseCurrency;
     uint256 avgLtv;
     uint256 avgLiquidationThreshold;
-    uint256 normalizedIncome;
-    uint256 normalizedDebt;
     uint256 eModeAssetPrice;
     uint256 eModeLtv;
     uint256 eModeLiqThreshold;
     uint256 eModeAssetCategory;
-    address eModePriceSource;
     address currentReserveAddress;
     bool hasZeroLtvCollateral;
+    bool isInEModeCategory;
   }
 
   /**
@@ -57,6 +52,7 @@ library GenericLogic {
    * the average Loan To Value, the average Liquidation Ratio, and the Health factor.
    * @param reservesData The data of all the reserves
    * @param reserves The list of the available reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional parameters needed for the calculation
    * @return The total collateral of the user in the base currency used by the price feed
    * @return The total debt of the user in the base currency used by the price feed
@@ -89,15 +85,11 @@ library GenericLogic {
     CalculateUserAccountDataVars memory vars;
 
     if (params.userEModeCategory != 0) {
-      vars.eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
-      vars.eModeLtv = eModeCategories[params.userEModeCategory].ltv;
-      vars.eModeLiqThreshold = eModeCategories[params.userEModeCategory].liquidationThreshold;
-
-      if (vars.eModePriceSource != address(0)) {
-        vars.eModeAssetPrice = IPriceOracleGetter(params.oracle).getAssetPrice(
-          vars.eModePriceSource
+      (vars.eModeLtv, vars.eModeLiqThreshold, vars.eModeAssetPrice) = EModeLogic
+        .getEModeConfiguration(
+          eModeCategories[params.userEModeCategory],
+          IPriceOracleGetter(params.oracle)
         );
-      }
     }
 
     while (vars.i < params.reservesCount) {
@@ -131,65 +123,47 @@ library GenericLogic {
       unchecked {
         vars.assetUnit = 10**vars.decimals;
       }
-      vars.assetPrice = vars.eModeAssetPrice > 0 &&
+
+      vars.assetPrice = vars.eModeAssetPrice != 0 &&
         params.userEModeCategory == vars.eModeAssetCategory
         ? vars.eModeAssetPrice
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
       if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
-        // Fetching normalized income directly from storage and then performing the multiplication
-        // here, saves a call from the IScaledBalanceToken to get the normalized income.
-        vars.normalizedIncome = currentReserve.getNormalizedIncome();
-        vars.userBalance = IScaledBalanceToken(currentReserve.aTokenAddress).scaledBalanceOf(
-          params.user
+        vars.userBalanceInBaseCurrency = _getUserBalanceInBaseCurrency(
+          params.user,
+          currentReserve,
+          vars.assetPrice,
+          vars.assetUnit
         );
-        vars.userBalance = vars.userBalance.rayMul(vars.normalizedIncome);
 
-        vars.userBalanceInBaseCurrency = (vars.assetPrice * vars.userBalance);
-        unchecked {
-          vars.userBalanceInBaseCurrency /= vars.assetUnit;
-        }
-        vars.totalCollateralInBaseCurrency =
-          vars.totalCollateralInBaseCurrency +
-          vars.userBalanceInBaseCurrency;
+        vars.totalCollateralInBaseCurrency += vars.userBalanceInBaseCurrency;
 
-        vars.hasZeroLtvCollateral = vars.hasZeroLtvCollateral || vars.ltv == 0;
+        vars.isInEModeCategory = EModeLogic.isInEModeCategory(
+          params.userEModeCategory,
+          vars.eModeAssetCategory
+        );
 
-        vars.avgLtv = vars.ltv > 0
-          ? vars.avgLtv +
+        if (vars.ltv != 0) {
+          vars.avgLtv +=
             vars.userBalanceInBaseCurrency *
-            (
-              (params.userEModeCategory == 0 || vars.eModeAssetCategory != params.userEModeCategory)
-                ? vars.ltv
-                : vars.eModeLtv
-            )
-          : vars.avgLtv;
+            (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
+        } else {
+          vars.hasZeroLtvCollateral = true;
+        }
 
-        vars.avgLiquidationThreshold =
-          vars.avgLiquidationThreshold +
+        vars.avgLiquidationThreshold +=
           vars.userBalanceInBaseCurrency *
-          (
-            (params.userEModeCategory == 0 || vars.eModeAssetCategory != params.userEModeCategory)
-              ? vars.liquidationThreshold
-              : vars.eModeLiqThreshold
-          );
+          (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
       }
 
       if (params.userConfig.isBorrowing(vars.i)) {
-        vars.userStableDebt = IERC20(currentReserve.stableDebtTokenAddress).balanceOf(params.user);
-        vars.userDebt = IScaledBalanceToken(currentReserve.variableDebtTokenAddress)
-          .scaledBalanceOf(params.user);
-
-        if (vars.userDebt > 0) {
-          vars.normalizedDebt = currentReserve.getNormalizedDebt();
-          vars.userDebt = vars.userDebt.rayMul(vars.normalizedDebt);
-        }
-        vars.userDebt = vars.userDebt + vars.userStableDebt;
-        vars.userDebtInBaseCurrency = (vars.assetPrice * vars.userDebt);
-        unchecked {
-          vars.userDebtInBaseCurrency /= vars.assetUnit;
-        }
-        vars.totalDebtInBaseCurrency = vars.totalDebtInBaseCurrency + vars.userDebtInBaseCurrency;
+        vars.totalDebtInBaseCurrency += _getUserDebtInBaseCurrency(
+          params.user,
+          currentReserve,
+          vars.assetPrice,
+          vars.assetUnit
+        );
       }
 
       unchecked {
@@ -198,10 +172,10 @@ library GenericLogic {
     }
 
     unchecked {
-      vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
+      vars.avgLtv = vars.totalCollateralInBaseCurrency != 0
         ? vars.avgLtv / vars.totalCollateralInBaseCurrency
         : 0;
-      vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
+      vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency != 0
         ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency
         : 0;
     }
@@ -242,5 +216,63 @@ library GenericLogic {
 
     availableBorrowsInBaseCurrency = availableBorrowsInBaseCurrency - totalDebtInBaseCurrency;
     return availableBorrowsInBaseCurrency;
+  }
+
+  /**
+   * @notice Calculates total debt of the user in the based currency used to normalize the values of the assets
+   * @dev This fetches the `balanceOf` of the stable and variable debt tokens for the user. For gas reasons, the Variable
+   *      debt balance is calculated by fetching `scaledBalancesOf` * normalized debt, which is cheaper than fetching `balanceOf`
+   * @param user The address of the user
+   * @param reserve The data of the reserve for which the total debt of the user is being calculated
+   * @param assetPrice The price of the asset for which the total debt of the user is being calculated
+   * @param assetUnit The value representing one full unit of the asset (10^decimals)
+   * @return The total debt of the user normalized to the base currency
+   **/
+  function _getUserDebtInBaseCurrency(
+    address user,
+    DataTypes.ReserveData storage reserve,
+    uint256 assetPrice,
+    uint256 assetUnit
+  ) private view returns (uint256) {
+    // fetching variable debt
+    uint256 userTotalDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledBalanceOf(
+      user
+    );
+    if (userTotalDebt != 0) {
+      userTotalDebt = userTotalDebt.rayMul(reserve.getNormalizedDebt());
+    }
+
+    userTotalDebt = userTotalDebt + IERC20(reserve.stableDebtTokenAddress).balanceOf(user);
+
+    userTotalDebt = assetPrice * userTotalDebt;
+
+    unchecked {
+      return userTotalDebt / assetUnit;
+    }
+  }
+
+  /**
+   * @notice Calculates total aToken balance of the user in the based currency used by the price oracle
+   * @dev For gas reasons, the aToken balance is calculated by fetching `scaledBalancesOf` * normalized debt, which is cheaper than fetching `balanceOf`
+   * @param user The address of the user
+   * @param reserve The data of the reserve for which the total aToken balance of the user is being calculated
+   * @param assetPrice The price of the asset for which the total aToken balance of the user is being calculated
+   * @param assetUnit The value representing one full unit of the asset (10^decimals)
+   * @return The total aToken balance of the user normalized to the base currency of the price oracle
+   **/
+  function _getUserBalanceInBaseCurrency(
+    address user,
+    DataTypes.ReserveData storage reserve,
+    uint256 assetPrice,
+    uint256 assetUnit
+  ) private view returns (uint256) {
+    uint256 normalizedIncome = reserve.getNormalizedIncome();
+    uint256 balance = (
+      IScaledBalanceToken(reserve.aTokenAddress).scaledBalanceOf(user).rayMul(normalizedIncome)
+    ) * assetPrice;
+
+    unchecked {
+      return balance / assetUnit;
+    }
   }
 }

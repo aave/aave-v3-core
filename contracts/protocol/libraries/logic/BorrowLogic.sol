@@ -9,7 +9,6 @@ import {IAToken} from '../../../interfaces/IAToken.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
-import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
