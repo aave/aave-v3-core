@@ -476,18 +476,8 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     const balanceAfter = await aDai.balanceOf(user1.address);
 
-    let debtPrice: BigNumber;
-    let collateralPrice: BigNumber;
-
-    // TODO: Decide on whether we want to use actual or oracle price.
-    const useActualPrices = true;
-    if (useActualPrices) {
-      debtPrice = await oracle.getAssetPrice(usdc.address);
-      collateralPrice = await oracle.getAssetPrice(dai.address);
-    } else {
-      debtPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
-      collateralPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
-    }
+    const debtPrice = await oracle.getAssetPrice(usdc.address);
+    const collateralPrice = await oracle.getAssetPrice(dai.address);
 
     const expectedCollateralLiquidated = debtPrice
       .mul(toBorrow.div(2))
