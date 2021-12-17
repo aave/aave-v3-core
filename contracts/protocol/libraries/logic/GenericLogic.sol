@@ -28,7 +28,6 @@ library GenericLogic {
     uint256 assetPrice;
     uint256 assetUnit;
     uint256 userBalanceInBaseCurrency;
-    uint256 userDebtInBaseCurrency;
     uint256 decimals;
     uint256 ltv;
     uint256 liquidationThreshold;
@@ -159,14 +158,12 @@ library GenericLogic {
       }
 
       if (params.userConfig.isBorrowing(vars.i)) {
-        vars.userDebtInBaseCurrency = _getUserDebtInBaseCurrency(
+        vars.totalDebtInBaseCurrency += _getUserDebtInBaseCurrency(
           params.user,
           currentReserve,
           vars.assetPrice,
           vars.assetUnit
         );
-
-        vars.totalDebtInBaseCurrency += vars.userDebtInBaseCurrency;
       }
 
       unchecked {
