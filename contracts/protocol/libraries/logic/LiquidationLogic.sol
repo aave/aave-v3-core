@@ -10,6 +10,7 @@ import {DataTypes} from '../../libraries/types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
+import {EModeLogic} from './EModeLogic.sol';
 import {IsolationModeLogic} from './IsolationModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
@@ -132,9 +133,12 @@ library LiquidationLogic {
       ? vars.maxLiquidatableDebt
       : params.debtToCover;
 
-    vars.liquidationBonus = params.userEModeCategory == 0
-      ? collateralReserve.configuration.getLiquidationBonus()
-      : eModeCategories[params.userEModeCategory].liquidationBonus;
+    vars.liquidationBonus = EModeLogic.isInEModeCategory(
+      params.userEModeCategory,
+      collateralReserve.configuration.getEModeCategory()
+    )
+      ? eModeCategories[params.userEModeCategory].liquidationBonus
+      : collateralReserve.configuration.getLiquidationBonus();
 
     (
       vars.maxCollateralToLiquidate,
