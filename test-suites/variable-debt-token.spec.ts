@@ -154,7 +154,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).transfer(users[1].address, 500)
-    ).to.be.revertedWith(ProtocolErrors.TRANSFER_NOT_SUPPORTED);
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to approve debt tokens (revert expected)', async () => {
@@ -166,10 +166,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).approve(users[1].address, 500)
-    ).to.be.revertedWith(ProtocolErrors.APPROVAL_NOT_SUPPORTED);
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
     await expect(
       variableDebtContract.allowance(users[0].address, users[1].address)
-    ).to.be.revertedWith(ProtocolErrors.ALLOWANCE_NOT_SUPPORTED);
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to increaseAllowance (revert expected)', async () => {
@@ -181,7 +181,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).increaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith(ProtocolErrors.ALLOWANCE_NOT_SUPPORTED);
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to decreaseAllowance (revert expected)', async () => {
@@ -193,7 +193,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).decreaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith(ProtocolErrors.ALLOWANCE_NOT_SUPPORTED);
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to transferFrom debt tokens (revert expected)', async () => {
@@ -207,7 +207,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       variableDebtContract
         .connect(users[0].signer)
         .transferFrom(users[0].address, users[1].address, 500)
-    ).to.be.revertedWith(ProtocolErrors.TRANSFER_NOT_SUPPORTED);
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('setIncentivesController() ', async () => {

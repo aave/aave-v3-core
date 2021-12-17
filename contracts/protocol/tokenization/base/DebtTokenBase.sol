@@ -110,15 +110,15 @@ abstract contract DebtTokenBase is
    * standard ERC20 functions for transfer and allowance.
    **/
   function transfer(address, uint256) external virtual override returns (bool) {
-    revert(Errors.TRANSFER_NOT_SUPPORTED);
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function allowance(address, address) external view virtual override returns (uint256) {
-    revert(Errors.ALLOWANCE_NOT_SUPPORTED);
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function approve(address, uint256) external virtual override returns (bool) {
-    revert(Errors.APPROVAL_NOT_SUPPORTED);
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function transferFrom(
@@ -126,15 +126,15 @@ abstract contract DebtTokenBase is
     address,
     uint256
   ) external virtual override returns (bool) {
-    revert(Errors.TRANSFER_NOT_SUPPORTED);
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function increaseAllowance(address, uint256) external virtual override returns (bool) {
-    revert(Errors.ALLOWANCE_NOT_SUPPORTED);
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function decreaseAllowance(address, uint256) external virtual override returns (bool) {
-    revert(Errors.ALLOWANCE_NOT_SUPPORTED);
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function _approveDelegation(
