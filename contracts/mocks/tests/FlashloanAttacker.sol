@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {FlashLoanSimpleReceiverBase} from '../../flashloan/base/FlashLoanSimpleReceiverBase.sol';
@@ -12,7 +12,7 @@ import {IPool} from '../../interfaces/IPool.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
 contract FlashloanAttacker is FlashLoanSimpleReceiverBase {
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   IPoolAddressesProvider internal _provider;

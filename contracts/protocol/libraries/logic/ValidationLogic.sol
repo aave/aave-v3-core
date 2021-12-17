@@ -3,7 +3,7 @@ pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
@@ -30,7 +30,7 @@ library ValidationLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
