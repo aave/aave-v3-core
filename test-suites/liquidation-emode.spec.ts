@@ -318,7 +318,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     // Activate emode
     expect(await pool.connect(user1.signer).setUserEMode(CATEGORY.id));
 
-    // Borrow a lo
+    // Borrow a as much usdc as possible
     const userData = await pool.getUserAccountData(user1.address);
     const toBorrow = userData.availableBorrowsBase.div(100);
 
@@ -446,7 +446,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     // Activate emode
     expect(await pool.connect(user1.signer).setUserEMode(CATEGORY.id));
 
-    // Borrow a lo
+    // Borrow as much usdc as possible
     const userData = await pool.getUserAccountData(user1.address);
     const toBorrow = userData.availableBorrowsBase.div(100);
 
