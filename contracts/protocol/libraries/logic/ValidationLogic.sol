@@ -226,7 +226,7 @@ library ValidationLogic {
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
-
+    require(vars.currentLtv > 0, Errors.VL_LTV_VALIDATION_FAILED);
     require(
       vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
