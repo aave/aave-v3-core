@@ -293,11 +293,12 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
       expect(await proxiedImpl.connect(nonAdmin).values(2)).to.be.eq(30, 'impl values[2] not 30');
     });
 
-    it('upgradeToAndCall() for a new proxied contract with no initialize function (revert expected)', async () => {
+    it('upgradeToAndCall() for a new proxied contract with no initialize function', async () => {
       const impl = await deployMockInitializableImple();
       const encodedInitialize = Buffer.from('');
-      await expect(proxy.connect(proxyAdminOwner).upgradeToAndCall(impl.address, encodedInitialize))
-        .reverted;
+      expect(await proxy.connect(proxyAdminOwner).upgradeToAndCall(impl.address, encodedInitialize))
+        .to.emit(proxy, 'Upgraded')
+        .withArgs(impl.address);
     });
 
     it('upgradeToAndCall() when initializing the new impl from admin address once it is already initialized (revert expected)', async () => {
