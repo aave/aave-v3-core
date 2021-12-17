@@ -3,11 +3,9 @@ pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts//IERC20.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {PercentageMath} from '../../libraries/math/PercentageMath.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
-import {Errors} from '../../libraries/helpers/Errors.sol';
 import {DataTypes} from '../../libraries/types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
@@ -99,24 +97,24 @@ library LiquidationLogic {
       reserves,
       reservesList,
       eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        userConfig,
-        params.reservesCount,
-        params.user,
-        params.priceOracle,
-        params.userEModeCategory
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: userConfig,
+        reservesCount: params.reservesCount,
+        user: params.user,
+        oracle: params.priceOracle,
+        userEModeCategory: params.userEModeCategory
+      })
     );
 
     ValidationLogic.validateLiquidationCall(
       userConfig,
       collateralReserve,
-      DataTypes.ValidateLiquidationCallParams(
-        vars.debtReserveCache,
-        vars.userStableDebt + vars.userVariableDebt,
-        vars.healthFactor,
-        params.priceOracleSentinel
-      )
+      DataTypes.ValidateLiquidationCallParams({
+        debtReserveCache: vars.debtReserveCache,
+        totalDebt: vars.userStableDebt + vars.userVariableDebt,
+        healthFactor: vars.healthFactor,
+        priceOracleSentinel: params.priceOracleSentinel
+      })
     );
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);

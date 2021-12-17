@@ -7,17 +7,74 @@ pragma solidity 0.8.10;
  * @notice Defines the basic interface for a Pool Addresses Provider.
  **/
 interface IPoolAddressesProvider {
+  /**
+   * @notice Emitted when the market identifier is updated.
+   * @param newMarketId The new id of the market
+   */
   event MarketIdSet(string newMarketId);
+
+  /**
+   * @notice Emitted when the pool is updated.
+   * @param newAddress The new address of the Pool
+   */
   event PoolUpdated(address indexed newAddress);
+
+  /**
+   * @notice Emitted when the pool configurator is updated.
+   * @param newAddress The new address of the PoolConfigurator
+   */
   event PoolConfiguratorUpdated(address indexed newAddress);
+
+  /**
+   * @notice Emitted when the price oracle is updated.
+   * @param newAddress The new address of the PriceOracle
+   */
   event PriceOracleUpdated(address indexed newAddress);
+
+  /**
+   * @notice Emitted when the ACL manager is updated.
+   * @param newAddress The new address of the ACLManager
+   */
   event ACLManagerUpdated(address indexed newAddress);
+
+  /**
+   * @notice Emitted when the ACL admin is updated.
+   * @param newAddress The new address of the ACLAdmin
+   */
   event ACLAdminUpdated(address indexed newAddress);
+
+  /**
+   * @notice Emitted when the price oracle sentinel is updated.
+   * @param newAddress The new address of the PriceOracleSentinel
+   */
   event PriceOracleSentinelUpdated(address indexed newAddress);
-  event ProxyCreated(bytes32 id, address indexed newAddress);
-  event BridgeAccessControlUpdated(address indexed newAddress);
+
+  /**
+   * @notice Emitted when the pool data provider is updated.
+   * @param newAddress The new address of the PoolDataProvider
+   */
   event PoolDataProviderUpdated(address indexed newAddress);
-  event AddressSet(bytes32 id, address indexed newAddress, bool hasProxy);
+
+  /**
+   * @notice Emitted when the bridge access control is updated.
+   * @param newAddress The new address of the BridgeAccessControl
+   */
+  event BridgeAccessControlUpdated(address indexed newAddress);
+
+  /**
+   * @notice Emitted when a new proxy is created
+   * @param id The identifier of the proxy
+   * @param proxyAddress The address of the created proxy contract
+   */
+  event ProxyCreated(bytes32 id, address indexed proxyAddress);
+
+  /**
+   * @notice Emitted when a new contract address if registered
+   * @param id The identifier of the contract
+   * @param implementationAddress The address of the implementation contract
+   * @param hasProxy True if the address is registered behind a proxy, false otherwise
+   */
+  event AddressSet(bytes32 id, address indexed implementationAddress, bool hasProxy);
 
   /**
    * @notice Returns the id of the Aave market to which this contract points to
@@ -82,8 +139,16 @@ interface IPoolAddressesProvider {
    **/
   function setPoolConfiguratorImpl(address configurator) external;
 
+  /**
+   * @notice Returns the address of the price oracle
+   * @return The address of the PriceOracle
+   */
   function getPriceOracle() external view returns (address);
 
+  /**
+   * @notice Updates the address of the price oracle
+   * @param priceOracle The address of the new PriceOracle
+   */
   function setPriceOracle(address priceOracle) external;
 
   /**
@@ -93,7 +158,7 @@ interface IPoolAddressesProvider {
   function getACLManager() external view returns (address);
 
   /**
-   * @notice Updates the address of the ACLManager
+   * @notice Updates the address of the ACL manager
    * @param aclManager The address of the new ACLManager
    **/
   function setACLManager(address aclManager) external;

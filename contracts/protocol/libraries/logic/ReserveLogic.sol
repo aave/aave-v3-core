@@ -3,7 +3,6 @@ pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
@@ -69,7 +68,7 @@ library ReserveLogic {
    * @dev A value of 1e27 means there is no debt. As time passes, the income is accrued
    * @dev A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
    * @param reserve The reserve object
-   * @return The normalized variable debt. expressed in ray
+   * @return The normalized variable debt, expressed in ray
    **/
   function getNormalizedDebt(DataTypes.ReserveData storage reserve)
     internal
@@ -184,17 +183,17 @@ library ReserveLogic {
       vars.nextStableRate,
       vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
-      DataTypes.CalculateInterestRatesParams(
-        reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
-        liquidityAdded,
-        liquidityTaken,
-        reserveCache.nextTotalStableDebt,
-        vars.totalVariableDebt,
-        reserveCache.nextAvgStableBorrowRate,
-        reserveCache.reserveFactor,
-        reserveAddress,
-        reserveCache.aTokenAddress
-      )
+      DataTypes.CalculateInterestRatesParams({
+        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
+        liquidityAdded: liquidityAdded,
+        liquidityTaken: liquidityTaken,
+        totalStableDebt: reserveCache.nextTotalStableDebt,
+        totalVariableDebt: vars.totalVariableDebt,
+        averageStableBorrowRate: reserveCache.nextAvgStableBorrowRate,
+        reserveFactor: reserveCache.reserveFactor,
+        reserve: reserveAddress,
+        aToken: reserveCache.aTokenAddress
+      })
     );
 
     reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);

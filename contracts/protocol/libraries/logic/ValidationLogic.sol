@@ -115,7 +115,7 @@ library ValidationLogic {
    * @notice Validates a borrow action
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
@@ -216,17 +216,17 @@ library ValidationLogic {
       reservesData,
       reserves,
       eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        params.userConfig,
-        params.reservesCount,
-        params.userAddress,
-        params.oracle,
-        params.userEModeCategory
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: params.userConfig,
+        reservesCount: params.reservesCount,
+        user: params.userAddress,
+        oracle: params.oracle,
+        userEModeCategory: params.userEModeCategory
+      })
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
-
+    require(vars.currentLtv > 0, Errors.VL_LTV_VALIDATION_FAILED);
     require(
       vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
@@ -537,7 +537,7 @@ library ValidationLogic {
    * @notice Validates the health factor of a user
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param user The user to validate health factor of
    * @param userEModeCategory The users active efficiency mode category
@@ -559,13 +559,13 @@ library ValidationLogic {
         reservesData,
         reserves,
         eModeCategories,
-        DataTypes.CalculateUserAccountDataParams(
-          userConfig,
-          reservesCount,
-          user,
-          oracle,
-          userEModeCategory
-        )
+        DataTypes.CalculateUserAccountDataParams({
+          userConfig: userConfig,
+          reservesCount: reservesCount,
+          user: user,
+          oracle: oracle,
+          userEModeCategory: userEModeCategory
+        })
       );
 
     require(
@@ -588,7 +588,7 @@ library ValidationLogic {
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred

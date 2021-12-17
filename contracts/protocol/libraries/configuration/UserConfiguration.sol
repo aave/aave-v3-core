@@ -158,7 +158,7 @@ library UserConfiguration {
    * @param reservesData The data of all the reserves
    * @param reservesList The reserve list
    * @return True if the user is in isolation mode, false otherwise
-   * @return The address of the first asset used as collateral
+   * @return The address of the only asset used as collateral
    * @return The debt ceiling of the reserve
    */
   function getIsolationModeState(
@@ -192,7 +192,7 @@ library UserConfiguration {
   /**
    * @notice Returns the address of the first asset used as collateral by the user
    * @param self The configuration object
-   * @return The address of the first collateral asset
+   * @return The index of the first collateral asset inside the list of reserves
    */
   function _getFirstAssetAsCollateralId(DataTypes.UserConfigurationMap memory self)
     internal
