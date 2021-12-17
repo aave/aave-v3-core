@@ -226,6 +226,7 @@ library ValidationLogic {
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
+    require(vars.currentLtv > 0, Errors.LTV_VALIDATION_FAILED);
 
     require(
       vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
@@ -276,10 +277,7 @@ library ValidationLogic {
       //available liquidity
       uint256 maxLoanSizeStable = vars.availableLiquidity.percentMul(params.maxStableLoanPercent);
 
-      require(
-        params.amount <= maxLoanSizeStable,
-        Errors.AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE
-      );
+      require(params.amount <= maxLoanSizeStable, Errors.AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
     }
   }
 
@@ -503,14 +501,8 @@ library ValidationLogic {
       .reserveConfiguration
       .getFlags();
 
-    require(
-      vars.collateralReserveActive && vars.principalReserveActive,
-      Errors.RESERVE_INACTIVE
-    );
-    require(
-      !vars.collateralReservePaused && !vars.principalReservePaused,
-      Errors.RESERVE_PAUSED
-    );
+    require(vars.collateralReserveActive && vars.principalReserveActive, Errors.RESERVE_INACTIVE);
+    require(!vars.collateralReservePaused && !vars.principalReservePaused, Errors.RESERVE_PAUSED);
 
     require(
       params.priceOracleSentinel == address(0) ||
@@ -638,10 +630,7 @@ library ValidationLogic {
    * @param reserve The reserve object
    **/
   function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {
-    require(
-      IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0,
-      Errors.STABLE_DEBT_NOT_ZERO
-    );
+    require(IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0, Errors.STABLE_DEBT_NOT_ZERO);
     require(
       IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0,
       Errors.VARIABLE_DEBT_SUPPLY_NOT_ZERO
