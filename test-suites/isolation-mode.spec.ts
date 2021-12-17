@@ -222,7 +222,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const { dai, aave, users, pool } = testEnv;
 
     const borrowAmount = utils.parseEther('10');
-    await pool.connect(users[1].signer).borrow(dai.address, borrowAmount, '2', 0, users[1].address);
+    await expect(
+      pool.connect(users[1].signer).borrow(dai.address, borrowAmount, '2', 0, users[1].address)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, 1000);
 
     const reserveData = await pool.getReserveData(aave.address);
 
@@ -238,8 +242,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await pool.connect(users[3].signer).supply(aave.address, aaveAmount, users[3].address, 0);
 
     const borrowAmount = utils.parseEther('10');
-    await pool.connect(users[3].signer).borrow(dai.address, borrowAmount, '2', 0, users[3].address);
-
+    await expect(
+      pool.connect(users[3].signer).borrow(dai.address, borrowAmount, '2', 0, users[3].address)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, 2000);
     const reserveData = await pool.getReserveData(aave.address);
 
     expect(reserveData.isolationModeTotalDebt).to.be.eq('2000');
@@ -273,8 +280,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await dai.connect(users[1].signer)['mint(uint256)'](mintAmount);
     await dai.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    await pool.connect(users[1].signer).repay(dai.address, MAX_UINT_AMOUNT, '2', users[1].address);
-
+    await expect(
+      pool.connect(users[1].signer).repay(dai.address, MAX_UINT_AMOUNT, '2', users[1].address)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, 0);
     const reserveData = await pool.getReserveData(aave.address);
 
     expect(reserveData.isolationModeTotalDebt).to.be.eq('0');
@@ -328,16 +338,20 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     const isolationModeTotalDebtBefore = (await pool.getReserveData(aave.address))
       .isolationModeTotalDebt;
-
-    await pool
-      .connect(liquidator.signer)
-      .liquidationCall(aave.address, dai.address, borrower.address, borrowAmount.div(2), false);
-
-    const isolationModeTotalDebtAfter = (await pool.getReserveData(aave.address))
-      .isolationModeTotalDebt;
     const expectedAmountAfter = isolationModeTotalDebtBefore.sub(
       borrowAmount.div(2).div(BigNumber.from(10).pow(16))
     );
+
+    await expect(
+      pool
+        .connect(liquidator.signer)
+        .liquidationCall(aave.address, dai.address, borrower.address, borrowAmount.div(2), false)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, expectedAmountAfter);
+
+    const isolationModeTotalDebtAfter = (await pool.getReserveData(aave.address))
+      .isolationModeTotalDebt;
 
     expect(isolationModeTotalDebtAfter).to.be.eq(expectedAmountAfter);
   });
