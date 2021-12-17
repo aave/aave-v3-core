@@ -100,7 +100,7 @@ interface IPool {
    * @notice Emitted on swapBorrowRateMode()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user swapping his rate mode
-   * @param rateMode The rate mode that the user wants to swap to
+   * @param rateMode The current interest rate mode of the position being swapped.
    **/
   event Swap(address indexed reserve, address indexed user, uint256 rateMode);
 

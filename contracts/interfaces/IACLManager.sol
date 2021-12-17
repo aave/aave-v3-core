@@ -9,18 +9,46 @@ import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
  * @notice Defines the basic interface for the ACL Manager
  **/
 interface IACLManager {
+  /**
+   * @notice Returns the contract address of the PoolAddressesProvider
+   * @return The address of the PoolAddressesProvider
+   */
   function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
 
+  /**
+   * @notice Returns the identifier of the PoolAdmin role
+   * @return The id of the PoolAdmin role
+   */
   function POOL_ADMIN_ROLE() external view returns (bytes32);
 
+  /**
+   * @notice Returns the identifier of the EmergencyAdmin role
+   * @return The id of the EmergencyAdmin role
+   */
   function EMERGENCY_ADMIN_ROLE() external view returns (bytes32);
 
+  /**
+   * @notice Returns the identifier of the RiskAdmin role
+   * @return The id of the RiskAdmin role
+   */
   function RISK_ADMIN_ROLE() external view returns (bytes32);
 
+  /**
+   * @notice Returns the identifier of the FlashBorrower role
+   * @return The id of the FlashBorrower role
+   */
   function FLASH_BORROWER_ROLE() external view returns (bytes32);
 
+  /**
+   * @notice Returns the identifier of the Bridge role
+   * @return The id of the Bridge role
+   */
   function BRIDGE_ROLE() external view returns (bytes32);
 
+  /**
+   * @notice Returns the identifier of the AssetListingAdmin role
+   * @return The id of the AssetListingAdmin role
+   */
   function ASSET_LISTING_ADMIN_ROLE() external view returns (bytes32);
 
   /**
