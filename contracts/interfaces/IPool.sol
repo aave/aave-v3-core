@@ -102,7 +102,7 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param rateMode The current interest rate mode of the position being swapped.
    **/
-  event Swap(address indexed reserve, address indexed user, uint256 rateMode);
+  event SwapBorrowRateMode(address indexed reserve, address indexed user, uint256 rateMode);
 
   /**
    * @notice Emitted on borrow(), repay() and liquidationCall() when using isolated assets

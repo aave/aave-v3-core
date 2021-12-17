@@ -45,7 +45,7 @@ library BorrowLogic {
   );
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
-  event Swap(address indexed reserve, address indexed user, uint256 rateMode);
+  event SwapBorrowRateMode(address indexed reserve, address indexed user, uint256 rateMode);
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
@@ -343,6 +343,6 @@ library BorrowLogic {
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
-    emit Swap(asset, msg.sender, rateMode);
+    emit SwapBorrowRateMode(asset, msg.sender, rateMode);
   }
 }
