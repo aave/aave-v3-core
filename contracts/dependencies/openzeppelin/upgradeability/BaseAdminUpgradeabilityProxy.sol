@@ -89,7 +89,7 @@ contract BaseAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
     ifAdmin
   {
     _upgradeTo(newImplementation);
-    if (data.length > 0) {
+    if (data.length != 0) {
       Address.functionDelegateCall(newImplementation, data);
     }
   }

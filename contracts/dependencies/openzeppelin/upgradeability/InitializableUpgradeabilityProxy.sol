@@ -21,7 +21,7 @@ contract InitializableUpgradeabilityProxy is BaseUpgradeabilityProxy {
     require(_implementation() == address(0));
     assert(IMPLEMENTATION_SLOT == bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1));
     _setImplementation(_logic);
-    if (_data.length > 0) {
+    if (_data.length != 0) {
       Address.functionDelegateCall(_logic, _data);
     }
   }
