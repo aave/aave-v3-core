@@ -217,7 +217,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       stableDebtDai
         .connect(user1.signer)
         .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith(ProtocolErrors.INVALID_DELEGATOR);
+    ).to.be.revertedWith(ProtocolErrors.ZERO_ADDRESS_NOT_VALID);
 
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -340,7 +340,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       variableDebtDai
         .connect(user1.signer)
         .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith(ProtocolErrors.INVALID_DELEGATOR);
+    ).to.be.revertedWith(ProtocolErrors.ZERO_ADDRESS_NOT_VALID);
 
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()

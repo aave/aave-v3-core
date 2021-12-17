@@ -149,12 +149,11 @@ export enum ProtocolErrors {
   UINT128_OVERFLOW = '76', // 'Uint128 overflow'
   ACL_ADMIN_CANNOT_BE_ZERO = '77', // 'ACL admin cannot be set to the zero address'
   INCONSISTENT_PARAMS_LENGTH = '78', // 'Array parameters that should be equal length are not'
-  INVALID_OWNER = '79', // 'Invalid owner'
+  ZERO_ADDRESS_NOT_VALID = '79', // 'Zero address not valid'
   INVALID_EXPIRATION = '80', // 'Invalid expiration'
   INVALID_SIGNATURE = '81', // 'Invalid signature'
-  INVALID_DELEGATOR = '82', // 'Invalid delegator'
-  OPERATION_NOT_SUPPORTED = '83', // 'Operation not supported'
-  CONTRACT_ALREADY_INITIALIZED = '84', // 'The contract instance has already been initialized'
+  OPERATION_NOT_SUPPORTED = '82', // 'Operation not supported'
+  CONTRACT_ALREADY_INITIALIZED = '83', // 'The contract instance has already been initialized'
 
   // old
 

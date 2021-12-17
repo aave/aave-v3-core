@@ -235,7 +235,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     bytes32 r,
     bytes32 s
   ) external override {
-    require(owner != address(0), ADDRESS_ZERO_NOT_VALID);
+    require(owner != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     //solium-disable-next-line
     require(block.timestamp <= deadline, Errors.INVALID_EXPIRATION);
     uint256 currentValidNonce = _nonces[owner];

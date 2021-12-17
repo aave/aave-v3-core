@@ -295,6 +295,6 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       aDai
         .connect(spender.signer)
         .permit(ZERO_ADDRESS, spender.address, expiration, permitAmount, v, r, s)
-    ).to.be.revertedWith(ProtocolErrors.INVALID_OWNER);
+    ).to.be.revertedWith(ProtocolErrors.ZERO_ADDRESS_NOT_VALID);
   });
 });

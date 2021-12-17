@@ -63,7 +63,7 @@ abstract contract DebtTokenBase is
     bytes32 r,
     bytes32 s
   ) external {
-    require(delegator != address(0), Errors.INVALID_DELEGATOR);
+    require(delegator != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     //solium-disable-next-line
     require(block.timestamp <= deadline, Errors.INVALID_EXPIRATION);
     uint256 currentValidNonce = _nonces[delegator];
