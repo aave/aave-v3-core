@@ -103,7 +103,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).transfer(users[1].address, 500)
-    ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.TRANSFER_NOT_SUPPORTED);
   });
 
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
@@ -203,10 +203,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).approve(users[1].address, 500)
-    ).to.be.revertedWith('APPROVAL_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.APPROVAL_NOT_SUPPORTED);
     await expect(
       stableDebtContract.allowance(users[0].address, users[1].address)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.ALLOWANCE_NOT_SUPPORTED);
   });
 
   it('Tries to increase allowance of debt tokens (revert expected)', async () => {
@@ -217,7 +217,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).increaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.ALLOWANCE_NOT_SUPPORTED);
   });
 
   it('Tries to decrease allowance of debt tokens (revert expected)', async () => {
@@ -228,7 +228,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).decreaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.ALLOWANCE_NOT_SUPPORTED);
   });
 
   it('Tries to transferFrom (revert expected)', async () => {
@@ -241,7 +241,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       stableDebtContract
         .connect(users[0].signer)
         .transferFrom(users[0].address, users[1].address, 500)
-    ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.TRANSFER_NOT_SUPPORTED);
   });
 
   it('Burn stable debt tokens such that `secondTerm >= firstTerm`', async () => {

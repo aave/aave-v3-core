@@ -141,7 +141,7 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
       pool
         .connect(user1.signer)
         .borrow(weth.address, borrowWethAmount, RateMode.Variable, 0, user1.address)
-    ).to.be.revertedWith(VL_LTV_VALIDATION_FAILED);
+    ).to.be.revertedWith(LTV_VALIDATION_FAILED);
 
     const userData = await pool.getUserAccountData(user1.address);
     expect(userData.totalCollateralBase).to.be.eq(parseUnits('10', 8));

@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import {BaseUpgradeabilityProxy} from '../../../dependencies/openzeppelin/upgradeability/BaseUpgradeabilityProxy.sol';
+import {Errors} from '../helpers/Errors.sol';
 
 /**
  * @title BaseImmutableAdminUpgradeabilityProxy
@@ -69,14 +70,14 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
   {
     _upgradeTo(newImplementation);
     (bool success, ) = newImplementation.delegatecall(data);
-    require(success);
+    require(success, Errors.UPGRADE_TO_CALL_FAILURE);
   }
 
   /**
    * @notice Only fall back when the sender is not the admin.
    */
   function _willFallback() internal virtual override {
-    require(msg.sender != ADMIN, 'Cannot call fallback function from the proxy admin');
+    require(msg.sender != ADMIN, Errors.CANNOT_CALL_FALLBACK_FUNC_FROM_PROXY_ADMIN);
     super._willFallback();
   }
 }

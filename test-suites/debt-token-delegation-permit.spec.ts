@@ -11,6 +11,7 @@ import { timeLatest } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getTestWallets } from './helpers/utils/wallets';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { ProtocolErrors } from '../helpers/types';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -216,7 +217,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       stableDebtDai
         .connect(user1.signer)
         .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_DELEGATOR');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_DELEGATOR);
 
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -257,7 +258,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       stableDebtDai
         .connect(user1.signer)
         .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_EXPIRATION');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_EXPIRATION);
 
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -298,7 +299,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       stableDebtDai
         .connect(user1.signer)
         .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_SIGNATURE');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_SIGNATURE);
 
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -339,7 +340,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       variableDebtDai
         .connect(user1.signer)
         .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_DELEGATOR');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_DELEGATOR);
 
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -380,7 +381,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       variableDebtDai
         .connect(user1.signer)
         .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_EXPIRATION');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_EXPIRATION);
 
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -421,7 +422,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       variableDebtDai
         .connect(user1.signer)
         .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_SIGNATURE');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_SIGNATURE);
 
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()

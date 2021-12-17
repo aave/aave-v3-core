@@ -147,6 +147,18 @@ export enum ProtocolErrors {
   INVALID_DEBT_CEILING = '74', // 'Invalid debt ceiling for the reserve
   INVALID_RESERVE_INDEX = '75', // 'Invalid reserve index'
   UINT128_OVERFLOW = '76', // 'Uint128 overflow'
+  ACL_ADMIN_CANNOT_BE_ZERO = '77', // 'ACL admin cannot be set to the zero address'
+  INCONSISTENT_PARAMS_LENGTH = '78', // 'Array parameters that should be equal length are not'
+  INVALID_OWNER = '79', // 'Invalid owner'
+  INVALID_EXPIRATION = '80', // 'Invalid expiration'
+  INVALID_SIGNATURE = '81', // 'Invalid signature'
+  INVALID_DELEGATOR = '82', // 'Invalid delegator'
+  TRANSFER_NOT_SUPPORTED = '83', // 'Transfer not supported'
+  ALLOWANCE_NOT_SUPPORTED = '84', // 'Allowance not supported'
+  APPROVAL_NOT_SUPPORTED = '85', // 'Approval not supported'
+  CANNOT_CALL_FALLBACK_FUNC_FROM_PROXY_ADMIN = '86', // 'Cannot call fallback function from the proxy admin'
+  UPGRADE_TO_CALL_FAILURE = '87', // 'The delegatecall in upgradeToAndCall function failed.
+  CONTRACT_ALREADY_INITIALIZED = '88', // 'The contract instance has already been initialized'
 
   // old
 

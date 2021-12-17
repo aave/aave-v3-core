@@ -59,7 +59,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [100, 200, 300]
         )
-      ).to.be.revertedWith('Contract instance has already been initialized');
+      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
     });
   });
 
@@ -125,7 +125,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith('Contract instance has already been initialized');
+      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
     });
 
     it('initialize() when initializing the impl from admin address once it is already initialized (revert expected)', async () => {
@@ -135,7 +135,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith('Cannot call fallback function from the proxy admin');
+      ).to.be.revertedWith(ProtocolErrors.CANNOT_CALL_FALLBACK_FUNC_FROM_PROXY_ADMIN);
     });
 
     it('initialize() deploy a proxy and call to initialize() with no initialization data', async () => {
@@ -250,10 +250,10 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith('Contract instance has already been initialized');
+      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
     });
 
-    it('upgradeToAndCall() to a new imple from non-admin address (revert expected)', async () => {
+    it('ProtocolErrors.CONTRACT_ALREADY_INITIALIZED() to a new imple from non-admin address (revert expected)', async () => {
       await expect(
         proxy.connect(nonAdmin).upgradeToAndCall(implementationV2.address, Buffer.from(''))
       ).to.be.reverted;
@@ -296,8 +296,9 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
     it('upgradeToAndCall() for a new proxied contract with no initialize function (revert expected)', async () => {
       const impl = await deployMockInitializableImple();
       const encodedInitialize = Buffer.from('');
-      await expect(proxy.connect(proxyAdminOwner).upgradeToAndCall(impl.address, encodedInitialize))
-        .reverted;
+      await expect(
+        proxy.connect(proxyAdminOwner).upgradeToAndCall(impl.address, encodedInitialize)
+      ).revertedWith(ProtocolErrors.UPGRADE_TO_CALL_FAILURE);
     });
 
     it('upgradeToAndCall() when initializing the new impl from admin address once it is already initialized (revert expected)', async () => {
@@ -317,7 +318,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith('Contract instance has already been initialized');
+      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
     });
 
     it('implementation.setValue() call through the proxy', async () => {

@@ -6,6 +6,7 @@ import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contrac
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getTestWallets } from './helpers/utils/wallets';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { ProtocolErrors } from '../helpers/types';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -79,7 +80,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       aDai
         .connect(spender.signer)
         .permit(owner.address, spender.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_EXPIRATION');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_EXPIRATION);
 
     expect((await aDai.allowance(owner.address, spender.address)).toString()).to.be.equal(
       '0',
@@ -198,7 +199,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       aDai
         .connect(spender.signer)
         .permit(owner.address, spender.address, permitAmount, deadline, v, r, s)
-    ).to.be.revertedWith('INVALID_SIGNATURE');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_SIGNATURE);
   });
 
   it('Tries to submit a permit with invalid expiration (previous to the current block) (revert expected)', async () => {
@@ -230,7 +231,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       aDai
         .connect(spender.signer)
         .permit(owner.address, spender.address, expiration, permitAmount, v, r, s)
-    ).to.be.revertedWith('INVALID_EXPIRATION');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_EXPIRATION);
   });
 
   it('Tries to submit a permit with invalid signature (revert expected)', async () => {
@@ -262,7 +263,7 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       aDai
         .connect(spender.signer)
         .permit(owner.address, ZERO_ADDRESS, permitAmount, deadline, v, r, s)
-    ).to.be.revertedWith('INVALID_SIGNATURE');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_SIGNATURE);
   });
 
   it('Tries to submit a permit with invalid owner (revert expected)', async () => {
@@ -294,6 +295,6 @@ makeSuite('AToken: Permit', (testEnv: TestEnv) => {
       aDai
         .connect(spender.signer)
         .permit(ZERO_ADDRESS, spender.address, expiration, permitAmount, v, r, s)
-    ).to.be.revertedWith('INVALID_OWNER');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_OWNER);
   });
 });
