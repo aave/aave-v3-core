@@ -21,8 +21,7 @@ contract UpgradeabilityProxy is BaseUpgradeabilityProxy {
     assert(IMPLEMENTATION_SLOT == bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1));
     _setImplementation(_logic);
     if (_data.length != 0) {
-      (bool success, ) = _logic.delegatecall(_data);
-      require(success);
+      Address.functionDelegateCall(_logic, _data);
     }
   }
 }
