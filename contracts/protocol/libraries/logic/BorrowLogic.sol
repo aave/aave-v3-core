@@ -126,14 +126,17 @@ library BorrowLogic {
     }
 
     if (isolationModeActive) {
-      uint256 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+      uint256 nextIsolationModeTotalDebt = reserves[isolationModeCollateralAddress]
         .isolationModeTotalDebt += Helpers.castUint128(
         params.amount /
           10 **
             (reserveCache.reserveConfiguration.getDecimals() -
               ReserveConfiguration.DEBT_CEILING_DECIMALS)
       );
-      emit IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, isolationModeTotalDebt);
+      emit IsolationModeTotalDebtUpdated(
+        isolationModeCollateralAddress,
+        nextIsolationModeTotalDebt
+      );
     }
 
     reserve.updateInterestRates(
