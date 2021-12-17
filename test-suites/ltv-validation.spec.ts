@@ -7,7 +7,7 @@ import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 import { parseUnits } from 'ethers/lib/utils';
 
 makeSuite('LTV validation', (testEnv: TestEnv) => {
-  const { VL_LTV_VALIDATION_FAILED } = ProtocolErrors;
+  const { LTV_VALIDATION_FAILED } = ProtocolErrors;
 
   let snap: string;
   before(async () => {
@@ -83,7 +83,7 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user1.signer).withdraw(usdc.address, withdrawnAmount, user1.address)
-    ).to.be.revertedWith(VL_LTV_VALIDATION_FAILED);
+    ).to.be.revertedWith(LTV_VALIDATION_FAILED);
   });
 
   it('Withdraws DAI', async () => {

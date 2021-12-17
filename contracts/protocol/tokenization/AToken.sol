@@ -33,7 +33,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   address internal _underlyingAsset;
 
   modifier onlyPool() {
-    require(_msgSender() == address(POOL), Errors.CT_CALLER_MUST_BE_POOL);
+    require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;
   }
 
@@ -88,7 +88,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 index
   ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
@@ -120,7 +120,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 index
   ) public override onlyPool returns (bool) {
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -

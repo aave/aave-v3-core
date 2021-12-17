@@ -25,7 +25,7 @@ const expectEqual = (
 };
 
 makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
-  const { VL_INVALID_AMOUNT, P_CALLER_NOT_BRIDGE, VL_UNBACKED_MINT_CAP_EXCEEDED } = ProtocolErrors;
+  const { INVALID_AMOUNT, CALLER_NOT_BRIDGE, UNBACKED_MINT_CAP_EXCEEDED } = ProtocolErrors;
 
   const depositAmount = utils.parseEther('1000');
   const borrowAmount = utils.parseEther('200');
@@ -96,7 +96,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     const { users, pool, dai } = testEnv;
     await expect(
       pool.connect(users[1].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
-    ).to.be.revertedWith(P_CALLER_NOT_BRIDGE);
+    ).to.be.revertedWith(CALLER_NOT_BRIDGE);
   });
 
   it('User 2 tries to perform fast withdraw from L2 with no unbackedMintCap (revert expected)', async () => {
@@ -104,12 +104,12 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     // fast withdraw a100 DAI
     await expect(
       pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
-    ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
+    ).to.be.revertedWith(UNBACKED_MINT_CAP_EXCEEDED);
 
     // fast withdraw 0 aDAI
     await expect(
       pool.connect(users[2].signer).mintUnbacked(dai.address, 0, users[0].address, 0)
-    ).to.be.revertedWith(VL_INVALID_AMOUNT);
+    ).to.be.revertedWith(INVALID_AMOUNT);
   });
 
   it('RiskAdmin updates the unbackedMintCap to 10 aDai (10 left) and user 1 tries to perform fast withdraw 100 aDai from L2 (revert expected)', async () => {
@@ -117,7 +117,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, '10'));
     await expect(
       pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
-    ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
+    ).to.be.revertedWith(UNBACKED_MINT_CAP_EXCEEDED);
 
     expect(
       await configurator
@@ -147,7 +147,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
     expect(await configurator.connect(riskAdmin.signer).setUnbackedMintCap(dai.address, '100'));
     await expect(
       pool.connect(users[2].signer).mintUnbacked(dai.address, mintAmount, users[0].address, 0)
-    ).to.be.revertedWith(VL_UNBACKED_MINT_CAP_EXCEEDED);
+    ).to.be.revertedWith(UNBACKED_MINT_CAP_EXCEEDED);
 
     expect(
       await configurator
@@ -252,7 +252,7 @@ makeSuite('BridgeLogic: Testing with borrows', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(users[1].signer).backUnbacked(dai.address, mintAmount, feeAmount)
-    ).to.be.revertedWith(P_CALLER_NOT_BRIDGE);
+    ).to.be.revertedWith(CALLER_NOT_BRIDGE);
   });
 
   it('100 bridged dai used to back unbacked', async () => {

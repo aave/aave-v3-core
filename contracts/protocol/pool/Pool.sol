@@ -65,14 +65,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function _onlyPoolConfigurator() internal view {
     require(
       ADDRESSES_PROVIDER.getPoolConfigurator() == msg.sender,
-      Errors.P_CALLER_NOT_POOL_CONFIGURATOR
+      Errors.CALLER_NOT_POOL_CONFIGURATOR
     );
   }
 
   function _onlyBridge() internal view {
     require(
       IACLManager(ADDRESSES_PROVIDER.getACLManager()).isBridge(msg.sender),
-      Errors.P_CALLER_NOT_BRIDGE
+      Errors.CALLER_NOT_BRIDGE
     );
   }
 
@@ -92,7 +92,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
-    require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
+    require(provider == ADDRESSES_PROVIDER, Errors.INCORRECT_ADDRESSES_PROVIDER);
     _maxStableRateBorrowSizePercent = 2500;
     _flashLoanPremiumTotal = 9;
     _flashLoanPremiumToProtocol = 0;
@@ -608,7 +608,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceFromBefore,
     uint256 balanceToBefore
   ) external override {
-    require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
+    require(msg.sender == _reserves[asset].aTokenAddress, Errors.CALLER_NOT_ATOKEN);
     SupplyLogic.executeFinalizeTransfer(
       _reserves,
       _reservesList,
@@ -637,7 +637,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address variableDebtAddress,
     address interestRateStrategyAddress
   ) external override onlyPoolConfigurator {
-    require(Address.isContract(asset), Errors.P_NOT_CONTRACT);
+    require(Address.isContract(asset), Errors.NOT_CONTRACT);
     _reserves[asset].init(
       aTokenAddress,
       stableDebtAddress,
@@ -694,7 +694,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     // category 0 is reserved for volatile heterogeneous assets and it's always disabled
-    require(id != 0, Errors.RC_INVALID_EMODE_CATEGORY);
+    require(id != 0, Errors.EMODE_CATEGORY_RESERVED);
     _eModeCategories[id] = category;
   }
 
@@ -731,7 +731,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
-    require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
+    require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
     uint16 reservesCount = _reservesCount;
 
@@ -742,7 +742,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         return;
       }
     }
-    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
+    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.NO_MORE_RESERVES_ALLOWED);
     _reserves[asset].id = reservesCount;
     _reservesList[reservesCount] = asset;
     // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max

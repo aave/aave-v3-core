@@ -17,9 +17,8 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
-  const { VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } = ProtocolErrors;
-
   let snapFresh: string;
+
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
     snapFresh = await evmSnapshot();
     const {

@@ -102,11 +102,11 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     const { users, aaveOracle } = testEnv;
     const user = users[0];
 
-    const { PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN } = ProtocolErrors;
+    const { CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN } = ProtocolErrors;
 
     await expect(
       aaveOracle.connect(user.signer).setAssetSources([mockToken.address], [mockAggregator.address])
-    ).to.be.revertedWith(PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
+    ).to.be.revertedWith(CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
   });
 
   it('Get price of BASE_CURRENCY asset with registered asset source for its address', async () => {

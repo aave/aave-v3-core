@@ -10,9 +10,9 @@ import { evmSnapshot, evmRevert, VariableDebtToken__factory } from '@aave/deploy
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   const {
-    VL_INCONSISTENT_EMODE_CATEGORY,
-    VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
-    VL_COLLATERAL_CANNOT_COVER_NEW_BORROW,
+    INCONSISTENT_EMODE_CATEGORY,
+    HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
+    COLLATERAL_CANNOT_COVER_NEW_BORROW,
   } = ProtocolErrors;
 
   let snapSetup: string;
@@ -159,7 +159,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
 
     const userCategory = await pool.getUserEMode(user0.address);
     await expect(pool.connect(user0.signer).setUserEMode(0)).to.be.revertedWith(
-      VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
+      HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
     );
     expect(await pool.getUserEMode(user0.address)).to.be.eq(userCategory);
   });
@@ -179,7 +179,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       aDai
         .connect(user0.signer)
         .transfer(user3.address, await convertToCurrencyDecimals(dai.address, '10'))
-    ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
+    ).to.be.revertedWith(HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
 
     expect(await pool.getUserEMode(user0.address)).to.be.eq(CATEGORIES.STABLECOINS.id);
     expect(await pool.getUserEMode(user3.address)).to.be.eq(0);
@@ -293,7 +293,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     const userCategory = await pool.getUserEMode(user0.address);
     await expect(
       pool.connect(user0.signer).setUserEMode(CATEGORIES.ETHEREUM.id)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INCONSISTENT_EMODE_CATEGORY);
     expect(await pool.getUserEMode(user0.address)).to.be.eq(userCategory);
   });
 
@@ -314,7 +314,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
           0,
           user0.address
         )
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INCONSISTENT_EMODE_CATEGORY);
   });
 
   it('User 1 tries to borrow (non-category asset) DAI (revert expected)', async () => {
@@ -334,7 +334,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
           0,
           user1.address
         )
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INCONSISTENT_EMODE_CATEGORY);
   });
 
   it('User 0 repays USDC debt and activates eMode for ethereum category', async () => {
@@ -381,7 +381,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
           0,
           user0.address
         )
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INCONSISTENT_EMODE_CATEGORY);
   });
 
   it('User 0 sends aTokens to user 3', async () => {
@@ -485,7 +485,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     // Bob borrows 0.01 weth on behalf of Alice (should revert)
     await expect(
       pool.connect(user5.signer).borrow(weth.address, parseUnits('0.01', 18), 2, 0, user4.address)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INCONSISTENT_EMODE_CATEGORY);
 
     expect(await weth.balanceOf(user5.address)).to.be.eq(
       bobWethBalanceBefore,
@@ -541,7 +541,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     // Bob borrows 90 usdc on behalf of Alice
     await expect(
       pool.connect(user5.signer).borrow(usdc.address, parseUnits('90', 6), 2, 0, user4.address)
-    ).to.be.revertedWith(VL_COLLATERAL_CANNOT_COVER_NEW_BORROW);
+    ).to.be.revertedWith(COLLATERAL_CANNOT_COVER_NEW_BORROW);
 
     // Alice is still in a position where she CANNOT be liquidated
     const user4Data = await pool.getUserAccountData(user4.address);
