@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {Errors} from '../helpers/Errors.sol';
-
 /**
  * @title VersionedInitializable
  * @author Aave, inspired by the OpenZeppelin Initializable contract
@@ -33,7 +31,7 @@ abstract contract VersionedInitializable {
     uint256 revision = getRevision();
     require(
       initializing || isConstructor() || revision > lastInitializedRevision,
-      Errors.CONTRACT_ALREADY_INITIALIZED
+      'Contract instance has already been initialized'
     );
 
     bool isTopLevelCall = !initializing;

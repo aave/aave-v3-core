@@ -89,5 +89,4 @@ library Errors {
   string public constant INVALID_EXPIRATION = '80'; // 'Invalid expiration'
   string public constant INVALID_SIGNATURE = '81'; // 'Invalid signature'
   string public constant OPERATION_NOT_SUPPORTED = '82'; // 'Operation not supported'
-  string public constant CONTRACT_ALREADY_INITIALIZED = '83'; // 'The contract instance has already been initialized'
 }

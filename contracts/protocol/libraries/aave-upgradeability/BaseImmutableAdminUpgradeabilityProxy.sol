@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import {BaseUpgradeabilityProxy} from '../../../dependencies/openzeppelin/upgradeability/BaseUpgradeabilityProxy.sol';
-import {Errors} from '../helpers/Errors.sol';
 
 /**
  * @title BaseImmutableAdminUpgradeabilityProxy

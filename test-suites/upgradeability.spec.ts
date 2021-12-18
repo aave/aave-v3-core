@@ -59,7 +59,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [100, 200, 300]
         )
-      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Contract instance has already been initialized');
     });
   });
 
@@ -125,7 +125,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Contract instance has already been initialized');
     });
 
     it('initialize() when initializing the impl from admin address once it is already initialized (revert expected)', async () => {
@@ -250,10 +250,10 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Contract instance has already been initialized');
     });
 
-    it('ProtocolErrors.CONTRACT_ALREADY_INITIALIZED() to a new imple from non-admin address (revert expected)', async () => {
+    it('upgradeToAndCall() to a new impl from non-admin address (revert expected)', async () => {
       await expect(
         proxy.connect(nonAdmin).upgradeToAndCall(implementationV2.address, Buffer.from(''))
       ).to.be.reverted;
@@ -317,7 +317,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
           'some text', // text
           [10, 20, 30]
         )
-      ).to.be.revertedWith(ProtocolErrors.CONTRACT_ALREADY_INITIALIZED);
+      ).to.be.revertedWith('Contract instance has already been initialized');
     });
 
     it('implementation.setValue() call through the proxy', async () => {

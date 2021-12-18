@@ -153,7 +153,6 @@ export enum ProtocolErrors {
   INVALID_EXPIRATION = '80', // 'Invalid expiration'
   INVALID_SIGNATURE = '81', // 'Invalid signature'
   OPERATION_NOT_SUPPORTED = '82', // 'Operation not supported'
-  CONTRACT_ALREADY_INITIALIZED = '83', // 'The contract instance has already been initialized'
 
   // old
 
