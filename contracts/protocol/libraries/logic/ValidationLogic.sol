@@ -36,8 +36,8 @@ library ValidationLogic {
   using Address for address;
 
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
-  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
+  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95e27; //usage ratio of 95%
+  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   /**
@@ -49,23 +49,22 @@ library ValidationLogic {
     internal
     view
   {
+    require(amount != 0, Errors.VL_INVALID_AMOUNT);
+
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
       .reserveConfiguration
       .getFlags();
-
-    uint256 reserveDecimals = reserveCache.reserveConfiguration.getDecimals();
-    uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
-
-    require(amount != 0, Errors.VL_INVALID_AMOUNT);
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(!isFrozen, Errors.VL_RESERVE_FROZEN);
+
+    uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
     require(
       supplyCap == 0 ||
         (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
           reserveCache.nextLiquidityIndex
         ) + amount) <=
-        supplyCap * (10**reserveDecimals),
+        supplyCap * (10**reserveCache.reserveConfiguration.getDecimals()),
       Errors.VL_SUPPLY_CAP_EXCEEDED
     );
   }
@@ -124,9 +123,9 @@ library ValidationLogic {
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.ValidateBorrowParams memory params
   ) internal view {
-    ValidateBorrowLocalVars memory vars;
+    require(params.amount != 0, Errors.VL_INVALID_AMOUNT);
 
-    vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
+    ValidateBorrowLocalVars memory vars;
 
     (
       vars.isActive,
@@ -139,8 +138,6 @@ library ValidationLogic {
     require(vars.isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!vars.isPaused, Errors.VL_RESERVE_PAUSED);
     require(!vars.isFrozen, Errors.VL_RESERVE_FROZEN);
-    require(params.amount != 0, Errors.VL_INVALID_AMOUNT);
-
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
     require(
@@ -156,6 +153,7 @@ library ValidationLogic {
       Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
     );
 
+    vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
     vars.borrowCap = params.reserveCache.reserveConfiguration.getBorrowCap();
     unchecked {
       vars.assetUnit = 10**vars.reserveDecimals;
@@ -297,11 +295,11 @@ library ValidationLogic {
     uint256 stableDebt,
     uint256 variableDebt
   ) internal view {
+    require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
+
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
-
-    require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
 
     uint256 variableDebtPreviousIndex = IScaledBalanceToken(reserveCache.variableDebtTokenAddress)
       .getPreviousIndex(onBehalfOf);
@@ -351,7 +349,6 @@ library ValidationLogic {
     (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) = reserveCache
       .reserveConfiguration
       .getFlags();
-
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(!isFrozen, Errors.VL_RESERVE_FROZEN);
@@ -398,7 +395,6 @@ library ValidationLogic {
     address aTokenAddress
   ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
-
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
@@ -433,11 +429,11 @@ library ValidationLogic {
     DataTypes.ReserveCache memory reserveCache,
     uint256 userBalance
   ) internal pure {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+    require(userBalance > 0, Errors.VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0);
 
+    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
-    require(userBalance > 0, Errors.VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0);
   }
 
   /**
@@ -573,11 +569,8 @@ library ValidationLogic {
     return (healthFactor, hasZeroLtvCollateral);
   }
 
-  struct validateHFAndLtvLocalVars {
-    uint256 healthFactor;
+  struct ValidateHFAndLtvLocalVars {
     uint256 assetLtv;
-    uint256 reserveDecimals;
-    uint256 totalSupplyAtoken;
     bool hasZeroLtvCollateral;
   }
 
@@ -604,9 +597,14 @@ library ValidationLogic {
     address oracle,
     uint8 userEModeCategory
   ) internal view {
-    validateHFAndLtvLocalVars memory vars;
+    ValidateHFAndLtvLocalVars memory vars;
+
     DataTypes.ReserveData memory reserve = reservesData[asset];
-    (vars.healthFactor, vars.hasZeroLtvCollateral) = validateHealthFactor(
+
+    vars.assetLtv = reserve.configuration.getLtv();
+    if (vars.assetLtv == 0) return;
+
+    (, vars.hasZeroLtvCollateral) = validateHealthFactor(
       reservesData,
       reserves,
       eModeCategories,
@@ -616,10 +614,7 @@ library ValidationLogic {
       reservesCount,
       oracle
     );
-
-    vars.assetLtv = reserve.configuration.getLtv();
-
-    require(vars.assetLtv == 0 || !vars.hasZeroLtvCollateral, Errors.VL_LTV_VALIDATION_FAILED);
+    require(!vars.hasZeroLtvCollateral, Errors.VL_LTV_VALIDATION_FAILED);
   }
 
   /**
