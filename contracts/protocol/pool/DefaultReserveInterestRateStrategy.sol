@@ -153,7 +153,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       : 0;
 
     vars.currentVariableBorrowRate = 0;
-    vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
 
     vars.borrowUtilizationRate = vars.totalDebt == 0
