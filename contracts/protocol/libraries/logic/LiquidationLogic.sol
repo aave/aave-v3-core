@@ -3,15 +3,15 @@ pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts//IERC20.sol';
 import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {PercentageMath} from '../../libraries/math/PercentageMath.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
-import {Errors} from '../../libraries/helpers/Errors.sol';
 import {DataTypes} from '../../libraries/types/DataTypes.sol';
-import {ReserveLogic} from '../../libraries/logic/ReserveLogic.sol';
-import {ValidationLogic} from '../../libraries/logic/ValidationLogic.sol';
-import {GenericLogic} from '../../libraries/logic/GenericLogic.sol';
+import {ReserveLogic} from './ReserveLogic.sol';
+import {ValidationLogic} from './ValidationLogic.sol';
+import {GenericLogic} from './GenericLogic.sol';
+import {EModeLogic} from './EModeLogic.sol';
+import {IsolationModeLogic} from './IsolationModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -98,24 +98,24 @@ library LiquidationLogic {
       reserves,
       reservesList,
       eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        userConfig,
-        params.reservesCount,
-        params.user,
-        params.priceOracle,
-        params.userEModeCategory
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: userConfig,
+        reservesCount: params.reservesCount,
+        user: params.user,
+        oracle: params.priceOracle,
+        userEModeCategory: params.userEModeCategory
+      })
     );
 
     ValidationLogic.validateLiquidationCall(
       userConfig,
       collateralReserve,
-      DataTypes.ValidateLiquidationCallParams(
-        vars.debtReserveCache,
-        vars.userStableDebt + vars.userVariableDebt,
-        vars.healthFactor,
-        params.priceOracleSentinel
-      )
+      DataTypes.ValidateLiquidationCallParams({
+        debtReserveCache: vars.debtReserveCache,
+        totalDebt: vars.userStableDebt + vars.userVariableDebt,
+        healthFactor: vars.healthFactor,
+        priceOracleSentinel: params.priceOracleSentinel
+      })
     );
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
@@ -133,9 +133,12 @@ library LiquidationLogic {
       ? vars.maxLiquidatableDebt
       : params.debtToCover;
 
-    vars.liquidationBonus = params.userEModeCategory == 0
-      ? collateralReserve.configuration.getLiquidationBonus()
-      : eModeCategories[params.userEModeCategory].liquidationBonus;
+    vars.liquidationBonus = EModeLogic.isInEModeCategory(
+      params.userEModeCategory,
+      collateralReserve.configuration.getEModeCategory()
+    )
+      ? eModeCategories[params.userEModeCategory].liquidationBonus
+      : collateralReserve.configuration.getLiquidationBonus();
 
     (
       vars.maxCollateralToLiquidate,
@@ -188,6 +191,14 @@ library LiquidationLogic {
       params.debtAsset,
       vars.actualDebtToLiquidate,
       0
+    );
+
+    IsolationModeLogic.updateIsolatedDebtIfIsolated(
+      reserves,
+      reservesList,
+      userConfig,
+      vars.debtReserveCache,
+      vars.actualDebtToLiquidate
     );
 
     if (params.receiveAToken) {
@@ -342,27 +353,26 @@ library LiquidationLogic {
       ((vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit)) /
       (vars.collateralPrice * vars.debtAssetUnit);
 
-    vars.bonusCollateral = vars.baseCollateral.percentMul(liquidationBonus) - vars.baseCollateral;
-
-    vars.maxCollateralToLiquidate = vars.baseCollateral + vars.bonusCollateral;
+    vars.maxCollateralToLiquidate = vars.baseCollateral.percentMul(liquidationBonus);
 
     if (vars.maxCollateralToLiquidate > userCollateralBalance) {
       vars.collateralAmount = userCollateralBalance;
       vars.debtAmountNeeded = ((vars.collateralPrice * vars.collateralAmount * vars.debtAssetUnit) /
         (vars.debtAssetPrice * vars.collateralAssetUnit)).percentDiv(liquidationBonus);
-
-      if (vars.liquidationProtocolFeePercentage > 0) {
-        vars.bonusCollateral = vars.collateralAmount.percentDiv(liquidationBonus);
-      }
     } else {
       vars.collateralAmount = vars.maxCollateralToLiquidate;
       vars.debtAmountNeeded = debtToCover;
     }
 
     if (vars.liquidationProtocolFeePercentage > 0) {
+      vars.bonusCollateral =
+        vars.collateralAmount -
+        vars.collateralAmount.percentDiv(liquidationBonus);
+
       vars.liquidationProtocolFee = vars.bonusCollateral.percentMul(
         vars.liquidationProtocolFeePercentage
       );
+
       return (
         vars.collateralAmount - vars.liquidationProtocolFee,
         vars.debtAmountNeeded,

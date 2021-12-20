@@ -40,12 +40,9 @@ contract FlashloanAttacker is FlashLoanSimpleReceiverBase {
     address asset,
     uint256 amount,
     uint256 premium,
-    address initiator,
-    bytes memory params
+    address, // initiator
+    bytes memory // params
   ) public override returns (bool) {
-    params;
-    initiator;
-
     MintableERC20 token = MintableERC20(asset);
     uint256 amountToReturn = amount.add(premium);
 

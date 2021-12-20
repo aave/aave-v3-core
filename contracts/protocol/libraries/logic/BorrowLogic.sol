@@ -9,10 +9,10 @@ import {IAToken} from '../../../interfaces/IAToken.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
-import {Errors} from '../helpers/Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
+import {IsolationModeLogic} from './IsolationModeLogic.sol';
 
 /**
  * @title BorrowLogic library
@@ -45,8 +45,19 @@ library BorrowLogic {
   );
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
-  event Swap(address indexed reserve, address indexed user, uint256 rateMode);
+  event SwapBorrowRateMode(address indexed reserve, address indexed user, uint256 rateMode);
+  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
+  /**
+   * @notice Implements the borrow feature. Borrowing allows users that provided collateral to draw liquidity from the
+   * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the isolated debt.
+   * @dev  Emits the `Borrow()` event
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the borrow function
+   */
   function executeBorrow(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -69,22 +80,22 @@ library BorrowLogic {
       reserves,
       reservesList,
       eModeCategories,
-      DataTypes.ValidateBorrowParams(
-        reserveCache,
-        userConfig,
-        params.asset,
-        params.onBehalfOf,
-        params.amount,
-        params.interestRateMode,
-        params.maxStableRateBorrowSizePercent,
-        params.reservesCount,
-        params.oracle,
-        params.userEModeCategory,
-        params.priceOracleSentinel,
-        isolationModeActive,
-        isolationModeCollateralAddress,
-        isolationModeDebtCeiling
-      )
+      DataTypes.ValidateBorrowParams({
+        reserveCache: reserveCache,
+        userConfig: userConfig,
+        asset: params.asset,
+        userAddress: params.onBehalfOf,
+        amount: params.amount,
+        interestRateMode: params.interestRateMode,
+        maxStableLoanPercent: params.maxStableRateBorrowSizePercent,
+        reservesCount: params.reservesCount,
+        oracle: params.oracle,
+        userEModeCategory: params.userEModeCategory,
+        priceOracleSentinel: params.priceOracleSentinel,
+        isolationModeActive: isolationModeActive,
+        isolationModeCollateralAddress: isolationModeCollateralAddress,
+        isolationModeDebtCeiling: isolationModeDebtCeiling
+      })
     );
 
     uint256 currentStableRate = 0;
@@ -114,11 +125,16 @@ library BorrowLogic {
     }
 
     if (isolationModeActive) {
-      reserves[isolationModeCollateralAddress].isolationModeTotalDebt += Helpers.castUint128(
+      uint256 nextIsolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+        .isolationModeTotalDebt += Helpers.castUint128(
         params.amount /
           10 **
             (reserveCache.reserveConfiguration.getDecimals() -
               ReserveConfiguration.DEBT_CEILING_DECIMALS)
+      );
+      emit IsolationModeTotalDebtUpdated(
+        isolationModeCollateralAddress,
+        nextIsolationModeTotalDebt
       );
     }
 
@@ -146,6 +162,17 @@ library BorrowLogic {
     );
   }
 
+  /**
+   * @notice Implements the repay feature. Repaying transfers the underlying back to the aToken and clears the equivalent amount
+   * of debt for the user by burning the corresponding debt token. For isolated positions, it also reduces the isolated debt.
+   * @dev  Emits the `Repay()` event
+   * @param reserves The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param reserve The data of the reserve of the asset being repaid
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the repay function
+   * @return The actual amount being repaid
+   */
   function executeRepay(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -189,35 +216,24 @@ library BorrowLogic {
       ).burn(params.onBehalfOf, paybackAmount, reserveCache.nextVariableBorrowIndex);
     }
 
-    reserve.updateInterestRates(reserveCache, params.asset, paybackAmount, 0);
+    reserve.updateInterestRates(
+      reserveCache,
+      params.asset,
+      params.useATokens ? 0 : paybackAmount,
+      0
+    );
 
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
     }
 
-    (bool isolationModeActive, address isolationModeCollateralAddress, ) = userConfig
-      .getIsolationModeState(reserves, reservesList);
-
-    if (isolationModeActive) {
-      uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
-        .isolationModeTotalDebt;
-
-      uint128 isolatedDebtRepaid = Helpers.castUint128(
-        paybackAmount /
-          10 **
-            (reserveCache.reserveConfiguration.getDecimals() -
-              ReserveConfiguration.DEBT_CEILING_DECIMALS)
-      );
-
-      // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
-      if (isolationModeTotalDebt <= isolatedDebtRepaid) {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
-      } else {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt =
-          isolationModeTotalDebt -
-          isolatedDebtRepaid;
-      }
-    }
+    IsolationModeLogic.updateIsolatedDebtIfIsolated(
+      reserves,
+      reservesList,
+      userConfig,
+      reserveCache,
+      paybackAmount
+    );
 
     if (params.useATokens) {
       IAToken(reserveCache.aTokenAddress).burn(
@@ -236,7 +252,15 @@ library BorrowLogic {
     return paybackAmount;
   }
 
-  function rebalanceStableBorrowRate(
+  /**
+   * @notice Implements the rebalance stable borrow rate feature. In case of liquidity crunches on the protocol, stable rate borrows might need to be rebalanced
+   * to bring back equilibrium between the borrow and supply APYs.
+   * @dev The rules that define if a position can be rebalanced are implemented in `ValidationLogic.validateRebalanceStableBorrowRate()`. Emits the `RebalanceStableBorrowRate()` event
+   * @param reserve The data of the reserve of the asset being repaid
+   * @param asset The asset of the position being rebalanced
+   * @param user The user being rebalanced
+   */
+  function executeRebalanceStableBorrowRate(
     DataTypes.ReserveData storage reserve,
     address asset,
     address user
@@ -268,7 +292,15 @@ library BorrowLogic {
     emit RebalanceStableBorrowRate(asset, user);
   }
 
-  function swapBorrowRateMode(
+  /**
+   * @notice Implements the swap borrow rate feature. Borrowers can swap from variable to stable positions at any time.
+   * @dev Emits the `Swap()` event
+   * @param reserve The data of the reserve of the asset being repaid
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param asset The asset of the position being swapped
+   * @param rateMode The current interest rate mode of the position being swapped. If `rateMode == InterestRateMode.STABLE`, user must have stable debt
+   */
+  function executeSwapBorrowRateMode(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
@@ -311,6 +343,6 @@ library BorrowLogic {
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
-    emit Swap(asset, msg.sender, rateMode);
+    emit SwapBorrowRateMode(asset, msg.sender, rateMode);
   }
 }

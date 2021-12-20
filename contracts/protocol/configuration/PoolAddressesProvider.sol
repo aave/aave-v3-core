@@ -2,8 +2,8 @@
 pragma solidity 0.8.10;
 
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
-import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 
 /**
  * @title PoolAddressesProvider
@@ -81,10 +81,12 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     emit PoolConfiguratorUpdated(configurator);
   }
 
+  /// @inheritdoc IPoolAddressesProvider
   function getPriceOracle() external view override returns (address) {
     return getAddress(PRICE_ORACLE);
   }
 
+  /// @inheritdoc IPoolAddressesProvider
   function setPriceOracle(address priceOracle) external override onlyOwner {
     _addresses[PRICE_ORACLE] = priceOracle;
     emit PriceOracleUpdated(priceOracle);
@@ -161,6 +163,10 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
     }
   }
 
+  /**
+   * @notice Updates the identifier of the Aave market
+   * @param marketId The new id of the market
+   **/
   function _setMarketId(string memory marketId) internal {
     _marketId = marketId;
     emit MarketIdSet(marketId);

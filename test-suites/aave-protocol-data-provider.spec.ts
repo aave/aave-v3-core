@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import hre from 'hardhat';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { getMockPool } from '@aave/deploy-v3';
 
 makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
   const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';

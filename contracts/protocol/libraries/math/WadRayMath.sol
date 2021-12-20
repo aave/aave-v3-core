@@ -12,10 +12,10 @@ import {Errors} from '../helpers/Errors.sol';
 library WadRayMath {
   // HALF_WAD and HALF_RAY expressed with extended notation as constant with operations are not supported in Yul assembly
   uint256 internal constant WAD = 1e18;
-  uint256 internal constant HALF_WAD = 500000000000000000;
+  uint256 internal constant HALF_WAD = 0.5e18;
 
   uint256 public constant RAY = 1e27;
-  uint256 internal constant HALF_RAY = 500000000000000000000000000;
+  uint256 internal constant HALF_RAY = 0.5e27;
 
   uint256 internal constant WAD_RAY_RATIO = 1e9;
 
@@ -69,7 +69,7 @@ library WadRayMath {
   function wadDiv(uint256 a, uint256 b) internal pure returns (uint256 c) {
     // to avoid overflow, a <= (type(uint256).max - halfB) / WAD
     assembly {
-      if iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), WAD)))) {
+      if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), WAD))))) {
         revert(0, 0)
       }
 
@@ -105,7 +105,7 @@ library WadRayMath {
   function rayDiv(uint256 a, uint256 b) internal pure returns (uint256 c) {
     // to avoid overflow, a <= (type(uint256).max - halfB) / RAY
     assembly {
-      if iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), RAY)))) {
+      if or(iszero(b), iszero(iszero(gt(a, div(sub(not(0), div(b, 2)), RAY))))) {
         revert(0, 0)
       }
 

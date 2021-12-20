@@ -71,7 +71,6 @@ export const buildDelegationWithSigParams = (
   token: tEthereumAddress,
   revision: string,
   tokenName: string,
-  delegator: tEthereumAddress,
   delegatee: tEthereumAddress,
   nonce: number,
   deadline: string,
@@ -85,7 +84,6 @@ export const buildDelegationWithSigParams = (
       { name: 'verifyingContract', type: 'address' },
     ],
     DelegationWithSig: [
-      { name: 'delegator', type: 'address' },
       { name: 'delegatee', type: 'address' },
       { name: 'value', type: 'uint256' },
       { name: 'nonce', type: 'uint256' },
@@ -100,7 +98,6 @@ export const buildDelegationWithSigParams = (
     verifyingContract: token,
   },
   message: {
-    delegator,
     delegatee,
     value,
     nonce,

@@ -10,8 +10,6 @@ import {MintableERC20} from '../tokens/MintableERC20.sol';
 contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   using SafeERC20 for IERC20;
 
-  IPoolAddressesProvider internal _provider;
-
   event ExecutedWithFail(address[] _assets, uint256[] _amounts, uint256[] _premiums);
   event ExecutedWithSuccess(address[] _assets, uint256[] _amounts, uint256[] _premiums);
 
@@ -45,12 +43,9 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
     address[] memory assets,
     uint256[] memory amounts,
     uint256[] memory premiums,
-    address initiator,
-    bytes memory params
+    address, // initiator
+    bytes memory // params
   ) public override returns (bool) {
-    params;
-    initiator;
-
     if (_failExecution) {
       emit ExecutedWithFail(assets, amounts, premiums);
       return !_simulateEOA;
