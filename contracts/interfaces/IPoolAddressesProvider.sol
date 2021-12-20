@@ -127,9 +127,9 @@ interface IPoolAddressesProvider {
    * @dev IMPORTANT Use this function carefully, only for ids that don't have an explicit
    * setter function, in order to avoid unexpected consequences
    * @param id The id
-   * @param impl The address of the new implementation
+   * @param implementationAddress The address of the new implementation
    */
-  function setAddressAsProxy(bytes32 id, address impl) external;
+  function setAddressAsProxy(bytes32 id, address implementationAddress) external;
 
   /**
    * @notice Sets an address for an id replacing the address saved in the addresses map.
