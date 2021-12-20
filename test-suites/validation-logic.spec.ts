@@ -754,7 +754,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configAfter.isFrozen).to.be.eq(false);
 
     await impersonateAccountsHardhat([pool.address]);
-    const poolSigner = hre.ethers.getSigner(pool.address);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
     await topUpNonPayableWithEther(user.signer, [pool.address], utils.parseEther('1'));
     expect(await aDai.connect(poolSigner).mint(user.address, 1, 1));
 
