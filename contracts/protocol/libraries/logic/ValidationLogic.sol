@@ -41,7 +41,7 @@ library ValidationLogic {
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   /**
-   * @notice Validates a supply action
+   * @notice Validates a supply action.
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be supplied
    */
@@ -70,7 +70,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a withdraw action
+   * @notice Validates a withdraw action.
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be withdrawn
    * @param userBalance The balance of the user
@@ -111,7 +111,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a borrow action
+   * @notice Validates a borrow action.
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -279,7 +279,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a repay action
+   * @notice Validates a repay action.
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
    * @param rateMode The interest rate mode of the debt being repaid
@@ -378,7 +378,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a stable borrow rate rebalance action
+   * @notice Validates a stable borrow rate rebalance action.
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
@@ -404,7 +404,7 @@ library ValidationLogic {
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
     uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
-    //if the liquidity rate is below REBALANCE_UP_THRESHOLD of the max variable APR at 95% usage,
+    //if the liquidity rate is below the threshold calculated based on the max variable APR at 95% usage,
     //then we allow rebalancing of the stable rate positions.
 
     uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
@@ -421,9 +421,9 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the action of setting an asset as collateral
+   * @notice Validates the action of setting an asset as collateral.
    * @param reserveCache The cached data of the reserve
-   * @param userBalance The baalnce of the user
+   * @param userBalance The balance of the user
    */
   function validateSetUseReserveAsCollateral(
     DataTypes.ReserveCache memory reserveCache,
@@ -437,8 +437,8 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a flashloan action
-   * @param assets The assets being flashborrowed
+   * @notice Validates a flashloan action.
+   * @param assets The assets being flash-borrowed
    * @param amounts The amounts for each asset being borrowed
    * @param reservesData The state of all the reserves
    */
@@ -457,7 +457,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a flashloan action
+   * @notice Validates a flashloan action.
    * @param reserve The state of the reserve
    */
   function validateFlashloanSimple(DataTypes.ReserveData storage reserve) internal view {
@@ -475,7 +475,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the liquidation action
+   * @notice Validates the liquidation action.
    * @param userConfig The user configuration mapping
    * @param collateralReserve The reserve data of the collateral
    * @param params Additional parameters needed for the validation
@@ -527,7 +527,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the health factor of a user
+   * @notice Validates the health factor of a user.
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -575,7 +575,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
+   * @notice Validates the health factor of a user and the ltv of the asset being withdrawn.
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -618,7 +618,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a transfer action
+   * @notice Validates a transfer action.
    * @param reserve The reserve object
    */
   function validateTransfer(DataTypes.ReserveData storage reserve) internal view {
@@ -626,7 +626,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a drop reserve action
+   * @notice Validates a drop reserve action.
    * @param reserve The reserve object
    **/
   function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {
@@ -642,7 +642,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the action of setting efficiency mode
+   * @notice Validates the action of setting efficiency mode.
    * @param reservesData the data mapping of the reserves
    * @param reserves a mapping storing the list of reserves
    * @param eModeCategories a mapping storing configurations for all efficiency mode categories
