@@ -1,13 +1,16 @@
 import { expect } from 'chai';
-import { utils } from 'ethers';
+import { utils, constants } from 'ethers';
+import { parseUnits } from '@ethersproject/units';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode, ProtocolErrors } from '../helpers/types';
-import { setAutomine, setAutomineEvm } from '../helpers/misc-utils';
+import { impersonateAccountsHardhat, setAutomine, setAutomineEvm } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { ethers } from 'hardhat';
-import { parseUnits } from '@ethersproject/units';
 import { waitForTx, evmSnapshot, evmRevert, getVariableDebtToken } from '@aave/deploy-v3';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -732,7 +735,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateSetUseReserveAsCollateral() when reserve is not active (revert expected)', async () => {
-    const { pool, configurator, helpersContract, poolAdmin, users, dai } = testEnv;
+    /**
+     * Since its not possible to deactivate a reserve with existing suppliers, making the user have
+     * aToken balance (aDAI) its not technically possible to end up in this situation.
+     * However, we impersonate the Pool to get some aDAI and make the test possible
+     */
+    const { pool, configurator, helpersContract, poolAdmin, users, dai, aDai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -744,6 +752,11 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
     expect(configAfter.isFrozen).to.be.eq(false);
+
+    await impersonateAccountsHardhat([pool.address]);
+    const poolSigner = hre.ethers.getSigner(pool.address);
+    await topUpNonPayableWithEther(user.signer, [pool.address], utils.parseEther('1'));
+    expect(await aDai.connect(poolSigner).mint(user.address, 1, 1));
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(dai.address, true)
@@ -824,14 +837,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(
       await configurator
         .connect(poolAdmin.signer)
-        .setEModeCategory(
-          '101',
-          '9800',
-          '9900',
-          '10100',
-          ethers.constants.AddressZero,
-          'INCONSISTENT'
-        )
+        .setEModeCategory('101', '9800', '9900', '10100', constants.AddressZero, 'INCONSISTENT')
     );
 
     await pool.connect(user.signer).setUserEMode(101);
@@ -876,7 +882,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     await configurator
       .connect(poolAdmin.signer)
-      .setEModeCategory('101', '9800', '9900', '10100', ethers.constants.AddressZero, 'NO-ASSETS');
+      .setEModeCategory('101', '9800', '9900', '10100', constants.AddressZero, 'NO-ASSETS');
 
     await pool.connect(user.signer).setUserEMode(101);
 
