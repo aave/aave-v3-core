@@ -65,7 +65,7 @@ library ReserveLogic {
 
   /**
    * @notice Returns the ongoing normalized variable debt for the reserve
-   * @dev A value of 1e27 means there is no debt. As time passes, the income is accrued
+   * @dev A value of 1e27 means there is no debt. As time passes, the debt is accrued
    * @dev A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
    * @param reserve The reserve object
    * @return The normalized variable debt, expressed in ray
