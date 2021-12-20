@@ -18,11 +18,7 @@ import { waitForTx } from '@aave/deploy-v3';
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
 
-  const {
-    TRANSFER_AMOUNT_EXCEEDS_BALANCE,
-    SAFEERC20_LOWLEVEL_CALL,
-    P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
-  } = ProtocolErrors;
+  const { TRANSFER_AMOUNT_EXCEEDS_BALANCE, P_INVALID_FLASH_LOAN_EXECUTOR_RETURN } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3;

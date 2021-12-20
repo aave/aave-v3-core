@@ -18,7 +18,6 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
   const {
     VL_COLLATERAL_BALANCE_IS_0,
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
-    SAFEERC20_LOWLEVEL_CALL,
     P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
   } = ProtocolErrors;
 
