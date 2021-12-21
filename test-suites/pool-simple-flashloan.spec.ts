@@ -19,7 +19,6 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
 
   const { TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } = ProtocolErrors;
-
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3;
   const PREMIUM_TO_LP = TOTAL_PREMIUM - PREMIUM_TO_PROTOCOL;
