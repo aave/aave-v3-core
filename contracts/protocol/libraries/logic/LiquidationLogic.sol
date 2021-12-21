@@ -56,6 +56,7 @@ library LiquidationLogic {
     uint256 userVariableDebt;
     uint256 maxLiquidatableDebt;
     uint256 actualDebtToLiquidate;
+    uint256 variableDebtToBurn;
     uint256 maxCollateralToLiquidate;
     uint256 debtAmountNeeded;
     uint256 liquidatorPreviousATokenBalance;
@@ -170,20 +171,9 @@ library LiquidationLogic {
     }
 
     if (vars.userVariableDebt >= vars.actualDebtToLiquidate) {
-      vars.debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(
-        vars.debtReserveCache.variableDebtTokenAddress
-      ).burn(
-          params.user,
-          vars.actualDebtToLiquidate,
-          vars.debtReserveCache.nextVariableBorrowIndex
-        );
+      vars.variableDebtToBurn = vars.actualDebtToLiquidate;
     } else {
-      // If the user doesn't have variable debt, no need to try to burn variable debt tokens
-      if (vars.userVariableDebt > 0) {
-        vars.debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(
-          vars.debtReserveCache.variableDebtTokenAddress
-        ).burn(params.user, vars.userVariableDebt, vars.debtReserveCache.nextVariableBorrowIndex);
-      }
+      vars.variableDebtToBurn = vars.userVariableDebt;
       (
         vars.debtReserveCache.nextTotalStableDebt,
         vars.debtReserveCache.nextAvgStableBorrowRate
@@ -192,6 +182,12 @@ library LiquidationLogic {
         vars.actualDebtToLiquidate - vars.userVariableDebt
       );
     }
+    if (vars.userVariableDebt > 0) {
+      vars.debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(
+        vars.debtReserveCache.variableDebtTokenAddress
+      ).burn(params.user, vars.variableDebtToBurn, vars.debtReserveCache.nextVariableBorrowIndex);
+    }
+
     debtReserve.updateInterestRates(
       vars.debtReserveCache,
       params.debtAsset,
