@@ -20,10 +20,10 @@ interface IPool {
    **/
   event MintUnbacked(
     address indexed reserve,
-    address user,
+    address indexed user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 referral
   );
 
   /**
@@ -44,10 +44,10 @@ interface IPool {
    **/
   event Supply(
     address indexed reserve,
-    address user,
+    address indexed user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referralCode
+    uint16 referralCode
   );
 
   /**
@@ -72,12 +72,12 @@ interface IPool {
    **/
   event Borrow(
     address indexed reserve,
-    address user,
+    address indexed user,
     address indexed onBehalfOf,
     uint256 amount,
     DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
-    uint16 indexed referral
+    uint16 referral
   );
 
   /**
@@ -102,7 +102,7 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-   
+
   event SwapBorrowRateMode(
     address indexed reserve,
     address indexed user,
