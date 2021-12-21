@@ -734,11 +734,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
 
     uint16 reservesCount = _reservesCount;
-
-    for (uint16 i = 0; i < reservesCount; i++) {
-      if (_reservesList[i] == address(0)) {
-        _reserves[asset].id = i;
-        _reservesList[i] = asset;
+    for (uint256 i = 0; i < reservesCount; i++) {
+      if (_reservesList[uint16(i)] == address(0)) {
+        _reserves[asset].id = uint16(i);
+        _reservesList[uint16(i)] = asset;
         return;
       }
     }
