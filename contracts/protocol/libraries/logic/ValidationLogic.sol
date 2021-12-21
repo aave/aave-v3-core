@@ -632,7 +632,12 @@ library ValidationLogic {
    * @notice Validates a drop reserve action
    * @param reserve The reserve object
    **/
-  function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {
+  function validateDropReserve(
+    mapping(uint256 => address) storage reserves,
+    DataTypes.ReserveData storage reserve,
+    address asset
+  ) internal view {
+    require(reserve.id != 0 || reserves[0] == asset, Errors.ASSET_NOT_LISTED);
     require(
       IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0,
       Errors.RL_STABLE_DEBT_NOT_ZERO

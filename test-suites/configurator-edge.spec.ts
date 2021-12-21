@@ -25,6 +25,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     RC_INVALID_EMODE_CATEGORY,
     VL_INCONSISTENT_EMODE_CATEGORY,
     PC_BRIDGE_PROTOCOL_FEE_INVALID,
+    ASSET_NOT_LISTED,
   } = ProtocolErrors;
 
   it('ReserveConfiguration setLiquidationBonus() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
@@ -171,7 +172,9 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
   it('Tries to set borrowCap of MAX_BORROW_CAP an unlisted asset', async () => {
     const { configurator, users } = testEnv;
     const newCap = 10;
-    await expect(configurator.setBorrowCap(users[5].address, newCap)).to.be.reverted;
+    await expect(configurator.setBorrowCap(users[5].address, newCap)).to.be.revertedWith(
+      ASSET_NOT_LISTED
+    );
   });
 
   it('Tries to add a category with id 0 (revert expected)', async () => {
