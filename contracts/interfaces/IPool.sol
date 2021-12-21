@@ -75,7 +75,7 @@ interface IPool {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    DataTypes.InterestRateMode interestRateMode,
+    uint256 interestRateMode,
     uint256 borrowRate,
     uint16 indexed referral
   );
@@ -102,11 +102,7 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-  event Swap(
-    address indexed reserve,
-    address indexed user,
-    DataTypes.InterestRateMode interestRateMode
-  );
+  event Swap(address indexed reserve, address indexed user, uint256 interestRateMode);
 
   /**
    * @notice Emitted on setUserUseReserveAsCollateral()
@@ -306,7 +302,7 @@ interface IPool {
   function borrow(
     address asset,
     uint256 amount,
-    DataTypes.InterestRateMode interestRateMode,
+    uint256 interestRateMode,
     uint16 referralCode,
     address onBehalfOf
   ) external;
@@ -326,7 +322,7 @@ interface IPool {
   function repay(
     address asset,
     uint256 amount,
-    DataTypes.InterestRateMode interestRateMode,
+    uint256 interestRateMode,
     address onBehalfOf
   ) external returns (uint256);
 
@@ -349,7 +345,7 @@ interface IPool {
   function repayWithPermit(
     address asset,
     uint256 amount,
-    DataTypes.InterestRateMode interestRateMode,
+    uint256 interestRateMode,
     address onBehalfOf,
     uint256 deadline,
     uint8 permitV,
@@ -369,7 +365,7 @@ interface IPool {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    DataTypes.InterestRateMode interestRateMode
+    uint256 interestRateMode
   ) external returns (uint256);
 
   /**
@@ -377,7 +373,7 @@ interface IPool {
    * @param asset The address of the underlying asset borrowed
    * @param interestRateMode The rate mode that the user wants to swap to: 1 for Stable, 2 for Variable
    **/
-  function swapBorrowRateMode(address asset, DataTypes.InterestRateMode interestRateMode) external;
+  function swapBorrowRateMode(address asset, uint256 interestRateMode) external;
 
   /**
    * @notice Rebalances the stable interest rate of a user to the current stable rate defined on the reserve.
@@ -425,9 +421,9 @@ interface IPool {
    * @param assets The addresses of the assets being flash-borrowed
    * @param amounts The amounts of the assets being flash-borrowed
    * @param interestRateModes Types of the debt to open if the flash loan is not returned:
-   *   0: NONE -> Don't open any debt, just revert if funds can't be transferred from the receiver
-   *   1: STABLE -> Open debt at stable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
-   *   2: VARIABLE -> Open debt at variable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
+   *   0 -> Don't open any debt, just revert if funds can't be transferred from the receiver
+   *   1 -> Open debt at stable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
+   *   2 -> Open debt at variable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
    * @param onBehalfOf The address  that will receive the debt in the case of using on `modes` 1 or 2
    * @param params Variadic packed params to pass to the receiver as extra information
    * @param referralCode The code used to register the integrator originating the operation, for potential rewards.
@@ -437,7 +433,7 @@ interface IPool {
     address receiverAddress,
     address[] calldata assets,
     uint256[] calldata amounts,
-    DataTypes.InterestRateMode[] calldata interestRateModes,
+    uint256[] calldata interestRateModes,
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode

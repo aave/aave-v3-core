@@ -173,7 +173,7 @@ library DataTypes {
     address receiverAddress;
     address[] assets;
     uint256[] amounts;
-    DataTypes.InterestRateMode[] interestRateModes;
+    uint256[] interestRateModes;
     address onBehalfOf;
     bytes params;
     uint16 referralCode;
