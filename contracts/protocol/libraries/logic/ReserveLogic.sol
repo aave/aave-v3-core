@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
@@ -22,7 +22,7 @@ import {DataTypes} from '../types/DataTypes.sol';
 library ReserveLogic {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
 
   // See `IPool` for descriptions
   event ReserveDataUpdated(
@@ -65,7 +65,7 @@ library ReserveLogic {
 
   /**
    * @notice Returns the ongoing normalized variable debt for the reserve
-   * @dev A value of 1e27 means there is no debt. As time passes, the income is accrued
+   * @dev A value of 1e27 means there is no debt. As time passes, the debt is accrued
    * @dev A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
    * @param reserve The reserve object
    * @return The normalized variable debt, expressed in ray
@@ -108,7 +108,7 @@ library ReserveLogic {
    * the flashloan fee to the reserve, and spread it between all the suppliers
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
-   * @param amount The amount to accomulate
+   * @param amount The amount to accumulate
    * @return The next liquidity index of the reserve
    **/
   function cumulateToLiquidityIndex(
@@ -222,7 +222,7 @@ library ReserveLogic {
   /**
    * @notice Mints part of the repaid interest to the reserve treasury as a function of the reserveFactor for the
    * specific asset.
-   * @param reserve The reserve reserve to be updated
+   * @param reserve The reserve to be updated
    * @param reserveCache The caching layer for the reserve data
    **/
   function _accrueToTreasury(

@@ -8,10 +8,10 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
 /**
  * @title PoolAddressesProviderRegistry
  * @author Aave
- * @notice Main registry of PoolAddressesProvider of multiple Aave protocol's markets
+ * @notice Main registry of PoolAddressesProvider of Aave markets.
  * @dev Used for indexing purposes of Aave protocol's markets. The id assigned
  *   to a PoolAddressesProvider refers to the market it is connected with, for
- *   example with `0` for the Aave main market and `1` for the next created.
+ *   example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
   mapping(address => uint256) private _addressesProviders;
@@ -60,6 +60,11 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     return _addressesProviders[addressesProvider];
   }
 
+  /**
+   * @notice Adds the addresses provider address to the list.
+   * @dev The addressesProvider is not added if it already exists in the registry
+   * @param provider The address of the PoolAddressesProvider
+   */
   function _addToAddressesProvidersList(address provider) internal {
     uint256 providersCount = _addressesProvidersList.length;
 

@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
@@ -45,7 +45,7 @@ import {Helpers} from '../libraries/helpers/Helpers.sol';
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -220,7 +220,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         user: msg.sender,
         onBehalfOf: onBehalfOf,
         amount: amount,
-        interestRateMode: interestRateMode,
+        interestRateMode: DataTypes.InterestRateMode(interestRateMode),
         referralCode: referralCode,
         releaseUnderlying: true,
         maxStableRateBorrowSizePercent: _maxStableRateBorrowSizePercent,
@@ -236,7 +236,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repay(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf
   ) external override returns (uint256) {
     return
@@ -248,7 +248,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,
-          rateMode: rateMode,
+          interestRateMode: DataTypes.InterestRateMode(interestRateMode),
           onBehalfOf: onBehalfOf,
           useATokens: false
         })
@@ -259,7 +259,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithPermit(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf,
     uint256 deadline,
     uint8 permitV,
@@ -281,7 +281,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       DataTypes.ExecuteRepayParams memory params = DataTypes.ExecuteRepayParams({
         asset: asset,
         amount: amount,
-        rateMode: rateMode,
+        interestRateMode: DataTypes.InterestRateMode(interestRateMode),
         onBehalfOf: onBehalfOf,
         useATokens: false
       });
@@ -300,7 +300,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode
+    uint256 interestRateMode
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
@@ -311,7 +311,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,
-          rateMode: rateMode,
+          interestRateMode: DataTypes.InterestRateMode(interestRateMode),
           onBehalfOf: msg.sender,
           useATokens: true
         })
@@ -319,12 +319,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function swapBorrowRateMode(address asset, uint256 rateMode) external override {
+  function swapBorrowRateMode(address asset, uint256 interestRateMode) external override {
     BorrowLogic.executeSwapBorrowRateMode(
       _reserves[asset],
       _usersConfig[msg.sender],
       asset,
-      rateMode
+      DataTypes.InterestRateMode(interestRateMode)
     );
   }
 
@@ -380,7 +380,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address receiverAddress,
     address[] calldata assets,
     uint256[] calldata amounts,
-    uint256[] calldata modes,
+    uint256[] calldata interestRateModes,
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode
@@ -389,7 +389,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       receiverAddress: receiverAddress,
       assets: assets,
       amounts: amounts,
-      modes: modes,
+      interestRateModes: interestRateModes,
       onBehalfOf: onBehalfOf,
       params: params,
       referralCode: referralCode,
