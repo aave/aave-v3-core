@@ -118,4 +118,5 @@ library Errors {
   string public constant VL_DEBT_CEILING_CROSSED = '108';
   string public constant SL_USER_IN_ISOLATION_MODE = '109';
   string public constant PC_BRIDGE_PROTOCOL_FEE_INVALID = '110';
+  string public constant ASSET_NOT_LISTED = '111';
 }

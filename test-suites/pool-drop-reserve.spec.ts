@@ -9,8 +9,12 @@ import { makeSuite, TestEnv } from './helpers/make-suite';
 makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
-  const { RL_ATOKEN_SUPPLY_NOT_ZERO, RL_STABLE_DEBT_NOT_ZERO, RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO } =
-    ProtocolErrors;
+  const {
+    RL_ATOKEN_SUPPLY_NOT_ZERO,
+    RL_STABLE_DEBT_NOT_ZERO,
+    RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO,
+    ASSET_NOT_LISTED,
+  } = ProtocolErrors;
 
   before(async () => {
     _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
@@ -91,6 +95,6 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
 
   it('Drop an asset that is not a listed reserve should fail', async () => {
     const { users, configurator } = testEnv;
-    await expect(configurator.dropReserve(users[5].address)).to.be.reverted;
+    await expect(configurator.dropReserve(users[5].address)).to.be.revertedWith(ASSET_NOT_LISTED);
   });
 });

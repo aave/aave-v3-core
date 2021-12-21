@@ -176,6 +176,7 @@ export enum ProtocolErrors {
   VL_DEBT_CEILING_CROSSED = '108',
   SL_USER_IN_ISOLATION_MODE = '109',
   PC_BRIDGE_PROTOCOL_FEE_INVALID = '110',
+  ASSET_NOT_LISTED = '111',
 
   // old
 
