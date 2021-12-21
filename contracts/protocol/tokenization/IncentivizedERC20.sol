@@ -278,11 +278,20 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
    * @dev Return cached value if chainid matched cache, otherwise recomputes separator
    * @return The domain separator of the token at current chain
    */
-  function DOMAIN_SEPARATOR() public view returns (bytes32) {
+  function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
     if (block.chainid == _chainId) {
       return _domainSeparator;
     }
     return _calculateDomainSeparator();
+  }
+
+  /**
+   * @notice Returns the nonce value for address specified as parameter
+   * @param owner The address for which the nonce is being returned
+   * @return The nonce value for the input address`
+   */
+  function nonces(address owner) public view virtual returns (uint256) {
+    return _nonces[owner];
   }
 
   /**
@@ -300,9 +309,5 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
           address(this)
         )
       );
-  }
-
-  function nonces(address owner) external view virtual returns (uint256) {
-    return _nonces[owner];
   }
 }
