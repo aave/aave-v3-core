@@ -928,4 +928,51 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       pool.connect(user.signer).withdraw(dai.address, parseUnits('500', 18), user.address)
     ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
   });
+
+  it('validateHFAndLtv() with HF < 1 for 0 LTV asset (revert expected)', async () => {
+    const {
+      usdc,
+      dai,
+      pool,
+      oracle,
+      poolAdmin,
+      configurator,
+      helpersContract,
+      users: [user, usdcProvider],
+    } = testEnv;
+
+    // Supply usdc
+    await usdc.connect(usdcProvider.signer)['mint(uint256)'](parseUnits('1000', 6));
+    await usdc.connect(usdcProvider.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(usdcProvider.signer)
+      .supply(usdc.address, parseUnits('1000', 6), usdcProvider.address, 0);
+
+    // Supply dai
+    await dai.connect(user.signer)['mint(uint256)'](parseUnits('1000', 18));
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
+
+    // Borrow usdc
+    await pool
+      .connect(user.signer)
+      .borrow(usdc.address, parseUnits('500', 6), RateMode.Variable, 0, user.address);
+
+    // Drop LTV
+    const daiData = await helpersContract.getReserveConfigurationData(dai.address);
+
+    await configurator
+      .connect(poolAdmin.signer)
+      .configureReserveAsCollateral(
+        dai.address,
+        0,
+        daiData.liquidationThreshold,
+        daiData.liquidationBonus
+      );
+
+    // Withdraw all my dai
+    await expect(
+      pool.connect(user.signer).withdraw(dai.address, parseUnits('500', 18), user.address)
+    ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
+  });
 });
