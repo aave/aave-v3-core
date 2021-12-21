@@ -35,13 +35,23 @@ library ValidationLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
 
-  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
-  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
+  // Factor to apply to the maximum supply utilization rate to calculate the maximum liquidity rate allowed, expressed in bps
+  // A factor of 4000 results in 40%
+  uint256 public constant REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR = 4000;
+
+  // Maximum borrow utilization rate allowed, expressed in ray
+  // A rate of 0.95e27 results in 95%
+  uint256 public constant REBALANCE_UP_MAXIMUM_BORROW_UTILIZATION_RATE = 0.95e27;
+
+  // Minimum health factor allowed under any circumstance
+  // A value of 0.95e18 results in 0.95
+  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
+
+  // Minimum health factor to consider a user position healthy
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   /**
-   * @notice Validates a supply action
+   * @notice Validates a supply action.
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be supplied
    */
@@ -49,29 +59,28 @@ library ValidationLogic {
     internal
     view
   {
+    require(amount != 0, Errors.VL_INVALID_AMOUNT);
+
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
       .reserveConfiguration
       .getFlags();
-
-    uint256 reserveDecimals = reserveCache.reserveConfiguration.getDecimals();
-    uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
-
-    require(amount != 0, Errors.VL_INVALID_AMOUNT);
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(!isFrozen, Errors.VL_RESERVE_FROZEN);
+
+    uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
     require(
       supplyCap == 0 ||
         (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
           reserveCache.nextLiquidityIndex
         ) + amount) <=
-        supplyCap * (10**reserveDecimals),
+        supplyCap * (10**reserveCache.reserveConfiguration.getDecimals()),
       Errors.VL_SUPPLY_CAP_EXCEEDED
     );
   }
 
   /**
-   * @notice Validates a withdraw action
+   * @notice Validates a withdraw action.
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be withdrawn
    * @param userBalance The balance of the user
@@ -112,7 +121,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a borrow action
+   * @notice Validates a borrow action.
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -124,9 +133,9 @@ library ValidationLogic {
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.ValidateBorrowParams memory params
   ) internal view {
-    ValidateBorrowLocalVars memory vars;
+    require(params.amount != 0, Errors.VL_INVALID_AMOUNT);
 
-    vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
+    ValidateBorrowLocalVars memory vars;
 
     (
       vars.isActive,
@@ -139,8 +148,6 @@ library ValidationLogic {
     require(vars.isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!vars.isPaused, Errors.VL_RESERVE_PAUSED);
     require(!vars.isFrozen, Errors.VL_RESERVE_FROZEN);
-    require(params.amount != 0, Errors.VL_INVALID_AMOUNT);
-
     require(vars.borrowingEnabled, Errors.VL_BORROWING_NOT_ENABLED);
 
     require(
@@ -156,6 +163,7 @@ library ValidationLogic {
       Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
     );
 
+    vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
     vars.borrowCap = params.reserveCache.reserveConfiguration.getBorrowCap();
     unchecked {
       vars.assetUnit = 10**vars.reserveDecimals;
@@ -281,7 +289,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a repay action
+   * @notice Validates a repay action.
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
    * @param rateMode The interest rate mode of the debt being repaid
@@ -297,11 +305,11 @@ library ValidationLogic {
     uint256 stableDebt,
     uint256 variableDebt
   ) internal view {
+    require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
+
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
-
-    require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
 
     uint256 variableDebtPreviousIndex = IScaledBalanceToken(reserveCache.variableDebtTokenAddress)
       .getPreviousIndex(onBehalfOf);
@@ -351,7 +359,6 @@ library ValidationLogic {
     (bool isActive, bool isFrozen, , bool stableRateEnabled, bool isPaused) = reserveCache
       .reserveConfiguration
       .getFlags();
-
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
     require(!isFrozen, Errors.VL_RESERVE_FROZEN);
@@ -381,7 +388,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a stable borrow rate rebalance action
+   * @notice Validates a stable borrow rate rebalance action.
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
@@ -398,51 +405,58 @@ library ValidationLogic {
     address aTokenAddress
   ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
-
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
-    //if the usage ratio is below 95%, no rebalances are needed
+    //if the utilization rate is below the threshold, no rebalances are needed
     uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
       .wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
-    uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity + totalDebt);
+    uint256 borrowUtilizationRate = totalDebt == 0
+      ? 0
+      : totalDebt.rayDiv(availableLiquidity + totalDebt);
+    uint256 supplyUtilizationRate = totalDebt == 0
+      ? 0
+      : totalDebt.rayDiv(availableLiquidity + reserve.unbacked + totalDebt);
 
-    //if the liquidity rate is below REBALANCE_UP_THRESHOLD of the max variable APR at 95% usage,
-    //then we allow rebalancing of the stable rate positions.
-
+    //if the utilization rate is more than the threshold and liquidity rate less than the maximum allowed based
+    // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
     uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
     uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
       reserve.interestRateStrategyAddress
     ).getMaxVariableBorrowRate();
 
+    uint256 maxSupplyUtilizationRate = maxVariableBorrowRate
+      .rayMul(supplyUtilizationRate)
+      .percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveCache.reserveFactor);
+
     require(
-      usageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
+      borrowUtilizationRate >= REBALANCE_UP_MAXIMUM_BORROW_UTILIZATION_RATE &&
         currentLiquidityRate <=
-        maxVariableBorrowRate.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
+        maxSupplyUtilizationRate.percentMul(REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR),
       Errors.P_INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
   }
 
   /**
-   * @notice Validates the action of setting an asset as collateral
+   * @notice Validates the action of setting an asset as collateral.
    * @param reserveCache The cached data of the reserve
-   * @param userBalance The baalnce of the user
+   * @param userBalance The balance of the user
    */
   function validateSetUseReserveAsCollateral(
     DataTypes.ReserveCache memory reserveCache,
     uint256 userBalance
   ) internal pure {
-    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
+    require(userBalance > 0, Errors.VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0);
 
+    (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
-    require(userBalance > 0, Errors.VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0);
   }
 
   /**
-   * @notice Validates a flashloan action
-   * @param assets The assets being flashborrowed
+   * @notice Validates a flashloan action.
+   * @param assets The assets being flash-borrowed
    * @param amounts The amounts for each asset being borrowed
    * @param reservesData The state of all the reserves
    */
@@ -461,7 +475,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a flashloan action
+   * @notice Validates a flashloan action.
    * @param reserve The state of the reserve
    */
   function validateFlashloanSimple(DataTypes.ReserveData storage reserve) internal view {
@@ -479,7 +493,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the liquidation action
+   * @notice Validates the liquidation action.
    * @param userConfig The user configuration mapping
    * @param collateralReserve The reserve data of the collateral
    * @param params Additional parameters needed for the validation
@@ -531,7 +545,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the health factor of a user
+   * @notice Validates the health factor of a user.
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -573,16 +587,13 @@ library ValidationLogic {
     return (healthFactor, hasZeroLtvCollateral);
   }
 
-  struct validateHFAndLtvLocalVars {
-    uint256 healthFactor;
+  struct ValidateHFAndLtvLocalVars {
     uint256 assetLtv;
-    uint256 reserveDecimals;
-    uint256 totalSupplyAtoken;
     bool hasZeroLtvCollateral;
   }
 
   /**
-   * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
+   * @notice Validates the health factor of a user and the ltv of the asset being withdrawn.
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -604,9 +615,10 @@ library ValidationLogic {
     address oracle,
     uint8 userEModeCategory
   ) internal view {
-    validateHFAndLtvLocalVars memory vars;
+    ValidateHFAndLtvLocalVars memory vars;
     DataTypes.ReserveData memory reserve = reservesData[asset];
-    (vars.healthFactor, vars.hasZeroLtvCollateral) = validateHealthFactor(
+
+    (, vars.hasZeroLtvCollateral) = validateHealthFactor(
       reservesData,
       reserves,
       eModeCategories,
@@ -616,14 +628,12 @@ library ValidationLogic {
       reservesCount,
       oracle
     );
-
     vars.assetLtv = reserve.configuration.getLtv();
-
     require(vars.assetLtv == 0 || !vars.hasZeroLtvCollateral, Errors.VL_LTV_VALIDATION_FAILED);
   }
 
   /**
-   * @notice Validates a transfer action
+   * @notice Validates a transfer action.
    * @param reserve The reserve object
    */
   function validateTransfer(DataTypes.ReserveData storage reserve) internal view {
@@ -631,7 +641,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates a drop reserve action
+   * @notice Validates a drop reserve action.
    * @param reserve The reserve object
    **/
   function validateDropReserve(DataTypes.ReserveData storage reserve) internal view {
@@ -647,7 +657,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates the action of setting efficiency mode
+   * @notice Validates the action of setting efficiency mode.
    * @param reservesData the data mapping of the reserves
    * @param reserves a mapping storing the list of reserves
    * @param eModeCategories a mapping storing configurations for all efficiency mode categories
