@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
@@ -22,7 +22,7 @@ import {DataTypes} from '../types/DataTypes.sol';
 library ReserveLogic {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
 
   // See `IPool` for descriptions
   event ReserveDataUpdated(

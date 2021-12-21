@@ -3,14 +3,14 @@ pragma solidity 0.8.10;
 
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {FlashLoanSimpleReceiverBase} from '../../flashloan/base/FlashLoanSimpleReceiverBase.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';
 
 contract MockFlashLoanSimpleReceiver is FlashLoanSimpleReceiverBase {
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   event ExecutedWithFail(address asset, uint256 amount, uint256 premium);

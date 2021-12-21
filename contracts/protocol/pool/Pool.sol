@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
@@ -45,7 +45,7 @@ import {Helpers} from '../libraries/helpers/Helpers.sol';
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
