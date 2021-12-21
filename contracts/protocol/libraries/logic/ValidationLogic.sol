@@ -406,8 +406,8 @@ library ValidationLogic {
       ? 0
       : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
-    //if the liquidity rate is below the threshold calculated based on the max variable APR at 95% usage,
-    //then we allow rebalancing of the stable rate positions.
+    //if the utilization rate is more than the threshold and liquidity rate less than the maximum allowed based
+    // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
 
     uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
     uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
