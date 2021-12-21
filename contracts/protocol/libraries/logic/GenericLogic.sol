@@ -54,7 +54,8 @@ library GenericLogic {
     uint256 eModeAssetCategory;
     address currentReserveAddress;
     uint8 shiftIndex;
-    uint8 i;
+    uint8 reserveIndex;
+    bool foundAssetBeingUsed;
     bool hasZeroLtvCollateral;
     bool isInEModeCategory;
   }
@@ -107,28 +108,15 @@ library GenericLogic {
 
     vars.shiftedUserConfig = params.userConfig.data;
     while (vars.shiftedUserConfig != 0) {
-      if (vars.shiftedUserConfig & FOUR_BYTE_MASK == 0) {
-        vars.shiftIndex += 16;
-        vars.shiftedUserConfig >>= 16;
+      vars.foundAssetBeingUsed = _iterateUserConfig(vars);
+      if (!vars.foundAssetBeingUsed) {
         continue;
       }
-      if (vars.shiftedUserConfig & TWO_BYTE_MASK == 0) {
-        vars.shiftIndex += 8;
-        vars.shiftedUserConfig >>= 8;
-        continue;
+
+      unchecked {
+        vars.reserveIndex = (vars.shiftIndex + 1) / 2;
       }
-      if (vars.shiftedUserConfig & ONE_BYTE_MASK == 0) {
-        vars.shiftIndex += 4;
-        vars.shiftedUserConfig >>= 4;
-        continue;
-      }
-      if (vars.shiftedUserConfig & TWO_BIT_MASK == 0) {
-        vars.shiftIndex += 2;
-        vars.shiftedUserConfig >>= 2;
-        continue;
-      }
-      vars.i = (vars.shiftIndex + 1) / 2;
-      vars.currentReserveAddress = reserves[vars.i];
+      vars.currentReserveAddress = reserves[vars.reserveIndex];
       DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
 
       (
@@ -149,7 +137,9 @@ library GenericLogic {
         ? vars.eModeAssetPrice
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
-      if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
+      if (
+        vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.reserveIndex)
+      ) {
         vars.userBalanceInBaseCurrency = _getUserBalanceInBaseCurrency(
           params.user,
           currentReserve,
@@ -177,7 +167,7 @@ library GenericLogic {
           (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
       }
 
-      if (params.userConfig.isBorrowing(vars.i)) {
+      if (params.userConfig.isBorrowing(vars.reserveIndex)) {
         vars.totalDebtInBaseCurrency += _getUserDebtInBaseCurrency(
           params.user,
           currentReserve,
@@ -185,7 +175,9 @@ library GenericLogic {
           vars.assetUnit
         );
       }
-      vars.shiftIndex += 2;
+      unchecked {
+        vars.shiftIndex += 2;
+      }
       vars.shiftedUserConfig >>= 2;
     }
 
@@ -292,5 +284,41 @@ library GenericLogic {
     unchecked {
       return balance / assetUnit;
     }
+  }
+
+  function _iterateUserConfig(CalculateUserAccountDataVars memory vars)
+    internal
+    view
+    returns (bool)
+  {
+    if (vars.shiftedUserConfig & FOUR_BYTE_MASK == 0) {
+      unchecked {
+        vars.shiftIndex += 16;
+      }
+      vars.shiftedUserConfig >>= 16;
+      return false;
+    }
+    if (vars.shiftedUserConfig & TWO_BYTE_MASK == 0) {
+      unchecked {
+        vars.shiftIndex += 8;
+      }
+      vars.shiftedUserConfig >>= 8;
+      return false;
+    }
+    if (vars.shiftedUserConfig & ONE_BYTE_MASK == 0) {
+      unchecked {
+        vars.shiftIndex += 4;
+      }
+      vars.shiftedUserConfig >>= 4;
+      return false;
+    }
+    if (vars.shiftedUserConfig & TWO_BIT_MASK == 0) {
+      unchecked {
+        vars.shiftIndex += 2;
+      }
+      vars.shiftedUserConfig >>= 2;
+      return false;
+    }
+    return true;
   }
 }
