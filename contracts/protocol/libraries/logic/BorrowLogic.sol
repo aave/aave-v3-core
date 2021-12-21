@@ -32,7 +32,7 @@ library BorrowLogic {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint256 borrowRateMode,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
     uint16 indexed referral
   );
@@ -45,7 +45,11 @@ library BorrowLogic {
   );
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
-  event SwapBorrowRateMode(address indexed reserve, address indexed user, uint256 rateMode);
+  event SwapBorrowRateMode(
+    address indexed reserve,
+    address indexed user,
+    DataTypes.InterestRateMode interestRateMode
+  );
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
@@ -101,7 +105,7 @@ library BorrowLogic {
     uint256 currentStableRate = 0;
     bool isFirstBorrowing = false;
 
-    if (DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
+    if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       currentStableRate = reserve.currentStableBorrowRate;
 
       (
@@ -155,7 +159,7 @@ library BorrowLogic {
       params.onBehalfOf,
       params.amount,
       params.interestRateMode,
-      DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE
+      params.interestRateMode == DataTypes.InterestRateMode.STABLE
         ? currentStableRate
         : reserve.currentVariableBorrowRate,
       params.referralCode
@@ -183,7 +187,6 @@ library BorrowLogic {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
-    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(params.rateMode);
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
       params.onBehalfOf,
       reserve
@@ -192,13 +195,13 @@ library BorrowLogic {
     ValidationLogic.validateRepay(
       reserveCache,
       params.amount,
-      interestRateMode,
+      params.interestRateMode,
       params.onBehalfOf,
       stableDebt,
       variableDebt
     );
 
-    uint256 paybackAmount = interestRateMode == DataTypes.InterestRateMode.STABLE
+    uint256 paybackAmount = params.interestRateMode == DataTypes.InterestRateMode.STABLE
       ? stableDebt
       : variableDebt;
 
@@ -206,7 +209,7 @@ library BorrowLogic {
       paybackAmount = params.amount;
     }
 
-    if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
+    if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       (reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
         reserveCache.stableDebtTokenAddress
       ).burn(params.onBehalfOf, paybackAmount);
@@ -298,21 +301,19 @@ library BorrowLogic {
    * @param reserve The data of the reserve of the asset being repaid
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param asset The asset of the position being swapped
-   * @param rateMode The current interest rate mode of the position being swapped. If `rateMode == InterestRateMode.STABLE`, user must have stable debt
+   * @param interestRateMode The current interest rate mode of the position being swapped
    */
   function executeSwapBorrowRateMode(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
-    uint256 rateMode
+    DataTypes.InterestRateMode interestRateMode
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
 
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(msg.sender, reserve);
-
-    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(rateMode);
 
     ValidationLogic.validateSwapRateMode(
       reserve,
@@ -343,6 +344,6 @@ library BorrowLogic {
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
-    emit SwapBorrowRateMode(asset, msg.sender, rateMode);
+    emit SwapBorrowRateMode(asset, msg.sender, interestRateMode);
   }
 }
