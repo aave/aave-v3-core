@@ -82,7 +82,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
   /// @inheritdoc IAToken
   function burn(
-    address user,
+    address from,
     address receiverOfUnderlying,
     uint256 amount,
     uint256 index
@@ -90,13 +90,13 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
 
-    uint256 scaledBalance = super.balanceOf(user);
+    uint256 scaledBalance = super.balanceOf(from);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
-      scaledBalance.rayMul(_userState[user].additionalData);
+      scaledBalance.rayMul(_userState[from].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[from].additionalData = Helpers.castUint128(index);
 
-    _burn(user, Helpers.castUint128(amountScaled));
+    _burn(from, Helpers.castUint128(amountScaled));
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
@@ -104,18 +104,18 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
-      emit Transfer(address(0), user, amountToMint);
-      emit Mint(user, user, amountToMint, balanceIncrease, index);
+      emit Transfer(address(0), from, amountToMint);
+      emit Mint(from, from, amountToMint, balanceIncrease, index);
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
-      emit Transfer(user, address(0), amountToBurn);
-      emit Burn(user, receiverOfUnderlying, amountToBurn, balanceIncrease, index);
+      emit Transfer(from, address(0), amountToBurn);
+      emit Burn(from, receiverOfUnderlying, amountToBurn, balanceIncrease, index);
     }
   }
 
   /// @inheritdoc IAToken
   function mint(
-    address user,
+    address caller,
     address onBehalfOf,
     uint256 amount,
     uint256 index
@@ -133,7 +133,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
 
     uint256 amountToMint = amount + balanceIncrease;
     emit Transfer(address(0), onBehalfOf, amountToMint);
-    emit Mint(user, onBehalfOf, amountToMint, balanceIncrease, index);
+    emit Mint(caller, onBehalfOf, amountToMint, balanceIncrease, index);
 
     return scaledBalance == 0;
   }

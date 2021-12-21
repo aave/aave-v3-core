@@ -265,7 +265,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event parameters
-    expect(parsedMintEvent.args.from).to.equal(depositor.address);
+    expect(parsedMintEvent.args.caller).to.equal(depositor.address);
     expect(parsedMintEvent.args.onBehalfOf).to.equal(depositor.address);
     expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
     expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(accruedInterest1, 2);
@@ -324,7 +324,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event
-    expect(parsedMintEvent.args.from).to.equal(depositor.address);
+    expect(parsedMintEvent.args.caller).to.equal(depositor.address);
     expect(parsedMintEvent.args.onBehalfOf).to.equal(depositor.address);
     expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
     expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(accruedInterest2, 2);
@@ -561,7 +561,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event
-    expect(parsedMintEvent.args.from).to.equal(depositor.address);
+    expect(parsedMintEvent.args.caller).to.equal(depositor.address);
     expect(parsedMintEvent.args.onBehalfOf).to.equal(depositor.address);
     expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
     expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(totalMinted.add(smallWithdrawal), 2);
