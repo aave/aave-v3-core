@@ -54,6 +54,7 @@ library GenericLogic {
     uint256 eModeAssetCategory;
     address currentReserveAddress;
     uint8 shiftIndex;
+    uint8 i;
     bool hasZeroLtvCollateral;
     bool isInEModeCategory;
   }
