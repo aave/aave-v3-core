@@ -117,6 +117,13 @@ interface IPool {
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
+   * @notice Emitted when the user selects a certain asset category for eMode
+   * @param user The address of the user
+   * @param categoryId The category id
+   **/
+  event UserEModeSet(address indexed user, uint8 categoryId);
+
+  /**
    * @notice Emitted on setUserUseReserveAsCollateral()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user enabling the usage as collateral
@@ -227,13 +234,6 @@ interface IPool {
     uint256 amount,
     uint256 fee
   ) external;
-
-  /**
-   * @notice Emitted when the user selects a certain asset category for eMode
-   * @param user The address of the user
-   * @param categoryId The category id
-   **/
-  event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
