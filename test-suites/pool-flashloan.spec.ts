@@ -19,7 +19,6 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
   const {
     COLLATERAL_BALANCE_IS_ZERO,
     TRANSFER_AMOUNT_EXCEEDS_BALANCE,
-    SAFEERC20_LOWLEVEL_CALL,
     INVALID_FLASHLOAN_EXECUTOR_RETURN,
   } = ProtocolErrors;
 
@@ -261,7 +260,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
+    ).to.be.reverted;
   });
 
   it('Takes WETH flashloan, simulating a receiver as EOA (revert expected)', async () => {
@@ -373,7 +372,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
         '0'
       ),
       TRANSFER_AMOUNT_EXCEEDS_BALANCE
-    ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
+    ).to.be.reverted;
   });
 
   it('Tries to take a flashloan using a non contract address as receiver (revert expected)', async () => {
@@ -549,7 +548,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
+    ).to.be.reverted;
   });
 
   it('Caller takes a WETH flashloan with mode = 1', async () => {

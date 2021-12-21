@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
@@ -26,7 +26,7 @@ import {ReserveLogic} from './ReserveLogic.sol';
 library FlashLoanLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -120,7 +120,10 @@ library FlashLoanLogic {
       vars.currentAsset = params.assets[vars.i];
       vars.currentAmount = params.amounts[vars.i];
 
-      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
+      if (
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]) ==
+        DataTypes.InterestRateMode.NONE
+      ) {
         vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
         vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
         vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
@@ -176,7 +179,7 @@ library FlashLoanLogic {
             user: msg.sender,
             onBehalfOf: params.onBehalfOf,
             amount: vars.currentAmount,
-            interestRateMode: params.modes[vars.i],
+            interestRateMode: DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
             referralCode: params.referralCode,
             releaseUnderlying: false,
             maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,

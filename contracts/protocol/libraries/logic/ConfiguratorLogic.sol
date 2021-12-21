@@ -63,7 +63,7 @@ library ConfiguratorLogic {
         IInitializableAToken.initialize.selector,
         input.treasury,
         input.underlyingAsset,
-        IAaveIncentivesController(input.incentivesController),
+        input.incentivesController,
         input.underlyingAssetDecimals,
         input.aTokenName,
         input.aTokenSymbol,
@@ -76,7 +76,7 @@ library ConfiguratorLogic {
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
         input.underlyingAsset,
-        IAaveIncentivesController(input.incentivesController),
+        input.incentivesController,
         input.underlyingAssetDecimals,
         input.stableDebtTokenName,
         input.stableDebtTokenSymbol,
@@ -89,7 +89,7 @@ library ConfiguratorLogic {
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
         input.underlyingAsset,
-        IAaveIncentivesController(input.incentivesController),
+        input.incentivesController,
         input.underlyingAssetDecimals,
         input.variableDebtTokenName,
         input.variableDebtTokenSymbol,
@@ -105,9 +105,7 @@ library ConfiguratorLogic {
       input.interestRateStrategyAddress
     );
 
-    DataTypes.ReserveConfigurationMap memory currentConfig = pool.getConfiguration(
-      input.underlyingAsset
-    );
+    DataTypes.ReserveConfigurationMap memory currentConfig = DataTypes.ReserveConfigurationMap(0);
 
     currentConfig.setDecimals(input.underlyingAssetDecimals);
 

@@ -20,9 +20,7 @@ abstract contract DebtTokenBase is
 {
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
   bytes32 public constant DELEGATION_WITH_SIG_TYPEHASH =
-    keccak256(
-      'DelegationWithSig(address delegator,address delegatee,uint256 value,uint256 nonce,uint256 deadline)'
-    );
+    keccak256('DelegationWithSig(address delegatee,uint256 value,uint256 nonce,uint256 deadline)');
   IPool public immutable POOL;
 
   /**
@@ -72,14 +70,7 @@ abstract contract DebtTokenBase is
         '\x19\x01',
         DOMAIN_SEPARATOR(),
         keccak256(
-          abi.encode(
-            DELEGATION_WITH_SIG_TYPEHASH,
-            delegator,
-            delegatee,
-            value,
-            currentValidNonce,
-            deadline
-          )
+          abi.encode(DELEGATION_WITH_SIG_TYPEHASH, delegatee, value, currentValidNonce, deadline)
         )
       )
     );
