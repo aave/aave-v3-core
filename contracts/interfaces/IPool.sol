@@ -102,7 +102,7 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-   
+
   event SwapBorrowRateMode(
     address indexed reserve,
     address indexed user,
@@ -533,7 +533,8 @@ interface IPool {
    * @param asset The address of the underlying asset of the reserve
    * @param configuration The new configuration bitmap
    **/
-  function setConfiguration(address asset, uint256 configuration) external;
+  function setConfiguration(address asset, DataTypes.ReserveConfigurationMap calldata configuration)
+    external;
 
   /**
    * @notice Returns the configuration of the reserve
