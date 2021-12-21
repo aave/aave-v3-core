@@ -402,7 +402,9 @@ library ValidationLogic {
     uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
       .wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
-    uint256 usageRatio = totalDebt == 0 ? 0 : totalDebt.rayDiv(availableLiquidity + totalDebt);
+    uint256 borrowUtilizationRate = totalDebt == 0
+      ? 0
+      : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
     //if the liquidity rate is below the threshold calculated based on the max variable APR at 95% usage,
     //then we allow rebalancing of the stable rate positions.
@@ -413,7 +415,7 @@ library ValidationLogic {
     ).getMaxVariableBorrowRate();
 
     require(
-      usageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
+      borrowUtilizationRate >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
         currentLiquidityRate <=
         maxVariableBorrowRate.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
       Errors.P_INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
