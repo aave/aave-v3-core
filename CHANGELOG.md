@@ -1,5 +1,26 @@
 # Changelog
 
+### [1.8.1](https://www.github.com/aave/aave-v3-core/compare/v1.8.0...v1.8.1) (2021-12-21)
+
+
+### Bug Fixes
+
+* Add natspec to `executeLiquidationCall` ([9bb5289](https://www.github.com/aave/aave-v3-core/commit/9bb5289465ffaf0edc32c6f733f4c7eccecf2f5a))
+* Cache result to not recompute for event ([b342d2f](https://www.github.com/aave/aave-v3-core/commit/b342d2f7f0f9fc05b5e7d9dc21e17183219b6d19))
+* Change  to  in Pool for V2 compatibility ([932c5a0](https://www.github.com/aave/aave-v3-core/commit/932c5a0dc02c22f4a9c20384a9912e2780fcbae8))
+* Fix `income` -> `debt` in `getNormalizedDebt` natspec. ([9e6b183](https://www.github.com/aave/aave-v3-core/commit/9e6b1831f3f814fca46e19d6761bda9a7cd07f66))
+* Fix differences between IPool and Pool ([8beefda](https://www.github.com/aave/aave-v3-core/commit/8beefda3d19c3814196052575332342a5b23be08))
+* Fix docstrings ([c55bb04](https://www.github.com/aave/aave-v3-core/commit/c55bb04725b4a1ed6c87a0f5092669d55e306afc))
+* Remove case, created separate issue ([0082fd8](https://www.github.com/aave/aave-v3-core/commit/0082fd82eacfe61f32efce03fe99f464a3992eec))
+* remove IAaveIncentivesController casting ([9805add](https://www.github.com/aave/aave-v3-core/commit/9805add3405965badb9803ab68c8b7f73b0989ab))
+* Remove unneeded `delegator` param from delegationWithSig typehash ([dcf7c36](https://www.github.com/aave/aave-v3-core/commit/dcf7c36dc2df66283f29c72738872c1e3e992a43))
+* Replace `rateMode` with `interestRateMode` and precise dataype ([806f161](https://www.github.com/aave/aave-v3-core/commit/806f16172bb718366417ef9e519b0fe5b9d04595))
+* set config map to zero on init ([ea40ee1](https://www.github.com/aave/aave-v3-core/commit/ea40ee1608b7ffe60ae03154403b77fdc20933de))
+* swap name ([ebd3622](https://www.github.com/aave/aave-v3-core/commit/ebd3622b28b18d8d7adbcd5f285a3c13a180db8f))
+* Typo in liquidation-emode.spec.ts ([97e0acc](https://www.github.com/aave/aave-v3-core/commit/97e0acc5515641ef936cbb3284b4e2f9811a27f6))
+* Update test with new delegationWithSig typehash ([fea83f3](https://www.github.com/aave/aave-v3-core/commit/fea83f39d433ff1e624a39878686ddf661eb66fe))
+* Use `next` prefix for isolation mode total debt ([5ffeecd](https://www.github.com/aave/aave-v3-core/commit/5ffeecdd6e376ff341d6f633e36be53c2cbc43b1))
+
 ## [1.8.0](https://www.github.com/aave/aave-v3-core/compare/v1.7.0...v1.8.0) (2021-12-16)
 
 
