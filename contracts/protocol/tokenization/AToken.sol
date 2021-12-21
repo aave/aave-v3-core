@@ -294,4 +294,25 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   ) internal override {
     _transfer(from, to, amount, true);
   }
+
+  /**
+   * @dev overrides the base function to fully implement IAToken
+   * @dev see `IncentivizedERC20.DOMAIN_SEPARATOR()` for more detailed documentation
+   */
+  function DOMAIN_SEPARATOR() public view override(IAToken, IncentivizedERC20) returns (bytes32) {
+    return super.DOMAIN_SEPARATOR();
+  }
+
+  /**
+   * @dev overrides the base function to fully implement IAToken
+   * @dev see `IncentivizedERC20.nonces()` for more detailed documentation
+   */
+  function nonces(address owner)
+    public
+    view
+    override(IAToken, IncentivizedERC20)
+    returns (uint256)
+  {
+    return super.nonces(owner);
+  }
 }
