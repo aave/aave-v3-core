@@ -126,8 +126,8 @@ library GenericLogic {
         vars.shiftedUserConfig >>= 2;
         continue;
       }
-
-      vars.currentReserveAddress = reserves[(vars.shiftIndex + 1) / 2];
+      vars.i = (vars.shiftIndex + 1) / 2;
+      vars.currentReserveAddress = reserves[vars.i];
       DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
 
       (
@@ -148,10 +148,7 @@ library GenericLogic {
         ? vars.eModeAssetPrice
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
-      if (
-        vars.liquidationThreshold != 0 &&
-        params.userConfig.isUsingAsCollateral((vars.shiftIndex + 1) / 2)
-      ) {
+      if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
         vars.userBalanceInBaseCurrency = _getUserBalanceInBaseCurrency(
           params.user,
           currentReserve,
@@ -179,7 +176,7 @@ library GenericLogic {
           (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
       }
 
-      if (params.userConfig.isBorrowing((vars.shiftIndex + 1) / 2)) {
+      if (params.userConfig.isBorrowing(vars.i)) {
         vars.totalDebtInBaseCurrency += _getUserDebtInBaseCurrency(
           params.user,
           currentReserve,
