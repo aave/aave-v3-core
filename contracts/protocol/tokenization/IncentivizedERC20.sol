@@ -286,9 +286,9 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @notice Returns the nonce value for `owner`
+   * @notice Returns the nonce value for address specified as parameter
    * @param owner The address for which the nonce is being returned
-   * @return The nonce value of `owner`
+   * @return The nonce value for the input address`
    */
   function nonces(address owner) public view virtual returns (uint256) {
     return _nonces[owner];
