@@ -75,7 +75,7 @@ interface IPool {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint256 interestRateMode,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
     uint16 indexed referral
   );
@@ -102,7 +102,11 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-  event Swap(address indexed reserve, address indexed user, uint256 interestRateMode);
+  event SwapBorrowRateMode(
+    address indexed reserve,
+    address indexed user,
+    DataTypes.InterestRateMode interestRateMode
+  );
 
   /**
    * @notice Emitted on setUserUseReserveAsCollateral()

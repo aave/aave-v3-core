@@ -45,7 +45,7 @@ library BorrowLogic {
   );
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
-  event Swap(
+  event SwapBorrowRateMode(
     address indexed reserve,
     address indexed user,
     DataTypes.InterestRateMode interestRateMode
@@ -338,6 +338,6 @@ library BorrowLogic {
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
-    emit Swap(asset, msg.sender, interestRateMode);
+    emit SwapBorrowRateMode(asset, msg.sender, interestRateMode);
   }
 }
