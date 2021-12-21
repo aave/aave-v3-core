@@ -69,9 +69,15 @@ library LiquidationLogic {
   }
 
   /**
-   * @dev Function to liquidate a position if its Health Factor drops below 1. The caller (liquidator)
+   * @notice Function to liquidate a position if its Health Factor drops below 1. The caller (liquidator)
    * covers `debtToCover` amount of debt of the user getting liquidated, and receives
    * a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
+   * @dev Emits the `LiquidationCall()` event
+   * @param reserves The state of all the reserves
+   * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
+   * @param reservesList The addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param params The additional parameters needed to execute the liquidation function
    **/
   function executeLiquidationCall(
     mapping(address => DataTypes.ReserveData) storage reserves,
