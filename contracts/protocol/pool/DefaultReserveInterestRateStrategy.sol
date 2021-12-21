@@ -153,8 +153,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       : 0;
 
     vars.currentVariableBorrowRate = 0;
-    vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
+    vars.currentStableBorrowRate = getBaseStableBorrowRate();
 
     vars.borrowUtilizationRate = vars.totalDebt == 0
       ? 0
@@ -163,8 +163,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.supplyUtilizationRate = vars.totalDebt == 0
       ? 0
       : vars.totalDebt.rayDiv(vars.availableLiquidity + params.unbacked + vars.totalDebt);
-
-    vars.currentStableBorrowRate = getBaseStableBorrowRate();
 
     if (vars.borrowUtilizationRate > OPTIMAL_UTILIZATION_RATE) {
       uint256 excessUtilizationRateRatio = (vars.borrowUtilizationRate - OPTIMAL_UTILIZATION_RATE)

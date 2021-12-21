@@ -102,11 +102,19 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
+   
   event SwapBorrowRateMode(
     address indexed reserve,
     address indexed user,
     DataTypes.InterestRateMode interestRateMode
   );
+
+  /**
+   * @notice Emitted on borrow(), repay() and liquidationCall() when using isolated assets
+   * @param asset The address of the underlying asset of the reserve
+   * @param totalDebt The total isolation mode debt for the reserve
+   */
+  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
    * @notice Emitted on setUserUseReserveAsCollateral()
