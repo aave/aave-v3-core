@@ -24,6 +24,17 @@ library GenericLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
+  uint256 internal constant FOUR_BYTE_MASK =
+    0x0000000000000000000000000000000000000000000000000000000000000000FFFF;
+  uint256 internal constant TWO_BYTE_MASK =
+    0x000000000000000000000000000000000000000000000000000000000000000000FF;
+  uint256 internal constant ONE_BYTE_MASK =
+    0x0000000000000000000000000000000000000000000000000000000000000000000F;
+  uint256 internal constant TWO_BIT_MASK =
+    0x00000000000000000000000000000000000000000000000000000000000000000003;
+  uint256 internal constant ONE_BIT_MASK =
+    0x00000000000000000000000000000000000000000000000000000000000000000001;
+
   struct CalculateUserAccountDataVars {
     uint256 assetPrice;
     uint256 assetUnit;
@@ -31,7 +42,7 @@ library GenericLogic {
     uint256 decimals;
     uint256 ltv;
     uint256 liquidationThreshold;
-    uint256 i;
+    uint256 shiftedUserConfig;
     uint256 healthFactor;
     uint256 totalCollateralInBaseCurrency;
     uint256 totalDebtInBaseCurrency;
@@ -42,6 +53,7 @@ library GenericLogic {
     uint256 eModeLiqThreshold;
     uint256 eModeAssetCategory;
     address currentReserveAddress;
+    uint8 shiftIndex;
     bool hasZeroLtvCollateral;
     bool isInEModeCategory;
   }
@@ -92,23 +104,30 @@ library GenericLogic {
         );
     }
 
-    while (vars.i < params.reservesCount) {
-      if (!params.userConfig.isUsingAsCollateralOrBorrowing(vars.i)) {
-        unchecked {
-          ++vars.i;
-        }
+    vars.shiftedUserConfig = params.userConfig.data;
+    while (vars.shiftedUserConfig != 0) {
+      if (vars.shiftedUserConfig & FOUR_BYTE_MASK == 0) {
+        vars.shiftIndex += 16;
+        vars.shiftedUserConfig >>= 16;
+        continue;
+      }
+      if (vars.shiftedUserConfig & TWO_BYTE_MASK == 0) {
+        vars.shiftIndex += 8;
+        vars.shiftedUserConfig >>= 8;
+        continue;
+      }
+      if (vars.shiftedUserConfig & ONE_BYTE_MASK == 0) {
+        vars.shiftIndex += 4;
+        vars.shiftedUserConfig >>= 4;
+        continue;
+      }
+      if (vars.shiftedUserConfig & TWO_BIT_MASK == 0) {
+        vars.shiftIndex += 2;
+        vars.shiftedUserConfig >>= 2;
         continue;
       }
 
-      vars.currentReserveAddress = reserves[vars.i];
-
-      if (vars.currentReserveAddress == address(0)) {
-        unchecked {
-          ++vars.i;
-        }
-        continue;
-      }
-
+      vars.currentReserveAddress = reserves[(vars.shiftIndex + 1) / 2];
       DataTypes.ReserveData storage currentReserve = reservesData[vars.currentReserveAddress];
 
       (
@@ -129,7 +148,10 @@ library GenericLogic {
         ? vars.eModeAssetPrice
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
-      if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
+      if (
+        vars.liquidationThreshold != 0 &&
+        params.userConfig.isUsingAsCollateral((vars.shiftIndex + 1) / 2)
+      ) {
         vars.userBalanceInBaseCurrency = _getUserBalanceInBaseCurrency(
           params.user,
           currentReserve,
@@ -157,7 +179,7 @@ library GenericLogic {
           (vars.isInEModeCategory ? vars.eModeLiqThreshold : vars.liquidationThreshold);
       }
 
-      if (params.userConfig.isBorrowing(vars.i)) {
+      if (params.userConfig.isBorrowing((vars.shiftIndex + 1) / 2)) {
         vars.totalDebtInBaseCurrency += _getUserDebtInBaseCurrency(
           params.user,
           currentReserve,
@@ -165,10 +187,8 @@ library GenericLogic {
           vars.assetUnit
         );
       }
-
-      unchecked {
-        ++vars.i;
-      }
+      vars.shiftIndex += 2;
+      vars.shiftedUserConfig >>= 2;
     }
 
     unchecked {
