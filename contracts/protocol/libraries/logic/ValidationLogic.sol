@@ -610,11 +610,7 @@ library ValidationLogic {
     uint8 userEModeCategory
   ) internal view {
     ValidateHFAndLtvLocalVars memory vars;
-
     DataTypes.ReserveData memory reserve = reservesData[asset];
-
-    vars.assetLtv = reserve.configuration.getLtv();
-    if (vars.assetLtv == 0) return;
 
     (, vars.hasZeroLtvCollateral) = validateHealthFactor(
       reservesData,
@@ -626,7 +622,8 @@ library ValidationLogic {
       reservesCount,
       oracle
     );
-    require(!vars.hasZeroLtvCollateral, Errors.VL_LTV_VALIDATION_FAILED);
+    vars.assetLtv = reserve.configuration.getLtv();
+    require(vars.assetLtv == 0 || !vars.hasZeroLtvCollateral, Errors.VL_LTV_VALIDATION_FAILED);
   }
 
   /**
