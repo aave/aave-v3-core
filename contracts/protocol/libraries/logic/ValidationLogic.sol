@@ -408,7 +408,7 @@ library ValidationLogic {
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
     require(!isPaused, Errors.VL_RESERVE_PAUSED);
 
-    //if the usage ratio is below 95%, no rebalances are needed
+    //if the utilization rate is below the threshold, no rebalances are needed
     uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
       .wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
