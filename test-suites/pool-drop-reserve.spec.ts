@@ -88,4 +88,9 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
     const { isActive } = await helpersContract.getReserveConfigurationData(dai.address);
     expect(isActive).to.be.false;
   });
+
+  it('Drop an asset that is not a listed reserve should fail', async () => {
+    const { users, configurator } = testEnv;
+    await expect(configurator.dropReserve(users[5].address)).to.be.reverted;
+  });
 });

@@ -168,6 +168,12 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(RC_INVALID_UNBACKED_MINT_CAP);
   });
 
+  it('Tries to set borrowCap of MAX_BORROW_CAP an unlisted asset', async () => {
+    const { configurator, users } = testEnv;
+    const newCap = 10;
+    await expect(configurator.setBorrowCap(users[5].address, newCap)).to.be.reverted;
+  });
+
   it('Tries to add a category with id 0 (revert expected)', async () => {
     const { configurator, poolAdmin } = testEnv;
 
