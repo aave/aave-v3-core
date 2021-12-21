@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
+import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Helpers} from '../helpers/Helpers.sol';
@@ -22,7 +23,7 @@ import {ReserveLogic} from './ReserveLogic.sol';
 library EModeLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -74,5 +75,50 @@ library EModeLogic {
       );
     }
     emit UserEModeSet(msg.sender, params.categoryId);
+  }
+
+  /**
+   * @notice Gets the eMode configuration and calculates the eMode asset price if a custom oracle is configured
+   * @dev The eMode asset price returned is 0 if no oracle is specified
+   * @param category The user eMode category
+   * @param oracle The price oracle
+   * @return The eMode ltv
+   * @return The eMode liquidation threshold
+   * @return The eMode asset price
+   **/
+  function getEModeConfiguration(
+    DataTypes.EModeCategory storage category,
+    IPriceOracleGetter oracle
+  )
+    internal
+    view
+    returns (
+      uint256,
+      uint256,
+      uint256
+    )
+  {
+    uint256 eModeAssetPrice = 0;
+    address eModePriceSource = category.priceSource;
+
+    if (eModePriceSource != address(0)) {
+      eModeAssetPrice = oracle.getAssetPrice(eModePriceSource);
+    }
+
+    return (category.ltv, category.liquidationThreshold, eModeAssetPrice);
+  }
+
+  /**
+   * @notice Checks if eMode is active for a user and if yes, if the asset belongs to the eMode category chosen
+   * @param eModeUserCategory The user eMode category
+   * @param eModeAssetCategory The asset eMode category
+   * @return True if eMode is active and the asset belongs to the eMode category chosen by the user, false otherwise
+   **/
+  function isInEModeCategory(uint256 eModeUserCategory, uint256 eModeAssetCategory)
+    internal
+    pure
+    returns (bool)
+  {
+    return (eModeUserCategory != 0 && eModeAssetCategory == eModeUserCategory);
   }
 }

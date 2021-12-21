@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
@@ -21,7 +21,7 @@ library BridgeLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
 
   // See `IPool` for descriptions
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
@@ -70,10 +70,7 @@ library BridgeLogic {
 
     uint256 unbacked = reserve.unbacked = reserve.unbacked + Helpers.castUint128(amount);
 
-    require(
-      unbacked <= unbackedMintCap * (10**reserveDecimals),
-      Errors.UNBACKED_MINT_CAP_EXCEEDED
-    );
+    require(unbacked <= unbackedMintCap * (10**reserveDecimals), Errors.UNBACKED_MINT_CAP_EXCEEDED);
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
