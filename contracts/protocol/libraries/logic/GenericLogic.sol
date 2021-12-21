@@ -24,16 +24,10 @@ library GenericLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
-  uint256 internal constant FOUR_BYTE_MASK =
-    0x0000000000000000000000000000000000000000000000000000000000000000FFFF;
-  uint256 internal constant TWO_BYTE_MASK =
-    0x000000000000000000000000000000000000000000000000000000000000000000FF;
-  uint256 internal constant ONE_BYTE_MASK =
-    0x0000000000000000000000000000000000000000000000000000000000000000000F;
-  uint256 internal constant TWO_BIT_MASK =
-    0x00000000000000000000000000000000000000000000000000000000000000000003;
-  uint256 internal constant ONE_BIT_MASK =
-    0x00000000000000000000000000000000000000000000000000000000000000000001;
+  uint256 internal constant TWO_BYTE_MASK = 0xFFFF;
+  uint256 internal constant ONE_BYTE_MASK = 0xFF;
+  uint256 internal constant FOUR_BIT_MASK = 0xF;
+  uint256 internal constant TWO_BIT_MASK = 0x3;
 
   struct CalculateUserAccountDataVars {
     uint256 assetPrice;
@@ -291,21 +285,21 @@ library GenericLogic {
     view
     returns (bool)
   {
-    if (vars.shiftedUserConfig & FOUR_BYTE_MASK == 0) {
+    if (vars.shiftedUserConfig & TWO_BYTE_MASK == 0) {
       unchecked {
         vars.shiftIndex += 16;
       }
       vars.shiftedUserConfig >>= 16;
       return false;
     }
-    if (vars.shiftedUserConfig & TWO_BYTE_MASK == 0) {
+    if (vars.shiftedUserConfig & ONE_BYTE_MASK == 0) {
       unchecked {
         vars.shiftIndex += 8;
       }
       vars.shiftedUserConfig >>= 8;
       return false;
     }
-    if (vars.shiftedUserConfig & ONE_BYTE_MASK == 0) {
+    if (vars.shiftedUserConfig & FOUR_BIT_MASK == 0) {
       unchecked {
         vars.shiftIndex += 4;
       }
