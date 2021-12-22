@@ -58,6 +58,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   function setProxyImplementation(address proxyAddress, address implementationAddress)
     public
     override
+    onlyOwner
   {
     _setProxyImplementation(proxyAddress, implementationAddress);
   }
