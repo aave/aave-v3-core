@@ -186,7 +186,7 @@ library ValidationLogic {
 
       require(
         reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt +
-          Helpers.castUint128(
+          Helpers.toUint128(
             params.amount / 10**(vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS)
           ) <=
           params.isolationModeDebtCeiling,

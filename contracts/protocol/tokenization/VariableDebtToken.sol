@@ -91,9 +91,9 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
 
-    _userState[onBehalfOf].additionalData = Helpers.castUint128(index);
+    _userState[onBehalfOf].additionalData = Helpers.toUint128(index);
 
-    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
+    _mint(onBehalfOf, Helpers.toUint128(amountScaled));
 
     uint256 amountToMint = amount + balanceIncrease;
     emit Transfer(address(0), onBehalfOf, amountToMint);
@@ -115,9 +115,9 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[user].additionalData = Helpers.toUint128(index);
 
-    _burn(user, Helpers.castUint128(amountScaled));
+    _burn(user, Helpers.toUint128(amountScaled));
 
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;

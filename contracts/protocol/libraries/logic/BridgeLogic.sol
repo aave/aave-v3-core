@@ -68,7 +68,7 @@ library BridgeLogic {
     uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCap();
     uint256 reserveDecimals = reserveCache.reserveConfiguration.getDecimals();
 
-    uint256 unbacked = reserve.unbacked = reserve.unbacked + Helpers.castUint128(amount);
+    uint256 unbacked = reserve.unbacked = reserve.unbacked + Helpers.toUint128(amount);
 
     require(
       unbacked <= unbackedMintCap * (10**reserveDecimals),
@@ -124,11 +124,11 @@ library BridgeLogic {
       feeToLP
     );
 
-    reserve.accruedToTreasury += Helpers.castUint128(
+    reserve.accruedToTreasury += Helpers.toUint128(
       feeToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
     );
 
-    reserve.unbacked -= Helpers.castUint128(backingAmount);
+    reserve.unbacked -= Helpers.toUint128(backingAmount);
     reserve.updateInterestRates(reserveCache, asset, added, 0);
 
     IERC20(asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, added);

@@ -40,7 +40,7 @@ library IsolationModeLogic {
       uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
         .isolationModeTotalDebt;
 
-      uint128 isolatedDebtRepaid = Helpers.castUint128(
+      uint128 isolatedDebtRepaid = Helpers.toUint128(
         repayAmount /
           10 **
             (reserveCache.reserveConfiguration.getDecimals() -

@@ -121,7 +121,7 @@ library ReserveLogic {
     uint256 result = amountToLiquidityRatio + WadRayMath.RAY;
 
     result = result.rayMul(reserve.liquidityIndex);
-    reserve.liquidityIndex = Helpers.castUint128(result);
+    reserve.liquidityIndex = Helpers.toUint128(result);
     return result;
   }
 
@@ -196,9 +196,9 @@ library ReserveLogic {
       })
     );
 
-    reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);
-    reserve.currentStableBorrowRate = Helpers.castUint128(vars.nextStableRate);
-    reserve.currentVariableBorrowRate = Helpers.castUint128(vars.nextVariableRate);
+    reserve.currentLiquidityRate = Helpers.toUint128(vars.nextLiquidityRate);
+    reserve.currentStableBorrowRate = Helpers.toUint128(vars.nextStableRate);
+    reserve.currentVariableBorrowRate = Helpers.toUint128(vars.nextVariableRate);
 
     emit ReserveDataUpdated(
       reserveAddress,
@@ -268,7 +268,7 @@ library ReserveLogic {
     if (vars.amountToMint != 0) {
       reserve.accruedToTreasury =
         reserve.accruedToTreasury +
-        Helpers.castUint128((vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex)));
+        Helpers.toUint128((vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex)));
     }
   }
 
@@ -293,7 +293,7 @@ library ReserveLogic {
       reserveCache.nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(
         reserveCache.currLiquidityIndex
       );
-      reserve.liquidityIndex = Helpers.castUint128(reserveCache.nextLiquidityIndex);
+      reserve.liquidityIndex = Helpers.toUint128(reserveCache.nextLiquidityIndex);
 
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
@@ -305,7 +305,7 @@ library ReserveLogic {
         reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
           reserveCache.currVariableBorrowIndex
         );
-        reserve.variableBorrowIndex = Helpers.castUint128(reserveCache.nextVariableBorrowIndex);
+        reserve.variableBorrowIndex = Helpers.toUint128(reserveCache.nextVariableBorrowIndex);
       }
     }
 

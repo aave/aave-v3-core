@@ -683,8 +683,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
-    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
+    _flashLoanPremiumTotal = Helpers.toUint128(flashLoanPremiumTotal);
+    _flashLoanPremiumToProtocol = Helpers.toUint128(flashLoanPremiumToProtocol);
   }
 
   /// @inheritdoc IPool

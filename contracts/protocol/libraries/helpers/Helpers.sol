@@ -46,7 +46,7 @@ library Helpers {
     );
   }
 
-  function castUint128(uint256 input) internal pure returns (uint128) {
+  function toUint128(uint256 input) internal pure returns (uint128) {
     require(input <= type(uint128).max, Errors.HLP_UINT128_OVERFLOW);
     return uint128(input);
   }

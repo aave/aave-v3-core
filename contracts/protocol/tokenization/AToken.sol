@@ -94,9 +94,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[user].additionalData = Helpers.toUint128(index);
 
-    _burn(user, Helpers.castUint128(amountScaled));
+    _burn(user, Helpers.toUint128(amountScaled));
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
@@ -126,9 +126,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[user].additionalData = Helpers.toUint128(index);
 
-    _mint(user, Helpers.castUint128(amountScaled));
+    _mint(user, Helpers.toUint128(amountScaled));
 
     uint256 amountToMint = amount + balanceIncrease;
     emit Transfer(address(0), user, amountToMint);
@@ -272,7 +272,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
 
-    super._transfer(from, to, Helpers.castUint128(amount.rayDiv(index)));
+    super._transfer(from, to, Helpers.toUint128(amount.rayDiv(index)));
 
     if (validate) {
       POOL.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);

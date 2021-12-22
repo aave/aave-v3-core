@@ -139,13 +139,13 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     vars.nextStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
-    _userState[onBehalfOf].additionalData = Helpers.castUint128(vars.nextStableRate);
+    _userState[onBehalfOf].additionalData = Helpers.toUint128(vars.nextStableRate);
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
 
     // Calculates the updated average stable rate
-    vars.currentAvgStableRate = _avgStableRate = Helpers.castUint128(
+    vars.currentAvgStableRate = _avgStableRate = Helpers.toUint128(
       (vars.currentAvgStableRate.rayMul(vars.previousSupply.wadToRay()) +
         rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay())
     );
@@ -200,7 +200,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       if (secondTerm >= firstTerm) {
         nextAvgStableRate = _totalSupply = _avgStableRate = 0;
       } else {
-        nextAvgStableRate = _avgStableRate = Helpers.castUint128(
+        nextAvgStableRate = _avgStableRate = Helpers.toUint128(
           (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay())
         );
       }
@@ -349,7 +349,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint128 castAmount = Helpers.castUint128(amount);
+    uint128 castAmount = Helpers.toUint128(amount);
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance + castAmount;
 
@@ -369,7 +369,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint128 castAmount = Helpers.castUint128(amount);
+    uint128 castAmount = Helpers.toUint128(amount);
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance - castAmount;
 

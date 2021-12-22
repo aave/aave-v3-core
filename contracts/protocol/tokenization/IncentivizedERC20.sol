@@ -110,7 +110,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /// @inheritdoc IERC20
   function transfer(address recipient, uint256 amount) external virtual override returns (bool) {
-    uint128 castAmount = Helpers.castUint128(amount);
+    uint128 castAmount = Helpers.toUint128(amount);
     _transfer(_msgSender(), recipient, castAmount);
     return true;
   }
@@ -138,7 +138,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address recipient,
     uint256 amount
   ) external virtual override returns (bool) {
-    uint128 castAmount = Helpers.castUint128(amount);
+    uint128 castAmount = Helpers.toUint128(amount);
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
     _transfer(sender, recipient, castAmount);
     return true;
