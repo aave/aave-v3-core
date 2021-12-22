@@ -54,13 +54,12 @@ library ReserveLogic {
     if (timestamp == block.timestamp) {
       //if the index was updated in the same block, no need to perform any calculation
       return reserve.liquidityIndex;
+    } else {
+      return
+        MathUtils.calculateLinearInterest(reserve.currentLiquidityRate, timestamp).rayMul(
+          reserve.liquidityIndex
+        );
     }
-
-    uint256 cumulated = MathUtils
-      .calculateLinearInterest(reserve.currentLiquidityRate, timestamp)
-      .rayMul(reserve.liquidityIndex);
-
-    return cumulated;
   }
 
   /**
@@ -81,13 +80,12 @@ library ReserveLogic {
     if (timestamp == block.timestamp) {
       //if the index was updated in the same block, no need to perform any calculation
       return reserve.variableBorrowIndex;
+    } else {
+      return
+        MathUtils.calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp).rayMul(
+          reserve.variableBorrowIndex
+        );
     }
-
-    uint256 cumulated = MathUtils
-      .calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp)
-      .rayMul(reserve.variableBorrowIndex);
-
-    return cumulated;
   }
 
   /**
