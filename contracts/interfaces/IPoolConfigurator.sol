@@ -315,7 +315,7 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    * @param freeze True if the reserve needs to be frozen, false otherwise
    **/
-  function setReserveFreeze(address asset, bool freeze) external;
+  function setReseveFreeze(address asset, bool freeze) external;
 
   /**
    * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay,
