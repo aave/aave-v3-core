@@ -773,25 +773,35 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Sets a debt ceiling through the pool admin', async () => {
     const { configurator, helpersContract, weth, poolAdmin } = testEnv;
 
-    expect(await configurator.connect(poolAdmin.signer).setDebtCeiling(weth.address, '1'))
+    const oldDebtCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    const newDebtCeiling = '1';
+    expect(
+      await configurator.connect(poolAdmin.signer).setDebtCeiling(weth.address, newDebtCeiling)
+    )
       .to.emit(configurator, 'DebtCeilingChanged')
-      .withArgs(weth.address, '1');
+      .withArgs(weth.address, oldDebtCeiling, newDebtCeiling);
 
     const newCeiling = await helpersContract.getDebtCeiling(weth.address);
 
-    expect(newCeiling).to.be.eq('1', 'Invalid debt ceiling');
+    expect(newCeiling).to.be.eq(newDebtCeiling, 'Invalid debt ceiling');
   });
 
   it('Sets a debt ceiling through the risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
 
-    expect(await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, '10'))
+    const oldDebtCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    const newDebtCeiling = '10';
+    expect(
+      await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, newDebtCeiling)
+    )
       .to.emit(configurator, 'DebtCeilingChanged')
-      .withArgs(weth.address, '10');
+      .withArgs(weth.address, oldDebtCeiling, newDebtCeiling);
 
     const newCeiling = await helpersContract.getDebtCeiling(weth.address);
 
-    expect(newCeiling).to.be.eq('10', 'Invalid debt ceiling');
+    expect(newCeiling).to.be.eq(newDebtCeiling, 'Invalid debt ceiling');
   });
 
   it('Resets the WETH debt ceiling. Tries to set debt ceiling after liquidity has been provided (revert expected)', async () => {
