@@ -37,11 +37,11 @@ library ReserveLogic {
   );
 
   /**
-   * @notice Returns the ongoing normalized income for the reserve
+   * @notice Returns the ongoing normalized income for the reserve.
    * @dev A value of 1e27 means there is no income. As time passes, the income is accrued
    * @dev A value of 2*1e27 means for each unit of asset one unit of income has been accrued
    * @param reserve The reserve object
-   * @return The normalized income. expressed in ray
+   * @return The normalized income, expressed in ray
    **/
   function getNormalizedIncome(DataTypes.ReserveData storage reserve)
     internal
@@ -64,7 +64,7 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Returns the ongoing normalized variable debt for the reserve
+   * @notice Returns the ongoing normalized variable debt for the reserve.
    * @dev A value of 1e27 means there is no debt. As time passes, the debt is accrued
    * @dev A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
    * @param reserve The reserve object
@@ -105,7 +105,7 @@ library ReserveLogic {
 
   /**
    * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
-   * the flashloan fee to the reserve, and spread it between all the suppliers
+   * the flashloan fee to the reserve, and spread it between all the suppliers.
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
    * @param amount The amount to accumulate
@@ -126,7 +126,7 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Initializes a reserve
+   * @notice Initializes a reserve.
    * @param reserve The reserve object
    * @param aTokenAddress The address of the overlying atoken contract
    * @param stableDebtTokenAddress The address of the overlying stable debt token contract
@@ -158,7 +158,7 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate
+   * @notice Updates the reserve current stable borrow rate, the current variable borrow rate and the current liquidity rate.
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The caching layer for the reserve data
    * @param reserveAddress The address of the reserve to be updated
@@ -220,7 +220,7 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Mints part of the repaid interest to the reserve treasury as a function of the reserveFactor for the
+   * @notice Mints part of the repaid interest to the reserve treasury as a function of the reserve factor for the
    * specific asset.
    * @param reserve The reserve to be updated
    * @param reserveCache The caching layer for the reserve data
@@ -271,7 +271,7 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Updates the reserve indexes and the timestamp of the update
+   * @notice Updates the reserve indexes and the timestamp of the update.
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The cache layer holding the cached protocol data
    **/
