@@ -177,6 +177,7 @@ export enum ProtocolErrors {
   SL_USER_IN_ISOLATION_MODE = '109',
   PC_BRIDGE_PROTOCOL_FEE_INVALID = '110',
   ASSET_NOT_LISTED = '111',
+  ZERO_ADDRESS_NOT_VALID = '112',
 
   // old
 

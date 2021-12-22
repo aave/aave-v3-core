@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { ProtocolErrors } from '../helpers/types';
-import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { MockFlashLoanReceiver } from '../types/MockFlashLoanReceiver';
 import { getMockFlashLoanReceiver } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { makeSuite, TestEnv } from './helpers/make-suite';
@@ -14,6 +14,7 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
     RL_STABLE_DEBT_NOT_ZERO,
     RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO,
     ASSET_NOT_LISTED,
+    ZERO_ADDRESS_NOT_VALID,
   } = ProtocolErrors;
 
   before(async () => {
@@ -96,5 +97,10 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
   it('Drop an asset that is not a listed reserve should fail', async () => {
     const { users, configurator } = testEnv;
     await expect(configurator.dropReserve(users[5].address)).to.be.revertedWith(ASSET_NOT_LISTED);
+  });
+
+  it('Drop an asset that is not a listed reserve should fail', async () => {
+    const { users, configurator } = testEnv;
+    await expect(configurator.dropReserve(ZERO_ADDRESS)).to.be.revertedWith(ZERO_ADDRESS_NOT_VALID);
   });
 });

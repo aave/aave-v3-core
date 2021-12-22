@@ -639,6 +639,7 @@ library ValidationLogic {
     DataTypes.ReserveData storage reserve,
     address asset
   ) internal view {
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     require(reserve.id != 0 || reserves[0] == asset, Errors.ASSET_NOT_LISTED);
     require(
       IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0,

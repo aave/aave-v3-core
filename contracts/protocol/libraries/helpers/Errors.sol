@@ -119,4 +119,5 @@ library Errors {
   string public constant SL_USER_IN_ISOLATION_MODE = '109';
   string public constant PC_BRIDGE_PROTOCOL_FEE_INVALID = '110';
   string public constant ASSET_NOT_LISTED = '111';
+  string public constant ZERO_ADDRESS_NOT_VALID = '112';
 }
