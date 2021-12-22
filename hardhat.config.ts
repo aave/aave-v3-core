@@ -47,7 +47,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
-    bail: true,
+    bail: false,
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT || '',

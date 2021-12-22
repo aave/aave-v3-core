@@ -14,12 +14,12 @@ import {IPriceOracleSentinel} from '../../../interfaces/IPriceOracleSentinel.sol
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title ReserveLogic library
@@ -30,6 +30,7 @@ library ValidationLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
+  using SafeCast for uint256;
   using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
@@ -186,9 +187,8 @@ library ValidationLogic {
 
       require(
         reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt +
-          Helpers.castUint128(
-            params.amount / 10**(vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS)
-          ) <=
+          (params.amount / 10**(vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS))
+            .toUint128() <=
           params.isolationModeDebtCeiling,
         Errors.VL_DEBT_CEILING_CROSSED
       );

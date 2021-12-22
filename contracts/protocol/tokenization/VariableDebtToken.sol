@@ -5,7 +5,6 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
@@ -13,6 +12,7 @@ import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {IncentivizedERC20} from './IncentivizedERC20.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title VariableDebtToken
@@ -22,6 +22,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
  **/
 contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
+  using SafeCast for uint256;
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
   address internal _underlyingAsset;
@@ -91,9 +92,9 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
 
-    _userState[onBehalfOf].additionalData = Helpers.castUint128(index);
+    _userState[onBehalfOf].additionalData = index.toUint128();
 
-    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
+    _mint(onBehalfOf, amountScaled.toUint128());
 
     uint256 amountToMint = amount + balanceIncrease;
     emit Transfer(address(0), onBehalfOf, amountToMint);
@@ -115,9 +116,9 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[user].additionalData = index.toUint128();
 
-    _burn(user, Helpers.castUint128(amountScaled));
+    _burn(user, amountScaled.toUint128());
 
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
