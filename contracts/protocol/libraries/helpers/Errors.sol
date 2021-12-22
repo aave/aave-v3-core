@@ -88,7 +88,6 @@ library Errors {
   string public constant P_INCONSISTENT_PARAMS_LENGTH = '74';
   string public constant UL_INVALID_INDEX = '77';
   string public constant P_NOT_CONTRACT = '78';
-  string public constant SDT_STABLE_DEBT_OVERFLOW = '79'; // Deprecated moved to general `HLP_UINT128_OVERFLOW`
   string public constant SDT_BURN_EXCEEDS_BALANCE = '80';
   string public constant VL_BORROW_CAP_EXCEEDED = '81';
   string public constant RC_INVALID_BORROW_CAP = '82';
@@ -107,7 +106,6 @@ library Errors {
   string public constant RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97';
   string public constant RC_INVALID_EMODE_CATEGORY = '98';
   string public constant VL_INCONSISTENT_EMODE_CATEGORY = '99';
-  string public constant HLP_UINT128_OVERFLOW = '100';
   string public constant PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101';
   string public constant P_CALLER_NOT_BRIDGE = '102';
   string public constant RC_INVALID_UNBACKED_MINT_CAP = '103';

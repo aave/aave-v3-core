@@ -6,13 +6,13 @@ import {VersionedInitializable} from '../libraries/aave-upgradeability/Versioned
 import {MathUtils} from '../libraries/math/MathUtils.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {IncentivizedERC20} from './IncentivizedERC20.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title StableDebtToken
@@ -22,6 +22,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
  **/
 contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   using WadRayMath for uint256;
+  using SafeCast for uint256;
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
@@ -139,16 +140,16 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     vars.nextStableRate = (vars.currentStableRate.rayMul(currentBalance.wadToRay()) +
       vars.amountInRay.rayMul(rate)).rayDiv((currentBalance + amount).wadToRay());
 
-    _userState[onBehalfOf].additionalData = Helpers.toUint128(vars.nextStableRate);
+    _userState[onBehalfOf].additionalData = vars.nextStableRate.toUint128();
 
     //solium-disable-next-line
     _totalSupplyTimestamp = _timestamps[onBehalfOf] = uint40(block.timestamp);
 
     // Calculates the updated average stable rate
-    vars.currentAvgStableRate = _avgStableRate = Helpers.toUint128(
+    vars.currentAvgStableRate = _avgStableRate = (
       (vars.currentAvgStableRate.rayMul(vars.previousSupply.wadToRay()) +
         rate.rayMul(vars.amountInRay)).rayDiv(vars.nextSupply.wadToRay())
-    );
+    ).toUint128();
 
     uint256 amountToMint = amount + balanceIncrease;
     _mint(onBehalfOf, amountToMint, vars.previousSupply);
@@ -200,9 +201,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       if (secondTerm >= firstTerm) {
         nextAvgStableRate = _totalSupply = _avgStableRate = 0;
       } else {
-        nextAvgStableRate = _avgStableRate = Helpers.toUint128(
+        nextAvgStableRate = _avgStableRate = (
           (firstTerm - secondTerm).rayDiv(nextSupply.wadToRay())
-        );
+        ).toUint128();
       }
     }
 
@@ -349,7 +350,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint128 castAmount = Helpers.toUint128(amount);
+    uint128 castAmount = amount.toUint128();
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance + castAmount;
 
@@ -369,7 +370,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     uint256 amount,
     uint256 oldTotalSupply
   ) internal {
-    uint128 castAmount = Helpers.toUint128(amount);
+    uint128 castAmount = amount.toUint128();
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance - castAmount;
 

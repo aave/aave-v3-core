@@ -4,12 +4,12 @@ pragma solidity 0.8.10;
 import {Context} from '../../dependencies/openzeppelin/contracts/Context.sol';
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title IncentivizedERC20
@@ -18,6 +18,7 @@ import {IACLManager} from '../../interfaces/IACLManager.sol';
  **/
 abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
+  using SafeCast for uint256;
 
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
@@ -110,7 +111,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /// @inheritdoc IERC20
   function transfer(address recipient, uint256 amount) external virtual override returns (bool) {
-    uint128 castAmount = Helpers.toUint128(amount);
+    uint128 castAmount = amount.toUint128();
     _transfer(_msgSender(), recipient, castAmount);
     return true;
   }
@@ -138,7 +139,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     address recipient,
     uint256 amount
   ) external virtual override returns (bool) {
-    uint128 castAmount = Helpers.toUint128(amount);
+    uint128 castAmount = amount.toUint128();
     _approve(sender, _msgSender(), _allowances[sender][_msgSender()] - castAmount);
     _transfer(sender, recipient, castAmount);
     return true;

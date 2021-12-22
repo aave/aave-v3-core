@@ -15,7 +15,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
   const {
     CT_INVALID_MINT_AMOUNT,
     CT_INVALID_BURN_AMOUNT,
-    HLP_UINT128_OVERFLOW,
+    UINT128_OVERFLOW,
     CALLER_NOT_POOL_ADMIN,
   } = ProtocolErrors;
 
@@ -220,8 +220,6 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
       users: [depositor, borrower],
     } = testEnv;
 
-    expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(
-      HLP_UINT128_OVERFLOW
-    );
+    expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(UINT128_OVERFLOW);
   });
 });
