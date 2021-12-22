@@ -31,9 +31,12 @@ library UserConfiguration {
   ) internal {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      self.data =
-        (self.data & ~(1 << (reserveIndex * 2))) |
-        (uint256(borrowing ? 1 : 0) << (reserveIndex * 2));
+      uint256 bit = 1 << (reserveIndex << 1);
+      if (borrowing) {
+        self.data |= bit;
+      } else {
+        self.data &= ~bit;
+      }
     }
   }
 
@@ -50,9 +53,12 @@ library UserConfiguration {
   ) internal {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      self.data =
-        (self.data & ~(1 << (reserveIndex * 2 + 1))) |
-        (uint256(usingAsCollateral ? 1 : 0) << (reserveIndex * 2 + 1));
+      uint256 bit = 1 << ((reserveIndex << 1) + 1);
+      if (usingAsCollateral) {
+        self.data |= bit;
+      } else {
+        self.data &= ~bit;
+      }
     }
   }
 
@@ -68,7 +74,7 @@ library UserConfiguration {
   ) internal pure returns (bool) {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      return (self.data >> (reserveIndex * 2)) & 3 != 0;
+      return (self.data >> (reserveIndex << 1)) & 3 != 0;
     }
   }
 
@@ -85,7 +91,7 @@ library UserConfiguration {
   {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      return (self.data >> (reserveIndex * 2)) & 1 != 0;
+      return (self.data >> (reserveIndex << 1)) & 1 != 0;
     }
   }
 
@@ -102,7 +108,7 @@ library UserConfiguration {
   {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
-      return (self.data >> (reserveIndex * 2 + 1)) & 1 != 0;
+      return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
     }
   }
 
@@ -118,7 +124,7 @@ library UserConfiguration {
     returns (bool)
   {
     uint256 collateralData = self.data & COLLATERAL_MASK;
-    return collateralData > 0 && (collateralData & (collateralData - 1) == 0);
+    return collateralData != 0 && (collateralData & (collateralData - 1) == 0);
   }
 
   /**
@@ -174,9 +180,6 @@ library UserConfiguration {
       uint256
     )
   {
-    if (!isUsingAsCollateralAny(self)) {
-      return (false, address(0), 0);
-    }
     if (isUsingAsCollateralOne(self)) {
       uint256 assetId = _getFirstAssetAsCollateralId(self);
 
