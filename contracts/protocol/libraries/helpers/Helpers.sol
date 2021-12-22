@@ -45,9 +45,4 @@ library Helpers {
       IERC20(reserve.variableDebtTokenAddress).balanceOf(user)
     );
   }
-
-  function castUint128(uint256 input) internal pure returns (uint128) {
-    require(input <= type(uint128).max, Errors.UINT128_OVERFLOW);
-    return uint128(input);
-  }
 }
