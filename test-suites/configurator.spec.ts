@@ -561,7 +561,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const newSupplyCap = '3000000';
     expect(await configurator.setSupplyCap(weth.address, newSupplyCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(weth.address,oldWethSupplyCap, newSupplyCap);
+      .withArgs(weth.address, oldWethSupplyCap, newSupplyCap);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -704,15 +704,19 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Updates flash loan premiums: 10 toProtocol, 40 total', async () => {
     const { pool, configurator } = testEnv;
+
+    const oldFlashloanPremiumTotal = await pool.FLASHLOAN_PREMIUM_TOTAL();
+    const oldFlashloanPremiumToProtocol = await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
+
     const newPremiumTotal = 40;
     const newPremiumToProtocol = 10;
 
     expect(await configurator.updateFlashloanPremiumTotal(newPremiumTotal))
       .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
-      .withArgs(newPremiumTotal);
+      .withArgs(oldFlashloanPremiumTotal, newPremiumTotal);
     expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
       .to.emit(configurator, 'FlashloanPremiumToProtocolUpdated')
-      .withArgs(newPremiumToProtocol);
+      .withArgs(oldFlashloanPremiumToProtocol, newPremiumToProtocol);
 
     expect(await pool.FLASHLOAN_PREMIUM_TOTAL()).to.be.eq(newPremiumTotal);
     expect(await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL()).to.be.eq(newPremiumToProtocol);
