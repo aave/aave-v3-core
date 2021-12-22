@@ -146,6 +146,12 @@ export enum ProtocolErrors {
   INVALID_UNBACKED_MINT_CAP = '73', // 'Invalid unbacked mint cap for the reserve'
   INVALID_DEBT_CEILING = '74', // 'Invalid debt ceiling for the reserve
   INVALID_RESERVE_INDEX = '75', // 'Invalid reserve index'
+  ACL_ADMIN_CANNOT_BE_ZERO = '76', // 'ACL admin cannot be set to the zero address'
+  INCONSISTENT_PARAMS_LENGTH = '77', // 'Array parameters that should be equal length are not'
+  ZERO_ADDRESS_NOT_VALID = '78', // 'Zero address not valid'
+  INVALID_EXPIRATION = '79', // 'Invalid expiration'
+  INVALID_SIGNATURE = '80', // 'Invalid signature'
+  OPERATION_NOT_SUPPORTED = '81', // 'Operation not supported'
 
   // SafeCast
   UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",

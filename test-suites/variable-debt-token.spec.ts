@@ -14,12 +14,8 @@ import './helpers/utils/wadraymath';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
-  const {
-    CALLER_MUST_BE_POOL,
-    INVALID_MINT_AMOUNT,
-    INVALID_BURN_AMOUNT,
-    CALLER_NOT_POOL_ADMIN,
-  } = ProtocolErrors;
+  const { CALLER_MUST_BE_POOL, INVALID_MINT_AMOUNT, INVALID_BURN_AMOUNT, CALLER_NOT_POOL_ADMIN } =
+    ProtocolErrors;
 
   it('Check initialization', async () => {
     const { pool, weth, dai, helpersContract, users } = testEnv;
@@ -158,7 +154,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).transfer(users[1].address, 500)
-    ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to approve debt tokens (revert expected)', async () => {
@@ -170,10 +166,10 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).approve(users[1].address, 500)
-    ).to.be.revertedWith('APPROVAL_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
     await expect(
       variableDebtContract.allowance(users[0].address, users[1].address)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to increaseAllowance (revert expected)', async () => {
@@ -185,7 +181,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).increaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to decreaseAllowance (revert expected)', async () => {
@@ -197,7 +193,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       variableDebtContract.connect(users[0].signer).decreaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to transferFrom debt tokens (revert expected)', async () => {
@@ -211,7 +207,7 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
       variableDebtContract
         .connect(users[0].signer)
         .transferFrom(users[0].address, users[1].address, 500)
-    ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('setIncentivesController() ', async () => {
