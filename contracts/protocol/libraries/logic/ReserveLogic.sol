@@ -114,12 +114,10 @@ library ReserveLogic {
     uint256 totalLiquidity,
     uint256 amount
   ) internal returns (uint256) {
-    uint256 amountToLiquidityRatio = amount.wadToRay().rayDiv(totalLiquidity.wadToRay());
-
-    uint256 result = amountToLiquidityRatio + WadRayMath.RAY;
-
-    result = result.rayMul(reserve.liquidityIndex);
+    uint256 factor = (amount.wadDiv(totalLiquidity) + WadRayMath.WAD).wadToRay();
+    uint256 result = factor.rayMul(reserve.liquidityIndex);
     reserve.liquidityIndex = Helpers.castUint128(result);
+
     return result;
   }
 
