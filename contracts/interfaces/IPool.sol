@@ -102,7 +102,7 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-   
+
   event SwapBorrowRateMode(
     address indexed reserve,
     address indexed user,
@@ -150,6 +150,7 @@ interface IPool {
    * @param initiator The address initiating the flash loan
    * @param asset The address of the asset being flash borrowed
    * @param amount The amount flash borrowed
+   * @param interestRateMode The flashloan mode: 0 for regular flashloan, 1 for Stable debt, 2 for Variable debt
    * @param premium The fee flash borrowed
    * @param referralCode The referral code used
    **/
@@ -158,6 +159,7 @@ interface IPool {
     address indexed initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
     uint16 referralCode
   );
