@@ -146,7 +146,9 @@ export enum ProtocolErrors {
   INVALID_UNBACKED_MINT_CAP = '73', // 'Invalid unbacked mint cap for the reserve'
   INVALID_DEBT_CEILING = '74', // 'Invalid debt ceiling for the reserve
   INVALID_RESERVE_INDEX = '75', // 'Invalid reserve index'
-  UINT128_OVERFLOW = '76', // 'Uint128 overflow'
+
+  // SafeCast
+  UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
 
   // old
 

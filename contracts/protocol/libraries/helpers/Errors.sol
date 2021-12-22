@@ -82,5 +82,4 @@ library Errors {
   string public constant INVALID_UNBACKED_MINT_CAP = '73'; // 'Invalid unbacked mint cap for the reserve'
   string public constant INVALID_DEBT_CEILING = '74'; // 'Invalid debt ceiling for the reserve
   string public constant INVALID_RESERVE_INDEX = '75'; // 'Invalid reserve index'
-  string public constant UINT128_OVERFLOW = '76'; // 'Uint128 overflow'
 }
