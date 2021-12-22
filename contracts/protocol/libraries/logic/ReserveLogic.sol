@@ -23,6 +23,8 @@ library ReserveLogic {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
   using GPv2SafeERC20 for IERC20;
+  using ReserveLogic for DataTypes.ReserveData;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   // See `IPool` for descriptions
   event ReserveDataUpdated(
@@ -33,8 +35,6 @@ library ReserveLogic {
     uint256 liquidityIndex,
     uint256 variableBorrowIndex
   );
-  using ReserveLogic for DataTypes.ReserveData;
-  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
   /**
    * @notice Returns the ongoing normalized income for the reserve
@@ -54,13 +54,13 @@ library ReserveLogic {
     if (timestamp == uint40(block.timestamp)) {
       //if the index was updated in the same block, no need to perform any calculation
       return reserve.liquidityIndex;
+    } else {
+      uint256 cumulated = MathUtils
+        .calculateLinearInterest(reserve.currentLiquidityRate, timestamp)
+        .rayMul(reserve.liquidityIndex);
+
+      return cumulated;
     }
-
-    uint256 cumulated = MathUtils
-      .calculateLinearInterest(reserve.currentLiquidityRate, timestamp)
-      .rayMul(reserve.liquidityIndex);
-
-    return cumulated;
   }
 
   /**
@@ -81,13 +81,13 @@ library ReserveLogic {
     if (timestamp == uint40(block.timestamp)) {
       //if the index was updated in the same block, no need to perform any calculation
       return reserve.variableBorrowIndex;
+    } else {
+      uint256 cumulated = MathUtils
+        .calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp)
+        .rayMul(reserve.variableBorrowIndex);
+
+      return cumulated;
     }
-
-    uint256 cumulated = MathUtils
-      .calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp)
-      .rayMul(reserve.variableBorrowIndex);
-
-    return cumulated;
   }
 
   /**
@@ -266,9 +266,7 @@ library ReserveLogic {
     vars.amountToMint = vars.totalDebtAccrued.percentMul(reserveCache.reserveFactor);
 
     if (vars.amountToMint != 0) {
-      reserve.accruedToTreasury =
-        reserve.accruedToTreasury +
-        Helpers.castUint128((vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex)));
+      reserve.accruedToTreasury += Helpers.castUint128(vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex));
     }
   }
 
