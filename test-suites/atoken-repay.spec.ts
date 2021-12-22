@@ -18,7 +18,7 @@ import './helpers/utils/wadraymath';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   let snapFresh: string;
-  
+
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
     snapFresh = await evmSnapshot();
     const {

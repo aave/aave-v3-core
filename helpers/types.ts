@@ -147,6 +147,12 @@ export enum ProtocolErrors {
   INVALID_DEBT_CEILING = '74', // 'Invalid debt ceiling for the reserve
   INVALID_RESERVE_INDEX = '75', // 'Invalid reserve index'
   UINT128_OVERFLOW = '76', // 'Uint128 overflow'
+  ACL_ADMIN_CANNOT_BE_ZERO = '77', // 'ACL admin cannot be set to the zero address'
+  INCONSISTENT_PARAMS_LENGTH = '78', // 'Array parameters that should be equal length are not'
+  ZERO_ADDRESS_NOT_VALID = '79', // 'Zero address not valid'
+  INVALID_EXPIRATION = '80', // 'Invalid expiration'
+  INVALID_SIGNATURE = '81', // 'Invalid signature'
+  OPERATION_NOT_SUPPORTED = '82', // 'Operation not supported'
 
   // old
 

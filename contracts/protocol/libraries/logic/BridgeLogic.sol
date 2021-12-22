@@ -70,10 +70,7 @@ library BridgeLogic {
 
     uint256 unbacked = reserve.unbacked = reserve.unbacked + Helpers.castUint128(amount);
 
-    require(
-      unbacked <= unbackedMintCap * (10**reserveDecimals),
-      Errors.UNBACKED_MINT_CAP_EXCEEDED
-    );
+    require(unbacked <= unbackedMintCap * (10**reserveDecimals), Errors.UNBACKED_MINT_CAP_EXCEEDED);
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
