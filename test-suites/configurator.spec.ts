@@ -246,7 +246,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Freezes the ETH reserve by pool Admin', async () => {
     const { configurator, weth, helpersContract } = testEnv;
 
-    expect(await configurator.setReseveFreeze(weth.address, true))
+    expect(await configurator.setReserveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, true);
 
@@ -258,7 +258,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Unfreezes the ETH reserve by Pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
-    expect(await configurator.setReseveFreeze(weth.address, false))
+    expect(await configurator.setReserveFreeze(weth.address, false))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, false);
 
@@ -267,7 +267,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Freezes the ETH reserve by Risk Admin', async () => {
     const { configurator, weth, helpersContract, riskAdmin } = testEnv;
-    expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, true))
+    expect(await configurator.connect(riskAdmin.signer).setReserveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, true);
 
@@ -279,7 +279,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Unfreezes the ETH reserve by Risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
-    expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, false))
+    expect(await configurator.connect(riskAdmin.signer).setReserveFreeze(weth.address, false))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, false);
 
