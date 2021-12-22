@@ -518,7 +518,7 @@ library ReserveConfiguration {
    * @return The state flag representing active
    * @return The state flag representing frozen
    * @return The state flag representing borrowing enabled
-   * @return The state flag representing stabelRateBorrowing enabled
+   * @return The state flag representing stableRateBorrowing enabled
    * @return The state flag representing paused
    **/
   function getFlags(DataTypes.ReserveConfigurationMap memory self)
