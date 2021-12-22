@@ -17,11 +17,11 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
   address internal immutable _admin;
 
   constructor(address admin) {
-    ADMIN = admin;
+    _admin = admin;
   }
 
   modifier ifAdmin() {
-    if (msg.sender == ADMIN) {
+    if (msg.sender == _admin) {
       _;
     } else {
       _fallback();
@@ -33,7 +33,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
    * @return The address of the proxy admin.
    */
   function admin() external ifAdmin returns (address) {
-    return ADMIN;
+    return _admin;
   }
 
   /**
@@ -76,7 +76,7 @@ contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
    * @notice Only fall back when the sender is not the admin.
    */
   function _willFallback() internal virtual override {
-    require(msg.sender != ADMIN, 'Cannot call fallback function from the proxy admin');
+    require(msg.sender != _admin, 'Cannot call fallback function from the proxy admin');
     super._willFallback();
   }
 }
