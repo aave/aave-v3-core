@@ -306,6 +306,10 @@ library ValidationLogic {
     uint256 variableDebt
   ) internal view {
     require(amountSent > 0, Errors.VL_INVALID_AMOUNT);
+    require(
+      amountSent != type(uint256).max || msg.sender == onBehalfOf,
+      Errors.VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
+    );
 
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.VL_NO_ACTIVE_RESERVE);
@@ -331,11 +335,6 @@ library ValidationLogic {
         (variableDebt > 0 &&
           DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_NO_DEBT_OF_SELECTED_TYPE
-    );
-
-    require(
-      amountSent != type(uint256).max || msg.sender == onBehalfOf,
-      Errors.VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
     );
   }
 
