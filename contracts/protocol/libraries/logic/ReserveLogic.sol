@@ -52,16 +52,15 @@ library ReserveLogic {
     uint40 timestamp = reserve.lastUpdateTimestamp;
 
     //solium-disable-next-line
-    if (timestamp == uint40(block.timestamp)) {
+    if (timestamp == block.timestamp) {
       //if the index was updated in the same block, no need to perform any calculation
       return reserve.liquidityIndex;
+    } else {
+      return
+        MathUtils.calculateLinearInterest(reserve.currentLiquidityRate, timestamp).rayMul(
+          reserve.liquidityIndex
+        );
     }
-
-    uint256 cumulated = MathUtils
-      .calculateLinearInterest(reserve.currentLiquidityRate, timestamp)
-      .rayMul(reserve.liquidityIndex);
-
-    return cumulated;
   }
 
   /**
@@ -79,16 +78,15 @@ library ReserveLogic {
     uint40 timestamp = reserve.lastUpdateTimestamp;
 
     //solium-disable-next-line
-    if (timestamp == uint40(block.timestamp)) {
+    if (timestamp == block.timestamp) {
       //if the index was updated in the same block, no need to perform any calculation
       return reserve.variableBorrowIndex;
+    } else {
+      return
+        MathUtils.calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp).rayMul(
+          reserve.variableBorrowIndex
+        );
     }
-
-    uint256 cumulated = MathUtils
-      .calculateCompoundedInterest(reserve.currentVariableBorrowRate, timestamp)
-      .rayMul(reserve.variableBorrowIndex);
-
-    return cumulated;
   }
 
   /**
@@ -117,11 +115,11 @@ library ReserveLogic {
     uint256 totalLiquidity,
     uint256 amount
   ) internal returns (uint256) {
-    uint256 amountToLiquidityRatio = amount.wadToRay().rayDiv(totalLiquidity.wadToRay());
-
-    uint256 result = amountToLiquidityRatio + WadRayMath.RAY;
-
-    result = result.rayMul(reserve.liquidityIndex);
+    //next liquidity index is calculated this way: `((amount / totalLiquidity) + 1) * liquidityIndex`
+    //division `amount / totalLiquidity` done in ray for precision
+    uint256 result = (amount.wadToRay().rayDiv(totalLiquidity.wadToRay()) + WadRayMath.RAY).rayMul(
+      reserve.liquidityIndex
+    );
     reserve.liquidityIndex = result.toUint128();
     return result;
   }
