@@ -650,9 +650,13 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       configurator,
     } = testEnv;
 
+    const oldAaveLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      aave.address
+    );
+
     expect(await configurator.setLiquidationProtocolFee(aave.address, 0))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(aave.address, 0);
+      .withArgs(aave.address, oldAaveLiquidationProtocolFee, 0);
 
     //mints AAVE to borrower
     await aave
