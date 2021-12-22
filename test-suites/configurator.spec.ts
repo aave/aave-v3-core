@@ -459,10 +459,14 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Changes the reserve factor of WETH via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
 
+    const { reserveFactor: oldReserveFactor } = await helpersContract.getReserveConfigurationData(
+      weth.address
+    );
+
     const newReserveFactor = '1000';
     expect(await configurator.setReserveFactor(weth.address, newReserveFactor))
       .to.emit(configurator, 'ReserveFactorChanged')
-      .withArgs(weth.address, newReserveFactor);
+      .withArgs(weth.address, oldReserveFactor, newReserveFactor);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -472,12 +476,17 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Changes the reserve factor of WETH via risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
+
+    const { reserveFactor: oldReserveFactor } = await helpersContract.getReserveConfigurationData(
+      weth.address
+    );
+
     const newReserveFactor = '1000';
     expect(
       await configurator.connect(riskAdmin.signer).setReserveFactor(weth.address, newReserveFactor)
     )
       .to.emit(configurator, 'ReserveFactorChanged')
-      .withArgs(weth.address, newReserveFactor);
+      .withArgs(weth.address, oldReserveFactor, newReserveFactor);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -487,30 +496,39 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Updates the unbackedMintCap of WETH via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
+
+    const oldWethUnbackedMintCap = await helpersContract.getUnbackedMintCap(weth.address);
+
     const newUnbackedMintCap = '10000';
     expect(await configurator.setUnbackedMintCap(weth.address, newUnbackedMintCap))
       .to.emit(configurator, 'UnbackedMintCapChanged')
-      .withArgs(weth.address, newUnbackedMintCap);
+      .withArgs(weth.address, oldWethUnbackedMintCap, newUnbackedMintCap);
 
     expect(await helpersContract.getUnbackedMintCap(weth.address)).to.be.eq(newUnbackedMintCap);
   });
 
   it('Updates the unbackedMintCap of WETH via risk admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
+
+    const oldWethUnbackedMintCap = await helpersContract.getUnbackedMintCap(weth.address);
+
     const newUnbackedMintCap = '20000';
     expect(await configurator.setUnbackedMintCap(weth.address, newUnbackedMintCap))
       .to.emit(configurator, 'UnbackedMintCapChanged')
-      .withArgs(weth.address, newUnbackedMintCap);
+      .withArgs(weth.address, oldWethUnbackedMintCap, newUnbackedMintCap);
 
     expect(await helpersContract.getUnbackedMintCap(weth.address)).to.be.eq(newUnbackedMintCap);
   });
 
   it('Updates the borrowCap of WETH via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
+
+    const { borrowCap: wethOldBorrowCap } = await helpersContract.getReserveCaps(weth.address);
+
     const newBorrowCap = '3000000';
     expect(await configurator.setBorrowCap(weth.address, newBorrowCap))
       .to.emit(configurator, 'BorrowCapChanged')
-      .withArgs(weth.address, newBorrowCap);
+      .withArgs(weth.address, wethOldBorrowCap, newBorrowCap);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -520,10 +538,13 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Updates the borrowCap of WETH risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
+
+    const { borrowCap: wethOldBorrowCap } = await helpersContract.getReserveCaps(weth.address);
+
     const newBorrowCap = '3000000';
     expect(await configurator.connect(riskAdmin.signer).setBorrowCap(weth.address, newBorrowCap))
       .to.emit(configurator, 'BorrowCapChanged')
-      .withArgs(weth.address, newBorrowCap);
+      .withArgs(weth.address, wethOldBorrowCap, newBorrowCap);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -533,11 +554,14 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Updates the supplyCap of WETH via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
+
+    const { supplyCap: oldWethSupplyCap } = await helpersContract.getReserveCaps(weth.address);
+
     const newBorrowCap = '3000000';
     const newSupplyCap = '3000000';
     expect(await configurator.setSupplyCap(weth.address, newSupplyCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(weth.address, newSupplyCap);
+      .withArgs(weth.address,oldWethSupplyCap, newSupplyCap);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -548,11 +572,14 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Updates the supplyCap of WETH via risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
+
+    const { supplyCap: oldWethSupplyCap } = await helpersContract.getReserveCaps(weth.address);
+
     const newBorrowCap = '3000000';
     const newSupplyCap = '3000000';
     expect(await configurator.connect(riskAdmin.signer).setSupplyCap(weth.address, newSupplyCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(weth.address, newSupplyCap);
+      .withArgs(weth.address, oldWethSupplyCap, newSupplyCap);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
@@ -572,7 +599,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
         .setReserveInterestRateStrategyAddress(weth.address, ZERO_ADDRESS)
     )
       .to.emit(configurator, 'ReserveInterestRateStrategyChanged')
-      .withArgs(weth.address, ZERO_ADDRESS);
+      .withArgs(weth.address, before.interestRateStrategyAddress, ZERO_ADDRESS);
     const after = await pool.getReserveData(weth.address);
 
     expect(before.interestRateStrategyAddress).to.not.be.eq(ZERO_ADDRESS);
@@ -595,7 +622,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
         .setReserveInterestRateStrategyAddress(weth.address, ONE_ADDRESS)
     )
       .to.emit(configurator, 'ReserveInterestRateStrategyChanged')
-      .withArgs(weth.address, ONE_ADDRESS);
+      .withArgs(weth.address, before.interestRateStrategyAddress, ONE_ADDRESS);
     const after = await pool.getReserveData(weth.address);
 
     expect(before.interestRateStrategyAddress).to.not.be.eq(ONE_ADDRESS);
@@ -663,11 +690,14 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Updates bridge protocol fee', async () => {
     const { pool, configurator } = testEnv;
+
+    const oldBridgeProtocolFee = await pool.BRIDGE_PROTOCOL_FEE();
+
     const newProtocolFee = 2000;
 
     expect(await configurator.updateBridgeProtocolFee(newProtocolFee))
       .to.emit(configurator, 'BridgeProtocolFeeUpdated')
-      .withArgs(newProtocolFee);
+      .withArgs(oldBridgeProtocolFee, newProtocolFee);
 
     expect(await pool.BRIDGE_PROTOCOL_FEE()).to.be.eq(newProtocolFee);
   });
@@ -713,13 +743,17 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   });
 
   it('Set a eMode category to an asset', async () => {
-    const { configurator, pool, poolAdmin, dai } = testEnv;
+    const { configurator, pool, helpersContract, poolAdmin, dai } = testEnv;
+
+    const oldCategoryId = await helpersContract.getReserveEModeCategory(dai.address);
+
+    const newCategoryId = 1;
 
     expect(await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '1'))
       .to.emit(configurator, 'EModeAssetCategoryChanged')
-      .withArgs(dai.address, 1);
+      .withArgs(dai.address, oldCategoryId, newCategoryId);
 
-    const categoryData = await pool.getEModeCategoryData(1);
+    const categoryData = await pool.getEModeCategoryData(newCategoryId);
     expect(categoryData.ltv).to.be.equal(9800, 'invalid eMode category ltv');
     expect(categoryData.liquidationThreshold).to.be.equal(
       9800,
