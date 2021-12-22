@@ -191,7 +191,7 @@ library SupplyLogic {
             params.fromEModeCategory
           );
         }
-        if (params.balanceFromBefore - params.amount == 0) {
+        if (params.balanceFromBefore == params.amount) {
           fromConfig.setUsingAsCollateral(reserveId, false);
           emit ReserveUsedAsCollateralDisabled(params.asset, params.from);
         }
