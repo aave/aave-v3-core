@@ -28,7 +28,7 @@ library ReserveLogic {
 
   // See `IPool` for descriptions
   event ReserveDataUpdated(
-    address indexed asset,
+    address indexed reserve,
     uint256 liquidityRate,
     uint256 stableBorrowRate,
     uint256 variableBorrowRate,
