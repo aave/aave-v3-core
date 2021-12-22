@@ -11,8 +11,8 @@ import {MathUtils} from '../math/MathUtils.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
 import {Errors} from '../helpers/Errors.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {DataTypes} from '../types/DataTypes.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title ReserveLogic library
@@ -22,6 +22,7 @@ import {DataTypes} from '../types/DataTypes.sol';
 library ReserveLogic {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
+  using SafeCast for uint256;
   using GPv2SafeERC20 for IERC20;
 
   // See `IPool` for descriptions
@@ -121,7 +122,7 @@ library ReserveLogic {
     uint256 result = amountToLiquidityRatio + WadRayMath.RAY;
 
     result = result.rayMul(reserve.liquidityIndex);
-    reserve.liquidityIndex = Helpers.castUint128(result);
+    reserve.liquidityIndex = result.toUint128();
     return result;
   }
 
@@ -196,9 +197,9 @@ library ReserveLogic {
       })
     );
 
-    reserve.currentLiquidityRate = Helpers.castUint128(vars.nextLiquidityRate);
-    reserve.currentStableBorrowRate = Helpers.castUint128(vars.nextStableRate);
-    reserve.currentVariableBorrowRate = Helpers.castUint128(vars.nextVariableRate);
+    reserve.currentLiquidityRate = vars.nextLiquidityRate.toUint128();
+    reserve.currentStableBorrowRate = vars.nextStableRate.toUint128();
+    reserve.currentVariableBorrowRate = vars.nextVariableRate.toUint128();
 
     emit ReserveDataUpdated(
       reserveAddress,
@@ -266,9 +267,10 @@ library ReserveLogic {
     vars.amountToMint = vars.totalDebtAccrued.percentMul(reserveCache.reserveFactor);
 
     if (vars.amountToMint != 0) {
-      reserve.accruedToTreasury =
-        reserve.accruedToTreasury +
-        Helpers.castUint128((vars.amountToMint.rayDiv(reserveCache.nextLiquidityIndex)));
+      reserve.accruedToTreasury += vars
+        .amountToMint
+        .rayDiv(reserveCache.nextLiquidityIndex)
+        .toUint128();
     }
   }
 
@@ -293,7 +295,7 @@ library ReserveLogic {
       reserveCache.nextLiquidityIndex = cumulatedLiquidityInterest.rayMul(
         reserveCache.currLiquidityIndex
       );
-      reserve.liquidityIndex = Helpers.castUint128(reserveCache.nextLiquidityIndex);
+      reserve.liquidityIndex = reserveCache.nextLiquidityIndex.toUint128();
 
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
@@ -305,7 +307,7 @@ library ReserveLogic {
         reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
           reserveCache.currVariableBorrowIndex
         );
-        reserve.variableBorrowIndex = Helpers.castUint128(reserveCache.nextVariableBorrowIndex);
+        reserve.variableBorrowIndex = reserveCache.nextVariableBorrowIndex.toUint128();
       }
     }
 
