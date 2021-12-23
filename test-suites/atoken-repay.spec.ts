@@ -2,12 +2,11 @@ import {
   waitForTx,
   evmSnapshot,
   evmRevert,
-  ProtocolErrors,
   DefaultReserveInterestRateStrategy__factory,
   IStableDebtToken__factory,
   IVariableDebtToken__factory,
 } from '@aave/deploy-v3';
-import { formatUnits, parseUnits } from '@ethersproject/units';
+import { parseUnits } from '@ethersproject/units';
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
@@ -17,9 +16,8 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
-  const { VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD } = ProtocolErrors;
-
   let snapFresh: string;
+  let snapRepay: string;
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
     snapFresh = await evmSnapshot();
     const {
@@ -62,6 +60,7 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   });
 
   it('User 1 receives 25 aDAI from user 0, repays half of the debt', async () => {
+    snapRepay = await evmSnapshot();
     const {
       pool,
       dai,
@@ -89,6 +88,96 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     expect(balanceAfter).to.be.closeTo(balanceBefore.sub(repayAmount), 2);
     expect(debtAfter).to.be.closeTo(debtBefore.sub(repayAmount), 2);
+  });
+
+  it('User 1 receives 25 aDAI from user 0, use all aDai to repay debt', async () => {
+    await evmRevert(snapRepay);
+    snapRepay = await evmSnapshot();
+    const {
+      pool,
+      dai,
+      aDai,
+      variableDebtDai,
+      users: [user0, user1],
+    } = testEnv;
+
+    const transferAmount = utils.parseEther('25');
+    expect(await aDai.connect(user0.signer).transfer(user1.address, transferAmount));
+
+    const time = await timeLatest();
+    await setBlocktime(time.add(1).toNumber());
+
+    const balanceBefore = await aDai.balanceOf(user1.address, { blockTag: 'pending' });
+    expect(balanceBefore).to.be.gt(transferAmount);
+
+    const debtBefore = await variableDebtDai.balanceOf(user1.address, { blockTag: 'pending' });
+
+    const tx = await waitForTx(
+      await pool.connect(user1.signer).repayWithATokens(dai.address, MAX_UINT_AMOUNT, 2)
+    );
+
+    const repayEventSignature = utils.keccak256(
+      utils.toUtf8Bytes('Repay(address,address,address,uint256,bool)')
+    );
+
+    const rawRepayEvents = tx.logs.filter((log) => log.topics[0] === repayEventSignature);
+    const parsedRepayEvent = pool.interface.parseLog(rawRepayEvents[0]);
+
+    expect(parsedRepayEvent.args.useATokens).to.be.true;
+    expect(parsedRepayEvent.args.reserve).to.be.eq(dai.address);
+    expect(parsedRepayEvent.args.repayer).to.be.eq(user1.address);
+    expect(parsedRepayEvent.args.user).to.be.eq(user1.address);
+
+    const repayAmount = parsedRepayEvent.args.amount;
+    const balanceAfter = await aDai.balanceOf(user1.address);
+    const debtAfter = await variableDebtDai.balanceOf(user1.address);
+
+    expect(balanceAfter).to.be.eq(0);
+    expect(debtAfter).to.be.closeTo(debtBefore.sub(repayAmount), 2);
+  });
+
+  it('User 1 receives 55 aDAI from user 0, repay all debt', async () => {
+    await evmRevert(snapRepay);
+    const {
+      pool,
+      dai,
+      aDai,
+      variableDebtDai,
+      users: [user0, user1],
+    } = testEnv;
+
+    const transferAmount = utils.parseEther('55');
+    expect(await aDai.connect(user0.signer).transfer(user1.address, transferAmount));
+
+    const time = await timeLatest();
+    await setBlocktime(time.add(1).toNumber());
+
+    const balanceBefore = await aDai.balanceOf(user1.address, { blockTag: 'pending' });
+    const debtBefore = await variableDebtDai.balanceOf(user1.address, { blockTag: 'pending' });
+    expect(debtBefore).to.be.gt(parseUnits('50', 18));
+
+    const tx = await waitForTx(
+      await pool.connect(user1.signer).repayWithATokens(dai.address, MAX_UINT_AMOUNT, 2)
+    );
+
+    const repayEventSignature = utils.keccak256(
+      utils.toUtf8Bytes('Repay(address,address,address,uint256,bool)')
+    );
+
+    const rawRepayEvents = tx.logs.filter((log) => log.topics[0] === repayEventSignature);
+    const parsedRepayEvent = pool.interface.parseLog(rawRepayEvents[0]);
+
+    expect(parsedRepayEvent.args.useATokens).to.be.true;
+    expect(parsedRepayEvent.args.reserve).to.be.eq(dai.address);
+    expect(parsedRepayEvent.args.repayer).to.be.eq(user1.address);
+    expect(parsedRepayEvent.args.user).to.be.eq(user1.address);
+
+    const repayAmount = parsedRepayEvent.args.amount;
+    const balanceAfter = await aDai.balanceOf(user1.address);
+    const debtAfter = await variableDebtDai.balanceOf(user1.address);
+
+    expect(debtAfter).to.be.eq(0);
+    expect(balanceAfter).to.be.eq(balanceBefore.sub(repayAmount));
   });
 
   it('Check interest rates after repaying with aTokens', async () => {
