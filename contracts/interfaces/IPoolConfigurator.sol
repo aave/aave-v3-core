@@ -360,21 +360,21 @@ interface IPoolConfigurator {
   /**
    * @notice Updates the borrow cap of a reserve.
    * @param asset The address of the underlying asset of the reserve
-   * @param newBorrowCap The new borrow of the reserve
+   * @param newBorrowCap The new borrow cap of the reserve
    **/
   function setBorrowCap(address asset, uint256 newBorrowCap) external;
 
   /**
    * @notice Updates the supply cap of a reserve.
    * @param asset The address of the underlying asset of the reserve
-   * @param newSupplyCap The new supply of the reserve
+   * @param newSupplyCap The new supply cap of the reserve
    **/
   function setSupplyCap(address asset, uint256 newSupplyCap) external;
 
   /**
    * @notice Updates the liquidation protocol fee of reserve.
    * @param asset The address of the underlying asset of the reserve
-   * @param newFee The new supply of the reserve
+   * @param newFee The new liquidation protocol fee of the reserve
    **/
   function setLiquidationProtocolFee(address asset, uint256 newFee) external;
 
@@ -435,7 +435,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
-   * @param newFlashloanPremiumToProtocol The part of the premium sent to protocol
+   * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to the protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
 
