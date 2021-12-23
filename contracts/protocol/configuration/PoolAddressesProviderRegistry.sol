@@ -57,11 +57,13 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   function _addToAddressesProvidersList(address provider) internal {
     uint256 providersCount = _addressesProvidersList.length;
 
-    for (uint256 i = 0; i < providersCount; i++) {
-      if (_addressesProvidersList[i] == provider) {
+    if (providersCount != 0) {
+      uint256 index = _addressesProvidersIndexes[provider];
+      if (_addressesProvidersList[index] == provider) {
         return;
       }
     }
+
     _addressesProvidersIndexes[provider] = _addressesProvidersList.length;
     _addressesProvidersList.push(provider);
   }
