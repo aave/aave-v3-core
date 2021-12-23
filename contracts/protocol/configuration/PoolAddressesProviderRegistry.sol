@@ -59,7 +59,6 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
     for (uint256 i = 0; i < providersCount; i++) {
       if (_addressesProvidersList[i] == provider) {
-        _addressesProvidersIndexes[provider] = i;
         return;
       }
     }
