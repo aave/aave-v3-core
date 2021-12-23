@@ -26,42 +26,6 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when an aToken implementation is upgraded.
-   * @param asset The address of the underlying asset of the reserve
-   * @param proxy The aToken proxy address
-   * @param implementation The new aToken implementation
-   **/
-  event ATokenUpgraded(
-    address indexed asset,
-    address indexed proxy,
-    address indexed implementation
-  );
-
-  /**
-   * @notice Emitted when the implementation of a stable debt token is upgraded.
-   * @param asset The address of the underlying asset of the reserve
-   * @param proxy The stable debt token proxy address
-   * @param implementation The new aToken implementation
-   **/
-  event StableDebtTokenUpgraded(
-    address indexed asset,
-    address indexed proxy,
-    address indexed implementation
-  );
-
-  /**
-   * @notice Emitted when the implementation of a variable debt token is upgraded.
-   * @param asset The address of the underlying asset of the reserve
-   * @param proxy The variable debt token proxy address
-   * @param implementation The new aToken implementation
-   **/
-  event VariableDebtTokenUpgraded(
-    address indexed asset,
-    address indexed proxy,
-    address indexed implementation
-  );
-
-  /**
    * @notice Emitted when borrowing is enabled or disabled on a reserve.
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if borrowing is enabled, false otherwise
@@ -117,13 +81,6 @@ interface IPoolConfigurator {
   event ReserveDropped(address indexed asset);
 
   /**
-   * @notice Emitted when the reserve is set as borrowable/non borrowable in isolation mode.
-   * @param asset The address of the underlying asset of the reserve
-   * @param borrowable True if the reserve is borrowable in isolation, false otherwise
-   **/
-  event BorrowableInIsolationChanged(address asset, bool borrowable);
-
-  /**
    * @notice Emitted when a reserve factor is updated.
    * @param asset The address of the underlying asset of the reserve
    * @param oldReserveFactor The old reserve factor
@@ -134,14 +91,6 @@ interface IPoolConfigurator {
     uint256 oldReserveFactor,
     uint256 newReserveFactor
   );
-
-  /**
-   * @notice Emitted when the debt ceiling of an asset is set.
-   * @param asset The address of the underlying asset of the reserve
-   * @param oldDebtCeiling The old debt ceiling
-   * @param newDebtCeiling The new debt ceiling
-   **/
-  event DebtCeilingChanged(address indexed asset, uint256 oldDebtCeiling, uint256 newDebtCeiling);
 
   /**
    * @notice Emitted when the borrow cap of a reserve is updated.
@@ -167,6 +116,17 @@ interface IPoolConfigurator {
    **/
   event LiquidationProtocolFeeChanged(address indexed asset, uint256 oldFee, uint256 newFee);
 
+  /**
+   * @notice Emitted when the unbacked mint cap of a reserve is updated.
+   * @param asset The address of the underlying asset of the reserve
+   * @param oldUnbackedMintCap The old unbacked mint cap
+   * @param newUnbackedMintCap The new unbacked mint cap
+   */
+  event UnbackedMintCapChanged(
+    address indexed asset,
+    uint256 oldUnbackedMintCap,
+    uint256 newUnbackedMintCap
+  );
   /**
    * @notice Emitted when the category of an asset in eMode is changed.
    * @param asset The address of the underlying asset of the reserve
@@ -194,25 +154,6 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when the unbacked mint cap of a reserve is updated.
-   * @param asset The address of the underlying asset of the reserve
-   * @param oldUnbackedMintCap The old unbacked mint cap
-   * @param newUnbackedMintCap The new unbacked mint cap
-   */
-  event UnbackedMintCapChanged(
-    address indexed asset,
-    uint256 oldUnbackedMintCap,
-    uint256 newUnbackedMintCap
-  );
-
-  /**
-   * @notice Emitted when the bridge protocol fee is updated.
-   * @param oldBridgeProtocolFee The old protocol fee
-   * @param newBridgeProtocolFee The new protocol fee
-   */
-  event BridgeProtocolFeeUpdated(uint256 oldBridgeProtocolFee, uint256 newBridgeProtocolFee);
-
-  /**
    * @notice Emitted when a reserve interest strategy contract is updated.
    * @param asset The address of the underlying asset of the reserve
    * @param oldStrategy The address of the old interest strategy contract
@@ -223,6 +164,57 @@ interface IPoolConfigurator {
     address oldStrategy,
     address newStrategy
   );
+
+  /**
+   * @notice Emitted when an aToken implementation is upgraded.
+   * @param asset The address of the underlying asset of the reserve
+   * @param proxy The aToken proxy address
+   * @param implementation The new aToken implementation
+   **/
+  event ATokenUpgraded(
+    address indexed asset,
+    address indexed proxy,
+    address indexed implementation
+  );
+
+  /**
+   * @notice Emitted when the implementation of a stable debt token is upgraded.
+   * @param asset The address of the underlying asset of the reserve
+   * @param proxy The stable debt token proxy address
+   * @param implementation The new aToken implementation
+   **/
+  event StableDebtTokenUpgraded(
+    address indexed asset,
+    address indexed proxy,
+    address indexed implementation
+  );
+
+  /**
+   * @notice Emitted when the implementation of a variable debt token is upgraded.
+   * @param asset The address of the underlying asset of the reserve
+   * @param proxy The variable debt token proxy address
+   * @param implementation The new aToken implementation
+   **/
+  event VariableDebtTokenUpgraded(
+    address indexed asset,
+    address indexed proxy,
+    address indexed implementation
+  );
+
+  /**
+   * @notice Emitted when the debt ceiling of an asset is set.
+   * @param asset The address of the underlying asset of the reserve
+   * @param oldDebtCeiling The old debt ceiling
+   * @param newDebtCeiling The new debt ceiling
+   **/
+  event DebtCeilingChanged(address indexed asset, uint256 oldDebtCeiling, uint256 newDebtCeiling);
+
+  /**
+   * @notice Emitted when the bridge protocol fee is updated.
+   * @param oldBridgeProtocolFee The old protocol fee
+   * @param newBridgeProtocolFee The new protocol fee
+   */
+  event BridgeProtocolFeeUpdated(uint256 oldBridgeProtocolFee, uint256 newBridgeProtocolFee);
 
   /**
    * @notice Emitted when a the total premium on flashloans is updated.
@@ -243,6 +235,13 @@ interface IPoolConfigurator {
     uint256 oldFlashloanPremiumToProtocol,
     uint256 newFlashloanPremiumToProtocol
   );
+
+  /**
+   * @notice Emitted when the reserve is set as borrowable/non borrowable in isolation mode.
+   * @param asset The address of the underlying asset of the reserve
+   * @param borrowable True if the reserve is borrowable in isolation, false otherwise
+   **/
+  event BorrowableInIsolationChanged(address asset, bool borrowable);
 
   /**
    * @notice Initializes multiple reserves.
@@ -318,27 +317,6 @@ interface IPoolConfigurator {
   function setReseveFreeze(address asset, bool freeze) external;
 
   /**
-   * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay,
-   * swap interest rate, liquidate, atoken transfers).
-   * @param asset The address of the underlying asset of the reserve
-   * @param paused True if pausing the reserve, false if unpausing
-   **/
-  function setReservePause(address asset, bool paused) external;
-
-  /**
-   * @notice Drops a reserve entirely.
-   * @param asset The address of the reserve to drop
-   **/
-  function dropReserve(address asset) external;
-
-  /**
-   * @notice Pauses or unpauses all the actions of the protocol, including aToken transfers. Effectively
-   * it pauses every reserve.
-   * @param paused True if protocol needs to be paused, false otherwise
-   **/
-  function setPoolPause(bool paused) external;
-
-  /**
    * @notice Sets the borrowable in isolation flag for the reserve.
    * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the
    * borrowed amount will be accumulated in the isolated collateral's total debt exposure
@@ -350,6 +328,14 @@ interface IPoolConfigurator {
   function setBorrowableInIsolation(address asset, bool borrowable) external;
 
   /**
+   * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay,
+   * swap interest rate, liquidate, atoken transfers).
+   * @param asset The address of the underlying asset of the reserve
+   * @param paused True if pausing the reserve, false if unpausing
+   **/
+  function setReservePause(address asset, bool paused) external;
+
+  /**
    * @notice Updates the reserve factor of a reserve.
    * @param asset The address of the underlying asset of the reserve
    * @param newReserveFactor The new reserve factor of the reserve
@@ -357,10 +343,19 @@ interface IPoolConfigurator {
   function setReserveFactor(address asset, uint256 newReserveFactor) external;
 
   /**
-   * @notice Sets the debt ceiling for an asset.
-   * @param newDebtCeiling The new debt ceiling
-   */
-  function setDebtCeiling(address asset, uint256 newDebtCeiling) external;
+   * @notice Sets the interest rate strategy of a reserve.
+   * @param asset The address of the underlying asset of the reserve
+   * @param newRateStrategyAddress The address of the new interest strategy contract
+   **/
+  function setReserveInterestRateStrategyAddress(address asset, address newRateStrategyAddress)
+    external;
+
+  /**
+   * @notice Pauses or unpauses all the actions of the protocol, including aToken transfers. Effectively
+   * it pauses every reserve.
+   * @param paused True if protocol needs to be paused, false otherwise
+   **/
+  function setPoolPause(bool paused) external;
 
   /**
    * @notice Updates the borrow cap of a reserve.
@@ -384,6 +379,20 @@ interface IPoolConfigurator {
   function setLiquidationProtocolFee(address asset, uint256 newFee) external;
 
   /**
+   * @notice Updates the unbacked mint cap of reserve.
+   * @param asset The address of the underlying asset of the reserve
+   * @param newUnbackedMintCap The new unbacked mint cap of the reserve
+   **/
+  function setUnbackedMintCap(address asset, uint256 newUnbackedMintCap) external;
+
+  /**
+   * @notice Assign an efficiency mode (eMode) category to asset.
+   * @param asset The address of the underlying asset of the reserve
+   * @param newCategoryId The new category id of the asset
+   **/
+  function setAssetEModeCategory(address asset, uint8 newCategoryId) external;
+
+  /**
    * @notice Adds a new efficiency mode (eMode) category.
    * @dev If 0x0 is provided as oracle address, the default asset oracles will be used to compute
    * the overall debt and overcollateralization of the users using this category.
@@ -404,32 +413,16 @@ interface IPoolConfigurator {
   ) external;
 
   /**
-   * @notice Assign an efficiency mode (eMode) category to asset.
-   * @param asset The address of the underlying asset of the reserve
-   * @param newCategoryId The new category id of the asset
+   * @notice Drops a reserve entirely.
+   * @param asset The address of the reserve to drop
    **/
-  function setAssetEModeCategory(address asset, uint8 newCategoryId) external;
-
-  /**
-   * @notice Updates the unbacked mint cap of reserve.
-   * @param asset The address of the underlying asset of the reserve
-   * @param newUnbackedMintCap The new unbacked mint cap of the reserve
-   **/
-  function setUnbackedMintCap(address asset, uint256 newUnbackedMintCap) external;
+  function dropReserve(address asset) external;
 
   /**
    * @notice Updates the bridge fee collected by the protocol reserves.
    * @param newBridgeProtocolFee The part of the fee sent to protocol
    */
   function updateBridgeProtocolFee(uint256 newBridgeProtocolFee) external;
-
-  /**
-   * @notice Sets the interest rate strategy of a reserve.
-   * @param asset The address of the underlying asset of the reserve
-   * @param newRateStrategyAddress The address of the new interest strategy contract
-   **/
-  function setReserveInterestRateStrategyAddress(address asset, address newRateStrategyAddress)
-    external;
 
   /**
    * @notice Updates the total flash loan premium.
@@ -445,4 +438,10 @@ interface IPoolConfigurator {
    * @param newFlashloanPremiumToProtocol The part of the premium sent to protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
+
+  /**
+   * @notice Sets the debt ceiling for an asset.
+   * @param newDebtCeiling The new debt ceiling
+   */
+  function setDebtCeiling(address asset, uint256 newDebtCeiling) external;
 }

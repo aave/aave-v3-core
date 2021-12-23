@@ -76,6 +76,12 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function dropReserve(address asset) external override onlyPoolAdmin {
+    _pool.dropReserve(asset);
+    emit ReserveDropped(asset);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function updateAToken(ConfiguratorInputTypes.UpdateATokenInput calldata input)
     external
     override
@@ -182,31 +188,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setReservePause(address asset, bool paused) public override onlyEmergencyOrPoolAdmin {
-    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-    currentConfig.setPaused(paused);
-    _pool.setConfiguration(asset, currentConfig.data);
-    emit ReservePaused(asset, paused);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function dropReserve(address asset) external override onlyPoolAdmin {
-    _pool.dropReserve(asset);
-    emit ReserveDropped(asset);
-  }
-
-  /// @inheritdoc IPoolConfigurator
-  function setPoolPause(bool paused) external override onlyEmergencyAdmin {
-    address[] memory reserves = _pool.getReservesList();
-
-    for (uint256 i = 0; i < reserves.length; i++) {
-      if (reserves[i] != address(0)) {
-        setReservePause(reserves[i], paused);
-      }
-    }
-  }
-
-  /// @inheritdoc IPoolConfigurator
   function setBorrowableInIsolation(address asset, bool borrowable)
     external
     override
@@ -216,6 +197,14 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     currentConfig.setBorrowableInIsolation(borrowable);
     _pool.setConfiguration(asset, currentConfig.data);
     emit BorrowableInIsolationChanged(asset, borrowable);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setReservePause(address asset, bool paused) public override onlyEmergencyOrPoolAdmin {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    currentConfig.setPaused(paused);
+    _pool.setConfiguration(asset, currentConfig.data);
+    emit ReservePaused(asset, paused);
   }
 
   /// @inheritdoc IPoolConfigurator
@@ -360,17 +349,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateBridgeProtocolFee(uint256 newBridgeProtocolFee) external override onlyPoolAdmin {
-    require(
-      newBridgeProtocolFee < PercentageMath.PERCENTAGE_FACTOR,
-      Errors.PC_BRIDGE_PROTOCOL_FEE_INVALID
-    );
-    uint256 oldBridgeProtocolFee = _pool.BRIDGE_PROTOCOL_FEE();
-    _pool.updateBridgeProtocolFee(newBridgeProtocolFee);
-    emit BridgeProtocolFeeUpdated(oldBridgeProtocolFee, newBridgeProtocolFee);
-  }
-
-  /// @inheritdoc IPoolConfigurator
   function setReserveInterestRateStrategyAddress(address asset, address newRateStrategyAddress)
     external
     override
@@ -380,6 +358,28 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address oldRateStrategyAddress = reserve.interestRateStrategyAddress;
     _pool.setReserveInterestRateStrategyAddress(asset, newRateStrategyAddress);
     emit ReserveInterestRateStrategyChanged(asset, oldRateStrategyAddress, newRateStrategyAddress);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setPoolPause(bool paused) external override onlyEmergencyAdmin {
+    address[] memory reserves = _pool.getReservesList();
+
+    for (uint256 i = 0; i < reserves.length; i++) {
+      if (reserves[i] != address(0)) {
+        setReservePause(reserves[i], paused);
+      }
+    }
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function updateBridgeProtocolFee(uint256 newBridgeProtocolFee) external override onlyPoolAdmin {
+    require(
+      newBridgeProtocolFee < PercentageMath.PERCENTAGE_FACTOR,
+      Errors.PC_BRIDGE_PROTOCOL_FEE_INVALID
+    );
+    uint256 oldBridgeProtocolFee = _pool.BRIDGE_PROTOCOL_FEE();
+    _pool.updateBridgeProtocolFee(newBridgeProtocolFee);
+    emit BridgeProtocolFeeUpdated(oldBridgeProtocolFee, newBridgeProtocolFee);
   }
 
   /// @inheritdoc IPoolConfigurator
