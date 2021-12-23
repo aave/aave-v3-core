@@ -78,7 +78,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).setReseveFreeze(dai.address, true);
+    await configurator.connect(poolAdmin.signer).setReserveFreeze(dai.address, true);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(true);
@@ -146,7 +146,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).setReseveFreeze(dai.address, true);
+    await configurator.connect(poolAdmin.signer).setReserveFreeze(dai.address, true);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(true);
@@ -611,7 +611,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
 
-    await configurator.connect(poolAdmin.signer).setReseveFreeze(dai.address, true);
+    await configurator.connect(poolAdmin.signer).setReserveFreeze(dai.address, true);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(true);
