@@ -730,6 +730,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersEModeCategory[user];
   }
 
+  /// @inheritdoc IPool
+  function updateIsolationModeTotalDebt(address asset, uint256 totalDebt)
+    external
+    override
+    onlyPoolConfigurator
+  {
+    _reserves[asset].isolationModeTotalDebt = totalDebt.toUint128();
+    emit IsolationModeTotalDebtUpdated(asset, totalDebt);
+  }
+
   function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
     require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);

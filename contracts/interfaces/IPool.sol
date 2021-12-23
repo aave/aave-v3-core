@@ -102,7 +102,7 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-   
+
   event SwapBorrowRateMode(
     address indexed reserve,
     address indexed user,
@@ -655,6 +655,13 @@ interface IPool {
    * @return The eMode id
    */
   function getUserEMode(address user) external view returns (uint256);
+
+  /**
+   * @notice Updates the isolation mode total debt of the given asset
+   * @param asset The address of the underlying asset to update the isolationModeTotalDebt
+   * @param totalDebt The total debt amount
+   */
+  function updateIsolationModeTotalDebt(address asset, uint256 totalDebt) external;
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate
