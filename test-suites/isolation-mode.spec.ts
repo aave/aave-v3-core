@@ -218,6 +218,22 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_ASSET_NOT_BORROWABLE_IN_ISOLATION);
   });
 
+  it('User 2 tries to borrow some ETH on behalf of User 1 (revert expected)', async () => {
+    const { users, pool, dai, weth } = testEnv;
+
+    await expect(
+      pool
+        .connect(users[2].signer)
+        .borrow(
+          weth.address,
+          utils.parseEther('0.0000001'),
+          RateMode.Variable,
+          AAVE_REFERRAL,
+          users[1].address
+        )
+    ).to.be.revertedWith(VL_ASSET_NOT_BORROWABLE_IN_ISOLATION);
+  });
+
   it('User 1 borrows 10 DAI. Check debt ceiling', async () => {
     const { dai, aave, users, pool } = testEnv;
 
