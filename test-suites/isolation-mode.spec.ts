@@ -67,7 +67,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     // configure oracle
     const { aaveOracle, addressesProvider, oracle } = testEnv;
-    oracleBaseDecimals = (await (await aaveOracle.BASE_CURRENCY_UNIT()).toString().length) - 1;
+    oracleBaseDecimals = (await aaveOracle.BASE_CURRENCY_UNIT()).toString().length - 1;
     await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
 
     snapshot = await evmSnapshot();
@@ -312,14 +312,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       dai,
       aave,
       oracle,
-      aaveOracle,
       addressesProvider,
       helpersContract,
       users: [, , , , borrower, liquidator],
       pool,
     } = testEnv;
-
-    await addressesProvider.setPriceOracle(oracle.address);
 
     // Fund depositor and liquidator
     const liquidatorAmount = utils.parseUnits('1000', 18);
