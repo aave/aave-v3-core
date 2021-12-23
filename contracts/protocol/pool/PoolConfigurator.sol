@@ -322,7 +322,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
-    if (newCategoryId > 0) {
+    if (newCategoryId != 0) {
       DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(newCategoryId);
       require(
         categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
