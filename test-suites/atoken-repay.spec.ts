@@ -16,10 +16,9 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
-  let snapFresh: string;
-  let snapRepay: string;
+  let snapShot: string;
+
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
-    snapFresh = await evmSnapshot();
     const {
       weth,
       pool,
@@ -35,16 +34,20 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
     await waitForTx(await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT));
     await waitForTx(await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
-    await expect(
-      await pool.connect(user0.signer).deposit(dai.address, daiAmount, user0.address, 0)
-    );
-    await expect(
-      await pool.connect(user1.signer).deposit(weth.address, wethAmount, user1.address, 0)
-    );
+    expect(await pool.connect(user0.signer).deposit(dai.address, daiAmount, user0.address, 0));
+    expect(await pool.connect(user1.signer).deposit(weth.address, wethAmount, user1.address, 0));
 
-    await expect(
+    expect(
       await pool.connect(user1.signer).borrow(dai.address, daiAmount.div(2), 2, 0, user1.address)
     );
+  });
+
+  beforeEach(async () => {
+    snapShot = await evmSnapshot();
+  });
+
+  afterEach(async () => {
+    await evmRevert(snapShot);
   });
 
   it('User 1 tries to repay using aTokens without actually holding aDAI', async () => {
@@ -60,7 +63,6 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   });
 
   it('User 1 receives 25 aDAI from user 0, repays half of the debt', async () => {
-    snapRepay = await evmSnapshot();
     const {
       pool,
       dai,
@@ -91,8 +93,6 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   });
 
   it('User 1 receives 25 aDAI from user 0, use all aDai to repay debt', async () => {
-    await evmRevert(snapRepay);
-    snapRepay = await evmSnapshot();
     const {
       pool,
       dai,
@@ -137,7 +137,6 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   });
 
   it('User 1 receives 55 aDAI from user 0, repay all debt', async () => {
-    await evmRevert(snapRepay);
     const {
       pool,
       dai,
@@ -181,7 +180,6 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   });
 
   it('Check interest rates after repaying with aTokens', async () => {
-    await evmRevert(snapFresh);
     const {
       weth,
       dai,
