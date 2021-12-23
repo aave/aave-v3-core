@@ -15,23 +15,12 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
   mapping(address => uint256) private _addressesProviders;
+  mapping(address => uint256) private _addressesProvidersIndexes;
   address[] private _addressesProvidersList;
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
-    address[] memory addressesProvidersList = _addressesProvidersList;
-
-    uint256 maxLength = addressesProvidersList.length;
-
-    address[] memory activeProviders = new address[](maxLength);
-
-    for (uint256 i = 0; i < maxLength; i++) {
-      if (_addressesProviders[addressesProvidersList[i]] > 0) {
-        activeProviders[i] = addressesProvidersList[i];
-      }
-    }
-
-    return activeProviders;
+    return _addressesProvidersList;
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
@@ -46,7 +35,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
     require(_addressesProviders[provider] > 0, Errors.PAPR_PROVIDER_NOT_REGISTERED);
-    _addressesProviders[provider] = 0;
+    _removeFromAddressesProvidersList(provider);
     emit AddressesProviderUnregistered(provider);
   }
 
@@ -70,10 +59,30 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
     for (uint256 i = 0; i < providersCount; i++) {
       if (_addressesProvidersList[i] == provider) {
+        _addressesProvidersIndexes[provider] = i;
         return;
       }
     }
-
+    _addressesProvidersIndexes[provider] = _addressesProvidersList.length;
     _addressesProvidersList.push(provider);
+  }
+
+  /**
+   * @notice Removes the addresses provider address from the list.
+   * @param provider The address of the PoolAddressesProvider
+   */
+  function _removeFromAddressesProvidersList(address provider) internal {
+    uint256 index = _addressesProvidersIndexes[provider];
+
+    _addressesProviders[provider] = 0;
+    _addressesProvidersIndexes[provider] = 0;
+
+    uint256 lastIndex = _addressesProvidersList.length - 1;
+    if (index < lastIndex) {
+      address lastProvider = _addressesProvidersList[lastIndex];
+      _addressesProvidersList[index] = lastProvider;
+      _addressesProvidersIndexes[lastProvider] = index;
+    }
+    _addressesProvidersList.pop();
   }
 }
