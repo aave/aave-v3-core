@@ -2,7 +2,7 @@ const { expect } = require('chai');
 import { utils, BigNumber } from 'ethers';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP } from '../helpers/constants';
+import { AAVE_REFERRAL, MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
@@ -427,5 +427,101 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     // confirm the newly received aave tokens (in isolation mode) cannot be used as collateral
     const userData = await helpersContract.getUserReserveData(aave.address, users[5].address);
     expect(userData.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 1 supplies AAVE and borrows DAI in isolation, AAVE exits isolation. User 1 repay and withdraw. AAVE enters isolation again', async () => {
+    await evmRevert(snapshot);
+
+    const { pool, configurator, helpersContract, users, poolAdmin, dai, aave } = testEnv;
+
+    // Depositor supplies DAI
+    await dai.connect(users[0].signer)['mint(uint256)'](depositAmount);
+    await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[0].signer).supply(dai.address, depositAmount, users[0].address, 0);
+
+    // User 1 supplies AAVE in isolation mode
+    const aaveAmountToSupply = utils.parseEther('2');
+    await aave.connect(users[1].signer)['mint(uint256)'](aaveAmountToSupply);
+    await aave.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[1].signer)
+      .supply(aave.address, aaveAmountToSupply, users[1].address, 0);
+
+    const { isolationModeTotalDebt: isolationModeTotalDebtBeforeBorrow } =
+      await pool.getReserveData(aave.address);
+    console.log('before', isolationModeTotalDebtBeforeBorrow.toString());
+    console.log('before', (await helpersContract.getDebtCeiling(aave.address)).toString());
+    const daiAmountToBorrow = utils.parseEther('10');
+    const isolationModeTotalDebtAfterBorrow = isolationModeTotalDebtBeforeBorrow.add(1000);
+
+    // User 1 borrows DAI against isolated AAVE
+    expect(
+      await pool
+        .connect(users[1].signer)
+        .borrow(dai.address, daiAmountToBorrow, '2', 0, users[1].address)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, isolationModeTotalDebtAfterBorrow);
+
+    const reserveDataAfterBorrow = await pool.getReserveData(aave.address);
+    expect(reserveDataAfterBorrow.isolationModeTotalDebt).to.be.eq(
+      isolationModeTotalDebtAfterBorrow
+    );
+
+    // AAVE exits isolation mode (debt ceiling = 0)
+    const oldAaveDebtCeiling = await helpersContract.getDebtCeiling(aave.address);
+    const newAaveDebtCeiling = 0;
+    expect(
+      await configurator.connect(poolAdmin.signer).setDebtCeiling(aave.address, newAaveDebtCeiling)
+    )
+      .to.emit(configurator, 'DebtCeilingChanged')
+      .withArgs(aave.address, oldAaveDebtCeiling, newAaveDebtCeiling);
+
+    expect(await helpersContract.getDebtCeiling(aave.address)).to.be.eq(newAaveDebtCeiling);
+
+    const { isolationModeTotalDebt: isolationModeTotalDebtAfterDebtCeilingReset } =
+      await pool.getReserveData(aave.address);
+    console.log('after reset', isolationModeTotalDebtAfterDebtCeilingReset.toString());
+    console.log('after reset', (await helpersContract.getDebtCeiling(aave.address)).toString());
+    // expect(await helpersContract.getDebtCeiling(aave.address)).to.be.eq(0)
+
+    // User 1 borrows 1 DAI
+    await pool
+      .connect(users[1].signer)
+      .borrow(dai.address, utils.parseEther('1'), '2', 0, users[1].address);
+    console.log(
+      'after another borrow',
+      (await pool.getReserveData(aave.address)).isolationModeTotalDebt.toString()
+    );
+
+    // User 1 repays debt and withdraw
+    console.log(await helpersContract.getUserReserveData(dai.address, users[1].address));
+    await dai.connect(users[1].signer)['mint(uint256)'](utils.parseEther('20'));
+    await dai.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[1].signer).repay(dai.address, MAX_UINT_AMOUNT, '2', users[1].address);
+    console.log(
+      'after repay',
+      (await pool.getReserveData(aave.address)).isolationModeTotalDebt.toString()
+    );
+    await pool.connect(users[1].signer).withdraw(aave.address, MAX_UINT_AMOUNT, users[1].address);
+    console.log(
+      'after withdraw',
+      (await pool.getReserveData(aave.address)).isolationModeTotalDebt.toString()
+    );
+
+    // AAVE enters isolation mode again
+    expect(await configurator.connect(poolAdmin.signer).setDebtCeiling(aave.address, 100))
+      .to.emit(configurator, 'DebtCeilingChanged')
+      .withArgs(aave.address, 0, 100);
+
+    expect(await helpersContract.getDebtCeiling(aave.address)).to.be.eq(100);
+    console.log(
+      'after enters again',
+      (await pool.getReserveData(aave.address)).isolationModeTotalDebt
+    );
+    expect((await pool.getReserveData(aave.address)).isolationModeTotalDebt).to.be.eq(
+      0,
+      'isolationModeTotalDebt when entering isolation mode'
+    );
   });
 });
