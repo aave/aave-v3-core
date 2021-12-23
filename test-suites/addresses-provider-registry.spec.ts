@@ -47,6 +47,23 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
+  it('Registers a new mock addresses provider', async () => {
+    const { users, registry } = testEnv;
+
+    // Simulating an addresses provider using the users[1] wallet address
+    expect(await registry.registerAddressesProvider(users[2].address, 3))
+      .to.emit(registry, 'AddressesProviderRegistered')
+      .withArgs(users[2].address);
+
+    const providers = await registry.getAddressesProvidersList();
+
+    expect(providers.length).to.be.equal(3, 'Invalid length of the addresses providers list');
+    expect(providers[2].toString()).to.be.equal(
+      users[2].address,
+      'Invalid addresses provider added to the list'
+    );
+  });
+
   it('Removes the mock addresses provider', async () => {
     const { users, registry, addressesProvider } = testEnv;
 
@@ -65,7 +82,6 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       addressesProvider.address,
       'Invalid addresses provider added to the list'
     );
-    expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, 'Invalid addresses');
   });
 
   it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
