@@ -205,6 +205,7 @@ library BorrowLogic {
       ? stableDebt
       : variableDebt;
 
+    // Allows a user to repay with aTokens without leaving dust from interest.
     if (params.useATokens && params.amount == type(uint256).max) {
       params.amount = IAToken(reserveCache.aTokenAddress).balanceOf(msg.sender);
     }
