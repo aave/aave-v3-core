@@ -48,7 +48,7 @@ library LiquidationLogic {
 
   uint256 internal constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 5000;
   uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 10000;
-  uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95 * 1e18;
+  uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95e18;
 
   struct LiquidationCallLocalVars {
     uint256 userCollateralBalance;
