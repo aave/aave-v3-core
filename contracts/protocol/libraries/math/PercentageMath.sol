@@ -9,8 +9,8 @@ pragma solidity 0.8.10;
  * @dev Operations are rounded half up
  **/
 library PercentageMath {
-  uint256 constant PERCENTAGE_FACTOR = 1e4; //percentage plus two decimals
-  uint256 constant HALF_PERCENTAGE_FACTOR = 0.5e4;
+  uint256 internal constant PERCENTAGE_FACTOR = 1e4; //percentage plus two decimals
+  uint256 internal constant HALF_PERCENTAGE_FACTOR = 0.5e4;
 
   /**
    * @notice Executes a percentage multiplication
