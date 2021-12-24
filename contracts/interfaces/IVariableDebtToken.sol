@@ -3,7 +3,6 @@ pragma solidity 0.8.10;
 
 import {IScaledBalanceToken} from './IScaledBalanceToken.sol';
 import {IInitializableDebtToken} from './IInitializableDebtToken.sol';
-import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
 
 /**
  * @title IVariableDebtToken
