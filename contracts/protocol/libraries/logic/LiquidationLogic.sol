@@ -384,7 +384,8 @@ library LiquidationLogic {
         vars.debtAmountNeeded,
         vars.liquidationProtocolFee
       );
+    } else {
+      return (vars.collateralAmount, vars.debtAmountNeeded, 0);
     }
-    return (vars.collateralAmount, vars.debtAmountNeeded, 0);
   }
 }
