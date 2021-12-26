@@ -786,7 +786,35 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     ).to.be.revertedWith(VL_INCONSISTENT_FLASHLOAN_PARAMS);
   });
 
-  it('validateFlashLoanSimple() with paused reserve', async () => {
+  it('validateFlashloan() with inactive reserve (revert expected)', async () => {
+    const {
+      configurator,
+      poolAdmin,
+      pool,
+      dai,
+      aDai,
+      usdc,
+      users: [user],
+    } = testEnv;
+
+    expect(await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false));
+
+    await expect(
+      pool
+        .connect(user.signer)
+        .flashLoan(
+          aDai.address,
+          [dai.address, usdc.address],
+          [0, 0],
+          [RateMode.Variable, RateMode.Variable],
+          user.address,
+          '0x00',
+          0
+        )
+    ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
+  });
+
+  it('validateFlashLoanSimple() with paused reserve (revert expected)', async () => {
     const {
       configurator,
       poolAdmin,
@@ -800,6 +828,22 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     await expect(
       pool.connect(user.signer).flashLoanSimple(user.address, weth.address, 0, '0x10', 0)
     ).to.be.revertedWith(VL_RESERVE_PAUSED);
+  });
+
+  it('validateFlashLoanSimple() with inactive reserve (revert expected)', async () => {
+    const {
+      configurator,
+      poolAdmin,
+      pool,
+      weth,
+      users: [user],
+    } = testEnv;
+
+    expect(await configurator.connect(poolAdmin.signer).setReserveActive(weth.address, false));
+
+    await expect(
+      pool.connect(user.signer).flashLoanSimple(user.address, weth.address, 0, '0x10', 0)
+    ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
   });
 
   it('validateSetUserEMode() to undefined emode category (revert expected)', async () => {

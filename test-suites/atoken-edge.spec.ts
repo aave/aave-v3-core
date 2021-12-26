@@ -222,4 +222,30 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
 
     expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(UINT128_OVERFLOW);
   });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { deployer, poolAdmin, aWETH, aclManager } = testEnv;
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(await aWETH.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS));
+    expect(await aWETH.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      users: [user],
+      aWETH,
+    } = testEnv;
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      aWETH.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  });
 });
