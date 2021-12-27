@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
@@ -9,7 +10,6 @@ import {IFlashLoanSimpleReceiver} from '../../../flashloan/interfaces/IFlashLoan
 import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
@@ -26,10 +26,11 @@ import {ReserveLogic} from './ReserveLogic.sol';
 library FlashLoanLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
+  using SafeCast for uint256;
 
   // See `IPool` for descriptions
   event FlashLoan(
@@ -37,10 +38,12 @@ library FlashLoanLogic {
     address indexed initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
     uint16 referralCode
   );
 
+  // Helper struct for internal variables used in the `executeFlashLoan` function
   struct FlashLoanLocalVars {
     IFlashLoanReceiver receiver;
     address oracle;
@@ -59,6 +62,19 @@ library FlashLoanLogic {
     uint256 flashloanPremiumToProtocol;
   }
 
+  /**
+   * @notice Implements the flashloan feature that allow users to access liquidity of the pool for one transaction
+   * as long as the amount taken plus fee is returned or debt is opened.
+   * @dev For authorized flashborrowers the fee is waived
+   * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
+   * if the receiver have not approved the pool the transaction will revert.
+   * @dev Emits the `FlashLoan()` event
+   * @param reserves The state of all the reserves
+   * @param reservesList The list of addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
+   * @param params The additional parameters needed to execute the flashloan function
+   */
   function executeFlashLoan(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
@@ -106,7 +122,10 @@ library FlashLoanLogic {
       vars.currentAsset = params.assets[vars.i];
       vars.currentAmount = params.amounts[vars.i];
 
-      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
+      if (
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]) ==
+        DataTypes.InterestRateMode.NONE
+      ) {
         vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
         vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
         vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
@@ -123,11 +142,10 @@ library FlashLoanLogic {
           vars.currentPremiumToLP
         );
 
-        reserve.accruedToTreasury =
-          reserve.accruedToTreasury +
-          Helpers.castUint128(
-            vars.currentPremiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
-          );
+        reserve.accruedToTreasury += vars
+          .currentPremiumToProtocol
+          .rayDiv(reserveCache.nextLiquidityIndex)
+          .toUint128();
 
         reserve.updateInterestRates(
           reserveCache,
@@ -157,20 +175,20 @@ library FlashLoanLogic {
           reservesList,
           eModeCategories,
           userConfig,
-          DataTypes.ExecuteBorrowParams(
-            vars.currentAsset,
-            msg.sender,
-            params.onBehalfOf,
-            vars.currentAmount,
-            params.modes[vars.i],
-            params.referralCode,
-            false,
-            params.maxStableRateBorrowSizePercent,
-            params.reservesCount,
-            vars.oracle,
-            params.userEModeCategory,
-            vars.oracleSentinel
-          )
+          DataTypes.ExecuteBorrowParams({
+            asset: vars.currentAsset,
+            user: msg.sender,
+            onBehalfOf: params.onBehalfOf,
+            amount: vars.currentAmount,
+            interestRateMode: DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
+            referralCode: params.referralCode,
+            releaseUnderlying: false,
+            maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,
+            reservesCount: params.reservesCount,
+            oracle: vars.oracle,
+            userEModeCategory: params.userEModeCategory,
+            priceOracleSentinel: vars.oracleSentinel
+          })
         );
       }
       emit FlashLoan(
@@ -178,12 +196,14 @@ library FlashLoanLogic {
         msg.sender,
         vars.currentAsset,
         vars.currentAmount,
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
         vars.totalPremiums[vars.i],
         params.referralCode
       );
     }
   }
 
+  // Helper struct for internal variables used in the `executeFlashLoanSimple` function
   struct FlashLoanSimpleLocalVars {
     IFlashLoanSimpleReceiver receiver;
     uint256 totalPremium;
@@ -192,6 +212,16 @@ library FlashLoanLogic {
     uint256 amountPlusPremium;
   }
 
+  /**
+   * @notice Implements the simple flashloan feature that allow users to access liquidity of ONE reserve for one transaction
+   * as long as the amount taken plus fee is returned.
+   * @dev Does not waive fee for approved flashborrowers nor allow taking on debt instead of repaying to save gas
+   * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
+   * if the receiver have not approved the pool the transaction will revert.
+   * @dev Emits the `FlashLoan()` event
+   * @param reserve The state of the flashloaned reserve
+   * @param params The additional parameters needed to execute the simple flashloan function
+   */
   function executeFlashLoanSimple(
     DataTypes.ReserveData storage reserve,
     DataTypes.FlashloanSimpleParams memory params
@@ -231,7 +261,7 @@ library FlashLoanLogic {
 
     reserve.accruedToTreasury =
       reserve.accruedToTreasury +
-      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex));
+      vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex).toUint128();
 
     reserve.updateInterestRates(reserveCache, params.asset, vars.amountPlusPremium, 0);
 
@@ -251,6 +281,7 @@ library FlashLoanLogic {
       msg.sender,
       params.asset,
       params.amount,
+      DataTypes.InterestRateMode(0),
       vars.totalPremium,
       0
     );

@@ -23,7 +23,7 @@ import { evmSnapshot, evmRevert, increaseTime } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 makeSuite('Interest Rate and Index Overflow', (testEnv) => {
-  const { HLP_UINT128_OVERFLOW } = ProtocolErrors;
+  const { UINT128_OVERFLOW } = ProtocolErrors;
 
   let mockToken: MintableERC20;
   let mockStableDebtToken: StableDebtToken;
@@ -134,12 +134,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
         inputParams[i].liquidationThreshold,
         inputParams[i].liquidationBonus
       );
-    await configurator
-      .connect(poolAdmin.signer)
-      .setReserveBorrowing(
-        inputParams[i].asset,
-        true
-      );
+    await configurator.connect(poolAdmin.signer).setReserveBorrowing(inputParams[i].asset, true);
 
     await configurator
       .connect(poolAdmin.signer)
@@ -185,7 +180,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
+    ).to.be.revertedWith(UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `updateInterestRates` with nextStableRate > type(uint128).max (revert expected)', async () => {
@@ -210,7 +205,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
+    ).to.be.revertedWith(UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `updateInterestRates` with nextVariableRate > type(uint128).max (revert expected)', async () => {
@@ -235,7 +230,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
+    ).to.be.revertedWith(UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `_updateIndexes` with nextLiquidityIndex > type(uint128).max (revert expected)', async () => {
@@ -300,7 +295,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
+    ).to.be.revertedWith(UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `_updateIndexes` with nextVariableBorrowIndex > type(uint128).max (revert expected)', async () => {
@@ -360,7 +355,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           user.address,
           0
         )
-    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
+    ).to.be.revertedWith(UINT128_OVERFLOW);
   });
 
   it('ReserveLogic `cumulateToLiquidityIndex` with liquidityIndex > type(uint128).max (revert expected)', async () => {
@@ -396,7 +391,7 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           '0x00',
           0
         )
-    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
+    ).to.be.revertedWith(UINT128_OVERFLOW);
   });
 
   it('StableDebtToken `mint` with nextStableRate > type(uint128).max (revert expected)', async () => {
@@ -422,6 +417,6 @@ makeSuite('Interest Rate and Index Overflow', (testEnv) => {
           await convertToCurrencyDecimals(mockStableDebtToken.address, '100'),
           rate
         )
-    ).to.be.revertedWith(HLP_UINT128_OVERFLOW);
+    ).to.be.revertedWith(UINT128_OVERFLOW);
   });
 });

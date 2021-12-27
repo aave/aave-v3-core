@@ -3,9 +3,8 @@ pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
-import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
@@ -14,12 +13,12 @@ import {IPriceOracleSentinel} from '../../../interfaces/IPriceOracleSentinel.sol
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title ReserveLogic library
@@ -30,7 +29,8 @@ library ValidationLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeCast for uint256;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
@@ -115,7 +115,7 @@ library ValidationLogic {
    * @notice Validates a borrow action
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
@@ -151,8 +151,8 @@ library ValidationLogic {
 
     //validate interest rate mode
     require(
-      uint256(DataTypes.InterestRateMode.VARIABLE) == params.interestRateMode ||
-        uint256(DataTypes.InterestRateMode.STABLE) == params.interestRateMode,
+      params.interestRateMode == DataTypes.InterestRateMode.VARIABLE ||
+        params.interestRateMode == DataTypes.InterestRateMode.STABLE,
       Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
     );
 
@@ -186,12 +186,8 @@ library ValidationLogic {
 
       require(
         reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt +
-          Helpers.castUint128(
-            params.amount /
-              10 **
-                (params.reserveCache.reserveConfiguration.getDecimals() -
-                  ReserveConfiguration.DEBT_CEILING_DECIMALS)
-          ) <=
+          (params.amount / 10**(vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS))
+            .toUint128() <=
           params.isolationModeDebtCeiling,
         Errors.VL_DEBT_CEILING_CROSSED
       );
@@ -216,17 +212,17 @@ library ValidationLogic {
       reservesData,
       reserves,
       eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        params.userConfig,
-        params.reservesCount,
-        params.userAddress,
-        params.oracle,
-        params.userEModeCategory
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: params.userConfig,
+        reservesCount: params.reservesCount,
+        user: params.userAddress,
+        oracle: params.oracle,
+        userEModeCategory: params.userEModeCategory
+      })
     );
 
     require(vars.userCollateralInBaseCurrency > 0, Errors.VL_COLLATERAL_BALANCE_IS_0);
-
+    require(vars.currentLtv > 0, Errors.VL_LTV_VALIDATION_FAILED);
     require(
       vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
       Errors.VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
@@ -258,7 +254,7 @@ library ValidationLogic {
      * 3. Users will be able to borrow only a portion of the total available liquidity
      **/
 
-    if (params.interestRateMode == uint256(DataTypes.InterestRateMode.STABLE)) {
+    if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       //check if the borrow mode is stable and if stable rate borrowing is enabled on this reserve
 
       require(vars.stableRateBorrowingEnabled, Errors.VL_STABLE_BORROWING_NOT_ENABLED);
@@ -287,7 +283,7 @@ library ValidationLogic {
    * @notice Validates a repay action
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
-   * @param rateMode The interest rate mode of the debt being repaid
+   * @param interestRateMode The interest rate mode of the debt being repaid
    * @param onBehalfOf The address of the user msg.sender is repaying for
    * @param stableDebt The borrow balance of the user
    * @param variableDebt The borrow balance of the user
@@ -295,7 +291,7 @@ library ValidationLogic {
   function validateRepay(
     DataTypes.ReserveCache memory reserveCache,
     uint256 amountSent,
-    DataTypes.InterestRateMode rateMode,
+    DataTypes.InterestRateMode interestRateMode,
     address onBehalfOf,
     uint256 stableDebt,
     uint256 variableDebt
@@ -314,17 +310,15 @@ library ValidationLogic {
 
     require(
       (stableRatePreviousTimestamp < uint40(block.timestamp) &&
-        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
+        interestRateMode == DataTypes.InterestRateMode.STABLE) ||
         (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
-          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
+          interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_SAME_BLOCK_BORROW_REPAY
     );
 
     require(
-      (stableDebt > 0 &&
-        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebt > 0 &&
-          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
+      (stableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
+        (variableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_NO_DEBT_OF_SELECTED_TYPE
     );
 
@@ -537,7 +531,7 @@ library ValidationLogic {
    * @notice Validates the health factor of a user
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param user The user to validate health factor of
    * @param userEModeCategory The users active efficiency mode category
@@ -559,13 +553,13 @@ library ValidationLogic {
         reservesData,
         reserves,
         eModeCategories,
-        DataTypes.CalculateUserAccountDataParams(
-          userConfig,
-          reservesCount,
-          user,
-          oracle,
-          userEModeCategory
-        )
+        DataTypes.CalculateUserAccountDataParams({
+          userConfig: userConfig,
+          reservesCount: reservesCount,
+          user: user,
+          oracle: oracle,
+          userEModeCategory: userEModeCategory
+        })
       );
 
     require(
@@ -588,7 +582,7 @@ library ValidationLogic {
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
-   * @param eModeCategories The configuration for all efficiency mode categories
+   * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
    * @param from The user from which the aTokens are being transferred

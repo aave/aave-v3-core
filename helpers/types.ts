@@ -146,7 +146,6 @@ export enum ProtocolErrors {
   RC_INVALID_RESERVE_FACTOR = '71',
   PAPR_INVALID_ADDRESSES_PROVIDER_ID = '72',
   VL_INCONSISTENT_FLASHLOAN_PARAMS = '73',
-  SDT_STABLE_DEBT_OVERFLOW = '79',
   VL_BORROW_CAP_EXCEEDED = '81',
   RC_INVALID_BORROW_CAP = '82',
   VL_SUPPLY_CAP_EXCEEDED = '83',
@@ -165,7 +164,6 @@ export enum ProtocolErrors {
   RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
   RC_INVALID_EMODE_CATEGORY = '98',
   VL_INCONSISTENT_EMODE_CATEGORY = '99',
-  HLP_UINT128_OVERFLOW = '100',
   PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101',
   P_CALLER_NOT_BRIDGE = '102',
   RC_INVALID_UNBACKED_MINT_CAP = '103',
@@ -177,6 +175,9 @@ export enum ProtocolErrors {
   SL_USER_IN_ISOLATION_MODE = '109',
   PC_BRIDGE_PROTOCOL_FEE_INVALID = '110',
 
+  // SafeCast
+  UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
+
   // old
 
   INVALID_FROM_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
@@ -184,7 +185,6 @@ export enum ProtocolErrors {
   INVALID_OWNER_REVERT_MSG = 'Ownable: caller is not the owner',
   INVALID_HF = 'Invalid health factor',
   TRANSFER_AMOUNT_EXCEEDS_BALANCE = 'ERC20: transfer amount exceeds balance',
-  SAFEERC20_LOWLEVEL_CALL = 'SafeERC20: low-level call failed',
 }
 
 export type tEthereumAddress = string;

@@ -18,11 +18,7 @@ import { waitForTx } from '@aave/deploy-v3';
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
 
-  const {
-    TRANSFER_AMOUNT_EXCEEDS_BALANCE,
-    SAFEERC20_LOWLEVEL_CALL,
-    P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
-  } = ProtocolErrors;
+  const { TRANSFER_AMOUNT_EXCEEDS_BALANCE, P_INVALID_FLASH_LOAN_EXECUTOR_RETURN } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3;
@@ -198,7 +194,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
+    ).to.be.reverted;
   });
 
   it('Takes WETH flashloan, simulating a receiver as EOA (revert expected)', async () => {
@@ -233,7 +229,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
         '0'
       ),
       TRANSFER_AMOUNT_EXCEEDS_BALANCE
-    ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
+    ).to.be.reverted;
   });
 
   it('Tries to take a flashloan using a non contract address as receiver (revert expected)', async () => {
@@ -354,7 +350,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(SAFEERC20_LOWLEVEL_CALL);
+    ).to.be.reverted;
   });
 
   it('Check that reentrance borrow within flashloanSimple impacts rates', async () => {

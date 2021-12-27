@@ -7,11 +7,20 @@ pragma solidity 0.8.10;
  * @notice Defines the basic interface for an Aave Pool Addresses Provider Registry.
  **/
 interface IPoolAddressesProviderRegistry {
-  event AddressesProviderRegistered(address indexed newAddress);
-  event AddressesProviderUnregistered(address indexed newAddress);
+  /**
+   * @notice Emitted when a new AddressesProvider is registered.
+   * @param addressesProvider The address of the registered PoolAddressesProvider
+   */
+  event AddressesProviderRegistered(address indexed addressesProvider);
 
   /**
-   * @notice Returns the list of registered addresses provider
+   * @notice Emitted when an AddressesProvider is unregistered.
+   * @param addressesProvider The address of the unregistered PoolAddressesProvider
+   */
+  event AddressesProviderUnregistered(address indexed addressesProvider);
+
+  /**
+   * @notice Returns the list of registered addresses providers
    * @return The list of addresses providers
    **/
   function getAddressesProvidersList() external view returns (address[] memory);
@@ -27,7 +36,7 @@ interface IPoolAddressesProviderRegistry {
     returns (uint256);
 
   /**
-   * @notice Registers an addresses provider
+   * @notice Registers an AddressesProvider
    * @param provider The address of the new PoolAddressesProvider
    * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
    **/

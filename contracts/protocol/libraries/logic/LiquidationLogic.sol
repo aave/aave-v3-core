@@ -2,16 +2,15 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts//IERC20.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
-import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {PercentageMath} from '../../libraries/math/PercentageMath.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {Helpers} from '../../libraries/helpers/Helpers.sol';
-import {Errors} from '../../libraries/helpers/Errors.sol';
 import {DataTypes} from '../../libraries/types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
+import {EModeLogic} from './EModeLogic.sol';
 import {IsolationModeLogic} from './IsolationModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
@@ -32,7 +31,7 @@ library LiquidationLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
 
   // See `IPool` for descriptions
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
@@ -49,7 +48,7 @@ library LiquidationLogic {
 
   uint256 internal constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 5000;
   uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 10000;
-  uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95 * 1e18;
+  uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95e18;
 
   struct LiquidationCallLocalVars {
     uint256 userCollateralBalance;
@@ -70,9 +69,15 @@ library LiquidationLogic {
   }
 
   /**
-   * @dev Function to liquidate a position if its Health Factor drops below 1. The caller (liquidator)
+   * @notice Function to liquidate a position if its Health Factor drops below 1. The caller (liquidator)
    * covers `debtToCover` amount of debt of the user getting liquidated, and receives
    * a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
+   * @dev Emits the `LiquidationCall()` event
+   * @param reserves The state of all the reserves
+   * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
+   * @param reservesList The addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param params The additional parameters needed to execute the liquidation function
    **/
   function executeLiquidationCall(
     mapping(address => DataTypes.ReserveData) storage reserves,
@@ -99,24 +104,24 @@ library LiquidationLogic {
       reserves,
       reservesList,
       eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        userConfig,
-        params.reservesCount,
-        params.user,
-        params.priceOracle,
-        params.userEModeCategory
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: userConfig,
+        reservesCount: params.reservesCount,
+        user: params.user,
+        oracle: params.priceOracle,
+        userEModeCategory: params.userEModeCategory
+      })
     );
 
     ValidationLogic.validateLiquidationCall(
       userConfig,
       collateralReserve,
-      DataTypes.ValidateLiquidationCallParams(
-        vars.debtReserveCache,
-        vars.userStableDebt + vars.userVariableDebt,
-        vars.healthFactor,
-        params.priceOracleSentinel
-      )
+      DataTypes.ValidateLiquidationCallParams({
+        debtReserveCache: vars.debtReserveCache,
+        totalDebt: vars.userStableDebt + vars.userVariableDebt,
+        healthFactor: vars.healthFactor,
+        priceOracleSentinel: params.priceOracleSentinel
+      })
     );
 
     vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
@@ -134,9 +139,12 @@ library LiquidationLogic {
       ? vars.maxLiquidatableDebt
       : params.debtToCover;
 
-    vars.liquidationBonus = params.userEModeCategory == 0
-      ? collateralReserve.configuration.getLiquidationBonus()
-      : eModeCategories[params.userEModeCategory].liquidationBonus;
+    vars.liquidationBonus = EModeLogic.isInEModeCategory(
+      params.userEModeCategory,
+      collateralReserve.configuration.getEModeCategory()
+    )
+      ? eModeCategories[params.userEModeCategory].liquidationBonus
+      : collateralReserve.configuration.getLiquidationBonus();
 
     (
       vars.maxCollateralToLiquidate,
@@ -376,7 +384,8 @@ library LiquidationLogic {
         vars.debtAmountNeeded,
         vars.liquidationProtocolFee
       );
+    } else {
+      return (vars.collateralAmount, vars.debtAmountNeeded, 0);
     }
-    return (vars.collateralAmount, vars.debtAmountNeeded, 0);
   }
 }

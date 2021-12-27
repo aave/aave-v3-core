@@ -46,6 +46,8 @@ makeSuite('WadRayMath', () => {
     const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(halfB).div(WAD).add(1);
 
     await expect(wrapper.wadDiv(tooLargeA, b)).to.be.reverted;
+
+    await expect(wrapper.wadDiv(a, 0)).to.be.reverted;
   });
 
   it('rayMul()', async () => {
@@ -70,6 +72,7 @@ makeSuite('WadRayMath', () => {
     const tooLargeA = BigNumber.from(MAX_UINT_AMOUNT).sub(halfB).div(RAY).add(1);
 
     await expect(wrapper.rayDiv(tooLargeA, b)).to.be.reverted;
+    await expect(wrapper.rayDiv(a, 0)).to.be.reverted;
   });
 
   it('rayToWad()', async () => {

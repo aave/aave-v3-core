@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
@@ -24,7 +24,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title Pool contract
@@ -45,7 +45,8 @@ import {Helpers} from '../libraries/helpers/Helpers.sol';
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeCast for uint256;
+  using GPv2SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -93,8 +94,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
-    _maxStableRateBorrowSizePercent = 2500;
-    _flashLoanPremiumTotal = 9;
+    _maxStableRateBorrowSizePercent = 0.25e4;
+    _flashLoanPremiumTotal = 0.0009e4;
     _flashLoanPremiumToProtocol = 0;
   }
 
@@ -137,7 +138,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reserves,
       _reservesList,
       _usersConfig[onBehalfOf],
-      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
+      DataTypes.ExecuteSupplyParams({
+        asset: asset,
+        amount: amount,
+        onBehalfOf: onBehalfOf,
+        referralCode: referralCode
+      })
     );
   }
 
@@ -165,7 +171,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reserves,
       _reservesList,
       _usersConfig[onBehalfOf],
-      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
+      DataTypes.ExecuteSupplyParams({
+        asset: asset,
+        amount: amount,
+        onBehalfOf: onBehalfOf,
+        referralCode: referralCode
+      })
     );
   }
 
@@ -181,14 +192,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _reservesList,
         _eModeCategories,
         _usersConfig[msg.sender],
-        DataTypes.ExecuteWithdrawParams(
-          asset,
-          amount,
-          to,
-          _reservesCount,
-          ADDRESSES_PROVIDER.getPriceOracle(),
-          _usersEModeCategory[msg.sender]
-        )
+        DataTypes.ExecuteWithdrawParams({
+          asset: asset,
+          amount: amount,
+          to: to,
+          reservesCount: _reservesCount,
+          oracle: ADDRESSES_PROVIDER.getPriceOracle(),
+          userEModeCategory: _usersEModeCategory[msg.sender]
+        })
       );
   }
 
@@ -205,20 +216,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reservesList,
       _eModeCategories,
       _usersConfig[onBehalfOf],
-      DataTypes.ExecuteBorrowParams(
-        asset,
-        msg.sender,
-        onBehalfOf,
-        amount,
-        interestRateMode,
-        referralCode,
-        true,
-        _maxStableRateBorrowSizePercent,
-        _reservesCount,
-        ADDRESSES_PROVIDER.getPriceOracle(),
-        _usersEModeCategory[onBehalfOf],
-        ADDRESSES_PROVIDER.getPriceOracleSentinel()
-      )
+      DataTypes.ExecuteBorrowParams({
+        asset: asset,
+        user: msg.sender,
+        onBehalfOf: onBehalfOf,
+        amount: amount,
+        interestRateMode: DataTypes.InterestRateMode(interestRateMode),
+        referralCode: referralCode,
+        releaseUnderlying: true,
+        maxStableRateBorrowSizePercent: _maxStableRateBorrowSizePercent,
+        reservesCount: _reservesCount,
+        oracle: ADDRESSES_PROVIDER.getPriceOracle(),
+        userEModeCategory: _usersEModeCategory[onBehalfOf],
+        priceOracleSentinel: ADDRESSES_PROVIDER.getPriceOracleSentinel()
+      })
     );
   }
 
@@ -226,7 +237,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repay(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf
   ) external override returns (uint256) {
     return
@@ -235,7 +246,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _reservesList,
         _reserves[asset],
         _usersConfig[onBehalfOf],
-        DataTypes.ExecuteRepayParams(asset, amount, rateMode, onBehalfOf, false)
+        DataTypes.ExecuteRepayParams({
+          asset: asset,
+          amount: amount,
+          interestRateMode: DataTypes.InterestRateMode(interestRateMode),
+          onBehalfOf: onBehalfOf,
+          useATokens: false
+        })
       );
   }
 
@@ -243,7 +260,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithPermit(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf,
     uint256 deadline,
     uint8 permitV,
@@ -262,13 +279,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       );
     }
     {
-      DataTypes.ExecuteRepayParams memory params = DataTypes.ExecuteRepayParams(
-        asset,
-        amount,
-        rateMode,
-        onBehalfOf,
-        false
-      );
+      DataTypes.ExecuteRepayParams memory params = DataTypes.ExecuteRepayParams({
+        asset: asset,
+        amount: amount,
+        interestRateMode: DataTypes.InterestRateMode(interestRateMode),
+        onBehalfOf: onBehalfOf,
+        useATokens: false
+      });
       return
         BorrowLogic.executeRepay(
           _reserves,
@@ -284,7 +301,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode
+    uint256 interestRateMode
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
@@ -292,17 +309,23 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         _reservesList,
         _reserves[asset],
         _usersConfig[msg.sender],
-        DataTypes.ExecuteRepayParams(asset, amount, rateMode, msg.sender, true)
+        DataTypes.ExecuteRepayParams({
+          asset: asset,
+          amount: amount,
+          interestRateMode: DataTypes.InterestRateMode(interestRateMode),
+          onBehalfOf: msg.sender,
+          useATokens: true
+        })
       );
   }
 
   /// @inheritdoc IPool
-  function swapBorrowRateMode(address asset, uint256 rateMode) external override {
+  function swapBorrowRateMode(address asset, uint256 interestRateMode) external override {
     BorrowLogic.executeSwapBorrowRateMode(
       _reserves[asset],
       _usersConfig[msg.sender],
       asset,
-      rateMode
+      DataTypes.InterestRateMode(interestRateMode)
     );
   }
 
@@ -339,17 +362,17 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _usersConfig,
       _reservesList,
       _eModeCategories,
-      DataTypes.ExecuteLiquidationCallParams(
-        _reservesCount,
-        debtToCover,
-        collateralAsset,
-        debtAsset,
-        user,
-        receiveAToken,
-        ADDRESSES_PROVIDER.getPriceOracle(),
-        _usersEModeCategory[user],
-        ADDRESSES_PROVIDER.getPriceOracleSentinel()
-      )
+      DataTypes.ExecuteLiquidationCallParams({
+        reservesCount: _reservesCount,
+        debtToCover: debtToCover,
+        collateralAsset: collateralAsset,
+        debtAsset: debtAsset,
+        user: user,
+        receiveAToken: receiveAToken,
+        priceOracle: ADDRESSES_PROVIDER.getPriceOracle(),
+        userEModeCategory: _usersEModeCategory[user],
+        priceOracleSentinel: ADDRESSES_PROVIDER.getPriceOracleSentinel()
+      })
     );
   }
 
@@ -358,27 +381,29 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address receiverAddress,
     address[] calldata assets,
     uint256[] calldata amounts,
-    uint256[] calldata modes,
+    uint256[] calldata interestRateModes,
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    DataTypes.FlashloanParams memory flashParams = DataTypes.FlashloanParams(
-      receiverAddress,
-      assets,
-      amounts,
-      modes,
-      onBehalfOf,
-      params,
-      referralCode,
-      _flashLoanPremiumToProtocol,
-      _flashLoanPremiumTotal,
-      _maxStableRateBorrowSizePercent,
-      _reservesCount,
-      address(ADDRESSES_PROVIDER),
-      _usersEModeCategory[onBehalfOf],
-      IACLManager(ADDRESSES_PROVIDER.getACLManager()).isFlashBorrower(msg.sender)
-    );
+    DataTypes.FlashloanParams memory flashParams = DataTypes.FlashloanParams({
+      receiverAddress: receiverAddress,
+      assets: assets,
+      amounts: amounts,
+      interestRateModes: interestRateModes,
+      onBehalfOf: onBehalfOf,
+      params: params,
+      referralCode: referralCode,
+      flashLoanPremiumToProtocol: _flashLoanPremiumToProtocol,
+      flashLoanPremiumTotal: _flashLoanPremiumTotal,
+      maxStableRateBorrowSizePercent: _maxStableRateBorrowSizePercent,
+      reservesCount: _reservesCount,
+      addressesProvider: address(ADDRESSES_PROVIDER),
+      userEModeCategory: _usersEModeCategory[onBehalfOf],
+      isAuthorizedFlashBorrower: IACLManager(ADDRESSES_PROVIDER.getACLManager()).isFlashBorrower(
+        msg.sender
+      )
+    });
 
     FlashLoanLogic.executeFlashLoan(
       _reserves,
@@ -397,15 +422,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     bytes calldata params,
     uint16 referralCode
   ) external override {
-    DataTypes.FlashloanSimpleParams memory flashParams = DataTypes.FlashloanSimpleParams(
-      receiverAddress,
-      asset,
-      amount,
-      params,
-      referralCode,
-      _flashLoanPremiumToProtocol,
-      _flashLoanPremiumTotal
-    );
+    DataTypes.FlashloanSimpleParams memory flashParams = DataTypes.FlashloanSimpleParams({
+      receiverAddress: receiverAddress,
+      asset: asset,
+      amount: amount,
+      params: params,
+      referralCode: referralCode,
+      flashLoanPremiumToProtocol: _flashLoanPremiumToProtocol,
+      flashLoanPremiumTotal: _flashLoanPremiumTotal
+    });
     FlashLoanLogic.executeFlashLoanSimple(_reserves[asset], flashParams);
   }
 
@@ -469,13 +494,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reserves,
       _reservesList,
       _eModeCategories,
-      DataTypes.CalculateUserAccountDataParams(
-        _usersConfig[user],
-        _reservesCount,
-        user,
-        ADDRESSES_PROVIDER.getPriceOracle(),
-        _usersEModeCategory[user]
-      )
+      DataTypes.CalculateUserAccountDataParams({
+        userConfig: _usersConfig[user],
+        reservesCount: _reservesCount,
+        user: user,
+        oracle: ADDRESSES_PROVIDER.getPriceOracle(),
+        userEModeCategory: _usersEModeCategory[user]
+      })
     );
 
     availableBorrowsBase = GenericLogic.calculateAvailableBorrows(
@@ -590,18 +615,18 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reservesList,
       _eModeCategories,
       _usersConfig,
-      DataTypes.FinalizeTransferParams(
-        asset,
-        from,
-        to,
-        amount,
-        balanceFromBefore,
-        balanceToBefore,
-        _reservesCount,
-        ADDRESSES_PROVIDER.getPriceOracle(),
-        _usersEModeCategory[from],
-        _usersEModeCategory[to]
-      )
+      DataTypes.FinalizeTransferParams({
+        asset: asset,
+        from: from,
+        to: to,
+        amount: amount,
+        balanceFromBefore: balanceFromBefore,
+        balanceToBefore: balanceToBefore,
+        reservesCount: _reservesCount,
+        oracle: ADDRESSES_PROVIDER.getPriceOracle(),
+        fromEModeCategory: _usersEModeCategory[from],
+        toEModeCategory: _usersEModeCategory[to]
+      })
     );
   }
 
@@ -659,8 +684,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
-    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
+    _flashLoanPremiumTotal = flashLoanPremiumTotal.toUint128();
+    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol.toUint128();
   }
 
   /// @inheritdoc IPool
@@ -692,11 +717,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _eModeCategories,
       _usersEModeCategory,
       _usersConfig[msg.sender],
-      DataTypes.ExecuteSetUserEModeParams(
-        _reservesCount,
-        ADDRESSES_PROVIDER.getPriceOracle(),
-        categoryId
-      )
+      DataTypes.ExecuteSetUserEModeParams({
+        reservesCount: _reservesCount,
+        oracle: ADDRESSES_PROVIDER.getPriceOracle(),
+        categoryId: categoryId
+      })
     );
   }
 
@@ -737,7 +762,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       _reserves,
       _reservesList,
       _usersConfig[onBehalfOf],
-      DataTypes.ExecuteSupplyParams(asset, amount, onBehalfOf, referralCode)
+      DataTypes.ExecuteSupplyParams({
+        asset: asset,
+        amount: amount,
+        onBehalfOf: onBehalfOf,
+        referralCode: referralCode
+      })
     );
   }
 }
