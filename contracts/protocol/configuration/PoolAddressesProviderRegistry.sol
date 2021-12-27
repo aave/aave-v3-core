@@ -34,12 +34,10 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
     if (removedProvidersCount == 0) return providers;
 
-    address[] memory activeProviders = new address[](providersListCount - removedProvidersCount);
-    for (uint256 i = 0; i < activeProviders.length; i++) {
-      activeProviders[i] = providers[i];
+    assembly {
+      mstore(providers, sub(providersListCount, removedProvidersCount))
     }
-
-    return activeProviders;
+    return providers;
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
