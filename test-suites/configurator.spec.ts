@@ -13,6 +13,7 @@ import {
   VariableDebtToken__factory,
 } from '../types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 
 type ReserveConfigurationValues = {
   reserveDecimals: string;
@@ -661,6 +662,17 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await aclManager.isFlashBorrower(authorizedFlashBorrower)).to.be.false;
   });
 
+  it('Updates bridge protocol fee equal to PERCENTAGE_FACTOR', async () => {
+    const { pool, configurator } = testEnv;
+    const newProtocolFee = 10000;
+
+    expect(await configurator.updateBridgeProtocolFee(newProtocolFee))
+      .to.emit(configurator, 'BridgeProtocolFeeUpdated')
+      .withArgs(newProtocolFee);
+
+    expect(await pool.BRIDGE_PROTOCOL_FEE()).to.be.eq(newProtocolFee);
+  });
+
   it('Updates bridge protocol fee', async () => {
     const { pool, configurator } = testEnv;
     const newProtocolFee = 2000;
@@ -670,6 +682,26 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .withArgs(newProtocolFee);
 
     expect(await pool.BRIDGE_PROTOCOL_FEE()).to.be.eq(newProtocolFee);
+  });
+
+  it('Updates flash loan premiums equal to PERCENTAGE_FACTOR: 10000 toProtocol, 10000 total', async () => {
+    const snapId = await evmSnapshot();
+
+    const { pool, configurator } = testEnv;
+    const newPremiumTotal = 10000;
+    const newPremiumToProtocol = 10000;
+
+    expect(await configurator.updateFlashloanPremiumTotal(newPremiumTotal))
+      .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
+      .withArgs(newPremiumTotal);
+    expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
+      .to.emit(configurator, 'FlashloanPremiumToProtocolUpdated')
+      .withArgs(newPremiumToProtocol);
+
+    expect(await pool.FLASHLOAN_PREMIUM_TOTAL()).to.be.eq(newPremiumTotal);
+    expect(await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL()).to.be.eq(newPremiumToProtocol);
+
+    await evmRevert(snapId);
   });
 
   it('Updates flash loan premiums: 10 toProtocol, 40 total', async () => {
