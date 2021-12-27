@@ -66,8 +66,8 @@ interface IPool {
    * initiator of the transaction on flashLoan()
    * @param onBehalfOf The address that will be getting the debt
    * @param amount The amount borrowed out
-   * @param borrowRateMode The rate mode: 1 for Stable, 2 for Variable
-   * @param borrowRate The numeric rate at which the user has borrowed
+   * @param interestRateMode The rate mode: 1 for Stable, 2 for Variable
+   * @param borrowRate The numeric rate at which the user has borrowed, expressed in ray
    * @param referral The referral code used
    **/
   event Borrow(
@@ -75,7 +75,7 @@ interface IPool {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint256 borrowRateMode,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
     uint16 indexed referral
   );
@@ -100,9 +100,28 @@ interface IPool {
    * @notice Emitted on swapBorrowRateMode()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user swapping his rate mode
-   * @param rateMode The current interest rate mode of the position being swapped.
+   * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-  event Swap(address indexed reserve, address indexed user, uint256 rateMode);
+
+  event SwapBorrowRateMode(
+    address indexed reserve,
+    address indexed user,
+    DataTypes.InterestRateMode interestRateMode
+  );
+
+  /**
+   * @notice Emitted on borrow(), repay() and liquidationCall() when using isolated assets
+   * @param asset The address of the underlying asset of the reserve
+   * @param totalDebt The total isolation mode debt for the reserve
+   */
+  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
+
+  /**
+   * @notice Emitted when the user selects a certain asset category for eMode
+   * @param user The address of the user
+   * @param categoryId The category id
+   **/
+  event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
    * @notice Emitted on setUserUseReserveAsCollateral()
@@ -131,6 +150,7 @@ interface IPool {
    * @param initiator The address initiating the flash loan
    * @param asset The address of the asset being flash borrowed
    * @param amount The amount flash borrowed
+   * @param interestRateMode The flashloan mode: 0 for regular flashloan, 1 for Stable debt, 2 for Variable debt
    * @param premium The fee flash borrowed
    * @param referralCode The referral code used
    **/
@@ -139,6 +159,7 @@ interface IPool {
     address indexed initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
     uint16 referralCode
   );
@@ -215,13 +236,6 @@ interface IPool {
     uint256 amount,
     uint256 fee
   ) external;
-
-  /**
-   * @notice Emitted when the user selects a certain asset category for eMode
-   * @param user The address of the user
-   * @param categoryId The category id
-   **/
-  event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
@@ -313,7 +327,7 @@ interface IPool {
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
-   * @param rateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
+   * @param interestRateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
    * @param onBehalfOf The address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
@@ -322,7 +336,7 @@ interface IPool {
   function repay(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf
   ) external returns (uint256);
 
@@ -332,7 +346,7 @@ interface IPool {
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
-   * @param rateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
+   * @param interestRateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
    * @param onBehalfOf Address of the user who will get his debt reduced/removed. Should be the address of the
    * user calling the function if he wants to reduce/remove his own debt, or the address of any other
    * other borrower whose debt should be removed
@@ -345,7 +359,7 @@ interface IPool {
   function repayWithPermit(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf,
     uint256 deadline,
     uint8 permitV,
@@ -356,24 +370,26 @@ interface IPool {
   /**
    * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the equivalent debt tokens
    * - E.g. User repays 100 USDC using 100 aUSDC, burning 100 variable/stable debt tokens
+   * @dev  Passing uint256.max as amount will clean up any residual aToken dust balance, if the user aToken balance is not enough to
+   * cover the whole debt
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
-   * @param rateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
+   * @param interestRateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
    * @return The final amount repaid
    **/
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode
+    uint256 interestRateMode
   ) external returns (uint256);
 
   /**
    * @notice Allows a borrower to swap his debt between stable and variable mode, or viceversa
    * @param asset The address of the underlying asset borrowed
-   * @param rateMode The rate mode that the user wants to swap to
+   * @param interestRateMode The rate mode that the user wants to swap to: 1 for Stable, 2 for Variable
    **/
-  function swapBorrowRateMode(address asset, uint256 rateMode) external;
+  function swapBorrowRateMode(address asset, uint256 interestRateMode) external;
 
   /**
    * @notice Rebalances the stable interest rate of a user to the current stable rate defined on the reserve.
@@ -420,7 +436,7 @@ interface IPool {
    * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanReceiver interface
    * @param assets The addresses of the assets being flash-borrowed
    * @param amounts The amounts of the assets being flash-borrowed
-   * @param modes Types of the debt to open if the flash loan is not returned:
+   * @param interestRateModes Types of the debt to open if the flash loan is not returned:
    *   0 -> Don't open any debt, just revert if funds can't be transferred from the receiver
    *   1 -> Open debt at stable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
    *   2 -> Open debt at variable rate for the value of the amount flash-borrowed to the `onBehalfOf` address
@@ -433,7 +449,7 @@ interface IPool {
     address receiverAddress,
     address[] calldata assets,
     uint256[] calldata amounts,
-    uint256[] calldata modes,
+    uint256[] calldata interestRateModes,
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode

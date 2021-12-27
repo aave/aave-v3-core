@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
@@ -9,7 +10,6 @@ import {IFlashLoanSimpleReceiver} from '../../../flashloan/interfaces/IFlashLoan
 import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
@@ -26,10 +26,11 @@ import {ReserveLogic} from './ReserveLogic.sol';
 library FlashLoanLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
+  using SafeCast for uint256;
 
   // See `IPool` for descriptions
   event FlashLoan(
@@ -37,6 +38,7 @@ library FlashLoanLogic {
     address indexed initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
     uint16 referralCode
   );
@@ -120,7 +122,10 @@ library FlashLoanLogic {
       vars.currentAsset = params.assets[vars.i];
       vars.currentAmount = params.amounts[vars.i];
 
-      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
+      if (
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]) ==
+        DataTypes.InterestRateMode.NONE
+      ) {
         vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
         vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
         vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
@@ -137,11 +142,10 @@ library FlashLoanLogic {
           vars.currentPremiumToLP
         );
 
-        reserve.accruedToTreasury =
-          reserve.accruedToTreasury +
-          Helpers.castUint128(
-            vars.currentPremiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
-          );
+        reserve.accruedToTreasury += vars
+          .currentPremiumToProtocol
+          .rayDiv(reserveCache.nextLiquidityIndex)
+          .toUint128();
 
         reserve.updateInterestRates(
           reserveCache,
@@ -176,7 +180,7 @@ library FlashLoanLogic {
             user: msg.sender,
             onBehalfOf: params.onBehalfOf,
             amount: vars.currentAmount,
-            interestRateMode: params.modes[vars.i],
+            interestRateMode: DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
             referralCode: params.referralCode,
             releaseUnderlying: false,
             maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,
@@ -192,6 +196,7 @@ library FlashLoanLogic {
         msg.sender,
         vars.currentAsset,
         vars.currentAmount,
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
         vars.totalPremiums[vars.i],
         params.referralCode
       );
@@ -256,7 +261,7 @@ library FlashLoanLogic {
 
     reserve.accruedToTreasury =
       reserve.accruedToTreasury +
-      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex));
+      vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex).toUint128();
 
     reserve.updateInterestRates(reserveCache, params.asset, vars.amountPlusPremium, 0);
 
@@ -276,6 +281,7 @@ library FlashLoanLogic {
       msg.sender,
       params.asset,
       params.amount,
+      DataTypes.InterestRateMode(0),
       vars.totalPremium,
       0
     );

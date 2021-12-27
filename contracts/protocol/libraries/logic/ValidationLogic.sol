@@ -3,9 +3,8 @@ pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
-import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
@@ -14,12 +13,12 @@ import {IPriceOracleSentinel} from '../../../interfaces/IPriceOracleSentinel.sol
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title ReserveLogic library
@@ -30,7 +29,8 @@ library ValidationLogic {
   using ReserveLogic for DataTypes.ReserveData;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeCast for uint256;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
@@ -151,8 +151,8 @@ library ValidationLogic {
 
     //validate interest rate mode
     require(
-      uint256(DataTypes.InterestRateMode.VARIABLE) == params.interestRateMode ||
-        uint256(DataTypes.InterestRateMode.STABLE) == params.interestRateMode,
+      params.interestRateMode == DataTypes.InterestRateMode.VARIABLE ||
+        params.interestRateMode == DataTypes.InterestRateMode.STABLE,
       Errors.VL_INVALID_INTEREST_RATE_MODE_SELECTED
     );
 
@@ -186,9 +186,8 @@ library ValidationLogic {
 
       require(
         reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt +
-          Helpers.castUint128(
-            params.amount / 10**(vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS)
-          ) <=
+          (params.amount / 10**(vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS))
+            .toUint128() <=
           params.isolationModeDebtCeiling,
         Errors.VL_DEBT_CEILING_CROSSED
       );
@@ -255,7 +254,7 @@ library ValidationLogic {
      * 3. Users will be able to borrow only a portion of the total available liquidity
      **/
 
-    if (params.interestRateMode == uint256(DataTypes.InterestRateMode.STABLE)) {
+    if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       //check if the borrow mode is stable and if stable rate borrowing is enabled on this reserve
 
       require(vars.stableRateBorrowingEnabled, Errors.VL_STABLE_BORROWING_NOT_ENABLED);
@@ -284,7 +283,7 @@ library ValidationLogic {
    * @notice Validates a repay action
    * @param reserveCache The cached data of the reserve
    * @param amountSent The amount sent for the repayment. Can be an actual value or uint(-1)
-   * @param rateMode The interest rate mode of the debt being repaid
+   * @param interestRateMode The interest rate mode of the debt being repaid
    * @param onBehalfOf The address of the user msg.sender is repaying for
    * @param stableDebt The borrow balance of the user
    * @param variableDebt The borrow balance of the user
@@ -292,7 +291,7 @@ library ValidationLogic {
   function validateRepay(
     DataTypes.ReserveCache memory reserveCache,
     uint256 amountSent,
-    DataTypes.InterestRateMode rateMode,
+    DataTypes.InterestRateMode interestRateMode,
     address onBehalfOf,
     uint256 stableDebt,
     uint256 variableDebt
@@ -311,17 +310,15 @@ library ValidationLogic {
 
     require(
       (stableRatePreviousTimestamp < uint40(block.timestamp) &&
-        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
+        interestRateMode == DataTypes.InterestRateMode.STABLE) ||
         (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
-          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
+          interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_SAME_BLOCK_BORROW_REPAY
     );
 
     require(
-      (stableDebt > 0 &&
-        DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebt > 0 &&
-          DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
+      (stableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
+        (variableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.VL_NO_DEBT_OF_SELECTED_TYPE
     );
 
