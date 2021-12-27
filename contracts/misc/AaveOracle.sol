@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+import {AggregatorInterface} from '../dependencies/chainlink/AggregatorInterface.sol';
 import {Errors} from '../protocol/libraries/helpers/Errors.sol';
 import {IACLManager} from '../interfaces/IACLManager.sol';
 import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
 import {IPriceOracleGetter} from '../interfaces/IPriceOracleGetter.sol';
 import {IAaveOracle} from '../interfaces/IAaveOracle.sol';
-import {IChainlinkAggregator} from '../interfaces/IChainlinkAggregator.sol';
 
 /**
  * @title AaveOracle
@@ -18,7 +18,7 @@ import {IChainlinkAggregator} from '../interfaces/IChainlinkAggregator.sol';
  */
 contract AaveOracle is IAaveOracle {
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
-  mapping(address => IChainlinkAggregator) private assetsSources;
+  mapping(address => AggregatorInterface) private assetsSources;
   IPriceOracleGetter private _fallbackOracle;
   address public immutable override BASE_CURRENCY;
   uint256 public immutable override BASE_CURRENCY_UNIT;
@@ -80,7 +80,7 @@ contract AaveOracle is IAaveOracle {
   function _setAssetsSources(address[] memory assets, address[] memory sources) internal {
     require(assets.length == sources.length, 'INCONSISTENT_PARAMS_LENGTH');
     for (uint256 i = 0; i < assets.length; i++) {
-      assetsSources[assets[i]] = IChainlinkAggregator(sources[i]);
+      assetsSources[assets[i]] = AggregatorInterface(sources[i]);
       emit AssetSourceUpdated(assets[i], sources[i]);
     }
   }
@@ -96,7 +96,7 @@ contract AaveOracle is IAaveOracle {
 
   /// @inheritdoc IPriceOracleGetter
   function getAssetPrice(address asset) public view override returns (uint256) {
-    IChainlinkAggregator source = assetsSources[asset];
+    AggregatorInterface source = assetsSources[asset];
 
     if (asset == BASE_CURRENCY) {
       return BASE_CURRENCY_UNIT;
