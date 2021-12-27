@@ -632,7 +632,7 @@ library ValidationLogic {
    * @notice Validates a drop reserve action
    * @param reserves a mapping storing the list of reserves
    * @param reserve The reserve object
-   * @param asset The address of the asset being validated as collateral
+   * @param asset The address of the reserve's underlying asset
    **/
   function validateDropReserve(
     mapping(uint256 => address) storage reserves,
