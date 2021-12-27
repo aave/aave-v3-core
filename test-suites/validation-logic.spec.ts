@@ -811,7 +811,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
           '0x00',
           0
         )
-    ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
+    ).to.be.revertedWith(RESERVE_INACTIVE);
   });
 
   it('validateFlashLoanSimple() with paused reserve (revert expected)', async () => {
@@ -843,7 +843,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user.signer).flashLoanSimple(user.address, weth.address, 0, '0x10', 0)
-    ).to.be.revertedWith(VL_NO_ACTIVE_RESERVE);
+    ).to.be.revertedWith(RESERVE_INACTIVE);
   });
 
   it('validateSetUserEMode() to undefined emode category (revert expected)', async () => {
