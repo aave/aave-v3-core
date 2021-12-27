@@ -82,7 +82,7 @@ export enum ProtocolErrors {
   NOT_CONTRACT = '9', // 'Address is not a contract'
   CALLER_NOT_POOL_CONFIGURATOR = '10', // 'The caller of the function is not the pool configurator'
   CALLER_NOT_ATOKEN = '11', // 'The caller of the function is not an atoken'
-  INCORRECT_ADDRESSES_PROVIDER = '12', // 'The address of the pool addresses provider is incorrect'
+  INVALID_ADDRESSES_PROVIDER = '12', // 'The address of the pool addresses provider is incorrect'
   INVALID_FLASHLOAN_EXECUTOR_RETURN = '13', // 'Invalid return value of the flashloan executor function'
   RESERVE_ALREADY_ADDED = '14', // 'Reserve has already been added to reserve list'
   NO_MORE_RESERVES_ALLOWED = '15', // 'Maximum amount of reserves in the pool reached'

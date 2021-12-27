@@ -27,7 +27,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     NOT_CONTRACT,
     CALLER_NOT_POOL_CONFIGURATOR,
     RESERVE_ALREADY_INITIALIZED,
-    INCORRECT_ADDRESSES_PROVIDER,
+    INVALID_ADDRESSES_PROVIDER,
     RESERVE_ALREADY_ADDED,
   } = ProtocolErrors;
 
@@ -69,7 +69,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const freshPool = Pool__factory.connect(NEW_POOL_IMPL_ARTIFACT.address, deployer.signer);
 
     await expect(freshPool.initialize(deployer.address)).to.be.revertedWith(
-      INCORRECT_ADDRESSES_PROVIDER
+      INVALID_ADDRESSES_PROVIDER
     );
   });
 
