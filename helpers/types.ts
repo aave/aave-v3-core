@@ -174,6 +174,7 @@ export enum ProtocolErrors {
   VL_DEBT_CEILING_CROSSED = '108',
   SL_USER_IN_ISOLATION_MODE = '109',
   PC_BRIDGE_PROTOCOL_FEE_INVALID = '110',
+  DEBT_CEILING_NOT_ZERO = '111',
 
   // SafeCast
   UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
