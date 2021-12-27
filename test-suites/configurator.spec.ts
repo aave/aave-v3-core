@@ -459,7 +459,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Changes the reserve factor of WETH via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
 
-    const newReserveFactor = '1000';
+    const newReserveFactor = '10000';
     expect(await configurator.setReserveFactor(weth.address, newReserveFactor))
       .to.emit(configurator, 'ReserveFactorChanged')
       .withArgs(weth.address, newReserveFactor);
