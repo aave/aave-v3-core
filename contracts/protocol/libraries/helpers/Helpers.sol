@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {Errors} from './Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 
 /**

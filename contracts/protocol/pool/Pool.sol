@@ -94,8 +94,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == ADDRESSES_PROVIDER, Errors.INCORRECT_ADDRESSES_PROVIDER);
-    _maxStableRateBorrowSizePercent = 2500;
-    _flashLoanPremiumTotal = 9;
+    _maxStableRateBorrowSizePercent = 0.25e4;
+    _flashLoanPremiumTotal = 0.0009e4;
     _flashLoanPremiumToProtocol = 0;
   }
 

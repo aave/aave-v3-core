@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
 import { timeLatest } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
   PriceOracleSentinel,
@@ -21,7 +21,12 @@ import { waitForTx, increaseTime } from '@aave/deploy-v3';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
-  const { PRICE_ORACLE_SENTINEL_CHECK_FAILED, INVALID_HF } = ProtocolErrors;
+  const {
+    PRICE_ORACLE_SENTINEL_CHECK_FAILED,
+    INVALID_HF,
+    CALLER_NOT_POOL_ADMIN,
+    CALLER_NOT_RISK_OR_POOL_ADMIN,
+  } = ProtocolErrors;
 
   let sequencerOracle: SequencerOracle;
   let priceOracleSentinel: PriceOracleSentinel;
@@ -68,6 +73,76 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const answer = await sequencerOracle.latestAnswer();
     expect(answer[0]).to.be.eq(false);
     expect(answer[1]).to.be.eq(0);
+  });
+
+  it('Pooladmin updates grace period for sentinel', async () => {
+    const { poolAdmin } = testEnv;
+
+    const newGracePeriod = 0;
+
+    expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(GRACE_PERIOD);
+    expect(await priceOracleSentinel.connect(poolAdmin.signer).setGracePeriod(0))
+      .to.emit(priceOracleSentinel, 'GracePeriodUpdated')
+      .withArgs(0);
+    expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(newGracePeriod);
+  });
+
+  it('Risk admin updates grace period for sentinel', async () => {
+    const { riskAdmin } = testEnv;
+
+    expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(0);
+    expect(await priceOracleSentinel.connect(riskAdmin.signer).setGracePeriod(GRACE_PERIOD))
+      .to.emit(priceOracleSentinel, 'GracePeriodUpdated')
+      .withArgs(GRACE_PERIOD);
+    expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(GRACE_PERIOD);
+  });
+
+  it('User tries to set grace period for sentinel', async () => {
+    const {
+      users: [user],
+    } = testEnv;
+
+    expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(GRACE_PERIOD);
+    await expect(priceOracleSentinel.connect(user.signer).setGracePeriod(0)).to.be.revertedWith(
+      CALLER_NOT_RISK_OR_POOL_ADMIN
+    );
+    expect(await priceOracleSentinel.getGracePeriod()).to.not.be.eq(0);
+  });
+
+  it('Pooladmin update the sequencer oracle', async () => {
+    const { poolAdmin } = testEnv;
+
+    const newSequencerOracle = ZERO_ADDRESS;
+
+    expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(sequencerOracle.address);
+    expect(
+      await priceOracleSentinel.connect(poolAdmin.signer).setSequencerOracle(newSequencerOracle)
+    )
+      .to.emit(priceOracleSentinel, 'SequencerOracleUpdated')
+      .withArgs(newSequencerOracle);
+    expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(newSequencerOracle);
+
+    expect(
+      await priceOracleSentinel
+        .connect(poolAdmin.signer)
+        .setSequencerOracle(sequencerOracle.address)
+    )
+      .to.emit(priceOracleSentinel, 'SequencerOracleUpdated')
+      .withArgs(sequencerOracle.address);
+    expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(sequencerOracle.address);
+  });
+
+  it('User tries to update sequencer oracle', async () => {
+    const {
+      users: [user],
+    } = testEnv;
+    const newSequencerOracle = ZERO_ADDRESS;
+
+    expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(sequencerOracle.address);
+    await expect(
+      priceOracleSentinel.connect(user.signer).setSequencerOracle(newSequencerOracle)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+    expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(sequencerOracle.address);
   });
 
   it('Borrow DAI', async () => {

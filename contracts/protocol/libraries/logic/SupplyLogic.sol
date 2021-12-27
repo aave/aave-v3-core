@@ -173,7 +173,7 @@ library SupplyLogic {
 
     uint256 reserveId = reserves[params.asset].id;
 
-    if (params.from != params.to) {
+    if (params.from != params.to && params.amount != 0) {
       DataTypes.UserConfigurationMap storage fromConfig = usersConfig[params.from];
 
       if (fromConfig.isUsingAsCollateral(reserveId)) {
@@ -196,7 +196,7 @@ library SupplyLogic {
         }
       }
 
-      if (params.balanceToBefore == 0 && params.amount != 0) {
+      if (params.balanceToBefore == 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         if (
           ValidationLogic.validateUseAsCollateral(reserves, reservesList, toConfig, params.asset)

@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IScaledBalanceToken} from './IScaledBalanceToken.sol';
 import {IInitializableAToken} from './IInitializableAToken.sol';
-import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
 
 /**
  * @title IAToken

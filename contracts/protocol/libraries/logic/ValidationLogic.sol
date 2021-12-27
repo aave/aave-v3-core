@@ -5,7 +5,6 @@ import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
 import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IReserveInterestRateStrategy} from '../../../interfaces/IReserveInterestRateStrategy.sol';
-import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
