@@ -48,7 +48,7 @@ library Errors {
   string public constant AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE = '39'; // 'The requested amount is greater than the max loan size in stable rate mode'
   string public constant NO_DEBT_OF_SELECTED_TYPE = '40'; // 'For repayment of a specific type of debt, the user needs to have debt that type'
   string public constant NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF = '41'; // 'To repay on behalf of a user an explicit amount to repay is needed'
-  string public constant NO_STABLE_RATE_LOAN_IN_RESERVE = '42'; // 'User does not have a stable rate loan in progress on this reserve'
+  string public constant NO_STABLE_RATE_DEBT = '42'; // 'User does not have stable rate debt in progress on this reserve'
   string public constant NO_VARIABLE_RATE_DEBT = '43'; // 'User does not have variable rate debt in progress on this reserve'
   string public constant UNDERLYING_BALANCE_ZERO = '44'; // 'The underlying balance needs to be greater than 0'
   string public constant INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET = '45'; // 'Interest rate rebalance conditions were not met'

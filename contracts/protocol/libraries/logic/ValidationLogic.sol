@@ -352,7 +352,7 @@ library ValidationLogic {
     require(!isFrozen, Errors.RESERVE_FROZEN);
 
     if (currentRateMode == DataTypes.InterestRateMode.STABLE) {
-      require(stableDebt > 0, Errors.NO_STABLE_RATE_LOAN_IN_RESERVE);
+      require(stableDebt > 0, Errors.NO_STABLE_RATE_DEBT);
     } else if (currentRateMode == DataTypes.InterestRateMode.VARIABLE) {
       require(variableDebt > 0, Errors.NO_VARIABLE_RATE_DEBT);
       /**
