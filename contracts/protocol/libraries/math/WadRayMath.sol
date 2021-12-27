@@ -12,32 +12,10 @@ library WadRayMath {
   uint256 internal constant WAD = 1e18;
   uint256 internal constant HALF_WAD = 0.5e18;
 
-  uint256 public constant RAY = 1e27;
+  uint256 internal constant RAY = 1e27;
   uint256 internal constant HALF_RAY = 0.5e27;
 
   uint256 internal constant WAD_RAY_RATIO = 1e9;
-
-  /**
-   * @return One wad, 1e18
-   **/
-
-  function wad() internal pure returns (uint256) {
-    return WAD;
-  }
-
-  /**
-   * @return Half ray, 1e27/2
-   **/
-  function halfRay() internal pure returns (uint256) {
-    return HALF_RAY;
-  }
-
-  /**
-   * @return Half ray, 1e18/2
-   **/
-  function halfWad() internal pure returns (uint256) {
-    return HALF_WAD;
-  }
 
   /**
    * @dev Multiplies two wad, rounding half up to the nearest wad
