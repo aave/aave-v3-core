@@ -116,6 +116,13 @@ interface IPool {
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
+   * @notice Emitted when the user selects a certain asset category for eMode
+   * @param user The address of the user
+   * @param categoryId The category id
+   **/
+  event UserEModeSet(address indexed user, uint8 categoryId);
+
+  /**
    * @notice Emitted on setUserUseReserveAsCollateral()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user enabling the usage as collateral
@@ -142,6 +149,7 @@ interface IPool {
    * @param initiator The address initiating the flash loan
    * @param asset The address of the asset being flash borrowed
    * @param amount The amount flash borrowed
+   * @param interestRateMode The flashloan mode: 0 for regular flashloan, 1 for Stable debt, 2 for Variable debt
    * @param premium The fee flash borrowed
    * @param referralCode The referral code used
    **/
@@ -150,6 +158,7 @@ interface IPool {
     address indexed initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
     uint16 referralCode
   );
@@ -226,13 +235,6 @@ interface IPool {
     uint256 amount,
     uint256 fee
   ) external;
-
-  /**
-   * @notice Emitted when the user selects a certain asset category for eMode
-   * @param user The address of the user
-   * @param categoryId The category id
-   **/
-  event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
@@ -367,6 +369,8 @@ interface IPool {
   /**
    * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the equivalent debt tokens
    * - E.g. User repays 100 USDC using 100 aUSDC, burning 100 variable/stable debt tokens
+   * @dev  Passing uint256.max as amount will clean up any residual aToken dust balance, if the user aToken balance is not enough to
+   * cover the whole debt
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`

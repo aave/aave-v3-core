@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import {AccessControl} from '../../dependencies/openzeppelin/contracts/AccessControl.sol';
-import {IAccessControl} from '../../dependencies/openzeppelin/contracts/IAccessControl.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 

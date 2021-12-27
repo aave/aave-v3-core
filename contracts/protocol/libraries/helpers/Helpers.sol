@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {Errors} from './Errors.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 
 /**
@@ -44,10 +43,5 @@ library Helpers {
       IERC20(reserve.stableDebtTokenAddress).balanceOf(user),
       IERC20(reserve.variableDebtTokenAddress).balanceOf(user)
     );
-  }
-
-  function castUint128(uint256 input) internal pure returns (uint128) {
-    require(input <= type(uint128).max, Errors.HLP_UINT128_OVERFLOW);
-    return uint128(input);
   }
 }

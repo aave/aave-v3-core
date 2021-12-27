@@ -2,7 +2,6 @@
 pragma solidity 0.8.10;
 
 import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
-import {ISequencerOracle} from './ISequencerOracle.sol';
 
 /**
  * @title IPriceOracleSentinel
