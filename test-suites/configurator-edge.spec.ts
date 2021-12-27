@@ -23,7 +23,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     INVALID_SUPPLY_CAP,
     INVALID_UNBACKED_MINT_CAP,
     EMODE_CATEGORY_RESERVED,
-    INVALID_PARAMS_EMODE_CATEGORY,
+    INVALID_EMODE_CATEGORY_PARAMS,
     INVALID_EMODE_CATEGORY_ASSIGNMENT,
     BRIDGE_PROTOCOL_FEE_INVALID,
   } = ProtocolErrors;
@@ -191,7 +191,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(INVALID_PARAMS_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to add an eMode category with no liquidation bonus (revert expected)', async () => {
@@ -206,7 +206,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(INVALID_PARAMS_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to add an eMode category with too large liquidation bonus (revert expected)', async () => {
@@ -221,7 +221,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(INVALID_PARAMS_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to add an eMode category with liquidation threshold > 1 (revert expected)', async () => {
@@ -236,7 +236,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(INVALID_PARAMS_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to set DAI eMode category to undefined category (revert expected)', async () => {

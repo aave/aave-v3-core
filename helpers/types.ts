@@ -92,7 +92,7 @@ export enum ProtocolErrors {
   FLASHLOAN_PREMIUMS_MISMATCH = '19', // 'Flashloan total premium should be equal or greater than flashloan premium to protocol'
   FLASHLOAN_PREMIUM_INVALID = '20', // 'Invalid flashloan premium'
   INVALID_PARAMS_RESERVE = '21', // 'Invalid risk parameters for the reserve'
-  INVALID_PARAMS_EMODE_CATEGORY = '22', // 'Invalid risk parameters for the eMode category'
+  INVALID_EMODE_CATEGORY_PARAMS = '22', // 'Invalid risk parameters for the eMode category'
   BRIDGE_PROTOCOL_FEE_INVALID = '23', // 'Invalid bridge protocol fee'
   CALLER_MUST_BE_POOL = '24', // 'The caller of this function must be a pool'
   INVALID_MINT_AMOUNT = '25', // 'Invalid amount to mint'
@@ -155,7 +155,7 @@ export enum ProtocolErrors {
 
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
-  
+
   // Ownable
   OWNABLE_ONLY_OWNER = 'Ownable: caller is not the owner',
 

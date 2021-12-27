@@ -277,10 +277,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     // validation of the parameters: the LTV can
     // only be lower or equal than the liquidation threshold
     // (otherwise a loan against the asset would cause instantaneous liquidation)
-    require(ltv <= liquidationThreshold, Errors.INVALID_PARAMS_EMODE_CATEGORY);
+    require(ltv <= liquidationThreshold, Errors.INVALID_EMODE_CATEGORY_PARAMS);
     require(
       liquidationBonus > PercentageMath.PERCENTAGE_FACTOR,
-      Errors.INVALID_PARAMS_EMODE_CATEGORY
+      Errors.INVALID_EMODE_CATEGORY_PARAMS
     );
 
     // if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
@@ -288,7 +288,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(
       uint256(liquidationThreshold).percentMul(liquidationBonus) <=
         PercentageMath.PERCENTAGE_FACTOR,
-      Errors.INVALID_PARAMS_EMODE_CATEGORY
+      Errors.INVALID_EMODE_CATEGORY_PARAMS
     );
 
     _pool.configureEModeCategory(
