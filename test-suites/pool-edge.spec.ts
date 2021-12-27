@@ -573,7 +573,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     const snapId = await evmSnapshot();
 
-    const debtCeiling = utils.parseUnits('10', 18);
+    const debtCeiling = utils.parseUnits('10', 2);
 
     expect(await helpersContract.getDebtCeiling(dai.address)).to.be.eq(0);
 
