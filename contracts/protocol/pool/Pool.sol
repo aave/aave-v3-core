@@ -24,7 +24,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title Pool contract
@@ -45,6 +45,7 @@ import {Helpers} from '../libraries/helpers/Helpers.sol';
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
+  using SafeCast for uint256;
   using GPv2SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -93,8 +94,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
-    _maxStableRateBorrowSizePercent = 2500;
-    _flashLoanPremiumTotal = 9;
+    _maxStableRateBorrowSizePercent = 0.25e4;
+    _flashLoanPremiumTotal = 0.0009e4;
     _flashLoanPremiumToProtocol = 0;
   }
 
@@ -683,8 +684,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
-    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
+    _flashLoanPremiumTotal = flashLoanPremiumTotal.toUint128();
+    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol.toUint128();
   }
 
   /// @inheritdoc IPool

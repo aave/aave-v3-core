@@ -123,12 +123,12 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     uint256 liquidationThreshold,
     uint256 liquidationBonus
   ) external override onlyRiskOrPoolAdmins {
-    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-
     //validation of the parameters: the LTV can
     //only be lower or equal than the liquidation threshold
     //(otherwise a loan against the asset would cause instantaneous liquidation)
     require(ltv <= liquidationThreshold, Errors.PC_INVALID_CONFIGURATION);
+
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
     if (liquidationThreshold != 0) {
       //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
@@ -180,7 +180,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setReseveFreeze(address asset, bool freeze) external override onlyRiskOrPoolAdmins {
+  function setReserveFreeze(address asset, bool freeze) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setFrozen(freeze);
     _pool.setConfiguration(asset, currentConfig.data);
@@ -374,7 +374,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   /// @inheritdoc IPoolConfigurator
   function updateBridgeProtocolFee(uint256 newBridgeProtocolFee) external override onlyPoolAdmin {
     require(
-      newBridgeProtocolFee < PercentageMath.PERCENTAGE_FACTOR,
+      newBridgeProtocolFee <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.PC_BRIDGE_PROTOCOL_FEE_INVALID
     );
     uint256 oldBridgeProtocolFee = _pool.BRIDGE_PROTOCOL_FEE();
@@ -389,7 +389,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     onlyPoolAdmin
   {
     require(
-      newFlashloanPremiumTotal < PercentageMath.PERCENTAGE_FACTOR,
+      newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.PC_FLASHLOAN_PREMIUM_INVALID
     );
     require(
@@ -408,7 +408,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     onlyPoolAdmin
   {
     require(
-      newFlashloanPremiumToProtocol < PercentageMath.PERCENTAGE_FACTOR,
+      newFlashloanPremiumToProtocol <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.PC_FLASHLOAN_PREMIUM_INVALID
     );
     require(

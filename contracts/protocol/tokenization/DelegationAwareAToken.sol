@@ -14,6 +14,12 @@ import {AToken} from './AToken.sol';
  * @dev The underlying asset needs to be compatible with the COMP delegation interface
  */
 contract DelegationAwareAToken is AToken {
+  /**
+   * @notice Emitted when underlying voting power is delegated
+   * @param delegatee The address of the delegatee
+   */
+  event DelegateUnderlyingTo(address indexed delegatee);
+
   constructor(IPool pool) AToken(pool) {}
 
   /**
@@ -22,5 +28,6 @@ contract DelegationAwareAToken is AToken {
    **/
   function delegateUnderlyingTo(address delegatee) external onlyPoolAdmin {
     IDelegationToken(_underlyingAsset).delegate(delegatee);
+    emit DelegateUnderlyingTo(delegatee);
   }
 }

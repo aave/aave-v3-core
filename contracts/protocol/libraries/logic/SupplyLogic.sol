@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {DataTypes} from '../types/DataTypes.sol';
@@ -174,7 +173,7 @@ library SupplyLogic {
 
     uint256 reserveId = reserves[params.asset].id;
 
-    if (params.from != params.to) {
+    if (params.from != params.to && params.amount != 0) {
       DataTypes.UserConfigurationMap storage fromConfig = usersConfig[params.from];
 
       if (fromConfig.isUsingAsCollateral(reserveId)) {
@@ -191,13 +190,13 @@ library SupplyLogic {
             params.fromEModeCategory
           );
         }
-        if (params.balanceFromBefore - params.amount == 0) {
+        if (params.balanceFromBefore == params.amount) {
           fromConfig.setUsingAsCollateral(reserveId, false);
           emit ReserveUsedAsCollateralDisabled(params.asset, params.from);
         }
       }
 
-      if (params.balanceToBefore == 0 && params.amount != 0) {
+      if (params.balanceToBefore == 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         if (
           ValidationLogic.validateUseAsCollateral(reserves, reservesList, toConfig, params.asset)

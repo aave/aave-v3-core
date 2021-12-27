@@ -84,7 +84,7 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   let baseConfigValues: ReserveConfigurationValues;
-  const { PC_RESERVE_LIQUIDITY_NOT_0 } = ProtocolErrors;
+  const { PC_RESERVE_LIQUIDITY_NOT_0, RC_INVALID_DEBT_CEILING } = ProtocolErrors;
 
   before(() => {
     const {
@@ -246,7 +246,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Freezes the ETH reserve by pool Admin', async () => {
     const { configurator, weth, helpersContract } = testEnv;
 
-    expect(await configurator.setReseveFreeze(weth.address, true))
+    expect(await configurator.setReserveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, true);
 
@@ -258,7 +258,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Unfreezes the ETH reserve by Pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
-    expect(await configurator.setReseveFreeze(weth.address, false))
+    expect(await configurator.setReserveFreeze(weth.address, false))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, false);
 
@@ -267,7 +267,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Freezes the ETH reserve by Risk Admin', async () => {
     const { configurator, weth, helpersContract, riskAdmin } = testEnv;
-    expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, true))
+    expect(await configurator.connect(riskAdmin.signer).setReserveFreeze(weth.address, true))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, true);
 
@@ -279,7 +279,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Unfreezes the ETH reserve by Risk admin', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
-    expect(await configurator.connect(riskAdmin.signer).setReseveFreeze(weth.address, false))
+    expect(await configurator.connect(riskAdmin.signer).setReserveFreeze(weth.address, false))
       .to.emit(configurator, 'ReserveFrozen')
       .withArgs(weth.address, false);
 
@@ -804,6 +804,22 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(newCeiling).to.be.eq(newDebtCeiling, 'Invalid debt ceiling');
   });
 
+  it('Sets a debt ceiling larger than max (revert expected)', async () => {
+    const { configurator, helpersContract, weth, riskAdmin } = testEnv;
+
+    const MAX_VALID_DEBT_CEILING = BigNumber.from('1099511627775');
+    const debtCeiling = MAX_VALID_DEBT_CEILING.add(1);
+
+    const currentCeiling = await helpersContract.getDebtCeiling(weth.address);
+
+    await expect(
+      configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, debtCeiling)
+    ).to.be.revertedWith(RC_INVALID_DEBT_CEILING);
+
+    const newCeiling = await helpersContract.getDebtCeiling(weth.address);
+    expect(newCeiling).to.be.eq(currentCeiling, 'Invalid debt ceiling');
+  });
+
   it('Resets the WETH debt ceiling. Tries to set debt ceiling after liquidity has been provided (revert expected)', async () => {
     const {
       configurator,
@@ -863,5 +879,10 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const newCeiling = await helpersContract.getDebtCeiling(weth.address);
 
     expect(newCeiling).to.be.eq('200');
+  });
+
+  it('Read debt ceiling decimals', async () => {
+    const { helpersContract } = testEnv;
+    expect(await helpersContract.getDebtCeilingDecimals()).to.be.eq(2);
   });
 });
