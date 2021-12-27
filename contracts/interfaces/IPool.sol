@@ -657,11 +657,11 @@ interface IPool {
   function getUserEMode(address user) external view returns (uint256);
 
   /**
-   * @notice Updates the isolation mode total debt of the given asset
-   * @param asset The address of the underlying asset to update the isolationModeTotalDebt
-   * @param totalDebt The total debt amount
+   * @notice Resets the isolation mode total debt of the given asset to zero
+   * @dev It requires the given asset has zero debt ceiling
+   * @param asset The address of the underlying asset to reset the isolationModeTotalDebt
    */
-  function updateIsolationModeTotalDebt(address asset, uint256 totalDebt) external;
+  function resetIsolationModeTotalDebt(address asset) external;
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate

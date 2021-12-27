@@ -236,7 +236,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _pool.setConfiguration(asset, currentConfig.data);
 
     if (ceiling == 0) {
-      _pool.updateIsolationModeTotalDebt(asset, 0);
+      _pool.resetIsolationModeTotalDebt(asset);
     }
 
     emit DebtCeilingChanged(asset, ceiling);

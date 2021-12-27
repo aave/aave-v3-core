@@ -731,13 +731,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function updateIsolationModeTotalDebt(address asset, uint256 totalDebt)
-    external
-    override
-    onlyPoolConfigurator
-  {
-    _reserves[asset].isolationModeTotalDebt = totalDebt.toUint128();
-    emit IsolationModeTotalDebtUpdated(asset, totalDebt);
+  function resetIsolationModeTotalDebt(address asset) external override onlyPoolConfigurator {
+    require(_reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
+    _reserves[asset].isolationModeTotalDebt = 0;
+    emit IsolationModeTotalDebtUpdated(asset, 0);
   }
 
   function _addReserveToList(address asset) internal {
