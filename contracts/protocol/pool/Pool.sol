@@ -661,6 +661,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
