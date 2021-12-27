@@ -18,7 +18,7 @@ import { waitForTx } from '@aave/deploy-v3';
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
 
-  const { TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } = ProtocolErrors;
+  const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } = ProtocolErrors;
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3;
   const PREMIUM_TO_LP = TOTAL_PREMIUM - PREMIUM_TO_PROTOCOL;
@@ -227,7 +227,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
         '0x10',
         '0'
       ),
-      TRANSFER_AMOUNT_EXCEEDS_BALANCE
+      ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE
     ).to.be.reverted;
   });
 

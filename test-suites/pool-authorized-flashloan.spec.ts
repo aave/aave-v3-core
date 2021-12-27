@@ -17,7 +17,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
 
   const {
     COLLATERAL_BALANCE_IS_ZERO,
-    TRANSFER_AMOUNT_EXCEEDS_BALANCE,
+    ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE,
     INVALID_FLASHLOAN_EXECUTOR_RETURN,
   } = ProtocolErrors;
 
@@ -221,7 +221,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
         '0x10',
         '0'
       ),
-      TRANSFER_AMOUNT_EXCEEDS_BALANCE
+      ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE
     ).to.be.reverted;
   });
 

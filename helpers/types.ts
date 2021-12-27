@@ -154,15 +154,19 @@ export enum ProtocolErrors {
   OPERATION_NOT_SUPPORTED = '81', // 'Operation not supported'
 
   // SafeCast
-  UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
+  SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
+  
+  // Ownable
+  OWNABLE_ONLY_OWNER = 'Ownable: caller is not the owner',
+
+  // ERC20
+  ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE = 'ERC20: transfer amount exceeds balance',
 
   // old
 
   INVALID_FROM_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
   INVALID_TO_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
-  INVALID_OWNER_REVERT_MSG = 'Ownable: caller is not the owner',
   INVALID_HF = 'Invalid health factor',
-  TRANSFER_AMOUNT_EXCEEDS_BALANCE = 'ERC20: transfer amount exceeds balance',
 }
 
 export type tEthereumAddress = string;
