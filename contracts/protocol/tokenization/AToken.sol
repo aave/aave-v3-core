@@ -95,9 +95,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[from].additionalData);
 
-    _userState[from].additionalData = Helpers.castUint128(index);
+    _userState[from].additionalData = index.toUint128();
 
-    _burn(from, Helpers.castUint128(amountScaled));
+    _burn(from, amountScaled.toUint128());
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
@@ -128,9 +128,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
 
-    _userState[onBehalfOf].additionalData = Helpers.castUint128(index);
+    _userState[onBehalfOf].additionalData = index.toUint128();
 
-    _mint(onBehalfOf, Helpers.castUint128(amountScaled));
+    _mint(onBehalfOf, amountScaled.toUint128());
 
     uint256 amountToMint = amount + balanceIncrease;
     emit Transfer(address(0), onBehalfOf, amountToMint);
