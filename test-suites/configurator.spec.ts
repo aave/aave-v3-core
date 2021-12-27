@@ -13,6 +13,7 @@ import {
   VariableDebtToken__factory,
 } from '../types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 
 type ReserveConfigurationValues = {
   reserveDecimals: string;
@@ -459,7 +460,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Changes the reserve factor of WETH via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
 
-    const newReserveFactor = '10000';
+    const newReserveFactor = '1000';
     expect(await configurator.setReserveFactor(weth.address, newReserveFactor))
       .to.emit(configurator, 'ReserveFactorChanged')
       .withArgs(weth.address, newReserveFactor);
@@ -483,6 +484,23 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       ...baseConfigValues,
       reserveFactor: newReserveFactor,
     });
+  });
+
+  it('Updates the reserve factor of WETH equal to PERCENTAGE_FACTOR', async () => {
+    const snapId = await evmSnapshot();
+    const { configurator, helpersContract, weth, poolAdmin } = testEnv;
+    const newReserveFactor = '10000';
+    expect(
+      await configurator.connect(poolAdmin.signer).setReserveFactor(weth.address, newReserveFactor)
+    )
+      .to.emit(configurator, 'ReserveFactorChanged')
+      .withArgs(weth.address, newReserveFactor);
+
+    await expectReserveConfigurationData(helpersContract, weth.address, {
+      ...baseConfigValues,
+      reserveFactor: newReserveFactor,
+    });
+    await evmRevert(snapId);
   });
 
   it('Updates the unbackedMintCap of WETH via pool admin', async () => {
