@@ -352,9 +352,9 @@ library ValidationLogic {
     require(!isFrozen, Errors.RESERVE_FROZEN);
 
     if (currentRateMode == DataTypes.InterestRateMode.STABLE) {
-      require(stableDebt > 0, Errors.NO_STABLE_RATE_DEBT);
+      require(stableDebt > 0, Errors.NO_OUTSTANDING_STABLE_DEBT);
     } else if (currentRateMode == DataTypes.InterestRateMode.VARIABLE) {
-      require(variableDebt > 0, Errors.NO_VARIABLE_RATE_DEBT);
+      require(variableDebt > 0, Errors.NO_OUTSTANDING_VARIABLE_DEBT);
       /**
        * user wants to swap to stable, before swapping we need to ensure that
        * 1. stable borrow rate is enabled on the reserve
