@@ -27,7 +27,7 @@ library Errors {
   string public constant RESERVE_LIQUIDITY_NOT_ZERO = '18'; // 'The liquidity of the reserve needs to be 0'
   string public constant FLASHLOAN_PREMIUMS_MISMATCH = '19'; // 'Flashloan total premium should be equal or greater than flashloan premium to protocol'
   string public constant FLASHLOAN_PREMIUM_INVALID = '20'; // 'Invalid flashloan premium'
-  string public constant INVALID_PARAMS_RESERVE = '21'; // 'Invalid risk parameters for the reserve'
+  string public constant INVALID_RESERVE_PARAMS = '21'; // 'Invalid risk parameters for the reserve'
   string public constant INVALID_EMODE_CATEGORY_PARAMS = '22'; // 'Invalid risk parameters for the eMode category'
   string public constant BRIDGE_PROTOCOL_FEE_INVALID = '23'; // 'Invalid bridge protocol fee'
   string public constant CALLER_MUST_BE_POOL = '24'; // 'The caller of this function must be a pool'

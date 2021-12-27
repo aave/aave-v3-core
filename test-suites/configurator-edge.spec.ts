@@ -14,7 +14,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
   const {
     INVALID_RESERVE_FACTOR,
-    INVALID_PARAMS_RESERVE,
+    INVALID_RESERVE_PARAMS,
     INVALID_LIQ_BONUS,
     FLASHLOAN_PREMIUMS_MISMATCH,
     FLASHLOAN_PREMIUM_INVALID,
@@ -59,7 +59,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
           config.liquidationThreshold,
           config.liquidationBonus
         )
-    ).to.be.revertedWith(INVALID_PARAMS_RESERVE);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationBonus < 10000', async () => {
@@ -71,7 +71,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, config.ltv, config.liquidationThreshold, 10000)
-    ).to.be.revertedWith(INVALID_PARAMS_RESERVE);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationThreshold.percentMul(liquidationBonus) > PercentageMath.PERCENTAGE_FACTOR', async () => {
@@ -81,7 +81,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, 10001, 10001, 10001)
-    ).to.be.revertedWith(INVALID_PARAMS_RESERVE);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationThreshold == 0 && liquidationBonus > 0', async () => {
@@ -89,7 +89,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).configureReserveAsCollateral(dai.address, 0, 0, 10500)
-    ).to.be.revertedWith(INVALID_PARAMS_RESERVE);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('Tries to bridge protocol fee > PERCENTAGE_FACTOR (revert expected)', async () => {

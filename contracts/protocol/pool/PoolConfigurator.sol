@@ -131,23 +131,23 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     //validation of the parameters: the LTV can
     //only be lower or equal than the liquidation threshold
     //(otherwise a loan against the asset would cause instantaneous liquidation)
-    require(ltv <= liquidationThreshold, Errors.INVALID_PARAMS_RESERVE);
+    require(ltv <= liquidationThreshold, Errors.INVALID_RESERVE_PARAMS);
 
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
     if (liquidationThreshold != 0) {
       //liquidation bonus must be bigger than 100.00%, otherwise the liquidator would receive less
       //collateral than needed to cover the debt
-      require(liquidationBonus > PercentageMath.PERCENTAGE_FACTOR, Errors.INVALID_PARAMS_RESERVE);
+      require(liquidationBonus > PercentageMath.PERCENTAGE_FACTOR, Errors.INVALID_RESERVE_PARAMS);
 
       //if threshold * bonus is less than PERCENTAGE_FACTOR, it's guaranteed that at the moment
       //a loan is taken there is enough collateral available to cover the liquidation bonus
       require(
         liquidationThreshold.percentMul(liquidationBonus) <= PercentageMath.PERCENTAGE_FACTOR,
-        Errors.INVALID_PARAMS_RESERVE
+        Errors.INVALID_RESERVE_PARAMS
       );
     } else {
-      require(liquidationBonus == 0, Errors.INVALID_PARAMS_RESERVE);
+      require(liquidationBonus == 0, Errors.INVALID_RESERVE_PARAMS);
       //if the liquidation threshold is being set to 0,
       // the reserve is being disabled as collateral. To do so,
       //we need to ensure no liquidity is supplied

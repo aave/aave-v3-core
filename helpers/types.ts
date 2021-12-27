@@ -91,7 +91,7 @@ export enum ProtocolErrors {
   RESERVE_LIQUIDITY_NOT_ZERO = '18', // 'The liquidity of the reserve needs to be 0'
   FLASHLOAN_PREMIUMS_MISMATCH = '19', // 'Flashloan total premium should be equal or greater than flashloan premium to protocol'
   FLASHLOAN_PREMIUM_INVALID = '20', // 'Invalid flashloan premium'
-  INVALID_PARAMS_RESERVE = '21', // 'Invalid risk parameters for the reserve'
+  INVALID_RESERVE_PARAMS = '21', // 'Invalid risk parameters for the reserve'
   INVALID_EMODE_CATEGORY_PARAMS = '22', // 'Invalid risk parameters for the eMode category'
   BRIDGE_PROTOCOL_FEE_INVALID = '23', // 'Invalid bridge protocol fee'
   CALLER_MUST_BE_POOL = '24', // 'The caller of this function must be a pool'
