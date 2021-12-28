@@ -666,12 +666,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function setConfiguration(address asset, uint256 configuration)
+  function setConfiguration(address asset, DataTypes.ReserveConfigurationMap calldata configuration)
     external
     override
     onlyPoolConfigurator
   {
-    _reserves[asset].configuration.data = configuration;
+    _reserves[asset].configuration.data = configuration.data;
   }
 
   /// @inheritdoc IPool
@@ -728,6 +728,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function getUserEMode(address user) external view override returns (uint256) {
     return _usersEModeCategory[user];
+  }
+
+  /// @inheritdoc IPool
+  function resetIsolationModeTotalDebt(address asset) external override onlyPoolConfigurator {
+    require(_reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
+    _reserves[asset].isolationModeTotalDebt = 0;
+    emit IsolationModeTotalDebtUpdated(asset, 0);
   }
 
   function _addReserveToList(address asset) internal {
