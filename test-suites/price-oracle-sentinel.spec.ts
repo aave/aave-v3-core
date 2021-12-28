@@ -22,10 +22,10 @@ declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   const {
-    VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED,
+    PRICE_ORACLE_SENTINEL_CHECK_FAILED,
     INVALID_HF,
     CALLER_NOT_POOL_ADMIN,
-    PC_CALLER_NOT_RISK_OR_POOL_ADMIN,
+    CALLER_NOT_RISK_OR_POOL_ADMIN,
   } = ProtocolErrors;
 
   let sequencerOracle: SequencerOracle;
@@ -104,7 +104,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
 
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(GRACE_PERIOD);
     await expect(priceOracleSentinel.connect(user.signer).setGracePeriod(0)).to.be.revertedWith(
-      PC_CALLER_NOT_RISK_OR_POOL_ADMIN
+      CALLER_NOT_RISK_OR_POOL_ADMIN
     );
     expect(await priceOracleSentinel.getGracePeriod()).to.not.be.eq(0);
   });
@@ -238,7 +238,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const amountToLiquidate = userReserveDataBefore.currentVariableDebt.div(2);
     await expect(
       pool.liquidationCall(weth.address, dai.address, borrower.address, amountToLiquidate, true)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
+    ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Drop health factor lower', async () => {
@@ -402,7 +402,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
+    ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Turn on sequencer', async () => {
@@ -427,7 +427,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
+    ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Turn off sequencer + increase time more than grace period', async () => {
@@ -454,7 +454,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool
         .connect(user.signer)
         .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
-    ).to.be.revertedWith(VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED);
+    ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
   it('Turn on sequencer + increase time past grace period', async () => {

@@ -246,7 +246,7 @@ library SupplyLogic {
     if (useAsCollateral) {
       require(
         ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, asset),
-        Errors.SL_USER_IN_ISOLATION_MODE
+        Errors.USER_IN_ISOLATION_MODE
       );
 
       userConfig.setUsingAsCollateral(reserve.id, true);

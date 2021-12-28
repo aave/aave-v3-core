@@ -3,6 +3,7 @@ import { constants, utils } from 'ethers';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { ACLManager, ACLManager__factory } from '../types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
+import { ProtocolErrors } from '../helpers/types';
 
 makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
   let aclManager: ACLManager;
@@ -266,6 +267,6 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
 
     expect(await addressesProvider.setACLAdmin(ZERO_ADDRESS));
     const deployTx = new ACLManager__factory(deployer.signer).deploy(addressesProvider.address);
-    await expect(deployTx).to.be.revertedWith('ACL admin cannot be the zero address');
+    await expect(deployTx).to.be.revertedWith(ProtocolErrors.ACL_ADMIN_CANNOT_BE_ZERO);
   });
 });
