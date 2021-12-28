@@ -498,12 +498,17 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Updates the reserve factor of WETH equal to PERCENTAGE_FACTOR', async () => {
     const snapId = await evmSnapshot();
     const { configurator, helpersContract, weth, poolAdmin } = testEnv;
+
+    const { reserveFactor: oldReserveFactor } = await helpersContract.getReserveConfigurationData(
+      weth.address
+    );
+
     const newReserveFactor = '10000';
     expect(
       await configurator.connect(poolAdmin.signer).setReserveFactor(weth.address, newReserveFactor)
     )
       .to.emit(configurator, 'ReserveFactorChanged')
-      .withArgs(weth.address, newReserveFactor);
+      .withArgs(weth.address, oldReserveFactor, newReserveFactor);
 
     await expectReserveConfigurationData(helpersContract, weth.address, {
       ...baseConfigValues,
