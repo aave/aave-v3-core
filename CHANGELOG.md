@@ -1,5 +1,69 @@
 # Changelog
 
+## [1.9.0](https://www.github.com/aave/aave-v3-core/compare/v1.8.0...v1.9.0) (2021-12-26)
+
+
+### Features
+
+* add event test ([d5fe4bb](https://www.github.com/aave/aave-v3-core/commit/d5fe4bb5afd7d5cc1dfe47ef0700c5dd4cfce5ea))
+* added additional functions to IAToken for EIP2612 ([df8ee61](https://www.github.com/aave/aave-v3-core/commit/df8ee614e460cf804fcaf1dcd8b9e5f1de0ef406))
+* added event to DelegationAwareAToken ([f5fd1b6](https://www.github.com/aave/aave-v3-core/commit/f5fd1b654d598ff9b2170dafcba6d28f88a391ae))
+* added indexed to the ICreditDelegation event ([0a3d365](https://www.github.com/aave/aave-v3-core/commit/0a3d36546683949a6dc8002db814827507847abc))
+* replaced SafeERC20 with GPv2SafeERC20 ([fe4ae41](https://www.github.com/aave/aave-v3-core/commit/fe4ae41aa2bb1583b430595decc4fddd6e60d137))
+
+
+### Bug Fixes
+
+* Add comment to BorrowLogic ([2ae309d](https://www.github.com/aave/aave-v3-core/commit/2ae309dbad85dedf1313a898a0bd558eeb447b64))
+* add else ([4bdbd7f](https://www.github.com/aave/aave-v3-core/commit/4bdbd7f56b4bdf7d3fdf421a7a2f21a0cdcb7b31))
+* Add explicit access level for variables ([8fb2e3c](https://www.github.com/aave/aave-v3-core/commit/8fb2e3c3102bc42aab9aaec8f77a1bea6463b6da))
+* Add mode to FlashLoan event ([956c809](https://www.github.com/aave/aave-v3-core/commit/956c809749a83d4fa79ffa1cfc8d7bd06348b442))
+* Add natspec to `executeLiquidationCall` ([9bb5289](https://www.github.com/aave/aave-v3-core/commit/9bb5289465ffaf0edc32c6f733f4c7eccecf2f5a))
+* Add repay with atoken ux issue ([b464cf5](https://www.github.com/aave/aave-v3-core/commit/b464cf55fe9dbfa918b3832f033e635595212247))
+* Avoid finalizeTransfer with 0 value transfer ([d6bf261](https://www.github.com/aave/aave-v3-core/commit/d6bf261f4fc08bfd8bd1a4b3e3b4ed140430a01a))
+* Cache result to not recompute for event ([b342d2f](https://www.github.com/aave/aave-v3-core/commit/b342d2f7f0f9fc05b5e7d9dc21e17183219b6d19))
+* Change  to  in Pool for V2 compatibility ([932c5a0](https://www.github.com/aave/aave-v3-core/commit/932c5a0dc02c22f4a9c20384a9912e2780fcbae8))
+* Clean cumulateToLiqIndex and add comments ([d6e90dc](https://www.github.com/aave/aave-v3-core/commit/d6e90dcd92e2f1536323648fb66c018a8811d97d))
+* Fix `income` -> `debt` in `getNormalizedDebt` natspec. ([9e6b183](https://www.github.com/aave/aave-v3-core/commit/9e6b1831f3f814fca46e19d6761bda9a7cd07f66))
+* Fix differences between IPool and Pool ([8beefda](https://www.github.com/aave/aave-v3-core/commit/8beefda3d19c3814196052575332342a5b23be08))
+* Fix docstrings ([93c2d95](https://www.github.com/aave/aave-v3-core/commit/93c2d954937172dedd3a794a0e58627b7aaa1dc0))
+* Fix docstrings ([c55bb04](https://www.github.com/aave/aave-v3-core/commit/c55bb04725b4a1ed6c87a0f5092669d55e306afc))
+* Fix typo ([df40063](https://www.github.com/aave/aave-v3-core/commit/df400636ac915f19b642a830b8ba86969837ac2d))
+* Fix typo in setReserveFreeze function name ([da72c39](https://www.github.com/aave/aave-v3-core/commit/da72c391f8ddef9a200e5b9203c1cfbd29986ca6))
+* Fix variable name of event in ReserveLogic ([40b9bb8](https://www.github.com/aave/aave-v3-core/commit/40b9bb814e5b89e19b50cb73a274646901dd2a00))
+* Gas optimization UserConfiguration ([af00927](https://www.github.com/aave/aave-v3-core/commit/af009272000e82aa2af78ec871373a57e2f1dbf5))
+* Handle code style issues ([af3743b](https://www.github.com/aave/aave-v3-core/commit/af3743b108ebeca4f7185a79b6ce6d7ca988075c))
+* Improve code readability of ReserveLogic ([ae1476d](https://www.github.com/aave/aave-v3-core/commit/ae1476daf53cf24262fdd9628e0fa4df9bf15a47))
+* Improve readability of initial values of variables ([592b21d](https://www.github.com/aave/aave-v3-core/commit/592b21d831b0dc2a6e3e998701ea4e3a4b13c401))
+* Include 100% as valid premiums ([c6b3347](https://www.github.com/aave/aave-v3-core/commit/c6b33472ed4f2ba6ebcf5a0b1aa3826c066aa7bd))
+* Make test engine not stop at first failure ([84eaf29](https://www.github.com/aave/aave-v3-core/commit/84eaf29afeffb720194d95b6ed86cb91273bf763))
+* Move up event in IVariableDebtToken ([f536538](https://www.github.com/aave/aave-v3-core/commit/f536538e6b7d6f97b24ff353c32e301c1b11d1ec))
+* move up require ([d47afa2](https://www.github.com/aave/aave-v3-core/commit/d47afa2da264bb4ec81957ebdc787052ce7d0079))
+* Re-add `getUserCurrentDebtMemory()` ([7742985](https://www.github.com/aave/aave-v3-core/commit/7742985319be5df5a11d6740a712c2017f64dcf6))
+* Refactor variable calc in StableDebtToken ([4ed69b4](https://www.github.com/aave/aave-v3-core/commit/4ed69b4a8ad17cfc8defe19e7049db88f1cd0cf8))
+* Remove case, created separate issue ([0082fd8](https://www.github.com/aave/aave-v3-core/commit/0082fd82eacfe61f32efce03fe99f464a3992eec))
+* remove IAaveIncentivesController casting ([9805add](https://www.github.com/aave/aave-v3-core/commit/9805add3405965badb9803ab68c8b7f73b0989ab))
+* Remove redundant casting for block.timestamp ([941539f](https://www.github.com/aave/aave-v3-core/commit/941539f0a3b72598a0ff556ba2b5889cfe0f08ff))
+* Remove redundant unneeded variable ([703782c](https://www.github.com/aave/aave-v3-core/commit/703782cb7c1d353239bec219b474f3ee30b0c063))
+* Remove unneeded `delegator` param from delegationWithSig typehash ([dcf7c36](https://www.github.com/aave/aave-v3-core/commit/dcf7c36dc2df66283f29c72738872c1e3e992a43))
+* Remove unneeded imports in contracts ([48f9e89](https://www.github.com/aave/aave-v3-core/commit/48f9e89ee21fe0637e970fd1bbcd662c74ab5147))
+* Remove unneededv variable in cumulateToLiqIndex ([75e7fdc](https://www.github.com/aave/aave-v3-core/commit/75e7fdcd4cf9b5112bb22fb3c4e6b03b33db4907))
+* removed invalid imports ([659b82c](https://www.github.com/aave/aave-v3-core/commit/659b82cf93d3a032a9ad746a7f0fdf02f06ecd60))
+* rename admin variable ([5199283](https://www.github.com/aave/aave-v3-core/commit/5199283c5ac4e93260ad416920fb28aa8896ce5a))
+* Replace `rateMode` with `interestRateMode` and precise dataype ([806f161](https://www.github.com/aave/aave-v3-core/commit/806f16172bb718366417ef9e519b0fe5b9d04595))
+* Replace factor with multiplier for clarity ([085ad0c](https://www.github.com/aave/aave-v3-core/commit/085ad0c8df62ac60a25f74c722fcd822c1f09107))
+* Replace HALF_PERCENT with HALF_PERCENTAGE_FACTOR ([4fb45ec](https://www.github.com/aave/aave-v3-core/commit/4fb45ec34d4d86f75b94e2d284942ac69d62e8db))
+* Replace Helper.toUint128 with OZ SafeCast ([3916735](https://www.github.com/aave/aave-v3-core/commit/391673546fbf7de6199822b60a49787498a26978))
+* Rever simplification of cumulateToLiqIndex due to precision loss ([585c9c4](https://www.github.com/aave/aave-v3-core/commit/585c9c41525a8df7c6b13aa37fa07c860a03bd27))
+* set config map to zero on init ([ea40ee1](https://www.github.com/aave/aave-v3-core/commit/ea40ee1608b7ffe60ae03154403b77fdc20933de))
+* Simplify condition in SupplyLogic ([6487f29](https://www.github.com/aave/aave-v3-core/commit/6487f29892706390cae8fd46b10de24ca67281db))
+* Simplify cumulateToLiqIndex in ReserveLogic ([53a95c8](https://www.github.com/aave/aave-v3-core/commit/53a95c809764a3acdb6f6e5d1845aea0d7de5a27))
+* swap name ([ebd3622](https://www.github.com/aave/aave-v3-core/commit/ebd3622b28b18d8d7adbcd5f285a3c13a180db8f))
+* Typo in liquidation-emode.spec.ts ([97e0acc](https://www.github.com/aave/aave-v3-core/commit/97e0acc5515641ef936cbb3284b4e2f9811a27f6))
+* update admin to internal ([7d19d29](https://www.github.com/aave/aave-v3-core/commit/7d19d295c66c5e19c58cec87082e1905116dc196))
+* Update test with new delegationWithSig typehash ([fea83f3](https://www.github.com/aave/aave-v3-core/commit/fea83f39d433ff1e624a39878686ddf661eb66fe))
+* Use `next` prefix for isolation mode total debt ([5ffeecd](https://www.github.com/aave/aave-v3-core/commit/5ffeecdd6e376ff341d6f633e36be53c2cbc43b1))
+
 ## [1.8.0](https://www.github.com/aave/aave-v3-core/compare/v1.7.0...v1.8.0) (2021-12-16)
 
 

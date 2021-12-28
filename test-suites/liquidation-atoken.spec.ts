@@ -13,10 +13,10 @@ declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
   const {
-    VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD,
+    HEALTH_FACTOR_NOT_BELOW_THRESHOLD,
     INVALID_HF,
-    VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER,
-    VL_COLLATERAL_CANNOT_BE_LIQUIDATED,
+    SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER,
+    COLLATERAL_CANNOT_BE_LIQUIDATED,
   } = ProtocolErrors;
 
   let oracleBaseDecimals: number;
@@ -90,7 +90,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     //someone tries to liquidate user 2
     await expect(
       pool.liquidationCall(weth.address, dai.address, borrower.address, 1, true)
-    ).to.be.revertedWith(VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD);
+    ).to.be.revertedWith(HEALTH_FACTOR_NOT_BELOW_THRESHOLD);
   });
 
   it('Drop the health factor below 1', async () => {
@@ -120,7 +120,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     //user 2 tries to borrow
     await expect(
       pool.liquidationCall(weth.address, weth.address, borrower.address, oneEther, true)
-    ).to.be.revertedWith(VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+    ).to.be.revertedWith(SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   });
 
   it('Tries to liquidate a different collateral than the borrower collateral (revert expected)', async () => {
@@ -132,7 +132,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
 
     await expect(
       pool.liquidationCall(dai.address, dai.address, borrower.address, oneEther, true)
-    ).to.be.revertedWith(VL_COLLATERAL_CANNOT_BE_LIQUIDATED);
+    ).to.be.revertedWith(COLLATERAL_CANNOT_BE_LIQUIDATED);
   });
 
   it('Liquidates the borrow', async () => {

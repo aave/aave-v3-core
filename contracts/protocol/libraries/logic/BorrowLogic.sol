@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
@@ -22,9 +23,10 @@ import {IsolationModeLogic} from './IsolationModeLogic.sol';
 library BorrowLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+  using SafeCast for uint256;
 
   // See `IPool` for descriptions
   event Borrow(
@@ -32,9 +34,9 @@ library BorrowLogic {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint256 borrowRateMode,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
   event Repay(
     address indexed reserve,
@@ -45,7 +47,11 @@ library BorrowLogic {
   );
 
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
-  event Swap(address indexed reserve, address indexed user, uint256 rateMode);
+  event SwapBorrowRateMode(
+    address indexed reserve,
+    address indexed user,
+    DataTypes.InterestRateMode interestRateMode
+  );
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
@@ -101,7 +107,7 @@ library BorrowLogic {
     uint256 currentStableRate = 0;
     bool isFirstBorrowing = false;
 
-    if (DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE) {
+    if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       currentStableRate = reserve.currentStableBorrowRate;
 
       (
@@ -126,12 +132,10 @@ library BorrowLogic {
 
     if (isolationModeActive) {
       uint256 nextIsolationModeTotalDebt = reserves[isolationModeCollateralAddress]
-        .isolationModeTotalDebt += Helpers.castUint128(
-        params.amount /
-          10 **
-            (reserveCache.reserveConfiguration.getDecimals() -
-              ReserveConfiguration.DEBT_CEILING_DECIMALS)
-      );
+        .isolationModeTotalDebt += (params.amount /
+        10 **
+          (reserveCache.reserveConfiguration.getDecimals() -
+            ReserveConfiguration.DEBT_CEILING_DECIMALS)).toUint128();
       emit IsolationModeTotalDebtUpdated(
         isolationModeCollateralAddress,
         nextIsolationModeTotalDebt
@@ -155,7 +159,7 @@ library BorrowLogic {
       params.onBehalfOf,
       params.amount,
       params.interestRateMode,
-      DataTypes.InterestRateMode(params.interestRateMode) == DataTypes.InterestRateMode.STABLE
+      params.interestRateMode == DataTypes.InterestRateMode.STABLE
         ? currentStableRate
         : reserve.currentVariableBorrowRate,
       params.referralCode
@@ -183,7 +187,6 @@ library BorrowLogic {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
-    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(params.rateMode);
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
       params.onBehalfOf,
       reserve
@@ -192,21 +195,26 @@ library BorrowLogic {
     ValidationLogic.validateRepay(
       reserveCache,
       params.amount,
-      interestRateMode,
+      params.interestRateMode,
       params.onBehalfOf,
       stableDebt,
       variableDebt
     );
 
-    uint256 paybackAmount = interestRateMode == DataTypes.InterestRateMode.STABLE
+    uint256 paybackAmount = params.interestRateMode == DataTypes.InterestRateMode.STABLE
       ? stableDebt
       : variableDebt;
+
+    // Allows a user to repay with aTokens without leaving dust from interest.
+    if (params.useATokens && params.amount == type(uint256).max) {
+      params.amount = IAToken(reserveCache.aTokenAddress).balanceOf(msg.sender);
+    }
 
     if (params.amount < paybackAmount) {
       paybackAmount = params.amount;
     }
 
-    if (interestRateMode == DataTypes.InterestRateMode.STABLE) {
+    if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       (reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
         reserveCache.stableDebtTokenAddress
       ).burn(params.onBehalfOf, paybackAmount);
@@ -298,21 +306,19 @@ library BorrowLogic {
    * @param reserve The data of the reserve of the asset being repaid
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param asset The asset of the position being swapped
-   * @param rateMode The current interest rate mode of the position being swapped. If `rateMode == InterestRateMode.STABLE`, user must have stable debt
+   * @param interestRateMode The current interest rate mode of the position being swapped
    */
   function executeSwapBorrowRateMode(
     DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
-    uint256 rateMode
+    DataTypes.InterestRateMode interestRateMode
   ) external {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
 
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(msg.sender, reserve);
-
-    DataTypes.InterestRateMode interestRateMode = DataTypes.InterestRateMode(rateMode);
 
     ValidationLogic.validateSwapRateMode(
       reserve,
@@ -343,6 +349,6 @@ library BorrowLogic {
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
-    emit Swap(asset, msg.sender, rateMode);
+    emit SwapBorrowRateMode(asset, msg.sender, interestRateMode);
   }
 }
