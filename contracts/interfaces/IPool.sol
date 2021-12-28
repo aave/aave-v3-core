@@ -16,14 +16,14 @@ interface IPool {
    * @param user The address initiating the supply
    * @param onBehalfOf The beneficiary of the supplied assets, receiving the aTokens
    * @param amount The amount of supplied assets
-   * @param referral The referral code used
+   * @param referralCode The referral code used
    **/
   event MintUnbacked(
     address indexed reserve,
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
 
   /**
@@ -68,7 +68,7 @@ interface IPool {
    * @param amount The amount borrowed out
    * @param interestRateMode The rate mode: 1 for Stable, 2 for Variable
    * @param borrowRate The numeric rate at which the user has borrowed, expressed in ray
-   * @param referral The referral code used
+   * @param referralCode The referral code used
    **/
   event Borrow(
     address indexed reserve,
@@ -77,7 +77,7 @@ interface IPool {
     uint256 amount,
     DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
 
   /**
@@ -102,7 +102,7 @@ interface IPool {
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
-   
+
   event SwapBorrowRateMode(
     address indexed reserve,
     address indexed user,
@@ -115,6 +115,13 @@ interface IPool {
    * @param totalDebt The total isolation mode debt for the reserve
    */
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
+
+  /**
+   * @notice Emitted when the user selects a certain asset category for eMode
+   * @param user The address of the user
+   * @param categoryId The category id
+   **/
+  event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
    * @notice Emitted on setUserUseReserveAsCollateral()
@@ -143,16 +150,18 @@ interface IPool {
    * @param initiator The address initiating the flash loan
    * @param asset The address of the asset being flash borrowed
    * @param amount The amount flash borrowed
+   * @param interestRateMode The flashloan mode: 0 for regular flashloan, 1 for Stable debt, 2 for Variable debt
    * @param premium The fee flash borrowed
    * @param referralCode The referral code used
    **/
   event FlashLoan(
     address indexed target,
-    address indexed initiator,
+    address initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
-    uint16 referralCode
+    uint16 indexed referralCode
   );
 
   /**
@@ -227,13 +236,6 @@ interface IPool {
     uint256 amount,
     uint256 fee
   ) external;
-
-  /**
-   * @notice Emitted when the user selects a certain asset category for eMode
-   * @param user The address of the user
-   * @param categoryId The category id
-   **/
-  event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
@@ -368,6 +370,8 @@ interface IPool {
   /**
    * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the equivalent debt tokens
    * - E.g. User repays 100 USDC using 100 aUSDC, burning 100 variable/stable debt tokens
+   * @dev  Passing uint256.max as amount will clean up any residual aToken dust balance, if the user aToken balance is not enough to
+   * cover the whole debt
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
@@ -655,6 +659,13 @@ interface IPool {
    * @return The eMode id
    */
   function getUserEMode(address user) external view returns (uint256);
+
+  /**
+   * @notice Resets the isolation mode total debt of the given asset to zero
+   * @dev It requires the given asset has zero debt ceiling
+   * @param asset The address of the underlying asset to reset the isolationModeTotalDebt
+   */
+  function resetIsolationModeTotalDebt(address asset) external;
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate

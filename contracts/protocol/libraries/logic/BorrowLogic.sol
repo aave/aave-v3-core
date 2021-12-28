@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IStableDebtToken} from '../../../interfaces/IStableDebtToken.sol';
 import {IVariableDebtToken} from '../../../interfaces/IVariableDebtToken.sol';
@@ -25,6 +26,7 @@ library BorrowLogic {
   using GPv2SafeERC20 for IERC20;
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+  using SafeCast for uint256;
 
   // See `IPool` for descriptions
   event Borrow(
@@ -34,7 +36,7 @@ library BorrowLogic {
     uint256 amount,
     DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
   event Repay(
     address indexed reserve,
@@ -130,12 +132,10 @@ library BorrowLogic {
 
     if (isolationModeActive) {
       uint256 nextIsolationModeTotalDebt = reserves[isolationModeCollateralAddress]
-        .isolationModeTotalDebt += Helpers.castUint128(
-        params.amount /
-          10 **
-            (reserveCache.reserveConfiguration.getDecimals() -
-              ReserveConfiguration.DEBT_CEILING_DECIMALS)
-      );
+        .isolationModeTotalDebt += (params.amount /
+        10 **
+          (reserveCache.reserveConfiguration.getDecimals() -
+            ReserveConfiguration.DEBT_CEILING_DECIMALS)).toUint128();
       emit IsolationModeTotalDebtUpdated(
         isolationModeCollateralAddress,
         nextIsolationModeTotalDebt
@@ -204,6 +204,11 @@ library BorrowLogic {
     uint256 paybackAmount = params.interestRateMode == DataTypes.InterestRateMode.STABLE
       ? stableDebt
       : variableDebt;
+
+    // Allows a user to repay with aTokens without leaving dust from interest.
+    if (params.useATokens && params.amount == type(uint256).max) {
+      params.amount = IAToken(reserveCache.aTokenAddress).balanceOf(msg.sender);
+    }
 
     if (params.amount < paybackAmount) {
       paybackAmount = params.amount;

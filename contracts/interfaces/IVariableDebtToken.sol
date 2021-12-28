@@ -3,7 +3,6 @@ pragma solidity 0.8.10;
 
 import {IScaledBalanceToken} from './IScaledBalanceToken.sol';
 import {IInitializableDebtToken} from './IInitializableDebtToken.sol';
-import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
 
 /**
  * @title IVariableDebtToken
@@ -28,6 +27,15 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
   );
 
   /**
+   * @notice Emitted when variable debt is burnt
+   * @param user The user which debt has been burned
+   * @param amount The amount of debt being burned (user entered amount - balance increase from interest)
+   * @param balanceIncrease The increase in balance since the last action of the user
+   * @param index The index of the user
+   **/
+  event Burn(address indexed user, uint256 amount, uint256 balanceIncrease, uint256 index);
+
+  /**
    * @notice Mints debt token to the `onBehalfOf` address
    * @param user The address receiving the borrowed underlying, being the delegatee in case
    * of credit delegate, or same as `onBehalfOf` otherwise
@@ -43,15 +51,6 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
     uint256 amount,
     uint256 index
   ) external returns (bool, uint256);
-
-  /**
-   * @notice Emitted when variable debt is burnt
-   * @param user The user which debt has been burned
-   * @param amount The amount of debt being burned (user entered amount - balance increase from interest)
-   * @param balanceIncrease The increase in balance since the last action of the user
-   * @param index The index of the user
-   **/
-  event Burn(address indexed user, uint256 amount, uint256 balanceIncrease, uint256 index);
 
   /**
    * @notice Burns user variable debt

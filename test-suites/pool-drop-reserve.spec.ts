@@ -10,9 +10,9 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const {
-    RL_ATOKEN_SUPPLY_NOT_ZERO,
-    RL_STABLE_DEBT_NOT_ZERO,
-    RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO,
+    ATOKEN_SUPPLY_NOT_ZERO,
+    STABLE_DEBT_NOT_ZERO,
+    VARIABLE_DEBT_SUPPLY_NOT_ZERO,
     ASSET_NOT_LISTED,
     ZERO_ADDRESS_NOT_VALID,
   } = ProtocolErrors;
@@ -46,18 +46,16 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
 
     await pool.deposit(dai.address, depositedAmount, deployer.address, 0);
 
-    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(
-      RL_ATOKEN_SUPPLY_NOT_ZERO
-    );
+    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(ATOKEN_SUPPLY_NOT_ZERO);
 
     await pool.connect(user1.signer).deposit(weth.address, depositedAmount, user1.address, 0);
 
     await pool.connect(user1.signer).borrow(dai.address, borrowedAmount, 2, 0, user1.address);
     await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(
-      RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO
+      VARIABLE_DEBT_SUPPLY_NOT_ZERO
     );
     await pool.connect(user1.signer).borrow(dai.address, borrowedAmount, 1, 0, user1.address);
-    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(RL_STABLE_DEBT_NOT_ZERO);
+    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(STABLE_DEBT_NOT_ZERO);
   });
 
   it('User 2 repays debts, drop DAI reserve should fail', async () => {
@@ -69,13 +67,11 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
     } = testEnv;
     expect(await pool.connect(user1.signer).repay(dai.address, MAX_UINT_AMOUNT, 1, user1.address));
     await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(
-      RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO
+      VARIABLE_DEBT_SUPPLY_NOT_ZERO
     );
 
     expect(await pool.connect(user1.signer).repay(dai.address, MAX_UINT_AMOUNT, 2, user1.address));
-    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(
-      RL_ATOKEN_SUPPLY_NOT_ZERO
-    );
+    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(ATOKEN_SUPPLY_NOT_ZERO);
   });
 
   it('User 1 withdraw DAI, drop DAI reserve should succeed', async () => {

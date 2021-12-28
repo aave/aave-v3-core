@@ -9,7 +9,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
   const {
     INVALID_FROM_BALANCE_AFTER_TRANSFER,
     INVALID_TO_BALANCE_AFTER_TRANSFER,
-    VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
+    HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
   } = ProtocolErrors;
 
   const DAI_AMOUNT_TO_DEPOSIT = '1000';
@@ -223,8 +223,8 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     await expect(
       aDai.connect(users[1].signer).transfer(users[0].address, amountDAItoTransfer),
-      VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
-    ).to.be.revertedWith(VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
+      HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
+    ).to.be.revertedWith(HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
   });
 
   it('User 1 transfers a small amount of DAI used as collateral back to user 0', async () => {

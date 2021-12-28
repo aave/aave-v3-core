@@ -1,15 +1,12 @@
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { MAX_UINT_AMOUNT, RAY, WAD, HALF_RAY, HALF_WAD } from '../helpers/constants';
-import { ProtocolErrors } from '../helpers/types';
 import { WadRayMathWrapper, WadRayMathWrapper__factory } from '../types';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
 import { makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 
 makeSuite('WadRayMath', () => {
-  const { MATH_MULTIPLICATION_OVERFLOW, MATH_ADDITION_OVERFLOW } = ProtocolErrors;
-
   let wrapper: WadRayMathWrapper;
 
   before('setup', async () => {
@@ -76,13 +73,19 @@ makeSuite('WadRayMath', () => {
   });
 
   it('rayToWad()', async () => {
+    const half = BigNumber.from(10).pow(9).div(2);
+
     const a = BigNumber.from('10').pow(27);
     expect(await wrapper.rayToWad(a)).to.be.eq(a.rayToWad());
 
-    const halfRatio = BigNumber.from(10).pow(9).div(2);
-    const tooLarge = BigNumber.from(MAX_UINT_AMOUNT).sub(halfRatio).add(1);
+    const roundDown = BigNumber.from('10').pow(27).add(half.sub(1));
+    expect(await wrapper.rayToWad(roundDown)).to.be.eq(roundDown.rayToWad());
 
-    await expect(wrapper.rayToWad(tooLarge)).to.be.reverted;
+    const roundUp = BigNumber.from('10').pow(27).add(half);
+    expect(await wrapper.rayToWad(roundUp)).to.be.eq(roundUp.rayToWad());
+
+    const tooLarge = BigNumber.from(MAX_UINT_AMOUNT).sub(half).add(1);
+    expect(await wrapper.rayToWad(tooLarge)).to.be.eq(tooLarge.rayToWad());
   });
 
   it('wadToRay()', async () => {
