@@ -7,7 +7,7 @@ import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
-  const { VL_SUPPLY_CAP_EXCEEDED, RC_INVALID_SUPPLY_CAP } = ProtocolErrors;
+  const { SUPPLY_CAP_EXCEEDED, INVALID_SUPPLY_CAP } = ProtocolErrors;
 
   before(async () => {
     const { weth, pool, dai, usdc } = testEnv;
@@ -86,7 +86,7 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
 
     await expect(
       pool.deposit(usdc.address, suppliedAmount, deployer.address, 0)
-    ).to.be.revertedWith(VL_SUPPLY_CAP_EXCEEDED);
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
 
     await expect(
       pool.deposit(
@@ -95,7 +95,7 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
         deployer.address,
         0
       )
-    ).to.be.revertedWith(VL_SUPPLY_CAP_EXCEEDED);
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
   });
 
   it('Tries to set the supply cap for USDC and DAI to > MAX_SUPPLY_CAP (revert expected)', async () => {
@@ -103,10 +103,10 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
     const newCap = Number(MAX_SUPPLY_CAP) + 1;
 
     await expect(configurator.setSupplyCap(usdc.address, newCap)).to.be.revertedWith(
-      RC_INVALID_SUPPLY_CAP
+      INVALID_SUPPLY_CAP
     );
     await expect(configurator.setSupplyCap(dai.address, newCap)).to.be.revertedWith(
-      RC_INVALID_SUPPLY_CAP
+      INVALID_SUPPLY_CAP
     );
   });
 
@@ -162,7 +162,7 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
         deployer.address,
         0
       )
-    ).to.be.revertedWith(VL_SUPPLY_CAP_EXCEEDED);
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
 
     await expect(
       pool.deposit(
@@ -171,7 +171,7 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
         deployer.address,
         0
       )
-    ).to.be.revertedWith(VL_SUPPLY_CAP_EXCEEDED);
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
   });
 
   it('Supply 99 DAI and 99 USDC (< SUPPLY_CAP), leaving 1 Units to reach the limit', async () => {
@@ -300,7 +300,7 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
         deployer.address,
         0
       )
-    ).to.be.revertedWith(VL_SUPPLY_CAP_EXCEEDED);
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
 
     await expect(
       pool.deposit(
@@ -309,7 +309,7 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
         deployer.address,
         0
       )
-    ).to.be.revertedWith(VL_SUPPLY_CAP_EXCEEDED);
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
   });
 
   it('Raises the supply cap for USDC and DAI to MAX_SUPPLY_CAP', async () => {

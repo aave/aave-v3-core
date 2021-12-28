@@ -40,11 +40,8 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const mintAmount = withdrawAmount.mul(denominatorBP.sub(feeBps)).div(denominatorBP);
   const bridgeProtocolFeeBps = BigNumber.from(2000);
 
-  const {
-    VL_ASSET_NOT_BORROWABLE_IN_ISOLATION,
-    VL_DEBT_CEILING_CROSSED,
-    SL_USER_IN_ISOLATION_MODE,
-  } = ProtocolErrors;
+  const { ASSET_NOT_BORROWABLE_IN_ISOLATION, DEBT_CEILING_EXCEEDED, USER_IN_ISOLATION_MODE } =
+    ProtocolErrors;
 
   let aclManager;
   let oracleBaseDecimals;
@@ -118,7 +115,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(users[1].signer).setUserUseReserveAsCollateral(weth.address, true)
-    ).to.be.revertedWith(SL_USER_IN_ISOLATION_MODE);
+    ).to.be.revertedWith(USER_IN_ISOLATION_MODE);
 
     const userDataAfter = await helpersContract.getUserReserveData(weth.address, users[1].address);
     expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
@@ -153,7 +150,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user2.signer).setUserUseReserveAsCollateral(aave.address, true)
-    ).to.be.revertedWith(SL_USER_IN_ISOLATION_MODE);
+    ).to.be.revertedWith(USER_IN_ISOLATION_MODE);
 
     const userDataAfter = await helpersContract.getUserReserveData(aave.address, user2.address);
     expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
@@ -270,7 +267,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       pool
         .connect(users[1].signer)
         .borrow(weth.address, utils.parseEther('0.01'), '2', 0, users[1].address)
-    ).to.be.revertedWith(VL_ASSET_NOT_BORROWABLE_IN_ISOLATION);
+    ).to.be.revertedWith(ASSET_NOT_BORROWABLE_IN_ISOLATION);
   });
 
   it('User 1 borrows 10 DAI. Check debt ceiling', async () => {
@@ -318,7 +315,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const borrowAmount = utils.parseEther('100');
     await expect(
       pool.connect(users[3].signer).borrow(dai.address, borrowAmount, '2', 0, users[3].address)
-    ).to.be.revertedWith(VL_DEBT_CEILING_CROSSED);
+    ).to.be.revertedWith(DEBT_CEILING_EXCEEDED);
   });
 
   it('Push time forward one year. User 1, User 3 repay debt. Ensure debt ceiling is 0', async () => {

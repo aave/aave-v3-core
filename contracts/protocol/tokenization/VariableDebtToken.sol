@@ -86,7 +86,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     }
 
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(onBehalfOf);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
@@ -110,7 +110,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     uint256 index
   ) external override onlyPool returns (uint256) {
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -

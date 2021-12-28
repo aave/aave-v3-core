@@ -13,6 +13,7 @@ import {
   VariableDebtToken__factory,
 } from '../types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 
 type ReserveConfigurationValues = {
   reserveDecimals: string;
@@ -84,7 +85,7 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   let baseConfigValues: ReserveConfigurationValues;
-  const { PC_RESERVE_LIQUIDITY_NOT_0, RC_INVALID_DEBT_CEILING } = ProtocolErrors;
+  const { RESERVE_LIQUIDITY_NOT_ZERO, INVALID_DEBT_CEILING } = ProtocolErrors;
 
   before(() => {
     const {
@@ -688,6 +689,19 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     expect(await aclManager.isFlashBorrower(authorizedFlashBorrower)).to.be.false;
   });
 
+  it('Updates bridge protocol fee equal to PERCENTAGE_FACTOR', async () => {
+    const { pool, configurator } = testEnv;
+    const newProtocolFee = 10000;
+
+    const oldBridgeProtocolFee = await pool.BRIDGE_PROTOCOL_FEE();
+
+    expect(await configurator.updateBridgeProtocolFee(newProtocolFee))
+      .to.emit(configurator, 'BridgeProtocolFeeUpdated')
+      .withArgs(oldBridgeProtocolFee, newProtocolFee);
+
+    expect(await pool.BRIDGE_PROTOCOL_FEE()).to.be.eq(newProtocolFee);
+  });
+
   it('Updates bridge protocol fee', async () => {
     const { pool, configurator } = testEnv;
 
@@ -700,6 +714,30 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       .withArgs(oldBridgeProtocolFee, newProtocolFee);
 
     expect(await pool.BRIDGE_PROTOCOL_FEE()).to.be.eq(newProtocolFee);
+  });
+
+  it('Updates flash loan premiums equal to PERCENTAGE_FACTOR: 10000 toProtocol, 10000 total', async () => {
+    const snapId = await evmSnapshot();
+
+    const { pool, configurator } = testEnv;
+
+    const oldFlashloanPremiumTotal = await pool.FLASHLOAN_PREMIUM_TOTAL();
+    const oldFlashloanPremiumToProtocol = await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
+
+    const newPremiumTotal = 10000;
+    const newPremiumToProtocol = 10000;
+
+    expect(await configurator.updateFlashloanPremiumTotal(newPremiumTotal))
+      .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
+      .withArgs(oldFlashloanPremiumTotal, newPremiumTotal);
+    expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
+      .to.emit(configurator, 'FlashloanPremiumToProtocolUpdated')
+      .withArgs(oldFlashloanPremiumToProtocol, newPremiumToProtocol);
+
+    expect(await pool.FLASHLOAN_PREMIUM_TOTAL()).to.be.eq(newPremiumTotal);
+    expect(await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL()).to.be.eq(newPremiumToProtocol);
+
+    await evmRevert(snapId);
   });
 
   it('Updates flash loan premiums: 10 toProtocol, 40 total', async () => {
@@ -814,7 +852,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, debtCeiling)
-    ).to.be.revertedWith(RC_INVALID_DEBT_CEILING);
+    ).to.be.revertedWith(INVALID_DEBT_CEILING);
 
     const newCeiling = await helpersContract.getDebtCeiling(weth.address);
     expect(newCeiling).to.be.eq(currentCeiling, 'Invalid debt ceiling');
@@ -839,7 +877,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     await pool.connect(user1.signer).supply(weth.address, '100', user1.address, '0');
 
     await expect(configurator.setDebtCeiling(weth.address, '100')).to.be.revertedWith(
-      PC_RESERVE_LIQUIDITY_NOT_0
+      RESERVE_LIQUIDITY_NOT_ZERO
     );
   });
 
