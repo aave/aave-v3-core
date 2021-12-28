@@ -218,7 +218,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyRiskOrPoolAdmins
   {
-    require(reserveFactor <= PercentageMath.PERCENTAGE_FACTOR, Errors.RC_INVALID_RESERVE_FACTOR);
+    require(reserveFactor <= PercentageMath.PERCENTAGE_FACTOR, Errors.INVALID_RESERVE_FACTOR);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setReserveFactor(reserveFactor);
     _pool.setConfiguration(asset, currentConfig.data);
