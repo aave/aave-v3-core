@@ -84,7 +84,7 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   let baseConfigValues: ReserveConfigurationValues;
-  const { PC_RESERVE_LIQUIDITY_NOT_0, RC_INVALID_DEBT_CEILING } = ProtocolErrors;
+  const { RESERVE_LIQUIDITY_NOT_ZERO, INVALID_DEBT_CEILING } = ProtocolErrors;
 
   before(() => {
     const {
@@ -766,7 +766,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, debtCeiling)
-    ).to.be.revertedWith(RC_INVALID_DEBT_CEILING);
+    ).to.be.revertedWith(INVALID_DEBT_CEILING);
 
     const newCeiling = await helpersContract.getDebtCeiling(weth.address);
     expect(newCeiling).to.be.eq(currentCeiling, 'Invalid debt ceiling');
@@ -791,7 +791,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     await pool.connect(user1.signer).supply(weth.address, '100', user1.address, '0');
 
     await expect(configurator.setDebtCeiling(weth.address, '100')).to.be.revertedWith(
-      PC_RESERVE_LIQUIDITY_NOT_0
+      RESERVE_LIQUIDITY_NOT_ZERO
     );
   });
 

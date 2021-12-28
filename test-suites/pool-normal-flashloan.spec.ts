@@ -15,11 +15,7 @@ import './helpers/utils/wadraymath';
 makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
-  const {
-    VL_COLLATERAL_BALANCE_IS_0,
-    TRANSFER_AMOUNT_EXCEEDS_BALANCE,
-    P_INVALID_FLASH_LOAN_EXECUTOR_RETURN,
-  } = ProtocolErrors;
+  const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3;
@@ -195,7 +191,7 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(P_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
+    ).to.be.revertedWith(INVALID_FLASHLOAN_EXECUTOR_RETURN);
   });
 
   it('Tries to take a flashloan that is bigger than the available liquidity (revert expected)', async () => {
@@ -212,7 +208,7 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
         '0x10',
         '0'
       ),
-      TRANSFER_AMOUNT_EXCEEDS_BALANCE
+      ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE
     ).to.be.reverted;
   });
 
@@ -314,7 +310,7 @@ makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
           '0x10',
           '0'
         )
-    ).to.be.revertedWith(P_INVALID_FLASH_LOAN_EXECUTOR_RETURN);
+    ).to.be.revertedWith(INVALID_FLASHLOAN_EXECUTOR_RETURN);
   });
 
   it('Caller deposits 1000 DAI as collateral, Takes a WETH flashloan with mode = 0, does not approve the transfer of the funds', async () => {

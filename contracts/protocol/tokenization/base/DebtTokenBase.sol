@@ -27,7 +27,7 @@ abstract contract DebtTokenBase is
    * @dev Only pool can call functions marked by this modifier
    **/
   modifier onlyPool() {
-    require(_msgSender() == address(POOL), Errors.CT_CALLER_MUST_BE_POOL);
+    require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;
   }
 
@@ -61,9 +61,9 @@ abstract contract DebtTokenBase is
     bytes32 r,
     bytes32 s
   ) external {
-    require(delegator != address(0), 'INVALID_DELEGATOR');
+    require(delegator != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     //solium-disable-next-line
-    require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
+    require(block.timestamp <= deadline, Errors.INVALID_EXPIRATION);
     uint256 currentValidNonce = _nonces[delegator];
     bytes32 digest = keccak256(
       abi.encodePacked(
@@ -74,7 +74,7 @@ abstract contract DebtTokenBase is
         )
       )
     );
-    require(delegator == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
+    require(delegator == ecrecover(digest, v, r, s), Errors.INVALID_SIGNATURE);
     _nonces[delegator] = currentValidNonce + 1;
     _approveDelegation(delegator, delegatee, value);
   }
@@ -101,15 +101,15 @@ abstract contract DebtTokenBase is
    * standard ERC20 functions for transfer and allowance.
    **/
   function transfer(address, uint256) external virtual override returns (bool) {
-    revert('TRANSFER_NOT_SUPPORTED');
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function allowance(address, address) external view virtual override returns (uint256) {
-    revert('ALLOWANCE_NOT_SUPPORTED');
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function approve(address, uint256) external virtual override returns (bool) {
-    revert('APPROVAL_NOT_SUPPORTED');
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function transferFrom(
@@ -117,15 +117,15 @@ abstract contract DebtTokenBase is
     address,
     uint256
   ) external virtual override returns (bool) {
-    revert('TRANSFER_NOT_SUPPORTED');
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function increaseAllowance(address, uint256) external virtual override returns (bool) {
-    revert('ALLOWANCE_NOT_SUPPORTED');
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function decreaseAllowance(address, uint256) external virtual override returns (bool) {
-    revert('ALLOWANCE_NOT_SUPPORTED');
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   function _approveDelegation(
