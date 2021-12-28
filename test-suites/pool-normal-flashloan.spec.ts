@@ -15,7 +15,8 @@ import './helpers/utils/wadraymath';
 makeSuite('Pool: FlashLoan for gas comparison', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
-  const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } = ProtocolErrors;
+  const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } =
+    ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3;

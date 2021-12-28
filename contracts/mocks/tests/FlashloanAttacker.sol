@@ -6,19 +6,19 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {SafeMath} from '../../dependencies/openzeppelin/contracts/SafeMath.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {FlashLoanSimpleReceiverBase} from '../../flashloan/base/FlashLoanSimpleReceiverBase.sol';
+import {FlashLoanReceiverBase} from '../../flashloan/base/FlashLoanReceiverBase.sol';
 import {MintableERC20} from '../tokens/MintableERC20.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
-contract FlashloanAttacker is FlashLoanSimpleReceiverBase {
+contract FlashloanAttacker is FlashLoanReceiverBase {
   using GPv2SafeERC20 for IERC20;
   using SafeMath for uint256;
 
   IPoolAddressesProvider internal _provider;
   IPool internal _pool;
 
-  constructor(IPoolAddressesProvider provider) FlashLoanSimpleReceiverBase(provider) {
+  constructor(IPoolAddressesProvider provider) FlashLoanReceiverBase(provider) {
     _pool = IPool(provider.getPool());
   }
 
@@ -37,20 +37,20 @@ contract FlashloanAttacker is FlashLoanSimpleReceiverBase {
   }
 
   function executeOperation(
-    address asset,
-    uint256 amount,
-    uint256 premium,
+    address[] calldata assets,
+    uint256[] calldata amounts,
+    uint256[] calldata premiums,
     address, // initiator
     bytes memory // params
   ) public override returns (bool) {
-    MintableERC20 token = MintableERC20(asset);
-    uint256 amountToReturn = amount.add(premium);
+    MintableERC20 token = MintableERC20(assets[0]);
+    uint256 amountToReturn = amounts[0].add(premiums[0]);
 
     // Also do a normal borrow here in the middle
-    _innerBorrow(asset);
+    _innerBorrow(assets[0]);
 
-    token.mint(premium);
-    IERC20(asset).approve(address(POOL), amountToReturn);
+    token.mint(premiums[0]);
+    IERC20(assets[0]).approve(address(POOL), amountToReturn);
 
     return true;
   }

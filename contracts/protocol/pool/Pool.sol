@@ -417,21 +417,21 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function flashLoanSimple(
     address receiverAddress,
-    address asset,
-    uint256 amount,
+    address[] calldata assets,
+    uint256[] calldata amounts,
     bytes calldata params,
     uint16 referralCode
   ) external override {
     DataTypes.FlashloanSimpleParams memory flashParams = DataTypes.FlashloanSimpleParams({
       receiverAddress: receiverAddress,
-      asset: asset,
-      amount: amount,
+      assets: assets,
+      amounts: amounts,
       params: params,
       referralCode: referralCode,
       flashLoanPremiumToProtocol: _flashLoanPremiumToProtocol,
       flashLoanPremiumTotal: _flashLoanPremiumTotal
     });
-    FlashLoanLogic.executeFlashLoanSimple(_reserves[asset], flashParams);
+    FlashLoanLogic.executeFlashLoanSimple(_reserves[assets[0]], flashParams);
   }
 
   /// @inheritdoc IPool

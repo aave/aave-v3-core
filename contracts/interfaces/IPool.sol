@@ -461,16 +461,16 @@ interface IPool {
    * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
    * For further details please visit https://developers.aave.com
    * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanSimpleReceiver interface
-   * @param asset The address of the asset being flash-borrowed
-   * @param amount The amount of the asset being flash-borrowed
+   * @param assets The address of the asset being flash-borrowed
+   * @param amounts The amount of the asset being flash-borrowed
    * @param params Variadic packed params to pass to the receiver as extra information
    * @param referralCode The code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    **/
   function flashLoanSimple(
     address receiverAddress,
-    address asset,
-    uint256 amount,
+    address[] calldata assets,
+    uint256[] calldata amounts,
     bytes calldata params,
     uint16 referralCode
   ) external;

@@ -205,7 +205,7 @@ library FlashLoanLogic {
 
   // Helper struct for internal variables used in the `executeFlashLoanSimple` function
   struct FlashLoanSimpleLocalVars {
-    IFlashLoanSimpleReceiver receiver;
+    IFlashLoanReceiver receiver;
     uint256 totalPremium;
     uint256 premiumToLP;
     uint256 premiumToProtocol;
@@ -230,26 +230,39 @@ library FlashLoanLogic {
     // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
+    require(params.assets.length == 1);
+    require(params.amounts.length == 1);
     ValidationLogic.validateFlashloanSimple(reserve);
     FlashLoanSimpleLocalVars memory vars;
 
-    vars.receiver = IFlashLoanSimpleReceiver(params.receiverAddress);
-    vars.totalPremium = params.amount.percentMul(params.flashLoanPremiumTotal);
-    vars.amountPlusPremium = params.amount + vars.totalPremium;
-    IAToken(reserve.aTokenAddress).transferUnderlyingTo(params.receiverAddress, params.amount);
+    vars.receiver = IFlashLoanReceiver(params.receiverAddress);
+    vars.totalPremium = params.amounts[0].percentMul(params.flashLoanPremiumTotal);
+    vars.amountPlusPremium = params.amounts[0] + vars.totalPremium;
+    IAToken(reserve.aTokenAddress).transferUnderlyingTo(params.receiverAddress, params.amounts[0]);
 
+    uint256[] memory premiums = new uint256[](1);
+    premiums[0] = vars.totalPremium;
     require(
       vars.receiver.executeOperation(
-        params.asset,
-        params.amount,
-        vars.totalPremium,
+        params.assets,
+        params.amounts,
+        premiums,
         msg.sender,
         params.params
       ),
       Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
+    // address[] memory assets = new address[](1);
+    // uint256[] memory amounts = new uint256[](1);
+    // assets[0] = params.asset;
+    // amounts[0] = params.amount;
 
-    vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
+    // require(
+    //   vars.receiver.executeOperation(assets, amounts, premiums, msg.sender, params.params),
+    //   Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
+    // );
+
+    vars.premiumToProtocol = params.amounts[0].percentMul(params.flashLoanPremiumToProtocol);
     vars.premiumToLP = vars.totalPremium - vars.premiumToProtocol;
 
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
@@ -263,9 +276,9 @@ library FlashLoanLogic {
       reserve.accruedToTreasury +
       vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex).toUint128();
 
-    reserve.updateInterestRates(reserveCache, params.asset, vars.amountPlusPremium, 0);
+    reserve.updateInterestRates(reserveCache, params.assets[0], vars.amountPlusPremium, 0);
 
-    IERC20(params.asset).safeTransferFrom(
+    IERC20(params.assets[0]).safeTransferFrom(
       params.receiverAddress,
       reserveCache.aTokenAddress,
       vars.amountPlusPremium
@@ -279,8 +292,8 @@ library FlashLoanLogic {
     emit FlashLoan(
       params.receiverAddress,
       msg.sender,
-      params.asset,
-      params.amount,
+      params.assets[0],
+      params.amounts[0],
       DataTypes.InterestRateMode(0),
       vars.totalPremium,
       0

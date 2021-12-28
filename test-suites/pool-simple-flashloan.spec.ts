@@ -7,8 +7,8 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 
 import './helpers/utils/wadraymath';
 import {
-  MockFlashLoanSimpleReceiver,
-  MockFlashLoanSimpleReceiver__factory,
+  MockFlashLoanReceiver,
+  MockFlashLoanReceiver__factory,
   FlashloanAttacker__factory,
   IERC20Detailed__factory,
 } from '../types';
@@ -16,9 +16,10 @@ import { parseEther, parseUnits } from '@ethersproject/units';
 import { waitForTx } from '@aave/deploy-v3';
 
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
-  let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
+  let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanReceiver;
 
-  const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } = ProtocolErrors;
+  const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } =
+    ProtocolErrors;
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3;
   const PREMIUM_TO_LP = TOTAL_PREMIUM - PREMIUM_TO_PROTOCOL;
@@ -26,9 +27,9 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   before(async () => {
     const { addressesProvider, deployer } = testEnv;
 
-    _mockFlashLoanSimpleReceiver = await new MockFlashLoanSimpleReceiver__factory(
-      deployer.signer
-    ).deploy(addressesProvider.address);
+    _mockFlashLoanSimpleReceiver = await new MockFlashLoanReceiver__factory(deployer.signer).deploy(
+      addressesProvider.address
+    );
   });
 
   it('Configurator sets total premium = 9 bps, premium to protocol = 3 bps', async () => {
@@ -86,8 +87,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const tx = await waitForTx(
       await pool.flashLoanSimple(
         _mockFlashLoanSimpleReceiver.address,
-        weth.address,
-        wethFlashBorrowedAmount,
+        [weth.address],
+        [wethFlashBorrowedAmount],
         '0x10',
         '0'
       )
@@ -154,8 +155,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const txResult = await pool.flashLoanSimple(
       _mockFlashLoanSimpleReceiver.address,
-      weth.address,
-      flashBorrowedAmount,
+      [weth.address],
+      [flashBorrowedAmount],
       '0x10',
       '0'
     );
@@ -188,8 +189,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
         .connect(caller.signer)
         .flashLoanSimple(
           _mockFlashLoanSimpleReceiver.address,
-          weth.address,
-          ethers.utils.parseEther('0.8'),
+          [weth.address],
+          [ethers.utils.parseEther('0.8')],
           '0x10',
           '0'
         )
@@ -207,8 +208,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
         .connect(caller.signer)
         .flashLoanSimple(
           _mockFlashLoanSimpleReceiver.address,
-          weth.address,
-          ethers.utils.parseEther('0.8'),
+          [weth.address],
+          [ethers.utils.parseEther('0.8')],
           '0x10',
           '0'
         )
@@ -222,8 +223,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     await expect(
       pool.connect(caller.signer).flashLoanSimple(
         _mockFlashLoanSimpleReceiver.address,
-        weth.address,
-        '1004415000000000000', //slightly higher than the available liquidity
+        [weth.address],
+        ['1004415000000000000'], //slightly higher than the available liquidity
         '0x10',
         '0'
       ),
@@ -236,7 +237,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const caller = users[1];
 
     await expect(
-      pool.flashLoanSimple(deployer.address, weth.address, '1000000000000000000', '0x10', '0')
+      pool.flashLoanSimple(deployer.address, [weth.address], ['1000000000000000000'], '0x10', '0')
     ).to.be.reverted;
   });
 
@@ -276,8 +277,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     await pool.flashLoanSimple(
       _mockFlashLoanSimpleReceiver.address,
-      usdc.address,
-      flashBorrowedAmount,
+      [usdc.address],
+      [flashBorrowedAmount],
       '0x10',
       '0'
     );
@@ -312,8 +313,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
         .connect(caller.signer)
         .flashLoanSimple(
           _mockFlashLoanSimpleReceiver.address,
-          usdc.address,
-          flashloanAmount,
+          [usdc.address],
+          [flashloanAmount],
           '0x10',
           '0'
         )
@@ -344,8 +345,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
         .connect(caller.signer)
         .flashLoanSimple(
           _mockFlashLoanSimpleReceiver.address,
-          weth.address,
-          flashAmount,
+          [weth.address],
+          [flashAmount],
           '0x10',
           '0'
         )
@@ -386,7 +387,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     await pool
       .connect(user.signer)
-      .flashLoanSimple(flashAttacker.address, dai.address, parseUnits('1', 18), '0x10', 0);
+      .flashLoanSimple(flashAttacker.address, [dai.address], [parseUnits('1', 18)], '0x10', 0);
 
     const dataAfter = await pool.getReserveData(dai.address);
     const debtAfter = await debtToken.totalSupply();

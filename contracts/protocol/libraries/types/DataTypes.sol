@@ -188,8 +188,8 @@ library DataTypes {
 
   struct FlashloanSimpleParams {
     address receiverAddress;
-    address asset;
-    uint256 amount;
+    address[] assets;
+    uint256[] amounts;
     bytes params;
     uint16 referralCode;
     uint256 flashLoanPremiumToProtocol;
