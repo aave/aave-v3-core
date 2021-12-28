@@ -8,10 +8,10 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
 /**
  * @title PoolAddressesProviderRegistry
  * @author Aave
- * @notice Main registry of PoolAddressesProvider of multiple Aave protocol's markets
+ * @notice Main registry of PoolAddressesProvider of Aave markets.
  * @dev Used for indexing purposes of Aave protocol's markets. The id assigned
  *   to a PoolAddressesProvider refers to the market it is connected with, for
- *   example with `0` for the Aave main market and `1` for the next created.
+ *   example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
   mapping(address => uint256) private _addressesProviders;
@@ -36,7 +36,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
-    require(id != 0, Errors.PAPR_INVALID_ADDRESSES_PROVIDER_ID);
+    require(id != 0, Errors.INVALID_ADDRESSES_PROVIDER_ID);
 
     _addressesProviders[provider] = id;
     _addToAddressesProvidersList(provider);
@@ -45,7 +45,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviders[provider] > 0, Errors.PAPR_PROVIDER_NOT_REGISTERED);
+    require(_addressesProviders[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
     _addressesProviders[provider] = 0;
     emit AddressesProviderUnregistered(provider);
   }
@@ -60,6 +60,11 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     return _addressesProviders[addressesProvider];
   }
 
+  /**
+   * @notice Adds the addresses provider address to the list.
+   * @dev The addressesProvider is not added if it already exists in the registry
+   * @param provider The address of the PoolAddressesProvider
+   */
   function _addToAddressesProvidersList(address provider) internal {
     uint256 providersCount = _addressesProvidersList.length;
 

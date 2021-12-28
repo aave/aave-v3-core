@@ -2,10 +2,9 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
@@ -13,6 +12,7 @@ import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesControl
 import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
 import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {IncentivizedERC20} from './IncentivizedERC20.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title Aave ERC20 AToken
@@ -21,7 +21,8 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
  */
 contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   using WadRayMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeCast for uint256;
+  using GPv2SafeERC20 for IERC20;
 
   bytes32 public constant PERMIT_TYPEHASH =
     keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
@@ -33,7 +34,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   address internal _underlyingAsset;
 
   modifier onlyPool() {
-    require(_msgSender() == address(POOL), Errors.CT_CALLER_MUST_BE_POOL);
+    require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;
   }
 
@@ -88,15 +89,15 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 index
   ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[user].additionalData = index.toUint128();
 
-    _burn(user, Helpers.castUint128(amountScaled));
+    _burn(user, amountScaled.toUint128());
 
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
@@ -120,15 +121,15 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 index
   ) public override onlyPool returns (bool) {
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
       scaledBalance.rayMul(_userState[user].additionalData);
 
-    _userState[user].additionalData = Helpers.castUint128(index);
+    _userState[user].additionalData = index.toUint128();
 
-    _mint(user, Helpers.castUint128(amountScaled));
+    _mint(user, amountScaled.toUint128());
 
     uint256 amountToMint = amount + balanceIncrease;
     emit Transfer(address(0), user, amountToMint);
@@ -235,9 +236,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     bytes32 r,
     bytes32 s
   ) external override {
-    require(owner != address(0), 'INVALID_OWNER');
+    require(owner != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     //solium-disable-next-line
-    require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
+    require(block.timestamp <= deadline, Errors.INVALID_EXPIRATION);
     uint256 currentValidNonce = _nonces[owner];
     bytes32 digest = keccak256(
       abi.encodePacked(
@@ -246,7 +247,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
         keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, currentValidNonce, deadline))
       )
     );
-    require(owner == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
+    require(owner == ecrecover(digest, v, r, s), Errors.INVALID_SIGNATURE);
     _nonces[owner] = currentValidNonce + 1;
     _approve(owner, spender, value);
   }
@@ -272,7 +273,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
 
-    super._transfer(from, to, Helpers.castUint128(amount.rayDiv(index)));
+    super._transfer(from, to, amount.rayDiv(index).toUint128());
 
     if (validate) {
       POOL.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
@@ -293,5 +294,26 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint128 amount
   ) internal override {
     _transfer(from, to, amount, true);
+  }
+
+  /**
+   * @dev overrides the base function to fully implement IAToken
+   * @dev see `IncentivizedERC20.DOMAIN_SEPARATOR()` for more detailed documentation
+   */
+  function DOMAIN_SEPARATOR() public view override(IAToken, IncentivizedERC20) returns (bytes32) {
+    return super.DOMAIN_SEPARATOR();
+  }
+
+  /**
+   * @dev overrides the base function to fully implement IAToken
+   * @dev see `IncentivizedERC20.nonces()` for more detailed documentation
+   */
+  function nonces(address owner)
+    public
+    view
+    override(IAToken, IncentivizedERC20)
+    returns (uint256)
+  {
+    return super.nonces(owner);
   }
 }

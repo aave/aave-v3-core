@@ -253,7 +253,7 @@ makeSuite('Upgradeability', (testEnv: TestEnv) => {
       ).to.be.revertedWith('Contract instance has already been initialized');
     });
 
-    it('upgradeToAndCall() to a new imple from non-admin address (revert expected)', async () => {
+    it('upgradeToAndCall() to a new impl from non-admin address (revert expected)', async () => {
       await expect(
         proxy.connect(nonAdmin).upgradeToAndCall(implementationV2.address, Buffer.from(''))
       ).to.be.reverted;

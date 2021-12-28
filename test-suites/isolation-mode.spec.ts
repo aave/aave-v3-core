@@ -40,7 +40,8 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const mintAmount = withdrawAmount.mul(denominatorBP.sub(feeBps)).div(denominatorBP);
   const bridgeProtocolFeeBps = BigNumber.from(2000);
 
-  const { VL_ASSET_NOT_BORROWABLE_IN_ISOLATION, VL_DEBT_CEILING_CROSSED } = ProtocolErrors;
+  const { ASSET_NOT_BORROWABLE_IN_ISOLATION, DEBT_CEILING_EXCEEDED, USER_IN_ISOLATION_MODE } =
+    ProtocolErrors;
 
   let aclManager;
   let oracleBaseDecimals;
@@ -104,6 +105,57 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const userData = await helpersContract.getUserReserveData(weth.address, users[1].address);
 
     expect(userData.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 1 tries to use eth as collateral (revert expected)', async () => {
+    const { users, pool, weth, helpersContract } = testEnv;
+
+    const userDataBefore = await helpersContract.getUserReserveData(weth.address, users[1].address);
+    expect(userDataBefore.usageAsCollateralEnabled).to.be.eq(false);
+
+    await expect(
+      pool.connect(users[1].signer).setUserUseReserveAsCollateral(weth.address, true)
+    ).to.be.revertedWith(USER_IN_ISOLATION_MODE);
+
+    const userDataAfter = await helpersContract.getUserReserveData(weth.address, users[1].address);
+    expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 2 deposit dai and aave, then tries to use aave as collateral (revert expected)', async () => {
+    const snap = await evmSnapshot();
+    const {
+      users: [, , user2],
+      pool,
+      dai,
+      aave,
+      helpersContract,
+    } = testEnv;
+
+    await dai.connect(user2.signer)['mint(uint256)'](utils.parseEther('1'));
+    await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user2.signer).supply(dai.address, utils.parseEther('1'), user2.address, 0);
+
+    await aave.connect(user2.signer)['mint(uint256)'](utils.parseEther('1'));
+    await aave.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user2.signer).supply(aave.address, utils.parseEther('1'), user2.address, 0);
+
+    const userDaiDataBefore = await helpersContract.getUserReserveData(dai.address, user2.address);
+    expect(userDaiDataBefore.usageAsCollateralEnabled).to.be.eq(true);
+
+    const userAaveDataBefore = await helpersContract.getUserReserveData(
+      aave.address,
+      user2.address
+    );
+    expect(userAaveDataBefore.usageAsCollateralEnabled).to.be.eq(false);
+
+    await expect(
+      pool.connect(user2.signer).setUserUseReserveAsCollateral(aave.address, true)
+    ).to.be.revertedWith(USER_IN_ISOLATION_MODE);
+
+    const userDataAfter = await helpersContract.getUserReserveData(aave.address, user2.address);
+    expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
+
+    await evmRevert(snap);
   });
 
   it('User 2 (as bridge) mint 100 unbacked dai to user 1. Checks that dai is NOT activated as collateral', async () => {
@@ -215,14 +267,18 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       pool
         .connect(users[1].signer)
         .borrow(weth.address, utils.parseEther('0.01'), '2', 0, users[1].address)
-    ).to.be.revertedWith(VL_ASSET_NOT_BORROWABLE_IN_ISOLATION);
+    ).to.be.revertedWith(ASSET_NOT_BORROWABLE_IN_ISOLATION);
   });
 
   it('User 1 borrows 10 DAI. Check debt ceiling', async () => {
     const { dai, aave, users, pool } = testEnv;
 
     const borrowAmount = utils.parseEther('10');
-    await pool.connect(users[1].signer).borrow(dai.address, borrowAmount, '2', 0, users[1].address);
+    await expect(
+      pool.connect(users[1].signer).borrow(dai.address, borrowAmount, '2', 0, users[1].address)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, 1000);
 
     const reserveData = await pool.getReserveData(aave.address);
 
@@ -238,8 +294,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await pool.connect(users[3].signer).supply(aave.address, aaveAmount, users[3].address, 0);
 
     const borrowAmount = utils.parseEther('10');
-    await pool.connect(users[3].signer).borrow(dai.address, borrowAmount, '2', 0, users[3].address);
-
+    await expect(
+      pool.connect(users[3].signer).borrow(dai.address, borrowAmount, '2', 0, users[3].address)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, 2000);
     const reserveData = await pool.getReserveData(aave.address);
 
     expect(reserveData.isolationModeTotalDebt).to.be.eq('2000');
@@ -256,7 +315,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const borrowAmount = utils.parseEther('100');
     await expect(
       pool.connect(users[3].signer).borrow(dai.address, borrowAmount, '2', 0, users[3].address)
-    ).to.be.revertedWith(VL_DEBT_CEILING_CROSSED);
+    ).to.be.revertedWith(DEBT_CEILING_EXCEEDED);
   });
 
   it('Push time forward one year. User 1, User 3 repay debt. Ensure debt ceiling is 0', async () => {
@@ -273,8 +332,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await dai.connect(users[1].signer)['mint(uint256)'](mintAmount);
     await dai.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
 
-    await pool.connect(users[1].signer).repay(dai.address, MAX_UINT_AMOUNT, '2', users[1].address);
-
+    await expect(
+      pool.connect(users[1].signer).repay(dai.address, MAX_UINT_AMOUNT, '2', users[1].address)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, 0);
     const reserveData = await pool.getReserveData(aave.address);
 
     expect(reserveData.isolationModeTotalDebt).to.be.eq('0');
@@ -328,16 +390,20 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     const isolationModeTotalDebtBefore = (await pool.getReserveData(aave.address))
       .isolationModeTotalDebt;
-
-    await pool
-      .connect(liquidator.signer)
-      .liquidationCall(aave.address, dai.address, borrower.address, borrowAmount.div(2), false);
-
-    const isolationModeTotalDebtAfter = (await pool.getReserveData(aave.address))
-      .isolationModeTotalDebt;
     const expectedAmountAfter = isolationModeTotalDebtBefore.sub(
       borrowAmount.div(2).div(BigNumber.from(10).pow(16))
     );
+
+    await expect(
+      pool
+        .connect(liquidator.signer)
+        .liquidationCall(aave.address, dai.address, borrower.address, borrowAmount.div(2), false)
+    )
+      .to.emit(pool, 'IsolationModeTotalDebtUpdated')
+      .withArgs(aave.address, expectedAmountAfter);
+
+    const isolationModeTotalDebtAfter = (await pool.getReserveData(aave.address))
+      .isolationModeTotalDebt;
 
     expect(isolationModeTotalDebtAfter).to.be.eq(expectedAmountAfter);
   });
