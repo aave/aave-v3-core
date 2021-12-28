@@ -69,7 +69,7 @@ library ReserveConfiguration {
    * @param ltv The new ltv
    **/
   function setLtv(DataTypes.ReserveConfigurationMap memory self, uint256 ltv) internal pure {
-    require(ltv <= MAX_VALID_LTV, Errors.RC_INVALID_LTV);
+    require(ltv <= MAX_VALID_LTV, Errors.INVALID_LTV);
 
     self.data = (self.data & LTV_MASK) | ltv;
   }
@@ -92,7 +92,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(threshold <= MAX_VALID_LIQUIDATION_THRESHOLD, Errors.RC_INVALID_LIQ_THRESHOLD);
+    require(threshold <= MAX_VALID_LIQUIDATION_THRESHOLD, Errors.INVALID_LIQ_THRESHOLD);
 
     self.data =
       (self.data & LIQUIDATION_THRESHOLD_MASK) |
@@ -121,7 +121,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(bonus <= MAX_VALID_LIQUIDATION_BONUS, Errors.RC_INVALID_LIQ_BONUS);
+    require(bonus <= MAX_VALID_LIQUIDATION_BONUS, Errors.INVALID_LIQ_BONUS);
 
     self.data =
       (self.data & LIQUIDATION_BONUS_MASK) |
@@ -150,7 +150,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(decimals <= MAX_VALID_DECIMALS, Errors.RC_INVALID_DECIMALS);
+    require(decimals <= MAX_VALID_DECIMALS, Errors.INVALID_DECIMALS);
 
     self.data = (self.data & DECIMALS_MASK) | (decimals << RESERVE_DECIMALS_START_BIT_POSITION);
   }
@@ -322,7 +322,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(reserveFactor <= MAX_VALID_RESERVE_FACTOR, Errors.RC_INVALID_RESERVE_FACTOR);
+    require(reserveFactor <= MAX_VALID_RESERVE_FACTOR, Errors.INVALID_RESERVE_FACTOR);
 
     self.data =
       (self.data & RESERVE_FACTOR_MASK) |
@@ -351,7 +351,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(borrowCap <= MAX_VALID_BORROW_CAP, Errors.RC_INVALID_BORROW_CAP);
+    require(borrowCap <= MAX_VALID_BORROW_CAP, Errors.INVALID_BORROW_CAP);
 
     self.data = (self.data & BORROW_CAP_MASK) | (borrowCap << BORROW_CAP_START_BIT_POSITION);
   }
@@ -378,7 +378,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(supplyCap <= MAX_VALID_SUPPLY_CAP, Errors.RC_INVALID_SUPPLY_CAP);
+    require(supplyCap <= MAX_VALID_SUPPLY_CAP, Errors.INVALID_SUPPLY_CAP);
 
     self.data = (self.data & SUPPLY_CAP_MASK) | (supplyCap << SUPPLY_CAP_START_BIT_POSITION);
   }
@@ -405,7 +405,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(ceiling <= MAX_VALID_DEBT_CEILING, Errors.RC_INVALID_DEBT_CEILING);
+    require(ceiling <= MAX_VALID_DEBT_CEILING, Errors.INVALID_DEBT_CEILING);
 
     self.data = (self.data & DEBT_CEILING_MASK) | (ceiling << DEBT_CEILING_START_BIT_POSITION);
   }
@@ -434,7 +434,7 @@ library ReserveConfiguration {
   ) internal pure {
     require(
       liquidationProtocolFee <= MAX_VALID_LIQUIDATION_PROTOCOL_FEE,
-      Errors.RC_INVALID_LIQUIDATION_PROTOCOL_FEE
+      Errors.INVALID_LIQUIDATION_PROTOCOL_FEE
     );
 
     self.data =
@@ -465,7 +465,7 @@ library ReserveConfiguration {
     DataTypes.ReserveConfigurationMap memory self,
     uint256 unbackedMintCap
   ) internal pure {
-    require(unbackedMintCap <= MAX_VALID_UNBACKED_MINT_CAP, Errors.RC_INVALID_UNBACKED_MINT_CAP);
+    require(unbackedMintCap <= MAX_VALID_UNBACKED_MINT_CAP, Errors.INVALID_UNBACKED_MINT_CAP);
 
     self.data =
       (self.data & UNBACKED_MINT_CAP_MASK) |
@@ -494,7 +494,7 @@ library ReserveConfiguration {
     internal
     pure
   {
-    require(category <= MAX_VALID_EMODE_CATEGORY, Errors.RC_INVALID_EMODE_CATEGORY);
+    require(category <= MAX_VALID_EMODE_CATEGORY, Errors.INVALID_EMODE_CATEGORY);
 
     self.data = (self.data & EMODE_CATEGORY_MASK) | (category << EMODE_CATEGORY_START_BIT_POSITION);
   }

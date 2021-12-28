@@ -34,7 +34,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   address internal _underlyingAsset;
 
   modifier onlyPool() {
-    require(_msgSender() == address(POOL), Errors.CT_CALLER_MUST_BE_POOL);
+    require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;
   }
 
@@ -89,7 +89,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 index
   ) external override onlyPool {
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_BURN_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
@@ -121,7 +121,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     uint256 index
   ) public override onlyPool returns (bool) {
     uint256 amountScaled = amount.rayDiv(index);
-    require(amountScaled != 0, Errors.CT_INVALID_MINT_AMOUNT);
+    require(amountScaled != 0, Errors.INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
     uint256 balanceIncrease = scaledBalance.rayMul(index) -
@@ -236,9 +236,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     bytes32 r,
     bytes32 s
   ) external override {
-    require(owner != address(0), 'INVALID_OWNER');
+    require(owner != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     //solium-disable-next-line
-    require(block.timestamp <= deadline, 'INVALID_EXPIRATION');
+    require(block.timestamp <= deadline, Errors.INVALID_EXPIRATION);
     uint256 currentValidNonce = _nonces[owner];
     bytes32 digest = keccak256(
       abi.encodePacked(
@@ -247,7 +247,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
         keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, currentValidNonce, deadline))
       )
     );
-    require(owner == ecrecover(digest, v, r, s), 'INVALID_SIGNATURE');
+    require(owner == ecrecover(digest, v, r, s), Errors.INVALID_SIGNATURE);
     _nonces[owner] = currentValidNonce + 1;
     _approve(owner, spender, value);
   }
