@@ -42,7 +42,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     const invalidReserveFactor = 20000;
     await expect(
       configurator.setReserveFactor(dai.address, invalidReserveFactor)
-    ).to.be.revertedWith(RC_INVALID_RESERVE_FACTOR);
+    ).to.be.revertedWith(INVALID_RESERVE_FACTOR);
   });
 
   it('ReserveConfiguration setReserveFactor() reserveFactor > MAX_VALID_RESERVE_FACTOR', async () => {
