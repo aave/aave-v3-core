@@ -96,13 +96,12 @@ library WadRayMath {
    * @return b = a converted to wad, rounded half up to the nearest wad
    **/
   function rayToWad(uint256 a) internal pure returns (uint256 b) {
-    // to avoid overflow, a + HALF_RAY_RATIO >= HALF_RAY_RATIO
     assembly {
-      b := add(a, div(WAD_RAY_RATIO, 2))
-      if lt(b, div(WAD_RAY_RATIO, 2)) {
-        revert(0, 0)
+      b := div(a, WAD_RAY_RATIO)
+      let remainder := mod(a, WAD_RAY_RATIO)
+      if iszero(lt(remainder, div(WAD_RAY_RATIO, 2))) {
+        b := add(b, 1)
       }
-      b := div(b, WAD_RAY_RATIO)
     }
   }
 

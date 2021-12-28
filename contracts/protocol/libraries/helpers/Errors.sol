@@ -88,4 +88,5 @@ library Errors {
   string public constant INVALID_EXPIRATION = '79'; // 'Invalid expiration'
   string public constant INVALID_SIGNATURE = '80'; // 'Invalid signature'
   string public constant OPERATION_NOT_SUPPORTED = '81'; // 'Operation not supported'
+  string public constant DEBT_CEILING_NOT_ZERO = '82'; // 'Debt ceiling is not zero'
 }

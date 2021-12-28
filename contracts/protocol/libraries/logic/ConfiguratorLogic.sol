@@ -113,7 +113,7 @@ library ConfiguratorLogic {
     currentConfig.setPaused(false);
     currentConfig.setFrozen(false);
 
-    pool.setConfiguration(input.underlyingAsset, currentConfig.data);
+    pool.setConfiguration(input.underlyingAsset, currentConfig);
 
     emit ReserveInitialized(
       input.underlyingAsset,
