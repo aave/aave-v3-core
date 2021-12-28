@@ -35,12 +35,12 @@ library FlashLoanLogic {
   // See `IPool` for descriptions
   event FlashLoan(
     address indexed target,
-    address indexed initiator,
+    address initiator,
     address indexed asset,
     uint256 amount,
     DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
-    uint16 referralCode
+    uint16 indexed referralCode
   );
 
   // Helper struct for internal variables used in the `executeFlashLoan` function

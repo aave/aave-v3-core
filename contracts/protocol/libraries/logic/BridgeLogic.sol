@@ -31,7 +31,7 @@ library BridgeLogic {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
