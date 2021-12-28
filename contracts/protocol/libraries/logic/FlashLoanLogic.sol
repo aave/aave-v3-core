@@ -86,12 +86,12 @@ library FlashLoanLogic {
     // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
+    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
+
     FlashLoanLocalVars memory vars;
 
     vars.aTokenAddresses = new address[](params.assets.length);
     vars.totalPremiums = new uint256[](params.assets.length);
-
-    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
 
     vars.receiver = IFlashLoanReceiver(params.receiverAddress);
     (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
@@ -231,6 +231,7 @@ library FlashLoanLogic {
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
     ValidationLogic.validateFlashloanSimple(reserve);
+
     FlashLoanSimpleLocalVars memory vars;
 
     vars.receiver = IFlashLoanSimpleReceiver(params.receiverAddress);
