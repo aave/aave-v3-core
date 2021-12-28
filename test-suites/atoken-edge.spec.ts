@@ -12,8 +12,12 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
-  const { INVALID_MINT_AMOUNT, INVALID_BURN_AMOUNT, SAFECAST_UINT128_OVERFLOW, CALLER_NOT_POOL_ADMIN } =
-    ProtocolErrors;
+  const {
+    INVALID_MINT_AMOUNT,
+    INVALID_BURN_AMOUNT,
+    SAFECAST_UINT128_OVERFLOW,
+    CALLER_NOT_POOL_ADMIN,
+  } = ProtocolErrors;
 
   it('Check getters', async () => {
     const { pool, users, dai, aDai } = testEnv;
@@ -216,7 +220,9 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
       users: [depositor, borrower],
     } = testEnv;
 
-    expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(SAFECAST_UINT128_OVERFLOW);
+    expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(
+      SAFECAST_UINT128_OVERFLOW
+    );
   });
 
   it('setIncentivesController() ', async () => {
