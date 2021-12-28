@@ -8,6 +8,8 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   const NEW_ADDRESES_PROVIDER_ADDRESS = ONE_ADDRESS;
   const NEW_ADDRESSES_PROVIDER_ID = 2;
 
+  const { INVALID_ADDRESSES_PROVIDER_ID, PROVIDER_NOT_REGISTERED } = ProtocolErrors;
+
   it('Checks the addresses provider is added to the registry', async () => {
     const { addressesProvider, registry } = testEnv;
 
@@ -22,11 +24,10 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
   it('Tries to register an addresses provider with id 0 (revert expected)', async () => {
     const { registry } = testEnv;
-    const { PAPR_INVALID_ADDRESSES_PROVIDER_ID } = ProtocolErrors;
 
     await expect(
       registry.registerAddressesProvider(NEW_ADDRESES_PROVIDER_ADDRESS, '0')
-    ).to.be.revertedWith(PAPR_INVALID_ADDRESSES_PROVIDER_ID);
+    ).to.be.revertedWith(INVALID_ADDRESSES_PROVIDER_ID);
   });
 
   it('Registers a new mock addresses provider', async () => {
@@ -83,17 +84,15 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to remove an unregistered addressesProvider (revert expected)', async () => {
-    const { PAPR_PROVIDER_NOT_REGISTERED } = ProtocolErrors;
-
+  it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
     const { users, registry } = testEnv;
 
     await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(
-      PAPR_PROVIDER_NOT_REGISTERED
+      PROVIDER_NOT_REGISTERED
     );
   });
 
-  it('Add an already added addressesProvider with a different id, overwriting the previous id', async () => {
+  it('Tries to add an already added addressesProvider with a different id. Should overwrite the previous id', async () => {
     const { registry, addressesProvider } = testEnv;
 
     const oldId = await registry.getAddressesProviderIdByAddress(addressesProvider.address);

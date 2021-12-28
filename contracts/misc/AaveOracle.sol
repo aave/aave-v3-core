@@ -78,7 +78,7 @@ contract AaveOracle is IAaveOracle {
    * @param sources The address of the source of each asset
    */
   function _setAssetsSources(address[] memory assets, address[] memory sources) internal {
-    require(assets.length == sources.length, 'INCONSISTENT_PARAMS_LENGTH');
+    require(assets.length == sources.length, Errors.INCONSISTENT_PARAMS_LENGTH);
     for (uint256 i = 0; i < assets.length; i++) {
       assetsSources[assets[i]] = IChainlinkAggregator(sources[i]);
       emit AssetSourceUpdated(assets[i], sources[i]);
@@ -140,7 +140,7 @@ contract AaveOracle is IAaveOracle {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(
       aclManager.isAssetListingAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
-      Errors.PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
+      Errors.CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN
     );
   }
 }

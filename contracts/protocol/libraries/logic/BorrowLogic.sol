@@ -36,7 +36,7 @@ library BorrowLogic {
     uint256 amount,
     DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
   event Repay(
     address indexed reserve,

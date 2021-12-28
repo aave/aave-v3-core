@@ -30,7 +30,7 @@ library UserConfiguration {
     bool borrowing
   ) internal {
     unchecked {
-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
       uint256 bit = 1 << (reserveIndex << 1);
       if (borrowing) {
         self.data |= bit;
@@ -52,7 +52,7 @@ library UserConfiguration {
     bool usingAsCollateral
   ) internal {
     unchecked {
-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
       uint256 bit = 1 << ((reserveIndex << 1) + 1);
       if (usingAsCollateral) {
         self.data |= bit;
@@ -73,7 +73,7 @@ library UserConfiguration {
     uint256 reserveIndex
   ) internal pure returns (bool) {
     unchecked {
-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
       return (self.data >> (reserveIndex << 1)) & 3 != 0;
     }
   }
@@ -90,7 +90,7 @@ library UserConfiguration {
     returns (bool)
   {
     unchecked {
-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
       return (self.data >> (reserveIndex << 1)) & 1 != 0;
     }
   }
@@ -107,7 +107,7 @@ library UserConfiguration {
     returns (bool)
   {
     unchecked {
-      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.UL_INVALID_INDEX);
+      require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
       return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
     }
   }

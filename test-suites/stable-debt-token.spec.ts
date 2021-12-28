@@ -12,7 +12,7 @@ import { StableDebtToken__factory } from '../types';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
+  const { CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
   let snap: string;
 
   before(async () => {
@@ -82,7 +82,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.mint(deployer.address, deployer.address, '1', '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
+    ).to.be.revertedWith(CALLER_MUST_BE_POOL);
   });
 
   it('Tries to burn not being the Pool (revert expected)', async () => {
@@ -100,7 +100,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     expect(name).to.be.equal('Aave stable debt bearing DAI');
     await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
+      CALLER_MUST_BE_POOL
     );
   });
 
@@ -115,7 +115,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).transfer(users[1].address, 500)
-    ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
@@ -221,10 +221,10 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).approve(users[1].address, 500)
-    ).to.be.revertedWith('APPROVAL_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
     await expect(
       stableDebtContract.allowance(users[0].address, users[1].address)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to increase allowance of debt tokens (revert expected)', async () => {
@@ -238,7 +238,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).increaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to decrease allowance of debt tokens (revert expected)', async () => {
@@ -252,7 +252,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     await expect(
       stableDebtContract.connect(users[0].signer).decreaseAllowance(users[1].address, 500)
-    ).to.be.revertedWith('ALLOWANCE_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Tries to transferFrom (revert expected)', async () => {
@@ -268,7 +268,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       stableDebtContract
         .connect(users[0].signer)
         .transferFrom(users[0].address, users[1].address, 500)
-    ).to.be.revertedWith('TRANSFER_NOT_SUPPORTED');
+    ).to.be.revertedWith(ProtocolErrors.OPERATION_NOT_SUPPORTED);
   });
 
   it('Burn stable debt tokens such that `secondTerm >= firstTerm`', async () => {

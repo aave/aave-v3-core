@@ -229,10 +229,10 @@ describe('ReserveConfiguration', async () => {
   it('setLtv() with ltv > MAX_VALID_LTV (revert expected)', async () => {
     expect(await configMock.getLtv()).to.be.eq(ZERO);
 
-    const { RC_INVALID_LTV } = ProtocolErrors;
+    const { INVALID_LTV } = ProtocolErrors;
 
     // setLTV to MAX_VALID_LTV + 1
-    await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).to.be.revertedWith(RC_INVALID_LTV);
+    await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).to.be.revertedWith(INVALID_LTV);
     expect(await configMock.getLtv()).to.be.eq(ZERO);
   });
 
@@ -257,12 +257,12 @@ describe('ReserveConfiguration', async () => {
   it('setLiquidationThreshold() with threshold > MAX_VALID_LIQUIDATION_THRESHOLD (revert expected)', async () => {
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
 
-    const { RC_INVALID_LIQ_THRESHOLD } = ProtocolErrors;
+    const { INVALID_LIQ_THRESHOLD } = ProtocolErrors;
 
     // setLiquidationThreshold to MAX_VALID_LIQUIDATION_THRESHOLD + 1
     await expect(
       configMock.setLiquidationThreshold(MAX_VALID_LIQUIDATION_THRESHOLD.add(1))
-    ).to.be.revertedWith(RC_INVALID_LIQ_THRESHOLD);
+    ).to.be.revertedWith(INVALID_LIQ_THRESHOLD);
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
   });
 
@@ -287,11 +287,11 @@ describe('ReserveConfiguration', async () => {
   it('setDecimals() with decimals > MAX_VALID_DECIMALS (revert expected)', async () => {
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
 
-    const { RC_INVALID_DECIMALS } = ProtocolErrors;
+    const { INVALID_DECIMALS } = ProtocolErrors;
 
     // setDecimals to MAX_VALID_DECIMALS + 1
     await expect(configMock.setDecimals(MAX_VALID_DECIMALS.add(1))).to.be.revertedWith(
-      RC_INVALID_DECIMALS
+      INVALID_DECIMALS
     );
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
   });
@@ -307,10 +307,10 @@ describe('ReserveConfiguration', async () => {
   it('setEModeCategory() with categoryID > MAX_VALID_EMODE_CATEGORY (revert expected)', async () => {
     expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
 
-    const { RC_INVALID_EMODE_CATEGORY } = ProtocolErrors;
+    const { INVALID_EMODE_CATEGORY } = ProtocolErrors;
 
     await expect(configMock.setEModeCategory(MAX_VALID_EMODE_CATEGORY.add(1))).to.be.revertedWith(
-      RC_INVALID_EMODE_CATEGORY
+      INVALID_EMODE_CATEGORY
     );
     expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
   });
