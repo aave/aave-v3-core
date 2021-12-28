@@ -35,11 +35,12 @@ library FlashLoanLogic {
   // See `IPool` for descriptions
   event FlashLoan(
     address indexed target,
-    address indexed initiator,
+    address initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
-    uint16 referralCode
+    uint16 indexed referralCode
   );
 
   // Helper struct for internal variables used in the `executeFlashLoan` function
@@ -114,7 +115,7 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
@@ -195,6 +196,7 @@ library FlashLoanLogic {
         msg.sender,
         vars.currentAsset,
         vars.currentAmount,
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
         vars.totalPremiums[vars.i],
         params.referralCode
       );
@@ -244,7 +246,7 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
@@ -279,6 +281,7 @@ library FlashLoanLogic {
       msg.sender,
       params.asset,
       params.amount,
+      DataTypes.InterestRateMode(0),
       vars.totalPremium,
       0
     );

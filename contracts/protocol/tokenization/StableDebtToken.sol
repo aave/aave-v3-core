@@ -263,10 +263,13 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
       return (0, 0, 0);
     }
 
-    // Calculation of the accrued interest since the last accumulation
-    uint256 balanceIncrease = balanceOf(user) - previousPrincipalBalance;
+    uint256 newPrincipalBalance = balanceOf(user);
 
-    return (previousPrincipalBalance, previousPrincipalBalance + balanceIncrease, balanceIncrease);
+    return (
+      previousPrincipalBalance,
+      newPrincipalBalance,
+      newPrincipalBalance - previousPrincipalBalance
+    );
   }
 
   /// @inheritdoc IStableDebtToken

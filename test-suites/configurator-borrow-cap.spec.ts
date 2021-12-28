@@ -7,7 +7,7 @@ import { ProtocolErrors, RateMode } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
-  const { VL_BORROW_CAP_EXCEEDED, RC_INVALID_BORROW_CAP } = ProtocolErrors;
+  const { BORROW_CAP_EXCEEDED, INVALID_BORROW_CAP } = ProtocolErrors;
 
   before(async () => {
     const {
@@ -144,7 +144,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
         0,
         deployer.address
       )
-    ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
+    ).to.be.revertedWith(BORROW_CAP_EXCEEDED);
 
     await expect(
       pool.borrow(
@@ -154,7 +154,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
         0,
         deployer.address
       )
-    ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
+    ).to.be.revertedWith(BORROW_CAP_EXCEEDED);
   });
 
   it('Tries to set the borrow cap for USDC and DAI to > MAX_BORROW_CAP (revert expected)', async () => {
@@ -162,10 +162,10 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     const newCap = Number(MAX_BORROW_CAP) + 1;
 
     await expect(configurator.setBorrowCap(usdc.address, newCap)).to.be.revertedWith(
-      RC_INVALID_BORROW_CAP
+      INVALID_BORROW_CAP
     );
     await expect(configurator.setBorrowCap(dai.address, newCap)).to.be.revertedWith(
-      RC_INVALID_BORROW_CAP
+      INVALID_BORROW_CAP
     );
   });
 
@@ -264,7 +264,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
         0,
         deployer.address
       )
-    ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
+    ).to.be.revertedWith(BORROW_CAP_EXCEEDED);
   });
 
   it('Borrows 99 variable DAI and 99 stable USDC (< BORROW_CAP)', async () => {
@@ -365,7 +365,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
         0,
         deployer.address
       )
-    ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
+    ).to.be.revertedWith(BORROW_CAP_EXCEEDED);
 
     await expect(
       pool.borrow(
@@ -375,7 +375,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
         0,
         deployer.address
       )
-    ).to.be.revertedWith(VL_BORROW_CAP_EXCEEDED);
+    ).to.be.revertedWith(BORROW_CAP_EXCEEDED);
   });
 
   it('Raises the borrow cap for USDC and DAI to MAX_BORROW_CAP', async () => {
