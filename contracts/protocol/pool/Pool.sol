@@ -662,6 +662,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
@@ -672,6 +673,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].configuration.data = configuration;
   }
