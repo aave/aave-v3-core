@@ -12,7 +12,7 @@ interface IPoolAddressesProvider {
    * @param oldMarketId The old id of the market
    * @param newMarketId The new id of the market
    */
-  event MarketIdSet(string oldMarketId, string newMarketId);
+  event MarketIdSet(string indexed oldMarketId, string indexed newMarketId);
 
   /**
    * @notice Emitted when the pool is updated.
