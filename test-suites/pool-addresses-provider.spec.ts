@@ -11,7 +11,7 @@ import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
   const { OWNABLE_ONLY_OWNER } = ProtocolErrors;
 
-  it.only('Test the onlyOwner accessibility of the PoolAddressesProvider', async () => {
+  it('Test the onlyOwner accessibility of the PoolAddressesProvider', async () => {
     const { addressesProvider, users } = testEnv;
     const mockAddress = createRandomAddress();
 
@@ -47,7 +47,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     ).to.be.revertedWith(OWNABLE_ONLY_OWNER);
   });
 
-  it.only('Owner adds a new address as proxy', async () => {
+  it('Owner adds a new address as proxy', async () => {
     const { addressesProvider, users } = testEnv;
 
     const currentAddressesProviderOwner = users[1];
@@ -69,7 +69,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(implAddress).to.be.eq(mockPool.address);
   });
 
-  it.only('Owner adds a new address with no proxy', async () => {
+  it('Owner adds a new address with no proxy', async () => {
     const { addressesProvider, users } = testEnv;
 
     const currentAddressesProviderOwner = users[1];
@@ -92,7 +92,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(await addressesProvider.getProxyImplementation(nonProxyAddress)).to.be.eq(ZERO_ADDRESS);
   });
 
-  it.only('Owner adds a new address with no proxy and turns it into a proxy', async () => {
+  it('Owner adds a new address with no proxy and turns it into a proxy', async () => {
     const { addressesProvider, users } = testEnv;
 
     const currentAddressesProviderOwner = users[1];
@@ -142,7 +142,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     );
   });
 
-  it.only('Unregister a proxy address', async () => {
+  it('Unregister a proxy address', async () => {
     const { addressesProvider, users } = testEnv;
 
     const currentAddressesProviderOwner = users[1];
@@ -177,7 +177,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(implementationAddressAfter).to.be.not.eq(implementationAddress);
   });
 
-  it.only('Owner adds a new address with proxy and turns it into a no proxy', async () => {
+  it('Owner adds a new address with proxy and turns it into a no proxy', async () => {
     const { addressesProvider, users } = testEnv;
 
     const currentAddressesProviderOwner = users[1];
@@ -233,7 +233,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(await addressesProvider.getProxyImplementation(proxyAddress)).to.be.eq(ZERO_ADDRESS);
   });
 
-  it.only('Unregister a no proxy address', async () => {
+  it('Unregister a no proxy address', async () => {
     const { addressesProvider, users } = testEnv;
 
     const currentAddressesProviderOwner = users[1];
@@ -261,7 +261,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(implementationAddressAfter).to.be.eq(ZERO_ADDRESS);
   });
 
-  it.only('Owner updates the implementation of a proxy which is already initialized', async () => {
+  it('Owner updates the implementation of a proxy which is already initialized', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, users } = testEnv;
@@ -291,7 +291,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it.only('Owner updates the MarketId', async () => {
+  it('Owner updates the MarketId', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, users } = testEnv;
@@ -317,7 +317,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it.only('Owner updates the PoolConfigurator', async () => {
+  it('Owner updates the PoolConfigurator', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, configurator, users } = testEnv;
@@ -350,7 +350,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it.only('Owner updates the PriceOracle', async () => {
+  it('Owner updates the PriceOracle', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, oracle, users } = testEnv;
@@ -376,7 +376,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it.only('Owner updates the ACLManager', async () => {
+  it('Owner updates the ACLManager', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, users, aclManager } = testEnv;
@@ -402,7 +402,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it.only('Owner updates the ACLAdmin', async () => {
+  it('Owner updates the ACLAdmin', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, users } = testEnv;
@@ -429,7 +429,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it.only('Owner updates the PriceOracleSentinel', async () => {
+  it('Owner updates the PriceOracleSentinel', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, users } = testEnv;
@@ -455,7 +455,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     await evmRevert(snapId);
   });
 
-  it.only('Owner updates the DataProvider', async () => {
+  it('Owner updates the DataProvider', async () => {
     const snapId = await evmSnapshot();
 
     const { addressesProvider, helpersContract, users } = testEnv;
