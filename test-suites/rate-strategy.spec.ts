@@ -6,6 +6,7 @@ import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../ty
 import { strategyDAI } from '@aave/deploy-v3/dist/markets/aave/reservesConfigs';
 import { rateStrategyStableTwo } from '@aave/deploy-v3/dist/markets/aave/rateStrategies';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import { ProtocolErrors, RateMode } from '../helpers/types';
 import { formatUnits } from '@ethersproject/units';
 import './helpers/utils/wadraymath';
 
@@ -30,6 +31,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   const baseStableRate = BigNumber.from(rateStrategyStableTwo.variableRateSlope1).add(
     rateStrategyStableTwo.baseStableRateOffset
   );
+
+  const { INVALID_OPTIMAL_UTILIZATION_RATE, INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO } =
+    ProtocolErrors;
 
   before(async () => {
     dai = testEnv.dai;
@@ -365,7 +369,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     );
   });
 
-  it('Deploy an interest rate strategy with optimalUtilizationRate out of range', async () => {
+  it('Deploy an interest rate strategy with optimalUtilizationRate out of range (expect revert)', async () => {
     const { addressesProvider } = testEnv;
 
     await expect(
@@ -381,10 +385,10 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
         rateStrategyStableTwo.stableRateExcessOffset,
         rateStrategyStableTwo.optimalStableToTotalDebtRatio,
       ])
-    ).to.be.reverted;
+    ).to.be.revertedWith(INVALID_OPTIMAL_UTILIZATION_RATE);
   });
 
-  it('Deploy an interest rate strategy with optimalStableToTotalDebtRatio out of range', async () => {
+  it('Deploy an interest rate strategy with optimalStableToTotalDebtRatio out of range (expect revert)', async () => {
     const { addressesProvider } = testEnv;
     await expect(
       deployDefaultReserveInterestRateStrategy([
@@ -399,6 +403,6 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
         rateStrategyStableTwo.stableRateExcessOffset,
         utils.parseUnits('1.0', 28),
       ])
-    ).to.be.reverted;
+    ).to.be.revertedWith(INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO);
   });
 });

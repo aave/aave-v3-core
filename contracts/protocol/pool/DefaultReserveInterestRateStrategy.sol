@@ -75,6 +75,11 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 stableRateExcessOffset,
     uint256 optimalStableToTotalDebtRatio
   ) {
+    require(WadRayMath.RAY >= optimalUtilizationRate, Errors.INVALID_OPTIMAL_UTILIZATION_RATE);
+    require(
+      WadRayMath.RAY >= optimalStableToTotalDebtRatio,
+      Errors.INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO
+    );
     OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
     EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
     OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = optimalStableToTotalDebtRatio;
