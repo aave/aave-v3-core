@@ -671,7 +671,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
-    _reserves[asset].configuration.data = configuration.data;
+    _reserves[asset].configuration = configuration;
   }
 
   /// @inheritdoc IPool
