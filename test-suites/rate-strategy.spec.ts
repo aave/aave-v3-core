@@ -6,6 +6,7 @@ import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../ty
 import { strategyDAI } from '@aave/deploy-v3/dist/markets/aave/reservesConfigs';
 import { rateStrategyStableTwo } from '@aave/deploy-v3/dist/markets/aave/rateStrategies';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import { ProtocolErrors, RateMode } from '../helpers/types';
 import { formatUnits } from '@ethersproject/units';
 import './helpers/utils/wadraymath';
 
@@ -30,6 +31,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   const baseStableRate = BigNumber.from(rateStrategyStableTwo.variableRateSlope1).add(
     rateStrategyStableTwo.baseStableRateOffset
   );
+
+  const { INVALID_OPTIMAL_UTILIZATION_RATE, INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO } =
+    ProtocolErrors;
 
   before(async () => {
     dai = testEnv.dai;
@@ -363,5 +367,42 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(await strategyInstance.getStableRateSlope2()).to.be.eq(
       rateStrategyStableTwo.stableRateSlope2
     );
+  });
+
+  it('Deploy an interest rate strategy with optimalUtilizationRate out of range (expect revert)', async () => {
+    const { addressesProvider } = testEnv;
+
+    await expect(
+      deployDefaultReserveInterestRateStrategy([
+        addressesProvider.address,
+        utils.parseUnits('1.0', 28),
+        rateStrategyStableTwo.baseVariableBorrowRate,
+        rateStrategyStableTwo.variableRateSlope1,
+        rateStrategyStableTwo.variableRateSlope2,
+        rateStrategyStableTwo.stableRateSlope1,
+        rateStrategyStableTwo.stableRateSlope2,
+        rateStrategyStableTwo.baseStableRateOffset,
+        rateStrategyStableTwo.stableRateExcessOffset,
+        rateStrategyStableTwo.optimalStableToTotalDebtRatio,
+      ])
+    ).to.be.revertedWith(INVALID_OPTIMAL_UTILIZATION_RATE);
+  });
+
+  it('Deploy an interest rate strategy with optimalStableToTotalDebtRatio out of range (expect revert)', async () => {
+    const { addressesProvider } = testEnv;
+    await expect(
+      deployDefaultReserveInterestRateStrategy([
+        addressesProvider.address,
+        rateStrategyStableTwo.optimalUtilizationRate,
+        rateStrategyStableTwo.baseVariableBorrowRate,
+        rateStrategyStableTwo.variableRateSlope1,
+        rateStrategyStableTwo.variableRateSlope2,
+        rateStrategyStableTwo.stableRateSlope1,
+        rateStrategyStableTwo.stableRateSlope2,
+        rateStrategyStableTwo.baseStableRateOffset,
+        rateStrategyStableTwo.stableRateExcessOffset,
+        utils.parseUnits('1.0', 28),
+      ])
+    ).to.be.revertedWith(INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO);
   });
 });
