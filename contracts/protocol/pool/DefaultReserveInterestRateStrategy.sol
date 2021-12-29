@@ -7,6 +7,7 @@ import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
  * @title DefaultReserveInterestRateStrategy contract

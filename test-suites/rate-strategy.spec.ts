@@ -364,4 +364,41 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       rateStrategyStableTwo.stableRateSlope2
     );
   });
+
+  it('Deploy an interest rate strategy with optimalUtilizationRate out of range', async () => {
+    const { addressesProvider } = testEnv;
+
+    await expect(
+      deployDefaultReserveInterestRateStrategy([
+        addressesProvider.address,
+        utils.parseUnits('1.0', 28),
+        rateStrategyStableTwo.baseVariableBorrowRate,
+        rateStrategyStableTwo.variableRateSlope1,
+        rateStrategyStableTwo.variableRateSlope2,
+        rateStrategyStableTwo.stableRateSlope1,
+        rateStrategyStableTwo.stableRateSlope2,
+        rateStrategyStableTwo.baseStableRateOffset,
+        rateStrategyStableTwo.stableRateExcessOffset,
+        rateStrategyStableTwo.optimalStableToTotalDebtRatio,
+      ])
+    ).to.be.reverted;
+  });
+
+  it('Deploy an interest rate strategy with optimalStableToTotalDebtRatio out of range', async () => {
+    const { addressesProvider } = testEnv;
+    await expect(
+      deployDefaultReserveInterestRateStrategy([
+        addressesProvider.address,
+        rateStrategyStableTwo.optimalUtilizationRate,
+        rateStrategyStableTwo.baseVariableBorrowRate,
+        rateStrategyStableTwo.variableRateSlope1,
+        rateStrategyStableTwo.variableRateSlope2,
+        rateStrategyStableTwo.stableRateSlope1,
+        rateStrategyStableTwo.stableRateSlope2,
+        rateStrategyStableTwo.baseStableRateOffset,
+        rateStrategyStableTwo.stableRateExcessOffset,
+        utils.parseUnits('1.0', 28),
+      ])
+    ).to.be.reverted;
+  });
 });
