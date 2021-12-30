@@ -107,18 +107,10 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Returns the implementation address of the proxy contract.
-   * @param proxyAddress The address of the proxy contract
+   * @param id The id
    * @return The implementation address of the proxy, or ZERO address if it is not a proxy
    */
-  function getProxyImplementation(address proxyAddress) external view returns (address);
-
-  /**
-   * @notice Sets an implementation address for a proxy saved in the proxies map.
-   * @dev IMPORTANT Use this function carefully, as it will do a hard replacement
-   * @param proxyAddress The address of the proxy contract
-   * @param implementationAddress The address of the implementation contract
-   */
-  function setProxyImplementation(address proxyAddress, address implementationAddress) external;
+  function getProxyImplementation(bytes32 id) external view returns (address);
 
   /**
    * @notice General function to update the implementation of a proxy registered with
