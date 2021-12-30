@@ -51,6 +51,13 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
+  function setAddress(bytes32 id, address newAddress) external override onlyOwner {
+    _addresses[id] = newAddress;
+
+    emit AddressSet(id, newAddress, false);
+  }
+
+  /// @inheritdoc IPoolAddressesProvider
   function getProxyImplementation(bytes32 id) public view override returns (address) {
     address proxyAddress = _addresses[id];
     if (proxyAddress == address(0)) {
@@ -71,13 +78,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   {
     _updateImpl(id, implementationAddress);
     emit AddressSet(id, implementationAddress, true);
-  }
-
-  /// @inheritdoc IPoolAddressesProvider
-  function setAddress(bytes32 id, address newAddress) external override onlyOwner {
-    _addresses[id] = newAddress;
-
-    emit AddressSet(id, newAddress, false);
   }
 
   /// @inheritdoc IPoolAddressesProvider
