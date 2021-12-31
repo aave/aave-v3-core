@@ -29,7 +29,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   /**
    * @dev UserState - additionalData is a flexible field.
    * ATokens and VariableDebtTokens use this field store the index of the
-   * user's last supply/withdrawl/borrow/repayment. StableDebtTokens use
+   * user's last supply/withdrawal/borrow/repayment. StableDebtTokens use
    * this field to store the user's stable rate.
    */
   struct UserState {
@@ -280,7 +280,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /**
    * @notice Get the domain separator for the token
-   * @dev Return cached value if chainid matched cache, otherwise recomputes separator
+   * @dev Return cached value if chainId matched cache, otherwise recomputes separator
    * @return The domain separator of the token at current chain
    */
   function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {

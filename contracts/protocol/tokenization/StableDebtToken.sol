@@ -187,7 +187,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     // Since the total supply and each single user debt accrue separately,
     // there might be accumulation errors so that the last borrower repaying
-    // mght actually try to repay more than the available debt supply.
+    // might actually try to repay more than the available debt supply.
     // In this case we simply set the total supply and the avg stable rate to 0
     if (previousSupply <= amount) {
       _avgStableRate = 0;
