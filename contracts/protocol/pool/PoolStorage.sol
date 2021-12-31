@@ -18,12 +18,21 @@ contract PoolStorage {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
+  /// Map of reserves and their data (underlyingAssetOfReserve => reserveData)
   mapping(address => DataTypes.ReserveData) internal _reserves;
+
+  /// Map of users address and their configuration data (userAddress => userConfiguration)
   mapping(address => DataTypes.UserConfigurationMap) internal _usersConfig;
 
-  // the list of the available reserves, structured as a mapping for gas savings reasons
+  /// List of reserves as a map (reserveId => reserve)
+  /// @dev structured as a mapping for gas savings reasons, using the reserve id as index
   mapping(uint256 => address) internal _reservesList;
+
+  /// List of eMode categories as a map (eModeCategoryId => eModeCategory)
+  /// @dev structured as a mapping for gas savings reasons, using the eModeCategoryId as index
   mapping(uint8 => DataTypes.EModeCategory) internal _eModeCategories;
+
+  /// Map of users address and their eMode category (userAddress => eModeCategoryId)
   mapping(address => uint8) internal _usersEModeCategory;
 
   uint256 internal _bridgeProtocolFee;

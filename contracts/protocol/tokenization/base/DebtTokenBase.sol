@@ -18,7 +18,9 @@ abstract contract DebtTokenBase is
   VersionedInitializable,
   ICreditDelegationToken
 {
+  /// Map of borrow allowances (delegator => delegatee => borrowAllowanceAmount)
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
+  
   bytes32 public constant DELEGATION_WITH_SIG_TYPEHASH =
     keccak256('DelegationWithSig(address delegatee,uint256 value,uint256 nonce,uint256 deadline)');
   IPool public immutable POOL;

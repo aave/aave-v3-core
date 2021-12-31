@@ -26,7 +26,9 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
+  /// Map of users address and the timestamp of their last update (userAddress => lastTimestampUpdate)
   mapping(address => uint40) internal _timestamps;
+
   uint128 _avgStableRate;
   uint40 _totalSupplyTimestamp;
 

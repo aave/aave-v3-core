@@ -36,9 +36,12 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
     uint128 balance;
     uint128 additionalData;
   }
+  /// Map of users address and their state data (userAddress => userStateData)
   mapping(address => UserState) internal _userState;
 
+  /// Map of allowances (delegate => delegatee => allowanceAmount)
   mapping(address => mapping(address => uint256)) private _allowances;
+
   uint256 internal _totalSupply;
   string private _name;
   string private _symbol;
@@ -50,6 +53,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   bytes32 internal constant EIP712_DOMAIN =
     keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
 
+  /// Map of addresses nonces (address => nonce)
   mapping(address => uint256) internal _nonces;
 
   bytes32 internal _domainSeparator;

@@ -14,6 +14,8 @@ import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-
  **/
 contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   string private _marketId;
+
+  /// Map of registered addresses (identifier => registeredAddress)
   mapping(bytes32 => address) private _addresses;
 
   bytes32 private constant POOL = 'POOL';

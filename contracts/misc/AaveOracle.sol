@@ -18,7 +18,10 @@ import {IAaveOracle} from '../interfaces/IAaveOracle.sol';
  */
 contract AaveOracle is IAaveOracle {
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
+  
+  /// Map of sources of assets price (asset => priceSource)
   mapping(address => AggregatorInterface) private assetsSources;
+
   IPriceOracleGetter private _fallbackOracle;
   address public immutable override BASE_CURRENCY;
   uint256 public immutable override BASE_CURRENCY_UNIT;
