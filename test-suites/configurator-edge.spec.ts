@@ -26,6 +26,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     INVALID_EMODE_CATEGORY_PARAMS,
     INVALID_EMODE_CATEGORY_ASSIGNMENT,
     BRIDGE_PROTOCOL_FEE_INVALID,
+    ASSET_NOT_LISTED,
   } = ProtocolErrors;
 
   it('ReserveConfiguration setLiquidationBonus() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
@@ -35,6 +36,14 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, 5, 10, 65535 + 1)
     ).to.be.revertedWith(INVALID_LIQ_BONUS);
+  });
+
+  it('PoolConfigurator setReserveFactor() reserveFactor > PERCENTAGE_FACTOR (revert expected)', async () => {
+    const { dai, configurator } = testEnv;
+    const invalidReserveFactor = 20000;
+    await expect(
+      configurator.setReserveFactor(dai.address, invalidReserveFactor)
+    ).to.be.revertedWith(INVALID_RESERVE_FACTOR);
   });
 
   it('ReserveConfiguration setReserveFactor() reserveFactor > MAX_VALID_RESERVE_FACTOR', async () => {
@@ -167,6 +176,14 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     await expect(
       configurator.setUnbackedMintCap(weth.address, BigNumber.from(MAX_UNBACKED_MINT_CAP).add(1))
     ).to.be.revertedWith(INVALID_UNBACKED_MINT_CAP);
+  });
+
+  it('Tries to set borrowCap of MAX_BORROW_CAP an unlisted asset', async () => {
+    const { configurator, users } = testEnv;
+    const newCap = 10;
+    await expect(configurator.setBorrowCap(users[5].address, newCap)).to.be.revertedWith(
+      ASSET_NOT_LISTED
+    );
   });
 
   it('Tries to add a category with id 0 (revert expected)', async () => {

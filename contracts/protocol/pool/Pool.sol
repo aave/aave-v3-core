@@ -651,7 +651,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function dropReserve(address asset) external override onlyPoolConfigurator {
     DataTypes.ReserveData storage reserve = _reserves[asset];
-    ValidationLogic.validateDropReserve(reserve);
+    ValidationLogic.validateDropReserve(_reservesList, reserve, asset);
     _reservesList[_reserves[asset].id] = address(0);
     delete _reserves[asset];
   }
@@ -662,16 +662,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
   /// @inheritdoc IPool
-  function setConfiguration(address asset, uint256 configuration)
+  function setConfiguration(address asset, DataTypes.ReserveConfigurationMap calldata configuration)
     external
     override
     onlyPoolConfigurator
   {
-    _reserves[asset].configuration.data = configuration;
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
+    _reserves[asset].configuration = configuration;
   }
 
   /// @inheritdoc IPool
@@ -728,6 +732,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function getUserEMode(address user) external view override returns (uint256) {
     return _usersEModeCategory[user];
+  }
+
+  /// @inheritdoc IPool
+  function resetIsolationModeTotalDebt(address asset) external override onlyPoolConfigurator {
+    require(_reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
+    _reserves[asset].isolationModeTotalDebt = 0;
+    emit IsolationModeTotalDebtUpdated(asset, 0);
   }
 
   function _addReserveToList(address asset) internal {
