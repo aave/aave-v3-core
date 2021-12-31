@@ -26,7 +26,7 @@ abstract contract DebtTokenBase is
   IPool public immutable POOL;
 
   /**
-   * @dev Only pool can call functions marked by this modifier
+   * @dev Only pool can call functions marked by this modifier.
    **/
   modifier onlyPool() {
     require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);

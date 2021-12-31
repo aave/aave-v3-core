@@ -33,6 +33,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   address internal _treasury;
   address internal _underlyingAsset;
 
+  /**
+   * @dev Only pool can call functions marked by this modifier.
+   **/
   modifier onlyPool() {
     require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;

@@ -31,26 +31,41 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   IPoolAddressesProvider internal _addressesProvider;
   IPool internal _pool;
 
+  /**
+   * @dev Only pool admin can call functions marked by this modifier.
+   **/
   modifier onlyPoolAdmin() {
     _onlyPoolAdmin();
     _;
   }
 
+  /**
+   * @dev Only emergency admin can call functions marked by this modifier.
+   **/
   modifier onlyEmergencyAdmin() {
     _onlyEmergencyAdmin();
     _;
   }
 
+  /**
+   * @dev Only emergency or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyEmergencyOrPoolAdmin() {
     _onlyPoolOrEmergencyAdmin();
     _;
   }
 
+  /**
+   * @dev Only asset listing or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyAssetListingOrPoolAdmins() {
     _onlyAssetListingOrPoolAdmins();
     _;
   }
 
+  /**
+   * @dev Only risk or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyRiskOrPoolAdmins() {
     _onlyRiskOrPoolAdmins();
     _;

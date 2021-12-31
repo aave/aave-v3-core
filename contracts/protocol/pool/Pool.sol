@@ -52,12 +52,18 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   uint256 public constant POOL_REVISION = 0x2;
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
-
+  
+  /**
+   * @dev Only pool configurator can call functions marked by this modifier.
+   **/
   modifier onlyPoolConfigurator() {
     _onlyPoolConfigurator();
     _;
   }
-
+  
+  /**
+   * @dev Only bridge can call functions marked by this modifier.
+   **/
   modifier onlyBridge() {
     _onlyBridge();
     _;

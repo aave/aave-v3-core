@@ -20,6 +20,9 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
+  /**
+   * @dev Only pool admin can call functions marked by this modifier.
+   **/
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
