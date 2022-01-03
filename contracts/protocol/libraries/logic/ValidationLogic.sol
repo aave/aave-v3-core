@@ -569,11 +569,6 @@ library ValidationLogic {
     return (healthFactor, hasZeroLtvCollateral);
   }
 
-  struct ValidateHFAndLtvLocalVars {
-    uint256 assetLtv;
-    bool hasZeroLtvCollateral;
-  }
-
   /**
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn.
    * @param reservesData The state of all the reserves
@@ -597,10 +592,9 @@ library ValidationLogic {
     address oracle,
     uint8 userEModeCategory
   ) internal view {
-    ValidateHFAndLtvLocalVars memory vars;
     DataTypes.ReserveData memory reserve = reservesData[asset];
 
-    (, vars.hasZeroLtvCollateral) = validateHealthFactor(
+    (, bool hasZeroLtvCollateral) = validateHealthFactor(
       reservesData,
       reserves,
       eModeCategories,
@@ -610,8 +604,11 @@ library ValidationLogic {
       reservesCount,
       oracle
     );
-    vars.assetLtv = reserve.configuration.getLtv();
-    require(vars.assetLtv == 0 || !vars.hasZeroLtvCollateral, Errors.LTV_VALIDATION_FAILED);
+
+    require(
+      reserve.configuration.getLtv() == 0 || !hasZeroLtvCollateral,
+      Errors.LTV_VALIDATION_FAILED
+    );
   }
 
   /**
