@@ -109,7 +109,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on borrow(), repay() and liquidationCall() when using isolated assets
+   * @dev Emitted on borrow(), repay() and liquidationCall() when using isolated assets
    * @param asset The address of the underlying asset of the reserve
    * @param totalDebt The total isolation mode debt for the reserve
    */

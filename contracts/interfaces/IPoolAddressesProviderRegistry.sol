@@ -8,13 +8,13 @@ pragma solidity 0.8.10;
  **/
 interface IPoolAddressesProviderRegistry {
   /**
-   * @notice Emitted when a new AddressesProvider is registered.
+   * @dev Emitted when a new AddressesProvider is registered.
    * @param addressesProvider The address of the registered PoolAddressesProvider
    */
   event AddressesProviderRegistered(address indexed addressesProvider);
 
   /**
-   * @notice Emitted when an AddressesProvider is unregistered.
+   * @dev Emitted when an AddressesProvider is unregistered.
    * @param addressesProvider The address of the unregistered PoolAddressesProvider
    */
   event AddressesProviderUnregistered(address indexed addressesProvider);

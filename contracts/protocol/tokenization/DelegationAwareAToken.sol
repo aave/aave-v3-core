@@ -15,7 +15,7 @@ import {AToken} from './AToken.sol';
  */
 contract DelegationAwareAToken is AToken {
   /**
-   * @notice Emitted when underlying voting power is delegated
+   * @dev Emitted when underlying voting power is delegated
    * @param delegatee The address of the delegatee
    */
   event DelegateUnderlyingTo(address indexed delegatee);

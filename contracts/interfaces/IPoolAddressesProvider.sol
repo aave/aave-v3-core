@@ -8,68 +8,68 @@ pragma solidity 0.8.10;
  **/
 interface IPoolAddressesProvider {
   /**
-   * @notice Emitted when the market identifier is updated.
+   * @dev Emitted when the market identifier is updated.
    * @param newMarketId The new id of the market
    */
   event MarketIdSet(string newMarketId);
 
   /**
-   * @notice Emitted when the pool is updated.
+   * @dev Emitted when the pool is updated.
    * @param newAddress The new address of the Pool
    */
   event PoolUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when the pool configurator is updated.
+   * @dev Emitted when the pool configurator is updated.
    * @param newAddress The new address of the PoolConfigurator
    */
   event PoolConfiguratorUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when the price oracle is updated.
+   * @dev Emitted when the price oracle is updated.
    * @param newAddress The new address of the PriceOracle
    */
   event PriceOracleUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when the ACL manager is updated.
+   * @dev Emitted when the ACL manager is updated.
    * @param newAddress The new address of the ACLManager
    */
   event ACLManagerUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when the ACL admin is updated.
+   * @dev Emitted when the ACL admin is updated.
    * @param newAddress The new address of the ACLAdmin
    */
   event ACLAdminUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when the price oracle sentinel is updated.
+   * @dev Emitted when the price oracle sentinel is updated.
    * @param newAddress The new address of the PriceOracleSentinel
    */
   event PriceOracleSentinelUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when the pool data provider is updated.
+   * @dev Emitted when the pool data provider is updated.
    * @param newAddress The new address of the PoolDataProvider
    */
   event PoolDataProviderUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when the bridge access control is updated.
+   * @dev Emitted when the bridge access control is updated.
    * @param newAddress The new address of the BridgeAccessControl
    */
   event BridgeAccessControlUpdated(address indexed newAddress);
 
   /**
-   * @notice Emitted when a new proxy is created
+   * @dev Emitted when a new proxy is created
    * @param id The identifier of the proxy
    * @param proxyAddress The address of the created proxy contract
    */
   event ProxyCreated(bytes32 id, address indexed proxyAddress);
 
   /**
-   * @notice Emitted when a new contract address if registered
+   * @dev Emitted when a new contract address if registered
    * @param id The identifier of the contract
    * @param implementationAddress The address of the implementation contract
    * @param hasProxy True if the address is registered behind a proxy, false otherwise
