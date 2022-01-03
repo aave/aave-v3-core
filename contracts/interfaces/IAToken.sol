@@ -14,7 +14,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
    * @notice Emitted after the mint action
    * @param caller The address performing the mint
-   * @param onBehalfOf The address of the user on which behalf minting has been performed
+   * @param onBehalfOf The address of the user that will receive the minted aTokens
    * @param value The amount being minted (user entered amount + balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
