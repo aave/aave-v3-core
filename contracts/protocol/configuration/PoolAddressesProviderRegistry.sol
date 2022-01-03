@@ -68,17 +68,19 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /**
    * @notice Adds the addresses provider address to the list.
-   * @dev The addressesProvider is not added if it already exists in the registry
+   * @dev The addressesProvider must not already exists in the registry
    * @param provider The address of the PoolAddressesProvider
    */
   function _addToAddressesProvidersList(address provider) internal {
     uint256 providersCount = _addressesProvidersList.length;
 
+    bool exists = false;
     for (uint256 i = 0; i < providersCount; i++) {
       if (_addressesProvidersList[i] == provider) {
-        return;
+        exists = true;
       }
     }
+    require(!exists, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
 
     _addressesProvidersList.push(provider);
   }

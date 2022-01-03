@@ -88,4 +88,5 @@ library Errors {
   string public constant INVALID_EXPIRATION = '79'; // 'Invalid expiration'
   string public constant INVALID_SIGNATURE = '80'; // 'Invalid signature'
   string public constant OPERATION_NOT_SUPPORTED = '81'; // 'Operation not supported'
+  string public constant ADDRESSES_PROVIDER_ALREADY_ADDED = '82'; // 'Reserve has already been added to reserve list'
 }

@@ -152,6 +152,7 @@ export enum ProtocolErrors {
   INVALID_EXPIRATION = '79', // 'Invalid expiration'
   INVALID_SIGNATURE = '80', // 'Invalid signature'
   OPERATION_NOT_SUPPORTED = '81', // 'Operation not supported'
+  ADDRESSES_PROVIDER_ALREADY_ADDED = '82', // 'Reserve has already been added to reserve list'
 
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",

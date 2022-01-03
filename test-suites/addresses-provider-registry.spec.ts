@@ -8,7 +8,11 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   const NEW_ADDRESES_PROVIDER_ADDRESS = ONE_ADDRESS;
   const NEW_ADDRESSES_PROVIDER_ID = 2;
 
-  const { INVALID_ADDRESSES_PROVIDER_ID, PROVIDER_NOT_REGISTERED } = ProtocolErrors;
+  const {
+    INVALID_ADDRESSES_PROVIDER_ID,
+    PROVIDER_NOT_REGISTERED,
+    ADDRESSES_PROVIDER_ALREADY_ADDED,
+  } = ProtocolErrors;
 
   it('Checks the addresses provider is added to the registry', async () => {
     const { addressesProvider, registry } = testEnv;
@@ -92,23 +96,20 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to add an already added addressesProvider with a different id. Should overwrite the previous id', async () => {
+  it('Tries to add an already registered addressesProvider with a different id (revert expected)', async () => {
     const { registry, addressesProvider } = testEnv;
 
-    const oldId = await registry.getAddressesProviderIdByAddress(addressesProvider.address);
+    const id = await registry.getAddressesProviderIdByAddress(addressesProvider.address);
+    expect(id).not.to.be.eq(0);
 
     const providersBefore = await registry.getAddressesProvidersList();
-    expect(
-      await registry.registerAddressesProvider(addressesProvider.address, NEW_ADDRESSES_PROVIDER_ID)
-    )
-      .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(addressesProvider.address);
+    await expect(
+      registry.registerAddressesProvider(addressesProvider.address, NEW_ADDRESSES_PROVIDER_ID)
+    ).to.be.revertedWith(ADDRESSES_PROVIDER_ALREADY_ADDED);
 
     const providersAfter = await registry.getAddressesProvidersList();
 
-    expect(await registry.getAddressesProviderIdByAddress(addressesProvider.address)).to.be.not.eq(
-      oldId
-    );
+    expect(await registry.getAddressesProviderIdByAddress(addressesProvider.address)).to.be.eq(id);
 
     expect(providersAfter.length).to.be.equal(
       providersBefore.length,
