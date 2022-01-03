@@ -2,12 +2,12 @@
 pragma solidity 0.8.10;
 
 /**
- * @title ByteCasting
+ * @title BytesLib
  * @author Aave
  */
 library BytesLib {
   /**
-   * @notice converts a dynamic array of bytes to an address
+   * @notice Converts a dynamic array of bytes to an address
    * @param bys bytes array
    * @return address
    **/
