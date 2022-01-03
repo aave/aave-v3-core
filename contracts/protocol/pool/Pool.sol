@@ -2,7 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {SafeERC20} from '../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
@@ -24,7 +24,7 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
-import {Helpers} from '../libraries/helpers/Helpers.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title Pool contract
@@ -45,7 +45,8 @@ import {Helpers} from '../libraries/helpers/Helpers.sol';
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
-  using SafeERC20 for IERC20;
+  using SafeCast for uint256;
+  using GPv2SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
@@ -65,14 +66,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function _onlyPoolConfigurator() internal view {
     require(
       ADDRESSES_PROVIDER.getPoolConfigurator() == msg.sender,
-      Errors.P_CALLER_NOT_POOL_CONFIGURATOR
+      Errors.CALLER_NOT_POOL_CONFIGURATOR
     );
   }
 
   function _onlyBridge() internal view {
     require(
       IACLManager(ADDRESSES_PROVIDER.getACLManager()).isBridge(msg.sender),
-      Errors.P_CALLER_NOT_BRIDGE
+      Errors.CALLER_NOT_BRIDGE
     );
   }
 
@@ -92,9 +93,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
-    require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
-    _maxStableRateBorrowSizePercent = 2500;
-    _flashLoanPremiumTotal = 9;
+    require(provider == ADDRESSES_PROVIDER, Errors.INVALID_ADDRESSES_PROVIDER);
+    _maxStableRateBorrowSizePercent = 0.25e4;
+    _flashLoanPremiumTotal = 0.0009e4;
     _flashLoanPremiumToProtocol = 0;
   }
 
@@ -220,7 +221,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         user: msg.sender,
         onBehalfOf: onBehalfOf,
         amount: amount,
-        interestRateMode: interestRateMode,
+        interestRateMode: DataTypes.InterestRateMode(interestRateMode),
         referralCode: referralCode,
         releaseUnderlying: true,
         maxStableRateBorrowSizePercent: _maxStableRateBorrowSizePercent,
@@ -236,7 +237,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repay(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf
   ) external override returns (uint256) {
     return
@@ -248,7 +249,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,
-          rateMode: rateMode,
+          interestRateMode: DataTypes.InterestRateMode(interestRateMode),
           onBehalfOf: onBehalfOf,
           useATokens: false
         })
@@ -259,7 +260,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithPermit(
     address asset,
     uint256 amount,
-    uint256 rateMode,
+    uint256 interestRateMode,
     address onBehalfOf,
     uint256 deadline,
     uint8 permitV,
@@ -281,7 +282,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       DataTypes.ExecuteRepayParams memory params = DataTypes.ExecuteRepayParams({
         asset: asset,
         amount: amount,
-        rateMode: rateMode,
+        interestRateMode: DataTypes.InterestRateMode(interestRateMode),
         onBehalfOf: onBehalfOf,
         useATokens: false
       });
@@ -300,7 +301,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function repayWithATokens(
     address asset,
     uint256 amount,
-    uint256 rateMode
+    uint256 interestRateMode
   ) external override returns (uint256) {
     return
       BorrowLogic.executeRepay(
@@ -311,7 +312,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         DataTypes.ExecuteRepayParams({
           asset: asset,
           amount: amount,
-          rateMode: rateMode,
+          interestRateMode: DataTypes.InterestRateMode(interestRateMode),
           onBehalfOf: msg.sender,
           useATokens: true
         })
@@ -319,12 +320,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function swapBorrowRateMode(address asset, uint256 rateMode) external override {
+  function swapBorrowRateMode(address asset, uint256 interestRateMode) external override {
     BorrowLogic.executeSwapBorrowRateMode(
       _reserves[asset],
       _usersConfig[msg.sender],
       asset,
-      rateMode
+      DataTypes.InterestRateMode(interestRateMode)
     );
   }
 
@@ -380,7 +381,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address receiverAddress,
     address[] calldata assets,
     uint256[] calldata amounts,
-    uint256[] calldata modes,
+    uint256[] calldata interestRateModes,
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode
@@ -389,7 +390,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       receiverAddress: receiverAddress,
       assets: assets,
       amounts: amounts,
-      modes: modes,
+      interestRateModes: interestRateModes,
       onBehalfOf: onBehalfOf,
       params: params,
       referralCode: referralCode,
@@ -608,7 +609,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceFromBefore,
     uint256 balanceToBefore
   ) external override {
-    require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
+    require(msg.sender == _reserves[asset].aTokenAddress, Errors.CALLER_NOT_ATOKEN);
     SupplyLogic.executeFinalizeTransfer(
       _reserves,
       _reservesList,
@@ -637,7 +638,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address variableDebtAddress,
     address interestRateStrategyAddress
   ) external override onlyPoolConfigurator {
-    require(Address.isContract(asset), Errors.P_NOT_CONTRACT);
+    require(Address.isContract(asset), Errors.NOT_CONTRACT);
     _reserves[asset].init(
       aTokenAddress,
       stableDebtAddress,
@@ -650,7 +651,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function dropReserve(address asset) external override onlyPoolConfigurator {
     DataTypes.ReserveData storage reserve = _reserves[asset];
-    ValidationLogic.validateDropReserve(reserve);
+    ValidationLogic.validateDropReserve(_reservesList, reserve, asset);
     _reservesList[_reserves[asset].id] = address(0);
     delete _reserves[asset];
   }
@@ -661,16 +662,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
   /// @inheritdoc IPool
-  function setConfiguration(address asset, uint256 configuration)
+  function setConfiguration(address asset, DataTypes.ReserveConfigurationMap calldata configuration)
     external
     override
     onlyPoolConfigurator
   {
-    _reserves[asset].configuration.data = configuration;
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
+    _reserves[asset].configuration = configuration;
   }
 
   /// @inheritdoc IPool
@@ -683,8 +688,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 flashLoanPremiumTotal,
     uint256 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = Helpers.castUint128(flashLoanPremiumTotal);
-    _flashLoanPremiumToProtocol = Helpers.castUint128(flashLoanPremiumToProtocol);
+    _flashLoanPremiumTotal = flashLoanPremiumTotal.toUint128();
+    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol.toUint128();
   }
 
   /// @inheritdoc IPool
@@ -694,7 +699,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     // category 0 is reserved for volatile heterogeneous assets and it's always disabled
-    require(id != 0, Errors.RC_INVALID_EMODE_CATEGORY);
+    require(id != 0, Errors.EMODE_CATEGORY_RESERVED);
     _eModeCategories[id] = category;
   }
 
@@ -729,9 +734,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersEModeCategory[user];
   }
 
+  /// @inheritdoc IPool
+  function resetIsolationModeTotalDebt(address asset) external override onlyPoolConfigurator {
+    require(_reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
+    _reserves[asset].isolationModeTotalDebt = 0;
+    emit IsolationModeTotalDebtUpdated(asset, 0);
+  }
+
   function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
-    require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
+    require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
     uint16 reservesCount = _reservesCount;
 
@@ -742,7 +754,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         return;
       }
     }
-    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
+    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.NO_MORE_RESERVES_ALLOWED);
     _reserves[asset].id = reservesCount;
     _reservesList[reservesCount] = asset;
     // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max

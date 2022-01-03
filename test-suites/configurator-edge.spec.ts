@@ -13,18 +13,20 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
   const {
-    RC_INVALID_RESERVE_FACTOR,
-    PC_INVALID_CONFIGURATION,
-    RC_INVALID_LIQ_BONUS,
-    PC_FLASHLOAN_PREMIUMS_MISMATCH,
-    PC_FLASHLOAN_PREMIUM_INVALID,
-    PC_RESERVE_LIQUIDITY_NOT_0,
-    RC_INVALID_BORROW_CAP,
-    RC_INVALID_SUPPLY_CAP,
-    RC_INVALID_UNBACKED_MINT_CAP,
-    RC_INVALID_EMODE_CATEGORY,
-    VL_INCONSISTENT_EMODE_CATEGORY,
-    PC_BRIDGE_PROTOCOL_FEE_INVALID,
+    INVALID_RESERVE_FACTOR,
+    INVALID_RESERVE_PARAMS,
+    INVALID_LIQ_BONUS,
+    FLASHLOAN_PREMIUMS_MISMATCH,
+    FLASHLOAN_PREMIUM_INVALID,
+    RESERVE_LIQUIDITY_NOT_ZERO,
+    INVALID_BORROW_CAP,
+    INVALID_SUPPLY_CAP,
+    INVALID_UNBACKED_MINT_CAP,
+    EMODE_CATEGORY_RESERVED,
+    INVALID_EMODE_CATEGORY_PARAMS,
+    INVALID_EMODE_CATEGORY_ASSIGNMENT,
+    BRIDGE_PROTOCOL_FEE_INVALID,
+    ASSET_NOT_LISTED,
   } = ProtocolErrors;
 
   it('ReserveConfiguration setLiquidationBonus() threshold > MAX_VALID_LIQUIDATION_THRESHOLD', async () => {
@@ -33,7 +35,15 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, 5, 10, 65535 + 1)
-    ).to.be.revertedWith(RC_INVALID_LIQ_BONUS);
+    ).to.be.revertedWith(INVALID_LIQ_BONUS);
+  });
+
+  it('PoolConfigurator setReserveFactor() reserveFactor > PERCENTAGE_FACTOR (revert expected)', async () => {
+    const { dai, configurator } = testEnv;
+    const invalidReserveFactor = 20000;
+    await expect(
+      configurator.setReserveFactor(dai.address, invalidReserveFactor)
+    ).to.be.revertedWith(INVALID_RESERVE_FACTOR);
   });
 
   it('ReserveConfiguration setReserveFactor() reserveFactor > MAX_VALID_RESERVE_FACTOR', async () => {
@@ -41,7 +51,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     const invalidReserveFactor = 65536;
     await expect(
       configurator.setReserveFactor(dai.address, invalidReserveFactor)
-    ).to.be.revertedWith(RC_INVALID_RESERVE_FACTOR);
+    ).to.be.revertedWith(INVALID_RESERVE_FACTOR);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() ltv > liquidationThreshold', async () => {
@@ -58,7 +68,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
           config.liquidationThreshold,
           config.liquidationBonus
         )
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationBonus < 10000', async () => {
@@ -70,7 +80,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, config.ltv, config.liquidationThreshold, 10000)
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationThreshold.percentMul(liquidationBonus) > PercentageMath.PERCENTAGE_FACTOR', async () => {
@@ -80,7 +90,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .configureReserveAsCollateral(dai.address, 10001, 10001, 10001)
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('PoolConfigurator configureReserveAsCollateral() liquidationThreshold == 0 && liquidationBonus > 0', async () => {
@@ -88,14 +98,14 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).configureReserveAsCollateral(dai.address, 0, 0, 10500)
-    ).to.be.revertedWith(PC_INVALID_CONFIGURATION);
+    ).to.be.revertedWith(INVALID_RESERVE_PARAMS);
   });
 
   it('Tries to bridge protocol fee > PERCENTAGE_FACTOR (revert expected)', async () => {
     const { configurator } = testEnv;
     const newProtocolFee = 10001;
     await expect(configurator.updateBridgeProtocolFee(newProtocolFee)).to.be.revertedWith(
-      PC_BRIDGE_PROTOCOL_FEE_INVALID
+      BRIDGE_PROTOCOL_FEE_INVALID
     );
   });
 
@@ -104,7 +114,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     const newPremiumTotal = 10001;
     await expect(configurator.updateFlashloanPremiumTotal(newPremiumTotal)).to.be.revertedWith(
-      PC_FLASHLOAN_PREMIUM_INVALID
+      FLASHLOAN_PREMIUM_INVALID
     );
   });
 
@@ -125,7 +135,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       .withArgs(newPremiumToProtocol);
 
     await expect(configurator.updateFlashloanPremiumTotal(wrongPremiumTotal)).to.be.revertedWith(
-      PC_FLASHLOAN_PREMIUMS_MISMATCH
+      FLASHLOAN_PREMIUMS_MISMATCH
     );
   });
 
@@ -135,7 +145,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     const newPremiumToProtocol = 10001;
     await expect(
       configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
-    ).to.be.revertedWith(PC_FLASHLOAN_PREMIUM_INVALID);
+    ).to.be.revertedWith(FLASHLOAN_PREMIUM_INVALID);
   });
 
   it('Tries to update flashloan premium to protocol > FLASHLOAN_PREMIUM_TOTAL (revert expected)', async () => {
@@ -144,28 +154,36 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     const newPremiumToProtocol = 101;
     await expect(
       configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
-    ).to.be.revertedWith(PC_FLASHLOAN_PREMIUMS_MISMATCH);
+    ).to.be.revertedWith(FLASHLOAN_PREMIUMS_MISMATCH);
   });
 
   it('Tries to update borrowCap > MAX_BORROW_CAP (revert expected)', async () => {
     const { configurator, weth } = testEnv;
     await expect(
       configurator.setBorrowCap(weth.address, BigNumber.from(MAX_BORROW_CAP).add(1))
-    ).to.be.revertedWith(RC_INVALID_BORROW_CAP);
+    ).to.be.revertedWith(INVALID_BORROW_CAP);
   });
 
   it('Tries to update supplyCap > MAX_SUPPLY_CAP (revert expected)', async () => {
     const { configurator, weth } = testEnv;
     await expect(
       configurator.setSupplyCap(weth.address, BigNumber.from(MAX_SUPPLY_CAP).add(1))
-    ).to.be.revertedWith(RC_INVALID_SUPPLY_CAP);
+    ).to.be.revertedWith(INVALID_SUPPLY_CAP);
   });
 
   it('Tries to update unbackedMintCap > MAX_UNBACKED_MINT_CAP (revert expected)', async () => {
     const { configurator, weth } = testEnv;
     await expect(
       configurator.setUnbackedMintCap(weth.address, BigNumber.from(MAX_UNBACKED_MINT_CAP).add(1))
-    ).to.be.revertedWith(RC_INVALID_UNBACKED_MINT_CAP);
+    ).to.be.revertedWith(INVALID_UNBACKED_MINT_CAP);
+  });
+
+  it('Tries to set borrowCap of MAX_BORROW_CAP an unlisted asset', async () => {
+    const { configurator, users } = testEnv;
+    const newCap = 10;
+    await expect(configurator.setBorrowCap(users[5].address, newCap)).to.be.revertedWith(
+      ASSET_NOT_LISTED
+    );
   });
 
   it('Tries to add a category with id 0 (revert expected)', async () => {
@@ -175,7 +193,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator
         .connect(poolAdmin.signer)
         .setEModeCategory(0, '9800', '9800', '10100', ZERO_ADDRESS, 'INVALID_ID_CATEGORY')
-    ).to.be.revertedWith(RC_INVALID_EMODE_CATEGORY);
+    ).to.be.revertedWith(EMODE_CATEGORY_RESERVED);
   });
 
   it('Tries to add an eMode category with ltv > liquidation threshold (revert expected)', async () => {
@@ -190,7 +208,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to add an eMode category with no liquidation bonus (revert expected)', async () => {
@@ -205,7 +223,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to add an eMode category with too large liquidation bonus (revert expected)', async () => {
@@ -220,7 +238,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to add an eMode category with liquidation threshold > 1 (revert expected)', async () => {
@@ -235,7 +253,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setEModeCategory(id, ltv, lt, lb, oracle, label)
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
   });
 
   it('Tries to set DAI eMode category to undefined category (revert expected)', async () => {
@@ -243,7 +261,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_ASSIGNMENT);
   });
 
   it('Tries to set DAI eMode category to category with too low LT (revert expected)', async () => {
@@ -268,7 +286,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, '100')
-    ).to.be.revertedWith(VL_INCONSISTENT_EMODE_CATEGORY);
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_ASSIGNMENT);
   });
 
   it('Tries to disable the DAI reserve with liquidity on it (revert expected)', async () => {
@@ -287,7 +305,7 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
 
     await expect(
       configurator.setReserveActive(dai.address, false),
-      PC_RESERVE_LIQUIDITY_NOT_0
-    ).to.be.revertedWith(PC_RESERVE_LIQUIDITY_NOT_0);
+      RESERVE_LIQUIDITY_NOT_ZERO
+    ).to.be.revertedWith(RESERVE_LIQUIDITY_NOT_ZERO);
   });
 });

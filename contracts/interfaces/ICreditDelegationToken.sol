@@ -17,7 +17,7 @@ interface ICreditDelegationToken {
   event BorrowAllowanceDelegated(
     address indexed fromUser,
     address indexed toUser,
-    address asset,
+    address indexed asset,
     uint256 amount
   );
 

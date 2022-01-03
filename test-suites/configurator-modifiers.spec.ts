@@ -6,10 +6,10 @@ import { TestEnv, makeSuite } from './helpers/make-suite';
 makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
   const {
     CALLER_NOT_POOL_ADMIN,
-    PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN,
-    PC_CALLER_NOT_RISK_OR_POOL_ADMIN,
-    PC_CALLER_NOT_EMERGENCY_ADMIN,
-    PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN,
+    CALLER_NOT_POOL_OR_EMERGENCY_ADMIN,
+    CALLER_NOT_RISK_OR_POOL_ADMIN,
+    CALLER_NOT_EMERGENCY_ADMIN,
+    CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN,
   } = ProtocolErrors;
 
   it('Test the accessibility of onlyAssetListingOrPoolAdmins modified functions', async () => {
@@ -43,7 +43,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     for (const call of calls) {
       await expect(
         configurator.connect(nonPoolAdmin.signer)[call.fn](...call.args)
-      ).to.be.revertedWith(PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN);
     }
   });
 
@@ -105,8 +105,8 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
       },
       { fn: 'setReserveStableRateBorrowing', args: [randomAddress, true] },
       { fn: 'setReserveStableRateBorrowing', args: [randomAddress, false] },
-      { fn: 'setReseveFreeze', args: [randomAddress, true] },
-      { fn: 'setReseveFreeze', args: [randomAddress, false] },
+      { fn: 'setReserveFreeze', args: [randomAddress, true] },
+      { fn: 'setReserveFreeze', args: [randomAddress, false] },
       { fn: 'setReserveFactor', args: [randomAddress, randomNumber] },
       { fn: 'setBorrowCap', args: [randomAddress, randomNumber] },
       { fn: 'setSupplyCap', args: [randomAddress, randomNumber] },
@@ -121,7 +121,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     for (const call of calls) {
       await expect(
         configurator.connect(nonRiskOrPoolAdmins.signer)[call.fn](...call.args)
-      ).to.be.revertedWith(PC_CALLER_NOT_RISK_OR_POOL_ADMIN);
+      ).to.be.revertedWith(CALLER_NOT_RISK_OR_POOL_ADMIN);
     }
   });
 
@@ -130,7 +130,7 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, true),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
+    ).to.be.revertedWith(CALLER_NOT_POOL_OR_EMERGENCY_ADMIN);
   });
 
   it('Tries to unpause reserve with non-emergency-admin account (revert expected)', async () => {
@@ -138,13 +138,13 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
     await expect(
       configurator.connect(riskAdmin.signer).setReservePause(weth.address, false),
       CALLER_NOT_POOL_ADMIN
-    ).to.be.revertedWith(PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN);
+    ).to.be.revertedWith(CALLER_NOT_POOL_OR_EMERGENCY_ADMIN);
   });
 
   it('Tries to pause pool with not emergency admin (revert expected)', async () => {
     const { users, configurator } = testEnv;
     await expect(configurator.connect(users[0].signer).setPoolPause(true)).to.be.revertedWith(
-      PC_CALLER_NOT_EMERGENCY_ADMIN
+      CALLER_NOT_EMERGENCY_ADMIN
     );
   });
 });

@@ -8,7 +8,7 @@ import { deployPool, deployMockPool } from '@aave/deploy-v3/dist/helpers/contrac
 import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 
 makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
-  const { INVALID_OWNER_REVERT_MSG } = ProtocolErrors;
+  const { OWNABLE_ONLY_OWNER } = ProtocolErrors;
 
   it('Test the onlyOwner accessibility of the PoolAddressesProvider', async () => {
     const { addressesProvider, users } = testEnv;
@@ -27,19 +27,19 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       addressesProvider.setPriceOracleSentinel,
       addressesProvider.setPoolDataProvider,
     ]) {
-      await expect(contractFunction(mockAddress)).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
+      await expect(contractFunction(mockAddress)).to.be.revertedWith(OWNABLE_ONLY_OWNER);
     }
 
     await expect(
       addressesProvider.setAddress(utils.keccak256(utils.toUtf8Bytes('RANDOM_ID')), mockAddress)
-    ).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
+    ).to.be.revertedWith(OWNABLE_ONLY_OWNER);
 
     await expect(
       addressesProvider.setAddressAsProxy(
         utils.keccak256(utils.toUtf8Bytes('RANDOM_ID')),
         mockAddress
       )
-    ).to.be.revertedWith(INVALID_OWNER_REVERT_MSG);
+    ).to.be.revertedWith(OWNABLE_ONLY_OWNER);
   });
 
   it('Owner adds a new address as proxy', async () => {

@@ -7,6 +7,7 @@ import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
+import {Errors} from '../libraries/helpers/Errors.sol';
 
 /**
  * @title DefaultReserveInterestRateStrategy contract
@@ -74,6 +75,11 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 stableRateExcessOffset,
     uint256 optimalStableToTotalDebtRatio
   ) {
+    require(WadRayMath.RAY >= optimalUtilizationRate, Errors.INVALID_OPTIMAL_UTILIZATION_RATE);
+    require(
+      WadRayMath.RAY >= optimalStableToTotalDebtRatio,
+      Errors.INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO
+    );
     OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
     EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
     OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = optimalStableToTotalDebtRatio;
@@ -152,9 +158,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       ? params.totalStableDebt.rayDiv(vars.totalDebt)
       : 0;
 
-    vars.currentVariableBorrowRate = 0;
-    vars.currentStableBorrowRate = 0;
     vars.currentLiquidityRate = 0;
+    vars.currentVariableBorrowRate = _baseVariableBorrowRate;
+    vars.currentStableBorrowRate = getBaseStableBorrowRate();
 
     vars.borrowUtilizationRate = vars.totalDebt == 0
       ? 0
@@ -164,29 +170,25 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       ? 0
       : vars.totalDebt.rayDiv(vars.availableLiquidity + params.unbacked + vars.totalDebt);
 
-    vars.currentStableBorrowRate = getBaseStableBorrowRate();
-
     if (vars.borrowUtilizationRate > OPTIMAL_UTILIZATION_RATE) {
       uint256 excessUtilizationRateRatio = (vars.borrowUtilizationRate - OPTIMAL_UTILIZATION_RATE)
         .rayDiv(EXCESS_UTILIZATION_RATE);
 
-      vars.currentStableBorrowRate =
-        vars.currentStableBorrowRate +
+      vars.currentStableBorrowRate +=
         _stableRateSlope1 +
         _stableRateSlope2.rayMul(excessUtilizationRateRatio);
 
-      vars.currentVariableBorrowRate =
-        _baseVariableBorrowRate +
+      vars.currentVariableBorrowRate +=
         _variableRateSlope1 +
         _variableRateSlope2.rayMul(excessUtilizationRateRatio);
     } else {
-      vars.currentStableBorrowRate =
-        vars.currentStableBorrowRate +
-        _stableRateSlope1.rayMul(vars.borrowUtilizationRate).rayDiv(OPTIMAL_UTILIZATION_RATE);
+      vars.currentStableBorrowRate += _stableRateSlope1.rayMul(vars.borrowUtilizationRate).rayDiv(
+        OPTIMAL_UTILIZATION_RATE
+      );
 
-      vars.currentVariableBorrowRate =
-        _baseVariableBorrowRate +
-        _variableRateSlope1.rayMul(vars.borrowUtilizationRate).rayDiv(OPTIMAL_UTILIZATION_RATE);
+      vars.currentVariableBorrowRate += _variableRateSlope1
+        .rayMul(vars.borrowUtilizationRate)
+        .rayDiv(OPTIMAL_UTILIZATION_RATE);
     }
 
     if (vars.stableToTotalDebtRatio > OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO) {

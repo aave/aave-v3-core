@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
-import {SafeERC20} from '../../../dependencies/openzeppelin/contracts/SafeERC20.sol';
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IFlashLoanReceiver} from '../../../flashloan/interfaces/IFlashLoanReceiver.sol';
@@ -9,7 +10,6 @@ import {IFlashLoanSimpleReceiver} from '../../../flashloan/interfaces/IFlashLoan
 import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
-import {Helpers} from '../helpers/Helpers.sol';
 import {Errors} from '../helpers/Errors.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {PercentageMath} from '../math/PercentageMath.sol';
@@ -26,19 +26,21 @@ import {ReserveLogic} from './ReserveLogic.sol';
 library FlashLoanLogic {
   using ReserveLogic for DataTypes.ReserveCache;
   using ReserveLogic for DataTypes.ReserveData;
-  using SafeERC20 for IERC20;
+  using GPv2SafeERC20 for IERC20;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
   using WadRayMath for uint256;
   using PercentageMath for uint256;
+  using SafeCast for uint256;
 
   // See `IPool` for descriptions
   event FlashLoan(
     address indexed target,
-    address indexed initiator,
+    address initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
-    uint16 referralCode
+    uint16 indexed referralCode
   );
 
   // Helper struct for internal variables used in the `executeFlashLoan` function
@@ -84,12 +86,12 @@ library FlashLoanLogic {
     // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
+    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
+
     FlashLoanLocalVars memory vars;
 
     vars.aTokenAddresses = new address[](params.assets.length);
     vars.totalPremiums = new uint256[](params.assets.length);
-
-    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
 
     vars.receiver = IFlashLoanReceiver(params.receiverAddress);
     (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
@@ -97,11 +99,12 @@ library FlashLoanLogic {
       : (params.flashLoanPremiumTotal, params.flashLoanPremiumToProtocol);
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
+      vars.currentAmount = params.amounts[vars.i];
       vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;
-      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(vars.flashloanPremiumTotal);
+      vars.totalPremiums[vars.i] = vars.currentAmount.percentMul(vars.flashloanPremiumTotal);
       IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
         params.receiverAddress,
-        params.amounts[vars.i]
+        vars.currentAmount
       );
     }
 
@@ -113,14 +116,17 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.currentAsset = params.assets[vars.i];
       vars.currentAmount = params.amounts[vars.i];
 
-      if (DataTypes.InterestRateMode(params.modes[vars.i]) == DataTypes.InterestRateMode.NONE) {
+      if (
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]) ==
+        DataTypes.InterestRateMode.NONE
+      ) {
         vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
         vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
         vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
@@ -137,11 +143,10 @@ library FlashLoanLogic {
           vars.currentPremiumToLP
         );
 
-        reserve.accruedToTreasury =
-          reserve.accruedToTreasury +
-          Helpers.castUint128(
-            vars.currentPremiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex)
-          );
+        reserve.accruedToTreasury += vars
+          .currentPremiumToProtocol
+          .rayDiv(reserveCache.nextLiquidityIndex)
+          .toUint128();
 
         reserve.updateInterestRates(
           reserveCache,
@@ -176,7 +181,7 @@ library FlashLoanLogic {
             user: msg.sender,
             onBehalfOf: params.onBehalfOf,
             amount: vars.currentAmount,
-            interestRateMode: params.modes[vars.i],
+            interestRateMode: DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
             referralCode: params.referralCode,
             releaseUnderlying: false,
             maxStableRateBorrowSizePercent: params.maxStableRateBorrowSizePercent,
@@ -192,6 +197,7 @@ library FlashLoanLogic {
         msg.sender,
         vars.currentAsset,
         vars.currentAmount,
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
         vars.totalPremiums[vars.i],
         params.referralCode
       );
@@ -226,6 +232,7 @@ library FlashLoanLogic {
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
     ValidationLogic.validateFlashloanSimple(reserve);
+
     FlashLoanSimpleLocalVars memory vars;
 
     vars.receiver = IFlashLoanSimpleReceiver(params.receiverAddress);
@@ -241,7 +248,7 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
@@ -256,7 +263,7 @@ library FlashLoanLogic {
 
     reserve.accruedToTreasury =
       reserve.accruedToTreasury +
-      Helpers.castUint128(vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex));
+      vars.premiumToProtocol.rayDiv(reserveCache.nextLiquidityIndex).toUint128();
 
     reserve.updateInterestRates(reserveCache, params.asset, vars.amountPlusPremium, 0);
 
@@ -276,6 +283,7 @@ library FlashLoanLogic {
       msg.sender,
       params.asset,
       params.amount,
+      DataTypes.InterestRateMode(0),
       vars.totalPremium,
       0
     );
