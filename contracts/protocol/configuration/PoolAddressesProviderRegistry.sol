@@ -33,7 +33,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     }
 
     if (removedProvidersCount == 0) return providers;
-
+    // Reduces the length of the providers array by `removedProvidersCount`
     assembly {
       mstore(providers, sub(providersListCount, removedProvidersCount))
     }
