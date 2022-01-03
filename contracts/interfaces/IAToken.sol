@@ -29,7 +29,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
 
   /**
    * @notice Emitted after aTokens are burned
-   * @param from The owner of the aTokens, getting them burned
+   * @param from The address from which the aTokens will be burned
    * @param target The address that will receive the underlying
    * @param value The amount being burned (user entered amount - balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
