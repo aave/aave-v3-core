@@ -544,7 +544,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @notice Gets the configuration paramters of the reserve from storage
+   * @notice Gets the configuration parameters of the reserve from storage
    * @param self The reserve configuration
    * @return The state param representing ltv
    * @return The state param representing liquidation threshold
@@ -578,7 +578,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @notice Gets the caps  paramters of the reserve from storage
+   * @notice Gets the caps parameters of the reserve from storage
    * @param self The reserve configuration
    * @return The state param representing borrow cap
    * @return The state param representing supply cap.
