@@ -35,7 +35,7 @@ library ValidationLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
 
-  // Factor to apply to the maximum supply utilization rate to calculate the maximum liquidity rate allowed, expressed in bps
+  // Factor to apply to "only-variable-debt" liquidity rate to get threshold for rebalancing, expressed in bps
   // A factor of 9000 results in 90%
   uint256 public constant REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR = 9000;
 
