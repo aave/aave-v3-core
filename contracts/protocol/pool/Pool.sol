@@ -87,6 +87,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return POOL_REVISION;
   }
 
+  /**
+   * @dev Constructor.
+   * @param provider The address of the PoolAddressesProvider contract
+   */
   constructor(IPoolAddressesProvider provider) {
     ADDRESSES_PROVIDER = provider;
   }

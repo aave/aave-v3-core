@@ -34,7 +34,13 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   address internal _underlyingAsset;
 
-  constructor(IPool pool) DebtTokenBase(pool) {}
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
+  constructor(IPool pool) DebtTokenBase(pool) {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(

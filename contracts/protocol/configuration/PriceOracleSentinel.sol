@@ -43,7 +43,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   uint256 internal _gracePeriod;
 
   /**
-   * @notice Constructor
+   * @dev Constructor
    * @param provider The address of the PoolAddressesProvider
    * @param oracle The address of the SequencerOracle
    * @param gracePeriod The duration of the grace period in seconds

@@ -35,6 +35,10 @@ abstract contract DebtTokenBase is
     _;
   }
 
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
   constructor(IPool pool)
     IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
   {

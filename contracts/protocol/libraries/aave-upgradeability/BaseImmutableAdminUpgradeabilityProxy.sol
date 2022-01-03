@@ -16,6 +16,10 @@ import {BaseUpgradeabilityProxy} from '../../../dependencies/openzeppelin/upgrad
 contract BaseImmutableAdminUpgradeabilityProxy is BaseUpgradeabilityProxy {
   address internal immutable _admin;
 
+  /**
+   * @dev Constructor.
+   * @param admin The address of the admin
+   */
   constructor(address admin) {
     _admin = admin;
   }

@@ -26,6 +26,10 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant PRICE_ORACLE_SENTINEL = 'PRICE_ORACLE_SENTINEL';
   bytes32 private constant DATA_PROVIDER = 'DATA_PROVIDER';
 
+  /**
+   * @dev Constructor.
+   * @param marketId The identifier of the market
+   */
   constructor(string memory marketId) {
     _setMarketId(marketId);
   }

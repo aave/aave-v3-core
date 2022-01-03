@@ -20,7 +20,13 @@ contract DelegationAwareAToken is AToken {
    */
   event DelegateUnderlyingTo(address indexed delegatee);
 
-  constructor(IPool pool) AToken(pool) {}
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
+  constructor(IPool pool) AToken(pool) {
+    // Intentionally left blank
+  }
 
   /**
    * @notice Delegates voting power of the underlying asset to a `delegatee` address

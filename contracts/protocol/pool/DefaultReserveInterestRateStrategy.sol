@@ -63,6 +63,19 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   uint256 internal immutable _stableRateExcessOffset;
 
+  /**
+   * @dev Constructor.
+   * @param provider The address of the PoolAddressesProvider contract
+   * @param optimalUtilizationRate The optimal utilization rate
+   * @param baseVariableBorrowRate The base variable borrow rate
+   * @param variableRateSlope1 The variable rate slope below optimal utilization rate
+   * @param variableRateSlope2 The variable rate slope beyond optimal utilization rate
+   * @param stableRateSlope1 The stable rate slope below optimal utilization rate
+   * @param stableRateSlope2 The stable rate slope beyond optimal utilization rate
+   * @param baseStableRateOffset The premium on top of variable rate for base stable borrowing rate
+   * @param stableRateExcessOffset The premium on top of stable rate when there stable debt surpass the threshold
+   * @param optimalStableToTotalDebtRatio The optimal stable debt to total debt ratio of the reserve
+   */
   constructor(
     IPoolAddressesProvider provider,
     uint256 optimalUtilizationRate,

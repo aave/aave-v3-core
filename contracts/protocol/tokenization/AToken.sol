@@ -46,6 +46,10 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     return ATOKEN_REVISION;
   }
 
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
   constructor(IPool pool)
     IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
   {

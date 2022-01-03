@@ -62,6 +62,13 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   bytes32 internal _domainSeparator;
   uint256 internal immutable _chainId;
 
+  /**
+   * @dev Constructor.
+   * @param addressesProvider The address of the PoolAddressesProvider contract
+   * @param name The name of the token
+   * @param symbol The symbol of the token
+   * @param decimals The number of decimals of the token
+   */
   constructor(
     IPoolAddressesProvider addressesProvider,
     string memory name,
