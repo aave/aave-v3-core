@@ -52,7 +52,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   uint256 public constant POOL_REVISION = 0x2;
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
-  
+
   /**
    * @dev Only pool configurator can call functions marked by this modifier.
    **/
@@ -60,7 +60,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _onlyPoolConfigurator();
     _;
   }
-  
+
   /**
    * @dev Only bridge can call functions marked by this modifier.
    **/
@@ -109,7 +109,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     _flashLoanPremiumToProtocol = 0;
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function mintUnbacked(
     address asset,
     uint256 amount,
@@ -128,7 +128,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     );
   }
 
-  ///@inheritdoc IPool
+  /// @inheritdoc IPool
   function backUnbacked(
     address asset,
     uint256 amount,
@@ -751,6 +751,10 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     emit IsolationModeTotalDebtUpdated(asset, 0);
   }
 
+  /**
+   * @notice Add an asset to the reserve list
+   * @param asset The address of the underlying asset
+   */
   function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
     require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);

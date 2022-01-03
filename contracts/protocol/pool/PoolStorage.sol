@@ -24,21 +24,33 @@ contract PoolStorage {
   /// Map of users address and their configuration data (userAddress => userConfiguration)
   mapping(address => DataTypes.UserConfigurationMap) internal _usersConfig;
 
-  /// List of reserves as a map (reserveId => reserve)
-  /// @dev structured as a mapping for gas savings reasons, using the reserve id as index
+  /**
+   * @dev List of reserves as a map (reserveId => reserve). It is structured as a mapping for
+   * gas savings reasons, using the reserve id as index
+   */
   mapping(uint256 => address) internal _reservesList;
 
-  /// List of eMode categories as a map (eModeCategoryId => eModeCategory)
-  /// @dev structured as a mapping for gas savings reasons, using the eModeCategoryId as index
+  /**
+   * List of eMode categories as a map (eModeCategoryId => eModeCategory). It is structured as a
+   * mapping for gas savings reasons, using the eModeCategoryId as index
+   */
   mapping(uint8 => DataTypes.EModeCategory) internal _eModeCategories;
 
   /// Map of users address and their eMode category (userAddress => eModeCategoryId)
   mapping(address => uint8) internal _usersEModeCategory;
 
+  /// Fee of the protocol bridge, expressed in bps
   uint256 internal _bridgeProtocolFee;
+
+  /// Total FlashLoan Premium, expressed in bps
   uint128 internal _flashLoanPremiumTotal;
+
+  /// FlashLoan premium paid to protocol treasury, expressed in bps
   uint128 internal _flashLoanPremiumToProtocol;
 
+  /// Available liquidity that can be borrowed at once at stable rate, expressed in bps
   uint64 internal _maxStableRateBorrowSizePercent;
+
+  /// Total number of listed reserves (dropped and undropped)
   uint16 internal _reservesCount;
 }
