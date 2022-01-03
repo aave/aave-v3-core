@@ -20,9 +20,11 @@ abstract contract DebtTokenBase is
 {
   /// Map of borrow allowances (delegator => delegatee => borrowAllowanceAmount)
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
-  
+
+  /// Credit Delegation Typehash
   bytes32 public constant DELEGATION_WITH_SIG_TYPEHASH =
     keccak256('DelegationWithSig(address delegatee,uint256 value,uint256 nonce,uint256 deadline)');
+
   IPool public immutable POOL;
 
   /**
@@ -130,6 +132,12 @@ abstract contract DebtTokenBase is
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
+  /**
+   * @notice Updates the borrow allowance of a user on the specific debt token.
+   * @param delegator The address delegating the borrowing power
+   * @param delegatee The address receiving the delegated borrowing power
+   * @param amount The maximum amount being delegated.
+   **/
   function _approveDelegation(
     address delegator,
     address delegatee,
@@ -139,6 +147,12 @@ abstract contract DebtTokenBase is
     emit BorrowAllowanceDelegated(delegator, delegatee, _getUnderlyingAssetAddress(), amount);
   }
 
+  /**
+   * @notice Decreases the borrow allowance of a user on the specific debt token.
+   * @param delegator The address delegating the borrowing power
+   * @param delegatee The address receiving the delegated borrowing power
+   * @param amount The allowance amount to decrease
+   **/
   function _decreaseBorrowAllowance(
     address delegator,
     address delegatee,
