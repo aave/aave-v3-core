@@ -36,8 +36,8 @@ library ValidationLogic {
   using Address for address;
 
   // Factor to apply to the maximum supply utilization rate to calculate the maximum liquidity rate allowed, expressed in bps
-  // A factor of 4000 results in 40%
-  uint256 public constant REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR = 4000;
+  // A factor of 8000 results in 80%
+  uint256 public constant REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR = 8000;
 
   // Maximum borrow utilization rate allowed, expressed in ray
   // A rate of 0.95e27 results in 95%

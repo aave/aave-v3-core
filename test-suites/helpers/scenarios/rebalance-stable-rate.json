@@ -177,7 +177,7 @@
           "name": "borrow",
           "args": {
             "reserve": "USDC",
-            "amount": "20",
+            "amount": "70",
             "borrowRateMode": "variable",
             "user": "1"
           },
