@@ -31,6 +31,7 @@ describe('ReserveConfiguration', async () => {
   const MAX_VALID_LIQUIDATION_THRESHOLD = BigNumber.from(65535);
   const MAX_VALID_DECIMALS = BigNumber.from(255);
   const MAX_VALID_EMODE_CATEGORY = BigNumber.from(255);
+  const MAX_VALID_RESERVE_FACTOR = BigNumber.from(65535);
 
   before(async () => {
     configMock = await deployMockReserveConfiguration();
@@ -162,8 +163,27 @@ describe('ReserveConfiguration', async () => {
       bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
     );
     expect(await configMock.getReserveFactor()).to.be.eq(ZERO);
-    await expect(configMock.setReserveFactor(65536)).to.be.revertedWith(
+  });
+
+  it('setReserveFactor() with reserveFactor == MAX_VALID_RESERVE_FACTOR', async () => {
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
+    expect(await configMock.setReserveFactor(MAX_VALID_RESERVE_FACTOR));
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, MAX_VALID_RESERVE_FACTOR, ZERO])
+    );
+  });
+
+  it('setReserveFactor() with reserveFactor > MAX_VALID_RESERVE_FACTOR', async () => {
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
+    );
+    await expect(configMock.setReserveFactor(MAX_VALID_RESERVE_FACTOR.add(1))).to.be.revertedWith(
       ProtocolErrors.INVALID_RESERVE_FACTOR
+    );
+    expect(bigNumbersToArrayString(await configMock.getParams())).to.be.eql(
+      bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
     );
   });
 
