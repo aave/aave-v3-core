@@ -73,13 +73,9 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   function _addToAddressesProvidersList(address provider) internal {
     uint256 providersCount = _addressesProvidersList.length;
 
-    bool exists = false;
     for (uint256 i = 0; i < providersCount; i++) {
-      if (_addressesProvidersList[i] == provider) {
-        exists = true;
-      }
+      require(_addressesProvidersList[i] != provider, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
     }
-    require(!exists, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
 
     _addressesProvidersList.push(provider);
   }
