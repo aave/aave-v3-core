@@ -565,14 +565,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       }
     }
 
-    if (droppedReservesCount == 0) return reserves;
-
-    address[] memory undroppedReserves = new address[](reserveListCount - droppedReservesCount);
-    for (uint256 i = 0; i < reserveListCount - droppedReservesCount; i++) {
-      undroppedReserves[i] = reserves[i];
+    // Reduces the length of the reserves array by `droppedReservesCount`
+    assembly {
+      mstore(reserves, sub(reserveListCount, droppedReservesCount))
     }
-
-    return undroppedReserves;
+    return reserves;
   }
 
   /// @inheritdoc IPool
