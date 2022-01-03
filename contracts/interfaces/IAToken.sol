@@ -21,19 +21,6 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   event Mint(address indexed from, uint256 value, uint256 balanceIncrease, uint256 index);
 
   /**
-   * @notice Mints `amount` aTokens to `user`
-   * @param user The address receiving the minted tokens
-   * @param amount The amount of tokens getting minted
-   * @param index The next liquidity index of the reserve
-   * @return `true` if the the previous balance of the user was 0
-   */
-  function mint(
-    address user,
-    uint256 amount,
-    uint256 index
-  ) external returns (bool);
-
-  /**
    * @notice Emitted after aTokens are burned
    * @param from The owner of the aTokens, getting them burned
    * @param target The address that will receive the underlying
@@ -57,6 +44,19 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param index The next liquidity index of the reserve
    **/
   event BalanceTransfer(address indexed from, address indexed to, uint256 value, uint256 index);
+
+  /**
+   * @notice Mints `amount` aTokens to `user`
+   * @param user The address receiving the minted tokens
+   * @param amount The amount of tokens getting minted
+   * @param index The next liquidity index of the reserve
+   * @return `true` if the the previous balance of the user was 0
+   */
+  function mint(
+    address user,
+    uint256 amount,
+    uint256 index
+  ) external returns (bool);
 
   /**
    * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`

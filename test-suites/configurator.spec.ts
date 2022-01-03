@@ -486,6 +486,23 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     });
   });
 
+  it('Updates the reserve factor of WETH equal to PERCENTAGE_FACTOR', async () => {
+    const snapId = await evmSnapshot();
+    const { configurator, helpersContract, weth, poolAdmin } = testEnv;
+    const newReserveFactor = '10000';
+    expect(
+      await configurator.connect(poolAdmin.signer).setReserveFactor(weth.address, newReserveFactor)
+    )
+      .to.emit(configurator, 'ReserveFactorChanged')
+      .withArgs(weth.address, newReserveFactor);
+
+    await expectReserveConfigurationData(helpersContract, weth.address, {
+      ...baseConfigValues,
+      reserveFactor: newReserveFactor,
+    });
+    await evmRevert(snapId);
+  });
+
   it('Updates the unbackedMintCap of WETH via pool admin', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     const newUnbackedMintCap = '10000';

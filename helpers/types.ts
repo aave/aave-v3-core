@@ -152,7 +152,11 @@ export enum ProtocolErrors {
   INVALID_EXPIRATION = '79', // 'Invalid expiration'
   INVALID_SIGNATURE = '80', // 'Invalid signature'
   OPERATION_NOT_SUPPORTED = '81', // 'Operation not supported'
-  ADDRESSES_PROVIDER_ALREADY_ADDED = '82', // 'Reserve has already been added to reserve list'
+  DEBT_CEILING_NOT_ZERO = '82', // 'Debt ceiling is not zero'
+  ASSET_NOT_LISTED = '83', // 'Asset is not listed'
+  INVALID_OPTIMAL_UTILIZATION_RATE = '84', // 'Invalid optimal utilization ratio'
+  INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85', // 'Invalid optimal stable to total debt ratio'
+  ADDRESSES_PROVIDER_ALREADY_ADDED = '86', // 'Reserve has already been added to reserve list'
 
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
