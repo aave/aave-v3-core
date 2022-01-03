@@ -34,6 +34,8 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
   const MAX_NUMBER_RESERVES = '128';
 
+  const POOL_ID = utils.formatBytes32String('POOL');
+
   let snap: string;
 
   beforeEach(async () => {
@@ -322,9 +324,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
-    const oldPoolImpl = await addressesProvider.getProxyImplementation(
-      await addressesProvider.getPool()
-    );
+    const oldPoolImpl = await addressesProvider.getProxyImplementation(POOL_ID);
 
     // Upgrade the Pool
     expect(
@@ -492,9 +492,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
-    const poolAddressId = utils.formatBytes32String('POOL');
-    const proxyAddress = await addressesProvider.getAddress(poolAddressId);
-    const implementationAddress = await addressesProvider.getProxyImplementation(proxyAddress);
+    const implementationAddress = await addressesProvider.getProxyImplementation(POOL_ID);
 
     // Upgrade the Pool
     expect(

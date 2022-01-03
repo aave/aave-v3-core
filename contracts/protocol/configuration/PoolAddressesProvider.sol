@@ -4,6 +4,7 @@ pragma solidity 0.8.10;
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
+import {BytesLib} from '../libraries/helpers/BytesLib.sol';
 
 /**
  * @title PoolAddressesProvider
@@ -13,13 +14,13 @@ import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-
  * @dev Owned by the Aave Governance
  **/
 contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
+  using BytesLib for bytes;
+
   // Identifier of the Aave Market
   string private _marketId;
 
   // Mapping of registered addresses (identifiers as keys)
   mapping(bytes32 => address) private _addresses;
-  // Mapping of proxy addresses to implementation addresses
-  mapping(address => address) private _proxyToImplementation;
 
   // Main identifiers
   bytes32 private constant POOL = 'POOL';
@@ -50,17 +51,23 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function getProxyImplementation(address proxyAddress) public view override returns (address) {
-    return _proxyToImplementation[proxyAddress];
+  function setAddress(bytes32 id, address newAddress) external override onlyOwner {
+    _addresses[id] = newAddress;
+
+    emit AddressSet(id, newAddress, false);
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setProxyImplementation(address proxyAddress, address implementationAddress)
-    public
-    override
-    onlyOwner
-  {
-    _setProxyImplementation(proxyAddress, implementationAddress);
+  function getProxyImplementation(bytes32 id) public view override returns (address) {
+    address proxyAddress = _addresses[id];
+    if (proxyAddress == address(0)) {
+      return address(0);
+    } else {
+      (bool success, bytes memory result) = proxyAddress.staticcall(
+        abi.encodeWithSignature('implementation()')
+      );
+      return success && result.length == 32 ? result.toAddress() : address(0);
+    }
   }
 
   /// @inheritdoc IPoolAddressesProvider
@@ -74,20 +81,13 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setAddress(bytes32 id, address newAddress) external override onlyOwner {
-    _addresses[id] = newAddress;
-
-    emit AddressSet(id, newAddress, false);
-  }
-
-  /// @inheritdoc IPoolAddressesProvider
   function getPool() external view override returns (address) {
     return getAddress(POOL);
   }
 
   /// @inheritdoc IPoolAddressesProvider
   function setPoolImpl(address newPoolImpl) external override onlyOwner {
-    address oldPoolImpl = _proxyToImplementation[_addresses[POOL]];
+    address oldPoolImpl = getProxyImplementation(POOL);
     _updateImpl(POOL, newPoolImpl);
     emit PoolUpdated(oldPoolImpl, newPoolImpl);
   }
@@ -99,7 +99,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
   /// @inheritdoc IPoolAddressesProvider
   function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external override onlyOwner {
-    address oldPoolConfiguratorImpl = _proxyToImplementation[_addresses[POOL_CONFIGURATOR]];
+    address oldPoolConfiguratorImpl = getProxyImplementation(POOL_CONFIGURATOR);
     _updateImpl(POOL_CONFIGURATOR, newPoolConfiguratorImpl);
     emit PoolConfiguratorUpdated(oldPoolConfiguratorImpl, newPoolConfiguratorImpl);
   }
@@ -174,34 +174,26 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @param newAddress The address of the new implementation
    **/
   function _updateImpl(bytes32 id, address newAddress) internal {
-    address payable proxyAddress = payable(_addresses[id]);
+    address payable payableProxyAddress = payable(_addresses[id]);
 
     InitializableImmutableAdminUpgradeabilityProxy proxy = InitializableImmutableAdminUpgradeabilityProxy(
-        proxyAddress
+        payableProxyAddress
       );
     bytes memory params = abi.encodeWithSignature('initialize(address)', address(this));
 
-    if (proxyAddress == address(0)) {
+    if (payableProxyAddress == address(0)) {
       proxy = new InitializableImmutableAdminUpgradeabilityProxy(address(this));
-      _addresses[id] = address(proxy);
-      _setProxyImplementation(address(proxy), newAddress);
+      address proxyAddress = address(proxy);
+      _addresses[id] = proxyAddress;
       proxy.initialize(newAddress, params);
 
-      emit ProxyCreated(id, address(proxy));
+      emit ProxyCreated(id, proxyAddress);
+      emit ProxyImplementationSet(proxyAddress, newAddress);
     } else {
       proxy.upgradeToAndCall(newAddress, params);
-      _setProxyImplementation(proxyAddress, newAddress);
-    }
-  }
 
-  /**
-   * @notice Sets an implementation address for a proxy saved in the proxies map.
-   * @param proxyAddress The address of the proxy contract
-   * @param implementationAddress The address of the implementation contract
-   */
-  function _setProxyImplementation(address proxyAddress, address implementationAddress) internal {
-    _proxyToImplementation[proxyAddress] = implementationAddress;
-    emit ProxyImplementationSet(proxyAddress, implementationAddress);
+      emit ProxyImplementationSet(address(payableProxyAddress), newAddress);
+    }
   }
 
   /**

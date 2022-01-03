@@ -7,6 +7,7 @@ import { getMockPool } from '@aave/deploy-v3';
 makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
   const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
   const ETH_ADDRESS = '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE';
+  const POOL_ID = utils.formatBytes32String('POOL');
 
   it('getAllReservesTokens() with MKR and ETH as symbols', async () => {
     const { addressesProvider, poolAdmin, helpersContract } = testEnv;
@@ -15,9 +16,7 @@ makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
     // Deploy a mock Pool
     const mockPool = await hre.deployments.deploy('MockPool', { from: deployer });
 
-    const oldPoolImpl = await addressesProvider.getProxyImplementation(
-      await addressesProvider.getPool()
-    );
+    const oldPoolImpl = await addressesProvider.getProxyImplementation(POOL_ID);
 
     // Update the addressesProvider with a mock pool
     expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPool.address))
