@@ -36,12 +36,8 @@ library ValidationLogic {
   using Address for address;
 
   // Factor to apply to the maximum supply utilization rate to calculate the maximum liquidity rate allowed, expressed in bps
-  // A factor of 8000 results in 80%
-  uint256 public constant REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR = 8000;
-
-  // Maximum borrow utilization rate allowed, expressed in ray
-  // A rate of 0.95e27 results in 95%
-  uint256 public constant REBALANCE_UP_MAXIMUM_BORROW_UTILIZATION_RATE = 0.95e27;
+  // A factor of 9000 results in 90%
+  uint256 public constant REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR = 9000;
 
   // Minimum health factor allowed under any circumstance
   // A value of 0.95e18 results in 0.95
@@ -403,31 +399,27 @@ library ValidationLogic {
     require(!isPaused, Errors.RESERVE_PAUSED);
 
     //if the utilization rate is below the threshold, no rebalances are needed
-    uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
-      .wadToRay();
-    uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
-    uint256 borrowUtilizationRate = totalDebt == 0
-      ? 0
-      : totalDebt.rayDiv(availableLiquidity + totalDebt);
-    uint256 supplyUtilizationRate = totalDebt == 0
-      ? 0
-      : totalDebt.rayDiv(availableLiquidity + reserve.unbacked + totalDebt);
+    uint256 totalDebt = stableDebtToken.totalSupply() + variableDebtToken.totalSupply();
 
-    //if the utilization rate is more than the threshold and liquidity rate less than the maximum allowed based
-    // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
-    uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
-    uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
+    (uint256 liquidityRateVariableDebtOnly, , ) = IReserveInterestRateStrategy(
       reserve.interestRateStrategyAddress
-    ).getMaxVariableBorrowRate();
-
-    uint256 maxSupplyUtilizationRate = maxVariableBorrowRate
-      .rayMul(supplyUtilizationRate)
-      .percentMul(PercentageMath.PERCENTAGE_FACTOR - reserveCache.reserveFactor);
+    ).calculateInterestRates(
+        DataTypes.CalculateInterestRatesParams({
+          unbacked: reserve.unbacked,
+          liquidityAdded: 0,
+          liquidityTaken: 0,
+          totalStableDebt: 0,
+          totalVariableDebt: totalDebt,
+          averageStableBorrowRate: 0,
+          reserveFactor: reserveCache.reserveFactor,
+          reserve: reserveAddress,
+          aToken: aTokenAddress
+        })
+      );
 
     require(
-      borrowUtilizationRate >= REBALANCE_UP_MAXIMUM_BORROW_UTILIZATION_RATE &&
-        currentLiquidityRate <=
-        maxSupplyUtilizationRate.percentMul(REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR),
+      reserveCache.currLiquidityRate <=
+        liquidityRateVariableDebtOnly.percentMul(REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR),
       Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
   }
