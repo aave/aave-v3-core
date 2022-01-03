@@ -606,7 +606,7 @@ library ValidationLogic {
     );
 
     require(
-      reserve.configuration.getLtv() == 0 || !hasZeroLtvCollateral,
+      !hasZeroLtvCollateral || reserve.configuration.getLtv() == 0,
       Errors.LTV_VALIDATION_FAILED
     );
   }
