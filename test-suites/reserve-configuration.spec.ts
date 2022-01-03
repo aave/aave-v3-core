@@ -162,6 +162,9 @@ describe('ReserveConfiguration', async () => {
       bigNumbersToArrayString([ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
     );
     expect(await configMock.getReserveFactor()).to.be.eq(ZERO);
+    await expect(configMock.setReserveFactor(65536)).to.be.revertedWith(
+      ProtocolErrors.INVALID_RESERVE_FACTOR
+    );
   });
 
   it('getBorrowCap()', async () => {
