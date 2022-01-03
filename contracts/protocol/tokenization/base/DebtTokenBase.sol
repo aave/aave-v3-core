@@ -140,7 +140,7 @@ abstract contract DebtTokenBase is
    * @notice Updates the borrow allowance of a user on the specific debt token.
    * @param delegator The address delegating the borrowing power
    * @param delegatee The address receiving the delegated borrowing power
-   * @param amount The maximum amount being delegated.
+   * @param amount The allowance amount being delegated.
    **/
   function _approveDelegation(
     address delegator,
@@ -155,7 +155,7 @@ abstract contract DebtTokenBase is
    * @notice Decreases the borrow allowance of a user on the specific debt token.
    * @param delegator The address delegating the borrowing power
    * @param delegatee The address receiving the delegated borrowing power
-   * @param amount The allowance amount to decrease
+   * @param amount The amount to subtract to the current allowance
    **/
   function _decreaseBorrowAllowance(
     address delegator,

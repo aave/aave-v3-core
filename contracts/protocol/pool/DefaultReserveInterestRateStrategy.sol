@@ -58,7 +58,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   /// Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _stableRateSlope2;
 
-  /// Premium on top of variable rate slope below optimal utilization rate for base stable borrowing rate
+  /// Premium on top of `_variableRateSlope1` for base stable borrowing rate
   uint256 internal immutable _baseStableRateOffset;
 
   /// Additional premium applied to stable rate when stable debt surpass `OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO`

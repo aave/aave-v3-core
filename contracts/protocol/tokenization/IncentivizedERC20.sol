@@ -42,7 +42,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   /// Map of users address and their state data (userAddress => userStateData)
   mapping(address => UserState) internal _userState;
 
-  /// Map of allowances (delegate => delegatee => allowanceAmount)
+  /// Map of allowances (delegator => delegatee => allowanceAmount)
   mapping(address => mapping(address => uint256)) private _allowances;
 
   uint256 internal _totalSupply;
@@ -290,7 +290,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /**
    * @notice Get the domain separator for the token
-   * @dev Return cached value if chainId matched cache, otherwise recomputes separator
+   * @dev Return cached value if chainId matches cache, otherwise recomputes separator
    * @return The domain separator of the token at current chain
    */
   function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
