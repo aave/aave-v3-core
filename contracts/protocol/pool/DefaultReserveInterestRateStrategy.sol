@@ -39,28 +39,29 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * 1-optimal utilization rate. Added as a constant here for gas optimizations.
    * Expressed in ray
    **/
-
   uint256 public immutable EXCESS_UTILIZATION_RATE;
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
-  // Base variable borrow rate when Utilization rate = 0. Expressed in ray
+  /// Base variable borrow rate when Utilization rate = 0. Expressed in ray
   uint256 internal immutable _baseVariableBorrowRate;
 
-  // Slope of the variable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  /// Slope of the variable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _variableRateSlope1;
 
-  // Slope of the variable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  /// Slope of the variable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _variableRateSlope2;
 
-  // Slope of the stable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  /// Slope of the stable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _stableRateSlope1;
 
-  // Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  /// Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _stableRateSlope2;
 
+  /// Premium on top of variable rate slope below optimal utilization rate for base stable borrowing rate
   uint256 internal immutable _baseStableRateOffset;
 
+  /// Additional premium applied to stable rate when stable debt surpass `OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO`
   uint256 internal immutable _stableRateExcessOffset;
 
   /**
@@ -106,22 +107,46 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     _stableRateExcessOffset = stableRateExcessOffset;
   }
 
+  /**
+   * @notice Returns the variable rate slope below optimal utilization rate
+   * @dev Its the variable rate when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE
+   * @return The variable rate slope
+   **/
   function getVariableRateSlope1() external view returns (uint256) {
     return _variableRateSlope1;
   }
 
+  /**
+   * @notice Returns the variable rate slope beyond optimal utilization rate
+   * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
+   * @return The variable rate slope
+   **/
   function getVariableRateSlope2() external view returns (uint256) {
     return _variableRateSlope2;
   }
 
+  /**
+   * @notice Returns the stable rate slope below optimal utilization rate
+   * @dev Its the stable rate when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE
+   * @return The stable rate slope
+   **/
   function getStableRateSlope1() external view returns (uint256) {
     return _stableRateSlope1;
   }
 
+  /**
+   * @notice Returns the stable rate slope beyond optimal utilization rate
+   * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
+   * @return The stable rate slope
+   **/
   function getStableRateSlope2() external view returns (uint256) {
     return _stableRateSlope2;
   }
 
+  /**
+   * @notice Returns the base stable borrow rate
+   * @return The base stable borrow rate
+   **/
   function getBaseStableBorrowRate() public view returns (uint256) {
     return _variableRateSlope1 + _baseStableRateOffset;
   }
