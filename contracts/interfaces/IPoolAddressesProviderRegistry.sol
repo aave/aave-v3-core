@@ -37,6 +37,7 @@ interface IPoolAddressesProviderRegistry {
 
   /**
    * @notice Registers an AddressesProvider
+   * @dev The addressesProvider must not be already registered in the registry
    * @param provider The address of the new PoolAddressesProvider
    * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
    **/
