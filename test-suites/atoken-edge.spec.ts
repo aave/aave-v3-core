@@ -126,7 +126,9 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     await expect(
-      aDai.connect(poolSigner).mint(users[0].address, 0, utils.parseUnits('1', 27))
+      aDai
+        .connect(poolSigner)
+        .mint(users[0].address, users[0].address, 0, utils.parseUnits('1', 27))
     ).to.be.revertedWith(INVALID_MINT_AMOUNT);
   });
 
@@ -139,7 +141,11 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const mintingAmount = await convertToCurrencyDecimals(aDai.address, '100');
-    expect(aDai.connect(poolSigner).mint(ZERO_ADDRESS, mintingAmount, utils.parseUnits('1', 27)))
+    expect(
+      aDai
+        .connect(poolSigner)
+        .mint(ZERO_ADDRESS, ZERO_ADDRESS, mintingAmount, utils.parseUnits('1', 27))
+    )
       .to.emit(aDai, 'Transfer')
       .withArgs(ZERO_ADDRESS, ZERO_ADDRESS, mintingAmount);
   });
