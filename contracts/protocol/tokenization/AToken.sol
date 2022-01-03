@@ -212,10 +212,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     return _userState[user].additionalData;
   }
 
-  /**
-   * @notice Returns the address of the Aave treasury, receiving the fees on this aToken
-   * @return Address of the Aave treasury
-   **/
+  /// @inheritdoc IAToken
   function RESERVE_TREASURY_ADDRESS() external view override returns (address) {
     return _treasury;
   }
@@ -304,7 +301,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   }
 
   /**
-   * @dev overrides the base function to fully implement IAToken
+   * @dev Overrides the base function to fully implement IAToken
    * @dev see `IncentivizedERC20.DOMAIN_SEPARATOR()` for more detailed documentation
    */
   function DOMAIN_SEPARATOR() public view override(IAToken, IncentivizedERC20) returns (bytes32) {
@@ -312,7 +309,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   }
 
   /**
-   * @dev overrides the base function to fully implement IAToken
+   * @dev Overrides the base function to fully implement IAToken
    * @dev see `IncentivizedERC20.nonces()` for more detailed documentation
    */
   function nonces(address owner)

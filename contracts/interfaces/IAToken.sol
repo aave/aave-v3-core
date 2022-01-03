@@ -140,19 +140,22 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   function UNDERLYING_ASSET_ADDRESS() external view returns (address);
 
   /**
-   * @dev Returns the address of the Aave treasury, receiving the fees on this aToken
+   * @notice Returns the address of the Aave treasury, receiving the fees on this aToken.
+   * @return Address of the Aave treasury
    **/
   function RESERVE_TREASURY_ADDRESS() external view returns (address);
 
   /**
    * @notice Get the domain separator for the token
-   * @dev Return cached value if chainid matched cache, otherwise recomputes separator
+   * @dev Return cached value if chainId matched cache, otherwise recomputes separator
    * @return The domain separator of the token at current chain
    */
   function DOMAIN_SEPARATOR() external view returns (bytes32);
 
   /**
-   * @notice Returns the nonce for owner
+   * @notice Returns the nonce for owner.
+   * @param owner The address of the owner
+   * @return The nonce of the owner
    **/
   function nonces(address owner) external view returns (uint256);
 }
