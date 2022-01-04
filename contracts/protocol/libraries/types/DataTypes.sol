@@ -99,7 +99,7 @@ library DataTypes {
     uint256 currLiquidityRate;
     uint256 currVariableBorrowRate;
     uint256 reserveFactor;
-    DataTypes.ReserveConfigurationMap reserveConfiguration;
+    ReserveConfigurationMap reserveConfiguration;
     address aTokenAddress;
     address stableDebtTokenAddress;
     address variableDebtTokenAddress;
@@ -131,7 +131,7 @@ library DataTypes {
     address user;
     address onBehalfOf;
     uint256 amount;
-    DataTypes.InterestRateMode interestRateMode;
+    InterestRateMode interestRateMode;
     uint16 referralCode;
     bool releaseUnderlying;
     uint256 maxStableRateBorrowSizePercent;
@@ -144,7 +144,7 @@ library DataTypes {
   struct ExecuteRepayParams {
     address asset;
     uint256 amount;
-    DataTypes.InterestRateMode interestRateMode;
+    InterestRateMode interestRateMode;
     address onBehalfOf;
     bool useATokens;
   }
@@ -213,12 +213,12 @@ library DataTypes {
   }
 
   struct ValidateBorrowParams {
-    DataTypes.ReserveCache reserveCache;
-    DataTypes.UserConfigurationMap userConfig;
+    ReserveCache reserveCache;
+    UserConfigurationMap userConfig;
     address asset;
     address userAddress;
     uint256 amount;
-    DataTypes.InterestRateMode interestRateMode;
+    InterestRateMode interestRateMode;
     uint256 maxStableLoanPercent;
     uint256 reservesCount;
     address oracle;
@@ -230,7 +230,7 @@ library DataTypes {
   }
 
   struct ValidateLiquidationCallParams {
-    DataTypes.ReserveCache debtReserveCache;
+    ReserveCache debtReserveCache;
     uint256 totalDebt;
     uint256 healthFactor;
     address priceOracleSentinel;

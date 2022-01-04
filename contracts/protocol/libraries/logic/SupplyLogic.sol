@@ -65,6 +65,7 @@ library SupplyLogic {
     IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, params.amount);
 
     bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
+      msg.sender,
       params.onBehalfOf,
       params.amount,
       reserveCache.nextLiquidityIndex
