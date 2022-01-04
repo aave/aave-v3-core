@@ -39,6 +39,7 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
     _setupDecimals(decimals);
   }
 
+  /// @inheritdoc IERC20WithPermit
   function permit(
     address owner,
     address spender,

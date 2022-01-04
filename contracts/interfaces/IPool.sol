@@ -31,6 +31,7 @@ interface IPool {
    * @param reserve The address of the underlying asset of the reserve
    * @param backer The address paying for the backing
    * @param amount The amount added as backing
+   * @param fee The amount paid in fees
    **/
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
@@ -577,7 +578,7 @@ interface IPool {
   /**
    * @notice Returns the state and configuration of the reserve
    * @param asset The address of the underlying asset of the reserve
-   * @return The state of the reserve
+   * @return The state and configuration data of the reserve
    **/
   function getReserveData(address asset) external view returns (DataTypes.ReserveData memory);
 
