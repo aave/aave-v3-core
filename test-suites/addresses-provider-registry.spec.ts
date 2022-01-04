@@ -62,7 +62,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       'Invalid addresses provider added to the list'
     );
     expect(await registry.getAddressesProviderAddressById(NEW_ADDRESSES_PROVIDER_ID)).to.be.equal(
-      users[1].address,
+      NEW_ADDRESES_PROVIDER_ADDRESS,
       'Invalid update of id mapping'
     );
   });
@@ -126,12 +126,15 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   });
 
   it('Tries to add an addressesProvider with an already used id (revert expected)', async () => {
-    const { users, registry } = testEnv;
+    const { users, registry, addressesProvider } = testEnv;
+
+    const id = await registry.getAddressesProviderIdByAddress(addressesProvider.address);
+    expect(id).not.to.be.eq(0);
 
     // Simulating an addresses provider using the users[2] wallet address
-    await expect(
-      registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID)
-    ).to.be.revertedWith(ProtocolErrors.INVALID_ADDRESSES_PROVIDER_ID);
+    await expect(registry.registerAddressesProvider(users[2].address, id)).to.be.revertedWith(
+      ProtocolErrors.INVALID_ADDRESSES_PROVIDER_ID
+    );
 
     const providers = await registry.getAddressesProvidersList();
     const idMap = {};

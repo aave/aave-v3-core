@@ -44,11 +44,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
     require(id != 0, Errors.INVALID_ADDRESSES_PROVIDER_ID);
     require(_idToAddressesProvider[id] == address(0), Errors.INVALID_ADDRESSES_PROVIDER_ID);
-
-    uint256 oldId = _addressesProviders[provider];
-    if (oldId > 0) {
-      _idToAddressesProvider[oldId] = address(0);
-    }
+    require(_addressesProviders[provider] == 0, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
 
     _addressesProviders[provider] = id;
     _idToAddressesProvider[id] = provider;
