@@ -379,6 +379,7 @@ library ValidationLogic {
 
   /**
    * @notice Validates a stable borrow rate rebalance action.
+   * @dev Rebalancing is accepted when depositors are earning <= 90% of their earnings in pure supply/demand market (variable rate only)
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
@@ -398,7 +399,6 @@ library ValidationLogic {
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
-    //if the utilization rate is below the threshold, no rebalances are needed
     uint256 totalDebt = stableDebtToken.totalSupply() + variableDebtToken.totalSupply();
 
     (uint256 liquidityRateVariableDebtOnly, , ) = IReserveInterestRateStrategy(
