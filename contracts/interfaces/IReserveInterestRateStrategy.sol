@@ -23,7 +23,10 @@ interface IReserveInterestRateStrategy {
 
   /**
    * @notice Calculates the interest rates depending on the reserve's state and configurations
-   * @param params The params structure with the amount pending to treasury, amount to mint during operation and amount to burn during operation
+   * @param params An structure with the following params:
+   *   - amount pending to treasury
+   *   - amount to mint during operation
+   *   - amount to burn during operation
    **/
   function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory params)
     external

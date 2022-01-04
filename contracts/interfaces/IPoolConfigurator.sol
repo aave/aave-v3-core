@@ -268,12 +268,12 @@ interface IPoolConfigurator {
 
   /**
    * @notice Configures the reserve collateralization parameters
-   * @dev all the values are expressed in percentages with two decimals of precision. A valid value is 10000, which means 100.00%
+   * @dev All the values are expressed in bps with two decimals of precision. A value of 10000 results in 100.00%
+   * @dev The `liquidationBonus` is always above 100%. A value of 105% means the liquidator will receive a 5% bonus
    * @param asset The address of the underlying asset of the reserve
    * @param ltv The loan to value of the asset when used as collateral
    * @param liquidationThreshold The threshold at which loans using this asset as collateral will be considered undercollateralized
-   * @param liquidationBonus The bonus liquidators receive to liquidate this asset. The values is always above 100%. A value of 105%
-   * means the liquidator will receive a 5% bonus
+   * @param liquidationBonus The bonus liquidators receive to liquidate this asset
    **/
   function configureReserveAsCollateral(
     address asset,
@@ -306,15 +306,18 @@ interface IPoolConfigurator {
 
   /**
    * @notice Sets the borrowable in isolation flag for the reserve
-   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed amount will be accumulated in the isolated collateral's total debt exposure.
-   * Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep consistency in the debt ceiling calculations.
+   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed
+   * amount will be accumulated in the isolated collateral's total debt exposure.
+   * Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep consistency
+   * in the debt ceiling calculations.
    * @param asset The address of the underlying asset of the reserve
    * @param borrowable True if the asset should be borrowable in isolation, false otherwise
    **/
   function setBorrowableInIsolation(address asset, bool borrowable) external;
 
   /**
-   * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay, swap interestrate, liquidate, atoken transfers)
+   * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay, swap interest
+   * rate, liquidate, atoken transfers)
    * @param asset The address of the underlying asset of the reserve
    * @param val True if pausing the reserve, false if unpausing
    **/
@@ -379,13 +382,14 @@ interface IPoolConfigurator {
 
   /**
    * @notice Adds a new eMode category
+   * @dev If `oracle` is zero address, the default assets oracles will be used to compute the overall debt and
+   * overcollateralization of the users using this category.
    * @param categoryId The id of the category to be configured
    * @param ltv The ltv associated with the category
    * @param liquidationThreshold The liquidation threshold associated with the category
    * @param liquidationBonus The liquidation bonus associated with the category
-   * @param oracle The oracle associated with the category. If 0x0, the default assets oracles will be used to compute the overall
+   * @param oracle The oracle associated with the category
    * @param label a label identifying the category
-   * debt and overcollateralization of the users using this category.
    **/
   function setEModeCategory(
     uint8 categoryId,

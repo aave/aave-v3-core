@@ -367,10 +367,11 @@ interface IPool {
   ) external returns (uint256);
 
   /**
-   * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the equivalent debt tokens
+   * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the
+   * equivalent debt tokens
    * - E.g. User repays 100 USDC using 100 aUSDC, burning 100 variable/stable debt tokens
-   * @dev  Passing uint256.max as amount will clean up any residual aToken dust balance, if the user aToken balance is not enough to
-   * cover the whole debt
+   * @dev  Passing uint256.max as amount will clean up any residual aToken dust balance, if the user aToken
+   * balance is not enough to cover the whole debt
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
@@ -394,8 +395,8 @@ interface IPool {
    * @notice Rebalances the stable interest rate of a user to the current stable rate defined on the reserve.
    * - Users can be rebalanced if the following conditions are satisfied:
    *     1. Usage ratio is above 95%
-   *     2. the current supply APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too much has been
-   *        borrowed at a stable rate and suppliers are not earning enough
+   *     2. the current supply APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too
+   *        much has been borrowed at a stable rate and suppliers are not earning enough
    * @param asset The address of the underlying asset borrowed
    * @param user The address of the user to be rebalanced
    **/
@@ -430,9 +431,9 @@ interface IPool {
   /**
    * @notice Allows smartcontracts to access the liquidity of the pool within one transaction,
    * as long as the amount taken plus a fee is returned.
-   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
-   * For further details please visit https://developers.aave.com
-   * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanReceiver interface
+   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept
+   * into consideration. For further details please visit https://developers.aave.com
+   * @param receiverAddress The address of the contract receiving the funds, implementing IFlashLoanReceiver interface
    * @param assets The addresses of the assets being flash-borrowed
    * @param amounts The amounts of the assets being flash-borrowed
    * @param interestRateModes Types of the debt to open if the flash loan is not returned:
@@ -457,9 +458,9 @@ interface IPool {
   /**
    * @notice Allows smartcontracts to access the liquidity of the pool within one transaction,
    * as long as the amount taken plus a fee is returned.
-   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
-   * For further details please visit https://developers.aave.com
-   * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanSimpleReceiver interface
+   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept
+   * into consideration. For further details please visit https://developers.aave.com
+   * @param receiverAddress The address of the contract receiving the funds, implementing IFlashLoanSimpleReceiver interface
    * @param asset The address of the asset being flash-borrowed
    * @param amount The amount of the asset being flash-borrowed
    * @param params Variadic packed params to pass to the receiver as extra information
