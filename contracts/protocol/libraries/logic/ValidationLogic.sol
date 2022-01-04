@@ -37,7 +37,7 @@ library ValidationLogic {
 
   /**
    * @dev Factor to apply to the maximum variable borrow to calculate the maximum liquidity rate allowed
-   * Expressed in bps, a factor of 4000 results in 40%
+   * Expressed in bps, a factor of 4000 results in 40.00%
    */
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
 
@@ -45,7 +45,7 @@ library ValidationLogic {
    * @dev Maximum borrow utilization rate allowed
    * Expressed in ray, a rate of 0.95e27 results in 95%
    */
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
+  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27;
 
   /**
    * @dev Minimum health factor allowed under any circumstance
