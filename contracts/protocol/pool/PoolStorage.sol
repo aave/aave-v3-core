@@ -50,6 +50,9 @@ contract PoolStorage {
   /// Available liquidity that can be borrowed at once at stable rate, expressed in bps
   uint64 internal _maxStableRateBorrowSizePercent;
 
-  /// Total number of listed reserves (dropped and undropped)
+  /**
+   * Maximum number of active reserves there have been in the protocol.
+   * @dev It is the upper bound of the reserves list
+   */
   uint16 internal _reservesCount;
 }

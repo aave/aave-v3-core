@@ -61,7 +61,7 @@ library DataTypes {
 
   struct UserConfigurationMap {
     /**
-     * @dev Bitmap of the users collaterals and borrows. It is divided in pairs of bits, one per asset.
+     * @dev Bitmap of the users collaterals and borrows. It is divided in pairs of bits, one pair per asset.
      * The first bit indicates if an asset is used as collateral by the user, the second whether an
      * asset is borrowed by the user.
      */

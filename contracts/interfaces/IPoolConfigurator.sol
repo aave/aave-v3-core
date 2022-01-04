@@ -269,7 +269,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Configures the reserve collateralization parameters
-   * @dev All the values are expressed in bps with two decimals of precision. A value of 10000 results in 100.00%
+   * @dev All the values are expressed in bps. A value of 10000 results in 100.00%
    * @dev The `liquidationBonus` is always above 100%. A value of 105% means the liquidator will receive a 5% bonus
    * @param asset The address of the underlying asset of the reserve
    * @param ltv The loan to value of the asset when used as collateral
@@ -390,7 +390,7 @@ interface IPoolConfigurator {
    * @param liquidationThreshold The liquidation threshold associated with the category
    * @param liquidationBonus The liquidation bonus associated with the category
    * @param oracle The oracle associated with the category
-   * @param label a label identifying the category
+   * @param label A label identifying the category
    **/
   function setEModeCategory(
     uint8 categoryId,
@@ -418,14 +418,14 @@ interface IPoolConfigurator {
    * Total flash loan premium consist in 2 parts:
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
-   * @dev Expressed in bps with 2 decimals of precision
+   * @dev Expressed in bps
    * @param flashloanPremiumTotal The total premium
    */
   function updateFlashloanPremiumTotal(uint256 flashloanPremiumTotal) external;
 
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
-   * @dev Expressed in bps with 2 decimals of precision
+   * @dev Expressed in bps
    * @param flashloanPremiumToProtocol The part of the total flashloan premium sent to the protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 flashloanPremiumToProtocol) external;

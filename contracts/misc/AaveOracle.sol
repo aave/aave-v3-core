@@ -19,7 +19,7 @@ import {IAaveOracle} from '../interfaces/IAaveOracle.sol';
 contract AaveOracle is IAaveOracle {
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
-  /// Map of sources of assets price (asset => priceSource)
+  /// Map of asset price sources (asset => priceSource)
   mapping(address => AggregatorInterface) private assetsSources;
 
   IPriceOracleGetter private _fallbackOracle;
