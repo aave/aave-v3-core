@@ -40,14 +40,15 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
     _addressesProviders[provider] = id;
     _addToAddressesProvidersList(provider);
-    emit AddressesProviderRegistered(provider);
+    emit AddressesProviderRegistered(provider, id);
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
     require(_addressesProviders[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
+    uint256 id = _addressesProviders[provider];
     _addressesProviders[provider] = 0;
-    emit AddressesProviderUnregistered(provider);
+    emit AddressesProviderUnregistered(provider, id);
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry

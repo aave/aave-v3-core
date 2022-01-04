@@ -34,7 +34,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     // Simulating an addresses provider using the users[1] wallet address
     expect(await registry.registerAddressesProvider(users[1].address, NEW_ADDRESSES_PROVIDER_ID))
       .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(users[1].address);
+      .withArgs(users[1].address, NEW_ADDRESSES_PROVIDER_ID);
 
     const providers = await registry.getAddressesProvidersList();
 
@@ -57,7 +57,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
     expect(await registry.unregisterAddressesProvider(users[1].address))
       .to.emit(registry, 'AddressesProviderUnregistered')
-      .withArgs(users[1].address);
+      .withArgs(users[1].address, id);
 
     const providers = await registry.getAddressesProvidersList();
 
@@ -94,7 +94,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       await registry.registerAddressesProvider(addressesProvider.address, NEW_ADDRESSES_PROVIDER_ID)
     )
       .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(addressesProvider.address);
+      .withArgs(addressesProvider.address, NEW_ADDRESSES_PROVIDER_ID);
 
     const providers = await registry.getAddressesProvidersList();
 
