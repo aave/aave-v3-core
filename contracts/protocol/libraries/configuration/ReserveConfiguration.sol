@@ -55,7 +55,7 @@ library ReserveConfiguration {
   uint256 internal constant MAX_VALID_RESERVE_FACTOR = 65535;
   uint256 internal constant MAX_VALID_BORROW_CAP = 68719476735;
   uint256 internal constant MAX_VALID_SUPPLY_CAP = 68719476735;
-  uint256 internal constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 10000;
+  uint256 internal constant MAX_VALID_LIQUIDATION_PROTOCOL_FEE = 65535;
   uint256 internal constant MAX_VALID_EMODE_CATEGORY = 255;
   uint256 internal constant MAX_VALID_UNBACKED_MINT_CAP = 68719476735;
   uint256 internal constant MAX_VALID_DEBT_CEILING = 1099511627775;
