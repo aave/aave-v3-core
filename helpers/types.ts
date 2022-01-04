@@ -68,123 +68,109 @@ export enum eContractid {
 }
 
 /*
- * Error messages prefix glossary:
- *  - VL = ValidationLogic
- *  - MATH = Math libraries
- *  - AT = aToken or DebtTokens
- *  - P = Pool
- *  - PAPR = PoolAddressesProviderRegistry
- *  - PC = PoolConfiguration
- *  - RL = ReserveLogic
- *  - P = Pausable
+ * Error messages
  */
 export enum ProtocolErrors {
-  //common errors
-  CALLER_NOT_POOL_ADMIN = '33', // 'The caller must be the pool admin'
-
-  //contract specific errors
-  VL_INVALID_AMOUNT = '1', // 'Amount must be greater than 0'
-  VL_NO_ACTIVE_RESERVE = '2', // 'Action requires an active reserve'
-  VL_RESERVE_FROZEN = '3', // 'Action requires an unfrozen reserve'
-  VL_CURRENT_AVAILABLE_LIQUIDITY_NOT_ENOUGH = '4', // 'The current liquidity is not enough'
-  VL_NOT_ENOUGH_AVAILABLE_USER_BALANCE = '5', // 'User cannot withdraw more than the available balance'
-  VL_BORROWING_NOT_ENABLED = '7', // 'Borrowing is not enabled'
-  VL_INVALID_INTEREST_RATE_MODE_SELECTED = '8', // 'Invalid interest rate mode selected'
-  VL_COLLATERAL_BALANCE_IS_0 = '9', // 'The collateral balance is 0'
-  VL_HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD = '10', // 'Health factor is lesser than the liquidation threshold'
-  VL_COLLATERAL_CANNOT_COVER_NEW_BORROW = '11', // 'There is not enough collateral to cover a new borrow'
-  VL_STABLE_BORROWING_NOT_ENABLED = '12', // stable borrowing not enabled
-  VL_COLLATERAL_SAME_AS_BORROWING_CURRENCY = '13', // collateral is (mostly) the same currency that is being borrowed
-  VL_AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE = '14', // 'The requested amount is greater than the max loan size in stable rate mode
-  VL_NO_DEBT_OF_SELECTED_TYPE = '15', // 'for repayment of stable debt, the user needs to have stable debt, otherwise, he needs to have variable debt'
-  VL_NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF = '16', // 'To repay on behalf of an user an explicit amount to repay is needed'
-  VL_NO_STABLE_RATE_LOAN_IN_RESERVE = '17', // 'User does not have a stable rate loan in progress on this reserve'
-  VL_NO_VARIABLE_RATE_LOAN_IN_RESERVE = '18', // 'User does not have a variable rate loan in progress on this reserve'
-  VL_UNDERLYING_BALANCE_NOT_GREATER_THAN_0 = '19', // 'The underlying balance needs to be greater than 0'
-  VL_SUPPLIED_ASSETS_ALREADY_IN_USE = '20', // 'User supplied assets are already being used as collateral'
-  P_NOT_ENOUGH_STABLE_BORROW_BALANCE = '21', // 'User does not have any stable rate loan for this reserve'
-  P_INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET = '22', // 'Interest rate rebalance conditions were not met'
-  P_LIQUIDATION_CALL_FAILED = '23', // 'Liquidation call failed'
-  P_NOT_ENOUGH_LIQUIDITY_TO_BORROW = '24', // 'There is not enough liquidity available to borrow'
-  P_REQUESTED_AMOUNT_TOO_SMALL = '25', // 'The requested amount is too small for a FlashLoan.'
-  P_INCONSISTENT_PROTOCOL_ACTUAL_BALANCE = '26', // 'The actual balance of the protocol is inconsistent'
-  P_CALLER_NOT_POOL_CONFIGURATOR = '27', // 'The caller is not the pool configurator'
-  P_INCONSISTENT_FLASHLOAN_PARAMS = '28',
-  CT_CALLER_MUST_BE_POOL = '29', // 'The caller of this function must be a pool'
-  CT_CANNOT_GIVE_ALLOWANCE_TO_HIMSELF = '30', // 'User cannot give allowance to himself'
-  CT_TRANSFER_AMOUNT_NOT_GT_0 = '31', // 'Transferred amount needs to be greater than zero'
-  RL_RESERVE_ALREADY_INITIALIZED = '32', // 'Reserve has already been initialized'
-  PC_RESERVE_LIQUIDITY_NOT_0 = '34', // 'The liquidity of the reserve needs to be 0'
-  PC_INVALID_ATOKEN_POOL_ADDRESS = '35', // 'The liquidity of the reserve needs to be 0'
-  PC_INVALID_STABLE_DEBT_TOKEN_POOL_ADDRESS = '36', // 'The liquidity of the reserve needs to be 0'
-  PC_INVALID_VARIABLE_DEBT_TOKEN_POOL_ADDRESS = '37', // 'The liquidity of the reserve needs to be 0'
-  PC_INVALID_STABLE_DEBT_TOKEN_UNDERLYING_ADDRESS = '38', // 'The liquidity of the reserve needs to be 0'
-  PC_INVALID_VARIABLE_DEBT_TOKEN_UNDERLYING_ADDRESS = '39', // 'The liquidity of the reserve needs to be 0'
-  PC_INVALID_ADDRESSES_PROVIDER_ID = '40', // 'The liquidity of the reserve needs to be 0'
-  PC_CALLER_NOT_EMERGENCY_ADMIN = '76', // 'The caller must be the emergencya admin'
-  PAPR_PROVIDER_NOT_REGISTERED = '41', // 'Provider is not registered'
-  VL_HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '42', // 'Health factor is not below the threshold'
-  VL_COLLATERAL_CANNOT_BE_LIQUIDATED = '43', // 'The collateral chosen cannot be liquidated'
-  VL_SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '44', // 'User did not borrow the specified currency'
-  VL_NOT_ENOUGH_LIQUIDITY_TO_LIQUIDATE = '45', // "There isn't enough liquidity available to liquidate"
-  P_INVALID_FLASHLOAN_MODE = '47', //Invalid flashloan mode selected
-  MATH_MULTIPLICATION_OVERFLOW = '48',
-  MATH_ADDITION_OVERFLOW = '49',
-  MATH_DIVISION_BY_ZERO = '50',
-  CT_INVALID_MINT_AMOUNT = '56', //invalid amount to mint
-  CT_INVALID_BURN_AMOUNT = '58', //invalid amount to burn
-  P_REENTRANCY_NOT_ALLOWED = '62',
-  P_CALLER_MUST_BE_AN_ATOKEN = '63',
-  P_IS_PAUSED = '64', // 'Pool is paused'
-  P_NO_MORE_RESERVES_ALLOWED = '65',
-  P_INVALID_FLASH_LOAN_EXECUTOR_RETURN = '66',
-  P_NOT_CONTRACT = '78',
-  RC_INVALID_LTV = '67',
-  RC_INVALID_LIQ_THRESHOLD = '68',
-  RC_INVALID_LIQ_BONUS = '69',
-  RC_INVALID_DECIMALS = '70',
-  RC_INVALID_RESERVE_FACTOR = '71',
-  PAPR_INVALID_ADDRESSES_PROVIDER_ID = '72',
-  VL_INCONSISTENT_FLASHLOAN_PARAMS = '73',
-  VL_BORROW_CAP_EXCEEDED = '81',
-  RC_INVALID_BORROW_CAP = '82',
-  VL_SUPPLY_CAP_EXCEEDED = '83',
-  RC_INVALID_SUPPLY_CAP = '84',
-  PC_INVALID_CONFIGURATION = '75',
-  PC_CALLER_NOT_EMERGENCY_OR_POOL_ADMIN = '85',
-  VL_RESERVE_PAUSED = '86',
-  PC_CALLER_NOT_RISK_OR_POOL_ADMIN = '87',
-  RL_ATOKEN_SUPPLY_NOT_ZERO = '88',
-  RL_STABLE_DEBT_NOT_ZERO = '89',
-  RL_VARIABLE_DEBT_SUPPLY_NOT_ZERO = '90',
-  VL_LTV_VALIDATION_FAILED = '93',
-  VL_SAME_BLOCK_BORROW_REPAY = '94',
-  PC_FLASHLOAN_PREMIUMS_MISMATCH = '95',
-  PC_FLASHLOAN_PREMIUM_INVALID = '96',
-  RC_INVALID_LIQUIDATION_PROTOCOL_FEE = '97',
-  RC_INVALID_EMODE_CATEGORY = '98',
-  VL_INCONSISTENT_EMODE_CATEGORY = '99',
-  PC_CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '101',
-  P_CALLER_NOT_BRIDGE = '102',
-  RC_INVALID_UNBACKED_MINT_CAP = '103',
-  VL_UNBACKED_MINT_CAP_EXCEEDED = '104',
-  VL_PRICE_ORACLE_SENTINEL_CHECK_FAILED = '105',
-  RC_INVALID_DEBT_CEILING = '106',
-  VL_ASSET_NOT_BORROWABLE_IN_ISOLATION = '107',
-  VL_DEBT_CEILING_CROSSED = '108',
-  SL_USER_IN_ISOLATION_MODE = '109',
-  PC_BRIDGE_PROTOCOL_FEE_INVALID = '110',
+  CALLER_NOT_POOL_ADMIN = '1', // 'The caller of the function is not a pool admin'
+  CALLER_NOT_EMERGENCY_ADMIN = '2', // 'The caller of the function is not an emergency admin'
+  CALLER_NOT_POOL_OR_EMERGENCY_ADMIN = '3', // 'The caller of the function is not a pool or emergency admin'
+  CALLER_NOT_RISK_OR_POOL_ADMIN = '4', // 'The caller of the function is not a risk or pool admin'
+  CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '5', // 'The caller of the function is not an asset listing or pool admin'
+  CALLER_NOT_BRIDGE = '6', // 'The caller of the function is not a bridge'
+  PROVIDER_NOT_REGISTERED = '7', // 'Provider is not registered'
+  INVALID_ADDRESSES_PROVIDER_ID = '8', // 'Invalid id for the pool addresses provider'
+  NOT_CONTRACT = '9', // 'Address is not a contract'
+  CALLER_NOT_POOL_CONFIGURATOR = '10', // 'The caller of the function is not the pool configurator'
+  CALLER_NOT_ATOKEN = '11', // 'The caller of the function is not an atoken'
+  INVALID_ADDRESSES_PROVIDER = '12', // 'The address of the pool addresses provider is invalid'
+  INVALID_FLASHLOAN_EXECUTOR_RETURN = '13', // 'Invalid return value of the flashloan executor function'
+  RESERVE_ALREADY_ADDED = '14', // 'Reserve has already been added to reserve list'
+  NO_MORE_RESERVES_ALLOWED = '15', // 'Maximum amount of reserves in the pool reached'
+  EMODE_CATEGORY_RESERVED = '16', // 'Zero eMode category is reserved for volatile heterogeneous assets'
+  INVALID_EMODE_CATEGORY_ASSIGNMENT = '17', // 'Invalid eMode category assignment to asset'
+  RESERVE_LIQUIDITY_NOT_ZERO = '18', // 'The liquidity of the reserve needs to be 0'
+  FLASHLOAN_PREMIUMS_MISMATCH = '19', // 'Flashloan total premium should be equal or greater than flashloan premium to protocol'
+  FLASHLOAN_PREMIUM_INVALID = '20', // 'Invalid flashloan premium'
+  INVALID_RESERVE_PARAMS = '21', // 'Invalid risk parameters for the reserve'
+  INVALID_EMODE_CATEGORY_PARAMS = '22', // 'Invalid risk parameters for the eMode category'
+  BRIDGE_PROTOCOL_FEE_INVALID = '23', // 'Invalid bridge protocol fee'
+  CALLER_MUST_BE_POOL = '24', // 'The caller of this function must be a pool'
+  INVALID_MINT_AMOUNT = '25', // 'Invalid amount to mint'
+  INVALID_BURN_AMOUNT = '26', // 'Invalid amount to burn'
+  INVALID_AMOUNT = '27', // 'Amount must be greater than 0'
+  RESERVE_INACTIVE = '28', // 'Action requires an active reserve'
+  RESERVE_FROZEN = '29', // 'Action cannot be performed because the reserve is frozen'
+  RESERVE_PAUSED = '30', // 'Action cannot be performed because the reserve is paused'
+  BORROWING_NOT_ENABLED = '31', // 'Borrowing is not enabled'
+  STABLE_BORROWING_NOT_ENABLED = '32', // 'Stable borrowing is not enabled'
+  NOT_ENOUGH_AVAILABLE_USER_BALANCE = '33', // 'User cannot withdraw more than the available balance'
+  INVALID_INTEREST_RATE_MODE_SELECTED = '34', // 'Invalid interest rate mode selected'
+  COLLATERAL_BALANCE_IS_ZERO = '35', // 'The collateral balance is 0'
+  HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD = '36', // 'Health factor is lesser than the liquidation threshold'
+  COLLATERAL_CANNOT_COVER_NEW_BORROW = '37', // 'There is not enough collateral to cover a new borrow'
+  COLLATERAL_SAME_AS_BORROWING_CURRENCY = '38', // 'Collateral is (mostly) the same currency that is being borrowed'
+  AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE = '39', // 'The requested amount is greater than the max loan size in stable rate mode'
+  NO_DEBT_OF_SELECTED_TYPE = '40', // 'For repayment of a specific type of debt, the user needs to have debt that type'
+  NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF = '41', // 'To repay on behalf of a user an explicit amount to repay is needed'
+  NO_OUTSTANDING_STABLE_DEBT = '42', // 'User does not have outstanding stable rate debt this reserve'
+  NO_OUTSTANDING_VARIABLE_DEBT = '43', // 'User does not have outstanding variable rate debt on this reserve'
+  UNDERLYING_BALANCE_ZERO = '44', // 'The underlying balance needs to be greater than 0'
+  INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET = '45', // 'Interest rate rebalance conditions were not met'
+  HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '46', // 'Health factor is not below the threshold'
+  COLLATERAL_CANNOT_BE_LIQUIDATED = '47', // 'The collateral chosen cannot be liquidated'
+  SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '48', // 'User did not borrow the specified currency'
+  SAME_BLOCK_BORROW_REPAY = '49', // 'Borrow and repay in same block is not allowed'
+  INCONSISTENT_FLASHLOAN_PARAMS = '50', // 'Inconsistent flashloan parameters'
+  BORROW_CAP_EXCEEDED = '51', // 'Borrow cap is exceeded'
+  SUPPLY_CAP_EXCEEDED = '52', // 'Supply cap is exceeded'
+  UNBACKED_MINT_CAP_EXCEEDED = '53', // 'Unbacked mint cap is exceeded'
+  DEBT_CEILING_EXCEEDED = '54', // 'Debt ceiling is exceeded'
+  ATOKEN_SUPPLY_NOT_ZERO = '55', // 'Atoken supply is not zero'
+  STABLE_DEBT_NOT_ZERO = '56', // 'Stable debt supply is not zero'
+  VARIABLE_DEBT_SUPPLY_NOT_ZERO = '57', // 'Variable debt supply is not zero'
+  LTV_VALIDATION_FAILED = '58', // 'Ltv validation failed'
+  INCONSISTENT_EMODE_CATEGORY = '59', // 'Inconsistent eMode category'
+  PRICE_ORACLE_SENTINEL_CHECK_FAILED = '60', // 'Price oracle sentinel validation failed'
+  ASSET_NOT_BORROWABLE_IN_ISOLATION = '61', // 'Asset is not borrowable in isolation mode'
+  RESERVE_ALREADY_INITIALIZED = '62', // 'Reserve has already been initialized'
+  USER_IN_ISOLATION_MODE = '63', // 'User is in isolation mode'
+  INVALID_LTV = '64', // 'Invalid ltv parameter for the reserve'
+  INVALID_LIQ_THRESHOLD = '65', // 'Invalid liquidity threshold parameter for the reserve'
+  INVALID_LIQ_BONUS = '66', // 'Invalid liquidity bonus parameter for the reserve'
+  INVALID_DECIMALS = '67', // 'Invalid decimals parameter of the underlying asset of the reserve'
+  INVALID_RESERVE_FACTOR = '68', // 'Invalid reserve factor parameter for the reserve'
+  INVALID_BORROW_CAP = '69', // 'Invalid borrow cap for the reserve'
+  INVALID_SUPPLY_CAP = '70', // 'Invalid supply cap for the reserve'
+  INVALID_LIQUIDATION_PROTOCOL_FEE = '71', // 'Invalid liquidation protocol fee for the reserve'
+  INVALID_EMODE_CATEGORY = '72', // 'Invalid eMode category for the reserve'
+  INVALID_UNBACKED_MINT_CAP = '73', // 'Invalid unbacked mint cap for the reserve'
+  INVALID_DEBT_CEILING = '74', // 'Invalid debt ceiling for the reserve
+  INVALID_RESERVE_INDEX = '75', // 'Invalid reserve index'
+  ACL_ADMIN_CANNOT_BE_ZERO = '76', // 'ACL admin cannot be set to the zero address'
+  INCONSISTENT_PARAMS_LENGTH = '77', // 'Array parameters that should be equal length are not'
+  ZERO_ADDRESS_NOT_VALID = '78', // 'Zero address not valid'
+  INVALID_EXPIRATION = '79', // 'Invalid expiration'
+  INVALID_SIGNATURE = '80', // 'Invalid signature'
+  OPERATION_NOT_SUPPORTED = '81', // 'Operation not supported'
+  DEBT_CEILING_NOT_ZERO = '82', // 'Debt ceiling is not zero'
+  ASSET_NOT_LISTED = '83', // 'Asset is not listed'
+  INVALID_OPTIMAL_UTILIZATION_RATE = '84', // 'Invalid optimal utilization ratio'
+  INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85', // 'Invalid optimal stable to total debt ratio'
 
   // SafeCast
-  UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
+  SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
+
+  // Ownable
+  OWNABLE_ONLY_OWNER = 'Ownable: caller is not the owner',
+
+  // ERC20
+  ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE = 'ERC20: transfer amount exceeds balance',
 
   // old
 
   INVALID_FROM_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
   INVALID_TO_BALANCE_AFTER_TRANSFER = 'Invalid from balance after transfer',
-  INVALID_OWNER_REVERT_MSG = 'Ownable: caller is not the owner',
   INVALID_HF = 'Invalid health factor',
-  TRANSFER_AMOUNT_EXCEEDS_BALANCE = 'ERC20: transfer amount exceeds balance',
 }
 
 export type tEthereumAddress = string;

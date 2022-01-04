@@ -3,17 +3,19 @@ import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 
 makeSuite('AToken: Modifiers', (testEnv: TestEnv) => {
-  const { CT_CALLER_MUST_BE_POOL } = ProtocolErrors;
+  const { CALLER_MUST_BE_POOL } = ProtocolErrors;
 
   it('Tries to invoke mint not being the Pool (revert expected)', async () => {
     const { deployer, aDai } = testEnv;
-    await expect(aDai.mint(deployer.address, '1', '1')).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
+    await expect(aDai.mint(deployer.address, deployer.address, '1', '1')).to.be.revertedWith(
+      CALLER_MUST_BE_POOL
+    );
   });
 
   it('Tries to invoke burn not being the Pool (revert expected)', async () => {
     const { deployer, aDai } = testEnv;
     await expect(aDai.burn(deployer.address, deployer.address, '1', '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
+      CALLER_MUST_BE_POOL
     );
   });
 
@@ -21,13 +23,13 @@ makeSuite('AToken: Modifiers', (testEnv: TestEnv) => {
     const { deployer, users, aDai } = testEnv;
     await expect(
       aDai.transferOnLiquidation(deployer.address, users[0].address, '1')
-    ).to.be.revertedWith(CT_CALLER_MUST_BE_POOL);
+    ).to.be.revertedWith(CALLER_MUST_BE_POOL);
   });
 
   it('Tries to invoke transferUnderlyingTo not being the Pool (revert expected)', async () => {
     const { deployer, aDai } = testEnv;
     await expect(aDai.transferUnderlyingTo(deployer.address, '1')).to.be.revertedWith(
-      CT_CALLER_MUST_BE_POOL
+      CALLER_MUST_BE_POOL
     );
   });
 });

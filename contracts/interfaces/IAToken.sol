@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IScaledBalanceToken} from './IScaledBalanceToken.sol';
 import {IInitializableAToken} from './IInitializableAToken.sol';
-import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
 
 /**
  * @title IAToken
@@ -14,29 +13,23 @@ import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
 interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
    * @notice Emitted after the mint action
-   * @param from The address performing the mint
+   * @param caller The address performing the mint
+   * @param onBehalfOf The address of the user that will receive the minted aTokens
    * @param value The amount being minted (user entered amount + balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
    **/
-  event Mint(address indexed from, uint256 value, uint256 balanceIncrease, uint256 index);
-
-  /**
-   * @notice Mints `amount` aTokens to `user`
-   * @param user The address receiving the minted tokens
-   * @param amount The amount of tokens getting minted
-   * @param index The next liquidity index of the reserve
-   * @return `true` if the the previous balance of the user was 0
-   */
-  function mint(
-    address user,
-    uint256 amount,
+  event Mint(
+    address indexed caller,
+    address indexed onBehalfOf,
+    uint256 value,
+    uint256 balanceIncrease,
     uint256 index
-  ) external returns (bool);
+  );
 
   /**
    * @notice Emitted after aTokens are burned
-   * @param from The owner of the aTokens, getting them burned
+   * @param from The address from which the aTokens will be burned
    * @param target The address that will receive the underlying
    * @param value The amount being burned (user entered amount - balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
@@ -60,16 +53,31 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   event BalanceTransfer(address indexed from, address indexed to, uint256 value, uint256 index);
 
   /**
+   * @notice Mints `amount` aTokens to `user`
+   * @param caller The address performing the mint
+   * @param onBehalfOf The address of the user that will receive the minted aTokens
+   * @param amount The amount of tokens getting minted
+   * @param index The next liquidity index of the reserve
+   * @return `true` if the the previous balance of the user was 0
+   */
+  function mint(
+    address caller,
+    address onBehalfOf,
+    uint256 amount,
+    uint256 index
+  ) external returns (bool);
+
+  /**
    * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
    * @dev In some instances, the mint event could be emitted from a burn transaction
    * if the amount to burn is less than the interest the user earned
-   * @param user The owner of the aTokens, getting them burned
+   * @param from The address from which the aTokens will be burned
    * @param receiverOfUnderlying The address that will receive the underlying
    * @param amount The amount being burned
    * @param index The next liquidity index of the reserve
    **/
   function burn(
-    address user,
+    address from,
     address receiverOfUnderlying,
     uint256 amount,
     uint256 index

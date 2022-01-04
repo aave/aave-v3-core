@@ -25,7 +25,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(
       aclManager.isRiskAdmin(msg.sender) || aclManager.isPoolAdmin(msg.sender),
-      Errors.PC_CALLER_NOT_RISK_OR_POOL_ADMIN
+      Errors.CALLER_NOT_RISK_OR_POOL_ADMIN
     );
     _;
   }

@@ -22,12 +22,16 @@ declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   const {
-    P_NO_MORE_RESERVES_ALLOWED,
-    P_CALLER_MUST_BE_AN_ATOKEN,
-    P_NOT_CONTRACT,
-    P_CALLER_NOT_POOL_CONFIGURATOR,
-    RL_RESERVE_ALREADY_INITIALIZED,
-    PC_INVALID_CONFIGURATION,
+    NO_MORE_RESERVES_ALLOWED,
+    CALLER_NOT_ATOKEN,
+    NOT_CONTRACT,
+    CALLER_NOT_POOL_CONFIGURATOR,
+    RESERVE_ALREADY_INITIALIZED,
+    INVALID_ADDRESSES_PROVIDER,
+    RESERVE_ALREADY_ADDED,
+    DEBT_CEILING_NOT_ZERO,
+    ASSET_NOT_LISTED,
+    ZERO_ADDRESS_NOT_VALID,
   } = ProtocolErrors;
 
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
@@ -68,7 +72,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const freshPool = Pool__factory.connect(NEW_POOL_IMPL_ARTIFACT.address, deployer.signer);
 
     await expect(freshPool.initialize(deployer.address)).to.be.revertedWith(
-      PC_INVALID_CONFIGURATION
+      INVALID_ADDRESSES_PROVIDER
     );
   });
 
@@ -96,7 +100,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
           config.variableDebtTokenAddress,
           ZERO_ADDRESS
         )
-    ).to.be.revertedWith(P_CALLER_NOT_POOL_CONFIGURATOR);
+    ).to.be.revertedWith(CALLER_NOT_POOL_CONFIGURATOR);
   });
 
   it('Call `setUserUseReserveAsCollateral()` to use an asset as collateral when the asset is already set as collateral', async () => {
@@ -191,7 +195,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       pool
         .connect(users[0].signer)
         .finalizeTransfer(dai.address, users[0].address, users[1].address, 0, 0, 0)
-    ).to.be.revertedWith(P_CALLER_MUST_BE_AN_ATOKEN);
+    ).to.be.revertedWith(CALLER_NOT_ATOKEN);
   });
 
   it('Tries to call `initReserve()` with an EOA as reserve (revert expected)', async () => {
@@ -206,7 +210,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       pool
         .connect(configSigner)
         .initReserve(users[0].address, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS, ZERO_ADDRESS)
-    ).to.be.revertedWith(P_NOT_CONTRACT);
+    ).to.be.revertedWith(NOT_CONTRACT);
   });
 
   it('PoolConfigurator updates the ReserveInterestRateStrategy address', async () => {
@@ -227,6 +231,41 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(config.interestRateStrategyAddress).to.be.eq(ZERO_ADDRESS);
   });
 
+  it('PoolConfigurator updates the ReserveInterestRateStrategy address for asset 0', async () => {
+    const { pool, deployer, dai, configurator } = testEnv;
+
+    // Impersonate PoolConfigurator
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([configurator.address]);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
+
+    await expect(
+      pool.connect(configSigner).setReserveInterestRateStrategyAddress(ZERO_ADDRESS, ZERO_ADDRESS)
+    ).to.be.revertedWith(ZERO_ADDRESS_NOT_VALID);
+  });
+
+  it('PoolConfigurator updates the ReserveInterestRateStrategy address for an unlisted asset (revert expected)', async () => {
+    const { pool, deployer, dai, configurator, users } = testEnv;
+
+    // Impersonate PoolConfigurator
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([configurator.address]);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
+
+    await expect(
+      pool
+        .connect(configSigner)
+        .setReserveInterestRateStrategyAddress(users[5].address, ZERO_ADDRESS)
+    ).to.be.revertedWith(ASSET_NOT_LISTED);
+  });
+
+  it('Activates the zero address reserve for borrowing via pool admin (expect revert)', async () => {
+    const { configurator } = testEnv;
+    await expect(configurator.setReserveBorrowing(ZERO_ADDRESS, true)).to.be.revertedWith(
+      ZERO_ADDRESS_NOT_VALID
+    );
+  });
+
   it('Initialize an already initialized reserve. ReserveLogic `init` where aTokenAddress != ZERO_ADDRESS (revert expected)', async () => {
     const { pool, dai, deployer, configurator } = testEnv;
 
@@ -245,7 +284,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         config.variableDebtTokenAddress,
         ZERO_ADDRESS
       )
-    ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
+    ).to.be.revertedWith(RESERVE_ALREADY_INITIALIZED);
   });
 
   it('Init reserve with ZERO_ADDRESS as aToken twice, to enter `_addReserveToList()` already added (revert expected)', async () => {
@@ -290,7 +329,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
           config.variableDebtTokenAddress,
           ZERO_ADDRESS
         )
-    ).to.be.revertedWith(RL_RESERVE_ALREADY_INITIALIZED);
+    ).to.be.revertedWith(RESERVE_ALREADY_ADDED);
     const poolListAfter = await pool.getReservesList();
     expect(poolListAfter.length).to.be.eq(poolListMid.length);
   });
@@ -352,7 +391,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         config.variableDebtTokenAddress,
         ZERO_ADDRESS
       )
-    ).to.be.revertedWith(P_NO_MORE_RESERVES_ALLOWED);
+    ).to.be.revertedWith(NO_MORE_RESERVES_ALLOWED);
   });
 
   it('Add asset after multiple drops', async () => {
@@ -557,5 +596,38 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       )
     );
     expect((await pool.getReservesList()).length).to.be.eq(await pool.MAX_NUMBER_RESERVES());
+  });
+
+  it('Call `resetIsolationModeTotalDebt()` to reset isolationModeTotalDebt of an asset with non-zero debt ceiling', async () => {
+    const {
+      configurator,
+      pool,
+      helpersContract,
+      dai,
+      poolAdmin,
+      deployer,
+      users: [user0],
+    } = testEnv;
+
+    const snapId = await evmSnapshot();
+
+    const debtCeiling = utils.parseUnits('10', 2);
+
+    expect(await helpersContract.getDebtCeiling(dai.address)).to.be.eq(0);
+
+    await configurator.connect(poolAdmin.signer).setDebtCeiling(dai.address, debtCeiling);
+
+    expect(await helpersContract.getDebtCeiling(dai.address)).to.be.eq(debtCeiling);
+
+    // Impersonate PoolConfigurator
+    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
+    await impersonateAccountsHardhat([configurator.address]);
+    const configSigner = await hre.ethers.getSigner(configurator.address);
+
+    await expect(
+      pool.connect(configSigner).resetIsolationModeTotalDebt(dai.address)
+    ).to.be.revertedWith(DEBT_CEILING_NOT_ZERO);
+
+    await evmRevert(snapId);
   });
 });

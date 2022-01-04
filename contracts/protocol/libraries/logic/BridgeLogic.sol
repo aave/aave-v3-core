@@ -31,7 +31,7 @@ library BridgeLogic {
     address user,
     address indexed onBehalfOf,
     uint256 amount,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
@@ -71,14 +71,12 @@ library BridgeLogic {
 
     uint256 unbacked = reserve.unbacked += amount.toUint128();
 
-    require(
-      unbacked <= unbackedMintCap * (10**reserveDecimals),
-      Errors.VL_UNBACKED_MINT_CAP_EXCEEDED
-    );
+    require(unbacked <= unbackedMintCap * (10**reserveDecimals), Errors.UNBACKED_MINT_CAP_EXCEEDED);
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
+      msg.sender,
       onBehalfOf,
       amount,
       reserveCache.nextLiquidityIndex

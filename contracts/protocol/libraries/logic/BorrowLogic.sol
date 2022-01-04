@@ -36,7 +36,7 @@ library BorrowLogic {
     uint256 amount,
     DataTypes.InterestRateMode interestRateMode,
     uint256 borrowRate,
-    uint16 indexed referral
+    uint16 indexed referralCode
   );
   event Repay(
     address indexed reserve,
@@ -204,6 +204,11 @@ library BorrowLogic {
     uint256 paybackAmount = params.interestRateMode == DataTypes.InterestRateMode.STABLE
       ? stableDebt
       : variableDebt;
+
+    // Allows a user to repay with aTokens without leaving dust from interest.
+    if (params.useATokens && params.amount == type(uint256).max) {
+      params.amount = IAToken(reserveCache.aTokenAddress).balanceOf(msg.sender);
+    }
 
     if (params.amount < paybackAmount) {
       paybackAmount = params.amount;

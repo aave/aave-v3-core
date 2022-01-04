@@ -5,7 +5,7 @@ import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 
 makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
-  const { RC_INVALID_LIQUIDATION_PROTOCOL_FEE } = ProtocolErrors;
+  const { INVALID_LIQUIDATION_PROTOCOL_FEE } = ProtocolErrors;
 
   before(async () => {
     const { weth, pool, dai, usdc } = testEnv;
@@ -58,9 +58,9 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
 
     expect(
       configurator.setLiquidationProtocolFee(usdc.address, liquidationProtocolFee)
-    ).to.be.revertedWith(RC_INVALID_LIQUIDATION_PROTOCOL_FEE);
+    ).to.be.revertedWith(INVALID_LIQUIDATION_PROTOCOL_FEE);
     expect(
       configurator.setLiquidationProtocolFee(dai.address, liquidationProtocolFee)
-    ).to.be.revertedWith(RC_INVALID_LIQUIDATION_PROTOCOL_FEE);
+    ).to.be.revertedWith(INVALID_LIQUIDATION_PROTOCOL_FEE);
   });
 });

@@ -13,9 +13,9 @@ declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
   const {
-    CT_INVALID_MINT_AMOUNT,
-    CT_INVALID_BURN_AMOUNT,
-    UINT128_OVERFLOW,
+    INVALID_MINT_AMOUNT,
+    INVALID_BURN_AMOUNT,
+    SAFECAST_UINT128_OVERFLOW,
     CALLER_NOT_POOL_ADMIN,
   } = ProtocolErrors;
 
@@ -126,8 +126,10 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     await expect(
-      aDai.connect(poolSigner).mint(users[0].address, 0, utils.parseUnits('1', 27))
-    ).to.be.revertedWith(CT_INVALID_MINT_AMOUNT);
+      aDai
+        .connect(poolSigner)
+        .mint(users[0].address, users[0].address, 0, utils.parseUnits('1', 27))
+    ).to.be.revertedWith(INVALID_MINT_AMOUNT);
   });
 
   it('mint() to a ZERO_ADDRESS account', async () => {
@@ -139,7 +141,11 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const mintingAmount = await convertToCurrencyDecimals(aDai.address, '100');
-    expect(aDai.connect(poolSigner).mint(ZERO_ADDRESS, mintingAmount, utils.parseUnits('1', 27)))
+    expect(
+      aDai
+        .connect(poolSigner)
+        .mint(ZERO_ADDRESS, ZERO_ADDRESS, mintingAmount, utils.parseUnits('1', 27))
+    )
       .to.emit(aDai, 'Transfer')
       .withArgs(ZERO_ADDRESS, ZERO_ADDRESS, mintingAmount);
   });
@@ -156,7 +162,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
       aDai
         .connect(poolSigner)
         .burn(users[0].address, users[0].address, 0, utils.parseUnits('1', 27))
-    ).to.be.revertedWith(CT_INVALID_BURN_AMOUNT);
+    ).to.be.revertedWith(INVALID_BURN_AMOUNT);
   });
 
   it('burn() of a ZERO_ADDRESS account (revert expected)', async () => {
@@ -220,6 +226,34 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
       users: [depositor, borrower],
     } = testEnv;
 
-    expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(UINT128_OVERFLOW);
+    expect(aDai.transfer(borrower.address, MAX_UINT_AMOUNT)).to.be.revertedWith(
+      SAFECAST_UINT128_OVERFLOW
+    );
+  });
+
+  it('setIncentivesController() ', async () => {
+    const snapshot = await evmSnapshot();
+    const { deployer, poolAdmin, aWETH, aclManager } = testEnv;
+
+    expect(await aclManager.connect(deployer.signer).addPoolAdmin(poolAdmin.address));
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+    expect(await aWETH.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS));
+    expect(await aWETH.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
+
+    await evmRevert(snapshot);
+  });
+
+  it('setIncentivesController() from not pool admin (revert expected)', async () => {
+    const {
+      users: [user],
+      aWETH,
+    } = testEnv;
+
+    expect(await aWETH.getIncentivesController()).to.not.be.eq(ZERO_ADDRESS);
+
+    await expect(
+      aWETH.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
   });
 });

@@ -66,14 +66,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   function _onlyPoolConfigurator() internal view {
     require(
       ADDRESSES_PROVIDER.getPoolConfigurator() == msg.sender,
-      Errors.P_CALLER_NOT_POOL_CONFIGURATOR
+      Errors.CALLER_NOT_POOL_CONFIGURATOR
     );
   }
 
   function _onlyBridge() internal view {
     require(
       IACLManager(ADDRESSES_PROVIDER.getACLManager()).isBridge(msg.sender),
-      Errors.P_CALLER_NOT_BRIDGE
+      Errors.CALLER_NOT_BRIDGE
     );
   }
 
@@ -93,9 +93,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @param provider The address of the PoolAddressesProvider
    **/
   function initialize(IPoolAddressesProvider provider) external initializer {
-    require(provider == ADDRESSES_PROVIDER, Errors.PC_INVALID_CONFIGURATION);
-    _maxStableRateBorrowSizePercent = 2500;
-    _flashLoanPremiumTotal = 9;
+    require(provider == ADDRESSES_PROVIDER, Errors.INVALID_ADDRESSES_PROVIDER);
+    _maxStableRateBorrowSizePercent = 0.25e4;
+    _flashLoanPremiumTotal = 0.0009e4;
     _flashLoanPremiumToProtocol = 0;
   }
 
@@ -565,14 +565,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       }
     }
 
-    if (droppedReservesCount == 0) return reserves;
-
-    address[] memory undroppedReserves = new address[](reserveListCount - droppedReservesCount);
-    for (uint256 i = 0; i < reserveListCount - droppedReservesCount; i++) {
-      undroppedReserves[i] = reserves[i];
+    // Reduces the length of the reserves array by `droppedReservesCount`
+    assembly {
+      mstore(reserves, sub(reserveListCount, droppedReservesCount))
     }
-
-    return undroppedReserves;
+    return reserves;
   }
 
   /// @inheritdoc IPool
@@ -609,7 +606,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 balanceFromBefore,
     uint256 balanceToBefore
   ) external override {
-    require(msg.sender == _reserves[asset].aTokenAddress, Errors.P_CALLER_MUST_BE_AN_ATOKEN);
+    require(msg.sender == _reserves[asset].aTokenAddress, Errors.CALLER_NOT_ATOKEN);
     SupplyLogic.executeFinalizeTransfer(
       _reserves,
       _reservesList,
@@ -638,7 +635,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address variableDebtAddress,
     address interestRateStrategyAddress
   ) external override onlyPoolConfigurator {
-    require(Address.isContract(asset), Errors.P_NOT_CONTRACT);
+    require(Address.isContract(asset), Errors.NOT_CONTRACT);
     _reserves[asset].init(
       aTokenAddress,
       stableDebtAddress,
@@ -651,7 +648,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function dropReserve(address asset) external override onlyPoolConfigurator {
     DataTypes.ReserveData storage reserve = _reserves[asset];
-    ValidationLogic.validateDropReserve(reserve);
+    ValidationLogic.validateDropReserve(_reservesList, reserve, asset);
     _reservesList[_reserves[asset].id] = address(0);
     delete _reserves[asset];
   }
@@ -662,16 +659,20 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
   /// @inheritdoc IPool
-  function setConfiguration(address asset, uint256 configuration)
+  function setConfiguration(address asset, DataTypes.ReserveConfigurationMap calldata configuration)
     external
     override
     onlyPoolConfigurator
   {
-    _reserves[asset].configuration.data = configuration;
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
+    _reserves[asset].configuration = configuration;
   }
 
   /// @inheritdoc IPool
@@ -695,7 +696,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     // category 0 is reserved for volatile heterogeneous assets and it's always disabled
-    require(id != 0, Errors.RC_INVALID_EMODE_CATEGORY);
+    require(id != 0, Errors.EMODE_CATEGORY_RESERVED);
     _eModeCategories[id] = category;
   }
 
@@ -730,9 +731,16 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     return _usersEModeCategory[user];
   }
 
+  /// @inheritdoc IPool
+  function resetIsolationModeTotalDebt(address asset) external override onlyPoolConfigurator {
+    require(_reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
+    _reserves[asset].isolationModeTotalDebt = 0;
+    emit IsolationModeTotalDebtUpdated(asset, 0);
+  }
+
   function _addReserveToList(address asset) internal {
     bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
-    require(!reserveAlreadyAdded, Errors.RL_RESERVE_ALREADY_INITIALIZED);
+    require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
     uint16 reservesCount = _reservesCount;
 
@@ -743,7 +751,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         return;
       }
     }
-    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.P_NO_MORE_RESERVES_ALLOWED);
+    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.NO_MORE_RESERVES_ALLOWED);
     _reserves[asset].id = reservesCount;
     _reservesList[reservesCount] = asset;
     // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max

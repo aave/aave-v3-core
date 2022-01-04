@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 contract MockAggregator {
   int256 private _latestAnswer;
 
-  event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 timestamp);
+  event AnswerUpdated(int256 indexed current, uint256 indexed roundId, uint256 updatedAt);
 
   constructor(int256 initialAnswer) {
     _latestAnswer = initialAnswer;

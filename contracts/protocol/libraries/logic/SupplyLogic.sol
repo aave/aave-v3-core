@@ -65,6 +65,7 @@ library SupplyLogic {
     IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, params.amount);
 
     bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
+      msg.sender,
       params.onBehalfOf,
       params.amount,
       reserveCache.nextLiquidityIndex
@@ -173,7 +174,7 @@ library SupplyLogic {
 
     uint256 reserveId = reserves[params.asset].id;
 
-    if (params.from != params.to) {
+    if (params.from != params.to && params.amount != 0) {
       DataTypes.UserConfigurationMap storage fromConfig = usersConfig[params.from];
 
       if (fromConfig.isUsingAsCollateral(reserveId)) {
@@ -196,7 +197,7 @@ library SupplyLogic {
         }
       }
 
-      if (params.balanceToBefore == 0 && params.amount != 0) {
+      if (params.balanceToBefore == 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         if (
           ValidationLogic.validateUseAsCollateral(reserves, reservesList, toConfig, params.asset)
@@ -245,7 +246,7 @@ library SupplyLogic {
     if (useAsCollateral) {
       require(
         ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, asset),
-        Errors.SL_USER_IN_ISOLATION_MODE
+        Errors.USER_IN_ISOLATION_MODE
       );
 
       userConfig.setUsingAsCollateral(reserve.id, true);

@@ -35,11 +35,12 @@ library FlashLoanLogic {
   // See `IPool` for descriptions
   event FlashLoan(
     address indexed target,
-    address indexed initiator,
+    address initiator,
     address indexed asset,
     uint256 amount,
+    DataTypes.InterestRateMode interestRateMode,
     uint256 premium,
-    uint16 referralCode
+    uint16 indexed referralCode
   );
 
   // Helper struct for internal variables used in the `executeFlashLoan` function
@@ -85,12 +86,12 @@ library FlashLoanLogic {
     // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
+    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
+
     FlashLoanLocalVars memory vars;
 
     vars.aTokenAddresses = new address[](params.assets.length);
     vars.totalPremiums = new uint256[](params.assets.length);
-
-    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
 
     vars.receiver = IFlashLoanReceiver(params.receiverAddress);
     (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
@@ -98,11 +99,12 @@ library FlashLoanLogic {
       : (params.flashLoanPremiumTotal, params.flashLoanPremiumToProtocol);
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
+      vars.currentAmount = params.amounts[vars.i];
       vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;
-      vars.totalPremiums[vars.i] = params.amounts[vars.i].percentMul(vars.flashloanPremiumTotal);
+      vars.totalPremiums[vars.i] = vars.currentAmount.percentMul(vars.flashloanPremiumTotal);
       IAToken(vars.aTokenAddresses[vars.i]).transferUnderlyingTo(
         params.receiverAddress,
-        params.amounts[vars.i]
+        vars.currentAmount
       );
     }
 
@@ -114,7 +116,7 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
@@ -195,6 +197,7 @@ library FlashLoanLogic {
         msg.sender,
         vars.currentAsset,
         vars.currentAmount,
+        DataTypes.InterestRateMode(params.interestRateModes[vars.i]),
         vars.totalPremiums[vars.i],
         params.referralCode
       );
@@ -229,6 +232,7 @@ library FlashLoanLogic {
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
     ValidationLogic.validateFlashloanSimple(reserve);
+
     FlashLoanSimpleLocalVars memory vars;
 
     vars.receiver = IFlashLoanSimpleReceiver(params.receiverAddress);
@@ -244,7 +248,7 @@ library FlashLoanLogic {
         msg.sender,
         params.params
       ),
-      Errors.P_INVALID_FLASH_LOAN_EXECUTOR_RETURN
+      Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
     vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
@@ -279,6 +283,7 @@ library FlashLoanLogic {
       msg.sender,
       params.asset,
       params.amount,
+      DataTypes.InterestRateMode(0),
       vars.totalPremium,
       0
     );

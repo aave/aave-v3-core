@@ -11,6 +11,7 @@ import { timeLatest } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { getTestWallets } from './helpers/utils/wallets';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { ProtocolErrors } from '../helpers/types';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -213,7 +214,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       stableDebtDai
         .connect(user1.signer)
         .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_DELEGATOR');
+    ).to.be.revertedWith(ProtocolErrors.ZERO_ADDRESS_NOT_VALID);
 
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -253,7 +254,48 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       stableDebtDai
         .connect(user1.signer)
         .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_EXPIRATION');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_EXPIRATION);
+
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+  });
+
+  it('Stable debt delegation with wrong delegator', async () => {
+    const {
+      stableDebtDai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
+    const expiration = MAX_UINT_AMOUNT;
+    const nonce = (await stableDebtDai.nonces(user2.address)).toNumber();
+    const EIP712_REVISION = await stableDebtDai.EIP712_REVISION();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildDelegationWithSigParams(
+      chainId,
+      stableDebtDai.address,
+      EIP712_REVISION,
+      await stableDebtDai.name(),
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = testWallets[1].secretKey;
+    expect(
+      (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      stableDebtDai
+        .connect(user1.signer)
+        .delegationWithSig(user1.address, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith(ProtocolErrors.INVALID_SIGNATURE);
 
     expect(
       (await stableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -293,7 +335,7 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       variableDebtDai
         .connect(user1.signer)
         .delegationWithSig(ZERO_ADDRESS, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_DELEGATOR');
+    ).to.be.revertedWith(ProtocolErrors.ZERO_ADDRESS_NOT_VALID);
 
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
@@ -333,7 +375,47 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
       variableDebtDai
         .connect(user1.signer)
         .delegationWithSig(user2.address, user3.address, permitAmount, expiration, v, r, s)
-    ).to.be.revertedWith('INVALID_EXPIRATION');
+    ).to.be.revertedWith(ProtocolErrors.INVALID_EXPIRATION);
+
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+  });
+
+  it('Variable debt delegation with wrong delegator', async () => {
+    const {
+      variableDebtDai,
+      deployer: user1,
+      users: [user2, user3],
+    } = testEnv;
+
+    const chainId = hre.network.config.chainId || HARDHAT_CHAINID;
+    const expiration = MAX_UINT_AMOUNT;
+    const nonce = (await variableDebtDai.nonces(user2.address)).toNumber();
+    const permitAmount = daiMintedAmount.div(3);
+    const msgParams = buildDelegationWithSigParams(
+      chainId,
+      variableDebtDai.address,
+      EIP712_REVISION,
+      await variableDebtDai.name(),
+      user3.address,
+      nonce,
+      expiration,
+      permitAmount.toString()
+    );
+
+    const user2PrivateKey = testWallets[1].secretKey;
+    expect(
+      (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
+    ).to.be.equal('0');
+
+    const { v, r, s } = getSignatureFromTypedData(user2PrivateKey, msgParams);
+
+    await expect(
+      variableDebtDai
+        .connect(user1.signer)
+        .delegationWithSig(user1.address, user3.address, permitAmount, expiration, v, r, s)
+    ).to.be.revertedWith(ProtocolErrors.INVALID_SIGNATURE);
 
     expect(
       (await variableDebtDai.borrowAllowance(user2.address, user3.address)).toString()
