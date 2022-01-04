@@ -26,7 +26,7 @@ interface IPoolAddressesProviderRegistry {
   function getAddressesProvidersList() external view returns (address[] memory);
 
   /**
-   * @notice Returns the id on a registered PoolAddressesProvider
+   * @notice Returns the id of a registered PoolAddressesProvider
    * @param addressesProvider The address of the PoolAddressesProvider
    * @return The id of the PoolAddressesProvider or 0 if is not registered
    */

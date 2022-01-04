@@ -61,7 +61,7 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param rate The rate of the debt being minted
    * @return True if it is the first borrow, false otherwise
    * @return The total stable debt
-   * @return The average stale borrow rate
+   * @return The average stable borrow rate
    **/
   function mint(
     address user,

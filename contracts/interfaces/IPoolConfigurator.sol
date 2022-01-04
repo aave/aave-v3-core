@@ -215,13 +215,13 @@ interface IPoolConfigurator {
   event BridgeProtocolFeeUpdated(uint256 protocolFee);
 
   /**
-   * @notice Emitted when a the total premium on flashloans is updated
+   * @notice Emitted when the total premium on flashloans is updated
    * @param flashloanPremiumTotal The new premium
    **/
   event FlashloanPremiumTotalUpdated(uint256 flashloanPremiumTotal);
 
   /**
-   * @notice Emitted when a the part of the premium that goes to protocol is updated
+   * @notice Emitted when the part of the premium that goes to protocol is updated
    * @param flashloanPremiumToProtocol The new premium
    **/
   event FlashloanPremiumToProtocolUpdated(uint256 flashloanPremiumToProtocol);
@@ -414,7 +414,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Updates the total flash loan premium
-   * flash loan premium consist in 2 parts
+   * Total flash loan premium consist in 2 parts:
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
    * @param flashloanPremiumTotal The total premium in bps
