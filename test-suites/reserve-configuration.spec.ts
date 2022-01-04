@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { deployMockReserveConfiguration } from '@aave/deploy-v3/dist/helpers/contract-deployments';
-import { MockReserveConfiguration } from '@aave/deploy-v3/dist/types/typechain';
 import { ProtocolErrors } from '../helpers/types';
 import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import { MockReserveConfiguration } from '../types';
 
 describe('ReserveConfiguration', async () => {
   let snap: string;
