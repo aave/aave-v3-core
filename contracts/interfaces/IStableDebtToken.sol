@@ -11,7 +11,7 @@ import {IInitializableDebtToken} from './IInitializableDebtToken.sol';
  **/
 interface IStableDebtToken is IInitializableDebtToken {
   /**
-   * @notice Emitted when new stable debt is minted
+   * @dev Emitted when new stable debt is minted
    * @param user The address of the user who triggered the minting
    * @param onBehalfOf The recipient of stable debt tokens
    * @param amount The amount minted (user entered amount + balance increase from interest)
@@ -33,7 +33,7 @@ interface IStableDebtToken is IInitializableDebtToken {
   );
 
   /**
-   * @notice Emitted when new stable debt is burned
+   * @dev Emitted when new stable debt is burned
    * @param user The address of the user
    * @param amount The amount being burned (user entered amount - balance increase from interest)
    * @param currentBalance The current balance of the user

@@ -12,7 +12,7 @@ import {IInitializableAToken} from './IInitializableAToken.sol';
  **/
 interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
-   * @notice Emitted after the mint action
+   * @dev Emitted after the mint action
    * @param caller The address performing the mint
    * @param onBehalfOf The address of the user that will receive the minted aTokens
    * @param value The amount being minted (user entered amount + balance increase from interest)
@@ -28,7 +28,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   );
 
   /**
-   * @notice Emitted after aTokens are burned
+   * @dev Emitted after aTokens are burned
    * @param from The address from which the aTokens will be burned
    * @param target The address that will receive the underlying
    * @param value The amount being burned (user entered amount - balance increase from interest)
@@ -44,7 +44,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   );
 
   /**
-   * @notice Emitted during the transfer action
+   * @dev Emitted during the transfer action
    * @param from The user whose tokens are being transferred
    * @param to The recipient
    * @param value The amount being transferred

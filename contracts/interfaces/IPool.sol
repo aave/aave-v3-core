@@ -11,7 +11,7 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
  **/
 interface IPool {
   /**
-   * @notice Emitted on mintUnbacked()
+   * @dev Emitted on mintUnbacked()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the supply
    * @param onBehalfOf The beneficiary of the supplied assets, receiving the aTokens
@@ -27,7 +27,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on backUnbacked()
+   * @dev Emitted on backUnbacked()
    * @param reserve The address of the underlying asset of the reserve
    * @param backer The address paying for the backing
    * @param amount The amount added as backing
@@ -36,7 +36,7 @@ interface IPool {
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   /**
-   * @notice Emitted on supply()
+   * @dev Emitted on supply()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the supply
    * @param onBehalfOf The beneficiary of the supply, receiving the aTokens
@@ -52,7 +52,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on withdraw()
+   * @dev Emitted on withdraw()
    * @param reserve The address of the underlying asset being withdrawn
    * @param user The address initiating the withdrawal, owner of aTokens
    * @param to The address that will receive the underlying
@@ -61,7 +61,7 @@ interface IPool {
   event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
 
   /**
-   * @notice Emitted on borrow() and flashLoan() when debt needs to be opened
+   * @dev Emitted on borrow() and flashLoan() when debt needs to be opened
    * @param reserve The address of the underlying asset being borrowed
    * @param user The address of the user initiating the borrow(), receiving the funds on borrow() or just
    * initiator of the transaction on flashLoan()
@@ -82,7 +82,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on repay()
+   * @dev Emitted on repay()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The beneficiary of the repayment, getting his debt reduced
    * @param repayer The address of the user initiating the repay(), providing the funds
@@ -98,7 +98,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on swapBorrowRateMode()
+   * @dev Emitted on swapBorrowRateMode()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
@@ -117,35 +117,35 @@ interface IPool {
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
-   * @notice Emitted when the user selects a certain asset category for eMode
+   * @dev Emitted when the user selects a certain asset category for eMode
    * @param user The address of the user
    * @param categoryId The category id
    **/
   event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
-   * @notice Emitted on setUserUseReserveAsCollateral()
+   * @dev Emitted on setUserUseReserveAsCollateral()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user enabling the usage as collateral
    **/
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
 
   /**
-   * @notice Emitted on setUserUseReserveAsCollateral()
+   * @dev Emitted on setUserUseReserveAsCollateral()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user enabling the usage as collateral
    **/
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
 
   /**
-   * @notice Emitted on rebalanceStableBorrowRate()
+   * @dev Emitted on rebalanceStableBorrowRate()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user for which the rebalance has been executed
    **/
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
 
   /**
-   * @notice Emitted on flashLoan()
+   * @dev Emitted on flashLoan()
    * @param target The address of the flash loan receiver contract
    * @param initiator The address initiating the flash loan
    * @param asset The address of the asset being flash borrowed
@@ -165,7 +165,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted when a borrower is liquidated.
+   * @dev Emitted when a borrower is liquidated.
    * @param collateralAsset The address of the underlying asset used as collateral, to receive as result of the liquidation
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param user The address of the borrower getting liquidated
@@ -186,7 +186,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted when the state of a reserve is updated.
+   * @dev Emitted when the state of a reserve is updated.
    * @param reserve The address of the underlying asset of the reserve
    * @param liquidityRate The next liquidity rate
    * @param stableBorrowRate The next stable borrow rate
@@ -204,7 +204,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted when the protocol treasury receives minted aTokens from the accrued interest.
+   * @dev Emitted when the protocol treasury receives minted aTokens from the accrued interest.
    * @param reserve The address of the reserve
    * @param amountMinted The amount minted to the treasury
    **/
