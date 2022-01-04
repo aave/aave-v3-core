@@ -46,6 +46,10 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       users[1].address,
       'Invalid addresses provider added to the list'
     );
+    expect(await registry.getAddressesProviderAddressById(NEW_ADDRESSES_PROVIDER_ID)).to.be.equal(
+      users[1].address,
+      'Invalid update of id mapping'
+    );
   });
 
   it('Removes the mock addresses provider', async () => {
@@ -67,6 +71,10 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       'Invalid addresses provider added to the list'
     );
     expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, 'Invalid addresses');
+    expect(await registry.getAddressesProviderAddressById(NEW_ADDRESSES_PROVIDER_ID)).to.be.equal(
+      ZERO_ADDRESS,
+      'Invalid update of id mapping'
+    );
   });
 
   it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {

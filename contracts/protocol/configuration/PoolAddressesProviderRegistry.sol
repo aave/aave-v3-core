@@ -73,6 +73,11 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     return _addressesProviders[addressesProvider];
   }
 
+  /// @inheritdoc IPoolAddressesProviderRegistry
+  function getAddressesProviderAddressById(uint256 id) external view override returns (address) {
+    return _idToAddressesProvider[id];
+  }
+
   /**
    * @notice Adds the addresses provider address to the list.
    * @dev The addressesProvider is not added if it already exists in the registry
