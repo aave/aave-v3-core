@@ -150,4 +150,12 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       }
     }
   });
+
+  it('Registers a the mock addresses provider a second time (revert expected)', async () => {
+    const { registry } = testEnv;
+
+    await expect(
+      registry.registerAddressesProvider(NEW_ADDRESES_PROVIDER_ADDRESS, NEW_ADDRESSES_PROVIDER_ID)
+    ).to.be.revertedWith(ProtocolErrors.ADDRESSES_PROVIDER_ALREADY_ADDED);
+  });
 });
