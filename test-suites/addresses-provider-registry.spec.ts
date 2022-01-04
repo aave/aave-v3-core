@@ -95,15 +95,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
     const { users, registry } = testEnv;
 
-    await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(
-      PROVIDER_NOT_REGISTERED
-    );
-  });
-
-  it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
-    const { users, registry } = testEnv;
-
-    await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(
+    await expect(registry.unregisterAddressesProvider(users[1].address)).to.be.revertedWith(
       PROVIDER_NOT_REGISTERED
     );
   });
