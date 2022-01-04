@@ -147,7 +147,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
 
   /**
    * @notice Get the domain separator for the token
-   * @dev Return cached value if chainId matched cache, otherwise recomputes separator
+   * @dev Return cached value if chainId matches cache, otherwise recomputes separator
    * @return The domain separator of the token at current chain
    */
   function DOMAIN_SEPARATOR() external view returns (bytes32);
