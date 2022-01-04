@@ -625,8 +625,8 @@ interface IPool {
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
    * @dev Only callable by the PoolConfigurator contract
-   * @param flashLoanPremiumTotal The total premium in bps
-   * @param flashLoanPremiumToProtocol The part of the premium sent to protocol
+   * @param flashLoanPremiumTotal The total premium, expressed in bps
+   * @param flashLoanPremiumToProtocol The part of the premium sent to protocol, expressed in bps
    */
   function updateFlashloanPremiums(
     uint256 flashLoanPremiumTotal,

@@ -83,7 +83,7 @@ interface IPoolConfigurator {
   /**
    * @notice Emitted when a reserve factor is updated
    * @param asset The address of the underlying asset of the reserve
-   * @param factor The new reserve factor
+   * @param factor The new reserve factor, expressed in bps
    **/
   event ReserveFactorChanged(address indexed asset, uint256 factor);
 
@@ -104,7 +104,7 @@ interface IPoolConfigurator {
   /**
    * @notice Emitted when the liquidation protocol fee of a reserve is updated
    * @param asset The address of the underlying asset of the reserve
-   * @param fee The new supply cap
+   * @param fee The new liquidation protocol fee, expressed in bps
    **/
   event LiquidationProtocolFeeChanged(address indexed asset, uint256 fee);
 
@@ -210,19 +210,19 @@ interface IPoolConfigurator {
 
   /**
    * @notice Emitted when the bridge protocol fee is updated
-   * @param protocolFee The new protocol fee
+   * @param protocolFee The new protocol fee, expressed in bps
    */
   event BridgeProtocolFeeUpdated(uint256 protocolFee);
 
   /**
    * @notice Emitted when the total premium on flashloans is updated
-   * @param flashloanPremiumTotal The new premium
+   * @param flashloanPremiumTotal The new premium, expressed in bps
    **/
   event FlashloanPremiumTotalUpdated(uint256 flashloanPremiumTotal);
 
   /**
    * @notice Emitted when the part of the premium that goes to protocol is updated
-   * @param flashloanPremiumToProtocol The new premium
+   * @param flashloanPremiumToProtocol The new premium, expressed in bps
    **/
   event FlashloanPremiumToProtocolUpdated(uint256 flashloanPremiumToProtocol);
 
@@ -362,7 +362,7 @@ interface IPoolConfigurator {
   /**
    * @notice Updates the liquidation protocol fee of reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param fee The new supply of the reserve
+   * @param fee The new liquidation protocol fee of the reserve, expressed in bps
    **/
   function setLiquidationProtocolFee(address asset, uint256 fee) external;
 
@@ -417,12 +417,14 @@ interface IPoolConfigurator {
    * Total flash loan premium consist in 2 parts:
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
-   * @param flashloanPremiumTotal The total premium in bps
+   * @dev Expressed in bps with 2 decimals of precision
+   * @param flashloanPremiumTotal The total premium
    */
   function updateFlashloanPremiumTotal(uint256 flashloanPremiumTotal) external;
 
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
+   * @dev Expressed in bps with 2 decimals of precision
    * @param flashloanPremiumToProtocol The part of the premium sent to protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 flashloanPremiumToProtocol) external;
