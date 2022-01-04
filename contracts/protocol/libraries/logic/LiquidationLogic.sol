@@ -61,7 +61,8 @@ library LiquidationLogic {
   uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 1e4;
 
   /**
-   * @dev Minimum health factor allowed under any circumstance.
+   * @dev This constant represents below which health factor value it is possible to liquidate
+   * an amount of debt corresponding to `MAX_LIQUIDATION_CLOSE_FACTOR`.
    * A value of 0.95e18 results in 0.95
    */
   uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95e18;

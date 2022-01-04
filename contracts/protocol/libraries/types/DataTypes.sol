@@ -29,9 +29,9 @@ library DataTypes {
     address interestRateStrategyAddress;
     //the current treasury balance, scaled
     uint128 accruedToTreasury;
-    //the quick withdraw balance waiting for underlying to be backed
+    //the outstanding unbacked aTokens minted through the bridging feature
     uint128 unbacked;
-    //the total debt of the asset in isolation mode
+    //the outstanding debt borrowed against this asset in isolation mode
     uint128 isolationModeTotalDebt;
   }
 

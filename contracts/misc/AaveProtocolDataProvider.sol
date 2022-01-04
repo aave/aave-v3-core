@@ -15,7 +15,7 @@ import {IPoolDataProvider} from '../interfaces/IPoolDataProvider.sol';
 /**
  * @title AaveProtocolDataProvider
  * @author Aave
- * @notice Peripheral contract to gather and extract information from the Pool.
+ * @notice Peripheral contract to collect and pre-process information from the Pool.
  */
 contract AaveProtocolDataProvider is IPoolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;

@@ -36,19 +36,21 @@ library ValidationLogic {
   using Address for address;
 
   /**
-   * @dev Factor to apply to the maximum variable borrow to calculate the maximum liquidity rate allowed
+   * @dev This constant represents the delta between the maximum variable borrow rate and liquidity rate below which
+   * stable rate rebalances up are allowed when the utilization ratio > `REBALANCE_UP_USAGE_RATIO_THRESHOLD`
    * Expressed in bps, a factor of 4000 results in 40.00%
    */
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
 
   /**
-   * @dev Maximum borrow utilization rate allowed
+   * @dev This constant represents the minimum borrow utilization rate threshold at which rebalances up are possible
    * Expressed in ray, a rate of 0.95e27 results in 95%
    */
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27;
 
   /**
-   * @dev Minimum health factor allowed under any circumstance
+   * @dev This constant represents below which health factor value it is possible to liquidate
+   * the maximum percentage of borrower's debt.
    * A value of 0.95e18 results in 0.95
    */
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;

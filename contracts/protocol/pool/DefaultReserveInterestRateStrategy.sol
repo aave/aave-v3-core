@@ -43,25 +43,25 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
-  /// Base variable borrow rate when Utilization rate = 0. Expressed in ray
+  // Base variable borrow rate when Utilization rate = 0. Expressed in ray
   uint256 internal immutable _baseVariableBorrowRate;
 
-  /// Slope of the variable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the variable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _variableRateSlope1;
 
-  /// Slope of the variable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the variable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _variableRateSlope2;
 
-  /// Slope of the stable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the stable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _stableRateSlope1;
 
-  /// Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _stableRateSlope2;
 
-  /// Premium on top of `_variableRateSlope1` for base stable borrowing rate
+  // Premium on top of `_variableRateSlope1` for base stable borrowing rate
   uint256 internal immutable _baseStableRateOffset;
 
-  /// Additional premium applied to stable rate when stable debt surpass `OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO`
+  // Additional premium applied to stable rate when stable debt surpass `OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO`
   uint256 internal immutable _stableRateExcessOffset;
 
   /**
@@ -70,9 +70,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * @param optimalUtilizationRate The optimal utilization rate
    * @param baseVariableBorrowRate The base variable borrow rate
    * @param variableRateSlope1 The variable rate slope below optimal utilization rate
-   * @param variableRateSlope2 The variable rate slope beyond optimal utilization rate
+   * @param variableRateSlope2 The variable rate slope above optimal utilization rate
    * @param stableRateSlope1 The stable rate slope below optimal utilization rate
-   * @param stableRateSlope2 The stable rate slope beyond optimal utilization rate
+   * @param stableRateSlope2 The stable rate slope above optimal utilization rate
    * @param baseStableRateOffset The premium on top of variable rate for base stable borrowing rate
    * @param stableRateExcessOffset The premium on top of stable rate when there stable debt surpass the threshold
    * @param optimalStableToTotalDebtRatio The optimal stable debt to total debt ratio of the reserve
@@ -117,7 +117,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @notice Returns the variable rate slope beyond optimal utilization rate
+   * @notice Returns the variable rate slope above optimal utilization rate
    * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
    * @return The variable rate slope
    **/
@@ -135,7 +135,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @notice Returns the stable rate slope beyond optimal utilization rate
+   * @notice Returns the stable rate slope above optimal utilization rate
    * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
    * @return The stable rate slope
    **/

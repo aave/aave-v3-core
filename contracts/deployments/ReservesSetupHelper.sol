@@ -25,7 +25,7 @@ contract ReservesSetupHelper is Ownable {
 
   /**
    * @notice External function called by the owner account to setup the assets risk parameters in batch.
-   * @dev The Pool or Risk admin must transfer the ownership to ReservesSetupHelper before calling
+   * @dev The Pool or Risk admin must transfer the ownership to ReservesSetupHelper before calling this function
    * @param configurator The address of PoolConfigurator contract
    * @param inputParams An array of ConfigureReserveInput struct that contains the assets and their risk parameters
    */
