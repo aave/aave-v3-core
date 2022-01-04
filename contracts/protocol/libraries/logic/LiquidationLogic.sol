@@ -370,7 +370,7 @@ library LiquidationLogic {
       .configuration
       .getLiquidationProtocolFee();
 
-    // This is the base collateral to liqudate based on the given debt to cover
+    // This is the base collateral to liquidate based on the given debt to cover
     vars.baseCollateral =
       ((vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit)) /
       (vars.collateralPrice * vars.debtAssetUnit);

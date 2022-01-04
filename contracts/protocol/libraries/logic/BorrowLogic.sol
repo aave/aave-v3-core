@@ -45,7 +45,6 @@ library BorrowLogic {
     uint256 amount,
     bool useATokens
   );
-
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
   event SwapBorrowRateMode(
     address indexed reserve,

@@ -241,7 +241,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Updates the aToken implementation for the reserve
-   * @param input The aToken update paramenters
+   * @param input The aToken update parameters
    **/
   function updateAToken(ConfiguratorInputTypes.UpdateATokenInput calldata input) external;
 

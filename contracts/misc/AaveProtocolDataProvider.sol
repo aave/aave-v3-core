@@ -15,7 +15,7 @@ import {IPoolDataProvider} from '../interfaces/IPoolDataProvider.sol';
 /**
  * @title AaveProtocolDataProvider
  * @author Aave
- * @notice Peripherial contract to gather and extract information from the Pool.
+ * @notice Peripheral contract to gather and extract information from the Pool.
  */
 contract AaveProtocolDataProvider is IPoolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -134,7 +134,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /**
-   * @notice Returns the caps paramters of the reserve
+   * @notice Returns the caps parameters of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return borrowCap The borrow cap of the reserve
    * @return supplyCap The supply cap of the reserve

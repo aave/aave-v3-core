@@ -52,7 +52,7 @@ interface IPool {
 
   /**
    * @notice Emitted on withdraw()
-   * @param reserve The address of the underlyng asset being withdrawn
+   * @param reserve The address of the underlying asset being withdrawn
    * @param user The address initiating the withdrawal, owner of aTokens
    * @param to The address that will receive the underlying
    * @param amount The amount to be withdrawn
@@ -169,7 +169,7 @@ interface IPool {
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param user The address of the borrower getting liquidated
    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
-   * @param liquidatedCollateralAmount The amount of collateral received by the liiquidator
+   * @param liquidatedCollateralAmount The amount of collateral received by the liquidator
    * @param liquidator The address of the liquidator
    * @param receiveAToken True if the liquidators wants to receive the collateral aTokens, `false` if he wants
    * to receive the underlying collateral asset directly
