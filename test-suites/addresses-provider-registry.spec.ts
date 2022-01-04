@@ -77,14 +77,6 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to remove a unregistered addressesProvider (revert expected)', async () => {
-    const { users, registry } = testEnv;
-
-    await expect(registry.unregisterAddressesProvider(users[2].address)).to.be.revertedWith(
-      PROVIDER_NOT_REGISTERED
-    );
-  });
-
   it('Tries to add an already added addressesProvider with a different id. Should overwrite the previous id', async () => {
     const { registry, addressesProvider } = testEnv;
 
@@ -114,9 +106,9 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     const { users, registry } = testEnv;
 
     // Simulating an addresses provider using the users[2] wallet address
-    expect(await registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID))
-      .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(users[2].address);
+    await expect(
+      registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID)
+    ).to.be.revertedWith(ProtocolErrors.INVALID_ADDRESSES_PROVIDER_ID);
 
     const providers = await registry.getAddressesProvidersList();
     const idMap = {};
