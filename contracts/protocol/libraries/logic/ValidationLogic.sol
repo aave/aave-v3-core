@@ -35,9 +35,28 @@ library ValidationLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
 
+  /**
+   * @dev Factor to apply to the maximum variable borrow to calculate the maximum liquidity rate allowed
+   * Expressed in bps, a factor of 4000 results in 40%
+   */
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
+
+  /**
+   * @dev Maximum borrow utilization rate allowed
+   * Expressed in ray, a rate of 0.95e27 results in 95%
+   */
   uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27; //usage ratio of 95%
+
+  /**
+   * @dev Minimum health factor allowed under any circumstance
+   * A value of 0.95e18 results in 0.95
+   */
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
+
+  /**
+   * @dev Minimum health factor to consider a user position healthy
+   * A value of 1e18 results in 1
+   */
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   /**
