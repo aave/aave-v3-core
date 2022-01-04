@@ -14,6 +14,7 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  *   example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
+  /// Map of address provider list indexes (addressesProvider => index in list)
   mapping(address => uint256) private _addressesProvidersIndexes;
   /// Map of address provider ids (addressesProvider => id)
   mapping(address => uint256) private _addressesProviderToId;
@@ -68,18 +69,9 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /**
    * @notice Adds the addresses provider address to the list.
-   * @dev The addressesProvider must not already exists in the registry
    * @param provider The address of the PoolAddressesProvider
    */
   function _addToAddressesProvidersList(address provider) internal {
-    /*uint256 providersCount = _addressesProvidersList.length;
-    if (providersCount != 0) {
-      uint256 index = _addressesProvidersIndexes[provider];
-      if (_addressesProvidersList[index] == provider) {
-        return;
-      }
-    }*/
-
     _addressesProvidersIndexes[provider] = _addressesProvidersList.length;
     _addressesProvidersList.push(provider);
   }
@@ -91,7 +83,6 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   function _removeFromAddressesProvidersList(address provider) internal {
     uint256 index = _addressesProvidersIndexes[provider];
 
-    //_addressesProviderToId[provider] = 0;
     _addressesProvidersIndexes[provider] = 0;
 
     uint256 lastIndex = _addressesProvidersList.length - 1;
