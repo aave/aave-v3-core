@@ -2,11 +2,17 @@ import { expect } from 'chai';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
+import { ONE_ADDRESS } from '@aave/deploy-v3';
 
 makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
+  const NEW_ADDRESES_PROVIDER_ADDRESS = ONE_ADDRESS;
   const NEW_ADDRESSES_PROVIDER_ID = 2;
 
-  const { INVALID_ADDRESSES_PROVIDER_ID, PROVIDER_NOT_REGISTERED } = ProtocolErrors;
+  const {
+    INVALID_ADDRESSES_PROVIDER_ID,
+    PROVIDER_NOT_REGISTERED,
+    ADDRESSES_PROVIDER_ALREADY_ADDED,
+  } = ProtocolErrors;
 
   it('Checks the addresses provider is added to the registry', async () => {
     const { addressesProvider, registry } = testEnv;
@@ -21,29 +27,38 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   });
 
   it('Tries to register an addresses provider with id 0 (revert expected)', async () => {
-    const { users, registry } = testEnv;
+    const { registry } = testEnv;
 
-    await expect(registry.registerAddressesProvider(users[2].address, '0')).to.be.revertedWith(
-      INVALID_ADDRESSES_PROVIDER_ID
-    );
+    await expect(
+      registry.registerAddressesProvider(NEW_ADDRESES_PROVIDER_ADDRESS, '0')
+    ).to.be.revertedWith(INVALID_ADDRESSES_PROVIDER_ID);
   });
 
   it('Registers a new mock addresses provider', async () => {
     const { users, registry } = testEnv;
 
-    // Simulating an addresses provider using the users[1] wallet address
-    expect(await registry.registerAddressesProvider(users[1].address, NEW_ADDRESSES_PROVIDER_ID))
+    const providersBefore = await registry.getAddressesProvidersList();
+
+    expect(
+      await registry.registerAddressesProvider(
+        NEW_ADDRESES_PROVIDER_ADDRESS,
+        NEW_ADDRESSES_PROVIDER_ID
+      )
+    )
       .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(users[1].address);
+      .withArgs(NEW_ADDRESES_PROVIDER_ADDRESS);
 
-    const providers = await registry.getAddressesProvidersList();
+    expect(await registry.getAddressesProviderIdByAddress(NEW_ADDRESES_PROVIDER_ADDRESS)).to.be.eq(
+      NEW_ADDRESSES_PROVIDER_ID
+    );
 
-    expect(providers.length).to.be.equal(
-      NEW_ADDRESSES_PROVIDER_ID,
+    const providersAfter = await registry.getAddressesProvidersList();
+    expect(providersAfter.length).to.be.equal(
+      providersBefore.length + 1,
       'Invalid length of the addresses providers list'
     );
-    expect(providers[1].toString()).to.be.equal(
-      users[1].address,
+    expect(providersAfter[1].toString()).to.be.equal(
+      NEW_ADDRESES_PROVIDER_ADDRESS,
       'Invalid addresses provider added to the list'
     );
     expect(await registry.getAddressesProviderAddressById(NEW_ADDRESSES_PROVIDER_ID)).to.be.equal(
@@ -55,25 +70,25 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   it('Removes the mock addresses provider', async () => {
     const { users, registry, addressesProvider } = testEnv;
 
-    const id = await registry.getAddressesProviderIdByAddress(users[1].address);
+    const providersBefore = await registry.getAddressesProvidersList();
 
-    expect(id).to.be.equal(NEW_ADDRESSES_PROVIDER_ID, 'Invalid isRegistered return value');
+    expect(
+      await registry.getAddressesProviderIdByAddress(NEW_ADDRESES_PROVIDER_ADDRESS)
+    ).to.be.equal(NEW_ADDRESSES_PROVIDER_ID);
 
-    expect(await registry.unregisterAddressesProvider(users[1].address))
+    expect(await registry.unregisterAddressesProvider(NEW_ADDRESES_PROVIDER_ADDRESS))
       .to.emit(registry, 'AddressesProviderUnregistered')
-      .withArgs(users[1].address);
+      .withArgs(NEW_ADDRESES_PROVIDER_ADDRESS);
 
-    const providers = await registry.getAddressesProvidersList();
+    const providersAfter = await registry.getAddressesProvidersList();
 
-    expect(providers.length).to.be.equal(2, 'Invalid length of the addresses providers list');
-    expect(providers[0].toString()).to.be.equal(
+    expect(providersAfter.length).to.be.equal(
+      providersBefore.length - 1,
+      'Invalid length of the addresses providers list'
+    );
+    expect(providersAfter[0].toString()).to.be.equal(
       addressesProvider.address,
       'Invalid addresses provider added to the list'
-    );
-    expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, 'Invalid addresses');
-    expect(await registry.getAddressesProviderAddressById(NEW_ADDRESSES_PROVIDER_ID)).to.be.equal(
-      ZERO_ADDRESS,
-      'Invalid update of id mapping'
     );
   });
 
@@ -85,29 +100,29 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to add an already added addressesProvider with a different id. Should overwrite the previous id', async () => {
+  it('Tries to add an already registered addressesProvider with a different id (revert expected)', async () => {
     const { registry, addressesProvider } = testEnv;
 
-    const oldId = await registry.getAddressesProviderIdByAddress(addressesProvider.address);
+    const id = await registry.getAddressesProviderIdByAddress(addressesProvider.address);
+    expect(id).not.to.be.eq(0);
 
-    expect(
-      await registry.registerAddressesProvider(addressesProvider.address, NEW_ADDRESSES_PROVIDER_ID)
-    )
-      .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(addressesProvider.address);
+    const providersBefore = await registry.getAddressesProvidersList();
+    await expect(
+      registry.registerAddressesProvider(addressesProvider.address, NEW_ADDRESSES_PROVIDER_ID)
+    ).to.be.revertedWith(ADDRESSES_PROVIDER_ALREADY_ADDED);
 
-    const providers = await registry.getAddressesProvidersList();
+    const providersAfter = await registry.getAddressesProvidersList();
 
-    expect(await registry.getAddressesProviderIdByAddress(addressesProvider.address)).to.be.not.eq(
-      oldId
+    expect(await registry.getAddressesProviderIdByAddress(addressesProvider.address)).to.be.eq(id);
+
+    expect(providersAfter.length).to.be.equal(
+      providersBefore.length,
+      'Invalid length of the addresses providers list'
     );
-
-    expect(providers.length).to.be.equal(2, 'Invalid length of the addresses providers list');
-    expect(providers[0].toString()).to.be.equal(
+    expect(providersAfter[0].toString()).to.be.equal(
       addressesProvider.address,
       'Invalid addresses provider added to the list'
     );
-    expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, 'Invalid addresses');
   });
 
   it('Tries to add an addressesProvider with an already used id (revert expected)', async () => {

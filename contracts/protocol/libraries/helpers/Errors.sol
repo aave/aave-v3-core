@@ -92,4 +92,5 @@ library Errors {
   string public constant ASSET_NOT_LISTED = '83'; // 'Asset is not listed'
   string public constant INVALID_OPTIMAL_UTILIZATION_RATE = '84'; // 'Invalid optimal utilization ratio'
   string public constant INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85'; // 'Invalid optimal stable to total debt ratio'
+  string public constant ADDRESSES_PROVIDER_ALREADY_ADDED = '86'; // 'Reserve has already been added to reserve list'
 }
