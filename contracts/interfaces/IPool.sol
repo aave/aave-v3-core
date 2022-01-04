@@ -671,7 +671,7 @@ interface IPool {
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate
-   * @return The percentage of available liquidity to borrow
+   * @return The percentage of available liquidity to borrow, expressed in bps
    */
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() external view returns (uint256);
 

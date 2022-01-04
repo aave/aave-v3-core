@@ -114,7 +114,8 @@ interface IPoolConfigurator {
    * @param unbackedMintCap The unbacked mint cap
    */
   event UnbackedMintCapChanged(address indexed asset, uint256 unbackedMintCap);
-  /*
+
+  /**
    * @dev Emitted when the category of an asset in eMode is changed
    * @param asset The address of the underlying asset of the reserve
    * @param categoryId The new eMode asset category
@@ -333,7 +334,7 @@ interface IPoolConfigurator {
   /**
    * @notice Sets the interest rate strategy of a reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param rateStrategyAddress The new address of the interest strategy contract
+   * @param rateStrategyAddress The address of the new interest strategy contract
    **/
   function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
     external;
@@ -348,14 +349,14 @@ interface IPoolConfigurator {
   /**
    * @notice Updates the borrow cap of a reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param borrowCap The new borrow of the reserve
+   * @param borrowCap The new borrow cap of the reserve
    **/
   function setBorrowCap(address asset, uint256 borrowCap) external;
 
   /**
    * @notice Updates the supply cap of a reserve
    * @param asset The address of the underlying asset of the reserve
-   * @param supplyCap The new supply of the reserve
+   * @param supplyCap The new supply cap of the reserve
    **/
   function setSupplyCap(address asset, uint256 supplyCap) external;
 
@@ -373,7 +374,7 @@ interface IPoolConfigurator {
    **/
   function setUnbackedMintCap(address asset, uint256 unbackedMintCap) external;
 
-  /*
+  /**
    * @notice Assign an eMode category to asset
    * @param asset The address of the underlying asset of the reserve
    * @param categoryId The category id of the asset
@@ -425,7 +426,7 @@ interface IPoolConfigurator {
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
    * @dev Expressed in bps with 2 decimals of precision
-   * @param flashloanPremiumToProtocol The part of the premium sent to protocol
+   * @param flashloanPremiumToProtocol The part of the total flashloan premium sent to the protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 flashloanPremiumToProtocol) external;
 
