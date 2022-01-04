@@ -52,7 +52,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     _idToAddressesProvider[id] = provider;
 
     _addToAddressesProvidersList(provider);
-    emit AddressesProviderRegistered(provider);
+    emit AddressesProviderRegistered(provider, id);
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
@@ -63,7 +63,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     _idToAddressesProvider[oldId] = address(0);
 
     _addressesProviderToId[provider] = 0;
-    emit AddressesProviderUnregistered(provider);
+    emit AddressesProviderUnregistered(provider, oldId);
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
