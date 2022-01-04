@@ -14,8 +14,11 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  *   example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
-  mapping(address => uint256) private _addressesProviders;
   mapping(address => uint256) private _addressesProvidersIndexes;
+  /// Map of address provider ids (addressesProvider => id)
+  mapping(address => uint256) private _addressesProviderToId;
+  /// Map of id to address provider (id => addressesProvider)
+  mapping(uint256 => address) private _idToAddressesProvider;
   address[] private _addressesProvidersList;
 
   /// @inheritdoc IPoolAddressesProviderRegistry
@@ -26,16 +29,25 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   /// @inheritdoc IPoolAddressesProviderRegistry
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
     require(id != 0, Errors.INVALID_ADDRESSES_PROVIDER_ID);
+    require(_idToAddressesProvider[id] == address(0), Errors.INVALID_ADDRESSES_PROVIDER_ID);
+    require(_addressesProviderToId[provider] == 0, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
 
-    _addressesProviders[provider] = id;
+    _addressesProviderToId[provider] = id;
+    _idToAddressesProvider[id] = provider;
+
     _addToAddressesProvidersList(provider);
     emit AddressesProviderRegistered(provider);
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviders[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
+    require(_addressesProviderToId[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
+    uint256 oldId = _addressesProviderToId[provider];
+    _idToAddressesProvider[oldId] = address(0);
+    _addressesProviderToId[provider] = 0;
+
     _removeFromAddressesProvidersList(provider);
+
     emit AddressesProviderUnregistered(provider);
   }
 
@@ -46,23 +58,27 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     override
     returns (uint256)
   {
-    return _addressesProviders[addressesProvider];
+    return _addressesProviderToId[addressesProvider];
+  }
+
+  /// @inheritdoc IPoolAddressesProviderRegistry
+  function getAddressesProviderAddressById(uint256 id) external view override returns (address) {
+    return _idToAddressesProvider[id];
   }
 
   /**
    * @notice Adds the addresses provider address to the list.
-   * @dev The addressesProvider is not added if it already exists in the registry
+   * @dev The addressesProvider must not already exists in the registry
    * @param provider The address of the PoolAddressesProvider
    */
   function _addToAddressesProvidersList(address provider) internal {
-    uint256 providersCount = _addressesProvidersList.length;
-
+    /*uint256 providersCount = _addressesProvidersList.length;
     if (providersCount != 0) {
       uint256 index = _addressesProvidersIndexes[provider];
       if (_addressesProvidersList[index] == provider) {
         return;
       }
-    }
+    }*/
 
     _addressesProvidersIndexes[provider] = _addressesProvidersList.length;
     _addressesProvidersList.push(provider);
@@ -75,7 +91,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   function _removeFromAddressesProvidersList(address provider) internal {
     uint256 index = _addressesProvidersIndexes[provider];
 
-    _addressesProviders[provider] = 0;
+    //_addressesProviderToId[provider] = 0;
     _addressesProvidersIndexes[provider] = 0;
 
     uint256 lastIndex = _addressesProvidersList.length - 1;

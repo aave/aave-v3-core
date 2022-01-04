@@ -21,7 +21,7 @@ interface IPoolAddressesProviderRegistry {
 
   /**
    * @notice Returns the list of registered addresses providers
-   * @return The list of addresses providers, potentially containing address(0) elements
+   * @return The list of addresses providers
    **/
   function getAddressesProvidersList() external view returns (address[] memory);
 
@@ -36,7 +36,16 @@ interface IPoolAddressesProviderRegistry {
     returns (uint256);
 
   /**
+   * @notice Returns the address of a registered PoolAddressesProvider
+   * @param id The id of the market
+   * @return The address of the PoolAddressesProvider belonging to the market
+   * or the zero address if no provider is registered
+   */
+  function getAddressesProviderAddressById(uint256 id) external view returns (address);
+
+  /**
    * @notice Registers an AddressesProvider
+   * @dev The addressesProvider must not be already registered in the registry
    * @param provider The address of the new PoolAddressesProvider
    * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
    **/
