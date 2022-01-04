@@ -32,6 +32,7 @@ describe('ReserveConfiguration', async () => {
   const MAX_VALID_DECIMALS = BigNumber.from(255);
   const MAX_VALID_EMODE_CATEGORY = BigNumber.from(255);
   const MAX_VALID_RESERVE_FACTOR = BigNumber.from(65535);
+  const MAX_VALID_LIQUIDATION_PROTOCOL_FEE = BigNumber.from(65535);
 
   before(async () => {
     configMock = await deployMockReserveConfiguration();
@@ -336,5 +337,21 @@ describe('ReserveConfiguration', async () => {
       INVALID_EMODE_CATEGORY
     );
     expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
+  });
+
+  it('setLiquidationProtocolFee() with liquidationProtocolFee == MAX_VALID_LIQUIDATION_PROTOCOL_FEE', async () => {
+    expect(await configMock.getLiquidationProtocolFee()).to.be.eq(ZERO);
+    expect(await configMock.setLiquidationProtocolFee(MAX_VALID_LIQUIDATION_PROTOCOL_FEE));
+    expect(await configMock.getLiquidationProtocolFee()).to.be.eq(
+      MAX_VALID_LIQUIDATION_PROTOCOL_FEE
+    );
+  });
+
+  it('setLiquidationProtocolFee() with liquidationProtocolFee > MAX_VALID_LIQUIDATION_PROTOCOL_FEE', async () => {
+    expect(await configMock.getLiquidationProtocolFee()).to.be.eq(ZERO);
+    await expect(
+      configMock.setLiquidationProtocolFee(MAX_VALID_LIQUIDATION_PROTOCOL_FEE.add(1))
+    ).to.be.revertedWith(ProtocolErrors.INVALID_LIQUIDATION_PROTOCOL_FEE);
+    expect(await configMock.getLiquidationProtocolFee()).to.be.eq(ZERO);
   });
 });
