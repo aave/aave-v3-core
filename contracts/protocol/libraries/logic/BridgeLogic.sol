@@ -76,6 +76,7 @@ library BridgeLogic {
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
     bool isFirstSupply = IAToken(reserveCache.aTokenAddress).mint(
+      msg.sender,
       onBehalfOf,
       amount,
       reserveCache.nextLiquidityIndex
