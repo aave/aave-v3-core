@@ -109,4 +109,27 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     );
     expect(providers[1].toString()).to.be.equal(ZERO_ADDRESS, 'Invalid addresses');
   });
+
+  it('Tries to add an addressesProvider with an already used id (revert expected)', async () => {
+    const { users, registry } = testEnv;
+
+    // Simulating an addresses provider using the users[2] wallet address
+    expect(await registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID))
+      .to.emit(registry, 'AddressesProviderRegistered')
+      .withArgs(users[2].address);
+
+    const providers = await registry.getAddressesProvidersList();
+    const idMap = {};
+
+    for (let i = 0; i < providers.length; i++) {
+      const id = (await registry.getAddressesProviderIdByAddress(providers[i])).toNumber();
+      if (id > 0) {
+        if (idMap[id] == undefined) {
+          idMap[id] = true;
+        } else {
+          expect(false, 'Duplicate ids').to.be.true;
+        }
+      }
+    }
+  });
 });
