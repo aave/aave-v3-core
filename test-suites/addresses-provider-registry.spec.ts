@@ -134,4 +134,23 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       'Invalid addresses provider added to the list'
     );
   });
+
+  it('Removes the last addresses provider', async () => {
+    const { registry, addressesProvider } = testEnv;
+
+    const providersBefore = await registry.getAddressesProvidersList();
+    const providerToRemove = providersBefore[providersBefore.length - 1];
+
+    expect(await registry.unregisterAddressesProvider(providerToRemove))
+      .to.emit(registry, 'AddressesProviderUnregistered')
+      .withArgs(providerToRemove);
+
+    const providers = await registry.getAddressesProvidersList();
+
+    expect(providers.length).to.be.equal(1, 'Invalid length of the addresses providers list');
+    expect(providers[0].toString()).to.be.equal(
+      addressesProvider.address,
+      'Invalid addresses provider added to the list'
+    );
+  });
 });
