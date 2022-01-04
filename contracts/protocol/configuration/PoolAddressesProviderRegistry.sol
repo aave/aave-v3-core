@@ -14,7 +14,7 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  *   example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
-  /// Map of registered addresses providers and their position within the list (registeredAddressesProvider => index)
+  /// Map of registered addresses providers and their identifiers (registeredAddressesProvider => id)
   mapping(address => uint256) private _addressesProviders;
   /// List of registered addresses providers
   address[] private _addressesProvidersList;
