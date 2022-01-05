@@ -175,11 +175,8 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
       proxy.initialize(newAddress, params);
 
       emit ProxyCreated(id, proxyAddress);
-      emit ProxyImplementationSet(proxyAddress, newAddress);
     } else {
       proxy.upgradeToAndCall(newAddress, params);
-
-      emit ProxyImplementationSet(address(payableProxyAddress), newAddress);
     }
   }
 

@@ -77,14 +77,7 @@ interface IPoolAddressesProvider {
    * @param hasProxy True if the address is registered behind a proxy, false otherwise
    */
   event AddressSet(bytes32 indexed id, address indexed implementationAddress, bool hasProxy);
-
-  /**
-   * @notice Emitted when a new proxy implementation address is registered.
-   * @param proxyAddress The address of the proxy contract
-   * @param implementationAddress The address of the implementation contract
-   */
-  event ProxyImplementationSet(address indexed proxyAddress, address indexed implementationAddress);
-
+  
   /**
    * @notice Returns the id of the Aave market to which this contract points to.
    * @return The market id
