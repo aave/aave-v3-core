@@ -35,7 +35,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   });
 
   it('Registers a new mock addresses provider', async () => {
-    const { registry } = testEnv;
+    const { users, registry } = testEnv;
 
     const providersBefore = await registry.getAddressesProvidersList();
 
@@ -60,6 +60,10 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     expect(providersAfter[1].toString()).to.be.equal(
       NEW_ADDRESES_PROVIDER_ADDRESS,
       'Invalid addresses provider added to the list'
+    );
+    expect(await registry.getAddressesProviderAddressById(NEW_ADDRESSES_PROVIDER_ID)).to.be.equal(
+      NEW_ADDRESES_PROVIDER_ADDRESS,
+      'Invalid update of id mapping'
     );
   });
 
@@ -119,5 +123,39 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       addressesProvider.address,
       'Invalid addresses provider added to the list'
     );
+  });
+
+  it('Tries to add an addressesProvider with an already used id (revert expected)', async () => {
+    const { users, registry, addressesProvider } = testEnv;
+
+    const id = await registry.getAddressesProviderIdByAddress(addressesProvider.address);
+    expect(id).not.to.be.eq(0);
+
+    // Simulating an addresses provider using the users[2] wallet address
+    await expect(registry.registerAddressesProvider(users[2].address, id)).to.be.revertedWith(
+      ProtocolErrors.INVALID_ADDRESSES_PROVIDER_ID
+    );
+
+    const providers = await registry.getAddressesProvidersList();
+    const idMap = {};
+
+    for (let i = 0; i < providers.length; i++) {
+      const id = (await registry.getAddressesProviderIdByAddress(providers[i])).toNumber();
+      if (id > 0) {
+        if (idMap[id] == undefined) {
+          idMap[id] = true;
+        } else {
+          expect(false, 'Duplicate ids').to.be.true;
+        }
+      }
+    }
+  });
+
+  it('Registers a the mock addresses provider a second time (revert expected)', async () => {
+    const { registry } = testEnv;
+
+    await expect(
+      registry.registerAddressesProvider(NEW_ADDRESES_PROVIDER_ADDRESS, NEW_ADDRESSES_PROVIDER_ID)
+    ).to.be.revertedWith(ProtocolErrors.ADDRESSES_PROVIDER_ALREADY_ADDED);
   });
 });

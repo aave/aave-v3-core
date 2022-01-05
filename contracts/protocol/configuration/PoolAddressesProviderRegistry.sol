@@ -14,7 +14,10 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  *   example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
-  mapping(address => uint256) private _addressesProviders;
+  /// Map of address provider ids (addressesProvider => id)
+  mapping(address => uint256) private _addressesProviderToId;
+  /// Map of id to address provider (id => addressesProvider)
+  mapping(uint256 => address) private _idToAddressesProvider;
   address[] private _addressesProvidersList;
 
   /// @inheritdoc IPoolAddressesProviderRegistry
@@ -25,7 +28,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     address[] memory providers = new address[](providersListCount);
 
     for (uint256 i = 0; i < providersListCount; i++) {
-      if (_addressesProviders[_addressesProvidersList[i]] > 0) {
+      if (_addressesProviderToId[_addressesProvidersList[i]] > 0) {
         providers[i - removedProvidersCount] = _addressesProvidersList[i];
       } else {
         removedProvidersCount++;
@@ -42,18 +45,25 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   /// @inheritdoc IPoolAddressesProviderRegistry
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
     require(id != 0, Errors.INVALID_ADDRESSES_PROVIDER_ID);
+    require(_idToAddressesProvider[id] == address(0), Errors.INVALID_ADDRESSES_PROVIDER_ID);
+    require(_addressesProviderToId[provider] == 0, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
 
-    _addressesProviders[provider] = id;
+    _addressesProviderToId[provider] = id;
+    _idToAddressesProvider[id] = provider;
+
     _addToAddressesProvidersList(provider);
     emit AddressesProviderRegistered(provider, id);
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviders[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
-    uint256 id = _addressesProviders[provider];
-    _addressesProviders[provider] = 0;
-    emit AddressesProviderUnregistered(provider, id);
+    require(_addressesProviderToId[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
+
+    uint256 oldId = _addressesProviderToId[provider];
+    _idToAddressesProvider[oldId] = address(0);
+
+    _addressesProviderToId[provider] = 0;
+    emit AddressesProviderUnregistered(provider, oldId);
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
@@ -63,7 +73,12 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
     override
     returns (uint256)
   {
-    return _addressesProviders[addressesProvider];
+    return _addressesProviderToId[addressesProvider];
+  }
+
+  /// @inheritdoc IPoolAddressesProviderRegistry
+  function getAddressesProviderAddressById(uint256 id) external view override returns (address) {
+    return _idToAddressesProvider[id];
   }
 
   /**
