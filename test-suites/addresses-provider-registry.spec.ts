@@ -71,7 +71,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
   it('Registers users[2] as another addresses provider', async () => {
     const { users, registry } = testEnv;
 
-    // Simulating an addresses provider using the users[1] wallet address
+    // Simulating an addresses provider using the users[2] wallet address
     expect(await registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID_3))
       .to.emit(registry, 'AddressesProviderRegistered')
       .withArgs(users[2].address, NEW_ADDRESSES_PROVIDER_ID_3);
