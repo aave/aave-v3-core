@@ -380,6 +380,7 @@ library ValidationLogic {
   /**
    * @notice Validates a stable borrow rate rebalance action.
    * @dev Rebalancing is accepted when depositors are earning <= 90% of their earnings in pure supply/demand market (variable rate only)
+   * For this to be the case, there has to be quite large stable debt with an interest rate below the current variable rate.
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
