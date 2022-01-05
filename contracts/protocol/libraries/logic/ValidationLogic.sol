@@ -392,15 +392,15 @@ library ValidationLogic {
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
-    //if the utilization rate is below the threshold, no rebalances are needed
+    //if the usage ratio is below the threshold, no rebalances are needed
     uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
       .wadToRay();
     uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
-    uint256 borrowUtilizationRate = totalDebt == 0
+    uint256 borrowUsageRatio = totalDebt == 0
       ? 0
       : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
-    //if the utilization rate is more than the threshold and liquidity rate less than the maximum allowed based
+    //if the usage ratio is higher than the threshold and liquidity rate less than the maximum allowed based
     // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
 
     uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
@@ -409,7 +409,7 @@ library ValidationLogic {
     ).getMaxVariableBorrowRate();
 
     require(
-      borrowUtilizationRate >= REBALANCE_UP_MAXIMUM_BORROW_UTILIZATION_RATE &&
+      borrowUsageRatio >= REBALANCE_UP_MAXIMUM_BORROW_UTILIZATION_RATE &&
         currentLiquidityRate <=
         maxVariableBorrowRate.percentMul(REBALANCE_UP_MAXIMUM_VARIABLE_RATE_FACTOR),
       Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
