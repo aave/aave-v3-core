@@ -400,12 +400,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
     );
-    require(
-      newFlashloanPremiumTotal >= _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL(),
-      Errors.FLASHLOAN_PREMIUMS_MISMATCH
-    );
+    uint256 premiumToProtocol = _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
+    require(newFlashloanPremiumTotal >= premiumToProtocol, Errors.FLASHLOAN_PREMIUMS_MISMATCH);
     uint256 oldFlashloanPremiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
-    _pool.updateFlashloanPremiums(newFlashloanPremiumTotal, _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL());
+    _pool.updateFlashloanPremiums(newFlashloanPremiumTotal, premiumToProtocol);
     emit FlashloanPremiumTotalUpdated(oldFlashloanPremiumTotal, newFlashloanPremiumTotal);
   }
 
