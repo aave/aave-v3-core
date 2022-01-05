@@ -178,7 +178,7 @@ interface IPoolAddressesProvider {
   function setPriceOracle(address newPriceOracle) external;
 
   /**
-   * @notice Returns the address of the ACL manager proxy.
+   * @notice Returns the address of the ACL manager.
    * @return The address of the ACLManager
    */
   function getACLManager() external view returns (address);
