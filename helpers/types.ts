@@ -77,7 +77,7 @@ export enum ProtocolErrors {
   CALLER_NOT_RISK_OR_POOL_ADMIN = '4', // 'The caller of the function is not a risk or pool admin'
   CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '5', // 'The caller of the function is not an asset listing or pool admin'
   CALLER_NOT_BRIDGE = '6', // 'The caller of the function is not a bridge'
-  PROVIDER_NOT_REGISTERED = '7', // 'Provider is not registered'
+  ADDRESSES_PROVIDER_NOT_REGISTERED = '7', // 'Pool addresses provider is not registered'
   INVALID_ADDRESSES_PROVIDER_ID = '8', // 'Invalid id for the pool addresses provider'
   NOT_CONTRACT = '9', // 'Address is not a contract'
   CALLER_NOT_POOL_CONFIGURATOR = '10', // 'The caller of the function is not the pool configurator'

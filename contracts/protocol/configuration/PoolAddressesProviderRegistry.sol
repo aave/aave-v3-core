@@ -43,7 +43,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviderToId[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
+    require(_addressesProviderToId[provider] > 0, Errors.ADDRESSES_PROVIDER_NOT_REGISTERED);
     uint256 oldId = _addressesProviderToId[provider];
     _idToAddressesProvider[oldId] = address(0);
     _addressesProviderToId[provider] = 0;

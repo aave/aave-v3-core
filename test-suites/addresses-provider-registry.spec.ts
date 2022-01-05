@@ -11,7 +11,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
   const {
     INVALID_ADDRESSES_PROVIDER_ID,
-    PROVIDER_NOT_REGISTERED,
+    ADDRESSES_PROVIDER_NOT_REGISTERED,
     ADDRESSES_PROVIDER_ALREADY_ADDED,
   } = ProtocolErrors;
 
@@ -118,7 +118,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
     await expect(
       registry.unregisterAddressesProvider(NEW_ADDRESSES_PROVIDER_ADDRESS)
-    ).to.be.revertedWith(PROVIDER_NOT_REGISTERED);
+    ).to.be.revertedWith(ADDRESSES_PROVIDER_NOT_REGISTERED);
   });
 
   it('Tries to add an already registered addressesProvider with a different id (revert expected)', async () => {
