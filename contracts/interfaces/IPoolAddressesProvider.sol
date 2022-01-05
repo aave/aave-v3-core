@@ -160,7 +160,7 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Updates the implementation of the PoolConfigurator, or creates a proxy
-   * setting the new `configurator` implementation when the function is called for the first time.
+   * setting the new `PoolConfigurator` implementation when the function is called for the first time.
    * @param newPoolConfiguratorImpl The new PoolConfigurator implementation
    **/
   function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external;
