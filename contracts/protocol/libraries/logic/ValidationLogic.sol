@@ -409,9 +409,9 @@ library ValidationLogic {
     ).getMaxVariableBorrowRate();
 
     require(
-      borrowUsageRatio >= REBALANCE_UP_MAXIMUM_BORROW_UTILIZATION_RATE &&
+      borrowUsageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
         currentLiquidityRate <=
-        maxVariableBorrowRate.percentMul(REBALANCE_UP_MAXIMUM_VARIABLE_RATE_FACTOR),
+        maxVariableBorrowRate.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
       Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
   }
