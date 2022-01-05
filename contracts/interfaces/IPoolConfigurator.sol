@@ -217,7 +217,7 @@ interface IPoolConfigurator {
   event BridgeProtocolFeeUpdated(uint256 oldBridgeProtocolFee, uint256 newBridgeProtocolFee);
 
   /**
-   * @notice Emitted when a the total premium on flashloans is updated.
+   * @notice Emitted when the total premium on flashloans is updated.
    * @param oldFlashloanPremiumTotal The old premium
    * @param newFlashloanPremiumTotal The new premium
    **/
@@ -227,7 +227,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when a the part of the premium that goes to protocol is updated.
+   * @notice Emitted when the part of the premium that goes to protocol is updated.
    * @param oldFlashloanPremiumToProtocol The old premium
    * @param newFlashloanPremiumToProtocol The new premium
    **/
