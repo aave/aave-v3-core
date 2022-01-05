@@ -386,7 +386,7 @@ interface IPool {
   ) external returns (uint256);
 
   /**
-   * @notice Allows a borrower to swap his debt between stable and variable mode, or viceversa
+   * @notice Allows a borrower to swap his debt between stable and variable mode, or vice versa
    * @param asset The address of the underlying asset borrowed
    * @param interestRateMode The rate mode that the user wants to swap to: 1 for Stable, 2 for Variable
    **/
