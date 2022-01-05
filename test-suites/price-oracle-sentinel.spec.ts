@@ -66,7 +66,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
         .setPriceOracleSentinel(priceOracleSentinel.address)
     )
       .to.emit(addressesProvider, 'PriceOracleSentinelUpdated')
-      .withArgs(priceOracleSentinel.address);
+      .withArgs(ZERO_ADDRESS, priceOracleSentinel.address);
 
     expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(priceOracleSentinel.address);
 
