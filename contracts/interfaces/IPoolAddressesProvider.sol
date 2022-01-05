@@ -111,10 +111,10 @@ interface IPoolAddressesProvider {
 
   /**
    * @notice Returns an address by its identifier.
-   * @dev It returns the proxy address if the address is behind a proxy
+   * @dev The returned address might be an EOA or a contract, potentially proxied
    * @dev It returns ZERO if there is no registered address with the given id
    * @param id The id
-   * @return The address of the registered contract
+   * @return The address of the registered for the specified id
    */
   function getAddress(bytes32 id) external view returns (address);
 
