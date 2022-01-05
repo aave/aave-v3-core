@@ -538,7 +538,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       await configurator.connect(poolAdmin.signer).setDebtCeiling(aave.address, newAaveDebtCeiling)
     )
       .to.emit(configurator, 'DebtCeilingChanged')
-      .withArgs(aave.address, newAaveDebtCeiling);
+      .withArgs(aave.address, oldAaveDebtCeiling, newAaveDebtCeiling);
 
     expect(await helpersContract.getDebtCeiling(aave.address)).to.be.eq(newAaveDebtCeiling);
     expect((await pool.getReserveData(aave.address)).isolationModeTotalDebt).to.be.eq(
@@ -560,7 +560,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     // AAVE enters isolation mode again
     expect(await configurator.connect(poolAdmin.signer).setDebtCeiling(aave.address, 100))
       .to.emit(configurator, 'DebtCeilingChanged')
-      .withArgs(aave.address, 100);
+      .withArgs(aave.address, 0, 100);
 
     expect(await helpersContract.getDebtCeiling(aave.address)).to.be.eq(100);
     expect((await pool.getReserveData(aave.address)).isolationModeTotalDebt).to.be.eq(
