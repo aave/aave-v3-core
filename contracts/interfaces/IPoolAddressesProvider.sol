@@ -104,7 +104,9 @@ interface IPoolAddressesProvider {
   function getMarketId() external view returns (string memory);
 
   /**
-   * @notice Allows to set the market which this PoolAddressesProvider represents.
+   * @notice Associates an id with a specific PoolAddressesProvider.
+   * @dev This can be used to create an onchain registry of PoolAddressesProviders to
+   * identify and validate multiple Aave markets.
    * @param newMarketId The market id
    */
   function setMarketId(string calldata newMarketId) external;
