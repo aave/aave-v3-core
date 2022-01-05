@@ -708,8 +708,10 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates if an asset can be activated as collateral in supply/transfer/set as collateral/mint unbacked/liquidate
-   * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that generate transfers of aTokens
+   * @notice Validates if an asset can be activated as collateral in the following actions: supply, transfer,
+   * set as collateral, mint unbacked, and liquidate
+   * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that
+   * generate transfers of aTokens
    * @param reservesData the data mapping of the reserves
    * @param reserves a mapping storing the list of reserves
    * @param userConfig the user configuration

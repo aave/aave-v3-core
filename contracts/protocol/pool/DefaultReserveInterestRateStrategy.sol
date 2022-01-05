@@ -252,7 +252,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @dev Calculates the overall borrow rate as the weighted average between the total variable debt and total stable debt
+   * @dev Calculates the overall borrow rate as the weighted average between the total variable debt and total stable
+   * debt
    * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param currentVariableBorrowRate The current variable borrow rate of the reserve
