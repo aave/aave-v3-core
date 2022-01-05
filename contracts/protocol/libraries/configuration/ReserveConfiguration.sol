@@ -248,8 +248,8 @@ library ReserveConfiguration {
 
   /**
    * @notice Gets the borrowable in isolation flag for the reserve.
-   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed
-   * amount will be accumulated in the isolated collateral's total debt exposure.
+   * @dev If the returned flag is true, the asset is being borrowed against isolated collaterals and the borrowed
+   * amount is accumulated in the isolated collateral's total debt exposure.
    * @dev Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep
    * consistency in the debt ceiling calculations.
    * @param self The reserve configuration
