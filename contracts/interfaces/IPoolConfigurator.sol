@@ -351,8 +351,8 @@ interface IPoolConfigurator {
     external;
 
   /**
-   * @notice Pauses or unpauses all the actions of the protocol, including aToken transfers. Effectively
-   * it pauses every reserve.
+   * @notice Pauses or unpauses all the protocol reserves. In the paused state all the protocol interactions
+   * are suspended.
    * @param paused True if protocol needs to be paused, false otherwise
    **/
   function setPoolPause(bool paused) external;
