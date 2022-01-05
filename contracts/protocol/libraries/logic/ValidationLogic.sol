@@ -36,7 +36,7 @@ library ValidationLogic {
   using Address for address;
 
   uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 95e27; //usage ratio of 95%
+  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95e27; //usage ratio of 95%
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
