@@ -159,7 +159,7 @@ library SupplyLogic {
   /**
    * @notice Validates a transfer of aTokens. The sender is subjected to health factor validation to avoid
    * collateralization constraints violation.
-   * @dev Emits the `ReserveUsedAsCollateralEnabled()` event for the `to` account, if the asset can be activated as
+   * @dev Emits the `ReserveUsedAsCollateralEnabled()` event for the `to` account, if the asset is being activated as
    * collateral.
    * @dev In case the `from` user transfers everything, `ReserveUsedAsCollateralDisabled()` is emitted for `from`.
    * @param reserves The state of all the reserves

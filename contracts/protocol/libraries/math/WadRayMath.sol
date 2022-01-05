@@ -7,6 +7,7 @@ pragma solidity 0.8.10;
  * @notice Provides functions to perform calculations with Wad and Ray units
  * @dev Provides mul and div function for wads (decimal numbers with 18 digits of precision) and rays (decimal numbers
  * with 27 digits of precision)
+ * @dev Operations are rounded half up
  **/
 library WadRayMath {
   // HALF_WAD and HALF_RAY expressed with extended notation as constant with operations are not supported in Yul assembly
