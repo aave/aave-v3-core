@@ -14,13 +14,14 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  *   example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
-  /// Map of address provider list indexes (addressesProvider => index in list)
-  mapping(address => uint256) private _addressesProvidersIndexes;
   /// Map of address provider ids (addressesProvider => id)
   mapping(address => uint256) private _addressesProviderToId;
   /// Map of id to address provider (id => addressesProvider)
   mapping(uint256 => address) private _idToAddressesProvider;
+
   address[] private _addressesProvidersList;
+  /// Map of address provider list indexes (addressesProvider => indexInList)
+  mapping(address => uint256) private _addressesProvidersIndexes;
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
