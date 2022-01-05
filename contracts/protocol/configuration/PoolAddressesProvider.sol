@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 import {Ownable} from '../../dependencies/openzeppelin/contracts/Ownable.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
-import {BytesLib} from '../libraries/helpers/BytesLib.sol';
 
 /**
  * @title PoolAddressesProvider
@@ -14,8 +13,6 @@ import {BytesLib} from '../libraries/helpers/BytesLib.sol';
  * @dev Owned by the Aave Governance
  **/
 contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
-  using BytesLib for bytes;
-
   // Identifier of the Aave Market
   string private _marketId;
 
