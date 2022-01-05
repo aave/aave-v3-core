@@ -10,14 +10,16 @@ interface IPoolAddressesProviderRegistry {
   /**
    * @notice Emitted when a new AddressesProvider is registered.
    * @param addressesProvider The address of the registered PoolAddressesProvider
+   * @param id The id of the registered PoolAddressesProvider
    */
-  event AddressesProviderRegistered(address indexed addressesProvider);
+  event AddressesProviderRegistered(address indexed addressesProvider, uint256 indexed id);
 
   /**
    * @notice Emitted when an AddressesProvider is unregistered.
    * @param addressesProvider The address of the unregistered PoolAddressesProvider
+   * @param id The id of the unregistered PoolAddressesProvider
    */
-  event AddressesProviderUnregistered(address indexed addressesProvider);
+  event AddressesProviderUnregistered(address indexed addressesProvider, uint256 indexed id);
 
   /**
    * @notice Returns the list of registered addresses providers
@@ -38,8 +40,8 @@ interface IPoolAddressesProviderRegistry {
   /**
    * @notice Returns the address of a registered PoolAddressesProvider
    * @param id The id of the market
-   * @return The address of the PoolAddressesProvider belonging to the market
-   * or the zero address if no provider is registered
+   * @return The address of the PoolAddressesProvider with the given id or
+   * zero address if it is not registered
    */
   function getAddressesProviderAddressById(uint256 id) external view returns (address);
 

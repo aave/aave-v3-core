@@ -47,7 +47,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       )
     )
       .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(NEW_ADDRESSES_PROVIDER_ADDRESS);
+      .withArgs(NEW_ADDRESSES_PROVIDER_ADDRESS, NEW_ADDRESSES_PROVIDER_ID_2);
 
     expect(await registry.getAddressesProviderIdByAddress(NEW_ADDRESSES_PROVIDER_ADDRESS)).to.be.eq(
       NEW_ADDRESSES_PROVIDER_ID_2
@@ -99,7 +99,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
     expect(await registry.unregisterAddressesProvider(NEW_ADDRESSES_PROVIDER_ADDRESS))
       .to.emit(registry, 'AddressesProviderUnregistered')
-      .withArgs(NEW_ADDRESSES_PROVIDER_ADDRESS);
+      .withArgs(NEW_ADDRESSES_PROVIDER_ADDRESS, NEW_ADDRESSES_PROVIDER_ID_2);
 
     const providersAfter = await registry.getAddressesProvidersList();
 
