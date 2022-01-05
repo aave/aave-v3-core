@@ -84,7 +84,7 @@ interface IPoolAddressesProvider {
   event AddressSet(bytes32 indexed id, address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when a new proxied contract address is registered.
+   * @notice Emitted when the implementation of a the proxy registered for id is updated
    * @param id The identifier of the contract
    * @param proxyAddress The address of the proxy contract
    * @param oldImplementationAddress The address of the old implementation contract
