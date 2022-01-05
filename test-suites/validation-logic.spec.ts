@@ -742,32 +742,29 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
      */
     const { pool, configurator, helpersContract, poolAdmin, users, dai, aDai } = testEnv;
     const user = users[0];
-    console.log(1);
+
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configBefore.isActive).to.be.eq(true);
     expect(configBefore.isFrozen).to.be.eq(false);
-    console.log(2);
+
     await configurator.connect(poolAdmin.signer).setReserveActive(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
     expect(configAfter.isFrozen).to.be.eq(false);
-    console.log(3);
+
     await impersonateAccountsHardhat([pool.address]);
     const poolSigner = await hre.ethers.getSigner(pool.address);
     await topUpNonPayableWithEther(user.signer, [pool.address], utils.parseEther('1'));
     expect(await aDai.connect(poolSigner).mint(user.address, user.address, 1, 1));
-    console.log(4);
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(dai.address, true)
     ).to.be.revertedWith(RESERVE_INACTIVE);
-    console.log(5);
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(dai.address, false)
     ).to.be.revertedWith(RESERVE_INACTIVE);
-    console.log(6);
   });
 
   it('validateSetUseReserveAsCollateral() with userBalance == 0 (revert expected)', async () => {
