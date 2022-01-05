@@ -18,28 +18,14 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   mapping(address => uint256) private _addressesProviderToId;
   /// Map of id to address provider (id => addressesProvider)
   mapping(uint256 => address) private _idToAddressesProvider;
+
   address[] private _addressesProvidersList;
+  /// Map of address provider list indexes (addressesProvider => indexInList)
+  mapping(address => uint256) private _addressesProvidersIndexes;
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
-    uint256 providersListCount = _addressesProvidersList.length;
-    uint256 removedProvidersCount = 0;
-
-    address[] memory providers = new address[](providersListCount);
-
-    for (uint256 i = 0; i < providersListCount; i++) {
-      if (_addressesProviderToId[_addressesProvidersList[i]] > 0) {
-        providers[i - removedProvidersCount] = _addressesProvidersList[i];
-      } else {
-        removedProvidersCount++;
-      }
-    }
-
-    // Reduces the length of the providers array by `removedProvidersCount`
-    assembly {
-      mstore(providers, sub(providersListCount, removedProvidersCount))
-    }
-    return providers;
+    return _addressesProvidersList;
   }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
@@ -58,11 +44,12 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
     require(_addressesProviderToId[provider] > 0, Errors.PROVIDER_NOT_REGISTERED);
-
     uint256 oldId = _addressesProviderToId[provider];
     _idToAddressesProvider[oldId] = address(0);
-
     _addressesProviderToId[provider] = 0;
+
+    _removeFromAddressesProvidersList(provider);
+
     emit AddressesProviderUnregistered(provider, oldId);
   }
 
@@ -83,16 +70,28 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /**
    * @notice Adds the addresses provider address to the list.
-   * @dev The addressesProvider must not already exists in the registry
    * @param provider The address of the PoolAddressesProvider
    */
   function _addToAddressesProvidersList(address provider) internal {
-    uint256 providersCount = _addressesProvidersList.length;
-
-    for (uint256 i = 0; i < providersCount; i++) {
-      require(_addressesProvidersList[i] != provider, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
-    }
-
+    _addressesProvidersIndexes[provider] = _addressesProvidersList.length;
     _addressesProvidersList.push(provider);
+  }
+
+  /**
+   * @notice Removes the addresses provider address from the list.
+   * @param provider The address of the PoolAddressesProvider
+   */
+  function _removeFromAddressesProvidersList(address provider) internal {
+    uint256 index = _addressesProvidersIndexes[provider];
+
+    _addressesProvidersIndexes[provider] = 0;
+
+    uint256 lastIndex = _addressesProvidersList.length - 1;
+    if (index < lastIndex) {
+      address lastProvider = _addressesProvidersList[lastIndex];
+      _addressesProvidersList[index] = lastProvider;
+      _addressesProvidersIndexes[lastProvider] = index;
+    }
+    _addressesProvidersList.pop();
   }
 }
