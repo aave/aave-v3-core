@@ -67,17 +67,36 @@ interface IPoolAddressesProvider {
    * @notice Emitted when a new proxy is created.
    * @param id The identifier of the proxy
    * @param proxyAddress The address of the created proxy contract
+   * @param implementationAddress The address of the implementation contract
    */
-  event ProxyCreated(bytes32 indexed id, address indexed proxyAddress);
+  event ProxyCreated(
+    bytes32 indexed id,
+    address indexed proxyAddress,
+    address indexed implementationAddress
+  );
 
   /**
-   * @notice Emitted when a new contract address is registered.
+   * @notice Emitted when a new non-proxied contract address is registered.
    * @param id The identifier of the contract
-   * @param implementationAddress The address of the implementation contract
-   * @param hasProxy True if the address is registered behind a proxy, false otherwise
+   * @param oldAddress The address of the old contract
+   * @param newAddress The address of the new contract
    */
-  event AddressSet(bytes32 indexed id, address indexed implementationAddress, bool hasProxy);
-  
+  event AddressSet(bytes32 indexed id, address indexed oldAddress, address indexed newAddress);
+
+  /**
+   * @notice Emitted when a new proxied contract address is registered.
+   * @param id The identifier of the contract
+   * @param proxyAddress The address of the proxy contract
+   * @param oldImplementationAddress The address of the old implementation contract
+   * @param newImplementationAddress The address of the new implementation contract
+   */
+  event AddressSetAsProxy(
+    bytes32 indexed id,
+    address proxyAddress,
+    address indexed oldImplementationAddress,
+    address indexed newImplementationAddress
+  );
+
   /**
    * @notice Returns the id of the Aave market to which this contract points to.
    * @return The market id
@@ -102,13 +121,13 @@ interface IPoolAddressesProvider {
   /**
    * @notice General function to update the implementation of a proxy registered with
    * certain `id`. If there is no proxy registered, it will instantiate one and
-   * set as implementation the `impl`.
+   * set as implementation the `newImplementationAddress`.
    * @dev IMPORTANT Use this function carefully, only for ids that don't have an explicit
    * setter function, in order to avoid unexpected consequences
    * @param id The id
-   * @param implementationAddress The address of the new implementation
+   * @param newImplementationAddress The address of the new implementation
    */
-  function setAddressAsProxy(bytes32 id, address implementationAddress) external;
+  function setAddressAsProxy(bytes32 id, address newImplementationAddress) external;
 
   /**
    * @notice Sets an address for an id replacing the address saved in the addresses map.
