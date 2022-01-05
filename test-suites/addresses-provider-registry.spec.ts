@@ -74,7 +74,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     // Simulating an addresses provider using the users[1] wallet address
     expect(await registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID_3))
       .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(users[2].address);
+      .withArgs(users[2].address, NEW_ADDRESSES_PROVIDER_ID_3);
 
     const providers = await registry.getAddressesProvidersList();
 
@@ -184,7 +184,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       )
     )
       .to.emit(registry, 'AddressesProviderRegistered')
-      .withArgs(NEW_ADDRESSES_PROVIDER_ADDRESS);
+      .withArgs(NEW_ADDRESSES_PROVIDER_ADDRESS, NEW_ADDRESSES_PROVIDER_ID_2);
 
     expect(await registry.getAddressesProviderIdByAddress(NEW_ADDRESSES_PROVIDER_ADDRESS)).to.be.eq(
       NEW_ADDRESSES_PROVIDER_ID_2
@@ -210,10 +210,11 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
     const providersBefore = await registry.getAddressesProvidersList();
     const providerToRemove = providersBefore[providersBefore.length - 1];
+    const providerToRemoveId = await registry.getAddressesProviderIdByAddress(providerToRemove);
 
     expect(await registry.unregisterAddressesProvider(providerToRemove))
       .to.emit(registry, 'AddressesProviderUnregistered')
-      .withArgs(providerToRemove);
+      .withArgs(providerToRemove, providerToRemoveId);
 
     const providersAfter = await registry.getAddressesProvidersList();
 
