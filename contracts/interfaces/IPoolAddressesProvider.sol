@@ -146,8 +146,8 @@ interface IPoolAddressesProvider {
   function getPool() external view returns (address);
 
   /**
-   * @notice Updates the implementation of the Pool, or creates the proxy
-   * setting the new `pool` implementation on the first time calling it.
+   * @notice Updates the implementation of the Pool, or creates a proxy
+   * setting the new `pool` implementation when the function is called for the first time.
    * @param newPoolImpl The new Pool implementation
    **/
   function setPoolImpl(address newPoolImpl) external;
@@ -159,8 +159,8 @@ interface IPoolAddressesProvider {
   function getPoolConfigurator() external view returns (address);
 
   /**
-   * @notice Updates the implementation of the PoolConfigurator, or creates the proxy
-   * setting the new `configurator` implementation on the first time calling it.
+   * @notice Updates the implementation of the PoolConfigurator, or creates a proxy
+   * setting the new `configurator` implementation when the function is called for the first time.
    * @param newPoolConfiguratorImpl The new PoolConfigurator implementation
    **/
   function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external;
