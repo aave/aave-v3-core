@@ -40,22 +40,21 @@ interface IPoolAddressesProviderRegistry {
   /**
    * @notice Returns the address of a registered PoolAddressesProvider
    * @param id The id of the market
-   * @return The address of the PoolAddressesProvider with the given id or
-   * zero address if it is not registered
+   * @return The address of the PoolAddressesProvider with the given id or zero address if it is not registered
    */
   function getAddressesProviderAddressById(uint256 id) external view returns (address);
 
   /**
-   * @notice Registers an AddressesProvider
-   * @dev The addressesProvider must not already be registered in the registry
-   * @dev The id must not be used by an already registered addressesProvider
+   * @notice Registers an addresses provider
+   * @dev The PoolAddressesProvider must not already be registered in the registry
+   * @dev The id must not be used by an already registered PoolAddressesProvider
    * @param provider The address of the new PoolAddressesProvider
    * @param id The id for the new PoolAddressesProvider, referring to the market it belongs to
    **/
   function registerAddressesProvider(address provider, uint256 id) external;
 
   /**
-   * @notice Removes a PoolAddressesProvider from the list of registered addresses providers
+   * @notice Removes an addresses provider from the list of registered addresses providers
    * @param provider The PoolAddressesProvider address
    **/
   function unregisterAddressesProvider(address provider) external;

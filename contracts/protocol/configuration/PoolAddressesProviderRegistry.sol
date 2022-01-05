@@ -9,18 +9,17 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  * @title PoolAddressesProviderRegistry
  * @author Aave
  * @notice Main registry of PoolAddressesProvider of Aave markets.
- * @dev Used for indexing purposes of Aave protocol's markets. The id assigned
- *   to a PoolAddressesProvider refers to the market it is connected with, for
- *   example with `1` for the Aave main market and `2` for the next created.
+ * @dev Used for indexing purposes of Aave protocol's markets. The id assigned to a PoolAddressesProvider refers to the
+ * market it is connected with, for example with `1` for the Aave main market and `2` for the next created.
  **/
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
-  /// Map of address provider ids (addressesProvider => id)
+  // Map of address provider ids (addressesProvider => id)
   mapping(address => uint256) private _addressesProviderToId;
-  /// Map of id to address provider (id => addressesProvider)
+  // Map of id to address provider (id => addressesProvider)
   mapping(uint256 => address) private _idToAddressesProvider;
-
+  // List of addresses providers
   address[] private _addressesProvidersList;
-  /// Map of address provider list indexes (addressesProvider => indexInList)
+  // Map of address provider list indexes (addressesProvider => indexInList)
   mapping(address => uint256) private _addressesProvidersIndexes;
 
   /// @inheritdoc IPoolAddressesProviderRegistry
@@ -86,6 +85,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
     _addressesProvidersIndexes[provider] = 0;
 
+    // Swap the index of the last addresses provider in the list with the index of the provider to remove
     uint256 lastIndex = _addressesProvidersList.length - 1;
     if (index < lastIndex) {
       address lastProvider = _addressesProvidersList[lastIndex];
