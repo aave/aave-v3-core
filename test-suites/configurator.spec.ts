@@ -614,7 +614,8 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   it('Updates the ReserveInterestRateStrategy address of WETH via pool admin', async () => {
     const { poolAdmin, pool, configurator, weth } = testEnv;
 
-    const before = await pool.getReserveData(weth.address);
+    const { interestRateStrategyAddress: interestRateStrategyAddressBefore } =
+      await pool.getReserveData(weth.address);
 
     expect(
       await configurator
@@ -622,22 +623,24 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
         .setReserveInterestRateStrategyAddress(weth.address, ZERO_ADDRESS)
     )
       .to.emit(configurator, 'ReserveInterestRateStrategyChanged')
-      .withArgs(weth.address, before.interestRateStrategyAddress, ZERO_ADDRESS);
-    const after = await pool.getReserveData(weth.address);
+      .withArgs(weth.address, interestRateStrategyAddressBefore, ZERO_ADDRESS);
+    const { interestRateStrategyAddress: interestRateStrategyAddressAfter } =
+      await pool.getReserveData(weth.address);
 
-    expect(before.interestRateStrategyAddress).to.not.be.eq(ZERO_ADDRESS);
-    expect(after.interestRateStrategyAddress).to.be.eq(ZERO_ADDRESS);
+    expect(interestRateStrategyAddressBefore).to.not.be.eq(ZERO_ADDRESS);
+    expect(interestRateStrategyAddressAfter).to.be.eq(ZERO_ADDRESS);
 
     //reset interest rate strategy to the correct one
     await configurator
       .connect(poolAdmin.signer)
-      .setReserveInterestRateStrategyAddress(weth.address, before.interestRateStrategyAddress);
+      .setReserveInterestRateStrategyAddress(weth.address, interestRateStrategyAddressBefore);
   });
 
   it('Updates the ReserveInterestRateStrategy address of WETH via risk admin', async () => {
     const { riskAdmin, pool, configurator, weth } = testEnv;
 
-    const before = await pool.getReserveData(weth.address);
+    const { interestRateStrategyAddress: interestRateStrategyAddressBefore } =
+      await pool.getReserveData(weth.address);
 
     expect(
       await configurator
@@ -645,16 +648,17 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
         .setReserveInterestRateStrategyAddress(weth.address, ONE_ADDRESS)
     )
       .to.emit(configurator, 'ReserveInterestRateStrategyChanged')
-      .withArgs(weth.address, before.interestRateStrategyAddress, ONE_ADDRESS);
-    const after = await pool.getReserveData(weth.address);
+      .withArgs(weth.address, interestRateStrategyAddressBefore, ONE_ADDRESS);
+    const { interestRateStrategyAddress: interestRateStrategyAddressAfter } =
+      await pool.getReserveData(weth.address);
 
-    expect(before.interestRateStrategyAddress).to.not.be.eq(ONE_ADDRESS);
-    expect(after.interestRateStrategyAddress).to.be.eq(ONE_ADDRESS);
+    expect(interestRateStrategyAddressBefore).to.not.be.eq(ONE_ADDRESS);
+    expect(interestRateStrategyAddressAfter).to.be.eq(ONE_ADDRESS);
 
     //reset interest rate strategy to the correct one
     await configurator
       .connect(riskAdmin.signer)
-      .setReserveInterestRateStrategyAddress(weth.address, before.interestRateStrategyAddress);
+      .setReserveInterestRateStrategyAddress(weth.address, interestRateStrategyAddressBefore);
   });
 
   it('Register a new risk Admin', async () => {
