@@ -67,21 +67,15 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const mockPool = await deployPool();
     const proxiedAddressId = utils.formatBytes32String('RANDOM_PROXIED');
 
-    const proxyAddress = await addressesProvider.getAddress(proxiedAddressId);
-    const oldImplementationAddress =
-      proxyAddress == ZERO_ADDRESS
-        ? ZERO_ADDRESS
-        : await getProxyImplementation(addressesProvider.address, proxyAddress);
-
     expect(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(proxiedAddressId, mockPool.address)
     )
       .to.emit(addressesProvider, 'AddressSetAsProxy')
-      .withArgs(proxiedAddressId, oldImplementationAddress, mockPool.address)
       .to.emit(addressesProvider, 'ProxyCreated');
 
+    const proxyAddress = await addressesProvider.getAddress(proxiedAddressId);
     const implAddress = await getProxyImplementation(addressesProvider.address, proxyAddress);
     expect(implAddress).to.be.eq(mockPool.address);
   });
@@ -167,16 +161,14 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const convertibleAddressId = utils.formatBytes32String('CONVERTIBLE_ADDRESS');
 
     const proxyAddress = await addressesProvider.getAddress(convertibleAddressId);
-    const implAddress = await getProxyImplementation(addressesProvider.address, proxyAddress);
-    expect(implAddress).to.be.not.eq(ZERO_ADDRESS);
 
     expect(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(convertibleAddressId, ZERO_ADDRESS)
     )
-      .to.emit(addressesProvider, 'AddressSetAsProxy')
-      .withArgs(convertibleAddressId, proxyAddress, implAddress, ZERO_ADDRESS);
+      .to.emit(addressesProvider, 'AddressSet')
+      .withArgs(convertibleAddressId, proxyAddress, ZERO_ADDRESS);
 
     const proxyAddressAfter = await addressesProvider.getAddress(convertibleAddressId);
     expect(proxyAddressAfter).to.be.eq(ZERO_ADDRESS);
@@ -214,8 +206,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(convertibleAddressId, ZERO_ADDRESS)
     )
-      .to.emit(addressesProvider, 'AddressSetAsProxy')
-      .withArgs(convertibleAddressId, proxyAddress, mockConvertibleAddress, ZERO_ADDRESS);
+      .to.emit(addressesProvider, 'AddressSet')
+      .withArgs(convertibleAddressId, proxyAddress, ZERO_ADDRESS);
 
     // Add address as non proxy
     expect(
