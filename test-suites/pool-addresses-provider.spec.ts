@@ -1,12 +1,28 @@
 import hre from 'hardhat';
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { createRandomAddress } from '../helpers/misc-utils';
+import { createRandomAddress, impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { deployPool, deployMockPool } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import { InitializableImmutableAdminUpgradeabilityProxy } from '../types';
+
+const getProxyImplementation = async (addressesProviderAddress: string, proxyAddress: string) => {
+  // Impersonate PoolAddressesProvider
+  await impersonateAccountsHardhat([addressesProviderAddress]);
+  const addressesProviderSigner = await hre.ethers.getSigner(addressesProviderAddress);
+
+  const proxy = (await hre.ethers.getContractAt(
+    'InitializableImmutableAdminUpgradeabilityProxy',
+    proxyAddress,
+    addressesProviderSigner
+  )) as InitializableImmutableAdminUpgradeabilityProxy;
+
+  const implementationAddress = await proxy.callStatic.implementation();
+  return implementationAddress;
+};
 
 makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
   const { OWNABLE_ONLY_OWNER } = ProtocolErrors;
@@ -60,7 +76,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       .withArgs(proxiedAddressId, mockPool.address, true)
       .to.emit(addressesProvider, 'ProxyCreated');
 
-    const implAddress = await addressesProvider.getProxyImplementation(proxiedAddressId);
+    const proxyAddress = await addressesProvider.getAddress(proxiedAddressId);
+    const implAddress = await getProxyImplementation(addressesProvider.address, proxyAddress);
     expect(implAddress).to.be.eq(mockPool.address);
   });
 
@@ -83,8 +100,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       mockNonProxiedAddress.toLowerCase()
     );
 
-    const impAddress = await addressesProvider.getProxyImplementation(nonProxiedAddressId);
-    expect(impAddress).to.be.eq(ZERO_ADDRESS);
+    const proxyAddress = await addressesProvider.getAddress(nonProxiedAddressId);
+    await expect(getProxyImplementation(addressesProvider.address, proxyAddress)).to.be.reverted;
   });
 
   it('Owner adds a new address with no proxy and turns it into a proxy', async () => {
@@ -108,9 +125,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     let registeredAddress = await addressesProvider.getAddress(convertibleAddressId);
     expect(registeredAddress).to.be.eq(mockConvertibleAddress);
-    expect(await addressesProvider.getProxyImplementation(convertibleAddressId)).to.be.eq(
-      ZERO_ADDRESS
-    );
+    await expect(getProxyImplementation(addressesProvider.address, registeredAddress)).to.be
+      .reverted;
 
     // Unregister address as non proxy
     expect(
@@ -131,9 +147,9 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       .withArgs(convertibleAddressId, mockConvertibleAddress, true)
       .to.emit(addressesProvider, 'ProxyCreated');
 
-    expect(await addressesProvider.getProxyImplementation(convertibleAddressId)).to.be.eq(
-      mockConvertibleAddress
-    );
+    const proxyAddress = await addressesProvider.getAddress(convertibleAddressId);
+    const implAddress = await getProxyImplementation(addressesProvider.address, proxyAddress);
+    expect(implAddress).to.be.eq(mockConvertibleAddress);
   });
 
   it('Unregister a proxy address', async () => {
@@ -144,10 +160,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const convertibleAddressId = utils.formatBytes32String('CONVERTIBLE_ADDRESS');
 
     const proxyAddress = await addressesProvider.getAddress(convertibleAddressId);
-    const implementationAddress = await addressesProvider.getProxyImplementation(
-      convertibleAddressId
-    );
-    expect(implementationAddress).to.be.not.eq(ZERO_ADDRESS);
+    const implAddress = await getProxyImplementation(addressesProvider.address, proxyAddress);
+    expect(implAddress).to.be.not.eq(ZERO_ADDRESS);
 
     expect(
       await addressesProvider
@@ -160,11 +174,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const proxyAddressAfter = await addressesProvider.getAddress(convertibleAddressId);
     expect(proxyAddressAfter).to.be.eq(ZERO_ADDRESS);
     expect(proxyAddressAfter).to.be.not.eq(proxyAddress);
-    const implementationAddressAfter = await addressesProvider.getProxyImplementation(
-      convertibleAddressId
-    );
-    expect(implementationAddressAfter).to.be.eq(ZERO_ADDRESS);
-    expect(implementationAddressAfter).to.be.not.eq(implementationAddress);
+    await expect(getProxyImplementation(addressesProvider.address, proxyAddressAfter)).to.be
+      .reverted;
   });
 
   it('Owner adds a new address with proxy and turns it into a no proxy', async () => {
@@ -188,10 +199,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       .to.emit(addressesProvider, 'ProxyCreated');
 
     const proxyAddress = await addressesProvider.getAddress(convertibleAddressId);
-    const implementationAddress = await addressesProvider.getProxyImplementation(
-      convertibleAddressId
-    );
-    expect(implementationAddress).to.be.eq(mockConvertibleAddress);
+    const implAddress = await getProxyImplementation(addressesProvider.address, proxyAddress);
+    expect(implAddress).to.be.eq(mockConvertibleAddress);
 
     // Unregister address as proxy
     expect(
@@ -214,9 +223,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const registeredAddressAfter = await addressesProvider.getAddress(convertibleAddressId);
     expect(registeredAddressAfter).to.be.not.eq(proxyAddress);
     expect(registeredAddressAfter).to.be.eq(mockConvertibleAddress);
-    expect(await addressesProvider.getProxyImplementation(convertibleAddressId)).to.be.eq(
-      ZERO_ADDRESS
-    );
+    await expect(getProxyImplementation(addressesProvider.address, registeredAddressAfter)).to.be
+      .reverted;
   });
 
   it('Unregister a no proxy address', async () => {
@@ -227,10 +235,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const convertibleAddressId = utils.formatBytes32String('CONVERTIBLE_ADDRESS2');
 
     const registeredAddress = await addressesProvider.getAddress(convertibleAddressId);
-    const implementationAddress = await addressesProvider.getProxyImplementation(
-      convertibleAddressId
-    );
-    expect(implementationAddress).to.be.eq(ZERO_ADDRESS);
+    await expect(getProxyImplementation(addressesProvider.address, registeredAddress)).to.be
+      .reverted;
 
     expect(
       await addressesProvider
@@ -243,10 +249,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const registeredAddressAfter = await addressesProvider.getAddress(convertibleAddressId);
     expect(registeredAddressAfter).to.be.eq(ZERO_ADDRESS);
     expect(registeredAddressAfter).to.be.not.eq(registeredAddress);
-    const implementationAddressAfter = await addressesProvider.getProxyImplementation(
-      convertibleAddressId
-    );
-    expect(implementationAddressAfter).to.be.eq(ZERO_ADDRESS);
+    await expect(getProxyImplementation(addressesProvider.address, registeredAddress)).to.be
+      .reverted;
   });
 
   it('Owner updates the implementation of a proxy which is already initialized', async () => {
@@ -262,7 +266,12 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(poolAddress).to.be.not.eq(ZERO_ADDRESS);
 
     const poolAddressId = utils.formatBytes32String('POOL');
-    const implementationAddress = await addressesProvider.getProxyImplementation(poolAddressId);
+    const proxyAddress = await addressesProvider.getAddress(poolAddressId);
+    const implementationAddress = await getProxyImplementation(
+      addressesProvider.address,
+      proxyAddress
+    );
+
     // Update the Pool proxy
     expect(
       await addressesProvider
@@ -315,8 +324,10 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(await addressesProvider.getPoolConfigurator(), configurator.address);
 
     const poolConfiguratorAddressId = utils.formatBytes32String('POOL_CONFIGURATOR');
-    const implementationAddress = await addressesProvider.getProxyImplementation(
-      poolConfiguratorAddressId
+    const proxyAddress = await addressesProvider.getAddress(poolConfiguratorAddressId);
+    const implementationAddress = await getProxyImplementation(
+      addressesProvider.address,
+      proxyAddress
     );
 
     expect(
@@ -328,12 +339,12 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       .withArgs(implementationAddress, newPoolConfiguratorImpl);
 
     expect(await addressesProvider.getPoolConfigurator()).to.be.eq(configurator.address);
-    expect(await addressesProvider.getProxyImplementation(poolConfiguratorAddressId)).to.be.not.eq(
-      implementationAddress
+    const implementationAddressAfter = await getProxyImplementation(
+      addressesProvider.address,
+      proxyAddress
     );
-    expect(await addressesProvider.getProxyImplementation(poolConfiguratorAddressId)).to.be.eq(
-      newPoolConfiguratorImpl
-    );
+    expect(implementationAddressAfter).to.be.not.eq(implementationAddress);
+    expect(implementationAddressAfter).to.be.eq(newPoolConfiguratorImpl);
 
     await evmRevert(snapId);
   });

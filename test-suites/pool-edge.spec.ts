@@ -16,6 +16,7 @@ import {
   VariableDebtToken__factory,
   AToken__factory,
   Pool__factory,
+  InitializableImmutableAdminUpgradeabilityProxy,
 } from '../types';
 
 declare var hre: HardhatRuntimeEnvironment;
@@ -324,7 +325,18 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
-    const oldPoolImpl = await addressesProvider.getProxyImplementation(POOL_ID);
+    // Impersonate PoolAddressesProvider
+    await impersonateAccountsHardhat([addressesProvider.address]);
+    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
+
+    const poolProxyAddress = await addressesProvider.getPool();
+    const poolProxy = (await hre.ethers.getContractAt(
+      'InitializableImmutableAdminUpgradeabilityProxy',
+      poolProxyAddress,
+      addressesProviderSigner
+    )) as InitializableImmutableAdminUpgradeabilityProxy;
+
+    const oldPoolImpl = await poolProxy.callStatic.implementation();
 
     // Upgrade the Pool
     expect(
@@ -492,7 +504,18 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
-    const implementationAddress = await addressesProvider.getProxyImplementation(POOL_ID);
+    // Impersonate PoolAddressesProvider
+    await impersonateAccountsHardhat([addressesProvider.address]);
+    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
+
+    const proxyAddress = await addressesProvider.getAddress(POOL_ID);
+    const proxy = (await hre.ethers.getContractAt(
+      'InitializableImmutableAdminUpgradeabilityProxy',
+      proxyAddress,
+      addressesProviderSigner
+    )) as InitializableImmutableAdminUpgradeabilityProxy;
+
+    const implementationAddress = await proxy.callStatic.implementation();
 
     // Upgrade the Pool
     expect(

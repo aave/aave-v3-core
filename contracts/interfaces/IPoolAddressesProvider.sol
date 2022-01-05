@@ -106,13 +106,6 @@ interface IPoolAddressesProvider {
   function getAddress(bytes32 id) external view returns (address);
 
   /**
-   * @notice Returns the implementation address of the proxy contract.
-   * @param id The id
-   * @return The implementation address of the proxy, or ZERO address if it is not a proxy
-   */
-  function getProxyImplementation(bytes32 id) external view returns (address);
-
-  /**
    * @notice General function to update the implementation of a proxy registered with
    * certain `id`. If there is no proxy registered, it will instantiate one and
    * set as implementation the `impl`.
