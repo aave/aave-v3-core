@@ -161,19 +161,16 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    **/
   function _updateImpl(bytes32 id, address newAddress) internal {
     address proxyAddress = _addresses[id];
-
-    InitializableImmutableAdminUpgradeabilityProxy proxy = InitializableImmutableAdminUpgradeabilityProxy(
-        payable(proxyAddress)
-      );
+    InitializableImmutableAdminUpgradeabilityProxy proxy;
     bytes memory params = abi.encodeWithSignature('initialize(address)', address(this));
 
     if (proxyAddress == address(0)) {
       proxy = new InitializableImmutableAdminUpgradeabilityProxy(address(this));
       _addresses[id] = proxyAddress = address(proxy);
       proxy.initialize(newAddress, params);
-
       emit ProxyCreated(id, proxyAddress, newAddress);
     } else {
+      proxy = InitializableImmutableAdminUpgradeabilityProxy(payable(proxyAddress));
       proxy.upgradeToAndCall(newAddress, params);
     }
   }
