@@ -89,4 +89,7 @@ library Errors {
   string public constant INVALID_SIGNATURE = '80'; // 'Invalid signature'
   string public constant OPERATION_NOT_SUPPORTED = '81'; // 'Operation not supported'
   string public constant DEBT_CEILING_NOT_ZERO = '82'; // 'Debt ceiling is not zero'
+  string public constant ASSET_NOT_LISTED = '83'; // 'Asset is not listed'
+  string public constant INVALID_OPTIMAL_UTILIZATION_RATE = '84'; // 'Invalid optimal utilization ratio'
+  string public constant INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85'; // 'Invalid optimal stable to total debt ratio'
 }

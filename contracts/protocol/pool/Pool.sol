@@ -565,14 +565,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       }
     }
 
-    if (droppedReservesCount == 0) return reserves;
-
-    address[] memory undroppedReserves = new address[](reserveListCount - droppedReservesCount);
-    for (uint256 i = 0; i < reserveListCount - droppedReservesCount; i++) {
-      undroppedReserves[i] = reserves[i];
+    // Reduces the length of the reserves array by `droppedReservesCount`
+    assembly {
+      mstore(reserves, sub(reserveListCount, droppedReservesCount))
     }
-
-    return undroppedReserves;
+    return reserves;
   }
 
   /// @inheritdoc IPool
@@ -651,7 +648,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function dropReserve(address asset) external override onlyPoolConfigurator {
     DataTypes.ReserveData storage reserve = _reserves[asset];
-    ValidationLogic.validateDropReserve(reserve);
+    ValidationLogic.validateDropReserve(_reservesList, reserve, asset);
     _reservesList[_reserves[asset].id] = address(0);
     delete _reserves[asset];
   }
@@ -662,6 +659,8 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
@@ -671,7 +670,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     override
     onlyPoolConfigurator
   {
-    _reserves[asset].configuration.data = configuration.data;
+    require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
+    _reserves[asset].configuration = configuration;
   }
 
   /// @inheritdoc IPool
