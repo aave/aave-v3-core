@@ -476,11 +476,8 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     const balanceAfter = await aDai.balanceOf(user1.address);
 
-    const debtPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS); //usdc.address);
-    const collateralPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS); // dai.address);
-
-    // These two prices above need to use the oracle
-    // We also need a separate test then where we are liquidating the non-emode asset
+    const debtPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
+    const collateralPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
 
     const expectedCollateralLiquidated = debtPrice
       .mul(toBorrow.div(2))
@@ -607,7 +604,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     const balanceAfter = await aWETH.balanceOf(user1.address);
 
-    const debtPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS); // usdc.address);
+    const debtPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
     const collateralPrice = await oracle.getAssetPrice(weth.address);
 
     const wethConfig = await helpersContract.getReserveConfigurationData(weth.address);
