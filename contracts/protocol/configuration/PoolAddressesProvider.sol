@@ -50,7 +50,6 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   /// @inheritdoc IPoolAddressesProvider
   function setAddress(bytes32 id, address newAddress) external override onlyOwner {
     _addresses[id] = newAddress;
-
     emit AddressSet(id, newAddress, false);
   }
 
@@ -158,17 +157,16 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
    * @param newAddress The address of the new implementation
    **/
   function _updateImpl(bytes32 id, address newAddress) internal {
-    address payable payableProxyAddress = payable(_addresses[id]);
+    address proxyAddress = _addresses[id];
 
     InitializableImmutableAdminUpgradeabilityProxy proxy = InitializableImmutableAdminUpgradeabilityProxy(
-        payableProxyAddress
+        payable(proxyAddress)
       );
     bytes memory params = abi.encodeWithSignature('initialize(address)', address(this));
 
-    if (payableProxyAddress == address(0)) {
+    if (proxyAddress == address(0)) {
       proxy = new InitializableImmutableAdminUpgradeabilityProxy(address(this));
-      address proxyAddress = address(proxy);
-      _addresses[id] = proxyAddress;
+      _addresses[id] = proxyAddress = address(proxy);
       proxy.initialize(newAddress, params);
 
       emit ProxyCreated(id, proxyAddress);
