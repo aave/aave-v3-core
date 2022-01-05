@@ -92,8 +92,8 @@ interface IPoolAddressesProvider {
    */
   event AddressSetAsProxy(
     bytes32 indexed id,
-    address proxyAddress,
-    address indexed oldImplementationAddress,
+    address indexed proxyAddress,
+    address oldImplementationAddress,
     address indexed newImplementationAddress
   );
 
