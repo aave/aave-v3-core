@@ -67,16 +67,21 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const mockPool = await deployPool();
     const proxiedAddressId = utils.formatBytes32String('RANDOM_PROXIED');
 
+    const proxyAddress = await addressesProvider.getAddress(proxiedAddressId);
+    const oldImplementationAddress =
+      proxyAddress == ZERO_ADDRESS
+        ? ZERO_ADDRESS
+        : await getProxyImplementation(addressesProvider.address, proxyAddress);
+
     expect(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(proxiedAddressId, mockPool.address)
     )
-      .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(proxiedAddressId, mockPool.address, true)
+      .to.emit(addressesProvider, 'AddressSetAsProxy')
+      .withArgs(proxiedAddressId, oldImplementationAddress, mockPool.address)
       .to.emit(addressesProvider, 'ProxyCreated');
 
-    const proxyAddress = await addressesProvider.getAddress(proxiedAddressId);
     const implAddress = await getProxyImplementation(addressesProvider.address, proxyAddress);
     expect(implAddress).to.be.eq(mockPool.address);
   });
@@ -88,13 +93,14 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const mockNonProxiedAddress = createRandomAddress();
     const nonProxiedAddressId = utils.formatBytes32String('RANDOM_NON_PROXIED');
 
+    const oldAddress = await addressesProvider.getAddress(nonProxiedAddressId);
     expect(
       await addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(nonProxiedAddressId, mockNonProxiedAddress)
     )
       .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(nonProxiedAddressId, mockNonProxiedAddress, false);
+      .withArgs(nonProxiedAddressId, oldAddress, mockNonProxiedAddress);
 
     expect((await addressesProvider.getAddress(nonProxiedAddressId)).toLowerCase()).to.be.eq(
       mockNonProxiedAddress.toLowerCase()
@@ -114,6 +120,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     expect(await addressesProvider.getAddress(convertibleAddressId)).to.be.eq(ZERO_ADDRESS);
 
+    const oldNonProxiedAddress = await addressesProvider.getAddress(convertibleAddressId);
+
     // Add address as non proxy
     expect(
       await addressesProvider
@@ -121,7 +129,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .setAddress(convertibleAddressId, mockConvertibleAddress)
     )
       .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, mockConvertibleAddress, false);
+      .withArgs(convertibleAddressId, oldNonProxiedAddress, mockConvertibleAddress);
 
     let registeredAddress = await addressesProvider.getAddress(convertibleAddressId);
     expect(registeredAddress).to.be.eq(mockConvertibleAddress);
@@ -135,7 +143,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .setAddress(convertibleAddressId, ZERO_ADDRESS)
     )
       .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, ZERO_ADDRESS, false);
+      .withArgs(convertibleAddressId, mockConvertibleAddress, ZERO_ADDRESS);
 
     // Add address as proxy
     expect(
@@ -143,8 +151,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(convertibleAddressId, mockConvertibleAddress)
     )
-      .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, mockConvertibleAddress, true)
+      .to.emit(addressesProvider, 'AddressSetAsProxy')
       .to.emit(addressesProvider, 'ProxyCreated');
 
     const proxyAddress = await addressesProvider.getAddress(convertibleAddressId);
@@ -168,8 +175,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(convertibleAddressId, ZERO_ADDRESS)
     )
-      .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, ZERO_ADDRESS, false);
+      .to.emit(addressesProvider, 'AddressSetAsProxy')
+      .withArgs(convertibleAddressId, proxyAddress, implAddress, ZERO_ADDRESS);
 
     const proxyAddressAfter = await addressesProvider.getAddress(convertibleAddressId);
     expect(proxyAddressAfter).to.be.eq(ZERO_ADDRESS);
@@ -194,8 +201,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(convertibleAddressId, mockConvertibleAddress)
     )
-      .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, mockConvertibleAddress, true)
+      .to.emit(addressesProvider, 'AddressSetAsProxy')
       .to.emit(addressesProvider, 'ProxyCreated');
 
     const proxyAddress = await addressesProvider.getAddress(convertibleAddressId);
@@ -208,8 +214,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(convertibleAddressId, ZERO_ADDRESS)
     )
-      .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, ZERO_ADDRESS, false);
+      .to.emit(addressesProvider, 'AddressSetAsProxy')
+      .withArgs(convertibleAddressId, proxyAddress, mockConvertibleAddress, ZERO_ADDRESS);
 
     // Add address as non proxy
     expect(
@@ -218,7 +224,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .setAddress(convertibleAddressId, mockConvertibleAddress)
     )
       .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, mockConvertibleAddress, false);
+      .withArgs(convertibleAddressId, ZERO_ADDRESS, mockConvertibleAddress);
 
     const registeredAddressAfter = await addressesProvider.getAddress(convertibleAddressId);
     expect(registeredAddressAfter).to.be.not.eq(proxyAddress);
@@ -244,7 +250,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
         .setAddress(convertibleAddressId, ZERO_ADDRESS)
     )
       .to.emit(addressesProvider, 'AddressSet')
-      .withArgs(convertibleAddressId, ZERO_ADDRESS, false);
+      .withArgs(convertibleAddressId, registeredAddress, ZERO_ADDRESS);
 
     const registeredAddressAfter = await addressesProvider.getAddress(convertibleAddressId);
     expect(registeredAddressAfter).to.be.eq(ZERO_ADDRESS);
