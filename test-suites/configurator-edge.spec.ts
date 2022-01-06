@@ -118,30 +118,6 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to update flashloan premium total < FLASHLOAN_PREMIUM_TO_PROTOCOL (revert expected)', async () => {
-    const { pool, configurator } = testEnv;
-
-    const oldFlashloanPremiumTotal = await pool.FLASHLOAN_PREMIUM_TOTAL();
-    const oldFlashloanPremiumToProtocol = await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
-
-    const newPremiumToProtocol = 40;
-    const newPremiumTotal = 100;
-    const wrongPremiumTotal = 39;
-
-    // Update FLASHLOAN_PREMIUM_TO_PROTOCOL to non-zero
-    expect(await configurator.updateFlashloanPremiumTotal(newPremiumTotal))
-      .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
-      .withArgs(oldFlashloanPremiumTotal, newPremiumTotal);
-
-    expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
-      .to.emit(configurator, 'FlashloanPremiumToProtocolUpdated')
-      .withArgs(oldFlashloanPremiumToProtocol, newPremiumToProtocol);
-
-    await expect(configurator.updateFlashloanPremiumTotal(wrongPremiumTotal)).to.be.revertedWith(
-      FLASHLOAN_PREMIUMS_MISMATCH
-    );
-  });
-
   it('Tries to update flashloan premium to protocol > PERCENTAGE_FACTOR (revert expected)', async () => {
     const { configurator } = testEnv;
 
@@ -149,15 +125,6 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     await expect(
       configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
     ).to.be.revertedWith(FLASHLOAN_PREMIUM_INVALID);
-  });
-
-  it('Tries to update flashloan premium to protocol > FLASHLOAN_PREMIUM_TOTAL (revert expected)', async () => {
-    const { configurator } = testEnv;
-
-    const newPremiumToProtocol = 101;
-    await expect(
-      configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
-    ).to.be.revertedWith(FLASHLOAN_PREMIUMS_MISMATCH);
   });
 
   it('Tries to update borrowCap > MAX_BORROW_CAP (revert expected)', async () => {
