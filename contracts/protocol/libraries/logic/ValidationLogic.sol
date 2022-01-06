@@ -37,13 +37,11 @@ library ValidationLogic {
 
   // Factor to apply to "only-variable-debt" liquidity rate to get threshold for rebalancing, expressed in bps
   // A factor of 9000 results in 90%
-  uint256 public constant REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR = 9000;
+  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 9000;
 
   // Minimum health factor allowed under any circumstance
   // A value of 0.95e18 results in 0.95
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
-
-  // Minimum health factor to consider a user position healthy
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   /**
@@ -420,7 +418,7 @@ library ValidationLogic {
 
     require(
       reserveCache.currLiquidityRate <=
-        liquidityRateVariableDebtOnly.percentMul(REBALANCE_UP_MAXIMUM_LIQUIDITY_RATE_FACTOR),
+        liquidityRateVariableDebtOnly.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
       Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
   }
