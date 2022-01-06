@@ -16,6 +16,7 @@ import {
   VariableDebtToken__factory,
   AToken__factory,
   Pool__factory,
+  InitializableImmutableAdminUpgradeabilityProxy,
 } from '../types';
 
 declare var hre: HardhatRuntimeEnvironment;
@@ -36,6 +37,8 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
   const MAX_NUMBER_RESERVES = '128';
+
+  const POOL_ID = utils.formatBytes32String('POOL');
 
   let snap: string;
 
@@ -360,12 +363,25 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
+    // Impersonate PoolAddressesProvider
+    await impersonateAccountsHardhat([addressesProvider.address]);
+    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
+
+    const poolProxyAddress = await addressesProvider.getPool();
+    const poolProxy = (await hre.ethers.getContractAt(
+      'InitializableImmutableAdminUpgradeabilityProxy',
+      poolProxyAddress,
+      addressesProviderSigner
+    )) as InitializableImmutableAdminUpgradeabilityProxy;
+
+    const oldPoolImpl = await poolProxy.callStatic.implementation();
+
     // Upgrade the Pool
     expect(
       await addressesProvider.connect(poolAdmin.signer).setPoolImpl(NEW_POOL_IMPL_ARTIFACT.address)
     )
       .to.emit(addressesProvider, 'PoolUpdated')
-      .withArgs(NEW_POOL_IMPL_ARTIFACT.address);
+      .withArgs(oldPoolImpl, NEW_POOL_IMPL_ARTIFACT.address);
 
     // Get the Pool instance
     const mockPoolAddress = await addressesProvider.getPool();
@@ -526,12 +542,25 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
+    // Impersonate PoolAddressesProvider
+    await impersonateAccountsHardhat([addressesProvider.address]);
+    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
+
+    const proxyAddress = await addressesProvider.getAddress(POOL_ID);
+    const proxy = (await hre.ethers.getContractAt(
+      'InitializableImmutableAdminUpgradeabilityProxy',
+      proxyAddress,
+      addressesProviderSigner
+    )) as InitializableImmutableAdminUpgradeabilityProxy;
+
+    const implementationAddress = await proxy.callStatic.implementation();
+
     // Upgrade the Pool
     expect(
       await addressesProvider.connect(poolAdmin.signer).setPoolImpl(NEW_POOL_IMPL_ARTIFACT.address)
     )
       .to.emit(addressesProvider, 'PoolUpdated')
-      .withArgs(NEW_POOL_IMPL_ARTIFACT.address);
+      .withArgs(implementationAddress, NEW_POOL_IMPL_ARTIFACT.address);
 
     // Get the Pool instance
     const mockPoolAddress = await addressesProvider.getPool();

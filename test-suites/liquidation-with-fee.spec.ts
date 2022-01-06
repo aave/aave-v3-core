@@ -29,6 +29,13 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
   it('Sets the WETH protocol liquidation fee to 1000 (10.00%)', async () => {
     const { configurator, weth, aave, helpersContract } = testEnv;
 
+    const oldWethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      weth.address
+    );
+    const oldAaveLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      aave.address
+    );
+
     const wethLiquidationProtocolFeeInput = 1000;
     const aaveLiquidationProtocolFeeInput = 500;
 
@@ -36,12 +43,12 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       await configurator.setLiquidationProtocolFee(weth.address, wethLiquidationProtocolFeeInput)
     )
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(weth.address, wethLiquidationProtocolFeeInput);
+      .withArgs(weth.address, oldWethLiquidationProtocolFee, wethLiquidationProtocolFeeInput);
     expect(
       await configurator.setLiquidationProtocolFee(aave.address, aaveLiquidationProtocolFeeInput)
     )
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(aave.address, aaveLiquidationProtocolFeeInput);
+      .withArgs(aave.address, oldAaveLiquidationProtocolFee, aaveLiquidationProtocolFeeInput);
 
     const wethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
       weth.address
@@ -643,9 +650,13 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       configurator,
     } = testEnv;
 
+    const oldAaveLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      aave.address
+    );
+
     expect(await configurator.setLiquidationProtocolFee(aave.address, 0))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(aave.address, 0);
+      .withArgs(aave.address, oldAaveLiquidationProtocolFee, 0);
 
     //mints AAVE to borrower
     await aave

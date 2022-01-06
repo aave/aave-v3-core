@@ -97,7 +97,7 @@ library FlashLoanLogic {
     (vars.flashloanPremiumTotal, vars.flashloanPremiumToProtocol) = params.isAuthorizedFlashBorrower
       ? (0, 0)
       : (params.flashLoanPremiumTotal, params.flashLoanPremiumToProtocol);
- 
+
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.currentAmount = params.amounts[vars.i];
       vars.aTokenAddresses[vars.i] = reserves[params.assets[vars.i]].aTokenAddress;

@@ -9,87 +9,130 @@ pragma solidity 0.8.10;
 interface IPoolAddressesProvider {
   /**
    * @dev Emitted when the market identifier is updated.
+   * @param oldMarketId The old id of the market
    * @param newMarketId The new id of the market
    */
-  event MarketIdSet(string newMarketId);
+  event MarketIdSet(string indexed oldMarketId, string indexed newMarketId);
 
   /**
    * @dev Emitted when the pool is updated.
+   * @param oldAddress The old address of the Pool
    * @param newAddress The new address of the Pool
    */
-  event PoolUpdated(address indexed newAddress);
+  event PoolUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @dev Emitted when the pool configurator is updated.
+   * @param oldAddress The old address of the PoolConfigurator
    * @param newAddress The new address of the PoolConfigurator
    */
-  event PoolConfiguratorUpdated(address indexed newAddress);
+  event PoolConfiguratorUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @dev Emitted when the price oracle is updated.
+   * @param oldAddress The old address of the PriceOracle
    * @param newAddress The new address of the PriceOracle
    */
-  event PriceOracleUpdated(address indexed newAddress);
+  event PriceOracleUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @dev Emitted when the ACL manager is updated.
+   * @param oldAddress The old address of the ACLManager
    * @param newAddress The new address of the ACLManager
    */
-  event ACLManagerUpdated(address indexed newAddress);
+  event ACLManagerUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @dev Emitted when the ACL admin is updated.
+   * @param oldAddress The old address of the ACLAdmin
    * @param newAddress The new address of the ACLAdmin
    */
-  event ACLAdminUpdated(address indexed newAddress);
+  event ACLAdminUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @dev Emitted when the price oracle sentinel is updated.
+   * @param oldAddress The old address of the PriceOracleSentinel
    * @param newAddress The new address of the PriceOracleSentinel
    */
-  event PriceOracleSentinelUpdated(address indexed newAddress);
+  event PriceOracleSentinelUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
    * @dev Emitted when the pool data provider is updated.
+   * @param oldAddress The old address of the PoolDataProvider
    * @param newAddress The new address of the PoolDataProvider
    */
-  event PoolDataProviderUpdated(address indexed newAddress);
+  event PoolDataProviderUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @dev Emitted when the bridge access control is updated.
-   * @param newAddress The new address of the BridgeAccessControl
-   */
-  event BridgeAccessControlUpdated(address indexed newAddress);
-
-  /**
-   * @dev Emitted when a new proxy is created
+   * @dev Emitted when a new proxy is created.
    * @param id The identifier of the proxy
    * @param proxyAddress The address of the created proxy contract
-   */
-  event ProxyCreated(bytes32 id, address indexed proxyAddress);
-
-  /**
-   * @dev Emitted when a new contract address if registered
-   * @param id The identifier of the contract
    * @param implementationAddress The address of the implementation contract
-   * @param hasProxy True if the address is registered behind a proxy, false otherwise
    */
-  event AddressSet(bytes32 id, address indexed implementationAddress, bool hasProxy);
+  event ProxyCreated(
+    bytes32 indexed id,
+    address indexed proxyAddress,
+    address indexed implementationAddress
+  );
 
   /**
-   * @notice Returns the id of the Aave market to which this contract points to
+   * @dev Emitted when a new non-proxied contract address is registered.
+   * @param id The identifier of the contract
+   * @param oldAddress The address of the old contract
+   * @param newAddress The address of the new contract
+   */
+  event AddressSet(bytes32 indexed id, address indexed oldAddress, address indexed newAddress);
+
+  /**
+   * @dev Emitted when the implementation of the proxy registered with id is updated
+   * @param id The identifier of the contract
+   * @param proxyAddress The address of the proxy contract
+   * @param oldImplementationAddress The address of the old implementation contract
+   * @param newImplementationAddress The address of the new implementation contract
+   */
+  event AddressSetAsProxy(
+    bytes32 indexed id,
+    address indexed proxyAddress,
+    address oldImplementationAddress,
+    address indexed newImplementationAddress
+  );
+
+  /**
+   * @notice Returns the id of the Aave market to which this contract points to.
    * @return The market id
    **/
   function getMarketId() external view returns (string memory);
 
   /**
-   * @notice Allows to set the market which this PoolAddressesProvider represents
-   * @param marketId The market id
+   * @notice Associates an id with a specific PoolAddressesProvider.
+   * @dev This can be used to create an onchain registry of PoolAddressesProviders to
+   * identify and validate multiple Aave markets.
+   * @param newMarketId The market id
    */
-  function setMarketId(string calldata marketId) external;
+  function setMarketId(string calldata newMarketId) external;
 
   /**
-   * @notice Sets an address for an id replacing the address saved in the addresses map
+   * @notice Returns an address by its identifier.
+   * @dev The returned address might be an EOA or a contract, potentially proxied
+   * @dev It returns ZERO if there is no registered address with the given id
+   * @param id The id
+   * @return The address of the registered for the specified id
+   */
+  function getAddress(bytes32 id) external view returns (address);
+
+  /**
+   * @notice General function to update the implementation of a proxy registered with
+   * certain `id`. If there is no proxy registered, it will instantiate one and
+   * set as implementation the `newImplementationAddress`.
+   * @dev IMPORTANT Use this function carefully, only for ids that don't have an explicit
+   * setter function, in order to avoid unexpected consequences
+   * @param id The id
+   * @param newImplementationAddress The address of the new implementation
+   */
+  function setAddressAsProxy(bytes32 id, address newImplementationAddress) external;
+
+  /**
+   * @notice Sets an address for an id replacing the address saved in the addresses map.
    * @dev IMPORTANT Use this function carefully, as it will do a hard replacement
    * @param id The id
    * @param newAddress The address to set
@@ -97,105 +140,88 @@ interface IPoolAddressesProvider {
   function setAddress(bytes32 id, address newAddress) external;
 
   /**
-   * @notice General function to update the implementation of a proxy registered with
-   * certain `id`. If there is no proxy registered, it will instantiate one and
-   * set as implementation the `impl`
-   * @dev IMPORTANT Use this function carefully, only for ids that don't have an explicit
-   * setter function, in order to avoid unexpected consequences
-   * @param id The id
-   * @param impl The address of the new implementation
-   */
-  function setAddressAsProxy(bytes32 id, address impl) external;
-
-  /**
-   * @notice Returns an address by id
-   * @return The address
-   */
-  function getAddress(bytes32 id) external view returns (address);
-
-  /**
-   * @notice Returns the address of the Pool proxy
+   * @notice Returns the address of the Pool proxy.
    * @return The Pool proxy address
    **/
   function getPool() external view returns (address);
 
   /**
-   * @notice Updates the implementation of the Pool, or creates the proxy
-   * setting the new `pool` implementation on the first time calling it
-   * @param pool The new Pool implementation
+   * @notice Updates the implementation of the Pool, or creates a proxy
+   * setting the new `pool` implementation when the function is called for the first time.
+   * @param newPoolImpl The new Pool implementation
    **/
-  function setPoolImpl(address pool) external;
+  function setPoolImpl(address newPoolImpl) external;
 
   /**
-   * @notice Returns the address of the PoolConfigurator proxy
+   * @notice Returns the address of the PoolConfigurator proxy.
    * @return The PoolConfigurator proxy address
    **/
   function getPoolConfigurator() external view returns (address);
 
   /**
-   * @notice Updates the implementation of the PoolConfigurator, or creates the proxy
-   * setting the new `configurator` implementation on the first time calling it
-   * @param configurator The new PoolConfigurator implementation
+   * @notice Updates the implementation of the PoolConfigurator, or creates a proxy
+   * setting the new `PoolConfigurator` implementation when the function is called for the first time.
+   * @param newPoolConfiguratorImpl The new PoolConfigurator implementation
    **/
-  function setPoolConfiguratorImpl(address configurator) external;
+  function setPoolConfiguratorImpl(address newPoolConfiguratorImpl) external;
 
   /**
-   * @notice Returns the address of the price oracle
+   * @notice Returns the address of the price oracle.
    * @return The address of the PriceOracle
    */
   function getPriceOracle() external view returns (address);
 
   /**
-   * @notice Updates the address of the price oracle
-   * @param priceOracle The address of the new PriceOracle
+   * @notice Updates the address of the price oracle.
+   * @param newPriceOracle The address of the new PriceOracle
    */
-  function setPriceOracle(address priceOracle) external;
+  function setPriceOracle(address newPriceOracle) external;
 
   /**
-   * @notice Returns the address of the ACL manager proxy
-   * @return The ACLManager proxy address
+   * @notice Returns the address of the ACL manager.
+   * @return The address of the ACLManager
    */
   function getACLManager() external view returns (address);
 
   /**
-   * @notice Updates the address of the ACL manager
-   * @param aclManager The address of the new ACLManager
+   * @notice Updates the address of the ACL manager.
+   * @param newAclManager The address of the new ACLManager
    **/
-  function setACLManager(address aclManager) external;
+  function setACLManager(address newAclManager) external;
 
   /**
-   * @notice Returns the address of the ACL admin
+   * @notice Returns the address of the ACL admin.
    * @return The address of the ACL admin
    */
   function getACLAdmin() external view returns (address);
 
   /**
-   * @notice Updates the address of the ACL admin
-   * @param aclAdmin The address of the new ACL admin
+   * @notice Updates the address of the ACL admin.
+   * @param newAclAdmin The address of the new ACL admin
    */
-  function setACLAdmin(address aclAdmin) external;
+  function setACLAdmin(address newAclAdmin) external;
 
   /**
-   * @notice Returns the address of the PriceOracleSentinel
-   * @return The PriceOracleSentinel address
+   * @notice Returns the address of the price oracle sentinel.
+   * @return The address of the PriceOracleSentinel
    */
   function getPriceOracleSentinel() external view returns (address);
 
   /**
-   * @notice Updates the address of the PriceOracleSentinel
-   * @param oracleSentinel The address of the new PriceOracleSentinel
+   * @notice Updates the address of the price oracle sentinel.
+   * @param newPriceOracleSentinel The address of the new PriceOracleSentinel
    **/
-  function setPriceOracleSentinel(address oracleSentinel) external;
+  function setPriceOracleSentinel(address newPriceOracleSentinel) external;
 
   /**
-   * @notice Updates the address of the DataProvider
-   * @param dataProvider The address of the new DataProvider
-   **/
-  function setPoolDataProvider(address dataProvider) external;
-
-  /**
-   * @notice Returns the address of the DataProvider
-   * @return The DataProvider address
+   * @notice Returns the address of the data provider.
+   * @return The address of the DataProvider
    */
   function getPoolDataProvider() external view returns (address);
+
+  /**
+   * @notice Updates the address of the data provider.
+   * @param newDataProvider The address of the new DataProvider
+   **/
+  function setPoolDataProvider(address newDataProvider) external;
 }
