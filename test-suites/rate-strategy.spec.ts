@@ -367,6 +367,11 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(await strategyInstance.getStableRateSlope2()).to.be.eq(
       rateStrategyStableTwo.stableRateSlope2
     );
+    expect(await strategyInstance.getMaxVariableBorrowRate()).to.be.eq(
+      BigNumber.from(rateStrategyStableTwo.baseVariableBorrowRate)
+        .add(BigNumber.from(rateStrategyStableTwo.variableRateSlope1))
+        .add(BigNumber.from(rateStrategyStableTwo.variableRateSlope2))
+    );
   });
 
   it('Deploy an interest rate strategy with optimalUtilizationRate out of range (expect revert)', async () => {
