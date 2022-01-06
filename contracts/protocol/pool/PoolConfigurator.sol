@@ -280,12 +280,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     override
     onlyRiskOrPoolAdmins
   {
+    require(fee <= PercentageMath.PERCENTAGE_FACTOR, Errors.INVALID_LIQUIDATION_PROTOCOL_FEE);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
-
     currentConfig.setLiquidationProtocolFee(fee);
-
     _pool.setConfiguration(asset, currentConfig);
-
     emit LiquidationProtocolFeeChanged(asset, fee);
   }
 
