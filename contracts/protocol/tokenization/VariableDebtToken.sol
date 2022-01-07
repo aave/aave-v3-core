@@ -11,7 +11,7 @@ import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
 import {IScaledBalanceToken} from '../../interfaces/IScaledBalanceToken.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
-import {IncentivizedERC20} from './IncentivizedERC20.sol';
+import {IncentivizedERC20} from './base/IncentivizedERC20.sol';
 import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**

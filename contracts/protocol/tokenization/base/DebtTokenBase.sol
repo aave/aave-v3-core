@@ -5,7 +5,7 @@ import {Errors} from '../../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
-import {IncentivizedERC20} from '../IncentivizedERC20.sol';
+import {IncentivizedERC20} from '../base/IncentivizedERC20.sol';
 
 /**
  * @title DebtTokenBase
