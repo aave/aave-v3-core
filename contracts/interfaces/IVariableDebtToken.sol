@@ -11,7 +11,7 @@ import {IInitializableDebtToken} from './IInitializableDebtToken.sol';
  **/
 interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
   /**
-   * @notice Emitted after the mint action
+   * @dev Emitted after the mint action
    * @param from The address performing the mint
    * @param onBehalfOf The address of the user on which behalf minting has been performed
    * @param value The amount to be minted (user entered amount + balance increase from interest)
@@ -27,7 +27,7 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
   );
 
   /**
-   * @notice Emitted when variable debt is burnt
+   * @dev Emitted when variable debt is burnt
    * @param user The user which debt has been burned
    * @param amount The amount of debt being burned (user entered amount - balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
@@ -66,4 +66,10 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
     uint256 amount,
     uint256 index
   ) external returns (uint256);
+
+  /**
+   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for variableDebtWETH)
+   * @return The address of the underlying asset
+   **/
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address);
 }

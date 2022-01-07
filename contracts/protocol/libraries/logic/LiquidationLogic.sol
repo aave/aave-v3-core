@@ -46,8 +46,25 @@ library LiquidationLogic {
     bool receiveAToken
   );
 
+  /**
+   * @dev Default percentage of borrower's debt to be repaid in a liquidation.
+   * @dev Percentage applied when the users health factor is above `CLOSE_FACTOR_HF_THRESHOLD`
+   * Expressed in bps, a value of 0.5e4 results in 50.00%
+   */
   uint256 internal constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 5e3;
+
+  /**
+   * @dev Maximum percentage of borrower's debt to be repaid in a liquidation
+   * @dev Percentage applied when the users health factor is below `CLOSE_FACTOR_HF_THRESHOLD`
+   * Expressed in bps, a value of 1e5 results in 100.00%
+   */
   uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 1e4;
+
+  /**
+   * @dev This constant represents below which health factor value it is possible to liquidate
+   * an amount of debt corresponding to `MAX_LIQUIDATION_CLOSE_FACTOR`.
+   * A value of 0.95e18 results in 0.95
+   */
   uint256 public constant CLOSE_FACTOR_HF_THRESHOLD = 0.95e18;
 
   struct LiquidationCallLocalVars {
@@ -354,7 +371,7 @@ library LiquidationLogic {
       .configuration
       .getLiquidationProtocolFee();
 
-    // This is the base collateral to liqudate based on the given debt to cover
+    // This is the base collateral to liquidate based on the given debt to cover
     vars.baseCollateral =
       ((vars.debtAssetPrice * debtToCover * vars.collateralAssetUnit)) /
       (vars.collateralPrice * vars.debtAssetUnit);

@@ -129,7 +129,7 @@ library FlashLoanLogic {
       ) {
         vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
         vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
-        vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
+        vars.currentPremiumToProtocol = vars.totalPremiums[vars.i].percentMul(
           vars.flashloanPremiumToProtocol
         );
         vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
@@ -214,8 +214,8 @@ library FlashLoanLogic {
   }
 
   /**
-   * @notice Implements the simple flashloan feature that allow users to access liquidity of ONE reserve for one transaction
-   * as long as the amount taken plus fee is returned.
+   * @notice Implements the simple flashloan feature that allow users to access liquidity of ONE reserve for one
+   * transaction as long as the amount taken plus fee is returned.
    * @dev Does not waive fee for approved flashborrowers nor allow taking on debt instead of repaying to save gas
    * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
    * if the receiver have not approved the pool the transaction will revert.
@@ -251,7 +251,7 @@ library FlashLoanLogic {
       Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
-    vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
+    vars.premiumToProtocol = vars.totalPremium.percentMul(params.flashLoanPremiumToProtocol);
     vars.premiumToLP = vars.totalPremium - vars.premiumToProtocol;
 
     DataTypes.ReserveCache memory reserveCache = reserve.cache();

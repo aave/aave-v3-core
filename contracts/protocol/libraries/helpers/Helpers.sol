@@ -26,22 +26,4 @@ library Helpers {
       IERC20(reserve.variableDebtTokenAddress).balanceOf(user)
     );
   }
-
-  /**
-   * @notice Fetches the user current stable and variable debt balances
-   * @param user The user address
-   * @param reserve The reserve data object
-   * @return The stable debt balance
-   * @return The variable debt balance
-   **/
-  function getUserCurrentDebtMemory(address user, DataTypes.ReserveData memory reserve)
-    internal
-    view
-    returns (uint256, uint256)
-  {
-    return (
-      IERC20(reserve.stableDebtTokenAddress).balanceOf(user),
-      IERC20(reserve.variableDebtTokenAddress).balanceOf(user)
-    );
-  }
 }

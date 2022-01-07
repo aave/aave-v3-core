@@ -26,26 +26,41 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   IPoolAddressesProvider internal _addressesProvider;
   IPool internal _pool;
 
+  /**
+   * @dev Only pool admin can call functions marked by this modifier.
+   **/
   modifier onlyPoolAdmin() {
     _onlyPoolAdmin();
     _;
   }
 
+  /**
+   * @dev Only emergency admin can call functions marked by this modifier.
+   **/
   modifier onlyEmergencyAdmin() {
     _onlyEmergencyAdmin();
     _;
   }
 
+  /**
+   * @dev Only emergency or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyEmergencyOrPoolAdmin() {
     _onlyPoolOrEmergencyAdmin();
     _;
   }
 
+  /**
+   * @dev Only asset listing or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyAssetListingOrPoolAdmins() {
     _onlyAssetListingOrPoolAdmins();
     _;
   }
 
+  /**
+   * @dev Only risk or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyRiskOrPoolAdmins() {
     _onlyRiskOrPoolAdmins();
     _;
@@ -400,10 +415,8 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
     );
-    uint256 premiumToProtocol = _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
-    require(newFlashloanPremiumTotal >= premiumToProtocol, Errors.FLASHLOAN_PREMIUMS_MISMATCH);
     uint256 oldFlashloanPremiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
-    _pool.updateFlashloanPremiums(newFlashloanPremiumTotal, premiumToProtocol);
+    _pool.updateFlashloanPremiums(newFlashloanPremiumTotal, _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL());
     emit FlashloanPremiumTotalUpdated(oldFlashloanPremiumTotal, newFlashloanPremiumTotal);
   }
 
@@ -417,10 +430,8 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       newFlashloanPremiumToProtocol <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
     );
-    uint256 premiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
-    require(newFlashloanPremiumToProtocol <= premiumTotal, Errors.FLASHLOAN_PREMIUMS_MISMATCH);
     uint256 oldFlashloanPremiumToProtocol = _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
-    _pool.updateFlashloanPremiums(premiumTotal, newFlashloanPremiumToProtocol);
+    _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), newFlashloanPremiumToProtocol);
     emit FlashloanPremiumToProtocolUpdated(
       oldFlashloanPremiumToProtocol,
       newFlashloanPremiumToProtocol

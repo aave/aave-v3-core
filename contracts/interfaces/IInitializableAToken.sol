@@ -10,7 +10,7 @@ import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
  **/
 interface IInitializableAToken {
   /**
-   * @notice Emitted when an aToken is initialized
+   * @dev Emitted when an aToken is initialized
    * @param underlyingAsset The address of the underlying asset
    * @param pool The address of the associated pool
    * @param treasury The address of the treasury

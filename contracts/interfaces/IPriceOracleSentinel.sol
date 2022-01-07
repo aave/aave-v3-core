@@ -10,13 +10,13 @@ import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
  */
 interface IPriceOracleSentinel {
   /**
-   * @notice Emitted after the sequencer oracle is updated
+   * @dev Emitted after the sequencer oracle is updated
    * @param newSequencerOracle The new sequencer oracle
    */
   event SequencerOracleUpdated(address newSequencerOracle);
 
   /**
-   * @notice Emitted after the grace period is updated
+   * @dev Emitted after the grace period is updated
    * @param newGracePeriod The new grace period value
    */
   event GracePeriodUpdated(uint256 newGracePeriod);

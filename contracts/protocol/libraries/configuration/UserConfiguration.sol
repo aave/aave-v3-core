@@ -44,7 +44,7 @@ library UserConfiguration {
    * @notice Sets if the user is using as collateral the reserve identified by reserveIndex
    * @param self The configuration object
    * @param reserveIndex The index of the reserve in the bitmap
-   * @param usingAsCollateral True if the user is usin the reserve as collateral, false otherwise
+   * @param usingAsCollateral True if the user is using the reserve as collateral, false otherwise
    **/
   function setUsingAsCollateral(
     DataTypes.UserConfigurationMap storage self,

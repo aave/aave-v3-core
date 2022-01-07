@@ -22,7 +22,7 @@ contract ACLManager is AccessControl, IACLManager {
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   /**
-   * @notice Constructor
+   * @dev Constructor
    * @dev The ACL admin should be initialized at the addressesProvider beforehand
    * @param provider The address of the PoolAddressesProvider
    */
