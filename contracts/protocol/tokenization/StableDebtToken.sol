@@ -320,7 +320,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   }
 
   /// @inheritdoc IStableDebtToken
-  function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
+  function UNDERLYING_ASSET_ADDRESS() external view override returns (address) {
     return _underlyingAsset;
   }
 

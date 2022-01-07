@@ -169,7 +169,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   }
 
   /// @inheritdoc IVariableDebtToken
-  function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
+  function UNDERLYING_ASSET_ADDRESS() external view override returns (address) {
     return _underlyingAsset;
   }
 
