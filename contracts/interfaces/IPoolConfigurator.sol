@@ -429,6 +429,7 @@ interface IPoolConfigurator {
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
    * @dev Expressed in bps
+   * @dev The premium is applied to the amount borrowed
    * @param newFlashloanPremiumTotal The total flashloan premium
    */
   function updateFlashloanPremiumTotal(uint256 newFlashloanPremiumTotal) external;
@@ -436,7 +437,8 @@ interface IPoolConfigurator {
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
    * @dev Expressed in bps
-   * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to protocol
+   * @dev The premium is applied to the amount borrowed
+   * @param newFlashloanPremiumToProtocol The flashloan premium sent to protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
 
