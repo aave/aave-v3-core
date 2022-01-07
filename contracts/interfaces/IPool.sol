@@ -621,11 +621,11 @@ interface IPool {
   function updateBridgeProtocolFee(uint256 bridgeProtocolFee) external;
 
   /**
-   * @notice Updates flash loan premiums. Flash loan premium consist in two parts:
-   * - A part is sent to aToken holders as extra balance
+   * @notice Updates flash loan premiums. Flash loan premium consist of two parts:
+   * - A part is sent to aToken holders as extra, one time accumulated interest
    * - A part is collected by the protocol reserves
    * @dev The total premium is calculated on the total borrowed amount
-   * @dev The premium to protocol is calculated on the total premium, being a fraction of `flashLoanPremiumTotal`
+   * @dev The premium to protocol is calculated on the total premium, being a percentage of `flashLoanPremiumTotal`
    * @dev Only callable by the PoolConfigurator contract
    * @param flashLoanPremiumTotal The total premium, expressed in bps
    * @param flashLoanPremiumToProtocol The part of the premium sent to protocol, expressed in bps
