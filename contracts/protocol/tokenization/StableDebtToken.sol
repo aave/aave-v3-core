@@ -29,10 +29,10 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   // Map of users address and the timestamp of their last update (userAddress => lastUpdateTimestamp)
   mapping(address => uint40) internal _timestamps;
 
-  uint128 _avgStableRate;
+  uint128 internal _avgStableRate;
 
   // Timestamp of the last update of the total supply
-  uint40 _totalSupplyTimestamp;
+  uint40 internal _totalSupplyTimestamp;
 
   address internal _underlyingAsset;
 

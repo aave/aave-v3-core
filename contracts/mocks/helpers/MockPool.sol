@@ -7,8 +7,8 @@ contract MockPool {
   // Reserved storage space to avoid layout collisions.
   uint256[100] private ______gap;
 
-  address _addressesProvider;
-  address[] _reserveList;
+  address internal _addressesProvider;
+  address[] internal _reserveList;
 
   function initialize(address provider) external {
     _addressesProvider = provider;
