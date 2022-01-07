@@ -438,7 +438,7 @@ interface IPoolConfigurator {
    * @notice Updates the flash loan premium collected by protocol reserves
    * @dev Expressed in bps
    * @dev The premium is calculated on the total amount borrowed
-   * @param newFlashloanPremiumToProtocol The flashloan premium sent to protocol
+   * @param newFlashloanPremiumToProtocol The flashloan premium for the protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
 
