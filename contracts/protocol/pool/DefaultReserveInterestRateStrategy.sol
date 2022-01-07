@@ -39,7 +39,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * 1-optimal utilization rate. Added as a constant here for gas optimizations.
    * Expressed in ray
    **/
-
   uint256 public immutable EXCESS_UTILIZATION_RATE;
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
@@ -59,10 +58,25 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   // Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
   uint256 internal immutable _stableRateSlope2;
 
+  // Premium on top of `_variableRateSlope1` for base stable borrowing rate
   uint256 internal immutable _baseStableRateOffset;
 
+  // Additional premium applied to stable rate when stable debt surpass `OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO`
   uint256 internal immutable _stableRateExcessOffset;
 
+  /**
+   * @dev Constructor.
+   * @param provider The address of the PoolAddressesProvider contract
+   * @param optimalUtilizationRate The optimal utilization rate
+   * @param baseVariableBorrowRate The base variable borrow rate
+   * @param variableRateSlope1 The variable rate slope below optimal utilization rate
+   * @param variableRateSlope2 The variable rate slope above optimal utilization rate
+   * @param stableRateSlope1 The stable rate slope below optimal utilization rate
+   * @param stableRateSlope2 The stable rate slope above optimal utilization rate
+   * @param baseStableRateOffset The premium on top of variable rate for base stable borrowing rate
+   * @param stableRateExcessOffset The premium on top of stable rate when there stable debt surpass the threshold
+   * @param optimalStableToTotalDebtRatio The optimal stable debt to total debt ratio of the reserve
+   */
   constructor(
     IPoolAddressesProvider provider,
     uint256 optimalUtilizationRate,
@@ -93,22 +107,46 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     _stableRateExcessOffset = stableRateExcessOffset;
   }
 
+  /**
+   * @notice Returns the variable rate slope below optimal utilization rate
+   * @dev Its the variable rate when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE
+   * @return The variable rate slope
+   **/
   function getVariableRateSlope1() external view returns (uint256) {
     return _variableRateSlope1;
   }
 
+  /**
+   * @notice Returns the variable rate slope above optimal utilization rate
+   * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
+   * @return The variable rate slope
+   **/
   function getVariableRateSlope2() external view returns (uint256) {
     return _variableRateSlope2;
   }
 
+  /**
+   * @notice Returns the stable rate slope below optimal utilization rate
+   * @dev Its the stable rate when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE
+   * @return The stable rate slope
+   **/
   function getStableRateSlope1() external view returns (uint256) {
     return _stableRateSlope1;
   }
 
+  /**
+   * @notice Returns the stable rate slope above optimal utilization rate
+   * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
+   * @return The stable rate slope
+   **/
   function getStableRateSlope2() external view returns (uint256) {
     return _stableRateSlope2;
   }
 
+  /**
+   * @notice Returns the base stable borrow rate
+   * @return The base stable borrow rate
+   **/
   function getBaseStableBorrowRate() public view returns (uint256) {
     return _variableRateSlope1 + _baseStableRateOffset;
   }
@@ -214,7 +252,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @dev Calculates the overall borrow rate as the weighted average between the total variable debt and total stable debt
+   * @dev Calculates the overall borrow rate as the weighted average between the total variable debt and total stable
+   * debt
    * @param totalStableDebt The total borrowed from the reserve at a stable rate
    * @param totalVariableDebt The total borrowed from the reserve at a variable rate
    * @param currentVariableBorrowRate The current variable borrow rate of the reserve

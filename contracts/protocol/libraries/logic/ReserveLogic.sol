@@ -103,8 +103,8 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
-   * the flashloan fee to the reserve, and spread it between all the suppliers.
+   * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example
+   * to accumulate the flashloan fee to the reserve, and spread it between all the suppliers.
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
    * @param amount The amount to accumulate
@@ -314,7 +314,8 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Creates a cache object to avoid repeated storage reads and external contract calls when updating state and interest rates.
+   * @notice Creates a cache object to avoid repeated storage reads and external contract calls when updating state and
+   * interest rates.
    * @param reserve The reserve object for which the cache will be filled
    * @return The cache object
    */

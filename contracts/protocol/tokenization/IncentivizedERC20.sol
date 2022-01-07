@@ -20,6 +20,9 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
+  /**
+   * @dev Only pool admin can call functions marked by this modifier.
+   **/
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
@@ -29,16 +32,19 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   /**
    * @dev UserState - additionalData is a flexible field.
    * ATokens and VariableDebtTokens use this field store the index of the
-   * user's last supply/withdrawl/borrow/repayment. StableDebtTokens use
+   * user's last supply/withdrawal/borrow/repayment. StableDebtTokens use
    * this field to store the user's stable rate.
    */
   struct UserState {
     uint128 balance;
     uint128 additionalData;
   }
+  // Map of users address and their state data (userAddress => userStateData)
   mapping(address => UserState) internal _userState;
 
+  // Map of allowances (delegator => delegatee => allowanceAmount)
   mapping(address => mapping(address => uint256)) private _allowances;
+
   uint256 internal _totalSupply;
   string private _name;
   string private _symbol;
@@ -50,11 +56,19 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   bytes32 internal constant EIP712_DOMAIN =
     keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
 
+  // Map of address nonces (address => nonce)
   mapping(address => uint256) internal _nonces;
 
   bytes32 internal _domainSeparator;
   uint256 internal immutable _chainId;
 
+  /**
+   * @dev Constructor.
+   * @param addressesProvider The address of the PoolAddressesProvider contract
+   * @param name The name of the token
+   * @param symbol The symbol of the token
+   * @param decimals The number of decimals of the token
+   */
   constructor(
     IPoolAddressesProvider addressesProvider,
     string memory name,
@@ -276,7 +290,7 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
 
   /**
    * @notice Get the domain separator for the token
-   * @dev Return cached value if chainid matched cache, otherwise recomputes separator
+   * @dev Return cached value if chainId matches cache, otherwise recomputes separator
    * @return The domain separator of the token at current chain
    */
   function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {

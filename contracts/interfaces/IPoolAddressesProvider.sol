@@ -8,63 +8,63 @@ pragma solidity 0.8.10;
  **/
 interface IPoolAddressesProvider {
   /**
-   * @notice Emitted when the market identifier is updated.
+   * @dev Emitted when the market identifier is updated.
    * @param oldMarketId The old id of the market
    * @param newMarketId The new id of the market
    */
   event MarketIdSet(string indexed oldMarketId, string indexed newMarketId);
 
   /**
-   * @notice Emitted when the pool is updated.
+   * @dev Emitted when the pool is updated.
    * @param oldAddress The old address of the Pool
    * @param newAddress The new address of the Pool
    */
   event PoolUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when the pool configurator is updated.
+   * @dev Emitted when the pool configurator is updated.
    * @param oldAddress The old address of the PoolConfigurator
    * @param newAddress The new address of the PoolConfigurator
    */
   event PoolConfiguratorUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when the price oracle is updated.
+   * @dev Emitted when the price oracle is updated.
    * @param oldAddress The old address of the PriceOracle
    * @param newAddress The new address of the PriceOracle
    */
   event PriceOracleUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when the ACL manager is updated.
+   * @dev Emitted when the ACL manager is updated.
    * @param oldAddress The old address of the ACLManager
    * @param newAddress The new address of the ACLManager
    */
   event ACLManagerUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when the ACL admin is updated.
+   * @dev Emitted when the ACL admin is updated.
    * @param oldAddress The old address of the ACLAdmin
    * @param newAddress The new address of the ACLAdmin
    */
   event ACLAdminUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when the price oracle sentinel is updated.
+   * @dev Emitted when the price oracle sentinel is updated.
    * @param oldAddress The old address of the PriceOracleSentinel
    * @param newAddress The new address of the PriceOracleSentinel
    */
   event PriceOracleSentinelUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when the pool data provider is updated.
+   * @dev Emitted when the pool data provider is updated.
    * @param oldAddress The old address of the PoolDataProvider
    * @param newAddress The new address of the PoolDataProvider
    */
   event PoolDataProviderUpdated(address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when a new proxy is created.
+   * @dev Emitted when a new proxy is created.
    * @param id The identifier of the proxy
    * @param proxyAddress The address of the created proxy contract
    * @param implementationAddress The address of the implementation contract
@@ -76,7 +76,7 @@ interface IPoolAddressesProvider {
   );
 
   /**
-   * @notice Emitted when a new non-proxied contract address is registered.
+   * @dev Emitted when a new non-proxied contract address is registered.
    * @param id The identifier of the contract
    * @param oldAddress The address of the old contract
    * @param newAddress The address of the new contract
@@ -84,7 +84,7 @@ interface IPoolAddressesProvider {
   event AddressSet(bytes32 indexed id, address indexed oldAddress, address indexed newAddress);
 
   /**
-   * @notice Emitted when the implementation of the proxy registered for id is updated
+   * @dev Emitted when the implementation of the proxy registered with id is updated
    * @param id The identifier of the contract
    * @param proxyAddress The address of the proxy contract
    * @param oldImplementationAddress The address of the old implementation contract

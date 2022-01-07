@@ -15,12 +15,18 @@ import {IACLManager} from '../../interfaces/IACLManager.sol';
  *  period. So the PriceOracle is considered completely up once its up and the grace period passed.
  */
 contract PriceOracleSentinel is IPriceOracleSentinel {
+  /**
+   * @dev Only pool admin can call functions marked by this modifier.
+   **/
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
     _;
   }
 
+  /**
+   * @dev Only risk or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyRiskOrPoolAdmins() {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(
@@ -37,7 +43,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   uint256 internal _gracePeriod;
 
   /**
-   * @notice Constructor
+   * @dev Constructor
    * @param provider The address of the PoolAddressesProvider
    * @param oracle The address of the SequencerOracle
    * @param gracePeriod The duration of the grace period in seconds

@@ -13,12 +13,12 @@ import {ConfiguratorInputTypes} from '../types/ConfiguratorInputTypes.sol';
 /**
  * @title ConfiguratorLogic library
  * @author Aave
- * @notice Implements the functions to initialize reserves and update atokens/debt tokens
+ * @notice Implements the functions to initialize reserves and update aTokens and debtTokens
  */
 library ConfiguratorLogic {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-  // See `IPoolConfigurator` for description
+  // See `IPoolConfigurator` for descriptions
   event ReserveInitialized(
     address indexed asset,
     address indexed aToken,
@@ -26,22 +26,16 @@ library ConfiguratorLogic {
     address variableDebtToken,
     address interestRateStrategyAddress
   );
-
-  // See `IPoolConfigurator` for description
   event ATokenUpgraded(
     address indexed asset,
     address indexed proxy,
     address indexed implementation
   );
-
-  // See `IPoolConfigurator` for description
   event StableDebtTokenUpgraded(
     address indexed asset,
     address indexed proxy,
     address indexed implementation
   );
-
-  // See `IPoolConfigurator` for description
   event VariableDebtTokenUpgraded(
     address indexed asset,
     address indexed proxy,

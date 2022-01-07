@@ -16,7 +16,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   // Identifier of the Aave Market
   string private _marketId;
 
-  // Mapping of registered addresses (identifiers as keys)
+  // Map of registered addresses (identifier => registeredAddress)
   mapping(bytes32 => address) private _addresses;
 
   // Main identifiers
@@ -28,6 +28,10 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   bytes32 private constant PRICE_ORACLE_SENTINEL = 'PRICE_ORACLE_SENTINEL';
   bytes32 private constant DATA_PROVIDER = 'DATA_PROVIDER';
 
+  /**
+   * @dev Constructor.
+   * @param marketId The identifier of the market
+   */
   constructor(string memory marketId) {
     _setMarketId(marketId);
   }

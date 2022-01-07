@@ -12,7 +12,7 @@ import {IInitializableAToken} from './IInitializableAToken.sol';
  **/
 interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
-   * @notice Emitted after the mint action
+   * @dev Emitted after the mint action
    * @param caller The address performing the mint
    * @param onBehalfOf The address of the user that will receive the minted aTokens
    * @param value The amount being minted (user entered amount + balance increase from interest)
@@ -28,7 +28,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   );
 
   /**
-   * @notice Emitted after aTokens are burned
+   * @dev Emitted after aTokens are burned
    * @param from The address from which the aTokens will be burned
    * @param target The address that will receive the underlying
    * @param value The amount being burned (user entered amount - balance increase from interest)
@@ -44,7 +44,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   );
 
   /**
-   * @notice Emitted during the transfer action
+   * @dev Emitted during the transfer action
    * @param from The user whose tokens are being transferred
    * @param to The recipient
    * @param value The amount being transferred
@@ -112,9 +112,9 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
 
   /**
    * @notice Handles the underlying received by the aToken after the transfer has been completed.
-   * @dev The default implementation is empty as with standard ERC20 tokens, nothing needs to be done after the transfer is concluded.
-   * However in the future there may be aTokens that allow for example to stake the underlying to receive LM rewards. In that case,
-   * `handleRepayment()` would perform the staking of the underlying asset.
+   * @dev The default implementation is empty as with standard ERC20 tokens, nothing needs to be done after the
+   * transfer is concluded. However in the future there may be aTokens that allow for example to stake the underlying
+   * to receive LM rewards. In that case, `handleRepayment()` would perform the staking of the underlying asset.
    * @param user The user executing the repayment
    * @param amount The amount getting repaid
    **/
@@ -149,19 +149,22 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   function UNDERLYING_ASSET_ADDRESS() external view returns (address);
 
   /**
-   * @dev Returns the address of the Aave treasury, receiving the fees on this aToken
+   * @notice Returns the address of the Aave treasury, receiving the fees on this aToken.
+   * @return Address of the Aave treasury
    **/
   function RESERVE_TREASURY_ADDRESS() external view returns (address);
 
   /**
    * @notice Get the domain separator for the token
-   * @dev Return cached value if chainid matched cache, otherwise recomputes separator
+   * @dev Return cached value if chainId matches cache, otherwise recomputes separator
    * @return The domain separator of the token at current chain
    */
   function DOMAIN_SEPARATOR() external view returns (bytes32);
 
   /**
-   * @notice Returns the nonce for owner
+   * @notice Returns the nonce for owner.
+   * @param owner The address of the owner
+   * @return The nonce of the owner
    **/
   function nonces(address owner) external view returns (uint256);
 }

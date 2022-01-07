@@ -8,7 +8,7 @@ pragma solidity 0.8.10;
  **/
 interface IAaveIncentivesController {
   /**
-   * @notice Emitted during `handleAction`, `claimRewards` and `claimRewardsOnBehalf`
+   * @dev Emitted during `handleAction`, `claimRewards` and `claimRewardsOnBehalf`
    * @param user The user that accrued rewards
    * @param amount The amount of accrued rewards
    */
@@ -17,7 +17,7 @@ interface IAaveIncentivesController {
   event RewardsClaimed(address indexed user, address indexed to, uint256 amount);
 
   /**
-   * @notice Emitted during `claimRewards` and `claimRewardsOnBehalf`
+   * @dev Emitted during `claimRewards` and `claimRewardsOnBehalf`
    * @param user The address that accrued rewards
    * @param to The address that will be receiving the rewards
    * @param claimer The address that performed the claim
@@ -31,7 +31,7 @@ interface IAaveIncentivesController {
   );
 
   /**
-   * @notice Emitted during `setClaimer`
+   * @dev Emitted during `setClaimer`
    * @param user The address of the user
    * @param claimer The address of the claimer
    */

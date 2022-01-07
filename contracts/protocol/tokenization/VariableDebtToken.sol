@@ -27,7 +27,13 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
   address internal _underlyingAsset;
 
-  constructor(IPool pool) DebtTokenBase(pool) {}
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
+  constructor(IPool pool) DebtTokenBase(pool) {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(

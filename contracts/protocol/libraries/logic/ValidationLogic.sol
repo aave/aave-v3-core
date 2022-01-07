@@ -35,9 +35,30 @@ library ValidationLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
 
-  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4000;
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95e27; //usage ratio of 95%
+  /**
+   * @dev This constant represents the delta between the maximum variable borrow rate and liquidity rate below which
+   * stable rate rebalances up are allowed when the utilization ratio > `REBALANCE_UP_USAGE_RATIO_THRESHOLD`
+   * Expressed in bps, a factor of 4e3 results in 40.00%
+   */
+  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4e3;
+
+  /**
+   * @dev This constant represents the minimum borrow utilization rate threshold at which rebalances up are possible
+   * Expressed in ray, a rate of 0.95e27 results in 95%
+   */
+  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95e27;
+
+  /**
+   * @dev This constant represents below which health factor value it is possible to liquidate
+   * the maximum percentage of borrower's debt.
+   * A value of 0.95e18 results in 0.95
+   */
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
+
+  /**
+   * @dev Minimum health factor to consider a user position healthy
+   * A value of 1e18 results in 1
+   */
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   /**
@@ -677,8 +698,10 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates if an asset can be activated as collateral in supply/transfer/set as collateral/mint unbacked/liquidate
-   * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that generate transfers of aTokens
+   * @notice Validates if an asset can be activated as collateral in the following actions: supply, transfer,
+   * set as collateral, mint unbacked, and liquidate
+   * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that
+   * generate transfers of aTokens
    * @param reservesData the data mapping of the reserves
    * @param reserves a mapping storing the list of reserves
    * @param userConfig the user configuration
