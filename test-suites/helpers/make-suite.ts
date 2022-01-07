@@ -32,7 +32,7 @@ import { solidity } from 'ethereum-waffle';
 import { AaveOracle, ACLManager, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
-import { getEthersSigners, waitForTx, evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import { waitForTx, evmSnapshot, evmRevert, getEthersSigners } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 

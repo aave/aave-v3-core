@@ -3,7 +3,7 @@ import { BigNumberish, BigNumber, utils } from 'ethers';
 import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
-import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';

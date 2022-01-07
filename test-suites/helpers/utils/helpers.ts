@@ -1,7 +1,6 @@
 import { Pool } from '../../../types/Pool';
 import { ReserveData, UserReserveData } from './interfaces';
 import {
-  getIErc20Detailed,
   getMintableERC20,
   getAToken,
   getStableDebtToken,
@@ -12,7 +11,7 @@ import { tEthereumAddress } from '../../../helpers/types';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { BigNumber } from 'ethers';
 import { AToken } from '../../../types';
-import { TESTNET_TOKEN_PREFIX } from '@aave/deploy-v3';
+import { getContract } from '@aave/deploy-v3';
 
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
@@ -24,7 +23,7 @@ export const getReserveData = async (
       helper.getReserveTokensAddresses(reserve),
       helper.getInterestRateStrategyAddress(reserve),
       helper.getReserveConfigurationData(reserve),
-      getIErc20Detailed(reserve),
+      getContract('IERC20Detailed', reserve),
     ]);
 
   const stableDebtToken = await getStableDebtToken(tokenAddresses.stableDebtTokenAddress);
@@ -62,8 +61,7 @@ export const getReserveData = async (
     ? BigNumber.from(0)
     : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
 
-  supplyUsageRatio =
-    supplyUsageRatio > borrowUsageRatio ? borrowUsageRatio : supplyUsageRatio;
+  supplyUsageRatio = supplyUsageRatio > borrowUsageRatio ? borrowUsageRatio : supplyUsageRatio;
 
   return {
     reserveFactor,
