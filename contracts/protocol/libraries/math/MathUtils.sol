@@ -40,8 +40,9 @@ library MathUtils {
    *
    *  (1+x)^n = 1+n*x+[n/2*(n-1)]*x^2+[n/6*(n-1)*(n-2)*x^3...
    *
-   * The approximation slightly underpays liquidity providers and undercharges borrowers, with the advantage of great gas cost reductions
-   * The whitepaper contains reference to the approximation and a table showing the margin of error per different time periods
+   * The approximation slightly underpays liquidity providers and undercharges borrowers, with the advantage of great
+   * gas cost reductions. The whitepaper contains reference to the approximation and a table showing the margin of
+   * error per different time periods
    *
    * @param rate The interest rate, in ray
    * @param lastUpdateTimestamp The timestamp of the last update of the interest
