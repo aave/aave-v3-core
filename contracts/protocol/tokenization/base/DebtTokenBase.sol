@@ -18,19 +18,29 @@ abstract contract DebtTokenBase is
   VersionedInitializable,
   ICreditDelegationToken
 {
+  // Map of borrow allowances (delegator => delegatee => borrowAllowanceAmount)
   mapping(address => mapping(address => uint256)) internal _borrowAllowances;
+
+  // Credit Delegation Typehash
   bytes32 public constant DELEGATION_WITH_SIG_TYPEHASH =
     keccak256('DelegationWithSig(address delegatee,uint256 value,uint256 nonce,uint256 deadline)');
+
   IPool public immutable POOL;
 
+  address internal _underlyingAsset;
+
   /**
-   * @dev Only pool can call functions marked by this modifier
+   * @dev Only pool can call functions marked by this modifier.
    **/
   modifier onlyPool() {
     require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;
   }
 
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
   constructor(IPool pool)
     IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
   {
@@ -90,13 +100,6 @@ abstract contract DebtTokenBase is
   }
 
   /**
-   * @notice Returns the address of the underlying asset of this debt token
-   * @dev For internal usage in the logic of the parent contracts
-   * @return The address of the underlying asset
-   **/
-  function _getUnderlyingAssetAddress() internal view virtual returns (address);
-
-  /**
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
    **/
@@ -128,15 +131,27 @@ abstract contract DebtTokenBase is
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
+  /**
+   * @notice Updates the borrow allowance of a user on the specific debt token.
+   * @param delegator The address delegating the borrowing power
+   * @param delegatee The address receiving the delegated borrowing power
+   * @param amount The allowance amount being delegated.
+   **/
   function _approveDelegation(
     address delegator,
     address delegatee,
     uint256 amount
   ) internal {
     _borrowAllowances[delegator][delegatee] = amount;
-    emit BorrowAllowanceDelegated(delegator, delegatee, _getUnderlyingAssetAddress(), amount);
+    emit BorrowAllowanceDelegated(delegator, delegatee, _underlyingAsset, amount);
   }
 
+  /**
+   * @notice Decreases the borrow allowance of a user on the specific debt token.
+   * @param delegator The address delegating the borrowing power
+   * @param delegatee The address receiving the delegated borrowing power
+   * @param amount The amount to subtract from the current allowance
+   **/
   function _decreaseBorrowAllowance(
     address delegator,
     address delegatee,
@@ -146,6 +161,6 @@ abstract contract DebtTokenBase is
 
     _borrowAllowances[delegator][delegatee] = newAllowance;
 
-    emit BorrowAllowanceDelegated(delegator, delegatee, _getUnderlyingAssetAddress(), newAllowance);
+    emit BorrowAllowanceDelegated(delegator, delegatee, _underlyingAsset, newAllowance);
   }
 }

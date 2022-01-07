@@ -41,7 +41,9 @@ library SupplyLogic {
 
   /**
    * @notice Implements the supply feature. Through `supply()`, users supply assets to the Aave protocol.
-   * @dev  Emits the `Supply()` event. In the first supply action, `ReserveUsedAsCollateralEnabled()` is emitted, if the asset can be enabled as collateral.
+   * @dev Emits the `Supply()` event.
+   * @dev In the first supply action, `ReserveUsedAsCollateralEnabled()` is emitted, if the asset can be enabled as
+   * collateral.
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
@@ -84,8 +86,10 @@ library SupplyLogic {
   }
 
   /**
-   * @notice Implements the withdraw feature. Through `withdraw()`, users redeem their aTokens for the underlying asset previously supplied in the Aave protocol.
-   * @dev  Emits the `Withdraw()` event. If the user withdraws everything, `ReserveUsedAsCollateralDisabled()` is emitted.
+   * @notice Implements the withdraw feature. Through `withdraw()`, users redeem their aTokens for the underlying asset
+   * previously supplied in the Aave protocol.
+   * @dev Emits the `Withdraw()` event.
+   * @dev If the user withdraws everything, `ReserveUsedAsCollateralDisabled()` is emitted.
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -153,8 +157,11 @@ library SupplyLogic {
   }
 
   /**
-   * @notice Validates a transfer of aTokens. The sender is subjected to health factor validation to avoid collateralization constraints violation.
-   * @dev  Emits the `ReserveUsedAsCollateralEnabled()` event for the `to` account, if the asset can be activated as collateral. In case the `from` user transfers everything, `ReserveUsedAsCollateralDisabled()` is emitted for `from`.
+   * @notice Validates a transfer of aTokens. The sender is subjected to health factor validation to avoid
+   * collateralization constraints violation.
+   * @dev Emits the `ReserveUsedAsCollateralEnabled()` event for the `to` account, if the asset is being activated as
+   * collateral.
+   * @dev In case the `from` user transfers everything, `ReserveUsedAsCollateralDisabled()` is emitted for `from`.
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
@@ -210,9 +217,11 @@ library SupplyLogic {
   }
 
   /**
-   * @notice Executes the 'set as collateral' feature. A user can choose to activate or deactivate an asset as collateral at any point in time. Deactivating an asset as collateral
-   * is subjected to the usual health factor checks to ensure collateralization.
-   * @dev  Emits the `ReserveUsedAsCollateralEnabled()` event if the asset can be activated as collateral. In case the asset is being deactivated as collateral, `ReserveUsedAsCollateralDisabled()` is emitted.
+   * @notice Executes the 'set as collateral' feature. A user can choose to activate or deactivate an asset as
+   * collateral at any point in time. Deactivating an asset as collateral is subjected to the usual health factor
+   * checks to ensure collateralization.
+   * @dev Emits the `ReserveUsedAsCollateralEnabled()` event if the asset can be activated as collateral.
+   * @dev In case the asset is being deactivated as collateral, `ReserveUsedAsCollateralDisabled()` is emitted.
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories

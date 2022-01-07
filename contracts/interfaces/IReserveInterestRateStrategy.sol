@@ -11,19 +11,19 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
 interface IReserveInterestRateStrategy {
   /**
    * @notice Returns the base variable borrow rate
-   * @return The base variable borrow rate
+   * @return The base variable borrow rate, expressed in ray
    **/
   function getBaseVariableBorrowRate() external view returns (uint256);
 
   /**
    * @notice Returns the maximum variable borrow rate
-   * @return The maximum variable borrow rate
+   * @return The maximum variable borrow rate, expressed in ray
    **/
   function getMaxVariableBorrowRate() external view returns (uint256);
 
   /**
    * @notice Calculates the interest rates depending on the reserve's state and configurations
-   * @param params The params structure with the amount pending to treasury, amount to mint during operation and amount to burn during operation
+   * @param params The additional parameters needed to calculate interest rates
    **/
   function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory params)
     external

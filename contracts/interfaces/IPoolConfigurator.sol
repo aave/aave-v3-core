@@ -10,7 +10,7 @@ import {ConfiguratorInputTypes} from '../protocol/libraries/types/ConfiguratorIn
  **/
 interface IPoolConfigurator {
   /**
-   * @notice Emitted when a reserve is initialized.
+   * @dev Emitted when a reserve is initialized.
    * @param asset The address of the underlying asset of the reserve
    * @param aToken The address of the associated aToken contract
    * @param stableDebtToken The address of the associated stable rate debt token
@@ -26,14 +26,14 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when borrowing is enabled or disabled on a reserve.
+   * @dev Emitted when borrowing is enabled or disabled on a reserve.
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if borrowing is enabled, false otherwise
    **/
   event ReserveBorrowing(address indexed asset, bool enabled);
 
   /**
-   * @notice Emitted when the collateralization risk parameters for the specified asset are updated.
+   * @dev Emitted when the collateralization risk parameters for the specified asset are updated.
    * @param asset The address of the underlying asset of the reserve
    * @param ltv The loan to value of the asset when used as collateral
    * @param liquidationThreshold The threshold at which loans using this asset as collateral will be considered undercollateralized
@@ -47,44 +47,44 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when stable rate borrowing state is changed on a reserve.
+   * @dev Emitted when stable rate borrowing is enabled or disabled on a reserve
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if stable rate borrowing is enabled, false otherwise
    **/
   event ReserveStableRateBorrowing(address indexed asset, bool enabled);
 
   /**
-   * @notice Emitted when a reserve is activated or deactivated.
+   * @dev Emitted when a reserve is activated or deactivated
    * @param asset The address of the underlying asset of the reserve
    * @param active True if reserve is active, false otherwise
    **/
   event ReserveActive(address indexed asset, bool active);
 
   /**
-   * @notice Emitted when a reserve is frozen or unfrozen.
+   * @dev Emitted when a reserve is frozen or unfrozen
    * @param asset The address of the underlying asset of the reserve
    * @param frozen True if reserve is frozen, false otherwise
    **/
   event ReserveFrozen(address indexed asset, bool frozen);
 
   /**
-   * @notice Emitted when a reserve is paused or unpaused.
+   * @dev Emitted when a reserve is paused or unpaused
    * @param asset The address of the underlying asset of the reserve
    * @param paused True if reserve is paused, false otherwise
    **/
   event ReservePaused(address indexed asset, bool paused);
 
   /**
-   * @notice Emitted when a reserve is dropped.
+   * @dev Emitted when a reserve is dropped.
    * @param asset The address of the underlying asset of the reserve
    **/
   event ReserveDropped(address indexed asset);
 
   /**
-   * @notice Emitted when a reserve factor is updated.
+   * @dev Emitted when a reserve factor is updated.
    * @param asset The address of the underlying asset of the reserve
-   * @param oldReserveFactor The old reserve factor
-   * @param newReserveFactor The new reserve factor
+   * @param oldReserveFactor The old reserve factor, expressed in bps
+   * @param newReserveFactor The new reserve factor, expressed in bps
    **/
   event ReserveFactorChanged(
     address indexed asset,
@@ -93,7 +93,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when the borrow cap of a reserve is updated.
+   * @dev Emitted when the borrow cap of a reserve is updated.
    * @param asset The address of the underlying asset of the reserve
    * @param oldBorrowCap The old borrow cap
    * @param newBorrowCap The new borrow cap
@@ -101,7 +101,7 @@ interface IPoolConfigurator {
   event BorrowCapChanged(address indexed asset, uint256 oldBorrowCap, uint256 newBorrowCap);
 
   /**
-   * @notice Emitted when the supply cap of a reserve is updated.
+   * @dev Emitted when the supply cap of a reserve is updated.
    * @param asset The address of the underlying asset of the reserve
    * @param oldSupplyCap The old supply cap
    * @param newSupplyCap The new supply cap
@@ -109,15 +109,15 @@ interface IPoolConfigurator {
   event SupplyCapChanged(address indexed asset, uint256 oldSupplyCap, uint256 newSupplyCap);
 
   /**
-   * @notice Emitted when the liquidation protocol fee of a reserve is updated.
+   * @dev Emitted when the liquidation protocol fee of a reserve is updated.
    * @param asset The address of the underlying asset of the reserve
-   * @param oldFee The old fee
-   * @param newFee The new fee
+   * @param oldFee The old liquidation protocol fee, expressed in bps
+   * @param newFee The new liquidation protocol fee, expressed in bps
    **/
   event LiquidationProtocolFeeChanged(address indexed asset, uint256 oldFee, uint256 newFee);
 
   /**
-   * @notice Emitted when the unbacked mint cap of a reserve is updated.
+   * @dev Emitted when the unbacked mint cap of a reserve is updated.
    * @param asset The address of the underlying asset of the reserve
    * @param oldUnbackedMintCap The old unbacked mint cap
    * @param newUnbackedMintCap The new unbacked mint cap
@@ -127,8 +127,9 @@ interface IPoolConfigurator {
     uint256 oldUnbackedMintCap,
     uint256 newUnbackedMintCap
   );
+
   /**
-   * @notice Emitted when the category of an asset in eMode is changed.
+   * @dev Emitted when the category of an asset in eMode is changed.
    * @param asset The address of the underlying asset of the reserve
    * @param oldCategoryId The old eMode asset category
    * @param newCategoryId The new eMode asset category
@@ -136,7 +137,7 @@ interface IPoolConfigurator {
   event EModeAssetCategoryChanged(address indexed asset, uint8 oldCategoryId, uint8 newCategoryId);
 
   /**
-   * @notice Emitted when a new eMode category is added.
+   * @dev Emitted when a new eMode category is added.
    * @param categoryId The new eMode category id
    * @param ltv The ltv for the asset category in eMode
    * @param liquidationThreshold The liquidationThreshold for the asset category in eMode
@@ -154,7 +155,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when a reserve interest strategy contract is updated.
+   * @dev Emitted when a reserve interest strategy contract is updated.
    * @param asset The address of the underlying asset of the reserve
    * @param oldStrategy The address of the old interest strategy contract
    * @param newStrategy The address of the new interest strategy contract
@@ -166,7 +167,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when an aToken implementation is upgraded.
+   * @dev Emitted when an aToken implementation is upgraded.
    * @param asset The address of the underlying asset of the reserve
    * @param proxy The aToken proxy address
    * @param implementation The new aToken implementation
@@ -178,7 +179,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when the implementation of a stable debt token is upgraded.
+   * @dev Emitted when the implementation of a stable debt token is upgraded.
    * @param asset The address of the underlying asset of the reserve
    * @param proxy The stable debt token proxy address
    * @param implementation The new aToken implementation
@@ -190,7 +191,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when the implementation of a variable debt token is upgraded.
+   * @dev Emitted when the implementation of a variable debt token is upgraded.
    * @param asset The address of the underlying asset of the reserve
    * @param proxy The variable debt token proxy address
    * @param implementation The new aToken implementation
@@ -202,7 +203,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when the debt ceiling of an asset is set.
+   * @dev Emitted when the debt ceiling of an asset is set.
    * @param asset The address of the underlying asset of the reserve
    * @param oldDebtCeiling The old debt ceiling
    * @param newDebtCeiling The new debt ceiling
@@ -210,16 +211,16 @@ interface IPoolConfigurator {
   event DebtCeilingChanged(address indexed asset, uint256 oldDebtCeiling, uint256 newDebtCeiling);
 
   /**
-   * @notice Emitted when the bridge protocol fee is updated.
-   * @param oldBridgeProtocolFee The old protocol fee
-   * @param newBridgeProtocolFee The new protocol fee
+   * @dev Emitted when the bridge protocol fee is updated.
+   * @param oldBridgeProtocolFee The old protocol fee, expressed in bps
+   * @param newBridgeProtocolFee The new protocol fee, expressed in bps
    */
   event BridgeProtocolFeeUpdated(uint256 oldBridgeProtocolFee, uint256 newBridgeProtocolFee);
 
   /**
-   * @notice Emitted when the total premium on flashloans is updated.
-   * @param oldFlashloanPremiumTotal The old premium
-   * @param newFlashloanPremiumTotal The new premium
+   * @dev Emitted when the total premium on flashloans is updated.
+   * @param oldFlashloanPremiumTotal The old premium, expressed in bps
+   * @param newFlashloanPremiumTotal The new premium, expressed in bps
    **/
   event FlashloanPremiumTotalUpdated(
     uint256 oldFlashloanPremiumTotal,
@@ -227,9 +228,9 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when the part of the premium that goes to protocol is updated.
-   * @param oldFlashloanPremiumToProtocol The old premium
-   * @param newFlashloanPremiumToProtocol The new premium
+   * @dev Emitted when the part of the premium that goes to protocol is updated.
+   * @param oldFlashloanPremiumToProtocol The old premium, expressed in bps
+   * @param newFlashloanPremiumToProtocol The new premium, expressed in bps
    **/
   event FlashloanPremiumToProtocolUpdated(
     uint256 oldFlashloanPremiumToProtocol,
@@ -237,7 +238,7 @@ interface IPoolConfigurator {
   );
 
   /**
-   * @notice Emitted when the reserve is set as borrowable/non borrowable in isolation mode.
+   * @dev Emitted when the reserve is set as borrowable/non borrowable in isolation mode.
    * @param asset The address of the underlying asset of the reserve
    * @param borrowable True if the reserve is borrowable in isolation, false otherwise
    **/
@@ -250,7 +251,7 @@ interface IPoolConfigurator {
   function initReserves(ConfiguratorInputTypes.InitReserveInput[] calldata input) external;
 
   /**
-   * @notice Updates the aToken implementation for the reserve.
+   * @dev Updates the aToken implementation for the reserve.
    * @param input The aToken update parameters
    **/
   function updateAToken(ConfiguratorInputTypes.UpdateATokenInput calldata input) external;
@@ -278,10 +279,8 @@ interface IPoolConfigurator {
 
   /**
    * @notice Configures the reserve collateralization parameters.
-   * @dev All the values are expressed in percentages with two decimals of precision,
-   * so a value of 10000, results in 100.00%
-   * @dev The `liquidationBonus` value is always above 100%, so a value of 105%
-   * means the liquidator will receive a 5% bonus
+   * @dev All the values are expressed in bps. A value of 10000, results in 100.00%
+   * @dev The `liquidationBonus` is always above 100%. A value of 105% means the liquidator will receive a 5% bonus
    * @param asset The address of the underlying asset of the reserve
    * @param ltv The loan to value of the asset when used as collateral
    * @param liquidationThreshold The threshold at which loans using this asset as collateral will be considered undercollateralized
@@ -374,7 +373,7 @@ interface IPoolConfigurator {
   /**
    * @notice Updates the liquidation protocol fee of reserve.
    * @param asset The address of the underlying asset of the reserve
-   * @param newFee The new liquidation protocol fee of the reserve
+   * @param newFee The new liquidation protocol fee of the reserve, expressed in bps
    **/
   function setLiquidationProtocolFee(address asset, uint256 newFee) external;
 
@@ -394,14 +393,14 @@ interface IPoolConfigurator {
 
   /**
    * @notice Adds a new efficiency mode (eMode) category.
-   * @dev If 0x0 is provided as oracle address, the default asset oracles will be used to compute
-   * the overall debt and overcollateralization of the users using this category.
+   * @dev If zero is provided as oracle address, the default asset oracles will be used to compute the overall debt and
+   * overcollateralization of the users using this category.
    * @param categoryId The id of the category to be configured
    * @param ltv The ltv associated with the category
    * @param liquidationThreshold The liquidation threshold associated with the category
    * @param liquidationBonus The liquidation bonus associated with the category
-   * @param oracle The oracle associated with the category.
-   * @param label a label identifying the category
+   * @param oracle The oracle associated with the category
+   * @param label A label identifying the category
    **/
   function setEModeCategory(
     uint8 categoryId,
@@ -420,22 +419,25 @@ interface IPoolConfigurator {
 
   /**
    * @notice Updates the bridge fee collected by the protocol reserves.
-   * @param newBridgeProtocolFee The part of the fee sent to protocol
+   * @param newBridgeProtocolFee The part of the fee sent to protocol, expressed in bps
    */
   function updateBridgeProtocolFee(uint256 newBridgeProtocolFee) external;
 
   /**
    * @notice Updates the total flash loan premium.
-   * Flash loan premium consist in 2 parts:
+   * Total flash loan premium consists of two parts:
    * - A part is sent to aToken holders as extra balance
    * - A part is collected by the protocol reserves
-   * @param newFlashloanPremiumTotal The total premium in bps
+   * @dev Expressed in bps
+   * @dev The premium is calculated on the total amount borrowed
+   * @param newFlashloanPremiumTotal The total flashloan premium
    */
   function updateFlashloanPremiumTotal(uint256 newFlashloanPremiumTotal) external;
 
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
-   * @dev The premium is calculated on the total flashloan premium
+   * @dev Expressed in bps
+   * @dev The premium to protocol is calculated on the total flashloan premium
    * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to the protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;

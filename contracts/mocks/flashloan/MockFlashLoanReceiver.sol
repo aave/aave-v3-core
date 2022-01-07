@@ -13,9 +13,9 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   event ExecutedWithFail(address[] _assets, uint256[] _amounts, uint256[] _premiums);
   event ExecutedWithSuccess(address[] _assets, uint256[] _amounts, uint256[] _premiums);
 
-  bool _failExecution;
-  uint256 _amountToApprove;
-  bool _simulateEOA;
+  bool internal _failExecution;
+  uint256 internal _amountToApprove;
+  bool internal _simulateEOA;
 
   constructor(IPoolAddressesProvider provider) FlashLoanReceiverBase(provider) {}
 
