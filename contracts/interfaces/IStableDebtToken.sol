@@ -144,4 +144,10 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @return The debt balance of the user since the last burn/mint action
    **/
   function principalBalanceOf(address user) external view returns (uint256);
+
+  /**
+   * @notice Returns the address of the underlying asset of this stableDebtToken (E.g. WETH for stableDebtWETH)
+   * @return The address of the underlying asset
+   **/
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address);
 }

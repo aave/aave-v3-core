@@ -221,7 +221,7 @@ library GenericLogic {
   /**
    * @notice Calculates total debt of the user in the based currency used to normalize the values of the assets
    * @dev This fetches the `balanceOf` of the stable and variable debt tokens for the user. For gas reasons, the
-   * variable debt balance is calculated by fetching `scaledBalancesOf` normalized debt, which is cheaper than 
+   * variable debt balance is calculated by fetching `scaledBalancesOf` normalized debt, which is cheaper than
    * fetching `balanceOf`
    * @param user The address of the user
    * @param reserve The data of the reserve for which the total debt of the user is being calculated
