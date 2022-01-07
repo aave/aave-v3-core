@@ -419,7 +419,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Updates the bridge fee collected by the protocol reserves.
-   * @param newBridgeProtocolFee The part of the fee sent to protocol, expressed in bps
+   * @param newBridgeProtocolFee The part of the fee sent to the protocol treasury, expressed in bps
    */
   function updateBridgeProtocolFee(uint256 newBridgeProtocolFee) external;
 
@@ -438,7 +438,7 @@ interface IPoolConfigurator {
    * @notice Updates the flash loan premium collected by protocol reserves
    * @dev Expressed in bps
    * @dev The premium to protocol is calculated on the total flashloan premium
-   * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to the protocol
+   * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to the protocol treasury
    */
   function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
 

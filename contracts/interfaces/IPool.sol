@@ -616,7 +616,7 @@ interface IPool {
 
   /**
    * @notice Updates the protocol fee on the bridging
-   * @param bridgeProtocolFee The part of the premium sent to protocol
+   * @param bridgeProtocolFee The part of the premium sent to the protocol treasury
    */
   function updateBridgeProtocolFee(uint256 bridgeProtocolFee) external;
 
