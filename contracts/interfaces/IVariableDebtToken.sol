@@ -66,4 +66,10 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
     uint256 amount,
     uint256 index
   ) external returns (uint256);
+
+  /**
+   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for variableDebtWETH)
+   * @return The address of the underlying asset
+   **/
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address);
 }

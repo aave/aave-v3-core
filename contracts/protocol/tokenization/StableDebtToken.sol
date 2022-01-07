@@ -309,10 +309,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     return super.balanceOf(user);
   }
 
-  /**
-   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
-   * @return The address of the underlying asset
-   **/
+  /// @inheritdoc IStableDebtToken
   function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
     return _underlyingAsset;
   }

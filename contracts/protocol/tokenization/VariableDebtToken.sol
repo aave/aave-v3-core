@@ -162,10 +162,7 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return _userState[user].additionalData;
   }
 
-  /**
-   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
-   * @return The address of the underlying asset
-   **/
+  /// @inheritdoc IVariableDebtToken
   function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
     return _underlyingAsset;
   }
