@@ -33,6 +33,9 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   address internal _treasury;
   address internal _underlyingAsset;
 
+  /**
+   * @dev Only pool can call functions marked by this modifier.
+   **/
   modifier onlyPool() {
     require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;
@@ -43,6 +46,10 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     return ATOKEN_REVISION;
   }
 
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
   constructor(IPool pool)
     IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
   {
@@ -206,10 +213,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     return _userState[user].additionalData;
   }
 
-  /**
-   * @notice Returns the address of the Aave treasury, receiving the fees on this aToken
-   * @return Address of the Aave treasury
-   **/
+  /// @inheritdoc IAToken
   function RESERVE_TREASURY_ADDRESS() external view override returns (address) {
     return _treasury;
   }
@@ -298,7 +302,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   }
 
   /**
-   * @dev overrides the base function to fully implement IAToken
+   * @dev Overrides the base function to fully implement IAToken
    * @dev see `IncentivizedERC20.DOMAIN_SEPARATOR()` for more detailed documentation
    */
   function DOMAIN_SEPARATOR() public view override(IAToken, IncentivizedERC20) returns (bytes32) {
@@ -306,7 +310,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
   }
 
   /**
-   * @dev overrides the base function to fully implement IAToken
+   * @dev Overrides the base function to fully implement IAToken
    * @dev see `IncentivizedERC20.nonces()` for more detailed documentation
    */
   function nonces(address owner)

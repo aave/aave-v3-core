@@ -14,7 +14,13 @@ contract InitializableImmutableAdminUpgradeabilityProxy is
   BaseImmutableAdminUpgradeabilityProxy,
   InitializableUpgradeabilityProxy
 {
-  constructor(address admin) BaseImmutableAdminUpgradeabilityProxy(admin) {}
+  /**
+   * @dev Constructor.
+   * @param admin The address of the admin
+   */
+  constructor(address admin) BaseImmutableAdminUpgradeabilityProxy(admin) {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc BaseImmutableAdminUpgradeabilityProxy
   function _willFallback() internal override(BaseImmutableAdminUpgradeabilityProxy, Proxy) {
