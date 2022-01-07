@@ -46,14 +46,14 @@ library ValidationLogic {
    * @dev This constant represents the minimum borrow utilization rate threshold at which rebalances up are possible
    * Expressed in ray, a rate of 0.95e27 results in 95%
    */
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95 * 1e27;
+  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95e27;
 
   /**
    * @dev This constant represents below which health factor value it is possible to liquidate
    * the maximum percentage of borrower's debt.
    * A value of 0.95e18 results in 0.95
    */
-  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95 * 1e18;
+  uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
 
   /**
    * @dev Minimum health factor to consider a user position healthy
