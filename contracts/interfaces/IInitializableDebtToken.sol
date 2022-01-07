@@ -10,7 +10,7 @@ import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
  **/
 interface IInitializableDebtToken {
   /**
-   * @notice Emitted when a debt token is initialized
+   * @dev Emitted when a debt token is initialized
    * @param underlyingAsset The address of the underlying asset
    * @param pool The address of the associated pool
    * @param incentivesController The address of the incentives controller for this aToken

@@ -46,7 +46,8 @@ library IsolationModeLogic {
           (reserveCache.reserveConfiguration.getDecimals() -
             ReserveConfiguration.DEBT_CEILING_DECIMALS)).toUint128();
 
-      // since the debt ceiling does not take into account the interest accrued, it might happen that amount repaid > debt in isolation mode
+      // since the debt ceiling does not take into account the interest accrued, it might happen that amount
+      // repaid > debt in isolation mode
       if (isolationModeTotalDebt <= isolatedDebtRepaid) {
         reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
         emit IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, 0);

@@ -11,7 +11,7 @@ import {IInitializableDebtToken} from './IInitializableDebtToken.sol';
  **/
 interface IStableDebtToken is IInitializableDebtToken {
   /**
-   * @notice Emitted when new stable debt is minted
+   * @dev Emitted when new stable debt is minted
    * @param user The address of the user who triggered the minting
    * @param onBehalfOf The recipient of stable debt tokens
    * @param amount The amount minted (user entered amount + balance increase from interest)
@@ -33,7 +33,7 @@ interface IStableDebtToken is IInitializableDebtToken {
   );
 
   /**
-   * @notice Emitted when new stable debt is burned
+   * @dev Emitted when new stable debt is burned
    * @param user The address of the user
    * @param amount The amount being burned (user entered amount - balance increase from interest)
    * @param currentBalance The current balance of the user
@@ -61,7 +61,7 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param rate The rate of the debt being minted
    * @return True if it is the first borrow, false otherwise
    * @return The total stable debt
-   * @return The average stale borrow rate
+   * @return The average stable borrow rate
    **/
   function mint(
     address user,
@@ -144,4 +144,10 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @return The debt balance of the user since the last burn/mint action
    **/
   function principalBalanceOf(address user) external view returns (uint256);
+
+  /**
+   * @notice Returns the address of the underlying asset of this stableDebtToken (E.g. WETH for stableDebtWETH)
+   * @return The address of the underlying asset
+   **/
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address);
 }

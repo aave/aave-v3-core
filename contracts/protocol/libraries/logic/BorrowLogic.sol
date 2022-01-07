@@ -45,7 +45,6 @@ library BorrowLogic {
     uint256 amount,
     bool useATokens
   );
-
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
   event SwapBorrowRateMode(
     address indexed reserve,
@@ -56,7 +55,8 @@ library BorrowLogic {
 
   /**
    * @notice Implements the borrow feature. Borrowing allows users that provided collateral to draw liquidity from the
-   * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the isolated debt.
+   * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the
+   * isolated debt.
    * @dev  Emits the `Borrow()` event
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
@@ -167,8 +167,9 @@ library BorrowLogic {
   }
 
   /**
-   * @notice Implements the repay feature. Repaying transfers the underlying back to the aToken and clears the equivalent amount
-   * of debt for the user by burning the corresponding debt token. For isolated positions, it also reduces the isolated debt.
+   * @notice Implements the repay feature. Repaying transfers the underlying back to the aToken and clears the
+   * equivalent amount of debt for the user by burning the corresponding debt token. For isolated positions, it also
+   * reduces the isolated debt.
    * @dev  Emits the `Repay()` event
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
@@ -261,9 +262,10 @@ library BorrowLogic {
   }
 
   /**
-   * @notice Implements the rebalance stable borrow rate feature. In case of liquidity crunches on the protocol, stable rate borrows might need to be rebalanced
-   * to bring back equilibrium between the borrow and supply APYs.
-   * @dev The rules that define if a position can be rebalanced are implemented in `ValidationLogic.validateRebalanceStableBorrowRate()`. Emits the `RebalanceStableBorrowRate()` event
+   * @notice Implements the rebalance stable borrow rate feature. In case of liquidity crunches on the protocol, stable
+   * rate borrows might need to be rebalanced to bring back equilibrium between the borrow and supply APYs.
+   * @dev The rules that define if a position can be rebalanced are implemented in `ValidationLogic.validateRebalanceStableBorrowRate()`
+   * @dev Emits the `RebalanceStableBorrowRate()` event
    * @param reserve The data of the reserve of the asset being repaid
    * @param asset The asset of the position being rebalanced
    * @param user The user being rebalanced

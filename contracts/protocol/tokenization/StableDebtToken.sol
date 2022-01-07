@@ -26,13 +26,21 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
 
+  // Map of users address and the timestamp of their last update (userAddress => lastUpdateTimestamp)
   mapping(address => uint40) internal _timestamps;
-  uint128 _avgStableRate;
-  uint40 _totalSupplyTimestamp;
 
-  address internal _underlyingAsset;
+  uint128 internal _avgStableRate;
 
-  constructor(IPool pool) DebtTokenBase(pool) {}
+  // Timestamp of the last update of the total supply
+  uint40 internal _totalSupplyTimestamp;
+
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
+  constructor(IPool pool) DebtTokenBase(pool) {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
@@ -185,7 +193,7 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
 
     // Since the total supply and each single user debt accrue separately,
     // there might be accumulation errors so that the last borrower repaying
-    // mght actually try to repay more than the available debt supply.
+    // might actually try to repay more than the available debt supply.
     // In this case we simply set the total supply and the avg stable rate to 0
     if (previousSupply <= amount) {
       _avgStableRate = 0;
@@ -309,16 +317,8 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     return super.balanceOf(user);
   }
 
-  /**
-   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
-   * @return The address of the underlying asset
-   **/
-  function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
-    return _underlyingAsset;
-  }
-
-  /// @inheritdoc DebtTokenBase
-  function _getUnderlyingAssetAddress() internal view override returns (address) {
+  /// @inheritdoc IStableDebtToken
+  function UNDERLYING_ASSET_ADDRESS() external view override returns (address) {
     return _underlyingAsset;
   }
 

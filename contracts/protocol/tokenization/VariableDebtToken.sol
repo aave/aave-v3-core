@@ -25,9 +25,14 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   using SafeCast for uint256;
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
-  address internal _underlyingAsset;
 
-  constructor(IPool pool) DebtTokenBase(pool) {}
+  /**
+   * @dev Constructor.
+   * @param pool The address of the Pool contract
+   */
+  constructor(IPool pool) DebtTokenBase(pool) {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
@@ -162,16 +167,8 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
     return _userState[user].additionalData;
   }
 
-  /**
-   * @notice Returns the address of the underlying asset of this debtToken (E.g. WETH for aWETH)
-   * @return The address of the underlying asset
-   **/
-  function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
-    return _underlyingAsset;
-  }
-
-  /// @inheritdoc DebtTokenBase
-  function _getUnderlyingAssetAddress() internal view override returns (address) {
+  /// @inheritdoc IVariableDebtToken
+  function UNDERLYING_ASSET_ADDRESS() external view override returns (address) {
     return _underlyingAsset;
   }
 }

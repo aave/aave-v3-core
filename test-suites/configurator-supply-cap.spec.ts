@@ -61,17 +61,20 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
   it('Sets the supply cap for DAI and USDC to 1000 Unit, leaving 0 Units to reach the limit', async () => {
     const { configurator, dai, usdc, helpersContract } = testEnv;
 
+    const { supplyCap: oldUsdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: oldDaiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
+
     const newCap = '1000';
 
     expect(await configurator.setSupplyCap(usdc.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(usdc.address, newCap);
+      .withArgs(usdc.address, oldUsdcSupplyCap, newCap);
     expect(await configurator.setSupplyCap(dai.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(dai.address, newCap);
+      .withArgs(dai.address, oldDaiSupplyCap, newCap);
 
-    const usdcSupplyCap = (await helpersContract.getReserveCaps(usdc.address)).supplyCap;
-    const daiSupplyCap = (await helpersContract.getReserveCaps(dai.address)).supplyCap;
+    const { supplyCap: usdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: daiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
     expect(usdcSupplyCap).to.be.equal(newCap);
     expect(daiSupplyCap).to.be.equal(newCap);
@@ -109,17 +112,20 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
 
   it('Sets the supply cap for usdc and DAI to 1110 Units, leaving 110 Units to reach the limit', async () => {
     const { configurator, usdc, dai, helpersContract } = testEnv;
-    const newCap = '1110';
 
+    const { supplyCap: oldUsdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: oldDaiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
+
+    const newCap = '1110';
     expect(await configurator.setSupplyCap(usdc.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(usdc.address, newCap);
+      .withArgs(usdc.address, oldUsdcSupplyCap, newCap);
     expect(await configurator.setSupplyCap(dai.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(dai.address, newCap);
+      .withArgs(dai.address, oldDaiSupplyCap, newCap);
 
-    const usdcSupplyCap = (await helpersContract.getReserveCaps(usdc.address)).supplyCap;
-    const daiSupplyCap = (await helpersContract.getReserveCaps(dai.address)).supplyCap;
+    const { supplyCap: usdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: daiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
     expect(usdcSupplyCap).to.be.equal(newCap);
     expect(daiSupplyCap).to.be.equal(newCap);
@@ -224,17 +230,19 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
   it('Raises the supply cap for USDC and DAI to 2000 Units, leaving 800 Units to reach the limit', async () => {
     const { configurator, usdc, dai, helpersContract } = testEnv;
 
-    const newCap = '2000';
+    const { supplyCap: oldUsdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: oldDaiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
+    const newCap = '2000';
     expect(await configurator.setSupplyCap(usdc.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(usdc.address, newCap);
+      .withArgs(usdc.address, oldUsdcSupplyCap, newCap);
     expect(await configurator.setSupplyCap(dai.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(dai.address, newCap);
+      .withArgs(dai.address, oldDaiSupplyCap, newCap);
 
-    const usdcSupplyCap = (await helpersContract.getReserveCaps(usdc.address)).supplyCap;
-    const daiSupplyCap = (await helpersContract.getReserveCaps(dai.address)).supplyCap;
+    const { supplyCap: usdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: daiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
     expect(usdcSupplyCap).to.be.equal(newCap);
     expect(daiSupplyCap).to.be.equal(newCap);
@@ -262,17 +270,19 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
   it('Lowers the supply cap for USDC and DAI to 1200 Units (suppliedAmount > supplyCap)', async () => {
     const { configurator, usdc, dai, helpersContract } = testEnv;
 
-    const newCap = '1200';
+    const { supplyCap: oldUsdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: oldDaiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
+    const newCap = '1200';
     expect(await configurator.setSupplyCap(usdc.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(usdc.address, newCap);
+      .withArgs(usdc.address, oldUsdcSupplyCap, newCap);
     expect(await configurator.setSupplyCap(dai.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(dai.address, newCap);
+      .withArgs(dai.address, oldDaiSupplyCap, newCap);
 
-    const usdcSupplyCap = (await helpersContract.getReserveCaps(usdc.address)).supplyCap;
-    const daiSupplyCap = (await helpersContract.getReserveCaps(dai.address)).supplyCap;
+    const { supplyCap: usdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: daiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
     expect(usdcSupplyCap).to.be.equal(newCap);
     expect(daiSupplyCap).to.be.equal(newCap);
@@ -305,17 +315,19 @@ makeSuite('PoolConfigurator: Supply Cap', (testEnv: TestEnv) => {
   it('Raises the supply cap for USDC and DAI to MAX_SUPPLY_CAP', async () => {
     const { configurator, usdc, dai, helpersContract } = testEnv;
 
-    const newCap = MAX_SUPPLY_CAP;
+    const { supplyCap: oldUsdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: oldDaiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
+    const newCap = MAX_SUPPLY_CAP;
     expect(await configurator.setSupplyCap(usdc.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(usdc.address, newCap);
+      .withArgs(usdc.address, oldUsdcSupplyCap, newCap);
     expect(await configurator.setSupplyCap(dai.address, newCap))
       .to.emit(configurator, 'SupplyCapChanged')
-      .withArgs(dai.address, newCap);
+      .withArgs(dai.address, oldDaiSupplyCap, newCap);
 
-    const usdcSupplyCap = (await helpersContract.getReserveCaps(usdc.address)).supplyCap;
-    const daiSupplyCap = (await helpersContract.getReserveCaps(dai.address)).supplyCap;
+    const { supplyCap: usdcSupplyCap } = await helpersContract.getReserveCaps(usdc.address);
+    const { supplyCap: daiSupplyCap } = await helpersContract.getReserveCaps(dai.address);
 
     expect(usdcSupplyCap).to.be.equal(newCap);
     expect(daiSupplyCap).to.be.equal(newCap);
