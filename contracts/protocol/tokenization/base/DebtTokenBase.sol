@@ -27,6 +27,8 @@ abstract contract DebtTokenBase is
 
   IPool public immutable POOL;
 
+  address internal _underlyingAsset;
+
   /**
    * @dev Only pool can call functions marked by this modifier.
    **/
@@ -98,13 +100,6 @@ abstract contract DebtTokenBase is
   }
 
   /**
-   * @notice Returns the address of the underlying asset of this debt token
-   * @dev For internal usage in the logic of the parent contracts
-   * @return The address of the underlying asset
-   **/
-  function _getUnderlyingAssetAddress() internal view virtual returns (address);
-
-  /**
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
    **/
@@ -148,7 +143,7 @@ abstract contract DebtTokenBase is
     uint256 amount
   ) internal {
     _borrowAllowances[delegator][delegatee] = amount;
-    emit BorrowAllowanceDelegated(delegator, delegatee, _getUnderlyingAssetAddress(), amount);
+    emit BorrowAllowanceDelegated(delegator, delegatee, _underlyingAsset, amount);
   }
 
   /**
@@ -166,6 +161,6 @@ abstract contract DebtTokenBase is
 
     _borrowAllowances[delegator][delegatee] = newAllowance;
 
-    emit BorrowAllowanceDelegated(delegator, delegatee, _getUnderlyingAssetAddress(), newAllowance);
+    emit BorrowAllowanceDelegated(delegator, delegatee, _underlyingAsset, newAllowance);
   }
 }
