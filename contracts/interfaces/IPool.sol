@@ -685,13 +685,13 @@ interface IPool {
 
   /**
    * @notice Returns the part of the bridge fees sent to protocol
-   * @return The bridge fee sent to the protocol
+   * @return The bridge fee sent to the protocol treasury
    */
   function BRIDGE_PROTOCOL_FEE() external view returns (uint256);
 
   /**
    * @notice Returns the part of the flashloan fees sent to protocol
-   * @return The flashloan fee sent to the protocol
+   * @return The flashloan fee sent to the protocol treasury
    */
   function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint256);
 
