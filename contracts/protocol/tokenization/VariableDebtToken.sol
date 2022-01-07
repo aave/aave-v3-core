@@ -25,7 +25,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
   using SafeCast for uint256;
 
   uint256 public constant DEBT_TOKEN_REVISION = 0x2;
-  address internal _underlyingAsset;
 
   /**
    * @dev Constructor.
@@ -173,11 +172,6 @@ contract VariableDebtToken is DebtTokenBase, IVariableDebtToken {
    * @return The address of the underlying asset
    **/
   function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
-    return _underlyingAsset;
-  }
-
-  /// @inheritdoc DebtTokenBase
-  function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;
   }
 }

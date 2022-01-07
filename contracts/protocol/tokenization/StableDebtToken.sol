@@ -34,8 +34,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
   // Timestamp of the last update of the total supply
   uint40 _totalSupplyTimestamp;
 
-  address internal _underlyingAsset;
-
   /**
    * @dev Constructor.
    * @param pool The address of the Pool contract
@@ -324,11 +322,6 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @return The address of the underlying asset
    **/
   function UNDERLYING_ASSET_ADDRESS() external view returns (address) {
-    return _underlyingAsset;
-  }
-
-  /// @inheritdoc DebtTokenBase
-  function _getUnderlyingAssetAddress() internal view override returns (address) {
     return _underlyingAsset;
   }
 
