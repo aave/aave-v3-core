@@ -54,16 +54,16 @@ export const getReserveData = async (
 
   const totalDebt = reserveData.totalStableDebt.add(reserveData.totalVariableDebt);
 
-  const borrowUtilizationRate = totalDebt.eq(0)
+  const borrowUsageRatio = totalDebt.eq(0)
     ? BigNumber.from(0)
     : totalDebt.rayDiv(availableLiquidity.add(totalDebt));
 
-  let supplyUtilizationRate = totalDebt.eq(0)
+  let supplyUsageRatio = totalDebt.eq(0)
     ? BigNumber.from(0)
     : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
 
-  supplyUtilizationRate =
-    supplyUtilizationRate > borrowUtilizationRate ? borrowUtilizationRate : supplyUtilizationRate;
+  supplyUsageRatio =
+    supplyUsageRatio > borrowUsageRatio ? borrowUsageRatio : supplyUsageRatio;
 
   return {
     reserveFactor,
@@ -71,8 +71,8 @@ export const getReserveData = async (
     accruedToTreasuryScaled,
     availableLiquidity,
     totalLiquidity,
-    borrowUtilizationRate,
-    supplyUtilizationRate,
+    borrowUsageRatio,
+    supplyUsageRatio,
     totalStableDebt: reserveData.totalStableDebt,
     totalVariableDebt: reserveData.totalVariableDebt,
     liquidityRate: reserveData.liquidityRate,

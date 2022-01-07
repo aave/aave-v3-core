@@ -32,7 +32,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     rateStrategyStableTwo.baseStableRateOffset
   );
 
-  const { INVALID_OPTIMAL_UTILIZATION_RATE, INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO } =
+  const { INVALID_OPTIMAL_USAGE_RATIO, INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO } =
     ProtocolErrors;
 
   before(async () => {
@@ -43,7 +43,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
 
     strategyInstance = await deployDefaultReserveInterestRateStrategy([
       addressesProvider.address,
-      rateStrategyStableTwo.optimalUtilizationRate,
+      rateStrategyStableTwo.optimalUsageRatio,
       rateStrategyStableTwo.baseVariableBorrowRate,
       rateStrategyStableTwo.variableRateSlope1,
       rateStrategyStableTwo.variableRateSlope2,
@@ -55,7 +55,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     ]);
   });
 
-  it('Checks rates at 0% utilization rate, empty reserve', async () => {
+  it('Checks rates at 0% usage ratio, empty reserve', async () => {
     let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: 0,
@@ -82,7 +82,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     );
   });
 
-  it('Checks rates at 80% utilization rate', async () => {
+  it('Checks rates at 80% usage ratio', async () => {
     let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: '200000000000000000',
@@ -126,7 +126,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     }
   });
 
-  it('Checks rates at 100% utilization rate', async () => {
+  it('Checks rates at 100% usage ratio', async () => {
     let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: '0',
@@ -172,7 +172,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     }
   });
 
-  it('Checks rates at 100% utilization rate, 50% stable debt and 50% variable debt, with a 10% avg stable rate', async () => {
+  it('Checks rates at 100% usage ratio, 50% stable debt and 50% variable debt, with a 10% avg stable rate', async () => {
     let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: '0',
@@ -215,7 +215,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     );
   });
 
-  it('Checks rates at 80% borrow utilization rate and 50% supply utilization due to minted tokens', async () => {
+  it('Checks rates at 80% borrow usage ratio and 50% supply usage due to minted tokens', async () => {
     let params: CalculateInterestRatesParams = {
       unbacked: '600000000000000000',
       liquidityAdded: '200000000000000000',
@@ -253,7 +253,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     );
   });
 
-  it('Checks rates at 80% borrow utilization rate and 0.8% supply utilization due to minted tokens', async () => {
+  it('Checks rates at 80% borrow usage ratio and 0.8% supply usage due to minted tokens', async () => {
     const availableLiquidity = BigNumber.from('200000000000000000');
     const totalVariableDebt = BigNumber.from('800000000000000000');
 
@@ -299,7 +299,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     }
   });
 
-  it('Checks rates at 0.8% utilization', async () => {
+  it('Checks rates at 0.8% usage', async () => {
     let params: CalculateInterestRatesParams = {
       unbacked: 0,
       liquidityAdded: '9920000000000000000000',
@@ -318,11 +318,11 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
       2: currentVariableBorrowRate,
     } = await strategyInstance.calculateInterestRates(params);
 
-    const utilRate = BigNumber.from(1).ray().percentMul(80);
-    const optimalRate = BigNumber.from(rateStrategyStableTwo.optimalUtilizationRate);
+    const usageRatio = BigNumber.from(1).ray().percentMul(80);
+    const optimalRate = BigNumber.from(rateStrategyStableTwo.optimalUsageRatio);
 
     const expectedVariableRate = BigNumber.from(rateStrategyStableTwo.baseVariableBorrowRate).add(
-      BigNumber.from(rateStrategyStableTwo.variableRateSlope1).rayMul(utilRate.rayDiv(optimalRate))
+      BigNumber.from(rateStrategyStableTwo.variableRateSlope1).rayMul(usageRatio.rayDiv(optimalRate))
     );
 
     expect(currentLiquidityRate).to.be.equal(
@@ -336,7 +336,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
 
     expect(currentStableBorrowRate).to.be.equal(
       baseStableRate.add(
-        BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(utilRate.rayDiv(optimalRate))
+        BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(usageRatio.rayDiv(optimalRate))
       ),
       'Invalid stable rate'
     );
@@ -349,8 +349,8 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
   });
 
   it('Checks getters', async () => {
-    expect(await strategyInstance.OPTIMAL_UTILIZATION_RATE()).to.be.eq(
-      rateStrategyStableTwo.optimalUtilizationRate
+    expect(await strategyInstance.OPTIMAL_USAGE_RATIO()).to.be.eq(
+      rateStrategyStableTwo.optimalUsageRatio
     );
     expect(await strategyInstance.getBaseVariableBorrowRate()).to.be.eq(
       rateStrategyStableTwo.baseVariableBorrowRate
@@ -369,7 +369,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     );
   });
 
-  it('Deploy an interest rate strategy with optimalUtilizationRate out of range (expect revert)', async () => {
+  it('Deploy an interest rate strategy with optimalUsageRatio out of range (expect revert)', async () => {
     const { addressesProvider } = testEnv;
 
     await expect(
@@ -385,7 +385,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
         rateStrategyStableTwo.stableRateExcessOffset,
         rateStrategyStableTwo.optimalStableToTotalDebtRatio,
       ])
-    ).to.be.revertedWith(INVALID_OPTIMAL_UTILIZATION_RATE);
+    ).to.be.revertedWith(INVALID_OPTIMAL_USAGE_RATIO);
   });
 
   it('Deploy an interest rate strategy with optimalStableToTotalDebtRatio out of range (expect revert)', async () => {
@@ -393,7 +393,7 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     await expect(
       deployDefaultReserveInterestRateStrategy([
         addressesProvider.address,
-        rateStrategyStableTwo.optimalUtilizationRate,
+        rateStrategyStableTwo.optimalUsageRatio,
         rateStrategyStableTwo.baseVariableBorrowRate,
         rateStrategyStableTwo.variableRateSlope1,
         rateStrategyStableTwo.variableRateSlope2,

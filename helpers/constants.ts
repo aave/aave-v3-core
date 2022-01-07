@@ -25,8 +25,8 @@ export const ONE_ADDRESS = '0x0000000000000000000000000000000000000001';
 // ----------------
 // PROTOCOL GLOBAL PARAMS
 // ----------------
-export const OPTIMAL_UTILIZATION_RATE = parseUnits('0.8', 27);
-export const EXCESS_UTILIZATION_RATE = parseUnits('0.2', 27);
+export const OPTIMAL_USAGE_RATIO = parseUnits('0.8', 27);
+export const EXCESS_USAGE_RATIO = parseUnits('0.2', 27);
 export const MOCK_USD_PRICE_IN_WEI = '5848466240000000';
 export const USD_ADDRESS = '0x10F7Fc1F91Ba351f9C629c5947AD69bD03C05b96';
 export const AAVE_REFERRAL = '0';
