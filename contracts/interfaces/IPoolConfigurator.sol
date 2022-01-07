@@ -83,8 +83,8 @@ interface IPoolConfigurator {
   /**
    * @dev Emitted when a reserve factor is updated.
    * @param asset The address of the underlying asset of the reserve
-   * @param oldReserveFactor The old reserve factor
-   * @param newReserveFactor The new reserve factor
+   * @param oldReserveFactor The old reserve factor, expressed in bps
+   * @param newReserveFactor The new reserve factor, expressed in bps
    **/
   event ReserveFactorChanged(
     address indexed asset,
@@ -111,8 +111,8 @@ interface IPoolConfigurator {
   /**
    * @dev Emitted when the liquidation protocol fee of a reserve is updated.
    * @param asset The address of the underlying asset of the reserve
-   * @param oldFee The old fee
-   * @param newFee The new fee
+   * @param oldFee The old liquidation protocol fee, expressed in bps
+   * @param newFee The new liquidation protocol fee, expressed in bps
    **/
   event LiquidationProtocolFeeChanged(address indexed asset, uint256 oldFee, uint256 newFee);
 
@@ -212,15 +212,15 @@ interface IPoolConfigurator {
 
   /**
    * @dev Emitted when the bridge protocol fee is updated.
-   * @param oldBridgeProtocolFee The old protocol fee
-   * @param newBridgeProtocolFee The new protocol fee
+   * @param oldBridgeProtocolFee The old protocol fee, expressed in bps
+   * @param newBridgeProtocolFee The new protocol fee, expressed in bps
    */
   event BridgeProtocolFeeUpdated(uint256 oldBridgeProtocolFee, uint256 newBridgeProtocolFee);
 
   /**
    * @dev Emitted when the total premium on flashloans is updated.
-   * @param oldFlashloanPremiumTotal The old premium
-   * @param newFlashloanPremiumTotal The new premium
+   * @param oldFlashloanPremiumTotal The old premium, expressed in bps
+   * @param newFlashloanPremiumTotal The new premium, expressed in bps
    **/
   event FlashloanPremiumTotalUpdated(
     uint256 oldFlashloanPremiumTotal,
@@ -229,8 +229,8 @@ interface IPoolConfigurator {
 
   /**
    * @dev Emitted when the part of the premium that goes to protocol is updated.
-   * @param oldFlashloanPremiumToProtocol The old premium
-   * @param newFlashloanPremiumToProtocol The new premium
+   * @param oldFlashloanPremiumToProtocol The old premium, expressed in bps
+   * @param newFlashloanPremiumToProtocol The new premium, expressed in bps
    **/
   event FlashloanPremiumToProtocolUpdated(
     uint256 oldFlashloanPremiumToProtocol,
@@ -279,10 +279,8 @@ interface IPoolConfigurator {
 
   /**
    * @notice Configures the reserve collateralization parameters.
-   * @dev All the values are expressed in percentages with two decimals of precision,
-   * so a value of 10000, results in 100.00%
-   * @dev The `liquidationBonus` value is always above 100%, so a value of 105%
-   * means the liquidator will receive a 5% bonus
+   * @dev All the values are expressed in bps. A value of 10000, results in 100.00%
+   * @dev The `liquidationBonus` is always above 100%. A value of 105% means the liquidator will receive a 5% bonus
    * @param asset The address of the underlying asset of the reserve
    * @param ltv The loan to value of the asset when used as collateral
    * @param liquidationThreshold The threshold at which loans using this asset as collateral will be considered undercollateralized
@@ -375,7 +373,7 @@ interface IPoolConfigurator {
   /**
    * @notice Updates the liquidation protocol fee of reserve.
    * @param asset The address of the underlying asset of the reserve
-   * @param newFee The new liquidation protocol fee of the reserve
+   * @param newFee The new liquidation protocol fee of the reserve, expressed in bps
    **/
   function setLiquidationProtocolFee(address asset, uint256 newFee) external;
 
@@ -395,8 +393,8 @@ interface IPoolConfigurator {
 
   /**
    * @notice Adds a new efficiency mode (eMode) category.
-   * @dev If 0x0 is provided as oracle address, the default asset oracles will be used to compute
-   * the overall debt and overcollateralization of the users using this category.
+   * @dev If zero is provided as oracle address, the default asset oracles will be used to compute the overall debt and
+   * overcollateralization of the users using this category.
    * @param categoryId The id of the category to be configured
    * @param ltv The ltv associated with the category
    * @param liquidationThreshold The liquidation threshold associated with the category
@@ -421,23 +419,24 @@ interface IPoolConfigurator {
 
   /**
    * @notice Updates the bridge fee collected by the protocol reserves.
-   * @param newBridgeProtocolFee The part of the fee sent to protocol
+   * @param newBridgeProtocolFee The part of the fee sent to protocol, expressed in bps
    */
   function updateBridgeProtocolFee(uint256 newBridgeProtocolFee) external;
 
   /**
    * @notice Updates the total flash loan premium.
-   * Flash loan premium consists of two parts:
-   * - A part is sent to aToken holders and accumulated to the reserve index
-   * - A part is collected by the protocol treasury
+   * Total flash loan premium consists of two parts:
+   * - A part is sent to aToken holders as extra balance
+   * - A part is collected by the protocol reserves
    * @dev Expressed in bps
-   * @param newFlashloanPremiumTotal The total premium in bps
+   * @param newFlashloanPremiumTotal The total flashloan premium
    */
   function updateFlashloanPremiumTotal(uint256 newFlashloanPremiumTotal) external;
 
   /**
-   * @notice Updates the flash loan premium collected by the protocol treasury
-   * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to the protocol treasury
+   * @notice Updates the flash loan premium collected by protocol reserves
+   * @dev Expressed in bps
+   * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to protocol
    */
   function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
 
