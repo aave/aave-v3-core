@@ -21,8 +21,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } =
     ProtocolErrors;
   const TOTAL_PREMIUM = 9;
-  const PREMIUM_TO_PROTOCOL = 3;
-  const PREMIUM_TO_LP = TOTAL_PREMIUM - PREMIUM_TO_PROTOCOL;
+  const PREMIUM_TO_PROTOCOL = 3000;
 
   before(async () => {
     const { addressesProvider, deployer } = testEnv;
@@ -32,7 +31,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     ).deploy(addressesProvider.address);
   });
 
-  it('Configurator sets total premium = 9 bps, premium to protocol = 3 bps', async () => {
+  it('Configurator sets total premium = 9 bps, premium to protocol = 30%', async () => {
     const { configurator, pool } = testEnv;
     await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
     await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
@@ -69,8 +68,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const wethFlashBorrowedAmount = ethers.utils.parseEther('0.8');
     const wethTotalFees = wethFlashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
-    const wethFeesToProtocol = wethFlashBorrowedAmount.mul(PREMIUM_TO_PROTOCOL).div(10000);
-    const wethFeesToLp = wethFlashBorrowedAmount.mul(PREMIUM_TO_LP).div(10000);
+    const wethFeesToProtocol = wethTotalFees.mul(PREMIUM_TO_PROTOCOL).div(10000);
+    const wethFeesToLp = wethTotalFees.sub(wethFeesToProtocol);
 
     const wethLiquidityIndexAdded = wethFeesToLp
       .mul(BigNumber.from(10).pow(27))
@@ -142,8 +141,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const flashBorrowedAmount = totalLiquidityBefore;
 
     const totalFees = flashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
-    const feesToProtocol = flashBorrowedAmount.mul(PREMIUM_TO_PROTOCOL).div(10000);
-    const feesToLp = flashBorrowedAmount.mul(PREMIUM_TO_LP).div(10000);
+    const feesToProtocol = totalFees.mul(PREMIUM_TO_PROTOCOL).div(10000);
+    const feesToLp = totalFees.sub(feesToProtocol);
     const liquidityIndexBefore = reserveData.liquidityIndex;
     const liquidityIndexAdded = feesToLp
       .mul(BigNumber.from(10).pow(27))
@@ -261,8 +260,8 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
 
     const flashBorrowedAmount = await convertToCurrencyDecimals(usdc.address, '500');
     const totalFees = flashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
-    const feesToProtocol = flashBorrowedAmount.mul(PREMIUM_TO_PROTOCOL).div(10000);
-    const feesToLp = flashBorrowedAmount.mul(PREMIUM_TO_LP).div(10000);
+    const feesToProtocol = totalFees.mul(PREMIUM_TO_PROTOCOL).div(10000);
+    const feesToLp = totalFees.sub(feesToProtocol);
     const liquidityIndexAdded = feesToLp
       .mul(ethers.BigNumber.from(10).pow(27))
       .div(await aUsdc.totalSupply());
