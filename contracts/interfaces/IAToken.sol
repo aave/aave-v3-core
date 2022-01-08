@@ -12,38 +12,6 @@ import {IInitializableAToken} from './IInitializableAToken.sol';
  **/
 interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
-   * @dev Emitted after the mint action
-   * @param caller The address performing the mint
-   * @param onBehalfOf The address of the user that will receive the minted aTokens
-   * @param value The amount being minted (user entered amount + balance increase from interest)
-   * @param balanceIncrease The increase in balance since the last action of the user
-   * @param index The next liquidity index of the reserve
-   **/
-  event Mint(
-    address indexed caller,
-    address indexed onBehalfOf,
-    uint256 value,
-    uint256 balanceIncrease,
-    uint256 index
-  );
-
-  /**
-   * @dev Emitted after aTokens are burned
-   * @param from The address from which the aTokens will be burned
-   * @param target The address that will receive the underlying
-   * @param value The amount being burned (user entered amount - balance increase from interest)
-   * @param balanceIncrease The increase in balance since the last action of the user
-   * @param index The next liquidity index of the reserve
-   **/
-  event Burn(
-    address indexed from,
-    address indexed target,
-    uint256 value,
-    uint256 balanceIncrease,
-    uint256 index
-  );
-
-  /**
    * @dev Emitted during the transfer action
    * @param from The user whose tokens are being transferred
    * @param to The recipient

@@ -20,7 +20,7 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
  * @notice Implements a stable debt token to track the borrowing positions of users
  * at stable rate mode
  **/
-contract StableDebtToken is IStableDebtToken, DebtTokenBase {
+contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
@@ -38,7 +38,10 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
    * @dev Constructor.
    * @param pool The address of the Pool contract
    */
-  constructor(IPool pool) DebtTokenBase(pool) {
+  constructor(IPool pool)
+    DebtTokenBase()
+    IncentivizedERC20(pool, 'STABLE_DEBT_TOKEN_IMPL', 'STABLE_DEBT_TOKEN_IMPL', 0)
+  {
     // Intentionally left blank
   }
 
@@ -380,5 +383,41 @@ contract StableDebtToken is IStableDebtToken, DebtTokenBase {
     if (address(_incentivesController) != address(0)) {
       _incentivesController.handleAction(account, oldTotalSupply, oldAccountBalance);
     }
+  }
+
+  function _EIP712BaseId() internal view virtual override returns (string memory) {
+    return name();
+  }
+
+  /**
+   * @dev Being non transferrable, the debt token does not implement any of the
+   * standard ERC20 functions for transfer and allowance.
+   **/
+  function transfer(address, uint256) external virtual override returns (bool) {
+    revert(Errors.OPERATION_NOT_SUPPORTED);
+  }
+
+  function allowance(address, address) external view virtual override returns (uint256) {
+    revert(Errors.OPERATION_NOT_SUPPORTED);
+  }
+
+  function approve(address, uint256) external virtual override returns (bool) {
+    revert(Errors.OPERATION_NOT_SUPPORTED);
+  }
+
+  function transferFrom(
+    address,
+    address,
+    uint256
+  ) external virtual override returns (bool) {
+    revert(Errors.OPERATION_NOT_SUPPORTED);
+  }
+
+  function increaseAllowance(address, uint256) external virtual override returns (bool) {
+    revert(Errors.OPERATION_NOT_SUPPORTED);
+  }
+
+  function decreaseAllowance(address, uint256) external virtual override returns (bool) {
+    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 }

@@ -23,6 +23,7 @@
     "coverage": ". ./setup-test-env.sh && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test-suites/*.spec.ts'",
     "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test ./test-suites/*.spec.ts",
     "test-scenarios": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
+    "test-events": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/atoken-event-accounting.spec.ts",
     "test-subgraph:scenarios": ". ./setup-test-env.sh  && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
     "ci:test": ". ./setup-test-env.sh  && npm run test",
     "ci:clean": "rm -rf ./artifacts ./cache ./types ./temp-artifacts",

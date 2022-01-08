@@ -5,7 +5,9 @@ import {Errors} from '../../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
-import {IncentivizedERC20} from '../base/IncentivizedERC20.sol';
+import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {EIP712Base} from './EIP712Base.sol';
+import {Context} from '../../../dependencies/openzeppelin/contracts/Context.sol';
 
 /**
  * @title DebtTokenBase
@@ -14,8 +16,9 @@ import {IncentivizedERC20} from '../base/IncentivizedERC20.sol';
  * @dev Transfer and approve functionalities are disabled since its a non-transferable token.
  */
 abstract contract DebtTokenBase is
-  IncentivizedERC20,
   VersionedInitializable,
+  EIP712Base,
+  Context,
   ICreditDelegationToken
 {
   // Map of borrow allowances (delegator => delegatee => borrowAllowanceAmount)
@@ -25,27 +28,12 @@ abstract contract DebtTokenBase is
   bytes32 public constant DELEGATION_WITH_SIG_TYPEHASH =
     keccak256('DelegationWithSig(address delegatee,uint256 value,uint256 nonce,uint256 deadline)');
 
-  IPool public immutable POOL;
-
   address internal _underlyingAsset;
 
   /**
-   * @dev Only pool can call functions marked by this modifier.
-   **/
-  modifier onlyPool() {
-    require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
-    _;
-  }
-
-  /**
    * @dev Constructor.
-   * @param pool The address of the Pool contract
    */
-  constructor(IPool pool)
-    IncentivizedERC20(pool.ADDRESSES_PROVIDER(), 'DEBT_TOKEN_IMPL', 'DEBT_TOKEN_IMPL', 0)
-  {
-    POOL = pool;
-  }
+  constructor() EIP712Base() {}
 
   /// @inheritdoc ICreditDelegationToken
   function approveDelegation(address delegatee, uint256 amount) external override {
@@ -97,38 +85,6 @@ abstract contract DebtTokenBase is
     returns (uint256)
   {
     return _borrowAllowances[fromUser][toUser];
-  }
-
-  /**
-   * @dev Being non transferrable, the debt token does not implement any of the
-   * standard ERC20 functions for transfer and allowance.
-   **/
-  function transfer(address, uint256) external virtual override returns (bool) {
-    revert(Errors.OPERATION_NOT_SUPPORTED);
-  }
-
-  function allowance(address, address) external view virtual override returns (uint256) {
-    revert(Errors.OPERATION_NOT_SUPPORTED);
-  }
-
-  function approve(address, uint256) external virtual override returns (bool) {
-    revert(Errors.OPERATION_NOT_SUPPORTED);
-  }
-
-  function transferFrom(
-    address,
-    address,
-    uint256
-  ) external virtual override returns (bool) {
-    revert(Errors.OPERATION_NOT_SUPPORTED);
-  }
-
-  function increaseAllowance(address, uint256) external virtual override returns (bool) {
-    revert(Errors.OPERATION_NOT_SUPPORTED);
-  }
-
-  function decreaseAllowance(address, uint256) external virtual override returns (bool) {
-    revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
   /**
