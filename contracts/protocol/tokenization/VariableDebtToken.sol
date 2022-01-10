@@ -19,7 +19,7 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
  * @notice Implements a variable debt token to track the borrowing positions of users
  * at variable rate mode
  **/
-contract VariableDebtToken is ScaledBalanceTokenBase, DebtTokenBase, IVariableDebtToken {
+contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
