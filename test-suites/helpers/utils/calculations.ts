@@ -431,7 +431,7 @@ export const calcExpectedReserveDataAfterBorrow = (
     );
 
     [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-      calcExpectedUtilizationRates(
+      calcExpectedUsageRatios(
         expectedReserveData.totalStableDebt,
         expectedReserveData.totalVariableDebt,
         expectedReserveData.availableLiquidity,
@@ -465,7 +465,7 @@ export const calcExpectedReserveDataAfterBorrow = (
     );
 
     [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-      calcExpectedUtilizationRates(
+      calcExpectedUsageRatios(
         expectedReserveData.totalStableDebt,
         expectedReserveData.totalVariableDebt,
         expectedReserveData.availableLiquidity,
@@ -496,7 +496,7 @@ export const calcExpectedReserveDataAfterBorrow = (
     );
 
     [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-      calcExpectedUtilizationRates(
+      calcExpectedUsageRatios(
         expectedReserveData.totalStableDebt,
         expectedReserveData.totalVariableDebt,
         expectedReserveData.availableLiquidity,
@@ -602,7 +602,7 @@ export const calcExpectedReserveDataAfterRepay = (
 
   // Update usage ratio because of debt change
   [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-    calcExpectedUtilizationRates(
+    calcExpectedUsageRatios(
       expectedReserveData.totalStableDebt,
       expectedReserveData.totalVariableDebt,
       expectedReserveData.availableLiquidity,
@@ -880,7 +880,7 @@ export const calcExpectedReserveDataAfterSwapRateMode = (
   }
 
   [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-    calcExpectedUtilizationRates(
+    calcExpectedUsageRatios(
       expectedReserveData.totalStableDebt,
       expectedReserveData.totalVariableDebt,
       expectedReserveData.availableLiquidity,
@@ -1020,7 +1020,7 @@ export const calcExpectedReserveDataAfterStableRateRebalance = (
   );
 
   [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-    calcExpectedUtilizationRates(
+    calcExpectedUsageRatios(
       expectedReserveData.totalStableDebt,
       expectedReserveData.totalVariableDebt,
       expectedReserveData.availableLiquidity,
@@ -1248,7 +1248,7 @@ export const calcExpectedInterestRates = (
     reserveIndex
   ];
 
-  const [borrowUsageRatio, supplyUsageRatio] = calcExpectedUtilizationRates(
+  const [borrowUsageRatio, supplyUsageRatio] = calcExpectedUsageRatios(
     totalStableDebt,
     totalVariableDebt,
     availableLiquidity,
@@ -1345,7 +1345,7 @@ export const calcExpectedOverallBorrowRate = (
   return overallBorrowRate;
 };
 
-export const calcExpectedUtilizationRates = (
+export const calcExpectedUsageRatios = (
   totalStableDebt: BigNumber,
   totalVariableDebt: BigNumber,
   availableLiquidity: BigNumber,
@@ -1562,7 +1562,7 @@ const updateLiquidityAndUsageRatios = (
   );
 
   [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-    calcExpectedUtilizationRates(
+    calcExpectedUsageRatios(
       expectedReserveData.totalStableDebt,
       expectedReserveData.totalVariableDebt,
       expectedReserveData.availableLiquidity,
@@ -1576,7 +1576,7 @@ const updateTotalLiquidityAndUsageRatio = (expectedReserveData: ReserveData) => 
   );
 
   [expectedReserveData.borrowUsageRatio, expectedReserveData.supplyUsageRatio] =
-    calcExpectedUtilizationRates(
+    calcExpectedUsageRatios(
       expectedReserveData.totalStableDebt,
       expectedReserveData.totalVariableDebt,
       expectedReserveData.availableLiquidity,
