@@ -5,7 +5,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
 import {IAaveIncentivesController} from '../../../interfaces/IAaveIncentivesController.sol';
 import {IPool} from '../../../interfaces/IPool.sol';
 
-abstract contract MintableIncentivizedERC20 is IncentivizedERC20 {
+contract MintableIncentivizedERC20 is IncentivizedERC20 {
   constructor(
     IPool pool,
     string memory name,

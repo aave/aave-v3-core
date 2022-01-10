@@ -17,7 +17,7 @@ import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.so
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
  * @notice Basic ERC20 implementation
  **/
-abstract contract IncentivizedERC20 is IERC20, IERC20Detailed, Context {
+contract IncentivizedERC20 is IERC20Detailed, Context {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 

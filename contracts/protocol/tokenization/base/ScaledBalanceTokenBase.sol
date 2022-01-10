@@ -13,7 +13,7 @@ import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.so
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
  * @notice Basic ERC20 implementation
  **/
-abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBalanceToken {
+contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBalanceToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
