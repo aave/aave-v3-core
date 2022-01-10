@@ -3,9 +3,7 @@ pragma solidity 0.8.10;
 
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
-import {IPool} from '../../../interfaces/IPool.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
-import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {EIP712Base} from './EIP712Base.sol';
 import {Context} from '../../../dependencies/openzeppelin/contracts/Context.sol';
 
