@@ -1236,14 +1236,6 @@ export const calcExpectedInterestRates = (
   totalLiquidity: BigNumber
 ): BigNumber[] => {
   const { reservesParams } = configuration;
-  /*if (totalLiquidity) {
-    console.log(
-      `util rate:  ${usageRatio} ${totalStableDebt.add(
-        totalVariableDebt
-      )} ${totalLiquidity} ${totalStableDebt.add(totalVariableDebt).rayDiv(totalLiquidity)}js`
-    );
-  }*/
-
   const reserveIndex = Object.keys(reservesParams).findIndex((value) => value === reserveSymbol);
   const [, reserveConfiguration] = (Object.entries(reservesParams) as [string, IReserveParams][])[
     reserveIndex
