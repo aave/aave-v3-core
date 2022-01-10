@@ -88,7 +88,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) public override onlyPool returns (bool, uint256) {
+  ) external override onlyPool returns (bool, uint256) {
     if (user != onBehalfOf) {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
