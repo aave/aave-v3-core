@@ -15,13 +15,13 @@ abstract contract EIP712Base {
   mapping(address => uint256) internal _nonces;
 
   bytes32 internal _domainSeparator;
-  uint256 internal immutable _chainId;
+  uint256 internal immutable CHAIN_ID;
 
   /**
    * @dev Constructor.
    */
   constructor() {
-    _chainId = block.chainid;
+    CHAIN_ID = block.chainid;
   }
 
   /**
@@ -30,7 +30,7 @@ abstract contract EIP712Base {
    * @return The domain separator of the token at current chain
    */
   function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
-    if (block.chainid == _chainId) {
+    if (block.chainid == CHAIN_ID) {
       return _domainSeparator;
     }
     return _calculateDomainSeparator();
