@@ -10,7 +10,7 @@ interface IScaledBalanceToken {
   /**
    * @dev Emitted after the mint action
    * @param caller The address performing the mint
-   * @param onBehalfOf The address of the user that will receive the minted aTokens
+   * @param onBehalfOf The address of the user that will receive the minted scaled balance tokens
    * @param value The amount being minted (user entered amount + balance increase from interest)
    * @param balanceIncrease The increase in balance since the last action of the user
    * @param index The next liquidity index of the reserve
@@ -24,7 +24,7 @@ interface IScaledBalanceToken {
   );
 
   /**
-   * @dev Emitted after aTokens are burned
+   * @dev Emitted after scaled balance tokens are burned
    * @param from The address from which the scaled tokens will be burned
    * @param target The address that will receive the underlying, if any
    * @param value The amount being burned (user entered amount - balance increase from interest)
@@ -57,7 +57,7 @@ interface IScaledBalanceToken {
   function getScaledUserBalanceAndSupply(address user) external view returns (uint256, uint256);
 
   /**
-   * @notice Returns the scaled total supply of the variable debt token. Represents sum(debt/index)
+   * @notice Returns the scaled total supply of the scaled balance token. Represents sum(debt/index)
    * @return The scaled total supply
    **/
   function scaledTotalSupply() external view returns (uint256);
