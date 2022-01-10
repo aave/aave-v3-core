@@ -5,13 +5,27 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
 import {IAaveIncentivesController} from '../../../interfaces/IAaveIncentivesController.sol';
 import {IPool} from '../../../interfaces/IPool.sol';
 
+/**
+ * @title IncentivizedERC20
+ * @author Aave
+ * @notice Basic MintableERC20 implementation
+ **/
 contract MintableIncentivizedERC20 is IncentivizedERC20 {
+  /**
+   * @dev Constructor.
+   * @param pool The reference to the main Pool contract
+   * @param name The name of the token
+   * @param symbol The symbol of the token
+   * @param decimals The number of decimals of the token
+   */
   constructor(
     IPool pool,
     string memory name,
     string memory symbol,
     uint8 decimals
-  ) IncentivizedERC20(pool, name, symbol, decimals) {}
+  ) IncentivizedERC20(pool, name, symbol, decimals) {
+    // Intentionally left blank
+  }
 
   /**
    * @notice Mints tokens to an account and apply incentives if defined

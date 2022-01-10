@@ -11,18 +11,27 @@ import {MintableIncentivizedERC20} from './MintableIncentivizedERC20.sol';
 /**
  * @title ScaledBalanceTokenBase
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
- * @notice Basic ERC20 implementation
+ * @notice Basic ERC20 implementation of scaled balance token
  **/
 contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBalanceToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
+  /**
+   * @dev Constructor.
+   * @param pool The reference to the main Pool contract
+   * @param name The name of the token
+   * @param symbol The symbol of the token
+   * @param decimals The number of decimals of the token
+   */
   constructor(
     IPool pool,
     string memory name,
     string memory symbol,
     uint8 decimals
-  ) MintableIncentivizedERC20(pool, name, symbol, decimals) {}
+  ) MintableIncentivizedERC20(pool, name, symbol, decimals) {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IScaledBalanceToken
   function scaledBalanceOf(address user) external view override returns (uint256) {

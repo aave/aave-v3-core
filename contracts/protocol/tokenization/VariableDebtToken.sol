@@ -19,6 +19,7 @@ import {ScaledBalanceTokenBase} from './base/ScaledBalanceTokenBase.sol';
  * @author Aave
  * @notice Implements a variable debt token to track the borrowing positions of users
  * at variable rate mode
+ * @dev Transfer and approve functionalities are disabled since its a non-transferable token
  **/
 contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
@@ -109,6 +110,11 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
     return super.totalSupply().rayMul(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
+  /// @inheritdoc EIP712Base
+  function _EIP712BaseId() internal view virtual override returns (string memory) {
+    return name();
+  }
+
   /**
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
@@ -139,10 +145,6 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
 
   function decreaseAllowance(address, uint256) external virtual override returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
-  }
-
-  function _EIP712BaseId() internal view virtual override returns (string memory) {
-    return name();
   }
 
   /// @inheritdoc IVariableDebtToken

@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+/**
+ * @title EIP712Base
+ * @author Aave
+ * @notice Base contract implementation of EIP712.
+ */
 abstract contract EIP712Base {
   bytes public constant EIP712_REVISION = bytes('1');
   bytes32 internal constant EIP712_DOMAIN =
@@ -12,6 +17,9 @@ abstract contract EIP712Base {
   bytes32 internal _domainSeparator;
   uint256 internal immutable _chainId;
 
+  /**
+   * @dev Constructor.
+   */
   constructor() {
     _chainId = block.chainid;
   }
@@ -54,5 +62,9 @@ abstract contract EIP712Base {
       );
   }
 
+  /**
+   * @notice Returns the user readable name of signing domain (e.g. token name)
+   * @return The name of the signing domain
+   */
   function _EIP712BaseId() internal view virtual returns (string memory);
 }

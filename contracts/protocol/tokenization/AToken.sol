@@ -45,7 +45,9 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   constructor(IPool pool)
     ScaledBalanceTokenBase(pool, 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
     EIP712Base()
-  {}
+  {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IInitializableAToken
   function initialize(
@@ -160,7 +162,9 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IAToken
-  function handleRepayment(address user, uint256 amount) external override onlyPool {}
+  function handleRepayment(address user, uint256 amount) external override onlyPool {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IAToken
   function permit(
@@ -248,6 +252,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     return super.nonces(owner);
   }
 
+  /// @inheritdoc EIP712Base
   function _EIP712BaseId() internal view override returns (string memory) {
     return name();
   }

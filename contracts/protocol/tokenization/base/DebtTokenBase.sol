@@ -11,7 +11,6 @@ import {EIP712Base} from './EIP712Base.sol';
  * @title DebtTokenBase
  * @author Aave
  * @notice Base contract for different types of debt tokens, like StableDebtToken or VariableDebtToken
- * @dev Transfer and approve functionalities are disabled since its a non-transferable token.
  */
 abstract contract DebtTokenBase is
   VersionedInitializable,
@@ -31,7 +30,9 @@ abstract contract DebtTokenBase is
   /**
    * @dev Constructor.
    */
-  constructor() EIP712Base() {}
+  constructor() EIP712Base() {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc ICreditDelegationToken
   function approveDelegation(address delegatee, uint256 amount) external override {
