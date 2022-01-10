@@ -12,6 +12,7 @@ import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvide
 import { BigNumber } from 'ethers';
 import { AToken } from '../../../types';
 import { getContract } from '@aave/deploy-v3';
+import { expect } from 'chai';
 
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
@@ -61,7 +62,7 @@ export const getReserveData = async (
     ? BigNumber.from(0)
     : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
 
-  supplyUsageRatio = supplyUsageRatio > borrowUsageRatio ? borrowUsageRatio : supplyUsageRatio;
+  expect(supplyUsageRatio).to.be.lte(borrowUsageRatio);
 
   return {
     reserveFactor,

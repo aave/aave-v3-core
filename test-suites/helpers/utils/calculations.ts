@@ -3,6 +3,7 @@ import { IReserveParams, iMultiPoolsAssets, RateMode } from '../../../helpers/ty
 import './wadraymath';
 import { ReserveData, UserReserveData } from './interfaces';
 import { BigNumber } from 'ethers';
+import { expect } from 'chai';
 
 interface Configuration {
   reservesParams: iMultiPoolsAssets<IReserveParams>;
@@ -1276,18 +1277,12 @@ export const calcExpectedInterestRates = (
 
     stableBorrowRate = stableBorrowRate
       .add(reserveConfiguration.strategy.stableRateSlope1)
-      .add(
-        BigNumber.from(reserveConfiguration.strategy.stableRateSlope2).rayMul(
-          excessUsageRatio
-        )
-      );
+      .add(BigNumber.from(reserveConfiguration.strategy.stableRateSlope2).rayMul(excessUsageRatio));
 
     variableBorrowRate = variableBorrowRate
       .add(reserveConfiguration.strategy.variableRateSlope1)
       .add(
-        BigNumber.from(reserveConfiguration.strategy.variableRateSlope2).rayMul(
-          excessUsageRatio
-        )
+        BigNumber.from(reserveConfiguration.strategy.variableRateSlope2).rayMul(excessUsageRatio)
       );
   } else {
     stableBorrowRate = stableBorrowRate.add(
@@ -1360,8 +1355,7 @@ export const calcExpectedUsageRatios = (
     ? BigNumber.from(0)
     : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
 
-  supplyUsageRatio =
-    supplyUsageRatio > borrowUsageRatio ? borrowUsageRatio : supplyUsageRatio;
+  expect(supplyUsageRatio).to.be.lte(borrowUsageRatio);
 
   return [borrowUsageRatio, supplyUsageRatio];
 };
