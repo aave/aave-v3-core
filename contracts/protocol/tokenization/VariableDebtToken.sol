@@ -101,7 +101,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
     uint256 amount,
     uint256 index
   ) external override onlyPool returns (uint256) {
-    _burnScaled(user, user, amount, index);
+    _burnScaled(user, address(0), amount, index);
     return scaledTotalSupply();
   }
 
