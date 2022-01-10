@@ -322,12 +322,6 @@ export interface IInterestRateStrategyParams {
 }
 
 export interface IReserveBorrowParams {
-  // optimalUsageRatio: string;
-  // baseVariableBorrowRate: string;
-  // variableRateSlope1: string;
-  // variableRateSlope2: string;
-  // stableRateSlope1: string;
-  // stableRateSlope2: string;
   borrowingEnabled: boolean;
   stableBorrowRateEnabled: boolean;
   reserveDecimals: string;
