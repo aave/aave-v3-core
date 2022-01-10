@@ -1361,7 +1361,7 @@ export const calcExpectedUsageRatios = (
     ? BigNumber.from(0)
     : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
 
-  expect(supplyUsageRatio).to.be.lte(borrowUsageRatio);
+  expect(supplyUsageRatio).to.be.lte(borrowUsageRatio, 'Supply usage ratio > borrow usage ratio');
 
   return [borrowUsageRatio, supplyUsageRatio];
 };
