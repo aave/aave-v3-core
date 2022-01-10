@@ -1253,8 +1253,14 @@ export const calcExpectedInterestRates = (
     reserveConfiguration.strategy.baseVariableBorrowRate
   );
 
-  const optimalRate = BigNumber.from(reserveConfiguration.strategy.optimalUsageRatio);
-  const excessRate = BigNumber.from(RAY).sub(optimalRate);
+  const OPTIMAL_USAGE_RATIO = BigNumber.from(reserveConfiguration.strategy.optimalUsageRatio);
+  const EXCESS_USAGE_RATIO = BigNumber.from(RAY).sub(OPTIMAL_USAGE_RATIO);
+  const OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = BigNumber.from(
+    reserveConfiguration.strategy.optimalStableToTotalDebtRatio
+  );
+  const EXCESS_STABLE_TO_TOTAL_DEBT_RATIO = BigNumber.from(RAY).sub(
+    OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO
+  );
 
   const totalDebt = totalStableDebt.add(totalVariableDebt);
 
@@ -1262,39 +1268,47 @@ export const calcExpectedInterestRates = (
     ? totalStableDebt.rayDiv(totalDebt)
     : BigNumber.from(0);
 
-  if (borrowUsageRatio.gt(optimalRate)) {
-    const excessUsageRatio = borrowUsageRatio
+  if (borrowUsageRatio.gt(OPTIMAL_USAGE_RATIO)) {
+    const excessBorrowUsageRatio = borrowUsageRatio
       .sub(reserveConfiguration.strategy.optimalUsageRatio)
-      .rayDiv(excessRate);
+      .rayDiv(EXCESS_USAGE_RATIO);
 
     stableBorrowRate = stableBorrowRate
       .add(reserveConfiguration.strategy.stableRateSlope1)
-      .add(BigNumber.from(reserveConfiguration.strategy.stableRateSlope2).rayMul(excessUsageRatio));
+      .add(
+        BigNumber.from(reserveConfiguration.strategy.stableRateSlope2).rayMul(
+          excessBorrowUsageRatio
+        )
+      );
 
     variableBorrowRate = variableBorrowRate
       .add(reserveConfiguration.strategy.variableRateSlope1)
       .add(
-        BigNumber.from(reserveConfiguration.strategy.variableRateSlope2).rayMul(excessUsageRatio)
+        BigNumber.from(reserveConfiguration.strategy.variableRateSlope2).rayMul(
+          excessBorrowUsageRatio
+        )
       );
   } else {
     stableBorrowRate = stableBorrowRate.add(
       BigNumber.from(reserveConfiguration.strategy.stableRateSlope1)
         .rayMul(borrowUsageRatio)
-        .rayDiv(BigNumber.from(optimalRate))
+        .rayDiv(BigNumber.from(OPTIMAL_USAGE_RATIO))
     );
     variableBorrowRate = variableBorrowRate.add(
       BigNumber.from(reserveConfiguration.strategy.variableRateSlope1)
         .rayMul(borrowUsageRatio)
-        .rayDiv(optimalRate)
+        .rayDiv(OPTIMAL_USAGE_RATIO)
     );
   }
 
-  if (stableToTotalDebtRatio.gt(reserveConfiguration.strategy.optimalStableToTotalDebtRatio)) {
-    const excessRatio = stableToTotalDebtRatio
-      .sub(reserveConfiguration.strategy.optimalStableToTotalDebtRatio)
-      .rayDiv(BigNumber.from(RAY).sub(reserveConfiguration.strategy.optimalStableToTotalDebtRatio));
+  if (stableToTotalDebtRatio.gt(OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO)) {
+    const excessStableDebtRatio = stableToTotalDebtRatio
+      .sub(OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO)
+      .rayDiv(EXCESS_STABLE_TO_TOTAL_DEBT_RATIO);
     stableBorrowRate = stableBorrowRate.add(
-      BigNumber.from(reserveConfiguration.strategy.stableRateExcessOffset).rayMul(excessRatio)
+      BigNumber.from(reserveConfiguration.strategy.stableRateExcessOffset).rayMul(
+        excessStableDebtRatio
+      )
     );
   }
 

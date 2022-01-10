@@ -319,10 +319,12 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     } = await strategyInstance.calculateInterestRates(params);
 
     const usageRatio = BigNumber.from(1).ray().percentMul(80);
-    const optimalRate = BigNumber.from(rateStrategyStableTwo.optimalUsageRatio);
+    const OPTIMAL_USAGE_RATIO = BigNumber.from(rateStrategyStableTwo.optimalUsageRatio);
 
     const expectedVariableRate = BigNumber.from(rateStrategyStableTwo.baseVariableBorrowRate).add(
-      BigNumber.from(rateStrategyStableTwo.variableRateSlope1).rayMul(usageRatio.rayDiv(optimalRate))
+      BigNumber.from(rateStrategyStableTwo.variableRateSlope1).rayMul(
+        usageRatio.rayDiv(OPTIMAL_USAGE_RATIO)
+      )
     );
 
     expect(currentLiquidityRate).to.be.equal(
@@ -336,7 +338,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
 
     expect(currentStableBorrowRate).to.be.equal(
       baseStableRate.add(
-        BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(usageRatio.rayDiv(optimalRate))
+        BigNumber.from(rateStrategyStableTwo.stableRateSlope1).rayMul(
+          usageRatio.rayDiv(OPTIMAL_USAGE_RATIO)
+        )
       ),
       'Invalid stable rate'
     );

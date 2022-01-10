@@ -41,6 +41,13 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    **/
   uint256 public immutable EXCESS_USAGE_RATIO;
 
+  /**
+   * @dev This constant represents the excess stable debt ratio above the optimal. It's always equal to
+   * 1-optimal stable to total debt ratio. Added as a constant here for gas optimizations.
+   * Expressed in ray
+   **/
+  uint256 public immutable EXCESS_STABLE_TO_TOTAL_DEBT_RATIO;
+
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   // Base variable borrow rate when usage rate = 0. Expressed in ray
@@ -97,6 +104,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     OPTIMAL_USAGE_RATIO = optimalUsageRatio;
     EXCESS_USAGE_RATIO = WadRayMath.RAY - optimalUsageRatio;
     OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = optimalStableToTotalDebtRatio;
+    EXCESS_STABLE_TO_TOTAL_DEBT_RATIO = WadRayMath.RAY - optimalStableToTotalDebtRatio;
     ADDRESSES_PROVIDER = provider;
     _baseVariableBorrowRate = baseVariableBorrowRate;
     _variableRateSlope1 = variableRateSlope1;
@@ -209,30 +217,31 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       : vars.totalDebt.rayDiv(vars.availableLiquidity + params.unbacked + vars.totalDebt);
 
     if (vars.borrowUsageRatio > OPTIMAL_USAGE_RATIO) {
-      uint256 excessUsageRatio = (vars.borrowUsageRatio - OPTIMAL_USAGE_RATIO)
-        .rayDiv(EXCESS_USAGE_RATIO);
+      uint256 excessBorrowUsageRatio = (vars.borrowUsageRatio - OPTIMAL_USAGE_RATIO).rayDiv(
+        EXCESS_USAGE_RATIO
+      );
 
       vars.currentStableBorrowRate +=
         _stableRateSlope1 +
-        _stableRateSlope2.rayMul(excessUsageRatio);
+        _stableRateSlope2.rayMul(excessBorrowUsageRatio);
 
       vars.currentVariableBorrowRate +=
         _variableRateSlope1 +
-        _variableRateSlope2.rayMul(excessUsageRatio);
+        _variableRateSlope2.rayMul(excessBorrowUsageRatio);
     } else {
       vars.currentStableBorrowRate += _stableRateSlope1.rayMul(vars.borrowUsageRatio).rayDiv(
         OPTIMAL_USAGE_RATIO
       );
 
-      vars.currentVariableBorrowRate += _variableRateSlope1
-        .rayMul(vars.borrowUsageRatio)
-        .rayDiv(OPTIMAL_USAGE_RATIO);
+      vars.currentVariableBorrowRate += _variableRateSlope1.rayMul(vars.borrowUsageRatio).rayDiv(
+        OPTIMAL_USAGE_RATIO
+      );
     }
 
     if (vars.stableToTotalDebtRatio > OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO) {
-      uint256 excessRatio = (vars.stableToTotalDebtRatio - OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO)
-        .rayDiv(WadRayMath.RAY - OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO);
-      vars.currentStableBorrowRate += _stableRateExcessOffset.rayMul(excessRatio);
+      uint256 excessStableDebtRatio = (vars.stableToTotalDebtRatio -
+        OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO).rayDiv(EXCESS_STABLE_TO_TOTAL_DEBT_RATIO);
+      vars.currentStableBorrowRate += _stableRateExcessOffset.rayMul(excessStableDebtRatio);
     }
 
     vars.currentLiquidityRate = _getOverallBorrowRate(
