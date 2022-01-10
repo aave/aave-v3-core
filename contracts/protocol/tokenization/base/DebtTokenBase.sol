@@ -38,16 +38,7 @@ abstract contract DebtTokenBase is
     _approveDelegation(_msgSender(), delegatee, amount);
   }
 
-  /**
-   * @notice Implements the credit delegation with ERC712 signature
-   * @param delegator The delegator of the credit
-   * @param delegatee The delegatee that can use the credit
-   * @param value The amount to be delegated
-   * @param deadline The deadline timestamp, type(uint256).max for max deadline
-   * @param v The V signature param
-   * @param s The S signature param
-   * @param r The R signature param
-   */
+  /// @inheritdoc ICreditDelegationToken
   function delegationWithSig(
     address delegator,
     address delegatee,
