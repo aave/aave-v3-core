@@ -392,7 +392,7 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     const debtAfter = await debtToken.totalSupply();
     const availableAfter = await dai.balanceOf(aDai.address);
 
-    // More debt and less available -> higher util -> rates will increase
+    // More debt and less available -> higher usage-> rates will increase
     expect(debtAfter).to.be.gt(debtBefore);
     expect(availableAfter).to.be.lt(availableBefore);
 
