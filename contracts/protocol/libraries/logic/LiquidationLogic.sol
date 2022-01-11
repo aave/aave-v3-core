@@ -194,6 +194,9 @@ library LiquidationLogic {
           vars.actualDebtToLiquidate,
           vars.debtReserveCache.nextVariableBorrowIndex
         );
+      if (vars.userStableDebt == 0 && vars.userVariableDebt == vars.actualDebtToLiquidate) {
+        userConfig.setBorrowing(debtReserve.id, false);
+      }
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
       if (vars.userVariableDebt > 0) {
@@ -208,6 +211,10 @@ library LiquidationLogic {
         params.user,
         vars.actualDebtToLiquidate - vars.userVariableDebt
       );
+      if (vars.userStableDebt == vars.actualDebtToLiquidate - vars.userVariableDebt) {
+        // all variable debt is already burned here
+        userConfig.setBorrowing(debtReserve.id, false);
+      }
     }
     debtReserve.updateInterestRates(
       vars.debtReserveCache,
