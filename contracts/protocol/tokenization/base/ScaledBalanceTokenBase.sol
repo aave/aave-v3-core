@@ -58,6 +58,14 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
     return _userState[user].additionalData;
   }
 
+  /**
+   * @notice Implements the basic logic to mint a scaled balance token.
+   * @param caller The address performing the mint
+   * @param onBehalfOf The address of the user that will receive the scaled tokens
+   * @param amount The amount of tokens getting minted
+   * @param index The next liquidity index of the reserve
+   * @return `true` if the the previous balance of the user was 0
+   **/
   function _mintScaled(
     address caller,
     address onBehalfOf,
@@ -82,6 +90,14 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
     return (scaledBalance == 0);
   }
 
+  /**
+   * @notice Implements the basic logic to burn a scaled balance token.
+   * @dev In some instances, a burn transaction will emit a mint event
+   * if the amount to burn is less than the interest that the user accrued
+   * @param user The user which debt is burnt
+   * @param amount The amount getting burned
+   * @param index The variable debt index of the reserve
+   **/
   function _burnScaled(
     address user,
     address target,

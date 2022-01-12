@@ -38,7 +38,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
   /**
    * @notice Burns aTokens from `user` and sends the equivalent amount of underlying to `receiverOfUnderlying`
    * @dev In some instances, the mint event could be emitted from a burn transaction
-   * if the amount to burn is less than the interest the user earned
+   * if the amount to burn is less than the interest that the user accrued
    * @param from The address from which the aTokens will be burned
    * @param receiverOfUnderlying The address that will receive the underlying
    * @param amount The amount being burned
