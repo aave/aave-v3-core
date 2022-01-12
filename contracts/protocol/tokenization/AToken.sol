@@ -256,7 +256,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   function _EIP712BaseId() internal view override returns (string memory) {
     return name();
   }
-  
+
   /// @inheritdoc IAToken
   function rescueTokens(
     address token,
