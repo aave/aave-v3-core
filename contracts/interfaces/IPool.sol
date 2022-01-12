@@ -708,6 +708,18 @@ interface IPool {
   function mintToTreasury(address[] calldata assets) external;
 
   /**
+   * @notice Rescue and transfer tokens locked in this contract
+   * @param token the address of the token
+   * @param to the address of the recipient
+   * @param amount the amount of token to transfer
+   */
+  function rescueTokens(
+    address token,
+    address to,
+    uint256 amount
+  ) external;
+
+  /**
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.
    * - E.g. User supplies 100 USDC and gets in return 100 aUSDC
    * @dev Deprecated: Use the `supply` function instead

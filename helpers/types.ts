@@ -154,9 +154,10 @@ export enum ProtocolErrors {
   OPERATION_NOT_SUPPORTED = '81', // 'Operation not supported'
   DEBT_CEILING_NOT_ZERO = '82', // 'Debt ceiling is not zero'
   ASSET_NOT_LISTED = '83', // 'Asset is not listed'
-  INVALID_OPTIMAL_UTILIZATION_RATE = '84', // 'Invalid optimal utilization ratio'
+  INVALID_OPTIMAL_USAGE_RATIO = '84', // 'Invalid optimal usage ratio'
   INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85', // 'Invalid optimal stable to total debt ratio'
-  ADDRESSES_PROVIDER_ALREADY_ADDED = '86', // 'Reserve has already been added to reserve list'
+  UNDERLYING_CANNOT_BE_RESCUED = '86', // 'The underlying asset cannot be rescued'
+  ADDRESSES_PROVIDER_ALREADY_ADDED = '87', // 'Reserve has already been added to reserve list'
 
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
@@ -311,7 +312,7 @@ export interface IReserveParams extends IReserveBorrowParams, IReserveCollateral
 
 export interface IInterestRateStrategyParams {
   name: string;
-  optimalUtilizationRate: string;
+  optimalUsageRatio: string;
   baseVariableBorrowRate: string;
   variableRateSlope1: string;
   variableRateSlope2: string;
@@ -323,12 +324,6 @@ export interface IInterestRateStrategyParams {
 }
 
 export interface IReserveBorrowParams {
-  // optimalUtilizationRate: string;
-  // baseVariableBorrowRate: string;
-  // variableRateSlope1: string;
-  // variableRateSlope2: string;
-  // stableRateSlope1: string;
-  // stableRateSlope2: string;
   borrowingEnabled: boolean;
   stableBorrowRateEnabled: boolean;
   reserveDecimals: string;

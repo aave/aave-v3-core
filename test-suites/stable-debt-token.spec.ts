@@ -98,7 +98,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     const name = await stableDebtContract.name();
 
-    expect(name).to.be.equal('Aave stable debt bearing DAI');
+    expect(name).to.be.equal('Aave Testnet stable debt bearing DAI');
     await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(
       CALLER_MUST_BE_POOL
     );

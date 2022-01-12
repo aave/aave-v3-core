@@ -7,8 +7,7 @@ import {WadRayMath} from '../../protocol/libraries/math/WadRayMath.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
 contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
-  uint256 public immutable OPTIMAL_UTILIZATION_RATE;
-  uint256 public immutable EXCESS_UTILIZATION_RATE;
+  uint256 public immutable OPTIMAL_USAGE_RATIO;
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
   uint256 internal immutable _baseVariableBorrowRate;
   uint256 internal immutable _variableRateSlope1;
@@ -22,15 +21,14 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   constructor(
     IPoolAddressesProvider provider,
-    uint256 optimalUtilizationRate,
+    uint256 optimalUsageRatio,
     uint256 baseVariableBorrowRate,
     uint256 variableRateSlope1,
     uint256 variableRateSlope2,
     uint256 stableRateSlope1,
     uint256 stableRateSlope2
   ) {
-    OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
-    EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
+    OPTIMAL_USAGE_RATIO = optimalUsageRatio;
     ADDRESSES_PROVIDER = provider;
     _baseVariableBorrowRate = baseVariableBorrowRate;
     _variableRateSlope1 = variableRateSlope1;
