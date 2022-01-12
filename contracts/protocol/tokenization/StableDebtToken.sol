@@ -10,6 +10,7 @@ import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesControl
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IStableDebtToken} from '../../interfaces/IStableDebtToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
+import {EIP712Base} from './base/EIP712Base.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {IncentivizedERC20} from './base/IncentivizedERC20.sol';
 import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
@@ -19,6 +20,7 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
  * @author Aave
  * @notice Implements a stable debt token to track the borrowing positions of users
  * at stable rate mode
+ * @dev Transfer and approve functionalities are disabled since its a non-transferable token
  **/
 contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   using WadRayMath for uint256;
@@ -385,6 +387,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     }
   }
 
+  /// @inheritdoc EIP712Base
   function _EIP712BaseId() internal view virtual override returns (string memory) {
     return name();
   }

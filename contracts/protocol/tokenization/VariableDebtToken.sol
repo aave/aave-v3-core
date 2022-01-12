@@ -2,6 +2,7 @@
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
@@ -9,17 +10,18 @@ import {IPool} from '../../interfaces/IPool.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
 import {IInitializableDebtToken} from '../../interfaces/IInitializableDebtToken.sol';
 import {IVariableDebtToken} from '../../interfaces/IVariableDebtToken.sol';
+import {EIP712Base} from './base/EIP712Base.sol';
 import {DebtTokenBase} from './base/DebtTokenBase.sol';
 import {ScaledBalanceTokenBase} from './base/ScaledBalanceTokenBase.sol';
-import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title VariableDebtToken
  * @author Aave
  * @notice Implements a variable debt token to track the borrowing positions of users
  * at variable rate mode
+ * @dev Transfer and approve functionalities are disabled since its a non-transferable token
  **/
-contract VariableDebtToken is ScaledBalanceTokenBase, DebtTokenBase, IVariableDebtToken {
+contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
@@ -86,7 +88,7 @@ contract VariableDebtToken is ScaledBalanceTokenBase, DebtTokenBase, IVariableDe
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) public override onlyPool returns (bool, uint256) {
+  ) external override onlyPool returns (bool, uint256) {
     if (user != onBehalfOf) {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
@@ -99,13 +101,18 @@ contract VariableDebtToken is ScaledBalanceTokenBase, DebtTokenBase, IVariableDe
     uint256 amount,
     uint256 index
   ) external override onlyPool returns (uint256) {
-    _burnScaled(user, user, amount, index);
+    _burnScaled(user, address(0), amount, index);
     return scaledTotalSupply();
   }
 
   /// @inheritdoc IERC20
   function totalSupply() public view virtual override returns (uint256) {
     return super.totalSupply().rayMul(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
+  }
+
+  /// @inheritdoc EIP712Base
+  function _EIP712BaseId() internal view virtual override returns (string memory) {
+    return name();
   }
 
   /**
@@ -138,10 +145,6 @@ contract VariableDebtToken is ScaledBalanceTokenBase, DebtTokenBase, IVariableDe
 
   function decreaseAllowance(address, uint256) external virtual override returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
-  }
-
-  function _EIP712BaseId() internal view virtual override returns (string memory) {
-    return name();
   }
 
   /// @inheritdoc IVariableDebtToken

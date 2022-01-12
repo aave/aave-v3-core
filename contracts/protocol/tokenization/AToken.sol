@@ -3,6 +3,7 @@ pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
+import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
@@ -13,7 +14,6 @@ import {IInitializableAToken} from '../../interfaces/IInitializableAToken.sol';
 import {ScaledBalanceTokenBase} from './base/ScaledBalanceTokenBase.sol';
 import {IncentivizedERC20} from './base/IncentivizedERC20.sol';
 import {EIP712Base} from './base/EIP712Base.sol';
-import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title Aave ERC20 AToken
@@ -45,7 +45,9 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   constructor(IPool pool)
     ScaledBalanceTokenBase(pool, 'ATOKEN_IMPL', 'ATOKEN_IMPL', 0)
     EIP712Base()
-  {}
+  {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IInitializableAToken
   function initialize(
@@ -160,7 +162,9 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IAToken
-  function handleRepayment(address user, uint256 amount) external override onlyPool {}
+  function handleRepayment(address user, uint256 amount) external override onlyPool {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IAToken
   function permit(
@@ -248,6 +252,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     return super.nonces(owner);
   }
 
+  /// @inheritdoc EIP712Base
   function _EIP712BaseId() internal view override returns (string memory) {
     return name();
   }

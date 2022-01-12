@@ -1,17 +1,16 @@
 // SPDX-License-Identifier: agpl-3.0
 pragma solidity 0.8.10;
 
+import {Context} from '../../../dependencies/openzeppelin/contracts/Context.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {VersionedInitializable} from '../../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {ICreditDelegationToken} from '../../../interfaces/ICreditDelegationToken.sol';
 import {EIP712Base} from './EIP712Base.sol';
-import {Context} from '../../../dependencies/openzeppelin/contracts/Context.sol';
 
 /**
  * @title DebtTokenBase
  * @author Aave
  * @notice Base contract for different types of debt tokens, like StableDebtToken or VariableDebtToken
- * @dev Transfer and approve functionalities are disabled since its a non-transferable token.
  */
 abstract contract DebtTokenBase is
   VersionedInitializable,
@@ -31,23 +30,16 @@ abstract contract DebtTokenBase is
   /**
    * @dev Constructor.
    */
-  constructor() EIP712Base() {}
+  constructor() EIP712Base() {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc ICreditDelegationToken
   function approveDelegation(address delegatee, uint256 amount) external override {
     _approveDelegation(_msgSender(), delegatee, amount);
   }
 
-  /**
-   * @notice Implements the credit delegation with ERC712 signature
-   * @param delegator The delegator of the credit
-   * @param delegatee The delegatee that can use the credit
-   * @param value The amount to be delegated
-   * @param deadline The deadline timestamp, type(uint256).max for max deadline
-   * @param v The V signature param
-   * @param s The S signature param
-   * @param r The R signature param
-   */
+  /// @inheritdoc ICreditDelegationToken
   function delegationWithSig(
     address delegator,
     address delegatee,
