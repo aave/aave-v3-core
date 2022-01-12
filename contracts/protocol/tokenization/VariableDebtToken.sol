@@ -83,6 +83,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
     return scaledBalance.rayMul(POOL.getReserveNormalizedVariableDebt(_underlyingAsset));
   }
 
+  /// @inheritdoc IVariableDebtToken
   function mint(
     address user,
     address onBehalfOf,
