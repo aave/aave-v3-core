@@ -772,17 +772,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     IERC20(token).safeTransfer(to, amount);
   }
 
-  /// @inheritdoc IPool
-  function rescueTokensFromAToken(
-    address asset,
-    address token,
-    address to,
-    uint256 amount
-  ) external override onlyPoolAdmin {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-    IAToken(reserve.aTokenAddress).rescueTokens(token, to, amount);
-  }
-
   /**
    * @notice Add an asset to the reserve list
    * @param asset The address of the underlying asset

@@ -327,7 +327,7 @@ contract AToken is VersionedInitializable, IncentivizedERC20, IAToken {
     address token,
     address to,
     uint256 amount
-  ) external override onlyPool {
+  ) external override onlyPoolAdmin {
     require(token != _underlyingAsset, Errors.UNDERLYING_CANNOT_BE_RESCUED);
     IERC20(token).safeTransfer(to, amount);
   }
