@@ -1,5 +1,15 @@
 # Changelog
 
+### [1.10.1](https://www.github.com/aave/aave-v3-core/compare/v1.10.0...v1.10.1) (2022-01-12)
+
+
+### Bug Fixes
+
+* Fix contract docstrings ([802a4bd](https://www.github.com/aave/aave-v3-core/commit/802a4bd428edeff446cf0fca2696f4f7ad2a97cd))
+* Fix imports order ([5d237a4](https://www.github.com/aave/aave-v3-core/commit/5d237a4e7e4259b28a50052ba106961a38911220))
+* Re-add the abstract modifier to base tokenization contracts ([52abb3f](https://www.github.com/aave/aave-v3-core/commit/52abb3f81a420ed233422d7caee87beda8e8f31e))
+* Revert chainId renaming ([c4283d5](https://www.github.com/aave/aave-v3-core/commit/c4283d5fe062c4af5a6c37effa95df67efd7bd57))
+
 ## [1.10.0](https://www.github.com/aave/aave-v3-core/compare/v1.9.0...v1.10.0) (2022-01-12)
 
 
