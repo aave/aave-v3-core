@@ -38,9 +38,9 @@ library ValidationLogic {
   /**
    * @dev This constant represents the delta between the maximum variable borrow rate and liquidity rate below which
    * stable rate rebalances up are allowed when the usage ratio > `REBALANCE_UP_USAGE_RATIO_THRESHOLD`
-   * Expressed in bps, a factor of 4e3 results in 40.00%
+   * Expressed in bps, a factor of 0.4e4 results in 40.00%
    */
-  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 4e3;
+  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 0.4e4;
 
   /**
    * @dev This constant represents the minimum borrow usage ratio threshold at which rebalances up are possible
