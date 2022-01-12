@@ -6,9 +6,9 @@ import {IAaveIncentivesController} from '../../../interfaces/IAaveIncentivesCont
 import {IPool} from '../../../interfaces/IPool.sol';
 
 /**
- * @title IncentivizedERC20
+ * @title MintableIncentivizedERC20
  * @author Aave
- * @notice Basic MintableERC20 implementation
+ * @notice Implements mint and burn functions for IncentivizedERC20
  **/
 abstract contract MintableIncentivizedERC20 is IncentivizedERC20 {
   /**

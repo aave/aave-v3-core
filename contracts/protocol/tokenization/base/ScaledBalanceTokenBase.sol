@@ -10,7 +10,7 @@ import {MintableIncentivizedERC20} from './MintableIncentivizedERC20.sol';
 
 /**
  * @title ScaledBalanceTokenBase
- * @author Aave, inspired by the Openzeppelin ERC20 implementation
+ * @author Aave
  * @notice Basic ERC20 implementation of scaled balance token
  **/
 abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBalanceToken {
