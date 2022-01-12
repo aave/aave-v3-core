@@ -10,7 +10,7 @@ import {IPool} from '../../../interfaces/IPool.sol';
  * @author Aave
  * @notice Basic MintableERC20 implementation
  **/
-contract MintableIncentivizedERC20 is IncentivizedERC20 {
+abstract contract MintableIncentivizedERC20 is IncentivizedERC20 {
   /**
    * @dev Constructor.
    * @param pool The reference to the main Pool contract
