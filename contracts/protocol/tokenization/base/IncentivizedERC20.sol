@@ -4,19 +4,20 @@ pragma solidity 0.8.10;
 import {Context} from '../../../dependencies/openzeppelin/contracts/Context.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IERC20Detailed} from '../../../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
+import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {IAaveIncentivesController} from '../../../interfaces/IAaveIncentivesController.sol';
 import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
+import {IPool} from '../../../interfaces/IPool.sol';
 import {IACLManager} from '../../../interfaces/IACLManager.sol';
-import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title IncentivizedERC20
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
  * @notice Basic ERC20 implementation
  **/
-abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
+abstract contract IncentivizedERC20 is IERC20Detailed, Context {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
@@ -26,6 +27,14 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
+    _;
+  }
+
+  /**
+   * @dev Only pool can call functions marked by this modifier.
+   **/
+  modifier onlyPool() {
+    require(_msgSender() == address(POOL), Errors.CALLER_MUST_BE_POOL);
     _;
   }
 
@@ -51,39 +60,30 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   uint8 private _decimals;
   IAaveIncentivesController internal _incentivesController;
   IPoolAddressesProvider internal immutable _addressesProvider;
-
-  bytes public constant EIP712_REVISION = bytes('1');
-  bytes32 internal constant EIP712_DOMAIN =
-    keccak256('EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)');
-
-  // Map of address nonces (address => nonce)
-  mapping(address => uint256) internal _nonces;
-
-  bytes32 internal _domainSeparator;
-  uint256 internal immutable _chainId;
+  IPool public immutable POOL;
 
   /**
    * @dev Constructor.
-   * @param addressesProvider The address of the PoolAddressesProvider contract
+   * @param pool The reference to the main Pool contract
    * @param name The name of the token
    * @param symbol The symbol of the token
    * @param decimals The number of decimals of the token
    */
   constructor(
-    IPoolAddressesProvider addressesProvider,
+    IPool pool,
     string memory name,
     string memory symbol,
     uint8 decimals
   ) {
-    _addressesProvider = addressesProvider;
+    _addressesProvider = pool.ADDRESSES_PROVIDER();
     _name = name;
     _symbol = symbol;
     _decimals = decimals;
-    _chainId = block.chainid;
+    POOL = pool;
   }
 
   /// @inheritdoc IERC20Detailed
-  function name() external view override returns (string memory) {
+  function name() public view override returns (string memory) {
     return _name;
   }
 
@@ -213,43 +213,6 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
   }
 
   /**
-   * @notice Mints tokens to an account and apply incentives if defined
-   * @param account The address receiving tokens
-   * @param amount The amount of tokens to mint
-   */
-  function _mint(address account, uint128 amount) internal virtual {
-    uint256 oldTotalSupply = _totalSupply;
-    _totalSupply = oldTotalSupply + amount;
-
-    uint128 oldAccountBalance = _userState[account].balance;
-    _userState[account].balance = oldAccountBalance + amount;
-
-    IAaveIncentivesController incentivesControllerLocal = _incentivesController;
-    if (address(incentivesControllerLocal) != address(0)) {
-      incentivesControllerLocal.handleAction(account, oldTotalSupply, oldAccountBalance);
-    }
-  }
-
-  /**
-   * @notice Burns tokens from an account and apply incentives if defined
-   * @param account The account whose tokens are burnt
-   * @param amount The amount of tokens to burn
-   */
-  function _burn(address account, uint128 amount) internal virtual {
-    uint256 oldTotalSupply = _totalSupply;
-    _totalSupply = oldTotalSupply - amount;
-
-    uint128 oldAccountBalance = _userState[account].balance;
-    _userState[account].balance = oldAccountBalance - amount;
-
-    IAaveIncentivesController incentivesControllerLocal = _incentivesController;
-
-    if (address(incentivesControllerLocal) != address(0)) {
-      incentivesControllerLocal.handleAction(account, oldTotalSupply, oldAccountBalance);
-    }
-  }
-
-  /**
    * @notice Approve `spender` to use `amount` of `owner`s balance
    * @param owner The address owning the tokens
    * @param spender The address approved for spending
@@ -286,43 +249,5 @@ abstract contract IncentivizedERC20 is Context, IERC20, IERC20Detailed {
    */
   function _setDecimals(uint8 newDecimals) internal {
     _decimals = newDecimals;
-  }
-
-  /**
-   * @notice Get the domain separator for the token
-   * @dev Return cached value if chainId matches cache, otherwise recomputes separator
-   * @return The domain separator of the token at current chain
-   */
-  function DOMAIN_SEPARATOR() public view virtual returns (bytes32) {
-    if (block.chainid == _chainId) {
-      return _domainSeparator;
-    }
-    return _calculateDomainSeparator();
-  }
-
-  /**
-   * @notice Returns the nonce value for address specified as parameter
-   * @param owner The address for which the nonce is being returned
-   * @return The nonce value for the input address`
-   */
-  function nonces(address owner) public view virtual returns (uint256) {
-    return _nonces[owner];
-  }
-
-  /**
-   * @notice Compute the current domain separator
-   * @return The domain separator for the token
-   */
-  function _calculateDomainSeparator() internal view returns (bytes32) {
-    return
-      keccak256(
-        abi.encode(
-          EIP712_DOMAIN,
-          keccak256(bytes(_name)),
-          keccak256(EIP712_REVISION),
-          block.chainid,
-          address(this)
-        )
-      );
   }
 }
