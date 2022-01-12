@@ -62,6 +62,14 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /**
+   * @dev Only pool admin can call functions marked by this modifier.
+   **/
+  modifier onlyPoolAdmin() {
+    _onlyPoolAdmin();
+    _;
+  }
+
+  /**
    * @dev Only bridge can call functions marked by this modifier.
    **/
   modifier onlyBridge() {
@@ -73,6 +81,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     require(
       ADDRESSES_PROVIDER.getPoolConfigurator() == msg.sender,
       Errors.CALLER_NOT_POOL_CONFIGURATOR
+    );
+  }
+
+  function _onlyPoolAdmin() internal view {
+    require(
+      IACLManager(ADDRESSES_PROVIDER.getACLManager()).isPoolAdmin(msg.sender),
+      Errors.CALLER_NOT_POOL_ADMIN
     );
   }
 
@@ -746,6 +761,26 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     require(_reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
     _reserves[asset].isolationModeTotalDebt = 0;
     emit IsolationModeTotalDebtUpdated(asset, 0);
+  }
+
+  /// @inheritdoc IPool
+  function rescueTokens(
+    address token,
+    address to,
+    uint256 amount
+  ) external override onlyPoolAdmin {
+    IERC20(token).safeTransfer(to, amount);
+  }
+
+  /// @inheritdoc IPool
+  function rescueTokensFromAToken(
+    address asset,
+    address token,
+    address to,
+    uint256 amount
+  ) external override onlyPoolAdmin {
+    DataTypes.ReserveData storage reserve = _reserves[asset];
+    IAToken(reserve.aTokenAddress).rescueTokens(token, to, amount);
   }
 
   /**
