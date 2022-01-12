@@ -92,4 +92,5 @@ library Errors {
   string public constant ASSET_NOT_LISTED = '83'; // 'Asset is not listed'
   string public constant INVALID_OPTIMAL_USAGE_RATIO = '84'; // 'Invalid optimal usage ratio'
   string public constant INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85'; // 'Invalid optimal stable to total debt ratio'
+  string public constant UNDERLYING_CANNOT_BE_RESCUED = '86'; // 'The underlying asset cannot be rescued'
 }

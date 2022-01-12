@@ -135,4 +135,16 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @return The nonce of the owner
    **/
   function nonces(address owner) external view returns (uint256);
+
+  /**
+   * @notice Rescue and transfer tokens locked in this contract
+   * @param token the address of the token
+   * @param to the address of the recipient
+   * @param amount the amount of token to transfer
+   */
+  function rescueTokens(
+    address token,
+    address to,
+    uint256 amount
+  ) external;
 }
