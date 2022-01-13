@@ -138,9 +138,9 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
 
   /**
    * @notice Rescue and transfer tokens locked in this contract
-   * @param token the address of the token
-   * @param to the address of the recipient
-   * @param amount the amount of token to transfer
+   * @param token The address of the token
+   * @param to The address of the recipient
+   * @param amount The amount of token to transfer
    */
   function rescueTokens(
     address token,
