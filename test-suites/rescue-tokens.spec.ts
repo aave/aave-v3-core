@@ -75,6 +75,19 @@ makeSuite('Rescue tokens', (testEnv: TestEnv) => {
 
   it('User tries to rescue tokens of underlying from AToken (revert expected)', async () => {
     const {
+      aDai,
+      dai,
+      users: [rescuer],
+    } = testEnv;
+
+    const amount = 1;
+    await expect(
+      aDai.connect(rescuer.signer).rescueTokens(dai.address, rescuer.address, amount)
+    ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  });
+
+  it('PoolAdmin tries to rescue tokens of underlying from AToken (revert expected)', async () => {
+    const {
       poolAdmin,
       aDai,
       dai,
