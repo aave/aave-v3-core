@@ -1,7 +1,6 @@
 import { Pool } from '../../../types/Pool';
 import { ReserveData, UserReserveData } from './interfaces';
 import {
-  getIErc20Detailed,
   getMintableERC20,
   getAToken,
   getStableDebtToken,
@@ -12,7 +11,8 @@ import { tEthereumAddress } from '../../../helpers/types';
 import { AaveProtocolDataProvider } from '../../../types/AaveProtocolDataProvider';
 import { BigNumber } from 'ethers';
 import { AToken } from '../../../types';
-import { TESTNET_TOKEN_PREFIX } from '@aave/deploy-v3';
+import { getContract } from '@aave/deploy-v3';
+import { expect } from 'chai';
 
 export const getReserveData = async (
   helper: AaveProtocolDataProvider,
@@ -24,7 +24,7 @@ export const getReserveData = async (
       helper.getReserveTokensAddresses(reserve),
       helper.getInterestRateStrategyAddress(reserve),
       helper.getReserveConfigurationData(reserve),
-      getIErc20Detailed(reserve),
+      getContract('IERC20Detailed', reserve),
     ]);
 
   const stableDebtToken = await getStableDebtToken(tokenAddresses.stableDebtTokenAddress);
@@ -54,16 +54,15 @@ export const getReserveData = async (
 
   const totalDebt = reserveData.totalStableDebt.add(reserveData.totalVariableDebt);
 
-  const borrowUtilizationRate = totalDebt.eq(0)
+  const borrowUsageRatio = totalDebt.eq(0)
     ? BigNumber.from(0)
     : totalDebt.rayDiv(availableLiquidity.add(totalDebt));
 
-  let supplyUtilizationRate = totalDebt.eq(0)
+  let supplyUsageRatio = totalDebt.eq(0)
     ? BigNumber.from(0)
     : totalDebt.rayDiv(totalLiquidity.add(totalDebt));
 
-  supplyUtilizationRate =
-    supplyUtilizationRate > borrowUtilizationRate ? borrowUtilizationRate : supplyUtilizationRate;
+  expect(supplyUsageRatio).to.be.lte(borrowUsageRatio, 'Supply usage ratio > borrow usage ratio');
 
   return {
     reserveFactor,
@@ -71,8 +70,8 @@ export const getReserveData = async (
     accruedToTreasuryScaled,
     availableLiquidity,
     totalLiquidity,
-    borrowUtilizationRate,
-    supplyUtilizationRate,
+    borrowUsageRatio,
+    supplyUsageRatio,
     totalStableDebt: reserveData.totalStableDebt,
     totalVariableDebt: reserveData.totalVariableDebt,
     liquidityRate: reserveData.liquidityRate,

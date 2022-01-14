@@ -5,7 +5,7 @@ import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { deployMintableERC20 } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { ProtocolErrors } from '../helpers/types';
 import { MockPoolInherited__factory } from '../types/factories/MockPoolInherited__factory';
-import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';

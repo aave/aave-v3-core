@@ -3,12 +3,12 @@ import { signTypedData_v4 } from 'eth-sig-util';
 import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';
 import { tEthereumAddress, tStringTokenSmallUnits } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
-import { getIErc20Detailed } from '@aave/deploy-v3';
+import { getContract } from '@aave/deploy-v3';
 
 export type MockTokenMap = { [symbol: string]: MintableERC20 };
 
 export const convertToCurrencyDecimals = async (tokenAddress: tEthereumAddress, amount: string) => {
-  const token = await getIErc20Detailed(tokenAddress);
+  const token = await getContract('IERC20Detailed', tokenAddress);
   let decimals = (await token.decimals()).toString();
 
   return ethers.utils.parseUnits(amount, decimals);

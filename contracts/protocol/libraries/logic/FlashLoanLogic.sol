@@ -129,7 +129,7 @@ library FlashLoanLogic {
       ) {
         vars.currentATokenAddress = vars.aTokenAddresses[vars.i];
         vars.currentAmountPlusPremium = vars.currentAmount + vars.totalPremiums[vars.i];
-        vars.currentPremiumToProtocol = vars.currentAmount.percentMul(
+        vars.currentPremiumToProtocol = vars.totalPremiums[vars.i].percentMul(
           vars.flashloanPremiumToProtocol
         );
         vars.currentPremiumToLP = vars.totalPremiums[vars.i] - vars.currentPremiumToProtocol;
@@ -251,7 +251,7 @@ library FlashLoanLogic {
       Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
-    vars.premiumToProtocol = params.amount.percentMul(params.flashLoanPremiumToProtocol);
+    vars.premiumToProtocol = vars.totalPremium.percentMul(params.flashLoanPremiumToProtocol);
     vars.premiumToLP = vars.totalPremium - vars.premiumToProtocol;
 
     DataTypes.ReserveCache memory reserveCache = reserve.cache();

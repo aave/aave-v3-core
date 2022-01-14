@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { BigNumber, BigNumberish } from 'ethers';
 import { strategyWETH } from '@aave/deploy-v3/dist/markets/aave/reservesConfigs';
-import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { MAX_UINT_AMOUNT, ONE_ADDRESS, RAY, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors } from '../helpers/types';
 import {

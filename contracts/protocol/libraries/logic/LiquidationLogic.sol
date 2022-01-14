@@ -51,12 +51,12 @@ library LiquidationLogic {
    * @dev Percentage applied when the users health factor is above `CLOSE_FACTOR_HF_THRESHOLD`
    * Expressed in bps, a value of 0.5e4 results in 50.00%
    */
-  uint256 internal constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 5e3;
+  uint256 internal constant DEFAULT_LIQUIDATION_CLOSE_FACTOR = 0.5e4;
 
   /**
    * @dev Maximum percentage of borrower's debt to be repaid in a liquidation
    * @dev Percentage applied when the users health factor is below `CLOSE_FACTOR_HF_THRESHOLD`
-   * Expressed in bps, a value of 1e5 results in 100.00%
+   * Expressed in bps, a value of 1e4 results in 100.00%
    */
   uint256 public constant MAX_LIQUIDATION_CLOSE_FACTOR = 1e4;
 
@@ -71,6 +71,7 @@ library LiquidationLogic {
     uint256 userCollateralBalance;
     uint256 userStableDebt;
     uint256 userVariableDebt;
+    uint256 userTotalDebt;
     uint256 maxLiquidatableDebt;
     uint256 actualDebtToLiquidate;
     uint256 maxCollateralToLiquidate;
@@ -115,6 +116,7 @@ library LiquidationLogic {
       params.user,
       debtReserve
     );
+    vars.userTotalDebt = vars.userStableDebt + vars.userVariableDebt;
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
     (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
@@ -135,7 +137,7 @@ library LiquidationLogic {
       collateralReserve,
       DataTypes.ValidateLiquidationCallParams({
         debtReserveCache: vars.debtReserveCache,
-        totalDebt: vars.userStableDebt + vars.userVariableDebt,
+        totalDebt: vars.userTotalDebt,
         healthFactor: vars.healthFactor,
         priceOracleSentinel: params.priceOracleSentinel
       })
@@ -148,9 +150,7 @@ library LiquidationLogic {
       ? DEFAULT_LIQUIDATION_CLOSE_FACTOR
       : MAX_LIQUIDATION_CLOSE_FACTOR;
 
-    vars.maxLiquidatableDebt = (vars.userStableDebt + vars.userVariableDebt).percentMul(
-      vars.closeFactor
-    );
+    vars.maxLiquidatableDebt = vars.userTotalDebt.percentMul(vars.closeFactor);
 
     vars.actualDebtToLiquidate = params.debtToCover > vars.maxLiquidatableDebt
       ? vars.maxLiquidatableDebt
@@ -184,6 +184,10 @@ library LiquidationLogic {
 
     if (vars.debtAmountNeeded < vars.actualDebtToLiquidate) {
       vars.actualDebtToLiquidate = vars.debtAmountNeeded;
+    }
+
+    if (vars.userTotalDebt == vars.actualDebtToLiquidate) {
+      userConfig.setBorrowing(debtReserve.id, false);
     }
 
     if (vars.userVariableDebt >= vars.actualDebtToLiquidate) {

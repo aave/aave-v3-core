@@ -37,6 +37,6 @@ mkdir -p temp-artifacts/deploy
 cp -r node_modules/@aave/deploy-v3/artifacts/contracts/* temp-artifacts/deploy
 
 # Export MARKET_NAME variable to use Aave market as testnet deployment setup
-export MARKET_NAME="Aave"
+export MARKET_NAME="Test"
 
 echo "[BASH] Testnet enviroment ready"

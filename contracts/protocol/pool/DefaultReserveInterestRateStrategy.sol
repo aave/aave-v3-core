@@ -13,8 +13,8 @@ import {Errors} from '../libraries/helpers/Errors.sol';
  * @title DefaultReserveInterestRateStrategy contract
  * @author Aave
  * @notice Implements the calculation of the interest rates depending on the reserve state
- * @dev The model of interest rate is based on 2 slopes, one before the `OPTIMAL_UTILIZATION_RATE`
- * point of utilization and another from that one to 100%.
+ * @dev The model of interest rate is based on 2 slopes, one before the `OPTIMAL_USAGE_RATIO`
+ * point of usage and another from that one to 100%.
  * - An instance of this same contract, can't be used across different Aave markets, due to the caching
  *   of the PoolAddressesProvider
  **/
@@ -23,10 +23,10 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   using PercentageMath for uint256;
 
   /**
-   * @dev This constant represents the utilization rate at which the pool aims to obtain most competitive borrow rates.
+   * @dev This constant represents the usage ratio at which the pool aims to obtain most competitive borrow rates.
    * Expressed in ray
    **/
-  uint256 public immutable OPTIMAL_UTILIZATION_RATE;
+  uint256 public immutable OPTIMAL_USAGE_RATIO;
 
   /**
    * @dev This constant represents the optimal stable debt to total debt ratio of the reserve.
@@ -35,27 +35,34 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   uint256 public immutable OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO;
 
   /**
-   * @dev This constant represents the excess utilization rate above the optimal. It's always equal to
-   * 1-optimal utilization rate. Added as a constant here for gas optimizations.
+   * @dev This constant represents the excess usage ratio above the optimal. It's always equal to
+   * 1-optimal usage ratio. Added as a constant here for gas optimizations.
    * Expressed in ray
    **/
-  uint256 public immutable EXCESS_UTILIZATION_RATE;
+  uint256 public immutable MAX_EXCESS_USAGE_RATIO;
+
+  /**
+   * @dev This constant represents the excess stable debt ratio above the optimal. It's always equal to
+   * 1-optimal stable to total debt ratio. Added as a constant here for gas optimizations.
+   * Expressed in ray
+   **/
+  uint256 public immutable MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO;
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
-  // Base variable borrow rate when Utilization rate = 0. Expressed in ray
+  // Base variable borrow rate when usage rate = 0. Expressed in ray
   uint256 internal immutable _baseVariableBorrowRate;
 
-  // Slope of the variable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the variable interest curve when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO. Expressed in ray
   uint256 internal immutable _variableRateSlope1;
 
-  // Slope of the variable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the variable interest curve when usage ratio > OPTIMAL_USAGE_RATIO. Expressed in ray
   uint256 internal immutable _variableRateSlope2;
 
-  // Slope of the stable interest curve when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the stable interest curve when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO. Expressed in ray
   uint256 internal immutable _stableRateSlope1;
 
-  // Slope of the stable interest curve when utilization rate > OPTIMAL_UTILIZATION_RATE. Expressed in ray
+  // Slope of the stable interest curve when usage ratio > OPTIMAL_USAGE_RATIO. Expressed in ray
   uint256 internal immutable _stableRateSlope2;
 
   // Premium on top of `_variableRateSlope1` for base stable borrowing rate
@@ -67,19 +74,19 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   /**
    * @dev Constructor.
    * @param provider The address of the PoolAddressesProvider contract
-   * @param optimalUtilizationRate The optimal utilization rate
+   * @param optimalUsageRatio The optimal usage ratio
    * @param baseVariableBorrowRate The base variable borrow rate
-   * @param variableRateSlope1 The variable rate slope below optimal utilization rate
-   * @param variableRateSlope2 The variable rate slope above optimal utilization rate
-   * @param stableRateSlope1 The stable rate slope below optimal utilization rate
-   * @param stableRateSlope2 The stable rate slope above optimal utilization rate
+   * @param variableRateSlope1 The variable rate slope below optimal usage ratio
+   * @param variableRateSlope2 The variable rate slope above optimal usage ratio
+   * @param stableRateSlope1 The stable rate slope below optimal usage ratio
+   * @param stableRateSlope2 The stable rate slope above optimal usage ratio
    * @param baseStableRateOffset The premium on top of variable rate for base stable borrowing rate
    * @param stableRateExcessOffset The premium on top of stable rate when there stable debt surpass the threshold
    * @param optimalStableToTotalDebtRatio The optimal stable debt to total debt ratio of the reserve
    */
   constructor(
     IPoolAddressesProvider provider,
-    uint256 optimalUtilizationRate,
+    uint256 optimalUsageRatio,
     uint256 baseVariableBorrowRate,
     uint256 variableRateSlope1,
     uint256 variableRateSlope2,
@@ -89,14 +96,15 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 stableRateExcessOffset,
     uint256 optimalStableToTotalDebtRatio
   ) {
-    require(WadRayMath.RAY >= optimalUtilizationRate, Errors.INVALID_OPTIMAL_UTILIZATION_RATE);
+    require(WadRayMath.RAY >= optimalUsageRatio, Errors.INVALID_OPTIMAL_USAGE_RATIO);
     require(
       WadRayMath.RAY >= optimalStableToTotalDebtRatio,
       Errors.INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO
     );
-    OPTIMAL_UTILIZATION_RATE = optimalUtilizationRate;
-    EXCESS_UTILIZATION_RATE = WadRayMath.RAY - optimalUtilizationRate;
+    OPTIMAL_USAGE_RATIO = optimalUsageRatio;
+    MAX_EXCESS_USAGE_RATIO = WadRayMath.RAY - optimalUsageRatio;
     OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = optimalStableToTotalDebtRatio;
+    MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO = WadRayMath.RAY - optimalStableToTotalDebtRatio;
     ADDRESSES_PROVIDER = provider;
     _baseVariableBorrowRate = baseVariableBorrowRate;
     _variableRateSlope1 = variableRateSlope1;
@@ -108,8 +116,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @notice Returns the variable rate slope below optimal utilization rate
-   * @dev Its the variable rate when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE
+   * @notice Returns the variable rate slope below optimal usage ratio
+   * @dev Its the variable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
    * @return The variable rate slope
    **/
   function getVariableRateSlope1() external view returns (uint256) {
@@ -117,8 +125,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @notice Returns the variable rate slope above optimal utilization rate
-   * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
+   * @notice Returns the variable rate slope above optimal usage ratio
+   * @dev Its the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
    * @return The variable rate slope
    **/
   function getVariableRateSlope2() external view returns (uint256) {
@@ -126,8 +134,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @notice Returns the stable rate slope below optimal utilization rate
-   * @dev Its the stable rate when utilization rate > 0 and <= OPTIMAL_UTILIZATION_RATE
+   * @notice Returns the stable rate slope below optimal usage ratio
+   * @dev Its the stable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
    * @return The stable rate slope
    **/
   function getStableRateSlope1() external view returns (uint256) {
@@ -135,8 +143,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
-   * @notice Returns the stable rate slope above optimal utilization rate
-   * @dev Its the variable rate when utilization rate > OPTIMAL_UTILIZATION_RATE
+   * @notice Returns the stable rate slope above optimal usage ratio
+   * @dev Its the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
    * @return The stable rate slope
    **/
   function getStableRateSlope2() external view returns (uint256) {
@@ -167,8 +175,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 currentVariableBorrowRate;
     uint256 currentStableBorrowRate;
     uint256 currentLiquidityRate;
-    uint256 borrowUtilizationRate;
-    uint256 supplyUtilizationRate;
+    uint256 borrowUsageRatio;
+    uint256 supplyUsageRatio;
     uint256 stableToTotalDebtRatio;
   }
 
@@ -200,39 +208,40 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentVariableBorrowRate = _baseVariableBorrowRate;
     vars.currentStableBorrowRate = getBaseStableBorrowRate();
 
-    vars.borrowUtilizationRate = vars.totalDebt == 0
+    vars.borrowUsageRatio = vars.totalDebt == 0
       ? 0
       : vars.totalDebt.rayDiv(vars.availableLiquidity + vars.totalDebt);
 
-    vars.supplyUtilizationRate = vars.totalDebt == 0
+    vars.supplyUsageRatio = vars.totalDebt == 0
       ? 0
       : vars.totalDebt.rayDiv(vars.availableLiquidity + params.unbacked + vars.totalDebt);
 
-    if (vars.borrowUtilizationRate > OPTIMAL_UTILIZATION_RATE) {
-      uint256 excessUtilizationRateRatio = (vars.borrowUtilizationRate - OPTIMAL_UTILIZATION_RATE)
-        .rayDiv(EXCESS_UTILIZATION_RATE);
+    if (vars.borrowUsageRatio > OPTIMAL_USAGE_RATIO) {
+      uint256 excessBorrowUsageRatio = (vars.borrowUsageRatio - OPTIMAL_USAGE_RATIO).rayDiv(
+        MAX_EXCESS_USAGE_RATIO
+      );
 
       vars.currentStableBorrowRate +=
         _stableRateSlope1 +
-        _stableRateSlope2.rayMul(excessUtilizationRateRatio);
+        _stableRateSlope2.rayMul(excessBorrowUsageRatio);
 
       vars.currentVariableBorrowRate +=
         _variableRateSlope1 +
-        _variableRateSlope2.rayMul(excessUtilizationRateRatio);
+        _variableRateSlope2.rayMul(excessBorrowUsageRatio);
     } else {
-      vars.currentStableBorrowRate += _stableRateSlope1.rayMul(vars.borrowUtilizationRate).rayDiv(
-        OPTIMAL_UTILIZATION_RATE
+      vars.currentStableBorrowRate += _stableRateSlope1.rayMul(vars.borrowUsageRatio).rayDiv(
+        OPTIMAL_USAGE_RATIO
       );
 
-      vars.currentVariableBorrowRate += _variableRateSlope1
-        .rayMul(vars.borrowUtilizationRate)
-        .rayDiv(OPTIMAL_UTILIZATION_RATE);
+      vars.currentVariableBorrowRate += _variableRateSlope1.rayMul(vars.borrowUsageRatio).rayDiv(
+        OPTIMAL_USAGE_RATIO
+      );
     }
 
     if (vars.stableToTotalDebtRatio > OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO) {
-      uint256 excessRatio = (vars.stableToTotalDebtRatio - OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO)
-        .rayDiv(WadRayMath.RAY - OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO);
-      vars.currentStableBorrowRate += _stableRateExcessOffset.rayMul(excessRatio);
+      uint256 excessStableDebtRatio = (vars.stableToTotalDebtRatio -
+        OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO).rayDiv(MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO);
+      vars.currentStableBorrowRate += _stableRateExcessOffset.rayMul(excessStableDebtRatio);
     }
 
     vars.currentLiquidityRate = _getOverallBorrowRate(
@@ -240,7 +249,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
       params.totalVariableDebt,
       vars.currentVariableBorrowRate,
       params.averageStableBorrowRate
-    ).rayMul(vars.supplyUtilizationRate).percentMul(
+    ).rayMul(vars.supplyUsageRatio).percentMul(
         PercentageMath.PERCENTAGE_FACTOR - params.reserveFactor
       );
 
