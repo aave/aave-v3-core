@@ -13,7 +13,7 @@ library Errors {
   string public constant CALLER_NOT_RISK_OR_POOL_ADMIN = '4'; // 'The caller of the function is not a risk or pool admin'
   string public constant CALLER_NOT_ASSET_LISTING_OR_POOL_ADMIN = '5'; // 'The caller of the function is not an asset listing or pool admin'
   string public constant CALLER_NOT_BRIDGE = '6'; // 'The caller of the function is not a bridge'
-  string public constant PROVIDER_NOT_REGISTERED = '7'; // 'Provider is not registered'
+  string public constant ADDRESSES_PROVIDER_NOT_REGISTERED = '7'; // 'Pool addresses provider is not registered'
   string public constant INVALID_ADDRESSES_PROVIDER_ID = '8'; // 'Invalid id for the pool addresses provider'
   string public constant NOT_CONTRACT = '9'; // 'Address is not a contract'
   string public constant CALLER_NOT_POOL_CONFIGURATOR = '10'; // 'The caller of the function is not the pool configurator'
@@ -93,4 +93,5 @@ library Errors {
   string public constant INVALID_OPTIMAL_USAGE_RATIO = '84'; // 'Invalid optimal usage ratio'
   string public constant INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85'; // 'Invalid optimal stable to total debt ratio'
   string public constant UNDERLYING_CANNOT_BE_RESCUED = '86'; // 'The underlying asset cannot be rescued'
+  string public constant ADDRESSES_PROVIDER_ALREADY_ADDED = '87'; // 'Reserve has already been added to reserve list'
 }
