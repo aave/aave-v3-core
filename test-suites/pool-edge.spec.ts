@@ -62,8 +62,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     } = testEnv;
     const { deployer: deployerName } = await hre.getNamedAccounts();
 
-    // For some reason, the deployment here is getting utterly messed up and never exiting
-    // Deploy the mock Pool with a `dropReserve` skipping the
+    // Deploy the mock Pool with a `dropReserve` skipping the checks
     const NEW_POOL_IMPL_ARTIFACT = await hre.deployments.deploy('MockPoolInheritedDropper', {
       contract: 'MockPoolInherited',
       from: deployerName,
