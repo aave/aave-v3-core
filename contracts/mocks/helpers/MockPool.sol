@@ -45,4 +45,9 @@ contract MockPoolInherited is Pool {
   function MAX_NUMBER_RESERVES() public view override returns (uint256) {
     return _maxNumberOfReserves;
   }
+
+  function dropReserve(address asset) external override {
+    _reservesList[_reserves[asset].id] = address(0);
+    delete _reserves[asset];
+  }
 }

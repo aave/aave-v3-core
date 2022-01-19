@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumberish, utils } from 'ethers';
+import { BigNumber, BigNumberish, utils } from 'ethers';
 import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { deployMintableERC20 } from '@aave/deploy-v3/dist/helpers/contract-deployments';
@@ -48,6 +48,91 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
   afterEach(async () => {
     await evmRevert(snap);
+  });
+
+  it('Drop asset while user uses it as collateral, ensure that HF is lowered', async () => {
+    const {
+      addressesProvider,
+      poolAdmin,
+      pool,
+      dai,
+      deployer,
+      configurator,
+      users: [user0],
+    } = testEnv;
+    const { deployer: deployerName } = await hre.getNamedAccounts();
+
+    // For some reason, the deployment here is getting utterly messed up and never exiting
+    // Deploy the mock Pool with a `dropReserve` skipping the
+    const NEW_POOL_IMPL_ARTIFACT = await hre.deployments.deploy('MockPoolInheritedDropper', {
+      contract: 'MockPoolInherited',
+      from: deployerName,
+      args: [addressesProvider.address],
+      libraries: {
+        SupplyLogic: (await hre.deployments.get('SupplyLogic')).address,
+        BorrowLogic: (await hre.deployments.get('BorrowLogic')).address,
+        LiquidationLogic: (await hre.deployments.get('LiquidationLogic')).address,
+        EModeLogic: (await hre.deployments.get('EModeLogic')).address,
+        BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
+        FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+      },
+      log: false,
+    });
+
+    // Impersonate PoolAddressesProvider
+    await impersonateAccountsHardhat([addressesProvider.address]);
+    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
+
+    const poolProxyAddress = await addressesProvider.getPool();
+    const poolProxy = (await hre.ethers.getContractAt(
+      'InitializableImmutableAdminUpgradeabilityProxy',
+      poolProxyAddress,
+      addressesProviderSigner
+    )) as InitializableImmutableAdminUpgradeabilityProxy;
+
+    const oldPoolImpl = await poolProxy.callStatic.implementation();
+
+    // Upgrade the Pool
+    expect(
+      await addressesProvider.connect(poolAdmin.signer).setPoolImpl(NEW_POOL_IMPL_ARTIFACT.address)
+    )
+      .to.emit(addressesProvider, 'PoolUpdated')
+      .withArgs(oldPoolImpl, NEW_POOL_IMPL_ARTIFACT.address);
+
+    // Get the Pool instance
+    const mockPoolAddress = await addressesProvider.getPool();
+    const mockPool = await MockPoolInherited__factory.connect(
+      mockPoolAddress,
+      await getFirstSigner()
+    );
+
+    const amount = utils.parseUnits('10', 18);
+    const amountUSD = amount.div(BigNumber.from(10).pow(10));
+
+    await dai.connect(user0.signer)['mint(uint256)'](amount);
+    await dai.connect(user0.signer).approve(mockPool.address, MAX_UINT_AMOUNT);
+
+    expect(await mockPool.connect(user0.signer).supply(dai.address, amount, user0.address, 0));
+
+    const userReserveDataBefore = await mockPool.getUserAccountData(user0.address);
+
+    expect(userReserveDataBefore.totalCollateralBase).to.be.eq(amountUSD);
+    expect(userReserveDataBefore.totalDebtBase).to.be.eq(0);
+    expect(userReserveDataBefore.availableBorrowsBase).to.be.eq(amountUSD.mul(7500).div(10000));
+    expect(userReserveDataBefore.currentLiquidationThreshold).to.be.eq(8000);
+    expect(userReserveDataBefore.ltv).to.be.eq(7500);
+    expect(userReserveDataBefore.healthFactor).to.be.eq(MAX_UINT_AMOUNT);
+
+    expect(await mockPool.dropReserve(dai.address));
+
+    const userReserveDataAfter = await mockPool.getUserAccountData(user0.address);
+
+    expect(userReserveDataAfter.totalCollateralBase).to.be.eq(0);
+    expect(userReserveDataAfter.totalDebtBase).to.be.eq(0);
+    expect(userReserveDataAfter.availableBorrowsBase).to.be.eq(0);
+    expect(userReserveDataAfter.currentLiquidationThreshold).to.be.eq(0);
+    expect(userReserveDataAfter.ltv).to.be.eq(0);
+    expect(userReserveDataAfter.healthFactor).to.be.eq(MAX_UINT_AMOUNT);
   });
 
   it('Initialize fresh deployment with incorrect addresses provider (revert expected)', async () => {
@@ -114,8 +199,6 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       users: [user0],
     } = testEnv;
 
-    const snapId = await evmSnapshot();
-
     const amount = utils.parseUnits('10', 18);
     await dai.connect(user0.signer)['mint(uint256)'](amount);
     await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -137,8 +220,6 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       user0.address
     );
     expect(userReserveDataAfter.usageAsCollateralEnabled).to.be.true;
-
-    await evmRevert(snapId);
   });
 
   it('Call `setUserUseReserveAsCollateral()` to disable an asset as collateral when the asset is already disabled as collateral', async () => {
@@ -148,8 +229,6 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       dai,
       users: [user0],
     } = testEnv;
-
-    const snapId = await evmSnapshot();
 
     const amount = utils.parseUnits('10', 18);
     await dai.connect(user0.signer)['mint(uint256)'](amount);
@@ -177,8 +256,6 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       user0.address
     );
     expect(userReserveDataAfter.usageAsCollateralEnabled).to.be.false;
-
-    await evmRevert(snapId);
   });
 
   it('Call `mintToTreasury()` on a pool with an inactive reserve', async () => {
@@ -638,8 +715,6 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       users: [user0],
     } = testEnv;
 
-    const snapId = await evmSnapshot();
-
     const debtCeiling = utils.parseUnits('10', 2);
 
     expect(await helpersContract.getDebtCeiling(dai.address)).to.be.eq(0);
@@ -656,7 +731,5 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     await expect(
       pool.connect(configSigner).resetIsolationModeTotalDebt(dai.address)
     ).to.be.revertedWith(DEBT_CEILING_NOT_ZERO);
-
-    await evmRevert(snapId);
   });
 });

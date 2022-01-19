@@ -671,7 +671,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function dropReserve(address asset) external override onlyPoolConfigurator {
+  function dropReserve(address asset) external virtual override onlyPoolConfigurator {
     DataTypes.ReserveData storage reserve = _reserves[asset];
     ValidationLogic.validateDropReserve(_reservesList, reserve, asset);
     _reservesList[_reserves[asset].id] = address(0);
