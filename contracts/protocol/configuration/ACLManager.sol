@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {AccessControl} from '../../dependencies/openzeppelin/contracts/AccessControl.sol';
