@@ -50,14 +50,11 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  it('Drop asset while user uses it as collateral, ensure that HF is lowered', async () => {
+  it('Drop asset while user uses it as collateral, ensure that borrowing power is lowered', async () => {
     const {
       addressesProvider,
       poolAdmin,
-      pool,
       dai,
-      deployer,
-      configurator,
       users: [user0],
     } = testEnv;
     const { deployer: deployerName } = await hre.getNamedAccounts();
