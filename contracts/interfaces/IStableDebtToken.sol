@@ -34,7 +34,7 @@ interface IStableDebtToken is IInitializableDebtToken {
 
   /**
    * @dev Emitted when new stable debt is burned
-   * @param user The address of the user
+   * @param from The address from which the debt will be burned
    * @param amount The amount being burned (user entered amount - balance increase from interest)
    * @param currentBalance The current balance of the user
    * @param balanceIncrease The the increase in balance since the last action of the user
@@ -42,7 +42,7 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param newTotalSupply The next total supply of the stable debt token after the action
    **/
   event Burn(
-    address indexed user,
+    address indexed from,
     uint256 amount,
     uint256 currentBalance,
     uint256 balanceIncrease,
@@ -82,12 +82,12 @@ interface IStableDebtToken is IInitializableDebtToken {
    * and the rate of the previous debt
    * @dev In some instances, a burn transaction will emit a mint event
    * if the amount to burn is less than the interest the user earned
-   * @param user The address of the user getting his debt burned
+   * @param from The address from which the debt will be burned
    * @param amount The amount of debt tokens getting burned
    * @return The total stable debt
    * @return The average stable borrow rate
    **/
-  function burn(address user, uint256 amount) external returns (uint256, uint256);
+  function burn(address from, uint256 amount) external returns (uint256, uint256);
 
   /**
    * @notice Returns the average rate of all the stable rate loans.

@@ -98,11 +98,11 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
 
   /// @inheritdoc IVariableDebtToken
   function burn(
-    address user,
+    address from,
     uint256 amount,
     uint256 index
   ) external override onlyPool returns (uint256) {
-    _burnScaled(user, address(0), amount, index);
+    _burnScaled(from, address(0), amount, index);
     return scaledTotalSupply();
   }
 
