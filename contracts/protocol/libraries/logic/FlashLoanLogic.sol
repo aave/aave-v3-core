@@ -216,6 +216,12 @@ library FlashLoanLogic {
     );
   }
 
+  /**
+   * @notice Handles repayment of flashloaned assets + premium
+   * @dev Will pull the amount + premium from the receiver, so must have approved pool
+   * @param reserve The state of the flashloaned reserve
+   * @param params The additional parameters needed to execute the repayment function
+   */
   function _flashloanRepayment(
     DataTypes.ReserveData storage reserve,
     DataTypes.FlashLoanRepaymentParams memory params
