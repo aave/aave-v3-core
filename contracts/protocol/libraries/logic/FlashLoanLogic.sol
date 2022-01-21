@@ -55,7 +55,6 @@ library FlashLoanLogic {
     uint256 currentPremiumToLP;
     uint256 currentPremiumToProtocol;
     uint256 currentAmountPlusPremium;
-    address debtToken;
     address[] aTokenAddresses;
     uint256[] totalPremiums;
     uint256 flashloanPremiumTotal;
