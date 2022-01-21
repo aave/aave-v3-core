@@ -81,7 +81,7 @@ library LiquidationLogic {
     uint256 healthFactor;
     uint256 liquidationProtocolFeeAmount;
     uint256 closeFactor;
-    IAToken collateralAtoken;
+    IAToken collateralAToken;
     IPriceOracleGetter oracle;
     DataTypes.ReserveCache debtReserveCache;
   }
@@ -89,7 +89,7 @@ library LiquidationLogic {
   /**
    * @notice Function to liquidate a position if its Health Factor drops below 1. The caller (liquidator)
    * covers `debtToCover` amount of debt of the user getting liquidated, and receives
-   * a proportionally amount of the `collateralAsset` plus a bonus to cover market risk
+   * a proportional amount of the `collateralAsset` plus a bonus to cover market risk
    * @dev Emits the `LiquidationCall()` event
    * @param reserves The state of all the reserves
    * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
@@ -143,8 +143,8 @@ library LiquidationLogic {
       })
     );
 
-    vars.collateralAtoken = IAToken(collateralReserve.aTokenAddress);
-    vars.userCollateralBalance = vars.collateralAtoken.balanceOf(params.user);
+    vars.collateralAToken = IAToken(collateralReserve.aTokenAddress);
+    vars.userCollateralBalance = vars.collateralAToken.balanceOf(params.user);
 
     vars.closeFactor = vars.healthFactor > CLOSE_FACTOR_HF_THRESHOLD
       ? DEFAULT_LIQUIDATION_CLOSE_FACTOR
@@ -229,8 +229,8 @@ library LiquidationLogic {
     );
 
     if (params.receiveAToken) {
-      vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAtoken).balanceOf(msg.sender);
-      vars.collateralAtoken.transferOnLiquidation(
+      vars.liquidatorPreviousATokenBalance = IERC20(vars.collateralAToken).balanceOf(msg.sender);
+      vars.collateralAToken.transferOnLiquidation(
         params.user,
         msg.sender,
         vars.maxCollateralToLiquidate
@@ -261,7 +261,7 @@ library LiquidationLogic {
       );
 
       // Burn the equivalent amount of aToken, sending the underlying to the liquidator
-      vars.collateralAtoken.burn(
+      vars.collateralAToken.burn(
         params.user,
         msg.sender,
         vars.maxCollateralToLiquidate,
@@ -271,9 +271,9 @@ library LiquidationLogic {
 
     // Transfer fee to treasury if it is non-zero
     if (vars.liquidationProtocolFeeAmount > 0) {
-      vars.collateralAtoken.transferOnLiquidation(
+      vars.collateralAToken.transferOnLiquidation(
         params.user,
-        vars.collateralAtoken.RESERVE_TREASURY_ADDRESS(),
+        vars.collateralAToken.RESERVE_TREASURY_ADDRESS(),
         vars.liquidationProtocolFeeAmount
       );
     }
