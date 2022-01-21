@@ -190,7 +190,7 @@ library BorrowLogic {
 
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
       params.onBehalfOf,
-      reserve
+      reserveCache
     );
 
     ValidationLogic.validateRepay(
@@ -320,7 +320,10 @@ library BorrowLogic {
 
     reserve.updateState(reserveCache);
 
-    (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(msg.sender, reserve);
+    (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
+      msg.sender,
+      reserveCache
+    );
 
     ValidationLogic.validateSwapRateMode(
       reserve,
