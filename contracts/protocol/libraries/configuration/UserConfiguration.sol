@@ -74,7 +74,7 @@ library UserConfiguration {
   ) internal pure returns (bool) {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
-      return (self.data >> (reserveIndex << 1)) & 3 != 0;
+      return (self.data >> (reserveIndex << 1)) & 3 > 0;
     }
   }
 
@@ -91,7 +91,7 @@ library UserConfiguration {
   {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
-      return (self.data >> (reserveIndex << 1)) & 1 != 0;
+      return (self.data >> (reserveIndex << 1)) & 1 > 0;
     }
   }
 
@@ -108,7 +108,7 @@ library UserConfiguration {
   {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
-      return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
+      return (self.data >> ((reserveIndex << 1) + 1)) & 1 > 0;
     }
   }
 
@@ -124,7 +124,7 @@ library UserConfiguration {
     returns (bool)
   {
     uint256 collateralData = self.data & COLLATERAL_MASK;
-    return collateralData != 0 && (collateralData & (collateralData - 1) == 0);
+    return collateralData > 0 && (collateralData & (collateralData - 1) == 0);
   }
 
   /**
@@ -137,7 +137,7 @@ library UserConfiguration {
     pure
     returns (bool)
   {
-    return self.data & COLLATERAL_MASK != 0;
+    return self.data & COLLATERAL_MASK > 0;
   }
 
   /**
@@ -146,7 +146,7 @@ library UserConfiguration {
    * @return True if the user has been borrowing any reserve, false otherwise
    **/
   function isBorrowingAny(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
-    return self.data & BORROWING_MASK != 0;
+    return self.data & BORROWING_MASK > 0;
   }
 
   /**

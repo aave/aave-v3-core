@@ -70,7 +70,7 @@ library ValidationLogic {
     internal
     view
   {
-    require(amount != 0, Errors.INVALID_AMOUNT);
+    require(amount > 0, Errors.INVALID_AMOUNT);
 
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
       .reserveConfiguration
@@ -101,7 +101,7 @@ library ValidationLogic {
     uint256 amount,
     uint256 userBalance
   ) internal pure {
-    require(amount != 0, Errors.INVALID_AMOUNT);
+    require(amount > 0, Errors.INVALID_AMOUNT);
     require(amount <= userBalance, Errors.NOT_ENOUGH_AVAILABLE_USER_BALANCE);
 
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
@@ -144,7 +144,7 @@ library ValidationLogic {
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.ValidateBorrowParams memory params
   ) internal view {
-    require(params.amount != 0, Errors.INVALID_AMOUNT);
+    require(params.amount > 0, Errors.INVALID_AMOUNT);
 
     ValidateBorrowLocalVars memory vars;
 
@@ -180,7 +180,7 @@ library ValidationLogic {
       vars.assetUnit = 10**vars.reserveDecimals;
     }
 
-    if (vars.borrowCap != 0) {
+    if (vars.borrowCap > 0) {
       vars.totalSupplyVariableDebt = params.reserveCache.currScaledVariableDebt.rayMul(
         params.reserveCache.nextVariableBorrowIndex
       );
@@ -212,7 +212,7 @@ library ValidationLogic {
       );
     }
 
-    if (params.userEModeCategory != 0) {
+    if (params.userEModeCategory > 0) {
       require(
         params.reserveCache.reserveConfiguration.getEModeCategory() == params.userEModeCategory,
         Errors.INCONSISTENT_EMODE_CATEGORY
@@ -642,7 +642,7 @@ library ValidationLogic {
     address asset
   ) internal view {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
-    require(reserve.id != 0 || reserves[0] == asset, Errors.ASSET_NOT_LISTED);
+    require(reserve.id > 0 || reserves[0] == asset, Errors.ASSET_NOT_LISTED);
     require(IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0, Errors.STABLE_DEBT_NOT_ZERO);
     require(
       IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0,

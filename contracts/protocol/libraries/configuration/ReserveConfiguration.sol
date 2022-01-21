@@ -185,7 +185,7 @@ library ReserveConfiguration {
    * @return The active state
    **/
   function getActive(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
-    return (self.data & ~ACTIVE_MASK) != 0;
+    return (self.data & ~ACTIVE_MASK) > 0;
   }
 
   /**
@@ -205,7 +205,7 @@ library ReserveConfiguration {
    * @return The frozen state
    **/
   function getFrozen(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
-    return (self.data & ~FROZEN_MASK) != 0;
+    return (self.data & ~FROZEN_MASK) > 0;
   }
 
   /**
@@ -225,7 +225,7 @@ library ReserveConfiguration {
    * @return The paused state
    **/
   function getPaused(DataTypes.ReserveConfigurationMap memory self) internal pure returns (bool) {
-    return (self.data & ~PAUSED_MASK) != 0;
+    return (self.data & ~PAUSED_MASK) > 0;
   }
 
   /**
@@ -260,7 +260,7 @@ library ReserveConfiguration {
     pure
     returns (bool)
   {
-    return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
+    return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) > 0;
   }
 
   /**

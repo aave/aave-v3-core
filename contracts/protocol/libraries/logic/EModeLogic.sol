@@ -59,7 +59,7 @@ library EModeLogic {
     uint8 prevCategoryId = usersEModeCategory[msg.sender];
     usersEModeCategory[msg.sender] = params.categoryId;
 
-    if (prevCategoryId != 0) {
+    if (prevCategoryId > 0) {
       ValidationLogic.validateHealthFactor(
         reserves,
         reservesList,
@@ -116,6 +116,6 @@ library EModeLogic {
     pure
     returns (bool)
   {
-    return (eModeUserCategory != 0 && eModeAssetCategory == eModeUserCategory);
+    return (eModeUserCategory > 0 && eModeAssetCategory == eModeUserCategory);
   }
 }

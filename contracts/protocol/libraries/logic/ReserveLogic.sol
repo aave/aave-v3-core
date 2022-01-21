@@ -264,7 +264,7 @@ library ReserveLogic {
 
     vars.amountToMint = vars.totalDebtAccrued.percentMul(reserveCache.reserveFactor);
 
-    if (vars.amountToMint != 0) {
+    if (vars.amountToMint > 0) {
       reserve.accruedToTreasury += vars
         .amountToMint
         .rayDiv(reserveCache.nextLiquidityIndex)
@@ -297,7 +297,7 @@ library ReserveLogic {
 
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
-      if (reserveCache.currScaledVariableDebt != 0) {
+      if (reserveCache.currScaledVariableDebt > 0) {
         uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
           reserveCache.currVariableBorrowRate,
           reserveCache.reserveLastUpdateTimestamp
