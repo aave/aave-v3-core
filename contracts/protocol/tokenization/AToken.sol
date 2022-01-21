@@ -109,7 +109,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     if (amount == 0) {
       return;
     }
-    mint(address(POOL), _treasury, amount, index);
+    _mintScaled(address(POOL), _treasury, amount, index);
   }
 
   /// @inheritdoc IAToken
