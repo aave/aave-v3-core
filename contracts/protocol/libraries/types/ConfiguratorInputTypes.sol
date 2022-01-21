@@ -11,7 +11,6 @@ library ConfiguratorInputTypes {
     address underlyingAsset;
     address treasury;
     address incentivesController;
-    string underlyingAssetName;
     string aTokenName;
     string aTokenSymbol;
     string variableDebtTokenName;
