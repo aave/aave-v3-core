@@ -134,7 +134,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     BridgeLogic.executeMintUnbacked(
       _reserves,
       _reservesList,
-      _reserves[asset],
       _usersConfig[onBehalfOf],
       asset,
       amount,
