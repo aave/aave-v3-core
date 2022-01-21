@@ -204,6 +204,15 @@ library DataTypes {
     uint256 flashLoanPremiumTotal;
   }
 
+  struct FlashLoanRepaymentParams {
+    address asset;
+    address receiverAddress;
+    uint256 amount;
+    uint256 totalPremium;
+    uint256 flashLoanPremiumToProtocol;
+    uint16 referralCode;
+  }
+
   struct CalculateUserAccountDataParams {
     UserConfigurationMap userConfig;
     uint256 reservesCount;

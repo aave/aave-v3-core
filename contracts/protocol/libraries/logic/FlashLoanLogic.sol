@@ -121,12 +121,14 @@ library FlashLoanLogic {
       ) {
         _flashloanRepayment(
           reserves[vars.currentAsset],
-          vars.currentAsset,
-          params.receiverAddress,
-          vars.currentAmount,
-          vars.totalPremiums[vars.i],
-          vars.flashloanPremiumToProtocol,
-          params.referralCode
+          DataTypes.FlashLoanRepaymentParams({
+            asset: vars.currentAsset,
+            receiverAddress: params.receiverAddress,
+            amount: vars.currentAmount,
+            totalPremium: vars.totalPremiums[vars.i],
+            flashLoanPremiumToProtocol: vars.flashloanPremiumToProtocol,
+            referralCode: params.referralCode
+          })
         );
       } else {
         // If the user chose to not return the funds, the system checks if there is enough collateral and
@@ -203,27 +205,24 @@ library FlashLoanLogic {
 
     _flashloanRepayment(
       reserve,
-      params.asset,
-      params.receiverAddress,
-      params.amount,
-      totalPremium,
-      params.flashLoanPremiumToProtocol,
-      params.referralCode
+      DataTypes.FlashLoanRepaymentParams({
+        asset: params.asset,
+        receiverAddress: params.receiverAddress,
+        amount: params.amount,
+        totalPremium: totalPremium,
+        flashLoanPremiumToProtocol: params.flashLoanPremiumToProtocol,
+        referralCode: params.referralCode
+      })
     );
   }
 
   function _flashloanRepayment(
     DataTypes.ReserveData storage reserve,
-    address asset,
-    address receiverAddress,
-    uint256 amount,
-    uint256 totalPremium,
-    uint256 flashLoanPremiumToProtocol,
-    uint16 referralCode
+    DataTypes.FlashLoanRepaymentParams memory params
   ) internal {
-    uint256 premiumToProtocol = totalPremium.percentMul(flashLoanPremiumToProtocol);
-    uint256 premiumToLP = totalPremium - premiumToProtocol;
-    uint256 amountPlusPremium = amount + totalPremium;
+    uint256 premiumToProtocol = params.totalPremium.percentMul(params.flashLoanPremiumToProtocol);
+    uint256 premiumToLP = params.totalPremium - premiumToProtocol;
+    uint256 amountPlusPremium = params.amount + params.totalPremium;
 
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
@@ -236,20 +235,24 @@ library FlashLoanLogic {
       .rayDiv(reserveCache.nextLiquidityIndex)
       .toUint128();
 
-    reserve.updateInterestRates(reserveCache, asset, amountPlusPremium, 0);
+    reserve.updateInterestRates(reserveCache, params.asset, amountPlusPremium, 0);
 
-    IERC20(asset).safeTransferFrom(receiverAddress, reserveCache.aTokenAddress, amountPlusPremium);
+    IERC20(params.asset).safeTransferFrom(
+      params.receiverAddress,
+      reserveCache.aTokenAddress,
+      amountPlusPremium
+    );
 
-    IAToken(reserveCache.aTokenAddress).handleRepayment(receiverAddress, amountPlusPremium);
+    IAToken(reserveCache.aTokenAddress).handleRepayment(params.receiverAddress, amountPlusPremium);
 
     emit FlashLoan(
-      receiverAddress,
+      params.receiverAddress,
       msg.sender,
-      asset,
-      amount,
+      params.asset,
+      params.amount,
       DataTypes.InterestRateMode(0),
-      totalPremium,
-      referralCode
+      params.totalPremium,
+      params.referralCode
     );
   }
 }
