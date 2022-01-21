@@ -609,6 +609,13 @@ interface IPool {
   function getReservesList() external view returns (address[] memory);
 
   /**
+   * @notice Returns the address of the reserve by its id
+   * @dev the id represents the position of the reserve in the reserves mapping
+   * @return The addresses of the reserve associated with id
+   **/
+  function getReserveAddressById(uint16 id) external view returns (address);
+
+  /**
    * @notice Returns the PoolAddressesProvider connected to this contract
    * @return The address of the PoolAddressesProvider
    **/

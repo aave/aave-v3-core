@@ -598,6 +598,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
+  function getReserveAddressById(uint16 id) external view returns (address) {
+    return _reservesList[id];
+  }
+
+  /// @inheritdoc IPool
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() public view override returns (uint256) {
     return _maxStableRateBorrowSizePercent;
   }
