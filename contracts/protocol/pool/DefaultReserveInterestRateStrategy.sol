@@ -152,6 +152,15 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /**
+   * @notice Returns the stable rate excess offset
+   * @dev An additional premium applied to the stable when stable debt > OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO
+   * @return The stable rate excess offset
+   */
+  function getStableRateExcessOffset() external view returns (uint256) {
+    return _stableRateExcessOffset;
+  }
+
+  /**
    * @notice Returns the base stable borrow rate
    * @return The base stable borrow rate
    **/
