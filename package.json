@@ -1,6 +1,6 @@
 {
   "name": "@aave/core-v3",
-  "version": "1.10.0",
+  "version": "1.10.0-beta.0",
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
