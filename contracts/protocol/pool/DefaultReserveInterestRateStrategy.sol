@@ -208,8 +208,10 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     if (vars.totalDebt > 0) {
       vars.stableToTotalDebtRatio = params.totalStableDebt.rayDiv(vars.totalDebt);
       vars.availableLiquidityPlusDebt = vars.availableLiquidity + vars.totalDebt;
-      vars.borrowUsageRatio = vars.totalDebt.rayDiv(availableLiquidityPlusDebt);
-      vars.supplyUsageRatio = vars.totalDebt.rayDiv(availableLiquidityPlusDebt + params.unbacked);
+      vars.borrowUsageRatio = vars.totalDebt.rayDiv(vars.availableLiquidityPlusDebt);
+      vars.supplyUsageRatio = vars.totalDebt.rayDiv(
+        vars.availableLiquidityPlusDebt + params.unbacked
+      );
     }
 
     if (vars.borrowUsageRatio > OPTIMAL_USAGE_RATIO) {
