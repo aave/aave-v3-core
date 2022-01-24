@@ -307,9 +307,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address oracle,
     string calldata label
   ) external override onlyRiskOrPoolAdmins {
-    // setting eMode category ltv and liquidationThreshold would disable this
-    // category as collateral; instead use setAssetEModeCategory() to remove
-    // all assets from category
     require(ltv != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
     require(liquidationThreshold != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
 
@@ -330,8 +327,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       Errors.INVALID_EMODE_CATEGORY_PARAMS
     );
 
-    // validate the new ltv and liquidation threshold are greater than the base
-    // ltvs and liquidation thresholds of all assets within the eMode category
     address[] memory reserves = _pool.getReservesList();
     for (uint256 i = 0; i < reserves.length; i++) {
       DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(reserves[i]);
