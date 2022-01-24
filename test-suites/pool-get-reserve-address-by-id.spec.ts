@@ -1,13 +1,8 @@
 import { expect } from 'chai';
-import { utils } from 'ethers';
-import { ProtocolErrors } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
-import { evmSnapshot, evmRevert, ONE_ADDRESS } from '@aave/deploy-v3';
-import { deployMintableERC20 } from '@aave/deploy-v3/dist/helpers/contract-deployments';
-import { MintableERC20 } from '../types';
+import { evmSnapshot, evmRevert, ZERO_ADDRESS } from '@aave/deploy-v3';
 
-makeSuite('getReserveAddressById', (testEnv: TestEnv) => {
- 
+makeSuite('Pool: getReserveAddressById', (testEnv: TestEnv) => {
   let snap: string;
 
   beforeEach(async () => {
@@ -18,20 +13,23 @@ makeSuite('getReserveAddressById', (testEnv: TestEnv) => {
     await evmRevert(snap);
   });
 
-  it('User tries to rescue tokens from Pool (revert expected)', async () => {
-    const {
-      pool,
-      usdc,
-      users: [rescuer],
-    } = testEnv;
+  it('User gets address of reserve by id', async () => {
+    const { pool, usdc } = testEnv;
 
     const reserveData = await pool.getReserveData(usdc.address);
-    
+
     const reserveAddress = await pool.getReserveAddressById(reserveData.id);
-    
-    await expect(
-    reserveAddress
-    ).to.be.eq(usdc.address);
+
+    await expect(reserveAddress).to.be.eq(usdc.address);
   });
 
+  it('User calls `getReserveAddressById` with a wrong id (id > reservesCount)', async () => {
+    const { pool } = testEnv;
+
+    // MAX_NUMBER_RESERVES is always greater than reservesCount
+    const maxNumberOfReserves = await pool.MAX_NUMBER_RESERVES();
+    const reserveAddress = await pool.getReserveAddressById(maxNumberOfReserves.add(1));
+
+    await expect(reserveAddress).to.be.eq(ZERO_ADDRESS);
+  });
 });
