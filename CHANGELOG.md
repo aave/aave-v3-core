@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.11.0](https://www.github.com/aave/aave-v3-core/compare/v1.10.0...v1.11.0) (2022-01-23)
+
+
+### Features
+
+* Add rescueTokens functionality for Pool and AToken ([047edf8](https://www.github.com/aave/aave-v3-core/commit/047edf8a3cbb93d2d61f25b7954be9599ee96fd7))
+
+
+### Bug Fixes
+
+* Add getter for `_stableRateExcessOffset` ([3586ebb](https://www.github.com/aave/aave-v3-core/commit/3586ebbe2df893332c791ad9aa1bf049240d8c25))
+* Fix contract docstrings ([802a4bd](https://www.github.com/aave/aave-v3-core/commit/802a4bd428edeff446cf0fca2696f4f7ad2a97cd))
+* Fix imports order ([5d237a4](https://www.github.com/aave/aave-v3-core/commit/5d237a4e7e4259b28a50052ba106961a38911220))
+* Re-add the abstract modifier to base tokenization contracts ([52abb3f](https://www.github.com/aave/aave-v3-core/commit/52abb3f81a420ed233422d7caee87beda8e8f31e))
+* Remove blank space ([0c208fa](https://www.github.com/aave/aave-v3-core/commit/0c208fa3555c481667fa507ebfec1863a9bc39f9))
+* Remove rescueTokensFromAToken from Pool ([1a32301](https://www.github.com/aave/aave-v3-core/commit/1a32301881993888b880e077236de90493338cde))
+* Revert chainId renaming ([c4283d5](https://www.github.com/aave/aave-v3-core/commit/c4283d5fe062c4af5a6c37effa95df67efd7bd57))
+* Update comment ([94c4cfb](https://www.github.com/aave/aave-v3-core/commit/94c4cfbd95d45e772d6348bdcde7e212a5651ea6))
+* Update natspec and test ([39363e4](https://www.github.com/aave/aave-v3-core/commit/39363e4dd659899163619b62ef4fd2818a58f620))
+* Update natspec for `calculateInterestRates()` ([b22150b](https://www.github.com/aave/aave-v3-core/commit/b22150b8da8ba0a51845264e367b1935456b0ba7))
+* Update test name ([f6319b9](https://www.github.com/aave/aave-v3-core/commit/f6319b94d0db7a65ca7763115b29845f78dd5ae4))
+
 ## [1.10.0](https://www.github.com/aave/aave-v3-core/compare/v1.9.0...v1.10.0) (2022-01-12)
 
 
