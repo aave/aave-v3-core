@@ -174,7 +174,6 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 fromEModeCategory;
-    uint8 toEModeCategory;
   }
 
   struct FlashloanParams {

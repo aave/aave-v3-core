@@ -156,7 +156,6 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       underlyingAsset: string;
       treasury: string;
       incentivesController: string;
-      underlyingAssetName: string;
       aTokenName: string;
       aTokenSymbol: string;
       variableDebtTokenName: string;
@@ -174,7 +173,6 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
         underlyingAsset: mockToken.address,
         treasury: ZERO_ADDRESS,
         incentivesController: ZERO_ADDRESS,
-        underlyingAssetName: 'MOCK',
         aTokenName: 'AMOCK',
         aTokenSymbol: 'AMOCK',
         variableDebtTokenName: 'VMOCK',
