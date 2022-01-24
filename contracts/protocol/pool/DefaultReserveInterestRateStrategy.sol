@@ -178,6 +178,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 borrowUsageRatio;
     uint256 supplyUsageRatio;
     uint256 stableToTotalDebtRatio;
+    uint256 availableLiquidityPlusDebt;
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
@@ -206,11 +207,9 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
     if (vars.totalDebt > 0) {
       vars.stableToTotalDebtRatio = params.totalStableDebt.rayDiv(vars.totalDebt);
-      uint256 availableLiquidityAndDebtRatio = vars.availableLiquidity + vars.totalDebt;
-      vars.borrowUsageRatio = vars.totalDebt.rayDiv(availableLiquidityAndDebtRatio);
-      vars.supplyUsageRatio = vars.totalDebt.rayDiv(
-        availableLiquidityAndDebtRatio + params.unbacked
-      );
+      vars.availableLiquidityPlusDebt = vars.availableLiquidity + vars.totalDebt;
+      vars.borrowUsageRatio = vars.totalDebt.rayDiv(availableLiquidityPlusDebt);
+      vars.supplyUsageRatio = vars.totalDebt.rayDiv(availableLiquidityPlusDebt + params.unbacked);
     }
 
     if (vars.borrowUsageRatio > OPTIMAL_USAGE_RATIO) {
