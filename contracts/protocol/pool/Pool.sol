@@ -635,8 +635,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         balanceToBefore: balanceToBefore,
         reservesCount: _reservesCount,
         oracle: ADDRESSES_PROVIDER.getPriceOracle(),
-        fromEModeCategory: _usersEModeCategory[from],
-        toEModeCategory: _usersEModeCategory[to]
+        fromEModeCategory: _usersEModeCategory[from]
       })
     );
   }
