@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
+import {Address} from '../../../dependencies/openzeppelin/contracts/Address.sol';
 import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
+import {Errors} from '../helpers/Errors.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
-import {Errors} from '../helpers/Errors.sol';
 
 /**
  * @title PoolLogic library
@@ -25,6 +26,28 @@ library PoolLogic {
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
+  function initReserve(
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reserves,
+    uint16 reservesCount,
+    uint16 maxNumberReserves,
+    address asset,
+    address aTokenAddress,
+    address stableDebtAddress,
+    address variableDebtAddress,
+    address interestRateStrategyAddress
+  ) external returns (bool) {
+    require(Address.isContract(asset), Errors.NOT_CONTRACT);
+    reservesData[asset].init(
+      aTokenAddress,
+      stableDebtAddress,
+      variableDebtAddress,
+      interestRateStrategyAddress
+    );
+    return
+      PoolLogic.addReserveToList(reservesData, reserves, asset, reservesCount, maxNumberReserves);
+  }
+
   /**
    * @notice Add a reserve to the list of reserves
    * @param reservesData The state of all the reserves
@@ -40,7 +63,7 @@ library PoolLogic {
     address asset,
     uint16 reservesCount,
     uint16 maxNumberReserves
-  ) external returns (bool) {
+  ) internal returns (bool) {
     bool reserveAlreadyAdded = reservesData[asset].id != 0 || reserves[0] == asset;
     require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
@@ -124,5 +147,28 @@ library PoolLogic {
    */
   function MAX_NUMBER_RESERVES() external view returns (uint16) {
     return ReserveConfiguration.MAX_RESERVES_COUNT;
+  }
+
+  function getReservesList(mapping(uint256 => address) storage reserves, uint256 reservesListCount)
+    external
+    view
+    returns (address[] memory)
+  {
+    uint256 droppedReservesCount = 0;
+    address[] memory reservesList = new address[](reservesListCount);
+
+    for (uint256 i = 0; i < reservesListCount; i++) {
+      if (reserves[i] != address(0)) {
+        reservesList[i - droppedReservesCount] = reserves[i];
+      } else {
+        droppedReservesCount++;
+      }
+    }
+
+    // Reduces the length of the reserves array by `droppedReservesCount`
+    assembly {
+      mstore(reservesList, sub(reservesListCount, droppedReservesCount))
+    }
+    return reservesList;
   }
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
-import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {PoolLogic} from '../libraries/logic/PoolLogic.sol';
@@ -541,23 +540,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function getReservesList() external view override returns (address[] memory) {
-    uint256 reserveListCount = _reservesCount;
-    uint256 droppedReservesCount = 0;
-    address[] memory reserves = new address[](reserveListCount);
-
-    for (uint256 i = 0; i < reserveListCount; i++) {
-      if (_reservesList[i] != address(0)) {
-        reserves[i - droppedReservesCount] = _reservesList[i];
-      } else {
-        droppedReservesCount++;
-      }
-    }
-
-    // Reduces the length of the reserves array by `droppedReservesCount`
-    assembly {
-      mstore(reserves, sub(reserveListCount, droppedReservesCount))
-    }
-    return reserves;
+    return PoolLogic.getReservesList(_reservesList, _reservesCount);
   }
 
   /// @inheritdoc IPool
@@ -623,20 +606,17 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address variableDebtAddress,
     address interestRateStrategyAddress
   ) external override onlyPoolConfigurator {
-    require(Address.isContract(asset), Errors.NOT_CONTRACT);
-    _reserves[asset].init(
-      aTokenAddress,
-      stableDebtAddress,
-      variableDebtAddress,
-      interestRateStrategyAddress
-    );
     if (
-      PoolLogic.addReserveToList(
+      PoolLogic.initReserve(
         _reserves,
         _reservesList,
-        asset,
         _reservesCount,
-        MAX_NUMBER_RESERVES() // TODO: Function instead of direct read only used because of testing
+        MAX_NUMBER_RESERVES(),
+        asset,
+        aTokenAddress,
+        stableDebtAddress,
+        variableDebtAddress,
+        interestRateStrategyAddress
       )
     ) {
       // no need to check for overflow - the function will revert if adding 1 will overflow
