@@ -46,8 +46,6 @@ library FlashLoanLogic {
   // Helper struct for internal variables used in the `executeFlashLoan` function
   struct FlashLoanLocalVars {
     IFlashLoanReceiver receiver;
-    address oracle;
-    address oracleSentinel;
     uint256 i;
     address currentAsset;
     uint256 currentAmount;
