@@ -699,7 +699,7 @@ interface IPool {
    * @notice Returns the maximum number of reserves supported to be listed in this Pool
    * @return The maximum number of reserves supported
    */
-  function MAX_NUMBER_RESERVES() external view returns (uint256);
+  function MAX_NUMBER_RESERVES() external view returns (uint16);
 
   /**
    * @notice Mints the assets accrued through the reserve factor to the treasury in the form of aTokens

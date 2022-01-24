@@ -42,7 +42,7 @@ contract MockPoolInherited is Pool {
     _maxNumberOfReserves = newMaxNumberOfReserves;
   }
 
-  function MAX_NUMBER_RESERVES() public view override returns (uint256) {
+  function MAX_NUMBER_RESERVES() public view override returns (uint16) {
     return _maxNumberOfReserves;
   }
 
