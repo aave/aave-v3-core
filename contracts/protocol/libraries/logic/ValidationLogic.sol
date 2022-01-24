@@ -417,13 +417,13 @@ library ValidationLogic {
       ? 0
       : totalDebt.rayDiv(availableLiquidity + totalDebt);
 
+    //if the usage ratio is higher than the threshold and liquidity rate less than the maximum allowed based
+    // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
     require(
       borrowUsageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD,
       Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
 
-    //if the usage ratio is higher than the threshold and liquidity rate less than the maximum allowed based
-    // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
     uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
       reserve.interestRateStrategyAddress
     ).getMaxVariableBorrowRate();
