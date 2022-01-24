@@ -43,7 +43,7 @@ library BridgeLogic {
    * @param reserves The state of all the reserves
    * @param reservesList The list of the addresses of all the active reserves
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
-   * @param asset The address of the asset to mint
+   * @param asset The address of the underlying asset to mint aTokens of
    * @param amount The amount to mint
    * @param onBehalfOf The address that will receive the aTokens
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
