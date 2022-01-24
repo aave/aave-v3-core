@@ -26,26 +26,33 @@ library PoolLogic {
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
+  /**
+   * @notice Initialize an asset to the  Add a reserve to the list of reserves
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param params Additional parameters needed for initiation
+   * @return true if appended, false if inserted at existing empty spot
+   **/
   function initReserve(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
-    uint16 reservesCount,
-    uint16 maxNumberReserves,
-    address asset,
-    address aTokenAddress,
-    address stableDebtAddress,
-    address variableDebtAddress,
-    address interestRateStrategyAddress
+    DataTypes.InitReserveParams memory params
   ) external returns (bool) {
-    require(Address.isContract(asset), Errors.NOT_CONTRACT);
-    reservesData[asset].init(
-      aTokenAddress,
-      stableDebtAddress,
-      variableDebtAddress,
-      interestRateStrategyAddress
+    require(Address.isContract(params.asset), Errors.NOT_CONTRACT);
+    reservesData[params.asset].init(
+      params.aTokenAddress,
+      params.stableDebtAddress,
+      params.variableDebtAddress,
+      params.interestRateStrategyAddress
     );
     return
-      PoolLogic.addReserveToList(reservesData, reserves, asset, reservesCount, maxNumberReserves);
+      PoolLogic.addReserveToList(
+        reservesData,
+        reserves,
+        params.asset,
+        params.reservesCount,
+        params.maxNumberReserves
+      );
   }
 
   /**

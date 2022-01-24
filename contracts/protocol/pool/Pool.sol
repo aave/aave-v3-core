@@ -610,13 +610,15 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       PoolLogic.initReserve(
         _reserves,
         _reservesList,
-        _reservesCount,
-        MAX_NUMBER_RESERVES(),
-        asset,
-        aTokenAddress,
-        stableDebtAddress,
-        variableDebtAddress,
-        interestRateStrategyAddress
+        DataTypes.InitReserveParams({
+          asset: asset,
+          aTokenAddress: aTokenAddress,
+          stableDebtAddress: stableDebtAddress,
+          variableDebtAddress: variableDebtAddress,
+          interestRateStrategyAddress: interestRateStrategyAddress,
+          reservesCount: _reservesCount,
+          maxNumberReserves: MAX_NUMBER_RESERVES()
+        })
       )
     ) {
       // no need to check for overflow - the function will revert if adding 1 will overflow

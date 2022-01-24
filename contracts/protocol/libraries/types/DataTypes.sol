@@ -247,4 +247,14 @@ library DataTypes {
     address reserve;
     address aToken;
   }
+
+  struct InitReserveParams {
+    address asset;
+    address aTokenAddress;
+    address stableDebtAddress;
+    address variableDebtAddress;
+    address interestRateStrategyAddress;
+    uint16 reservesCount;
+    uint16 maxNumberReserves;
+  }
 }
