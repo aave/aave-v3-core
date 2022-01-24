@@ -386,8 +386,6 @@ interface IPoolConfigurator {
 
   /**
    * @notice Assign an efficiency mode (eMode) category to asset.
-   * @dev The new ltv and liquidation threshold must be greater than the base
-   * ltvs and liquidation thresholds of all assets within the eMode category
    * @param asset The address of the underlying asset of the reserve
    * @param newCategoryId The new category id of the asset
    **/
@@ -397,6 +395,8 @@ interface IPoolConfigurator {
    * @notice Adds a new efficiency mode (eMode) category.
    * @dev If zero is provided as oracle address, the default asset oracles will be used to compute the overall debt and
    * overcollateralization of the users using this category.
+   * @dev The new ltv and liquidation threshold must be greater than the base
+   * ltvs and liquidation thresholds of all assets within the eMode category
    * @param categoryId The id of the category to be configured
    * @param ltv The ltv associated with the category
    * @param liquidationThreshold The liquidation threshold associated with the category
