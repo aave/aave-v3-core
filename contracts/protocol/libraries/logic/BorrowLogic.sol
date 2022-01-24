@@ -173,7 +173,6 @@ library BorrowLogic {
    * @dev  Emits the `Repay()` event
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
-   * @param reserve The data of the reserve of the asset being repaid
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the repay function
    * @return The actual amount being repaid
@@ -181,10 +180,10 @@ library BorrowLogic {
   function executeRepay(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory params
   ) external returns (uint256) {
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
