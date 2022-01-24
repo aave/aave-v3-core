@@ -610,7 +610,7 @@ interface IPool {
 
   /**
    * @notice Returns the address of the reserve by its id
-   * @dev the id represents the position of the reserve in the reserves mapping
+   * @dev The id represents the position of the reserve in the reserves mapping
    * @return The addresses of the reserve associated with id
    **/
   function getReserveAddressById(uint16 id) external view returns (address);
