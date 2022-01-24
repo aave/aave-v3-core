@@ -187,6 +187,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     uint256 borrowUsageRatio;
     uint256 supplyUsageRatio;
     uint256 stableToTotalDebtRatio;
+    uint256 availableLiquidityPlusDebt;
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
@@ -202,28 +203,25 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   {
     CalcInterestRatesLocalVars memory vars;
 
-    vars.availableLiquidity =
-      IERC20(params.reserve).balanceOf(params.aToken) +
-      params.liquidityAdded -
-      params.liquidityTaken;
-
     vars.totalDebt = params.totalStableDebt + params.totalVariableDebt;
-
-    vars.stableToTotalDebtRatio = vars.totalDebt > 0
-      ? params.totalStableDebt.rayDiv(vars.totalDebt)
-      : 0;
 
     vars.currentLiquidityRate = 0;
     vars.currentVariableBorrowRate = _baseVariableBorrowRate;
     vars.currentStableBorrowRate = getBaseStableBorrowRate();
 
-    vars.borrowUsageRatio = vars.totalDebt == 0
-      ? 0
-      : vars.totalDebt.rayDiv(vars.availableLiquidity + vars.totalDebt);
+    if (vars.totalDebt > 0) {
+      vars.stableToTotalDebtRatio = params.totalStableDebt.rayDiv(vars.totalDebt);
+      vars.availableLiquidity =
+        IERC20(params.reserve).balanceOf(params.aToken) +
+        params.liquidityAdded -
+        params.liquidityTaken;
 
-    vars.supplyUsageRatio = vars.totalDebt == 0
-      ? 0
-      : vars.totalDebt.rayDiv(vars.availableLiquidity + params.unbacked + vars.totalDebt);
+      vars.availableLiquidityPlusDebt = vars.availableLiquidity + vars.totalDebt;
+      vars.borrowUsageRatio = vars.totalDebt.rayDiv(vars.availableLiquidityPlusDebt);
+      vars.supplyUsageRatio = vars.totalDebt.rayDiv(
+        vars.availableLiquidityPlusDebt + params.unbacked
+      );
+    }
 
     if (vars.borrowUsageRatio > OPTIMAL_USAGE_RATIO) {
       uint256 excessBorrowUsageRatio = (vars.borrowUsageRatio - OPTIMAL_USAGE_RATIO).rayDiv(
