@@ -397,26 +397,25 @@ library ValidationLogic {
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
-   * @param stableDebtToken The stable debt token instance
-   * @param variableDebtToken The variable debt token instance
-   * @param aTokenAddress The address of the aToken contract
    */
   function validateRebalanceStableBorrowRate(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
-    address reserveAddress,
-    IERC20 stableDebtToken,
-    IERC20 variableDebtToken,
-    address aTokenAddress
+    address reserveAddress
   ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
+    IERC20 stableDebtToken = IERC20(reserveCache.stableDebtTokenAddress);
+    IERC20 variableDebtToken = IERC20(reserveCache.variableDebtTokenAddress);
+
     //if the usage ratio is below the threshold, no rebalances are needed
     uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
       .wadToRay();
-    uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
+    uint256 availableLiquidity = IERC20(reserveAddress)
+      .balanceOf(reserveCache.aTokenAddress)
+      .wadToRay();
     uint256 borrowUsageRatio = totalDebt == 0
       ? 0
       : totalDebt.rayDiv(availableLiquidity + totalDebt);
