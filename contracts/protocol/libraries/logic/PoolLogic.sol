@@ -152,7 +152,7 @@ library PoolLogic {
    * @notice Returns the maximum number of reserves supported to be listed in this Pool
    * @return The maximum number of reserves supported
    */
-  function MAX_NUMBER_RESERVES() external view returns (uint16) {
+  function MAX_NUMBER_RESERVES() external pure returns (uint16) {
     return ReserveConfiguration.MAX_RESERVES_COUNT;
   }
 
