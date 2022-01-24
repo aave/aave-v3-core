@@ -127,6 +127,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     uint256 rate
   )
     external
+    virtual
     override
     onlyPool
     returns (
@@ -185,6 +186,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   /// @inheritdoc IStableDebtToken
   function burn(address user, uint256 amount)
     external
+    virtual
     override
     onlyPool
     returns (uint256, uint256)
@@ -308,7 +310,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   }
 
   /// @inheritdoc IERC20
-  function totalSupply() public view override returns (uint256) {
+  function totalSupply() public view virtual override returns (uint256) {
     return _calcTotalSupply(_avgStableRate);
   }
 
@@ -332,7 +334,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @param avgRate The average rate at which the total supply increases
    * @return The debt balance of the user since the last burn/mint action
    **/
-  function _calcTotalSupply(uint256 avgRate) internal view virtual returns (uint256) {
+  function _calcTotalSupply(uint256 avgRate) internal view returns (uint256) {
     uint256 principalSupply = super.totalSupply();
 
     if (principalSupply == 0) {
@@ -388,7 +390,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   }
 
   /// @inheritdoc EIP712Base
-  function _EIP712BaseId() internal view virtual override returns (string memory) {
+  function _EIP712BaseId() internal view override returns (string memory) {
     return name();
   }
 
