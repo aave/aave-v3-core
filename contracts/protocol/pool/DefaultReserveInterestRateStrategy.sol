@@ -194,11 +194,6 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   {
     CalcInterestRatesLocalVars memory vars;
 
-    vars.availableLiquidity =
-      IERC20(params.reserve).balanceOf(params.aToken) +
-      params.liquidityAdded -
-      params.liquidityTaken;
-
     vars.totalDebt = params.totalStableDebt + params.totalVariableDebt;
 
     vars.currentLiquidityRate = 0;
@@ -207,6 +202,11 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
     if (vars.totalDebt > 0) {
       vars.stableToTotalDebtRatio = params.totalStableDebt.rayDiv(vars.totalDebt);
+      vars.availableLiquidity =
+        IERC20(params.reserve).balanceOf(params.aToken) +
+        params.liquidityAdded -
+        params.liquidityTaken;
+
       vars.availableLiquidityPlusDebt = vars.availableLiquidity + vars.totalDebt;
       vars.borrowUsageRatio = vars.totalDebt.rayDiv(vars.availableLiquidityPlusDebt);
       vars.supplyUsageRatio = vars.totalDebt.rayDiv(
