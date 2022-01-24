@@ -111,7 +111,6 @@ library ValidationLogic {
 
   struct ValidateBorrowLocalVars {
     uint256 currentLtv;
-    uint256 currentLiquidationThreshold;
     uint256 collateralNeededInBaseCurrency;
     uint256 userCollateralInBaseCurrency;
     uint256 userDebtInBaseCurrency;
@@ -224,7 +223,7 @@ library ValidationLogic {
       vars.userCollateralInBaseCurrency,
       vars.userDebtInBaseCurrency,
       vars.currentLtv,
-      vars.currentLiquidationThreshold,
+      ,
       vars.healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
