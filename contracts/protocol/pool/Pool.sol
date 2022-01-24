@@ -24,7 +24,6 @@ import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
-import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 
 /**
  * @title Pool contract
@@ -45,7 +44,6 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
-  using SafeCast for uint256;
   using GPv2SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -608,12 +606,12 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function FLASHLOAN_PREMIUM_TOTAL() public view override returns (uint256) {
+  function FLASHLOAN_PREMIUM_TOTAL() public view override returns (uint128) {
     return _flashLoanPremiumTotal;
   }
 
   /// @inheritdoc IPool
-  function FLASHLOAN_PREMIUM_TO_PROTOCOL() public view override returns (uint256) {
+  function FLASHLOAN_PREMIUM_TO_PROTOCOL() public view override returns (uint128) {
     return _flashLoanPremiumToProtocol;
   }
 
@@ -707,11 +705,11 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function updateFlashloanPremiums(
-    uint256 flashLoanPremiumTotal,
-    uint256 flashLoanPremiumToProtocol
+    uint128 flashLoanPremiumTotal,
+    uint128 flashLoanPremiumToProtocol
   ) external override onlyPoolConfigurator {
-    _flashLoanPremiumTotal = flashLoanPremiumTotal.toUint128();
-    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol.toUint128();
+    _flashLoanPremiumTotal = flashLoanPremiumTotal;
+    _flashLoanPremiumToProtocol = flashLoanPremiumToProtocol;
   }
 
   /// @inheritdoc IPool
