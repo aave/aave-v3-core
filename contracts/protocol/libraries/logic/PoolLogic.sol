@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
+import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
-import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
@@ -13,7 +13,7 @@ import {Errors} from '../helpers/Errors.sol';
 /**
  * @title PoolLogic library
  * @author Aave
- * @notice
+ * @notice Implements the logic for Pool specific functions
  */
 library PoolLogic {
   using GPv2SafeERC20 for IERC20;
@@ -25,29 +25,44 @@ library PoolLogic {
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
+  /**
+   * @notice Add a reserve to the list of reserves
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param asset The address of the underlying asset to add to the list of reserves
+   * @param reservesCount The number of available reserves
+   * @param maxNumberReserves The maximum number of reserves
+   * @return true if appended, false if inserted at existing empty spot
+   **/
   function addReserveToList(
-    mapping(address => DataTypes.ReserveData) storage reserves,
-    mapping(uint256 => address) storage reservesList,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reserves,
     address asset,
     uint16 reservesCount,
     uint16 maxNumberReserves
   ) external returns (bool) {
-    bool reserveAlreadyAdded = reserves[asset].id != 0 || reservesList[0] == asset;
+    bool reserveAlreadyAdded = reservesData[asset].id != 0 || reserves[0] == asset;
     require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
     for (uint16 i = 0; i < reservesCount; i++) {
-      if (reservesList[i] == address(0)) {
-        reserves[asset].id = i;
-        reservesList[i] = asset;
+      if (reserves[i] == address(0)) {
+        reservesData[asset].id = i;
+        reserves[i] = asset;
         return false;
       }
     }
     require(reservesCount < maxNumberReserves, Errors.NO_MORE_RESERVES_ALLOWED);
-    reserves[asset].id = reservesCount;
-    reservesList[reservesCount] = asset;
+    reservesData[asset].id = reservesCount;
+    reserves[reservesCount] = asset;
     return true;
   }
 
+  /**
+   * @notice Rescue and transfer tokens locked in this contract
+   * @param token The address of the token
+   * @param to The address of the recipient
+   * @param amount The amount of token to transfer
+   */
   function rescueTokens(
     address token,
     address to,
@@ -56,14 +71,19 @@ library PoolLogic {
     IERC20(token).safeTransfer(to, amount);
   }
 
+  /**
+   * @notice Mints the assets accrued through the reserve factor to the treasury in the form of aTokens
+   * @param reservesData The state of all the reserves
+   * @param assets The list of reserves for which the minting needs to be executed
+   **/
   function mintToTreasury(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     address[] calldata assets
   ) external {
     for (uint256 i = 0; i < assets.length; i++) {
       address assetAddress = assets[i];
 
-      DataTypes.ReserveData storage reserve = reserves[assetAddress];
+      DataTypes.ReserveData storage reserve = reservesData[assetAddress];
 
       // this cover both inactive reserves and invalid reserves since the flag will be 0 for both
       if (!reserve.configuration.getActive()) {
@@ -83,15 +103,25 @@ library PoolLogic {
     }
   }
 
+  /**
+   * @notice Resets the isolation mode total debt of the given asset to zero
+   * @dev It requires the given asset has zero debt ceiling
+   * @param reservesData The state of all the reserves
+   * @param asset The address of the underlying asset to reset the isolationModeTotalDebt
+   */
   function resetIsolationModeTotalDebt(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     address asset
   ) external {
-    require(reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
-    reserves[asset].isolationModeTotalDebt = 0;
+    require(reservesData[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
+    reservesData[asset].isolationModeTotalDebt = 0;
     emit IsolationModeTotalDebtUpdated(asset, 0);
   }
 
+  /**
+   * @notice Returns the maximum number of reserves supported to be listed in this Pool
+   * @return The maximum number of reserves supported
+   */
   function MAX_NUMBER_RESERVES() external view returns (uint16) {
     return ReserveConfiguration.MAX_RESERVES_COUNT;
   }
