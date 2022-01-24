@@ -55,6 +55,7 @@ library ConfiguratorLogic {
       input.aTokenImpl,
       abi.encodeWithSelector(
         IInitializableAToken.initialize.selector,
+        pool,
         input.treasury,
         input.underlyingAsset,
         input.incentivesController,
@@ -64,11 +65,11 @@ library ConfiguratorLogic {
         input.params
       )
     );
-
     address stableDebtTokenProxyAddress = _initTokenWithProxy(
       input.stableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -77,11 +78,11 @@ library ConfiguratorLogic {
         input.params
       )
     );
-
     address variableDebtTokenProxyAddress = _initTokenWithProxy(
       input.variableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -90,7 +91,6 @@ library ConfiguratorLogic {
         input.params
       )
     );
-
     pool.initReserve(
       input.underlyingAsset,
       aTokenProxyAddress,
@@ -235,7 +235,6 @@ library ConfiguratorLogic {
     InitializableImmutableAdminUpgradeabilityProxy proxy = new InitializableImmutableAdminUpgradeabilityProxy(
         address(this)
       );
-
     proxy.initialize(implementation, initParams);
 
     return address(proxy);

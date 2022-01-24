@@ -94,4 +94,5 @@ library Errors {
   string public constant INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '85'; // 'Invalid optimal stable to total debt ratio'
   string public constant UNDERLYING_CANNOT_BE_RESCUED = '86'; // 'The underlying asset cannot be rescued'
   string public constant ADDRESSES_PROVIDER_ALREADY_ADDED = '87'; // 'Reserve has already been added to reserve list'
+  string public constant POOL_ADDRESSES_DO_NOT_MATCH = '88'; // 'The token implementation pool address and the pool address provided by the initializing pool do not match'
 }
