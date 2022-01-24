@@ -223,8 +223,8 @@ interface IPoolConfigurator {
    * @param newFlashloanPremiumTotal The new premium, expressed in bps
    **/
   event FlashloanPremiumTotalUpdated(
-    uint256 oldFlashloanPremiumTotal,
-    uint256 newFlashloanPremiumTotal
+    uint128 oldFlashloanPremiumTotal,
+    uint128 newFlashloanPremiumTotal
   );
 
   /**
@@ -233,8 +233,8 @@ interface IPoolConfigurator {
    * @param newFlashloanPremiumToProtocol The new premium, expressed in bps
    **/
   event FlashloanPremiumToProtocolUpdated(
-    uint256 oldFlashloanPremiumToProtocol,
-    uint256 newFlashloanPremiumToProtocol
+    uint128 oldFlashloanPremiumToProtocol,
+    uint128 newFlashloanPremiumToProtocol
   );
 
   /**
@@ -432,7 +432,7 @@ interface IPoolConfigurator {
    * @dev The premium is calculated on the total amount borrowed
    * @param newFlashloanPremiumTotal The total flashloan premium
    */
-  function updateFlashloanPremiumTotal(uint256 newFlashloanPremiumTotal) external;
+  function updateFlashloanPremiumTotal(uint128 newFlashloanPremiumTotal) external;
 
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
@@ -440,7 +440,7 @@ interface IPoolConfigurator {
    * @dev The premium to protocol is calculated on the total flashloan premium
    * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to the protocol treasury
    */
-  function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
+  function updateFlashloanPremiumToProtocol(uint128 newFlashloanPremiumToProtocol) external;
 
   /**
    * @notice Sets the debt ceiling for an asset.

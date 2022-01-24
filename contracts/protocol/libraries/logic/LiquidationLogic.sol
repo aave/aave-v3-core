@@ -114,7 +114,7 @@ library LiquidationLogic {
 
     (vars.userStableDebt, vars.userVariableDebt) = Helpers.getUserCurrentDebt(
       params.user,
-      debtReserve
+      vars.debtReserveCache
     );
     vars.userTotalDebt = vars.userStableDebt + vars.userVariableDebt;
     vars.oracle = IPriceOracleGetter(params.priceOracle);

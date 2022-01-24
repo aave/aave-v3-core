@@ -406,7 +406,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateFlashloanPremiumTotal(uint256 newFlashloanPremiumTotal)
+  function updateFlashloanPremiumTotal(uint128 newFlashloanPremiumTotal)
     external
     override
     onlyPoolAdmin
@@ -415,13 +415,13 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
     );
-    uint256 oldFlashloanPremiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
+    uint128 oldFlashloanPremiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
     _pool.updateFlashloanPremiums(newFlashloanPremiumTotal, _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL());
     emit FlashloanPremiumTotalUpdated(oldFlashloanPremiumTotal, newFlashloanPremiumTotal);
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol)
+  function updateFlashloanPremiumToProtocol(uint128 newFlashloanPremiumToProtocol)
     external
     override
     onlyPoolAdmin
@@ -430,7 +430,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       newFlashloanPremiumToProtocol <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
     );
-    uint256 oldFlashloanPremiumToProtocol = _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
+    uint128 oldFlashloanPremiumToProtocol = _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
     _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), newFlashloanPremiumToProtocol);
     emit FlashloanPremiumToProtocolUpdated(
       oldFlashloanPremiumToProtocol,

@@ -377,6 +377,9 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(await strategyInstance.MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO()).to.be.eq(
       BigNumber.from(1).ray().sub(rateStrategyStableTwo.optimalStableToTotalDebtRatio)
     );
+    expect(await strategyInstance.getStableRateExcessOffset()).to.be.eq(
+      rateStrategyStableTwo.stableRateExcessOffset
+    );
   });
 
   it('Deploy an interest rate strategy with optimalUsageRatio out of range (expect revert)', async () => {
