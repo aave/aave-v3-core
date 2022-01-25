@@ -27,7 +27,7 @@ library PoolLogic {
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
-   * @notice Initialize an asset to the  Add a reserve to the list of reserves
+   * @notice Initialize an asset reserve and add the reserve to the list of reserves
    * @param reservesData The state of all the reserves
    * @param reserves The addresses of all the active reserves
    * @param params Additional parameters needed for initiation
@@ -45,45 +45,21 @@ library PoolLogic {
       params.variableDebtAddress,
       params.interestRateStrategyAddress
     );
-    return
-      PoolLogic.addReserveToList(
-        reservesData,
-        reserves,
-        params.asset,
-        params.reservesCount,
-        params.maxNumberReserves
-      );
-  }
 
-  /**
-   * @notice Add a reserve to the list of reserves
-   * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
-   * @param asset The address of the underlying asset to add to the list of reserves
-   * @param reservesCount The number of available reserves
-   * @param maxNumberReserves The maximum number of reserves
-   * @return true if appended, false if inserted at existing empty spot
-   **/
-  function addReserveToList(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
-    address asset,
-    uint16 reservesCount,
-    uint16 maxNumberReserves
-  ) internal returns (bool) {
-    bool reserveAlreadyAdded = reservesData[asset].id != 0 || reserves[0] == asset;
+    bool reserveAlreadyAdded = reservesData[params.asset].id != 0 || reserves[0] == params.asset;
     require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
-    for (uint16 i = 0; i < reservesCount; i++) {
+    for (uint16 i = 0; i < params.reservesCount; i++) {
       if (reserves[i] == address(0)) {
-        reservesData[asset].id = i;
-        reserves[i] = asset;
+        reservesData[params.asset].id = i;
+        reserves[i] = params.asset;
         return false;
       }
     }
-    require(reservesCount < maxNumberReserves, Errors.NO_MORE_RESERVES_ALLOWED);
-    reservesData[asset].id = reservesCount;
-    reserves[reservesCount] = asset;
+
+    require(params.reservesCount < params.maxNumberReserves, Errors.NO_MORE_RESERVES_ALLOWED);
+    reservesData[params.asset].id = params.reservesCount;
+    reserves[params.reservesCount] = params.asset;
     return true;
   }
 
