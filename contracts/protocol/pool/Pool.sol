@@ -636,7 +636,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
         })
       )
     ) {
-      // no need to check for overflow - the function will revert if adding 1 will overflow
       _reservesCount++;
     }
   }
