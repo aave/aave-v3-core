@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.12.0](https://www.github.com/aave/aave-v3-core/compare/v1.11.1...v1.12.0) (2022-01-25)
+
+
+### Features
+
+* bump @aave/deploy-v3 version ([85ec0fe](https://www.github.com/aave/aave-v3-core/commit/85ec0fe7cb45ae227b74ceb53c9088612034a3dc))
+
+
+### Bug Fixes
+
+* missing library at test, add updated deploy beta package ([67a5c80](https://www.github.com/aave/aave-v3-core/commit/67a5c80f04d0bcdd2dfa01c4b2d18a8a82dd222e))
+
 ### [1.11.1](https://www.github.com/aave/aave-v3-core/compare/v1.11.0...v1.11.1) (2022-01-25)
 
 
