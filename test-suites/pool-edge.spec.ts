@@ -8,7 +8,7 @@ import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import { evmSnapshot, evmRevert, getPoolLibraries } from '@aave/deploy-v3';
 import {
   MockPoolInherited__factory,
   MockReserveInterestRateStrategy__factory,
@@ -739,14 +739,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       contract: 'Pool',
       from: deployer.address,
       args: [addressesProvider.address],
-      libraries: {
-        SupplyLogic: (await hre.deployments.get('SupplyLogic')).address,
-        BorrowLogic: (await hre.deployments.get('BorrowLogic')).address,
-        LiquidationLogic: (await hre.deployments.get('LiquidationLogic')).address,
-        EModeLogic: (await hre.deployments.get('EModeLogic')).address,
-        BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
-        FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
-      },
+      libraries: await getPoolLibraries(),
       log: false,
     });
 
