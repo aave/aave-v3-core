@@ -147,7 +147,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) external override {
+  ) public override {
     SupplyLogic.executeSupply(
       _reserves,
       _reservesList,
@@ -171,7 +171,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
-  ) external override {
+  ) public override {
     IERC20WithPermit(asset).permit(
       msg.sender,
       address(this),
@@ -199,7 +199,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     address to
-  ) external override returns (uint256) {
+  ) public override returns (uint256) {
     return
       SupplyLogic.executeWithdraw(
         _reserves,
@@ -224,7 +224,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 interestRateMode,
     uint16 referralCode,
     address onBehalfOf
-  ) external override {
+  ) public override {
     BorrowLogic.executeBorrow(
       _reserves,
       _reservesList,
@@ -253,7 +253,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     uint256 interestRateMode,
     address onBehalfOf
-  ) external override returns (uint256) {
+  ) public override returns (uint256) {
     return
       BorrowLogic.executeRepay(
         _reserves,
@@ -279,7 +279,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
-  ) external override returns (uint256) {
+  ) public override returns (uint256) {
     {
       IERC20WithPermit(asset).permit(
         msg.sender,
