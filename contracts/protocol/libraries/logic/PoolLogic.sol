@@ -10,6 +10,7 @@ import {Errors} from '../helpers/Errors.sol';
 import {WadRayMath} from '../math/WadRayMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
+import {ValidationLogic} from './ValidationLogic.sol';
 
 /**
  * @title PoolLogic library
@@ -122,5 +123,22 @@ library PoolLogic {
     require(reservesData[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
     reservesData[asset].isolationModeTotalDebt = 0;
     emit IsolationModeTotalDebtUpdated(asset, 0);
+  }
+
+  /**
+   * @notice Drop a reserve
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param asset The address of the underlying asset of the reserve
+   **/
+  function executeDropReserve(
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reserves,
+    address asset
+  ) external {
+    DataTypes.ReserveData storage reserve = reservesData[asset];
+    ValidationLogic.validateDropReserve(reserves, reserve, asset);
+    reserves[reservesData[asset].id] = address(0);
+    delete reservesData[asset];
   }
 }

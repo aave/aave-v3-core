@@ -7,7 +7,6 @@ import {ReserveConfiguration} from '../libraries/configuration/ReserveConfigurat
 import {PoolLogic} from '../libraries/logic/PoolLogic.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
-import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {EModeLogic} from '../libraries/logic/EModeLogic.sol';
 import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {FlashLoanLogic} from '../libraries/logic/FlashLoanLogic.sol';
@@ -644,10 +643,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function dropReserve(address asset) external virtual override onlyPoolConfigurator {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-    ValidationLogic.validateDropReserve(_reservesList, reserve, asset);
-    _reservesList[_reserves[asset].id] = address(0);
-    delete _reserves[asset];
+    PoolLogic.executeDropReserve(_reserves, _reservesList, asset);
   }
 
   /// @inheritdoc IPool
