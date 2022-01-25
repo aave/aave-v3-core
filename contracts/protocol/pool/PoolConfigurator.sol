@@ -307,6 +307,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address oracle,
     string calldata label
   ) external override onlyRiskOrPoolAdmins {
+    require(ltv != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
+    require(liquidationThreshold != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
+
     // validation of the parameters: the LTV can
     // only be lower or equal than the liquidation threshold
     // (otherwise a loan against the asset would cause instantaneous liquidation)
@@ -323,6 +326,18 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
         PercentageMath.PERCENTAGE_FACTOR,
       Errors.INVALID_EMODE_CATEGORY_PARAMS
     );
+
+    address[] memory reserves = _pool.getReservesList();
+    for (uint256 i = 0; i < reserves.length; i++) {
+      DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(reserves[i]);
+      if (categoryId == currentConfig.getEModeCategory()) {
+        require(ltv > currentConfig.getLtv(), Errors.INVALID_EMODE_CATEGORY_PARAMS);
+        require(
+          liquidationThreshold > currentConfig.getLiquidationThreshold(),
+          Errors.INVALID_EMODE_CATEGORY_PARAMS
+        );
+      }
+    }
 
     _pool.configureEModeCategory(
       categoryId,
