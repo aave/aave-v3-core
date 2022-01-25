@@ -117,7 +117,7 @@ library FlashLoanLogic {
         DataTypes.InterestRateMode(params.interestRateModes[vars.i]) ==
         DataTypes.InterestRateMode.NONE
       ) {
-        _flashloanRepayment(
+        _handleFlashLoanRepayment(
           reserves[vars.currentAsset],
           DataTypes.FlashLoanRepaymentParams({
             asset: vars.currentAsset,
@@ -201,7 +201,7 @@ library FlashLoanLogic {
       Errors.INVALID_FLASHLOAN_EXECUTOR_RETURN
     );
 
-    _flashloanRepayment(
+    _handleFlashLoanRepayment(
       reserve,
       DataTypes.FlashLoanRepaymentParams({
         asset: params.asset,
@@ -220,7 +220,7 @@ library FlashLoanLogic {
    * @param reserve The state of the flashloaned reserve
    * @param params The additional parameters needed to execute the repayment function
    */
-  function _flashloanRepayment(
+  function _handleFlashLoanRepayment(
     DataTypes.ReserveData storage reserve,
     DataTypes.FlashLoanRepaymentParams memory params
   ) internal {
