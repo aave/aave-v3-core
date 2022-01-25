@@ -48,7 +48,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   using ReserveLogic for DataTypes.ReserveData;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-  uint256 public constant POOL_REVISION = 0x2;
+  uint256 public constant POOL_REVISION = 0x1;
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   /**
@@ -132,7 +132,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     BridgeLogic.executeMintUnbacked(
       _reserves,
       _reservesList,
-      _reserves[asset],
       _usersConfig[onBehalfOf],
       asset,
       amount,

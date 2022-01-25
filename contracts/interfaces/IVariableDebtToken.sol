@@ -31,13 +31,13 @@ interface IVariableDebtToken is IScaledBalanceToken, IInitializableDebtToken {
    * @notice Burns user variable debt
    * @dev In some instances, a burn transaction will emit a mint event
    * if the amount to burn is less than the interest that the user accrued
-   * @param user The user which debt is burnt
+   * @param from The address from which the debt will be burned
    * @param amount The amount getting burned
    * @param index The variable debt index of the reserve
    * @return The scaled total debt of the reserve
    **/
   function burn(
-    address user,
+    address from,
     uint256 amount,
     uint256 index
   ) external returns (uint256);

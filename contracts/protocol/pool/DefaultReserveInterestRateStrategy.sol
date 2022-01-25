@@ -209,11 +209,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     vars.currentVariableBorrowRate = _baseVariableBorrowRate;
     vars.currentStableBorrowRate = getBaseStableBorrowRate();
 
-    if (vars.totalDebt > 0) {
-      vars.availableLiquidity =
-        IERC20(params.reserve).balanceOf(params.aToken) +
-        params.liquidityAdded -
-        params.liquidityTaken;
+    if (vars.totalDebt != 0) {
       vars.stableToTotalDebtRatio = params.totalStableDebt.rayDiv(vars.totalDebt);
       vars.availableLiquidity =
         IERC20(params.reserve).balanceOf(params.aToken) +
