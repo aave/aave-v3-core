@@ -17,7 +17,6 @@ import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {BridgeLogic} from '../libraries/logic/BridgeLogic.sol';
 import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
