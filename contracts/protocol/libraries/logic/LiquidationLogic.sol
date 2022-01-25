@@ -200,7 +200,7 @@ library LiquidationLogic {
         );
     } else {
       // If the user doesn't have variable debt, no need to try to burn variable debt tokens
-      if (vars.userVariableDebt > 0) {
+      if (vars.userVariableDebt != 0) {
         vars.debtReserveCache.nextScaledVariableDebt = IVariableDebtToken(
           vars.debtReserveCache.variableDebtTokenAddress
         ).burn(params.user, vars.userVariableDebt, vars.debtReserveCache.nextVariableBorrowIndex);
@@ -270,7 +270,7 @@ library LiquidationLogic {
     }
 
     // Transfer fee to treasury if it is non-zero
-    if (vars.liquidationProtocolFeeAmount > 0) {
+    if (vars.liquidationProtocolFeeAmount != 0) {
       vars.collateralAToken.transferOnLiquidation(
         params.user,
         vars.collateralAToken.RESERVE_TREASURY_ADDRESS(),
@@ -391,7 +391,7 @@ library LiquidationLogic {
       vars.debtAmountNeeded = debtToCover;
     }
 
-    if (vars.liquidationProtocolFeePercentage > 0) {
+    if (vars.liquidationProtocolFeePercentage != 0) {
       vars.bonusCollateral =
         vars.collateralAmount -
         vars.collateralAmount.percentDiv(liquidationBonus);

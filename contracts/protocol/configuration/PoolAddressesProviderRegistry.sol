@@ -29,7 +29,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function registerAddressesProvider(address provider, uint256 id) external override onlyOwner {
-    require(id > 0, Errors.INVALID_ADDRESSES_PROVIDER_ID);
+    require(id != 0, Errors.INVALID_ADDRESSES_PROVIDER_ID);
     require(_idToAddressesProvider[id] == address(0), Errors.INVALID_ADDRESSES_PROVIDER_ID);
     require(_addressesProviderToId[provider] == 0, Errors.ADDRESSES_PROVIDER_ALREADY_ADDED);
 
@@ -42,7 +42,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviderToId[provider] > 0, Errors.ADDRESSES_PROVIDER_NOT_REGISTERED);
+    require(_addressesProviderToId[provider] != 0, Errors.ADDRESSES_PROVIDER_NOT_REGISTERED);
     uint256 oldId = _addressesProviderToId[provider];
     _idToAddressesProvider[oldId] = address(0);
     _addressesProviderToId[provider] = 0;

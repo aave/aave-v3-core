@@ -461,7 +461,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
       uint256 accruedToTreasury = reserve.accruedToTreasury;
 
-      if (accruedToTreasury > 0) {
+      if (accruedToTreasury != 0) {
         reserve.accruedToTreasury = 0;
         uint256 normalizedIncome = reserve.getNormalizedIncome();
         uint256 amountToMint = accruedToTreasury.rayMul(normalizedIncome);
@@ -672,7 +672,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
-    require(_reserves[asset].id > 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
@@ -683,7 +683,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
-    require(_reserves[asset].id > 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
+    require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].configuration = configuration;
   }
 
@@ -708,7 +708,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     onlyPoolConfigurator
   {
     // category 0 is reserved for volatile heterogeneous assets and it's always disabled
-    require(id > 0, Errors.EMODE_CATEGORY_RESERVED);
+    require(id != 0, Errors.EMODE_CATEGORY_RESERVED);
     _eModeCategories[id] = category;
   }
 
@@ -764,7 +764,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
    * @param asset The address of the underlying asset
    */
   function _addReserveToList(address asset) internal {
-    bool reserveAlreadyAdded = _reserves[asset].id > 0 || _reservesList[0] == asset;
+    bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
     require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
     uint16 reservesCount = _reservesCount;

@@ -61,7 +61,9 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
         'Invalid balance for the contract'
       );
 
-      uint256 amountToReturn = (_amountToApprove > 0) ? _amountToApprove : amounts[i] + premiums[i];
+      uint256 amountToReturn = (_amountToApprove != 0)
+        ? _amountToApprove
+        : amounts[i] + premiums[i];
       //execution does not fail - mint tokens and return them to the _destination
 
       token.mint(premiums[i]);

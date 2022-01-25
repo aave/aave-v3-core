@@ -84,7 +84,7 @@ library GenericLogic {
 
     CalculateUserAccountDataVars memory vars;
 
-    if (params.userEModeCategory > 0) {
+    if (params.userEModeCategory != 0) {
       (vars.eModeLtv, vars.eModeLiqThreshold, vars.eModeAssetPrice) = EModeLogic
         .getEModeConfiguration(
           eModeCategories[params.userEModeCategory],
@@ -124,12 +124,12 @@ library GenericLogic {
         vars.assetUnit = 10**vars.decimals;
       }
 
-      vars.assetPrice = vars.eModeAssetPrice > 0 &&
+      vars.assetPrice = vars.eModeAssetPrice != 0 &&
         params.userEModeCategory == vars.eModeAssetCategory
         ? vars.eModeAssetPrice
         : IPriceOracleGetter(params.oracle).getAssetPrice(vars.currentReserveAddress);
 
-      if (vars.liquidationThreshold > 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
+      if (vars.liquidationThreshold != 0 && params.userConfig.isUsingAsCollateral(vars.i)) {
         vars.userBalanceInBaseCurrency = _getUserBalanceInBaseCurrency(
           params.user,
           currentReserve,
@@ -144,7 +144,7 @@ library GenericLogic {
           vars.eModeAssetCategory
         );
 
-        if (vars.ltv > 0) {
+        if (vars.ltv != 0) {
           vars.avgLtv +=
             vars.userBalanceInBaseCurrency *
             (vars.isInEModeCategory ? vars.eModeLtv : vars.ltv);
@@ -172,10 +172,10 @@ library GenericLogic {
     }
 
     unchecked {
-      vars.avgLtv = vars.totalCollateralInBaseCurrency > 0
+      vars.avgLtv = vars.totalCollateralInBaseCurrency != 0
         ? vars.avgLtv / vars.totalCollateralInBaseCurrency
         : 0;
-      vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency > 0
+      vars.avgLiquidationThreshold = vars.totalCollateralInBaseCurrency != 0
         ? vars.avgLiquidationThreshold / vars.totalCollateralInBaseCurrency
         : 0;
     }
@@ -239,7 +239,7 @@ library GenericLogic {
     uint256 userTotalDebt = IScaledBalanceToken(reserve.variableDebtTokenAddress).scaledBalanceOf(
       user
     );
-    if (userTotalDebt > 0) {
+    if (userTotalDebt != 0) {
       userTotalDebt = userTotalDebt.rayMul(reserve.getNormalizedDebt());
     }
 

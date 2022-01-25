@@ -183,7 +183,9 @@ library ReserveLogic {
       vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       DataTypes.CalculateInterestRatesParams({
-        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
+        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() != 0
+          ? reserve.unbacked
+          : 0,
         liquidityAdded: liquidityAdded,
         liquidityTaken: liquidityTaken,
         totalStableDebt: reserveCache.nextTotalStableDebt,
@@ -264,7 +266,7 @@ library ReserveLogic {
 
     vars.amountToMint = vars.totalDebtAccrued.percentMul(reserveCache.reserveFactor);
 
-    if (vars.amountToMint > 0) {
+    if (vars.amountToMint != 0) {
       reserve.accruedToTreasury += vars
         .amountToMint
         .rayDiv(reserveCache.nextLiquidityIndex)
@@ -285,7 +287,7 @@ library ReserveLogic {
     reserveCache.nextVariableBorrowIndex = reserveCache.currVariableBorrowIndex;
 
     //only cumulating if there is any income being produced
-    if (reserveCache.currLiquidityRate > 0) {
+    if (reserveCache.currLiquidityRate != 0) {
       uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
         reserveCache.currLiquidityRate,
         reserveCache.reserveLastUpdateTimestamp
@@ -297,7 +299,7 @@ library ReserveLogic {
 
       //as the liquidity rate might come only from stable rate loans, we need to ensure
       //that there is actual variable debt before accumulating
-      if (reserveCache.currScaledVariableDebt > 0) {
+      if (reserveCache.currScaledVariableDebt != 0) {
         uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
           reserveCache.currVariableBorrowRate,
           reserveCache.reserveLastUpdateTimestamp

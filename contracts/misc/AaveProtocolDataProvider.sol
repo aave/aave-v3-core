@@ -119,7 +119,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
 
     (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();
 
-    usageAsCollateralEnabled = liquidationThreshold > 0;
+    usageAsCollateralEnabled = liquidationThreshold != 0;
   }
 
   /**
