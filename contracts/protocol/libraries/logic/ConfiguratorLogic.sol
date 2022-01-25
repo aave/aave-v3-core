@@ -249,7 +249,7 @@ library ConfiguratorLogic {
 
   /**
    * @notice Upgrades the implementation and makes call to the proxy
-   * @dev In the current plementation the call is used to initialize the new implementation.
+   * @dev The call is used to initialize the new implementation.
    * @param proxyAddress The address of the proxy
    * @param implementation The address of the new implementation
    * @param  initParams The parameters to the call after the upgrade

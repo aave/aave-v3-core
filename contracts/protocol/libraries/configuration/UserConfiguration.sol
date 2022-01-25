@@ -185,7 +185,7 @@ library UserConfiguration {
 
       address assetAddress = reservesList[assetId];
       uint256 ceiling = reservesData[assetAddress].configuration.getDebtCeiling();
-      if (ceiling > 0) {
+      if (ceiling != 0) {
         return (true, assetAddress, ceiling);
       }
     }
@@ -207,7 +207,7 @@ library UserConfiguration {
       uint256 firstCollateralPosition = collateralData & ~(collateralData - 1);
       uint256 id;
 
-      while ((firstCollateralPosition >>= 2) > 0) {
+      while ((firstCollateralPosition >>= 2) != 0) {
         id += 1;
       }
       return id;

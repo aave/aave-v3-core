@@ -26,7 +26,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x1;
 
   // Map of users address and the timestamp of their last update (userAddress => lastUpdateTimestamp)
   mapping(address => uint40) internal _timestamps;
@@ -186,19 +186,19 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   }
 
   /// @inheritdoc IStableDebtToken
-  function burn(address user, uint256 amount)
+  function burn(address from, uint256 amount)
     external
     virtual
     override
     onlyPool
     returns (uint256, uint256)
   {
-    (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(user);
+    (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(from);
 
     uint256 previousSupply = totalSupply();
     uint256 nextAvgStableRate = 0;
     uint256 nextSupply = 0;
-    uint256 userStableRate = _userState[user].additionalData;
+    uint256 userStableRate = _userState[from].additionalData;
 
     // Since the total supply and each single user debt accrue separately,
     // there might be accumulation errors so that the last borrower repaying
@@ -225,22 +225,22 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     }
 
     if (amount == currentBalance) {
-      _userState[user].additionalData = 0;
-      _timestamps[user] = 0;
+      _userState[from].additionalData = 0;
+      _timestamps[from] = 0;
     } else {
       //solium-disable-next-line
-      _timestamps[user] = uint40(block.timestamp);
+      _timestamps[from] = uint40(block.timestamp);
     }
     //solium-disable-next-line
     _totalSupplyTimestamp = uint40(block.timestamp);
 
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
-      _mint(user, amountToMint, previousSupply);
-      emit Transfer(address(0), user, amountToMint);
+      _mint(from, amountToMint, previousSupply);
+      emit Transfer(address(0), from, amountToMint);
       emit Mint(
-        user,
-        user,
+        from,
+        from,
         amountToMint,
         currentBalance,
         balanceIncrease,
@@ -250,9 +250,9 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
       );
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
-      _burn(user, amountToBurn, previousSupply);
-      emit Transfer(user, address(0), amountToBurn);
-      emit Burn(user, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
+      _burn(from, amountToBurn, previousSupply);
+      emit Transfer(from, address(0), amountToBurn);
+      emit Burn(from, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
     }
 
     return (nextSupply, nextAvgStableRate);

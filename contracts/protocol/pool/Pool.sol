@@ -1,26 +1,21 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
-import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
-import {GPv2SafeERC20} from '../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
-import {Address} from '../../dependencies/openzeppelin/contracts/Address.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
-import {WadRayMath} from '../libraries/math/WadRayMath.sol';
+import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
+import {PoolLogic} from '../libraries/logic/PoolLogic.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
 import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
-import {ValidationLogic} from '../libraries/logic/ValidationLogic.sol';
 import {EModeLogic} from '../libraries/logic/EModeLogic.sol';
 import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {FlashLoanLogic} from '../libraries/logic/FlashLoanLogic.sol';
 import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
-import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
 import {BridgeLogic} from '../libraries/logic/BridgeLogic.sol';
 import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
-import {IAToken} from '../../interfaces/IAToken.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
 import {PoolStorage} from './PoolStorage.sol';
@@ -43,12 +38,9 @@ import {PoolStorage} from './PoolStorage.sol';
  *   PoolAddressesProvider
  **/
 contract Pool is VersionedInitializable, IPool, PoolStorage {
-  using WadRayMath for uint256;
-  using GPv2SafeERC20 for IERC20;
   using ReserveLogic for DataTypes.ReserveData;
-  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-  uint256 public constant POOL_REVISION = 0x2;
+  uint256 public constant POOL_REVISION = 0x1;
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   /**
@@ -132,7 +124,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     BridgeLogic.executeMintUnbacked(
       _reserves,
       _reservesList,
-      _reserves[asset],
       _usersConfig[onBehalfOf],
       asset,
       amount,
@@ -450,27 +441,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function mintToTreasury(address[] calldata assets) external override {
-    for (uint256 i = 0; i < assets.length; i++) {
-      address assetAddress = assets[i];
-
-      DataTypes.ReserveData storage reserve = _reserves[assetAddress];
-
-      // this cover both inactive reserves and invalid reserves since the flag will be 0 for both
-      if (!reserve.configuration.getActive()) {
-        continue;
-      }
-
-      uint256 accruedToTreasury = reserve.accruedToTreasury;
-
-      if (accruedToTreasury != 0) {
-        reserve.accruedToTreasury = 0;
-        uint256 normalizedIncome = reserve.getNormalizedIncome();
-        uint256 amountToMint = accruedToTreasury.rayMul(normalizedIncome);
-        IAToken(reserve.aTokenAddress).mintToTreasury(amountToMint, normalizedIncome);
-
-        emit MintedToTreasury(assetAddress, amountToMint);
-      }
-    }
+    PoolLogic.executeMintToTreasury(_reserves, assets);
   }
 
   /// @inheritdoc IPool
@@ -567,13 +538,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function getReservesList() external view override returns (address[] memory) {
-    uint256 reserveListCount = _reservesCount;
+    uint256 reservesListCount = _reservesCount;
     uint256 droppedReservesCount = 0;
-    address[] memory reserves = new address[](reserveListCount);
+    address[] memory reservesList = new address[](reservesListCount);
 
-    for (uint256 i = 0; i < reserveListCount; i++) {
+    for (uint256 i = 0; i < reservesListCount; i++) {
       if (_reservesList[i] != address(0)) {
-        reserves[i - droppedReservesCount] = _reservesList[i];
+        reservesList[i - droppedReservesCount] = _reservesList[i];
       } else {
         droppedReservesCount++;
       }
@@ -581,9 +552,9 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
     // Reduces the length of the reserves array by `droppedReservesCount`
     assembly {
-      mstore(reserves, sub(reserveListCount, droppedReservesCount))
+      mstore(reservesList, sub(reservesListCount, droppedReservesCount))
     }
-    return reserves;
+    return reservesList;
   }
 
   /// @inheritdoc IPool
@@ -607,7 +578,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function MAX_NUMBER_RESERVES() public view virtual override returns (uint256) {
+  function MAX_NUMBER_RESERVES() public view virtual override returns (uint16) {
     return ReserveConfiguration.MAX_RESERVES_COUNT;
   }
 
@@ -648,22 +619,28 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address variableDebtAddress,
     address interestRateStrategyAddress
   ) external override onlyPoolConfigurator {
-    require(Address.isContract(asset), Errors.NOT_CONTRACT);
-    _reserves[asset].init(
-      aTokenAddress,
-      stableDebtAddress,
-      variableDebtAddress,
-      interestRateStrategyAddress
-    );
-    _addReserveToList(asset);
+    if (
+      PoolLogic.executeInitReserve(
+        _reserves,
+        _reservesList,
+        DataTypes.InitReserveParams({
+          asset: asset,
+          aTokenAddress: aTokenAddress,
+          stableDebtAddress: stableDebtAddress,
+          variableDebtAddress: variableDebtAddress,
+          interestRateStrategyAddress: interestRateStrategyAddress,
+          reservesCount: _reservesCount,
+          maxNumberReserves: MAX_NUMBER_RESERVES()
+        })
+      )
+    ) {
+      _reservesCount++;
+    }
   }
 
   /// @inheritdoc IPool
   function dropReserve(address asset) external virtual override onlyPoolConfigurator {
-    DataTypes.ReserveData storage reserve = _reserves[asset];
-    ValidationLogic.validateDropReserve(_reservesList, reserve, asset);
-    _reservesList[_reserves[asset].id] = address(0);
-    delete _reserves[asset];
+    PoolLogic.executeDropReserve(_reserves, _reservesList, asset);
   }
 
   /// @inheritdoc IPool
@@ -746,9 +723,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
 
   /// @inheritdoc IPool
   function resetIsolationModeTotalDebt(address asset) external override onlyPoolConfigurator {
-    require(_reserves[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
-    _reserves[asset].isolationModeTotalDebt = 0;
-    emit IsolationModeTotalDebtUpdated(asset, 0);
+    PoolLogic.executeResetIsolationModeTotalDebt(_reserves, asset);
   }
 
   /// @inheritdoc IPool
@@ -757,31 +732,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address to,
     uint256 amount
   ) external override onlyPoolAdmin {
-    IERC20(token).safeTransfer(to, amount);
-  }
-
-  /**
-   * @notice Add an asset to the reserve list
-   * @param asset The address of the underlying asset
-   */
-  function _addReserveToList(address asset) internal {
-    bool reserveAlreadyAdded = _reserves[asset].id != 0 || _reservesList[0] == asset;
-    require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
-
-    uint16 reservesCount = _reservesCount;
-
-    for (uint16 i = 0; i < reservesCount; i++) {
-      if (_reservesList[i] == address(0)) {
-        _reserves[asset].id = i;
-        _reservesList[i] = asset;
-        return;
-      }
-    }
-    require(reservesCount < MAX_NUMBER_RESERVES(), Errors.NO_MORE_RESERVES_ALLOWED);
-    _reserves[asset].id = reservesCount;
-    _reservesList[reservesCount] = asset;
-    // no need to check for overflow - the require above must ensure that max number of reserves < type(uint16).max
-    _reservesCount = reservesCount + 1;
+    PoolLogic.executeRescueTokens(token, to, amount);
   }
 
   /// @inheritdoc IPool

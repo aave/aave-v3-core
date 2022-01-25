@@ -36,8 +36,8 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     ZERO_ADDRESS_NOT_VALID,
   } = ProtocolErrors;
 
-  const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
-  const MAX_NUMBER_RESERVES = '128';
+  const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = 2500;
+  const MAX_NUMBER_RESERVES = 128;
 
   const POOL_ID = utils.formatBytes32String('POOL');
 
@@ -72,6 +72,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });
@@ -150,6 +151,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });
@@ -433,6 +435,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });
@@ -610,6 +613,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });

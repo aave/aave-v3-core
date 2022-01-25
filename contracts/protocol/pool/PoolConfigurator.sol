@@ -66,7 +66,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _;
   }
 
-  uint256 internal constant CONFIGURATOR_REVISION = 0x1;
+  uint256 public constant CONFIGURATOR_REVISION = 0x1;
 
   /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
@@ -307,6 +307,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address oracle,
     string calldata label
   ) external override onlyRiskOrPoolAdmins {
+    require(ltv != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
+    require(liquidationThreshold != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
+
     // validation of the parameters: the LTV can
     // only be lower or equal than the liquidation threshold
     // (otherwise a loan against the asset would cause instantaneous liquidation)
@@ -323,6 +326,18 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
         PercentageMath.PERCENTAGE_FACTOR,
       Errors.INVALID_EMODE_CATEGORY_PARAMS
     );
+
+    address[] memory reserves = _pool.getReservesList();
+    for (uint256 i = 0; i < reserves.length; i++) {
+      DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(reserves[i]);
+      if (categoryId == currentConfig.getEModeCategory()) {
+        require(ltv > currentConfig.getLtv(), Errors.INVALID_EMODE_CATEGORY_PARAMS);
+        require(
+          liquidationThreshold > currentConfig.getLiquidationThreshold(),
+          Errors.INVALID_EMODE_CATEGORY_PARAMS
+        );
+      }
+    }
 
     _pool.configureEModeCategory(
       categoryId,
@@ -345,7 +360,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
-    if (newCategoryId > 0) {
+    if (newCategoryId != 0) {
       DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(newCategoryId);
       require(
         categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),

@@ -25,7 +25,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x1;
 
   /**
    * @dev Constructor.
@@ -100,11 +100,11 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
 
   /// @inheritdoc IVariableDebtToken
   function burn(
-    address user,
+    address from,
     uint256 amount,
     uint256 index
   ) external virtual override onlyPool returns (uint256) {
-    _burnScaled(user, address(0), amount, index);
+    _burnScaled(from, address(0), amount, index);
     return scaledTotalSupply();
   }
 

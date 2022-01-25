@@ -183,7 +183,9 @@ library ReserveLogic {
       vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       DataTypes.CalculateInterestRatesParams({
-        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
+        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() != 0
+          ? reserve.unbacked
+          : 0,
         liquidityAdded: liquidityAdded,
         liquidityTaken: liquidityTaken,
         totalStableDebt: reserveCache.nextTotalStableDebt,
@@ -285,7 +287,7 @@ library ReserveLogic {
     reserveCache.nextVariableBorrowIndex = reserveCache.currVariableBorrowIndex;
 
     //only cumulating if there is any income being produced
-    if (reserveCache.currLiquidityRate > 0) {
+    if (reserveCache.currLiquidityRate != 0) {
       uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
         reserveCache.currLiquidityRate,
         reserveCache.reserveLastUpdateTimestamp
