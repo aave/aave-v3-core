@@ -558,8 +558,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       mstore(reservesList, sub(reservesListCount, droppedReservesCount))
     }
     return reservesList;
-
-    //  return PoolLogic.getReservesList(_reservesList, _reservesCount);
   }
 
   /// @inheritdoc IPool
@@ -585,7 +583,6 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   /// @inheritdoc IPool
   function MAX_NUMBER_RESERVES() public view virtual override returns (uint16) {
     return ReserveConfiguration.MAX_RESERVES_COUNT;
-    //    return PoolLogic.MAX_NUMBER_RESERVES();
   }
 
   /// @inheritdoc IPool
