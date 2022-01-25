@@ -51,6 +51,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
 
   /// @inheritdoc IInitializableAToken
   function initialize(
+    IPool initializingPool,
     address treasury,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
@@ -59,6 +60,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     string calldata aTokenSymbol,
     bytes calldata params
   ) external override initializer {
+    require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
     _setName(aTokenName);
     _setSymbol(aTokenSymbol);
     _setDecimals(aTokenDecimals);
