@@ -152,7 +152,7 @@ library UserConfiguration {
   /**
    * @notice Checks if a user has not been using any reserve for borrowing or supply
    * @param self The configuration object
-   * @return True if the user has been borrowing any reserve, false otherwise
+   * @return True if the user has not been borrowing or supplying any reserve, false otherwise
    **/
   function isEmpty(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
     return self.data == 0;
