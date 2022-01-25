@@ -204,11 +204,11 @@ library DataTypes {
   }
 
   struct FlashLoanRepaymentParams {
-    address asset;
-    address receiverAddress;
     uint256 amount;
     uint256 totalPremium;
     uint256 flashLoanPremiumToProtocol;
+    address asset;
+    address receiverAddress;
     uint16 referralCode;
   }
 
