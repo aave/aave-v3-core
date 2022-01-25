@@ -134,6 +134,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableAToken.initialize.selector,
+      cachedPool,
       input.treasury,
       input.asset,
       input.incentivesController,
@@ -164,6 +165,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
@@ -201,6 +203,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
