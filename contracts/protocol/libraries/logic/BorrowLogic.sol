@@ -277,24 +277,15 @@ library BorrowLogic {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
-    IERC20 stableDebtToken = IERC20(reserveCache.stableDebtTokenAddress);
-    IERC20 variableDebtToken = IERC20(reserveCache.variableDebtTokenAddress);
-    uint256 stableDebt = IERC20(stableDebtToken).balanceOf(user);
+    ValidationLogic.validateRebalanceStableBorrowRate(reserve, reserveCache, asset);
 
-    ValidationLogic.validateRebalanceStableBorrowRate(
-      reserve,
-      reserveCache,
-      asset,
-      stableDebtToken,
-      variableDebtToken,
-      reserveCache.aTokenAddress
-    );
+    IStableDebtToken stableDebtToken = IStableDebtToken(reserveCache.stableDebtTokenAddress);
+    uint256 stableDebt = IERC20(address(stableDebtToken)).balanceOf(user);
 
-    IStableDebtToken(address(stableDebtToken)).burn(user, stableDebt);
+    stableDebtToken.burn(user, stableDebt);
 
-    (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
-      address(stableDebtToken)
-    ).mint(user, user, stableDebt, reserve.currentStableBorrowRate);
+    (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = stableDebtToken
+      .mint(user, user, stableDebt, reserve.currentStableBorrowRate);
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
