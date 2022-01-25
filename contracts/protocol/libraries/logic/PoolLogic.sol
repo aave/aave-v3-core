@@ -33,7 +33,7 @@ library PoolLogic {
    * @param params Additional parameters needed for initiation
    * @return true if appended, false if inserted at existing empty spot
    **/
-  function initReserve(
+  function executeInitReserve(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reserves,
     DataTypes.InitReserveParams memory params
@@ -93,7 +93,7 @@ library PoolLogic {
    * @param to The address of the recipient
    * @param amount The amount of token to transfer
    */
-  function rescueTokens(
+  function executeRescueTokens(
     address token,
     address to,
     uint256 amount
@@ -106,7 +106,7 @@ library PoolLogic {
    * @param reservesData The state of all the reserves
    * @param assets The list of reserves for which the minting needs to be executed
    **/
-  function mintToTreasury(
+  function executeMintToTreasury(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     address[] calldata assets
   ) external {
@@ -139,43 +139,12 @@ library PoolLogic {
    * @param reservesData The state of all the reserves
    * @param asset The address of the underlying asset to reset the isolationModeTotalDebt
    */
-  function resetIsolationModeTotalDebt(
+  function executeResetIsolationModeTotalDebt(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     address asset
   ) external {
     require(reservesData[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
     reservesData[asset].isolationModeTotalDebt = 0;
     emit IsolationModeTotalDebtUpdated(asset, 0);
-  }
-
-  /**
-   * @notice Returns the maximum number of reserves supported to be listed in this Pool
-   * @return The maximum number of reserves supported
-   */
-  function MAX_NUMBER_RESERVES() external pure returns (uint16) {
-    return ReserveConfiguration.MAX_RESERVES_COUNT;
-  }
-
-  function getReservesList(mapping(uint256 => address) storage reserves, uint256 reservesListCount)
-    external
-    view
-    returns (address[] memory)
-  {
-    uint256 droppedReservesCount = 0;
-    address[] memory reservesList = new address[](reservesListCount);
-
-    for (uint256 i = 0; i < reservesListCount; i++) {
-      if (reserves[i] != address(0)) {
-        reservesList[i - droppedReservesCount] = reserves[i];
-      } else {
-        droppedReservesCount++;
-      }
-    }
-
-    // Reduces the length of the reserves array by `droppedReservesCount`
-    assembly {
-      mstore(reservesList, sub(reservesListCount, droppedReservesCount))
-    }
-    return reservesList;
   }
 }
