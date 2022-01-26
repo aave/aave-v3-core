@@ -524,7 +524,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function getReserveNormalizedIncome(address asset) external view override returns (uint256) {
+  function getReserveNormalizedIncome(address asset)
+    external
+    view
+    virtual
+    override
+    returns (uint256)
+  {
     return _reserves[asset].getNormalizedIncome();
   }
 
