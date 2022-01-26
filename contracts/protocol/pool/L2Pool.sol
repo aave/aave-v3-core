@@ -6,10 +6,7 @@ import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {CalldataLogic} from '../libraries/logic/CalldataLogic.sol';
 
 contract L2Pool is Pool {
-  /**
-   * @dev Constructor.
-   * @param provider The address of the PoolAddressesProvider contract
-   */
+
   constructor(IPoolAddressesProvider provider) Pool(provider) {}
 
   function supply(bytes32 args) external {

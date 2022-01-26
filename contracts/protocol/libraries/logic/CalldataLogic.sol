@@ -9,8 +9,7 @@ import {DataTypes} from '../types/DataTypes.sol';
  * @notice Library to decode calldata, used to optimize calldata size in L2Pool for transaction cost reduction
  */
 library CalldataLogic {
-  using BytesLib for bytes;
-
+ 
   function decodeSupplyParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
