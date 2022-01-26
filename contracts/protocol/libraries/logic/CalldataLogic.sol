@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
-import {BytesLib} from '../../../dependencies/consensys/BytesLib.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 
 /**
