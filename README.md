@@ -29,15 +29,15 @@ Aave is a decentralized non-custodial liquidity markets protocol where users can
 ## Audits
 You can find all audit reports under the audits folder
 
-Round 1
+Round 1 - November 2021
 - ABDK [Pending]
 - OpenZeppelin
 - Trail of Bits
 - Peckshield
 
-Round 2
+Round 2 - December 2021
 - SigmaPrime[Pending]
-- Certora[Pending]
+- Certora
 
 ## Connect with the community
 
