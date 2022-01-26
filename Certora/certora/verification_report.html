@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>
+        Formal Verification of Aave Protocol V3 - HackMD
+    </title>
+    <link rel="icon" type="image/png" href="https://hackmd.io/favicon.png">
+    <link rel="apple-touch-icon" href="https://hackmd.io/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" integrity="sha256-3iu9jgsy9TpTwXKb7bNQzqWekRX7pPK+2OLj3R922fo=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/3.5.0/octicons.min.css" integrity="sha256-QiWfLIsCT02Sdwkogf6YMiQlj4NE84MKkzEMkZnMGdg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.5.1/themes/prism.min.css" integrity="sha256-vtR0hSWRc3Tb26iuN2oZHt3KRUomwTufNIf5/4oeCyg=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@hackmd/emojify.js@2.1.0/dist/css/basic/emojify.min.css" integrity="sha256-UOrvMOsSDSrW6szVLe8ZDZezBxh5IoIfgTwdNDgTjiU=" crossorigin="anonymous" />
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,500,500i|Source+Code+Pro:300,400,500|Source+Sans+Pro:300,300i,400,400i,600,600i|Source+Serif+Pro&subset=latin-ext);.hljs{display:block;background:#fff;padding:.5em;color:#333;overflow-x:auto}.hljs-comment,.hljs-meta{color:#969896}.hljs-emphasis,.hljs-quote,.hljs-string,.hljs-strong,.hljs-template-variable,.hljs-variable{color:#df5000}.hljs-keyword,.hljs-selector-tag,.hljs-type{color:#a71d5d}.hljs-attribute,.hljs-bullet,.hljs-literal,.hljs-number,.hljs-symbol{color:#0086b3}.hljs-built_in,.hljs-builtin-name{color:#005cc5}.hljs-name,.hljs-section{color:#63a35c}.hljs-tag{color:#333}.hljs-attr,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-selector-pseudo,.hljs-title{color:#795da3}.hljs-addition{color:#55a532;background-color:#eaffea}.hljs-deletion{color:#bd2c00;background-color:#ffecec}.hljs-link{text-decoration:underline}.markdown-body{font-size:16px;line-height:1.5;word-wrap:break-word}.markdown-body:after,.markdown-body:before{display:table;content:""}.markdown-body:after{clear:both}.markdown-body>:first-child{margin-top:0!important}.markdown-body>:last-child{margin-bottom:0!important}.markdown-body a:not([href]){color:inherit;text-decoration:none}.markdown-body .absent{color:#c00}.markdown-body .anchor{float:left;padding-right:4px;margin-left:-20px;line-height:1}.markdown-body .anchor:focus{outline:none}.markdown-body blockquote,.markdown-body dl,.markdown-body ol,.markdown-body p,.markdown-body pre,.markdown-body table,.markdown-body ul{margin-top:0;margin-bottom:16px}.markdown-body hr{height:.25em;padding:0;margin:24px 0;background-color:#e7e7e7;border:0}.markdown-body blockquote{font-size:16px;padding:0 1em;color:#777;border-left:.25em solid #ddd}.markdown-body blockquote>:first-child{margin-top:0}.markdown-body blockquote>:last-child{margin-bottom:0}.markdown-body kbd,.popover kbd{display:inline-block;padding:3px 5px;font-size:11px;line-height:10px;color:#555;vertical-align:middle;background-color:#fcfcfc;border:1px solid #ccc;border-bottom-color:#bbb;border-radius:3px;box-shadow:inset 0 -1px 0 #bbb}.markdown-body .loweralpha{list-style-type:lower-alpha}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{margin-top:24px;margin-bottom:16px;font-weight:600;line-height:1.25}.markdown-body h1 .octicon-link,.markdown-body h2 .octicon-link,.markdown-body h3 .octicon-link,.markdown-body h4 .octicon-link,.markdown-body h5 .octicon-link,.markdown-body h6 .octicon-link{color:#000;vertical-align:middle;visibility:hidden}.markdown-body h1:hover .anchor,.markdown-body h2:hover .anchor,.markdown-body h3:hover .anchor,.markdown-body h4:hover .anchor,.markdown-body h5:hover .anchor,.markdown-body h6:hover .anchor{text-decoration:none}.markdown-body h1:hover .anchor .octicon-link,.markdown-body h2:hover .anchor .octicon-link,.markdown-body h3:hover .anchor .octicon-link,.markdown-body h4:hover .anchor .octicon-link,.markdown-body h5:hover .anchor .octicon-link,.markdown-body h6:hover .anchor .octicon-link{visibility:visible}.markdown-body h1 code,.markdown-body h1 tt,.markdown-body h2 code,.markdown-body h2 tt,.markdown-body h3 code,.markdown-body h3 tt,.markdown-body h4 code,.markdown-body h4 tt,.markdown-body h5 code,.markdown-body h5 tt,.markdown-body h6 code,.markdown-body h6 tt{font-size:inherit}.markdown-body h1{font-size:2em}.markdown-body h1,.markdown-body h2{padding-bottom:.3em;border-bottom:1px solid #eee}.markdown-body h2{font-size:1.5em}.markdown-body h3{font-size:1.25em}.markdown-body h4{font-size:1em}.markdown-body h5{font-size:.875em}.markdown-body h6{font-size:.85em;color:#777}.markdown-body ol,.markdown-body ul{padding-left:2em}.markdown-body ol.no-list,.markdown-body ul.no-list{padding:0;list-style-type:none}.markdown-body ol ol,.markdown-body ol ul,.markdown-body ul ol,.markdown-body ul ul{margin-top:0;margin-bottom:0}.markdown-body li>p{margin-top:16px}.markdown-body li+li{padding-top:.25em}.markdown-body dl{padding:0}.markdown-body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}.markdown-body dl dd{padding:0 16px;margin-bottom:16px}.markdown-body table{display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}.markdown-body table th{font-weight:700}.markdown-body table td,.markdown-body table th{padding:6px 13px;border:1px solid #ddd}.markdown-body table tr{background-color:#fff;border-top:1px solid #ccc}.markdown-body table tr:nth-child(2n){background-color:#f8f8f8}.markdown-body img{max-width:100%;box-sizing:content-box;background-color:#fff}.markdown-body img[align=right]{padding-left:20px}.markdown-body img[align=left]{padding-right:20px}.markdown-body .emoji{max-width:none;vertical-align:text-top;background-color:transparent}.markdown-body span.frame{display:block;overflow:hidden}.markdown-body span.frame>span{display:block;float:left;width:auto;padding:7px;margin:13px 0 0;overflow:hidden;border:1px solid #ddd}.markdown-body span.frame span img{display:block;float:left}.markdown-body span.frame span span{display:block;padding:5px 0 0;clear:both;color:#333}.markdown-body span.align-center{display:block;overflow:hidden;clear:both}.markdown-body span.align-center>span{display:block;margin:13px auto 0;overflow:hidden;text-align:center}.markdown-body span.align-center span img{margin:0 auto;text-align:center}.markdown-body span.align-right{display:block;overflow:hidden;clear:both}.markdown-body span.align-right>span{display:block;margin:13px 0 0;overflow:hidden;text-align:right}.markdown-body span.align-right span img{margin:0;text-align:right}.markdown-body span.float-left{display:block;float:left;margin-right:13px;overflow:hidden}.markdown-body span.float-left span{margin:13px 0 0}.markdown-body span.float-right{display:block;float:right;margin-left:13px;overflow:hidden}.markdown-body span.float-right>span{display:block;margin:13px auto 0;overflow:hidden;text-align:right}.markdown-body code,.markdown-body tt{padding:0;padding-top:.2em;padding-bottom:.2em;margin:0;font-size:85%;background-color:rgba(0,0,0,.04);border-radius:3px}.markdown-body code:after,.markdown-body code:before,.markdown-body tt:after,.markdown-body tt:before{letter-spacing:-.2em;content:"\00a0"}.markdown-body code br,.markdown-body tt br{display:none}.markdown-body del code{text-decoration:inherit}.markdown-body pre{word-wrap:normal}.markdown-body pre>code{padding:0;margin:0;font-size:100%;word-break:normal;white-space:pre;background:transparent;border:0}.markdown-body .highlight{margin-bottom:16px}.markdown-body .highlight pre{margin-bottom:0;word-break:normal}.markdown-body .highlight pre,.markdown-body pre{padding:16px;overflow:auto;font-size:85%;line-height:1.45;background-color:#f7f7f7;border-radius:3px}.markdown-body pre code,.markdown-body pre tt{display:inline;max-width:auto;padding:0;margin:0;overflow:visible;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}.markdown-body pre code:after,.markdown-body pre code:before,.markdown-body pre tt:after,.markdown-body pre tt:before{content:normal}.markdown-body .csv-data td,.markdown-body .csv-data th{padding:5px;overflow:hidden;font-size:12px;line-height:1;text-align:left;white-space:nowrap}.markdown-body .csv-data .blob-line-num{padding:10px 8px 9px;text-align:right;background:#fff;border:0}.markdown-body .csv-data tr{border-top:0}.markdown-body .csv-data th{font-weight:700;background:#f8f8f8;border-top:0}.news .alert .markdown-body blockquote{padding:0 0 0 40px;border:0 none}.activity-tab .news .alert .commits,.activity-tab .news .markdown-body blockquote{padding-left:0}.task-list-item{list-style-type:none}.task-list-item label{font-weight:400}.task-list-item.enabled label{cursor:pointer}.task-list-item+.task-list-item{margin-top:3px}.task-list-item-checkbox{float:left;margin:.31em 0 .2em -1.3em!important;vertical-align:middle;cursor:default!important}.markdown-body{padding-top:40px;padding-bottom:40px;max-width:758px;overflow:visible!important;position:relative}.markdown-body .emoji{vertical-align:top}.markdown-body pre{border:inherit!important}.markdown-body code{color:inherit!important}.markdown-body pre code .wrapper{display:-moz-inline-flex;display:-ms-inline-flex;display:-o-inline-flex;display:inline-flex}.markdown-body pre code .gutter{float:left;overflow:hidden;-webkit-user-select:none;user-select:none}.markdown-body pre code .gutter.linenumber{text-align:right;position:relative;display:inline-block;cursor:default;z-index:4;padding:0 8px 0 0;min-width:20px;box-sizing:content-box;color:#afafaf!important;border-right:3px solid #6ce26c!important}.markdown-body pre code .gutter.linenumber>span:before{content:attr(data-linenumber)}.markdown-body pre code .code{float:left;margin:0 0 0 16px}.markdown-body .gist .line-numbers{border-left:none;border-top:none;border-bottom:none}.markdown-body .gist .line-data{border:none}.markdown-body .gist table{border-spacing:0;border-collapse:inherit!important}.markdown-body code[data-gist-id]{background:none;padding:0}.markdown-body code[data-gist-id]:after,.markdown-body code[data-gist-id]:before{content:""}.markdown-body code[data-gist-id] .blob-num{border:unset}.markdown-body code[data-gist-id] table{overflow:unset;margin-bottom:unset}.markdown-body code[data-gist-id] table tr{background:unset}.markdown-body[dir=rtl] pre{direction:ltr}.markdown-body[dir=rtl] code{direction:ltr;unicode-bidi:embed}.markdown-body .alert>p:last-child{margin-bottom:0}.markdown-body pre.abc,.markdown-body pre.flow-chart,.markdown-body pre.graphviz,.markdown-body pre.mermaid,.markdown-body pre.sequence-diagram,.markdown-body pre.vega{text-align:center;background-color:inherit;border-radius:0;white-space:inherit;overflow:visible}.markdown-body pre.abc>code,.markdown-body pre.flow-chart>code,.markdown-body pre.graphviz>code,.markdown-body pre.mermaid>code,.markdown-body pre.sequence-diagram>code,.markdown-body pre.vega>code{text-align:left}.markdown-body pre.abc>svg,.markdown-body pre.flow-chart>svg,.markdown-body pre.graphviz>svg,.markdown-body pre.mermaid>svg,.markdown-body pre.sequence-diagram>svg,.markdown-body pre.vega>svg{max-width:100%;height:100%}.markdown-body pre>code.wrap{white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word}.markdown-body .alert>p:last-child,.markdown-body .alert>ul:last-child{margin-bottom:0}.markdown-body summary{display:list-item}.markdown-body summary:focus{outline:none}.markdown-body details summary{cursor:pointer}.markdown-body details:not([open])>:not(summary){display:none}.markdown-body figure{margin:1em 40px}.markdown-body .mark,.markdown-body mark{background-color:#fff1a7}.vimeo,.youtube{cursor:pointer;display:table;text-align:center;background-position:50%;background-repeat:no-repeat;background-size:contain;background-color:#000;overflow:hidden}.vimeo,.youtube{position:relative;width:100%}.youtube{padding-bottom:56.25%}.vimeo img{width:100%;object-fit:contain;z-index:0}.youtube img{object-fit:cover;z-index:0}.vimeo iframe,.youtube iframe,.youtube img{width:100%;height:100%;position:absolute;top:0;left:0}.vimeo iframe,.youtube iframe{vertical-align:middle;z-index:1}.vimeo .icon,.youtube .icon{position:absolute;height:auto;width:auto;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;opacity:.3;transition:opacity .2s;z-index:0}.vimeo:hover .icon,.youtube:hover .icon{opacity:.6;transition:opacity .2s}.slideshare .inner,.speakerdeck .inner{position:relative;width:100%}.slideshare .inner iframe,.speakerdeck .inner iframe{position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%}.figma{display:table;position:relative;width:100%;padding-bottom:56.25%}.figma iframe{position:absolute;top:0;bottom:0;left:0;right:0;width:100%;height:100%;border:1px solid #eee}.MJX_Assistive_MathML{display:none}#MathJax_Message{z-index:1000!important}.ui-infobar{position:relative;z-index:2;max-width:760px;margin:25px auto -25px;color:#777}.toc .invisable-node{list-style-type:none}.ui-toc{position:fixed;bottom:20px;z-index:998}.ui-toc.both-mode{margin-left:8px}.ui-toc.both-mode .ui-toc-label{height:40px;padding:10px 4px;border-top-left-radius:0;border-bottom-left-radius:0}.ui-toc-label{background-color:#e6e6e6;border:none;color:#868686;transition:opacity .2s}.ui-toc .open .ui-toc-label{opacity:1;color:#fff;transition:opacity .2s}.ui-toc-label:focus{opacity:.3;background-color:#ccc;color:#000}.ui-toc-label:hover{opacity:1;background-color:#ccc;transition:opacity .2s}.ui-toc-dropdown{margin-top:20px;margin-bottom:20px;padding-left:10px;padding-right:10px;max-width:45vw;width:25vw;max-height:70vh;overflow:auto;text-align:inherit}.ui-toc-dropdown>.toc{max-height:calc(70vh - 100px);overflow:auto}.ui-toc-dropdown[dir=rtl] .nav{padding-right:0;letter-spacing:.0029em}.ui-toc-dropdown a{overflow:hidden;text-overflow:ellipsis;white-space:pre}.ui-toc-dropdown .nav>li>a{display:block;padding:4px 20px;font-size:13px;font-weight:500;color:#767676}.ui-toc-dropdown .nav>li:first-child:last-child>ul,.ui-toc-dropdown .toc.expand ul{display:block}.ui-toc-dropdown .nav>li>a:focus,.ui-toc-dropdown .nav>li>a:hover{padding-left:19px;color:#000;text-decoration:none;background-color:transparent;border-left:1px solid #000}.ui-toc-dropdown[dir=rtl] .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav>li>a:hover{padding-right:19px;border-left:none;border-right:1px solid #000}.ui-toc-dropdown .nav>.active:focus>a,.ui-toc-dropdown .nav>.active:hover>a,.ui-toc-dropdown .nav>.active>a{padding-left:18px;font-weight:700;color:#000;background-color:transparent;border-left:2px solid #000}.ui-toc-dropdown[dir=rtl] .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav>.active>a{padding-right:18px;border-left:none;border-right:2px solid #000}.ui-toc-dropdown .nav .nav{display:none;padding-bottom:10px}.ui-toc-dropdown .nav>.active>ul{display:block}.ui-toc-dropdown .nav .nav>li>a{padding-top:1px;padding-bottom:1px;padding-left:30px;font-size:12px;font-weight:400}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a{padding-right:30px}.ui-toc-dropdown .nav .nav>li>ul>li>a{padding-top:1px;padding-bottom:1px;padding-left:40px;font-size:12px;font-weight:400}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a{padding-right:40px}.ui-toc-dropdown .nav .nav>li>a:focus,.ui-toc-dropdown .nav .nav>li>a:hover{padding-left:29px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>a:hover{padding-right:29px}.ui-toc-dropdown .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown .nav .nav>li>ul>li>a:hover{padding-left:39px}.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:focus,.ui-toc-dropdown[dir=rtl] .nav .nav>li>ul>li>a:hover{padding-right:39px}.ui-toc-dropdown .nav .nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>a{padding-left:28px;font-weight:500}.ui-toc-dropdown[dir=rtl] .nav .nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>a{padding-right:28px}.ui-toc-dropdown .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown .nav .nav>.active>.nav>.active>a{padding-left:38px;font-weight:500}.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:focus>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active:hover>a,.ui-toc-dropdown[dir=rtl] .nav .nav>.active>.nav>.active>a{padding-right:38px}.markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,sans-serif}html[lang^=ja] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .markdown-body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}html .markdown-body[lang^=ja]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html .markdown-body[lang=zh-tw]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html .markdown-body[lang=zh-cn]{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica Neue,Helvetica,Roboto,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}html[lang^=ja] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ\ Ｐゴシック,sans-serif}html[lang=zh-tw] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html[lang=zh-cn] .ui-toc-dropdown{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}html .ui-toc-dropdown[lang^=ja]{font-family:Source Sans Pro,Helvetica,Arial,Meiryo UI,MS PGothic,ＭＳ\ Ｐゴシック,sans-serif}html .ui-toc-dropdown[lang=zh-tw]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft JhengHei UI,微軟正黑UI,sans-serif}html .ui-toc-dropdown[lang=zh-cn]{font-family:Source Sans Pro,Helvetica,Arial,Microsoft YaHei UI,微软雅黑UI,sans-serif}.ui-affix-toc{position:fixed;top:0;max-width:15vw;max-height:70vh;overflow:auto}.back-to-top,.expand-toggle,.go-to-bottom{display:block;padding:4px 10px;margin-top:10px;margin-left:10px;font-size:12px;font-weight:500;color:#999}.back-to-top:focus,.back-to-top:hover,.expand-toggle:focus,.expand-toggle:hover,.go-to-bottom:focus,.go-to-bottom:hover{color:#563d7c;text-decoration:none}.back-to-top,.go-to-bottom{margin-top:0}.ui-user-icon{width:20px;height:20px;display:block;border-radius:50%;margin-top:2px;margin-bottom:2px;margin-right:5px;background-position:50%;background-repeat:no-repeat;background-size:cover}.ui-user-icon.small{width:18px;height:18px;display:inline-block;vertical-align:middle;margin:0 0 .2em}.ui-infobar>small>span{line-height:22px}.ui-infobar>small .dropdown{display:inline-block}.ui-infobar>small .dropdown a:focus,.ui-infobar>small .dropdown a:hover{text-decoration:none}.ui-more-info{color:#888;cursor:pointer;vertical-align:middle}.ui-more-info .fa{font-size:16px}.ui-connectedGithub,.ui-published-note{color:#888}.ui-connectedGithub{line-height:23px;white-space:nowrap}.ui-connectedGithub a.file-path{color:#888;text-decoration:none;padding-left:22px}.ui-connectedGithub a.file-path:active,.ui-connectedGithub a.file-path:hover{color:#888;text-decoration:underline}.ui-connectedGithub .fa{font-size:20px}.ui-published-note .fa{font-size:20px;vertical-align:top}.unselectable{-webkit-user-select:none;-o-user-select:none;user-select:none}.selectable{-webkit-user-select:text;-o-user-select:text;user-select:text}@media print{blockquote,div,img,pre,table{page-break-inside:avoid!important}a[href]:after{font-size:12px!important}}.markdown-body.slides{position:relative;z-index:1;color:#222}.markdown-body.slides:before{content:"";display:block;position:absolute;top:0;left:0;right:0;bottom:0;z-index:-1;background-color:currentColor;box-shadow:0 0 0 50vw}.markdown-body.slides section[data-markdown]{position:relative;margin-bottom:1.5em;background-color:#fff;text-align:center}.markdown-body.slides section[data-markdown] code{text-align:left}.markdown-body.slides section[data-markdown]:before{content:"";display:block;padding-bottom:56.23%}.markdown-body.slides section[data-markdown]>div:first-child{position:absolute;top:50%;left:1em;right:1em;transform:translateY(-50%);max-height:100%;overflow:hidden}.markdown-body.slides section[data-markdown]>ul{display:inline-block}.markdown-body.slides>section>section+section:after{content:"";position:absolute;top:-1.5em;right:1em;height:1.5em;border:3px solid #777}.site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] .site-ui-font{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}body{font-smoothing:subpixel-antialiased!important;-webkit-font-smoothing:subpixel-antialiased!important;-moz-osx-font-smoothing:auto!important;text-shadow:0 0 1em transparent,1px 1px 1.2px rgba(0,0,0,.004);-webkit-overflow-scrolling:touch;letter-spacing:.025em;font-family:Source Sans Pro,Helvetica,Arial,sans-serif}html[lang^=ja] body{font-family:Source Sans Pro,Helvetica,Arial,Hiragino Kaku Gothic Pro,ヒラギノ角ゴ Pro W3,Osaka,Meiryo,メイリオ,MS Gothic,ＭＳ\ ゴシック,sans-serif}html[lang=zh-tw] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang TC,Microsoft JhengHei,微軟正黑,sans-serif}html[lang=zh-cn] body{font-family:Source Sans Pro,Helvetica,Arial,PingFang SC,Microsoft YaHei,微软雅黑,sans-serif}abbr[title]{border-bottom:none;text-decoration:underline;-webkit-text-decoration:underline dotted;text-decoration:underline dotted}abbr[data-original-title],abbr[title]{cursor:help}body.modal-open{overflow-y:auto;padding-right:0!important}
+    </style>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv.min.js" integrity="sha256-3Jy/GbSLrg0o9y5Z5n1uw0qxZECH7C6OQpVBgNFYa0g=" crossorigin="anonymous"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js" integrity="sha256-g6iAfvZp+nDQ2TdTR/VVKJf3bGro4ub5fvWSWVRi2NE=" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.9/es5-shim.min.js" integrity="sha256-8E4Is26QH0bD52WoQpcB+R/tcWQtpzlCojrybUd7Mxo=" crossorigin="anonymous"></script>
+    <![endif]-->
+</head>
+
+<body>
+    <div id="doc" class="markdown-body container-fluid comment-enabled" data-hard-breaks="true" style=""><p><img src="https://hackmd.io/_uploads/H1yqrfBZY.png" alt="Certora" loading="lazy"></p><h1 id="Formal-Verification-of-Aave-Protocol-V3" data-id="Formal-Verification-of-Aave-Protocol-V3"><a class="anchor hidden-xs" href="#Formal-Verification-of-Aave-Protocol-V3" title="Formal-Verification-of-Aave-Protocol-V3"><span class="octicon octicon-link"></span></a><span>Formal Verification of Aave Protocol V3</span></h1><h2 id="Summary" data-id="Summary"><a class="anchor hidden-xs" href="#Summary" title="Summary"><span class="octicon octicon-link"></span></a><span>Summary</span></h2><p><span>This document describes the specification and verification of Aave’s V3 protocol using the Certora Prover. The work was undertaken from Nov. 12, 2021 to Jan. 24, 2022. The latest commit that was reviewed and ran through the Certora Prover was </span><a href="https://github.com/aave/aave-v3-core/commit/a87d546d57d4e49bcb450d3c46b50d6bc6e5ddee" target="_blank" rel="noopener"><code>a87d546</code></a><span>.</span></p><p><span>The scope of this verification is Aave’s governance system, particularly the following contracts:</span></p><p><a href="https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/tokenization/StableDebtToken.sol" target="_blank" rel="noopener"><code>StableDebtToken.sol</code></a><span>  ( </span><a href="https://vaas-stg.certora.com/output/23658/fba2d71e4c3d6dbfb363/?anonymousKey=6b390e117ec02de424f710f58df71d37b665206e" target="_blank" rel="noopener"><code>Verification Results</code></a><span> )</span><br>
+<a href="https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/tokenization/VariableDebtToken.sol" target="_blank" rel="noopener"><code>VariableDebtToken.sol</code></a><span> ( </span><a href="https://vaas-stg.certora.com/output/23658/e86ac2232dbec433e2bb/?anonymousKey=2f3c90644d98890b8a7fa87ee0e006e8ecdd2515" target="_blank" rel="noopener"><code>Verification Results</code></a><span> )</span><br>
+<a href="https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/tokenization/AToken.sol" target="_blank" rel="noopener"><code>Atoken.sol</code></a><span> (</span><a href="https://vaas-stg.certora.com/output/23658/8e3d4e70b51dc5bea42d/?anonymousKey=05a2579876175654514e8e1174ef9c98c06dde3b" target="_blank" rel="noopener"><code>Verification Results</code></a><span>)</span><br>
+<a href="https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/libraries/configuration/ReserveConfiguration.sol" target="_blank" rel="noopener"><code>ReserveConfiguration.sol</code></a><span> (</span><a href="https://vaas-stg.certora.com/output/23658/633d0d7547a80788d266/?anonymousKey=83401dd8a786839159d64343adb7c70dd22c9c6c" target="_blank" rel="noopener"><code>Verification Results</code></a><span>)</span><br>
+<a href="https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/libraries/configuration/UserConfiguration.sol" target="_blank" rel="noopener"><code>UserConfiguration.sol</code></a><span> (</span><a href="https://vaas-stg.certora.com/output/23658/6b970f07251caed97b46/?anonymousKey=eec671384cee54c5a44fc278db2a489cb6fc1ddd" target="_blank" rel="noopener"><code>Verification Results</code></a><span>)</span></p><p><span>And partial verificaiton of:</span></p><ul>
+<li><a href="https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/pool/Pool.sol" target="_blank" rel="noopener"><code>Pool.sol</code></a></li>
+</ul><p><span>The Certora Prover proved the implementation of the protocol is correct with respect to formal specifications written by the the Certora team.  The team also performed a manual audit of these contracts.</span></p><p><span>The specification program was modularized to optimize coverage. First, the tokenization contracts were found to uphold to the same properties the </span><a href="https://hackmd.io/TYI3fetcQgmkAZF_ENSErA" target="_blank" rel="noopener"><span>Aave V2</span></a><span> tokenization did, as well as additional properties. On the main Pool contract, the focus of the verification was the protocol’s storage of its reserves data, their classification to EModes - a new feature of the V3 protocol - and its compatibility with the user’s action. This was done by modularly checking the userConfiguration and reservesConfiguration libraries first.</span></p><p><span>The resulting specification files are available on Aave’s public </span><a href="https://github.com/aave/aave-v3-core/tree/master/Certora/certora" target="_blank" rel="noopener"><span>git repository</span></a><span>.</span></p><h2 id="List-of-Main-Issues-Discovered" data-id="List-of-Main-Issues-Discovered"><a class="anchor hidden-xs" href="#List-of-Main-Issues-Discovered" title="List-of-Main-Issues-Discovered"><span class="octicon octicon-link"></span></a><span>List of Main Issues Discovered</span></h2><p><strong><span>Severity: </span><span style="color:Red"><span>Critical</span></span></strong></p><table>
+<thead>
+<tr>
+<th><span>Issue:</span></th>
+<th><span>Loss of assets</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span>Description:</span></td>
+<td><span>RepayWithATokens function lacks an HF check, can be exploited to withdraw liquidity from the system for free.</span></td>
+</tr>
+<tr>
+<td><span>Mitigation/Fix:</span></td>
+<td><span>Canceled repayment with ATokens on behalf of another user</span></td>
+</tr>
+<tr>
+<td><span>Property violated:</span></td>
+<td><span>Any Operation Should Preserve User’s HF&gt;1</span></td>
+</tr>
+</tbody>
+</table><p><strong><span>Severity: </span><span style="color:Orange"><span>High</span></span></strong></p><table>
+<thead>
+<tr>
+<th><span>Issue:</span></th>
+<th><span>Risk Exposure</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span>Description:</span></td>
+<td><span>User can come to hold both an isolated and a non-isolated assets as collaterals upon calling AToken.transfer(), liquidation call and mintUnbacked(). Can be exploited to surpass the debt ceiling</span></td>
+</tr>
+<tr>
+<td><span>Mitigation/Fix:</span></td>
+<td><span>A check for isolation mode was added to the functions</span></td>
+</tr>
+<tr>
+<td><span>Property violated:</span></td>
+<td><span>A User Can’t Hold Both an Isolated and non-Isolated Assets as Collaterals</span></td>
+</tr>
+</tbody>
+</table><p><strong><span>Severity: </span><span style="color:Orange"><span>High</span></span></strong></p><table>
+<thead>
+<tr>
+<th><span>Issue:</span></th>
+<th><span>Loss of assets</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span>Description:</span></td>
+<td><span>Confusion of Asset and EMode price feed for liquidations</span></td>
+</tr>
+<tr>
+<td><span>Mitigation/Fix:</span></td>
+<td><span>Price Sources are called according to EMode</span></td>
+</tr>
+<tr>
+<td><span>Property violated:</span></td>
+<td><span>Emode source price usage</span></td>
+</tr>
+</tbody>
+</table><p><strong><span>Severity: </span><span style="color:Blue"><span>Medium</span></span></strong></p><table>
+<thead>
+<tr>
+<th><span>Issue:</span></th>
+<th><span>Loss of Users’ Profitability</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span>Description:</span></td>
+<td><span>EMode liquidation may use wrong liquidation bonus</span></td>
+</tr>
+<tr>
+<td><span>Mitigation/Fix:</span></td>
+<td><span>Bonus rewarded correctly according to EMode</span></td>
+</tr>
+</tbody>
+</table><p><strong><span>Severity: </span><span style="color:Blue"><span>Medium</span></span></strong></p><table>
+<thead>
+<tr>
+<th><span>Issue:</span></th>
+<th><span>Loss of revenue</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span>Description:</span></td>
+<td><span>When repaying with aToken, the interest rate is updated as if we provided the equivalent liquidity in underlying instead of in AToken. In fact there’s no liquidity          provided to the system. It can be used to manipulate the interest rates.</span></td>
+</tr>
+<tr>
+<td><span>Mitigation/Fix:</span></td>
+<td><span>Call to rates updating function was changed to use 0 as the added liquidity</span></td>
+</tr>
+<tr>
+<td><span>Rule Coverage:</span></td>
+<td><span>No Change in Underlying’s Balance Implies No Change in rate</span></td>
+</tr>
+</tbody>
+</table><p><strong><span>Severity: </span><span style="color:tan"><span>Low  </span></span></strong></p><table>
+<thead>
+<tr>
+<th><span>Issue:</span></th>
+<th><span>Integrity of ReserveList</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span>Description:</span></td>
+<td><em><span>_addReserveToList</span></em><span> function will push a new reserve into all empty spots of the reserves list, instead of just the first one</span></td>
+</tr>
+<tr>
+<td><span>Mitigation/Fix:</span></td>
+<td><span>A </span><em><span>return</span></em><span> call was inserted to the loop</span></td>
+</tr>
+<tr>
+<td><span>Rule Coverage:</span></td>
+<td><span>The same asset should not appear twice on the reserves list</span></td>
+</tr>
+</tbody>
+</table><p><strong><span>Severity: </span><span style="color:Grey"><span>Recommendation</span></span></strong></p><table>
+<thead>
+<tr>
+<th><span>Issue:</span></th>
+<th><span>Denial of Service</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span>Description:</span></td>
+<td><span>Users can be forced into isolation mode through supply(),AToken.transfer() functions,  thus temporarily preventing them from borrowing other assets</span></td>
+</tr>
+<tr>
+<td><span>Property violated:</span></td>
+<td><span>Informative Rule: Check which functions can revert for one user due to another user’s action</span></td>
+</tr>
+<tr>
+<td><span>Mitagation/Fix:</span></td>
+<td><span>User can withdraw asset of isolation mode</span></td>
+</tr>
+</tbody>
+</table><h2 id="Disclaimer" data-id="Disclaimer"><a class="anchor hidden-xs" href="#Disclaimer" title="Disclaimer"><span class="octicon octicon-link"></span></a><span>Disclaimer</span></h2><p><span>The Certora Prover takes as input a contract and a specification and formally proves that the contract satisfies the specification in all scenarios. Importantly, the guarantees of the Certora Prover are scoped to the provided specification, and the Certora Prover does not check any cases not covered by the specification.</span></p><p><span>We hope that this information is useful, but provide no warranty of any kind, explicit or implied. The contents of this report should not be construed as a complete guarantee that the contract is secure in all dimensions. In no event shall Certora or any of its employees be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the results reporte</span><span class="ui-comment-inline-span"><span class="ui-comment-inline-span"><span class="ui-comment-inline-span">d here.</span></span></span></p><h1 id="Overview-of-the-verification" data-id="Overview-of-the-verification"><a class="anchor hidden-xs" href="#Overview-of-the-verification" title="Overview-of-the-verification"><span class="octicon octicon-link"></span></a><span>Overview of the verification</span></h1><h2 id="Description-of-the-system" data-id="Description-of-the-system"><a class="anchor hidden-xs" href="#Description-of-the-system" title="Description-of-the-system"><span class="octicon octicon-link"></span></a><span>Description of the system</span></h2><p><span>Aave is a decentralized non-custodial liquidity markets protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) or undercollateralized (one-block liquidity) fashion.</span></p><h2 id="Description-of-the-specification-files" data-id="Description-of-the-specification-files"><a class="anchor hidden-xs" href="#Description-of-the-specification-files" title="Description-of-the-specification-files"><span class="octicon octicon-link"></span></a><span>Description of the specification files</span></h2><p><span>The specification contains six files, three for the tokenization part, one for the pool and one for each of the reserve and user configuration contracts. The tokens’ contracts have similar specifications, using (up to slight modifications) properties based on Certora’s aggregated experience with ERC20 verificartion.</span><br>
+<span>On the main Pool contract, the focus of the coverage was the protocol’s storage of its reserves data, their classification to EModes - a new feature of the V3 protocol - and its compatibility with the user’s action. This was done by modularly checking the userConfiguration and reservesConfiguration libraries first.</span></p><h2 id="Assumptions-and-Simplifications" data-id="Assumptions-and-Simplifications"><a class="anchor hidden-xs" href="#Assumptions-and-Simplifications" title="Assumptions-and-Simplifications"><span class="octicon octicon-link"></span></a><span>Assumptions and Simplifications</span></h2><p><span>We made the following assumptions during the verification process:</span></p><ul>
+<li><span>Accumulation rates in the protocol are assumed to be 1, so that no interest rate is accumulated.</span></li>
+<li><span>We assume that hash operations return an arbitrary deterministic value</span></li>
+<li><span>We unroll loops. Violations that require a loop to execute more than once will not be detected.</span></li>
+<li><span>When verifying contracts that make external calls, we assume that those calls can have arbitrary side effects outside of the contracts, but that they do not affect the state of the contract being verified.  This means that some reentrancy bugs may not be caught.</span></li>
+<li><span>No usage of incentives controller</span></li>
+</ul><h2 id="Verification-Conditions" data-id="Verification-Conditions"><a class="anchor hidden-xs" href="#Verification-Conditions" title="Verification-Conditions"><span class="octicon octicon-link"></span></a><span>Verification Conditions</span></h2><h3 id="Notation" data-id="Notation"><a class="anchor hidden-xs" href="#Notation" title="Notation"><span class="octicon octicon-link"></span></a><span>Notation</span></h3><p><span>✔️ indicates the rule is formally verified on the latest reviewed commit. Footnotes describe any simplifications or assumptions used while verifying the rules (beyond the general assumptions listed above).</span></p><p><span>In this document, verification conditions are either shown as logical formulas or Hoare triples of the form {p} C {q}. A verification condition given by a logical formula denotes an invariant that holds if every reachable state satisfies the condition.</span></p><p><span>Hoare triples of the form {p} C {q} holds if any non-reverting execution of program C that starts in a state satsifying the precondition p ends in a state satisfying the postcondition q. The notation {p} C@withrevert {q} is similar but applies to both reverting and non-reverting executions. Preconditions and postconditions are similar to the Solidity require and assert statements.</span></p><p><span>Formulas relate the results of method calls. In most cases, these methods are getters defined in the contracts, but in some cases they are getters we have added to our harness or definitions provided in the rules file. Undefined variables in the formulas are treated as arbitrary: the rule is checked for every possible value of the variables.</span></p><h2 id="Stable-Debt-Token" data-id="Stable-Debt-Token"><a class="anchor hidden-xs" href="#Stable-Debt-Token" title="Stable-Debt-Token"><span class="octicon octicon-link"></span></a><span>Stable-Debt Token</span></h2><h3 id="Rules" data-id="Rules"><a class="anchor hidden-xs" href="#Rules" title="Rules"><span class="octicon octicon-link"></span></a><span>Rules</span></h3><h4 id="1-Integrity-of-User’s-Time-Stamp-✔️" data-id="1-Integrity-of-User’s-Time-Stamp-✔️"><a class="anchor hidden-xs" href="#1-Integrity-of-User’s-Time-Stamp-✔️" title="1-Integrity-of-User’s-Time-Stamp-✔️"><span class="octicon octicon-link"></span></a><span>1. Integrity of User’s Time-Stamp ✔️</span></h4><pre><code>getUserLastUpdated(user) &lt;= currentBlock.timestamp
+</code></pre><h4 id="2-Any-Operation-Changes-At-Most-One-User’s-balance-✔️" data-id="2-Any-Operation-Changes-At-Most-One-User’s-balance-✔️"><a class="anchor hidden-xs" href="#2-Any-Operation-Changes-At-Most-One-User’s-balance-✔️" title="2-Any-Operation-Changes-At-Most-One-User’s-balance-✔️"><span class="octicon octicon-link"></span></a><span>2. Any Operation Changes At Most One User’s balance ✔️</span></h4><pre><code>{ A!= B &amp;&amp; balanceA == balanceOf(A) &amp;&amp; balanceB == balanceOf(B) }
+      op ;
+{ balanceOf(A) == balanceA || balanceOf(B) == balanceB }
+</code></pre><p><span>where </span><code>op</code><span> is any operation</span></p><h4 id="3-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️" data-id="3-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️"><a class="anchor hidden-xs" href="#3-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️" title="3-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️"><span class="octicon octicon-link"></span></a><span>3. Change in Total Supply iff an Equal Change in Some User’s Balance ✔️</span></h4><pre><code>{ balanceA == balanceOf(A) &amp;&amp; total == totalSupply() }
+      op ;
+{ balanceOf(A) != balanceA  =&gt; balanceOf(A) - balanceA  == totalSupply() - total };
+</code></pre><h4 id="4-Additivity-of-Burn---Burning-at-Once-Equals-Burning-in-Two-Steps-in-the-Same-Transaction-✔️" data-id="4-Additivity-of-Burn---Burning-at-Once-Equals-Burning-in-Two-Steps-in-the-Same-Transaction-✔️"><a class="anchor hidden-xs" href="#4-Additivity-of-Burn---Burning-at-Once-Equals-Burning-in-Two-Steps-in-the-Same-Transaction-✔️" title="4-Additivity-of-Burn---Burning-at-Once-Equals-Burning-in-Two-Steps-in-the-Same-Transaction-✔️"><span class="octicon octicon-link"></span></a><span>4. Additivity of Burn - Burning at Once Equals Burning in Two Steps in the Same Transaction ✔️</span></h4><pre><code>burn(user,x);burn(user,y); 
+~
+burn(user,x+y)
+</code></pre><h4 id="5-Integrity-of-Mint-✔️" data-id="5-Integrity-of-Mint-✔️"><a class="anchor hidden-xs" href="#5-Integrity-of-Mint-✔️" title="5-Integrity-of-Mint-✔️"><span class="octicon octicon-link"></span></a><span>5. Integrity of Mint ✔️</span></h4><pre><code>{ b == balanceOf(user) } 
+    mint(delegatedUser,user,x,index);
+{ balanceOf(user) == b+x }
+</code></pre><h4 id="6-Integrity-of-Burn-✔️" data-id="6-Integrity-of-Burn-✔️"><a class="anchor hidden-xs" href="#6-Integrity-of-Burn-✔️" title="6-Integrity-of-Burn-✔️"><span class="octicon octicon-link"></span></a><span>6. Integrity of Burn ✔️</span></h4><pre><code>{ b == balanceOf(user) } 
+    burn(user,x) 
+{ balanceOf(user) == b-x }
+</code></pre><h4 id="7-Invertibility-of-Mint-and-Burn-✔️" data-id="7-Invertibility-of-Mint-and-Burn-✔️"><a class="anchor hidden-xs" href="#7-Invertibility-of-Mint-and-Burn-✔️" title="7-Invertibility-of-Mint-and-Burn-✔️"><span class="octicon octicon-link"></span></a><span>7. Invertibility of Mint and Burn ✔️</span></h4><pre><code>{ b == balanceOf(user) }
+    mint(delegatedUser,user,x,index); burn(user, x)
+{ balanceOf(user) == b }
+</code></pre><h2 id="Variable-Debt-Token" data-id="Variable-Debt-Token"><a class="anchor hidden-xs" href="#Variable-Debt-Token" title="Variable-Debt-Token"><span class="octicon octicon-link"></span></a><span>Variable-Debt Token</span></h2><h3 id="Rules1" data-id="Rules"><a class="anchor hidden-xs" href="#Rules1" title="Rules1"><span class="octicon octicon-link"></span></a><span>Rules</span></h3><h4 id="1-Any-Operation-Changes-At-Most-One-User’s-balance-✔️" data-id="1-Any-Operation-Changes-At-Most-One-User’s-balance-✔️"><a class="anchor hidden-xs" href="#1-Any-Operation-Changes-At-Most-One-User’s-balance-✔️" title="1-Any-Operation-Changes-At-Most-One-User’s-balance-✔️"><span class="octicon octicon-link"></span></a><span>1. Any Operation Changes At Most One User’s balance ✔️</span></h4><pre><code>{ A!= B &amp;&amp; balanceA == balanceOf(A) &amp;&amp; balanceB == balanceOf(B) }
+      op ;
+{ balanceOf(A) == balanceA || balanceOf(B) == balanceB }
+</code></pre><h4 id="2-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️" data-id="2-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️"><a class="anchor hidden-xs" href="#2-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️" title="2-Change-in-Total-Supply-iff-an-Equal-Change-in-Some-User’s-Balance-✔️"><span class="octicon octicon-link"></span></a><span>2. Change in Total Supply iff an Equal Change in Some User’s Balance ✔️</span></h4><pre><code>{ balanceA == balanceOf(A) &amp;&amp; total == totalSupply() }
+    op ;
+{ balanceOf(A) != balanceA  =&gt; balanceOf(A) - balanceA  == totalSupply() - total };
+</code></pre><h4 id="3-Only-pool-can-change-total-supply-with-burn-and-mint-✔️" data-id="3-Only-pool-can-change-total-supply-with-burn-and-mint-✔️"><a class="anchor hidden-xs" href="#3-Only-pool-can-change-total-supply-with-burn-and-mint-✔️" title="3-Only-pool-can-change-total-supply-with-burn-and-mint-✔️"><span class="octicon octicon-link"></span></a><span>3. Only pool can change total supply with burn and mint ✔️</span></h4><pre><code>{ total == totalSupply() }
+    op ;
+{ totalSupply() != total =&gt; msg.sender == pool &amp;&amp; (op == mint() || op == burn()) };
+</code></pre><h4 id="4-Mint-and-burn-are-inverse-operations-✔️" data-id="4-Mint-and-burn-are-inverse-operations-✔️"><a class="anchor hidden-xs" href="#4-Mint-and-burn-are-inverse-operations-✔️" title="4-Mint-and-burn-are-inverse-operations-✔️"><span class="octicon octicon-link"></span></a><span>4. Mint and burn are inverse operations ✔️</span></h4><pre><code>{ b == balanceOf(user) }
+    mint(delegatedUser,user,amount,index); burn(user, amount, index)
+{ balanceOf(user) == b }
+</code></pre><h4 id="5-Additivity-of-burn-✔️" data-id="5-Additivity-of-burn-✔️"><a class="anchor hidden-xs" href="#5-Additivity-of-burn-✔️" title="5-Additivity-of-burn-✔️"><span class="octicon octicon-link"></span></a><span>5. Additivity of burn ✔️</span></h4><pre><code>burn(u, u’, x); burn(u, u’, y) ~ burn(u, u’, x+y) at the same timestamp
+</code></pre><h4 id="6-Integrity-of-mint-✔️" data-id="6-Integrity-of-mint-✔️"><a class="anchor hidden-xs" href="#6-Integrity-of-mint-✔️" title="6-Integrity-of-mint-✔️"><span class="octicon octicon-link"></span></a><span>6. Integrity of mint ✔️</span></h4><pre><code>{ b = balanceOf(u) } 
+    mint(u,x) 
+{ balanceOf(u) == b + x }
+</code></pre><h4 id="7-Burn-doesn’t-change-other’s-balance-and-data-✔️" data-id="7-Burn-doesn’t-change-other’s-balance-and-data-✔️"><a class="anchor hidden-xs" href="#7-Burn-doesn’t-change-other’s-balance-and-data-✔️" title="7-Burn-doesn’t-change-other’s-balance-and-data-✔️"><span class="octicon octicon-link"></span></a><span>7. Burn doesn’t change other’s balance and data ✔️</span></h4><pre><code>{ other != user &amp;&amp; bb = balanceOf(other) } 
+    burn(user, amount, index) 
+{ balanceOf(other) == bb }
+</code></pre><h4 id="8-Mint-doesn’t-change-other’s-balance-and-data-✔️" data-id="8-Mint-doesn’t-change-other’s-balance-and-data-✔️"><a class="anchor hidden-xs" href="#8-Mint-doesn’t-change-other’s-balance-and-data-✔️" title="8-Mint-doesn’t-change-other’s-balance-and-data-✔️"><span class="octicon octicon-link"></span></a><span>8. Mint doesn’t change other’s balance and data ✔️</span></h4><pre><code>{ other != user &amp;&amp; bbo = balanceOf(other) &amp;&amp; bbu = balanceOf(user) }
+    mint(user, onBehalfOf, amount, index) 
+{ balanceOf(other) == bbo &amp;&amp; (user != onBehalfOf =&gt; balanceOf(user) == bbu) }
+</code></pre><h4 id="9-Burn-zero-dosen’t-change-balance-✔️" data-id="9-Burn-zero-dosen’t-change-balance-✔️"><a class="anchor hidden-xs" href="#9-Burn-zero-dosen’t-change-balance-✔️" title="9-Burn-zero-dosen’t-change-balance-✔️"><span class="octicon octicon-link"></span></a><span>9. Burn zero dosen’t change balance ✔️</span></h4><pre><code>{ b = balanceOf(user) } 
+    burn(user, 0, index) 
+{ balanceOf(user) == b }
+</code></pre><h2 id="AToken" data-id="AToken"><a class="anchor hidden-xs" href="#AToken" title="AToken"><span class="octicon octicon-link"></span></a><span>AToken</span></h2><h3 id="Rules2" data-id="Rules"><a class="anchor hidden-xs" href="#Rules2" title="Rules2"><span class="octicon octicon-link"></span></a><span>Rules</span></h3><h4 id="1-Any-Operation-Changes-At-Most-Two-User’s-balance-✔️" data-id="1-Any-Operation-Changes-At-Most-Two-User’s-balance-✔️"><a class="anchor hidden-xs" href="#1-Any-Operation-Changes-At-Most-Two-User’s-balance-✔️" title="1-Any-Operation-Changes-At-Most-Two-User’s-balance-✔️"><span class="octicon octicon-link"></span></a><span>1. Any Operation Changes At Most Two User’s balance ✔️</span></h4><pre><code>{ A != B != C &amp;&amp; balanceA == balanceOf(A) &amp;&amp; balanceB == balanceOf(B) &amp;&amp; balanceC == balanceOf(C) }
+      op ;
+{ balanceOf(A) == balanceA || balanceOf(B) == balanceB ||  balanceOf(C) == balanceC }
+</code></pre><h4 id="2-Integrity-of-mint-✔️" data-id="2-Integrity-of-mint-✔️"><a class="anchor hidden-xs" href="#2-Integrity-of-mint-✔️" title="2-Integrity-of-mint-✔️"><span class="octicon octicon-link"></span></a><span>2. Integrity of mint ✔️</span></h4><pre><code>{ b == balanceOf(u) } 
+    mint(u,x) 
+{ b + x - ε ≤ balanceOf(u) ≤ b + x + ε }
+</code></pre><h4 id="3-Additivity-of-mint-✔️" data-id="3-Additivity-of-mint-✔️"><a class="anchor hidden-xs" href="#3-Additivity-of-mint-✔️" title="3-Additivity-of-mint-✔️"><span class="octicon octicon-link"></span></a><span>3. Additivity of mint ✔️</span></h4><pre><code>mint(u,x); mint(u,y) ~ mint(u,x+y) 
+</code></pre><p><span>with resepct to balanceOf(u) up to some </span><code>ε</code></p><h4 id="4-Mint-of-zero-is-not-possible-✔️" data-id="4-Mint-of-zero-is-not-possible-✔️"><a class="anchor hidden-xs" href="#4-Mint-of-zero-is-not-possible-✔️" title="4-Mint-of-zero-is-not-possible-✔️"><span class="octicon octicon-link"></span></a><span>4. Mint of zero is not possible ✔️</span></h4><pre><code>{  } 
+    mint(caller, user, amount, index) 
+{ amount == 0 =&gt; REVERT }
+</code></pre><h4 id="4-Integrity-of-transfer-✔️" data-id="4-Integrity-of-transfer-✔️"><a class="anchor hidden-xs" href="#4-Integrity-of-transfer-✔️" title="4-Integrity-of-transfer-✔️"><span class="octicon octicon-link"></span></a><span>4. Integrity of transfer ✔️</span></h4><pre><code>I. 
+{ u ≠ u’ ∧ bu = balanceOf(u) ∧ bu’ = balanceOf(u’) }
+    transfer(u, u’ x);
+{ | balanceOf(u) - (bu - x) | ≤ ε ∧
+  | balanceOf(u’) - (bu’ + x) | ≤ ε }
+II. 
+{ b = underlyingAssetBalanceOf(u’’) }
+    transfer(u, u’ x);
+{ b = underlyingAssetBalanceOf(u’’) }
+</code></pre><h4 id="5-Additivity-of-transfer-✔️" data-id="5-Additivity-of-transfer-✔️"><a class="anchor hidden-xs" href="#5-Additivity-of-transfer-✔️" title="5-Additivity-of-transfer-✔️"><span class="octicon octicon-link"></span></a><span>5. Additivity of transfer ✔️</span></h4><pre><code>{ f1 != f2, t1 != t2, f2 != t1, f1 != t2, f1 == t1 &lt;=&gt; f2 == t2, 
+  balanceOf(f1) == balanceOf(f2), balanceOf(t1) == balanceOf(t2) }
+    transfer(f1, t1, x), transfer(f1, t1, y), transfer(f2, t2, x+y)
+{ |balanceOf(f1) - balanceOf(f2)| ≤ 3ε, |balanceOf(t1) - balanceOf(t2)| ≤ 3ε }
+</code></pre><h4 id="6-Integrity-of-burn-✔️" data-id="6-Integrity-of-burn-✔️"><a class="anchor hidden-xs" href="#6-Integrity-of-burn-✔️" title="6-Integrity-of-burn-✔️"><span class="octicon octicon-link"></span></a><span>6. Integrity of burn ✔️</span></h4><pre><code>{ bu = balanceOf(u) ∧ ba = underlyingAssetBalanceOf(u’) }
+    burn(u, u’, x)
+{ | balanceOf(u) - (bu - x) | ≤ ε ∧
+  u’ ≠ AToken ⇒ | underlyingAssetBalanceOf(u’) - (ba + x) | ≤ ε }
+</code></pre><h4 id="7-Additivity-of-burn-✔️" data-id="7-Additivity-of-burn-✔️"><a class="anchor hidden-xs" href="#7-Additivity-of-burn-✔️" title="7-Additivity-of-burn-✔️"><span class="octicon octicon-link"></span></a><span>7. Additivity of burn ✔️</span></h4><pre><code>burn(u, u’, x); burn(u, u’, y) ~ burn(u, u’, x+y) at the same timestamp
+</code></pre><h4 id="8-burn-doesn’t-change-other’s-balance-and-data-✔️" data-id="8-burn-doesn’t-change-other’s-balance-and-data-✔️"><a class="anchor hidden-xs" href="#8-burn-doesn’t-change-other’s-balance-and-data-✔️" title="8-burn-doesn’t-change-other’s-balance-and-data-✔️"><span class="octicon octicon-link"></span></a><span>8. burn doesn’t change other’s balance and data ✔️</span></h4><pre><code>{ other != user, other != recieverOfUnderlying, 
+  db = additionalData(other), bb = balanceOf(other)} 
+    burn(user, recieverOfUnderlying, amount, index) 
+{ additionalData(other) == db &amp;&amp; balanceOf(other) == bb }
+</code></pre><h4 id="9-mint-doesn’t-change-other’s-balance-and-data-✔️" data-id="9-mint-doesn’t-change-other’s-balance-and-data-✔️"><a class="anchor hidden-xs" href="#9-mint-doesn’t-change-other’s-balance-and-data-✔️" title="9-mint-doesn’t-change-other’s-balance-and-data-✔️"><span class="octicon octicon-link"></span></a><span>9. mint doesn’t change other’s balance and data ✔️</span></h4><pre><code>{ other != user, db = additionalData(other), bb = balanceOf(other) } 
+    mint(caller, user, amount, index) 
+{ additionalData(other) == db &amp;&amp; balanceOf(other) == bb }
+</code></pre><h2 id="ReserveConfiguration" data-id="ReserveConfiguration"><a class="anchor hidden-xs" href="#ReserveConfiguration" title="ReserveConfiguration"><span class="octicon octicon-link"></span></a><span>ReserveConfiguration</span></h2><h3 id="Rules3" data-id="Rules"><a class="anchor hidden-xs" href="#Rules3" title="Rules3"><span class="octicon octicon-link"></span></a><span>Rules</span></h3><h4 id="1-Integrity-SettersGetters-✔️" data-id="1-Integrity-SettersGetters-✔️"><a class="anchor hidden-xs" href="#1-Integrity-SettersGetters-✔️" title="1-Integrity-SettersGetters-✔️"><span class="octicon octicon-link"></span></a><span>1. Integrity Setters/Getters ✔️</span></h4><pre><code>{ r = ReserveConfiguration, x = some member of r }
+    setX(r, y)
+{ getX(r) == y }
+</code></pre><h4 id="2-Each-setter-changes-only-one-member-✔️" data-id="2-Each-setter-changes-only-one-member-✔️"><a class="anchor hidden-xs" href="#2-Each-setter-changes-only-one-member-✔️" title="2-Each-setter-changes-only-one-member-✔️"><span class="octicon octicon-link"></span></a><span>2. Each setter changes only one member ✔️</span></h4><pre><code>{ r = ReserveConfiguration, x = some member of r, x' = another member of r }
+    setX(r, y)
+{ getX'(r) == x' }
+</code></pre><h2 id="UserConfiguration" data-id="UserConfiguration"><a class="anchor hidden-xs" href="#UserConfiguration" title="UserConfiguration"><span class="octicon octicon-link"></span></a><span>UserConfiguration</span></h2><h3 id="Rules4" data-id="Rules"><a class="anchor hidden-xs" href="#Rules4" title="Rules4"><span class="octicon octicon-link"></span></a><span>Rules</span></h3><h4 id="1-Consistency-of-isEmpty-✔️" data-id="1-Consistency-of-isEmpty-✔️"><a class="anchor hidden-xs" href="#1-Consistency-of-isEmpty-✔️" title="1-Consistency-of-isEmpty-✔️"><span class="octicon octicon-link"></span></a><span>1. Consistency of isEmpty ✔️</span></h4><pre><code>{isEmpty =&gt; !isBorrowingAny() &amp;&amp; !isUsingAsCollateralOrBorrowing(reserveIndex) }
+</code></pre><h4 id="2-Consistency-of-not-isEmpty-✔️" data-id="2-Consistency-of-not-isEmpty-✔️"><a class="anchor hidden-xs" href="#2-Consistency-of-not-isEmpty-✔️" title="2-Consistency-of-not-isEmpty-✔️"><span class="octicon octicon-link"></span></a><span>2. Consistency of not isEmpty ✔️</span></h4><pre><code>{ (isBorrowingAny() ||  isUsingAsCollateral(reserveIndex)) =&gt; !isEmpty() }
+</code></pre><h4 id="3-Consistency-of-isBorrowingAny-✔️" data-id="3-Consistency-of-isBorrowingAny-✔️"><a class="anchor hidden-xs" href="#3-Consistency-of-isBorrowingAny-✔️" title="3-Consistency-of-isBorrowingAny-✔️"><span class="octicon octicon-link"></span></a><span>3. Consistency of isBorrowingAny ✔️</span></h4><pre><code>{ isBorrowing(reserveIndex) =&gt;  isBorrowingAny() }
+</code></pre><h4 id="4-Consistency-of-isUsingAsCollateral-functions-✔️" data-id="4-Consistency-of-isUsingAsCollateral-functions-✔️"><a class="anchor hidden-xs" href="#4-Consistency-of-isUsingAsCollateral-functions-✔️" title="4-Consistency-of-isUsingAsCollateral-functions-✔️"><span class="octicon octicon-link"></span></a><span>4. Consistency of isUsingAsCollateral functions ✔️</span></h4><pre><code>(isUsingAsCollateral(reserveIndex) || isBorrowing(reserveIndex)) 
+    &lt;=&gt; isUsingAsCollateralOrBorrowing(reserveIndex)
+</code></pre><h4 id="5-Integrity-of-User’s-Isolation-mode-configuration-data-✔️" data-id="5-Integrity-of-User’s-Isolation-mode-configuration-data-✔️"><a class="anchor hidden-xs" href="#5-Integrity-of-User’s-Isolation-mode-configuration-data-✔️" title="5-Integrity-of-User’s-Isolation-mode-configuration-data-✔️"><span class="octicon octicon-link"></span></a><span>5. Integrity of User’s Isolation mode configuration data  ✔️</span></h4><pre><code>!isUsingAsCollateralOne() =&gt; !isIsolated()
+</code></pre><h4 id="6-Integrity-of-setBorrowing-✔️" data-id="6-Integrity-of-setBorrowing-✔️"><a class="anchor hidden-xs" href="#6-Integrity-of-setBorrowing-✔️" title="6-Integrity-of-setBorrowing-✔️"><span class="octicon octicon-link"></span></a><span>6. Integrity of setBorrowing ✔️</span></h4><pre><code>{ reserveIndex &lt; 128 } 
+    setBorrowing(reserveIndex, borrowing)
+{ isBorrowing(reserveIndex) == borrowing }
+</code></pre><h4 id="7-Integrity-of-setUsingAsCollateral-✔️" data-id="7-Integrity-of-setUsingAsCollateral-✔️"><a class="anchor hidden-xs" href="#7-Integrity-of-setUsingAsCollateral-✔️" title="7-Integrity-of-setUsingAsCollateral-✔️"><span class="octicon octicon-link"></span></a><span>7. Integrity of setUsingAsCollateral ✔️</span></h4><pre><code>{ reserveIndex &lt; 128 } 
+    setUsingAsCollateral(reserveIndex, usingAsCollateral)
+{ isUsingAsCollateral(reserveIndex) == usingAsCollateral }
+</code></pre><h4 id="8-setBorrowing-for-one-reserve-doesn’t-affect-others-✔️" data-id="8-setBorrowing-for-one-reserve-doesn’t-affect-others-✔️"><a class="anchor hidden-xs" href="#8-setBorrowing-for-one-reserve-doesn’t-affect-others-✔️" title="8-setBorrowing-for-one-reserve-doesn’t-affect-others-✔️"><span class="octicon octicon-link"></span></a><span>8. setBorrowing for one reserve doesn’t affect others ✔️</span></h4><pre><code>{ reserveIndexOther != reserveIndex &amp;&amp; reserveIndexOther &lt; 128 &amp;&amp; 
+  reserveIndex &lt; 128 &amp;&amp; 
+  otherReserveBorrowing == isBorrowing(reserveIndexOther) &amp;&amp;
+  otherReserveCollateral == isUsingAsCollateral(reserveIndexOther) } 
+    setBorrowing(reserveIndex, borrowing)
+{ otherReserveBorrowing == isBorrowing(reserveIndexOther) &amp;&amp;
+  otherReserveCollateral == isUsingAsCollateral(reserveIndexOther) }
+</code></pre><h4 id="9-setUsingAsCollateral-for-one-reserve-doesn’t-affect-others-✔️" data-id="9-setUsingAsCollateral-for-one-reserve-doesn’t-affect-others-✔️"><a class="anchor hidden-xs" href="#9-setUsingAsCollateral-for-one-reserve-doesn’t-affect-others-✔️" title="9-setUsingAsCollateral-for-one-reserve-doesn’t-affect-others-✔️"><span class="octicon octicon-link"></span></a><span>9. setUsingAsCollateral for one reserve doesn’t affect others ✔️</span></h4><pre><code>{ reserveIndexOther != reserveIndex &amp;&amp;
+  reserveIndexOther &lt; 128 &amp;&amp; reserveIndex &lt; 128 &amp;&amp;
+  otherReserveBorrowing = isBorrowing(reserveIndexOther) &amp;&amp;
+  otherReserveCollateral = isUsingAsCollateral(reserveIndexOther) } 
+    setUsingAsCollateral(reserveIndex, isUsingAsCollateral)
+{ otherReserveBorrowing == isBorrowing(reserveIndexOther) &amp;&amp;
+  otherReserveCollateral == isUsingAsCollateral(reserveIndexOther) }
+</code></pre><h2 id="Pool" data-id="Pool"><a class="anchor hidden-xs" href="#Pool" title="Pool"><span class="octicon octicon-link"></span></a><span>Pool</span></h2><h3 id="Rules5" data-id="Rules"><a class="anchor hidden-xs" href="#Rules5" title="Rules5"><span class="octicon octicon-link"></span></a><span>Rules</span></h3><h4 id="1-Integrity-of-Supply-Cap---aToken-supply-shall-never-exceed-the-cap-✔️" data-id="1-Integrity-of-Supply-Cap---aToken-supply-shall-never-exceed-the-cap-✔️"><a class="anchor hidden-xs" href="#1-Integrity-of-Supply-Cap---aToken-supply-shall-never-exceed-the-cap-✔️" title="1-Integrity-of-Supply-Cap---aToken-supply-shall-never-exceed-the-cap-✔️"><span class="octicon octicon-link"></span></a><span>1. Integrity of Supply Cap - aToken supply shall never exceed the cap ✔️**</span></h4><pre><code>{ reserves[asset].aToken.totalSupply() &lt;= reserves[asset].supplyCap() }
+</code></pre><p><span>** rule times-out for some functions</span></p><h4 id="3-Integrity-of-setUserEMode-✔️" data-id="3-Integrity-of-setUserEMode-✔️"><a class="anchor hidden-xs" href="#3-Integrity-of-setUserEMode-✔️" title="3-Integrity-of-setUserEMode-✔️"><span class="octicon octicon-link"></span></a><span>3. Integrity of setUserEMode ✔️</span></h4><pre><code>{ }
+    setUserEMode(category)  
+{ getUserEMode() == category }
+</code></pre><h4 id="4-User-can-always-set-own-eMode-to-0-✔️" data-id="4-User-can-always-set-own-eMode-to-0-✔️"><a class="anchor hidden-xs" href="#4-User-can-always-set-own-eMode-to-0-✔️" title="4-User-can-always-set-own-eMode-to-0-✔️"><span class="octicon octicon-link"></span></a><span>4. User can always set own eMode to 0 ✔️</span></h4><pre><code>{ }
+    setUserEMode(0); 
+{ NOTREVERT } 
+</code></pre><h4 id="5-If-borrow-succeeds-then-reserve-flags-are-correct-✔️" data-id="5-If-borrow-succeeds-then-reserve-flags-are-correct-✔️"><a class="anchor hidden-xs" href="#5-If-borrow-succeeds-then-reserve-flags-are-correct-✔️" title="5-If-borrow-succeeds-then-reserve-flags-are-correct-✔️"><span class="octicon octicon-link"></span></a><span>5. If borrow succeeds then reserve flags are correct ✔️</span></h4><pre><code>{ r = _reserves[asset].configuration &amp;&amp; a = r.getActive() &amp;&amp;
+  f = r.getFrozen() &amp;&amp; p = r.getPaused() &amp;&amp; b = r.getBorrowingEnabled() &amp;&amp;
+  s = r.getStableRateBorrowingEnabled() }
+    borrow(asset, amount, interestRateMode, referralCode, onBehalfOf)
+{ a &amp;&amp; !f &amp;&amp; !p &amp;&amp; b  &amp;&amp; (interestRateMode == 1 =&gt; s) }
+</code></pre><h4 id="6-reservesCount-is-monotonic-✔️" data-id="6-reservesCount-is-monotonic-✔️"><a class="anchor hidden-xs" href="#6-reservesCount-is-monotonic-✔️" title="6-reservesCount-is-monotonic-✔️"><span class="octicon octicon-link"></span></a><span>6. </span><code>reservesCount()</code><span> is monotonic ✔️</span></h4><pre><code>{ rb = reservesCount() }
+    op
+{ reservesCount() &gt;= rb }
+</code></pre><h4 id="7-Each-function-changes-at-most-one-configuration-✔️" data-id="7-Each-function-changes-at-most-one-configuration-✔️"><a class="anchor hidden-xs" href="#7-Each-function-changes-at-most-one-configuration-✔️" title="7-Each-function-changes-at-most-one-configuration-✔️"><span class="octicon octicon-link"></span></a><span>7. Each function changes at most one configuration ✔️</span></h4><pre><code>{ rb1 = getReserveConfiguration(asset1) 
+  &amp;&amp; rb2 = getReserveConfiguration(asset2)}
+    op
+{ asset1 != asset2 =&gt; (rb1 == getReserveConfiguration(asset1) 
+  || rb2 == getReserveConfiguration(asset2)) }
+</code></pre><h4 id="8-Reserve-id-always-less-than-counter-✔️" data-id="8-Reserve-id-always-less-than-counter-✔️"><a class="anchor hidden-xs" href="#8-Reserve-id-always-less-than-counter-✔️" title="8-Reserve-id-always-less-than-counter-✔️"><span class="octicon octicon-link"></span></a><span>8. Reserve id always less than counter ✔️</span></h4><pre><code> {getReserveList(i) != 0 =&gt; i &lt; reservesCount()} 
+</code></pre><h4 id="10-Bijective-property-of-reserve-id-✔️" data-id="10-Bijective-property-of-reserve-id-✔️"><a class="anchor hidden-xs" href="#10-Bijective-property-of-reserve-id-✔️" title="10-Bijective-property-of-reserve-id-✔️"><span class="octicon octicon-link"></span></a><span>10. Bijective property of reserve id ✔️</span></h4><pre><code>I. 
+{(i != 0 and token != 0) =&gt; (getReserveList(i) == token 
+    &lt;=&gt; getReserveDataIndex(token) == i)}
+II. 
+{(i == 0 and token != 0) =&gt; (getReserveList(i) == token 
+    =&gt; getReserveDataIndex(token) == i)}
+</code></pre></div>
+    <div class="ui-toc dropup unselectable hidden-print" style="display:none;">
+        <div class="pull-right dropdown">
+            <a id="tocLabel" class="ui-toc-label btn btn-default" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false" title="Table of content">
+                <i class="fa fa-bars"></i>
+            </a>
+            <ul id="ui-toc" class="ui-toc-dropdown dropdown-menu" aria-labelledby="tocLabel">
+                <div class="toc"><ul class="nav">
+<li><a href="#Formal-Verification-of-Aave-Protocol-V3" title="Formal Verification of Aave Protocol V3">Formal Verification of Aave Protocol V3</a><ul class="nav">
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#List-of-Main-Issues-Discovered" title="List of Main Issues Discovered">List of Main Issues Discovered</a></li>
+<li><a href="#Disclaimer" title="Disclaimer">Disclaimer</a></li>
+</ul>
+</li>
+<li><a href="#Overview-of-the-verification" title="Overview of the verification">Overview of the verification</a><ul class="nav">
+<li><a href="#Description-of-the-system" title="Description of the system">Description of the system</a></li>
+<li><a href="#Description-of-the-specification-files" title="Description of the specification files">Description of the specification files</a></li>
+<li><a href="#Assumptions-and-Simplifications" title="Assumptions and Simplifications">Assumptions and Simplifications</a></li>
+<li><a href="#Verification-Conditions" title="Verification Conditions">Verification Conditions</a><ul class="nav">
+<li><a href="#Notation" title="Notation">Notation</a></li>
+</ul>
+</li>
+<li><a href="#Stable-Debt-Token" title="Stable-Debt Token">Stable-Debt Token</a><ul class="nav">
+<li><a href="#Rules" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#Variable-Debt-Token" title="Variable-Debt Token">Variable-Debt Token</a><ul class="nav">
+<li><a href="#Rules1" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#AToken" title="AToken">AToken</a><ul class="nav">
+<li><a href="#Rules2" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#ReserveConfiguration" title="ReserveConfiguration">ReserveConfiguration</a><ul class="nav">
+<li><a href="#Rules3" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#UserConfiguration" title="UserConfiguration">UserConfiguration</a><ul class="nav">
+<li><a href="#Rules4" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#Pool" title="Pool">Pool</a><ul class="nav">
+<li><a href="#Rules5" title="Rules">Rules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+            </ul>
+        </div>
+    </div>
+    <div id="ui-toc-affix" class="ui-affix-toc ui-toc-dropdown unselectable hidden-print" data-spy="affix" style="top:17px;display:none;" null null>
+        <div class="toc"><ul class="nav">
+<li><a href="#Formal-Verification-of-Aave-Protocol-V3" title="Formal Verification of Aave Protocol V3">Formal Verification of Aave Protocol V3</a><ul class="nav">
+<li><a href="#Summary" title="Summary">Summary</a></li>
+<li><a href="#List-of-Main-Issues-Discovered" title="List of Main Issues Discovered">List of Main Issues Discovered</a></li>
+<li><a href="#Disclaimer" title="Disclaimer">Disclaimer</a></li>
+</ul>
+</li>
+<li><a href="#Overview-of-the-verification" title="Overview of the verification">Overview of the verification</a><ul class="nav">
+<li><a href="#Description-of-the-system" title="Description of the system">Description of the system</a></li>
+<li><a href="#Description-of-the-specification-files" title="Description of the specification files">Description of the specification files</a></li>
+<li><a href="#Assumptions-and-Simplifications" title="Assumptions and Simplifications">Assumptions and Simplifications</a></li>
+<li><a href="#Verification-Conditions" title="Verification Conditions">Verification Conditions</a><ul class="nav">
+<li><a href="#Notation" title="Notation">Notation</a></li>
+</ul>
+</li>
+<li><a href="#Stable-Debt-Token" title="Stable-Debt Token">Stable-Debt Token</a><ul class="nav">
+<li><a href="#Rules" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#Variable-Debt-Token" title="Variable-Debt Token">Variable-Debt Token</a><ul class="nav">
+<li><a href="#Rules1" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#AToken" title="AToken">AToken</a><ul class="nav">
+<li><a href="#Rules2" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#ReserveConfiguration" title="ReserveConfiguration">ReserveConfiguration</a><ul class="nav">
+<li><a href="#Rules3" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#UserConfiguration" title="UserConfiguration">UserConfiguration</a><ul class="nav">
+<li><a href="#Rules4" title="Rules">Rules</a></li>
+</ul>
+</li>
+<li><a href="#Pool" title="Pool">Pool</a><ul class="nav">
+<li><a href="#Rules5" title="Rules">Rules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div><div class="toc-menu"><a class="expand-toggle" href="#">Expand all</a><a class="back-to-top" href="#">Back to top</a><a class="go-to-bottom" href="#">Go to bottom</a></div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gist-embed/2.6.0/gist-embed.min.js" integrity="sha256-KyF2D6xPIJUW5sUDSs93vWyZm+1RzIpKCexxElmxl8g=" crossorigin="anonymous" defer></script>
+    <script>
+        var markdown = $(".markdown-body");
+        //smooth all hash trigger scrolling
+        function smoothHashScroll() {
+            var hashElements = $("a[href^='#']").toArray();
+            for (var i = 0; i < hashElements.length; i++) {
+                var element = hashElements[i];
+                var $element = $(element);
+                var hash = element.hash;
+                if (hash) {
+                    $element.on('click', function (e) {
+                        // store hash
+                        var hash = this.hash;
+                        if ($(hash).length <= 0) return;
+                        // prevent default anchor click behavior
+                        e.preventDefault();
+                        // animate
+                        $('body, html').stop(true, true).animate({
+                            scrollTop: $(hash).offset().top
+                        }, 100, "linear", function () {
+                            // when done, add hash to url
+                            // (default click behaviour)
+                            window.location.hash = hash;
+                        });
+                    });
+                }
+            }
+        }
+
+        smoothHashScroll();
+        var toc = $('.ui-toc');
+        var tocAffix = $('.ui-affix-toc');
+        var tocDropdown = $('.ui-toc-dropdown');
+        //toc
+        tocDropdown.click(function (e) {
+            e.stopPropagation();
+        });
+
+        var enoughForAffixToc = true;
+
+        function generateScrollspy() {
+            $(document.body).scrollspy({
+                target: ''
+            });
+            $(document.body).scrollspy('refresh');
+            if (enoughForAffixToc) {
+                toc.hide();
+                tocAffix.show();
+            } else {
+                tocAffix.hide();
+                toc.show();
+            }
+            $(document.body).scroll();
+        }
+
+        function windowResize() {
+            //toc right
+            var paddingRight = parseFloat(markdown.css('padding-right'));
+            var right = ($(window).width() - (markdown.offset().left + markdown.outerWidth() - paddingRight));
+            toc.css('right', right + 'px');
+            //affix toc left
+            var newbool;
+            var rightMargin = (markdown.parent().outerWidth() - markdown.outerWidth()) / 2;
+            //for ipad or wider device
+            if (rightMargin >= 133) {
+                newbool = true;
+                var affixLeftMargin = (tocAffix.outerWidth() - tocAffix.width()) / 2;
+                var left = markdown.offset().left + markdown.outerWidth() - affixLeftMargin;
+                tocAffix.css('left', left + 'px');
+            } else {
+                newbool = false;
+            }
+            if (newbool != enoughForAffixToc) {
+                enoughForAffixToc = newbool;
+                generateScrollspy();
+            }
+        }
+        $(window).resize(function () {
+            windowResize();
+        });
+        $(document).ready(function () {
+            windowResize();
+            generateScrollspy();
+        });
+
+        //remove hash
+        function removeHash() {
+            window.location.hash = '';
+        }
+
+        var backtotop = $('.back-to-top');
+        var gotobottom = $('.go-to-bottom');
+
+        backtotop.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToTop)
+                scrollToTop();
+            removeHash();
+        });
+        gotobottom.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (scrollToBottom)
+                scrollToBottom();
+            removeHash();
+        });
+
+        var toggle = $('.expand-toggle');
+        var tocExpand = false;
+
+        checkExpandToggle();
+        toggle.click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            tocExpand = !tocExpand;
+            checkExpandToggle();
+        })
+
+        function checkExpandToggle () {
+            var toc = $('.ui-toc-dropdown .toc');
+            var toggle = $('.expand-toggle');
+            if (!tocExpand) {
+                toc.removeClass('expand');
+                toggle.text('Expand all');
+            } else {
+                toc.addClass('expand');
+                toggle.text('Collapse all');
+            }
+        }
+
+        function scrollToTop() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: 0
+            }, 100, "linear");
+        }
+
+        function scrollToBottom() {
+            $('body, html').stop(true, true).animate({
+                scrollTop: $(document.body)[0].scrollHeight
+            }, 100, "linear");
+        }
+    </script>
+</body>
+
+</html>
