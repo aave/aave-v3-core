@@ -9,7 +9,6 @@ import {DataTypes} from '../types/DataTypes.sol';
  * @notice Library to decode calldata, used to optimize calldata size in L2Pool for transaction cost reduction
  */
 library CalldataLogic {
- 
   function decodeSupplyParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
@@ -20,13 +19,16 @@ library CalldataLogic {
     )
   {
     unchecked {
+
       uint256 cursor;
 
-      uint16 assetId = uint16(uint256(args) & 0xFFFF);
+      uint16 referralCode = uint16(uint256(args) & 0xFFFF);
       cursor += 16;
-      uint256 amount = uint16(uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+
+      uint256 amount = uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
       cursor += 128;
-      uint16 referralCode = uint16(uint256(args >> cursor) & 0xFFFF);
+
+      uint16 assetId = uint16(uint256(args >> cursor) & 0xFFFF);
 
       return (reservesList[assetId], amount, referralCode);
     }
@@ -46,9 +48,18 @@ library CalldataLogic {
       uint8
     )
   {
-    (address asset, uint256 amount, uint16 referralCode) = decodeSupplyParams(reservesList, args);
-    uint32 deadline = uint32(uint256(args >> 160) & 0xFFFFFFFF);
-    uint8 v = uint8(uint256(args >> 192) & 0xFF);
+    uint256 counter;
+
+    uint32 deadline = uint32(uint256(args) & 0xFFFFFFFF);
+
+    counter += 32;
+
+    uint8 v = uint8(uint256(args >> counter) & 0xFF);
+
+    counter += 8;
+
+    (address asset, uint256 amount, uint16 referralCode) = decodeSupplyParams(reservesList, args >> counter);
+
     return (asset, amount, referralCode, deadline, v);
   }
 
@@ -88,7 +99,10 @@ library CalldataLogic {
     return (asset, amount, interestRateMode, referralCode);
   }
 
-  function decodeRepayWithPermitParams(mapping(uint256 => address) storage reservesList, bytes32 args)
+  function decodeRepayWithPermitParams(
+    mapping(uint256 => address) storage reservesList,
+    bytes32 args
+  )
     internal
     view
     returns (
@@ -99,13 +113,16 @@ library CalldataLogic {
       uint8
     )
   {
-    (address asset, uint256 amount, uint256 interestRateMode) = _decodeBorrowRepayCommonParams(reservesList, args);
+    (address asset, uint256 amount, uint256 interestRateMode) = _decodeBorrowRepayCommonParams(
+      reservesList,
+      args
+    );
     uint32 deadline = uint32(uint256(args >> 160) & 0xFFFFFFFF);
     uint8 v = uint8(uint256(args >> 192) & 0xFF);
     return (asset, amount, interestRateMode, deadline, v);
   }
 
-    function decodeRepayParams(mapping(uint256 => address) storage reservesList, bytes32 args)
+  function decodeRepayParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
     returns (
