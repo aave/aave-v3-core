@@ -12,7 +12,7 @@ import {DataTypes} from '../types/DataTypes.sol';
 library CalldataLogic {
   using BytesLib for bytes;
 
-  function decodeSupplyParams(mapping(uint256 => address) storage reservesList, bytes calldata args)
+  function decodeSupplyParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
     returns (
@@ -24,57 +24,53 @@ library CalldataLogic {
     unchecked {
       uint256 cursor;
 
-      uint16 assetId = args.toUint16(cursor);
-      cursor += 2;
-      uint256 amount = args.toUint128(cursor);
+      uint16 assetId = uint16(uint256(args) & 0xFFFF);
       cursor += 16;
-      uint16 referralCode = args.toUint16(cursor);
-      cursor += 2;
+      uint256 amount = uint16(uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
+      cursor += 128;
+      uint16 referralCode = uint16(uint256(args >> cursor) & 0xFFFF);
 
       return (reservesList[assetId], amount, referralCode);
     }
   }
 
-  function decodePermitParams(bytes calldata args, uint256 start)
+  function decodeSupplyWithPermitParams(
+    mapping(uint256 => address) storage reservesList,
+    bytes32 args
+  )
     internal
-    pure
+    view
     returns (
+      address,
+      uint256,
+      uint16,
       uint32,
-      uint8,
-      bytes32,
-      bytes32
+      uint8
     )
   {
-    unchecked {
-      uint32 deadline = args.toUint32(start);
-      start += 4;
-      uint8 v = args.toUint8(start);
-      start += 1;
-      bytes32 r = args.toBytes32(start);
-      start += 32;
-      bytes32 s = args.toBytes32(start);
-      start += 32;
-      return (deadline, v, r, s);
-    }
+    (address asset, uint256 amount, uint16 referralCode) = decodeSupplyParams(reservesList, args);
+    uint32 deadline = uint32(uint256(args >> 160) & 0xFFFFFFFF);
+    uint8 v = uint8(uint256(args >> 192) & 0xFF);
+    return (asset, amount, referralCode, deadline, v);
   }
 
-  function decodeWithdrawParams(
-    mapping(uint256 => address) storage reservesList,
-    bytes calldata args
-  ) internal view returns (address, uint256) {
+  function decodeWithdrawParams(mapping(uint256 => address) storage reservesList, bytes32 args)
+    internal
+    view
+    returns (address, uint256)
+  {
     unchecked {
       uint256 cursor;
 
-      uint16 assetId = args.toUint16(cursor);
+      uint16 assetId = uint16(uint256(args) & 0xFFFF);
       cursor += 2;
-      uint256 amount = args.toUint128(cursor);
-      cursor += 16;
+      uint256 amount = uint16(uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
 
       return (reservesList[assetId], amount);
     }
   }
 
-  function decodeBorrowParams(mapping(uint256 => address) storage reservesList, bytes calldata args)
+  function decodeBorrowParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
     returns (
@@ -89,12 +85,29 @@ library CalldataLogic {
       args
     );
 
-    uint16 referralCode = args.toUint16(17);
+    uint16 referralCode = uint16(uint256(args >> 136) & 0xFFFF);
 
     return (asset, amount, interestRateMode, referralCode);
   }
 
-  function decodeRepayParams(mapping(uint256 => address) storage reservesList, bytes calldata args)
+  function decodeRepayWithPermitParams(mapping(uint256 => address) storage reservesList, bytes32 args)
+    internal
+    view
+    returns (
+      address,
+      uint256,
+      uint256,
+      uint32,
+      uint8
+    )
+  {
+    (address asset, uint256 amount, uint256 interestRateMode) = _decodeBorrowRepayCommonParams(reservesList, args);
+    uint32 deadline = uint32(uint256(args >> 160) & 0xFFFFFFFF);
+    uint8 v = uint8(uint256(args >> 192) & 0xFF);
+    return (asset, amount, interestRateMode, deadline, v);
+  }
+
+    function decodeRepayParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
     returns (
@@ -108,7 +121,7 @@ library CalldataLogic {
 
   function _decodeBorrowRepayCommonParams(
     mapping(uint256 => address) storage reservesList,
-    bytes calldata args
+    bytes32 args
   )
     internal
     view
@@ -121,13 +134,11 @@ library CalldataLogic {
     unchecked {
       uint256 cursor;
 
-      uint16 assetId = args.toUint16(cursor);
+      uint16 assetId = uint16(uint256(args) & 0xFFFF);
       cursor += 2;
-      uint256 amount = args.toUint128(cursor);
+      uint256 amount = uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
       cursor += 16;
-
-      uint8 interestRateMode = args.toUint8(cursor);
-      cursor += 1;
+      uint16 interestRateMode = uint8(uint256(args >> cursor) & 0xFF);
 
       return (reservesList[assetId], amount, interestRateMode);
     }
