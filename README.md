@@ -1,6 +1,6 @@
-[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Build pass](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml/badge.svg)](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml)
 [![codecov](https://codecov.io/gh/aave/aave-v3-core/branch/master/graph/badge.svg?token=U50KN38G67)](https://codecov.io/gh/aave/aave-v3-core)
+
 ```
         .///.                .///.     //.            .//  `/////////////-
        `++:++`              .++:++`    :++`          `++:  `++:......---.`
@@ -16,7 +16,7 @@
 
 # Aave Protocol v3
 
-This repository contains the smart contracts source code and markets configuration for Aave Protocol V3. The repository uses Docker Compose and Hardhat as development enviroment for compilation, testing and deployment tasks.
+This repository contains the smart contracts source code and markets configuration for Aave Protocol V3. The repository uses Docker Compose and Hardhat as development environment for compilation, testing and deployment tasks.
 
 ## What is Aave?
 
@@ -85,28 +85,16 @@ Follow the next steps to setup the repository:
 - Create an enviroment file named `.env` and fill the next enviroment variables
 
 ```
-# Mnemonic, only first address will be used
-MNEMONIC=""
-
 # Add Alchemy or Infura provider keys, alchemy takes preference at the config level
 ALCHEMY_KEY=""
 INFURA_KEY=""
 
-
-# Optional Etherscan key, for automatize the verification of the contracts at Etherscan
-ETHERSCAN_KEY=""
 
 # Optional, if you plan to use Tenderly scripts
 TENDERLY_PROJECT=""
 TENDERLY_USERNAME=""
 
 ```
-
-## Markets configuration
-
-The configurations related with the Aave Markets are located at `markets` directory. You can follow the `IAaveConfiguration` interface to create new Markets configuration or extend the current Aave configuration.
-
-Each market should have his own Market configuration file, and their own set of deployment tasks, using the Aave market config and tasks as a reference.
 
 ## Test
 
@@ -122,11 +110,3 @@ docker-compose exec contracts-env bash
 # A new Bash terminal is prompted, connected to the container
 npm run test
 ```
-
-## Deployments
-
-To deploy the Aave Protocol V3 core contracts, refer to the repo aave-v3-deployments.
-
-## Interact with Aave in Mainnet via console
-
-[Pending]
