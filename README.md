@@ -29,7 +29,7 @@ Aave is a decentralized non-custodial liquidity markets protocol where users can
 ## Audits and Formal Verification
 You can find all audit reports under the audits folder
 
-Round 1 - November 2021
+Round 1 - October 2021
 - [ABDK [Pending]](./audits/27-01-2022_SigmaPrime_AaveV3.pdf)
 
 - [OpenZeppelin](./audits/01-11-2021_OpenZeppelin_AaveV3.pdf)
