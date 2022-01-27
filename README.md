@@ -24,7 +24,7 @@ Aave is a decentralized non-custodial liquidity markets protocol where users can
 
 ## Documentation
 See the link to the technical paper or visit the Aave Developer docs
-[Pending]
+- [Technical Paper](./techpaper/Aave_V3_Technical_Paper.pdf)
 
 - [Developer Documentation](https://docs.aave.com/developers/)
 
