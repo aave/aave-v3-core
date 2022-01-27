@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.13.1](https://www.github.com/aave/aave-v3-core/compare/v1.13.0...v1.13.1) (2022-01-27)
+
+
+### Bug Fixes
+
+* Add virtual to getReserveNormalizedIncome function ([bc10fd2](https://www.github.com/aave/aave-v3-core/commit/bc10fd24750680e83e3d4abb54bf452998fa0e0d))
+* Mark all functions as virtual ([f6932b3](https://www.github.com/aave/aave-v3-core/commit/f6932b3d8c0055caf4ed1a191ec64676f4e68ad1))
+
 ## [1.13.0](https://www.github.com/aave/aave-v3-core/compare/v1.12.0...v1.13.0) (2022-01-25)
 
 
