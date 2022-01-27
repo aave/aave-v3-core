@@ -285,7 +285,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     await expectReserveConfigurationData(helpersContract, weth.address, { ...baseConfigValues });
   });
 
-  it('Deactivates the ETH reserve for borrowing via pool admin (revert expected)', async () => {
+  it('Deactivates the ETH reserve for borrowing via pool admin while stable borrowing is active (revert expected)', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     await expect(configurator.setReserveBorrowing(weth.address, false)).to.be.revertedWith(
       ProtocolErrors.STABLE_BORROWING_ENABLED
@@ -295,7 +295,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     });
   });
 
-  it('Deactivates the ETH reserve for borrowing via risk admin (revert expected)', async () => {
+  it('Deactivates the ETH reserve for borrowing via risk admin while stable borrowing is active (revert expected)', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
 
     await expect(
@@ -365,7 +365,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     });
   });
 
-  it('Enables stable borrow rate on the ETH reserve via pool admin (revert expected)', async () => {
+  it('Enables stable borrow rate on the ETH reserve via pool admin while borrowing is disabled (revert expected)', async () => {
     const { configurator, helpersContract, weth } = testEnv;
     await expect(configurator.setReserveStableRateBorrowing(weth.address, true)).to.be.revertedWith(
       ProtocolErrors.BORROWING_NOT_ENABLED
@@ -378,7 +378,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     });
   });
 
-  it('Enables stable borrow rate on the ETH reserve via risk admin (revert expected)', async () => {
+  it('Enables stable borrow rate on the ETH reserve via risk admin while borrowing is disabled (revert expected)', async () => {
     const { configurator, helpersContract, weth, riskAdmin } = testEnv;
     await expect(
       configurator.connect(riskAdmin.signer).setReserveStableRateBorrowing(weth.address, true)
@@ -434,49 +434,6 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
       ...baseConfigValues,
     });
     await evmRevert(snap);
-  });
-
-  it('Enables stable borrow rate on the ETH reserve via risk admin', async () => {
-    const { configurator, helpersContract, weth, riskAdmin } = testEnv;
-    expect(
-      await configurator.connect(riskAdmin.signer).setReserveStableRateBorrowing(weth.address, true)
-    )
-      .to.emit(configurator, 'ReserveStableRateBorrowing')
-      .withArgs(weth.address, true);
-
-    await expectReserveConfigurationData(helpersContract, weth.address, {
-      ...baseConfigValues,
-    });
-  });
-
-  it('Disable stable borrow rate on the ETH reserve pool admin', async () => {
-    const snap = await evmSnapshot();
-    const { configurator, helpersContract, weth } = testEnv;
-    expect(await configurator.setReserveStableRateBorrowing(weth.address, false))
-      .to.emit(configurator, 'ReserveStableRateBorrowing')
-      .withArgs(weth.address, false);
-
-    await expectReserveConfigurationData(helpersContract, weth.address, {
-      ...baseConfigValues,
-      stableBorrowRateEnabled: false,
-    });
-    await evmRevert(snap);
-  });
-
-  it('Disable stable borrow rate on the ETH reserve risk admin', async () => {
-    const { configurator, helpersContract, weth, riskAdmin } = testEnv;
-    expect(
-      await configurator
-        .connect(riskAdmin.signer)
-        .setReserveStableRateBorrowing(weth.address, false)
-    )
-      .to.emit(configurator, 'ReserveStableRateBorrowing')
-      .withArgs(weth.address, false);
-
-    await expectReserveConfigurationData(helpersContract, weth.address, {
-      ...baseConfigValues,
-      stableBorrowRateEnabled: false,
-    });
   });
 
   it('Enables stable borrow rate on the ETH reserve via risk admin', async () => {
