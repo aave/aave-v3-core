@@ -26,7 +26,7 @@ Aave is a decentralized non-custodial liquidity markets protocol where users can
 
 [Pending]
 
-## Audits
+## Audits and Formal Verification
 You can find all audit reports under the audits folder
 
 Round 1 - November 2021
@@ -38,7 +38,9 @@ Round 1 - November 2021
 
 Round 2 - December 2021
 - [SigmaPrime[Pending]](./audits/27-01-2022_SigmaPrime_AaveV3.pdf)
-- [Certora](./formal-verification/26-01-2022_Certora_AaveV3.pdf)
+
+Formal Verification
+- [Certora](./Certora/certora/Verification_Report.pdf)
 
 ## Connect with the community
 
