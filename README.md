@@ -38,7 +38,7 @@ Round 1 - November 2021
 
 Round 2 - December 2021
 - [SigmaPrime[Pending]](./audits/27-01-2022_SigmaPrime_AaveV3.pdf)
-- [Certora](./audits/26-01-2022_Certora_AaveV3.pdf)
+- [Certora](./formal-verification/26-01-2022_Certora_AaveV3.pdf)
 
 ## Connect with the community
 
