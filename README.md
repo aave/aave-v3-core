@@ -23,7 +23,7 @@ This repository contains the smart contracts source code and markets configurati
 Aave is a decentralized non-custodial liquidity markets protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) or undercollateralized (one-block liquidity) fashion.
 
 ## Documentation
-See the link to the technical paper or visit the Aave Developer docss
+See the link to the technical paper or visit the Aave Developer docs
 [Pending]
 
 - [Developer Documentation](https://docs.aave.com/developers/)
