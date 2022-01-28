@@ -55,6 +55,7 @@ library ConfiguratorLogic {
       input.aTokenImpl,
       abi.encodeWithSelector(
         IInitializableAToken.initialize.selector,
+        pool,
         input.treasury,
         input.underlyingAsset,
         input.incentivesController,
@@ -69,6 +70,7 @@ library ConfiguratorLogic {
       input.stableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -82,6 +84,7 @@ library ConfiguratorLogic {
       input.variableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -134,6 +137,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableAToken.initialize.selector,
+      cachedPool,
       input.treasury,
       input.asset,
       input.incentivesController,
@@ -164,6 +168,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
@@ -201,6 +206,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
