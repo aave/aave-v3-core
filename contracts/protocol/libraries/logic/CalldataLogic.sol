@@ -18,20 +18,16 @@ library CalldataLogic {
       uint16
     )
   {
-    unchecked {
+    uint16 assetId;
+    uint256 amount;
+    uint16 referralCode;
 
-      uint256 cursor;
-
-      uint16 referralCode = uint16(uint256(args) & 0xFFFF);
-      cursor += 16;
-
-      uint256 amount = uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-      cursor += 128;
-
-      uint16 assetId = uint16(uint256(args >> cursor) & 0xFFFF);
-
-      return (reservesList[assetId], amount, referralCode);
+    assembly {
+      assetId := and(args, 0xFFFF)
+      amount := and(shr(16, args), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+      referralCode := and(shr(144, args), 0xFFFF)
     }
+    return (reservesList[assetId], amount, referralCode);
   }
 
   function decodeSupplyWithPermitParams(
@@ -48,19 +44,18 @@ library CalldataLogic {
       uint8
     )
   {
-    uint256 counter;
+    uint32 deadline;
+    uint8 permitV;
 
-    uint32 deadline = uint32(uint256(args) & 0xFFFFFFFF);
+    bytes32 supplyParams;
+    assembly {
+      supplyParams := and(args, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+      deadline := and(shr(160, args), 0xFFFFFFFF)
+      permitV := and(shr(192, args), 0xFF)
+    }
+    (address asset, uint256 amount, uint16 referralCode) = decodeSupplyParams(reservesList, args);
 
-    counter += 32;
-
-    uint8 v = uint8(uint256(args >> counter) & 0xFF);
-
-    counter += 8;
-
-    (address asset, uint256 amount, uint16 referralCode) = decodeSupplyParams(reservesList, args >> counter);
-
-    return (asset, amount, referralCode, deadline, v);
+    return (asset, amount, referralCode, deadline, permitV);
   }
 
   function decodeWithdrawParams(mapping(uint256 => address) storage reservesList, bytes32 args)
@@ -68,15 +63,16 @@ library CalldataLogic {
     view
     returns (address, uint256)
   {
-    unchecked {
-      uint256 cursor;
-
-      uint16 assetId = uint16(uint256(args) & 0xFFFF);
-      cursor += 2;
-      uint256 amount = uint16(uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF);
-
-      return (reservesList[assetId], amount);
+    uint16 assetId;
+    uint256 amount;
+    assembly {
+      assetId := and(args, 0xFFFF)
+      amount := and(shr(16, args), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
     }
+    if (amount == type(uint128).max) {
+      amount = type(uint256).max;
+    }
+    return (reservesList[assetId], amount);
   }
 
   function decodeBorrowParams(mapping(uint256 => address) storage reservesList, bytes32 args)
@@ -89,14 +85,45 @@ library CalldataLogic {
       uint16
     )
   {
-    (address asset, uint256 amount, uint256 interestRateMode) = _decodeBorrowRepayCommonParams(
-      reservesList,
-      args
-    );
+    uint16 assetId;
+    uint256 amount;
+    uint256 interestRateMode;
+    uint16 referralCode;
 
-    uint16 referralCode = uint16(uint256(args >> 136) & 0xFFFF);
+    assembly {
+      assetId := and(args, 0xFFFF)
+      amount := and(shr(16, args), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+      interestRateMode := and(shr(144, args), 0xFF)
+      referralCode := and(shr(152, args), 0xFFFF)
+    }
 
-    return (asset, amount, interestRateMode, referralCode);
+    return (reservesList[assetId], amount, interestRateMode, referralCode);
+  }
+
+  function decodeRepayParams(mapping(uint256 => address) storage reservesList, bytes32 args)
+    internal
+    view
+    returns (
+      address,
+      uint256,
+      uint256
+    )
+  {
+    uint16 assetId;
+    uint256 amount;
+    uint256 interestRateMode;
+
+    assembly {
+      assetId := and(args, 0xFFFF)
+      amount := and(shr(16, args), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+      interestRateMode := and(shr(144, args), 0xFF)
+    }
+
+    if (amount == type(uint128).max) {
+      amount = type(uint256).max;
+    }
+
+    return (reservesList[assetId], amount, interestRateMode);
   }
 
   function decodeRepayWithPermitParams(
@@ -113,49 +140,19 @@ library CalldataLogic {
       uint8
     )
   {
-    (address asset, uint256 amount, uint256 interestRateMode) = _decodeBorrowRepayCommonParams(
+    uint32 deadline;
+    uint8 permitV;
+
+    (address asset, uint256 amount, uint256 interestRateMode) = decodeRepayParams(
       reservesList,
       args
     );
-    uint32 deadline = uint32(uint256(args >> 160) & 0xFFFFFFFF);
-    uint8 v = uint8(uint256(args >> 192) & 0xFF);
-    return (asset, amount, interestRateMode, deadline, v);
-  }
 
-  function decodeRepayParams(mapping(uint256 => address) storage reservesList, bytes32 args)
-    internal
-    view
-    returns (
-      address,
-      uint256,
-      uint256
-    )
-  {
-    return _decodeBorrowRepayCommonParams(reservesList, args);
-  }
-
-  function _decodeBorrowRepayCommonParams(
-    mapping(uint256 => address) storage reservesList,
-    bytes32 args
-  )
-    internal
-    view
-    returns (
-      address,
-      uint256,
-      uint256
-    )
-  {
-    unchecked {
-      uint256 cursor;
-
-      uint16 assetId = uint16(uint256(args) & 0xFFFF);
-      cursor += 2;
-      uint256 amount = uint256(args >> cursor) & 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-      cursor += 16;
-      uint16 interestRateMode = uint8(uint256(args >> cursor) & 0xFF);
-
-      return (reservesList[assetId], amount, interestRateMode);
+    assembly {
+      deadline := and(shr(152, args), 0xFFFFFFFF)
+      permitV := and(shr(184, args), 0xFF)
     }
+
+    return (asset, amount, interestRateMode, deadline, permitV);
   }
 }
