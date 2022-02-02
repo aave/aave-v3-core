@@ -30,8 +30,7 @@
   "devDependencies": {
     "@aave/deploy-v3": "^1.17.0",
     "@aave/periphery-v3": "^1.10.0",
-    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.11",
-    "@openzeppelin/contracts": "4.2.0",
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
     "@tenderly/hardhat-tenderly": "^1.1.0-beta.5",
     "@typechain/ethers-v5": "^7.2.0",
     "@typechain/hardhat": "^2.3.1",
@@ -81,7 +80,7 @@
     "Lasse Herskind <lasse@aave.com>",
     "Mark Hinschberger <mark@aave.com>",
     "Peter Michael <peter.dev@aave.com>",
-    "Pol Sendra <pol@aave.com>" 
+    "Pol Sendra <pol@aave.com>"
   ],
   "license": "BUSL-1.1",
   "dependencies": {
@@ -103,5 +102,14 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/aave/aave-v3-core"
+  },
+  "overrides": {
+    "tar": ">=4.4.18",
+    "normalize-url": ">=4.5.1",
+    "underscore": ">=1.12.1",
+    "y18n": ">=4.0.1",
+    "axios": ">=0.21.2",
+    "yargs-parser": "13.1.2",
+    "node-fetch": ">=2.6.7"
   }
 }
