@@ -11,6 +11,7 @@ import {WadRayMath} from '../math/WadRayMath.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
+import {GenericLogic} from './GenericLogic.sol';
 
 /**
  * @title PoolLogic library
@@ -140,5 +141,51 @@ library PoolLogic {
     ValidationLogic.validateDropReserve(reserves, reserve, asset);
     reserves[reservesData[asset].id] = address(0);
     delete reservesData[asset];
+  }
+
+  /**
+   * @notice Returns the user account data across all the reserves
+   * @param reservesData The state of all the reserves
+   * @param reserves The addresses of all the active reserves
+   * @param eModeCategories The configuration of all the efficiency mode categories
+   * @param params Additional params needed for the calculation
+   * @return totalCollateralBase The total collateral of the user in the base currency used by the price feed
+   * @return totalDebtBase The total debt of the user in the base currency used by the price feed
+   * @return availableBorrowsBase The borrowing power left of the user in the base currency used by the price feed
+   * @return currentLiquidationThreshold The liquidation threshold of the user
+   * @return ltv The loan to value of The user
+   * @return healthFactor The current health factor of the user
+   **/
+  function executeGetUserAccountData(
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reserves,
+    mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
+    DataTypes.CalculateUserAccountDataParams memory params
+  )
+    external
+    view
+    returns (
+      uint256 totalCollateralBase,
+      uint256 totalDebtBase,
+      uint256 availableBorrowsBase,
+      uint256 currentLiquidationThreshold,
+      uint256 ltv,
+      uint256 healthFactor
+    )
+  {
+    (
+      totalCollateralBase,
+      totalDebtBase,
+      ltv,
+      currentLiquidationThreshold,
+      healthFactor,
+
+    ) = GenericLogic.calculateUserAccountData(reservesData, reserves, eModeCategories, params);
+
+    availableBorrowsBase = GenericLogic.calculateAvailableBorrows(
+      totalCollateralBase,
+      totalDebtBase,
+      ltv
+    );
   }
 }

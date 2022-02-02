@@ -6,7 +6,6 @@ import {Errors} from '../libraries/helpers/Errors.sol';
 import {ReserveConfiguration} from '../libraries/configuration/ReserveConfiguration.sol';
 import {PoolLogic} from '../libraries/logic/PoolLogic.sol';
 import {ReserveLogic} from '../libraries/logic/ReserveLogic.sol';
-import {GenericLogic} from '../libraries/logic/GenericLogic.sol';
 import {EModeLogic} from '../libraries/logic/EModeLogic.sol';
 import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {FlashLoanLogic} from '../libraries/logic/FlashLoanLogic.sol';
@@ -474,31 +473,19 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
       uint256 healthFactor
     )
   {
-    (
-      totalCollateralBase,
-      totalDebtBase,
-      ltv,
-      currentLiquidationThreshold,
-      healthFactor,
-
-    ) = GenericLogic.calculateUserAccountData(
-      _reserves,
-      _reservesList,
-      _eModeCategories,
-      DataTypes.CalculateUserAccountDataParams({
-        userConfig: _usersConfig[user],
-        reservesCount: _reservesCount,
-        user: user,
-        oracle: ADDRESSES_PROVIDER.getPriceOracle(),
-        userEModeCategory: _usersEModeCategory[user]
-      })
-    );
-
-    availableBorrowsBase = GenericLogic.calculateAvailableBorrows(
-      totalCollateralBase,
-      totalDebtBase,
-      ltv
-    );
+    return
+      PoolLogic.executeGetUserAccountData(
+        _reserves,
+        _reservesList,
+        _eModeCategories,
+        DataTypes.CalculateUserAccountDataParams({
+          userConfig: _usersConfig[user],
+          reservesCount: _reservesCount,
+          user: user,
+          oracle: ADDRESSES_PROVIDER.getPriceOracle(),
+          userEModeCategory: _usersEModeCategory[user]
+        })
+      );
   }
 
   /// @inheritdoc IPool
