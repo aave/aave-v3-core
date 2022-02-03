@@ -104,14 +104,5 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/aave/aave-v3-core"
-  },
-  "overrides": {
-    "tar": ">=4.4.18",
-    "normalize-url": ">=4.5.1",
-    "underscore": ">=1.12.1",
-    "y18n": ">=4.0.1",
-    "axios": ">=0.21.2",
-    "yargs-parser": "13.1.2",
-    "node-fetch": ">=2.6.7"
   }
 }
