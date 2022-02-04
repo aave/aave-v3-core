@@ -6,7 +6,6 @@ import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {CalldataLogic} from '../libraries/logic/CalldataLogic.sol';
 
 contract L2Pool is Pool {
-
   constructor(IPoolAddressesProvider provider) Pool(provider) {}
 
   function supply(bytes32 args) external {
@@ -65,5 +64,40 @@ contract L2Pool is Pool {
     ) = CalldataLogic.decodeRepayWithPermitParams(_reservesList, args);
 
     return repayWithPermit(asset, amount, interestRateMode, msg.sender, deadline, v, r, s);
+  }
+
+  function swapBorrowRateMode(bytes32 args) external {
+    (address asset, uint256 interestRateMode) = CalldataLogic.decodeSwapBorrowRateMode(
+      _reservesList,
+      args
+    );
+    swapBorrowRateMode(asset, interestRateMode);
+  }
+
+  function rebalanceStableBorrowRate(bytes32 args) external {
+    (address asset, address user) = CalldataLogic.decodeRebalanceStableBorrowRate(
+      _reservesList,
+      args
+    );
+    rebalanceStableBorrowRate(asset, user);
+  }
+
+  function setUserUseReserveAsCollateral(bytes32 args) external {
+    (address asset, bool useAsCollateral) = CalldataLogic.decodeSetUserUseReserveAsCollateral(
+      _reservesList,
+      args
+    );
+    setUserUseReserveAsCollateral(asset, useAsCollateral);
+  }
+
+  function liquidationCall(bytes32 args1, bytes32 args2) external {
+    (
+      address collateralAsset,
+      address debtAsset,
+      address user,
+      uint256 debtToCover,
+      bool receiveAToken
+    ) = CalldataLogic.decodeLiquidationCall(_reservesList, args1, args2);
+    liquidationCall(collateralAsset, debtAsset, user, debtToCover, receiveAToken);
   }
 }

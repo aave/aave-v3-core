@@ -161,4 +161,75 @@ contract L2Encoder {
     }
     return (res, permitR, permitS);
   }
+
+  function encodeSwapBorrowRateMode(address asset, uint256 interestRateMode)
+    external
+    view
+    returns (bytes32)
+  {
+    DataTypes.ReserveData memory data = POOL.getReserveData(asset);
+    uint16 assetId = data.id;
+    uint8 shortenedInterestRateMode = interestRateMode.toUint8();
+    bytes32 res;
+    assembly {
+      res := add(assetId, shl(16, shortenedInterestRateMode))
+    }
+    return res;
+  }
+
+  function encodeRebalanceStableBorrowRate(address asset, address user)
+    external
+    view
+    returns (bytes32)
+  {
+    DataTypes.ReserveData memory data = POOL.getReserveData(asset);
+    uint16 assetId = data.id;
+
+    bytes32 res;
+    assembly {
+      res := add(assetId, shl(16, user))
+    }
+    return res;
+  }
+
+  function encodeSetUserUseReserveAsCollateral(address asset, bool useAsCollateral)
+    external
+    view
+    returns (bytes32)
+  {
+    DataTypes.ReserveData memory data = POOL.getReserveData(asset);
+    uint16 assetId = data.id;
+    bytes32 res;
+    assembly {
+      res := add(assetId, shl(16, useAsCollateral))
+    }
+    return res;
+  }
+
+  function encodeLiquidationCall(
+    address collateralAsset,
+    address debtAsset,
+    address user,
+    uint256 debtToCover,
+    bool receiveAToken
+  ) external view returns (bytes32, bytes32) {
+    DataTypes.ReserveData memory collateralData = POOL.getReserveData(collateralAsset);
+    uint16 collateralAssetId = collateralData.id;
+
+    DataTypes.ReserveData memory debtData = POOL.getReserveData(debtAsset);
+    uint16 debtAssetId = debtData.id;
+
+    uint128 shortenedDebtToCover = debtToCover == type(uint256).max
+      ? type(uint128).max
+      : debtToCover.toUint128();
+
+    bytes32 res1;
+    bytes32 res2;
+
+    assembly {
+      res1 := add(add(collateralAssetId, shl(16, debtAssetId)), shl(32, user))
+      res2 := add(shortenedDebtToCover, shl(128, receiveAToken))
+    }
+    return (res1, res2);
+  }
 }

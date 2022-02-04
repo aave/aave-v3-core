@@ -10,6 +10,8 @@ import {
   evmRevert,
   DefaultReserveInterestRateStrategy__factory,
   VariableDebtToken__factory,
+  increaseTime,
+  AaveDistributionManager,
 } from '@aave/deploy-v3';
 import {
   InitializableImmutableAdminUpgradeabilityProxy,
@@ -23,11 +25,14 @@ import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contrac
 import { getTestWallets } from './helpers/utils/wallets';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { parseUnits } from 'ethers/lib/utils';
+import { getReserveData, getUserData } from './helpers/utils/helpers';
+import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
 
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
   const {
+    INVALID_HF,
     NO_MORE_RESERVES_ALLOWED,
     CALLER_NOT_ATOKEN,
     NOT_CONTRACT,
@@ -47,7 +52,7 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
   let encoder: L2Encoder;
 
   before('Deploying L2Pool', async () => {
-    const { addressesProvider, poolAdmin, pool, deployer } = testEnv;
+    const { addressesProvider, poolAdmin, pool, deployer, oracle } = testEnv;
     const { deployer: deployerName } = await hre.getNamedAccounts();
 
     encoder = await (await new L2Encoder__factory(deployer.signer).deploy(pool.address)).deployed();
@@ -92,9 +97,15 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
     // Get the Pool instance
     const poolAddress = await addressesProvider.getPool();
     l2Pool = await MockL2Pool__factory.connect(poolAddress, await getFirstSigner());
+    expect(await addressesProvider.setPriceOracle(oracle.address));
   });
 
-  it('Supply test', async () => {
+  after(async () => {
+    const { aaveOracle, addressesProvider } = testEnv;
+    expect(await addressesProvider.setPriceOracle(aaveOracle.address));
+  });
+
+  it('Supply', async () => {
     const {
       dai,
       aDai,
@@ -164,6 +175,39 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
     expect(userBalance).to.be.eq(amount, 'invalid amount deposited');
   });
 
+  it('setUserUseReserveAsCollateral to false', async () => {
+    const {
+      dai,
+      aDai,
+      users: [user0],
+      helpersContract,
+    } = testEnv;
+
+    const encoded = await encoder.encodeSetUserUseReserveAsCollateral(dai.address, false);
+    expect(await l2Pool.connect(user0.signer)['setUserUseReserveAsCollateral(bytes32)'](encoded))
+      .to.emit(l2Pool, 'ReserveUsedAsCollateralDisabled')
+      .withArgs(dai.address, user0.address);
+
+    const userData = await helpersContract.getUserReserveData(dai.address, user0.address);
+    expect(userData.usageAsCollateralEnabled).to.be.false;
+  });
+
+  it('setUserUseReserveAsCollateral to true', async () => {
+    const {
+      dai,
+      users: [user0],
+      helpersContract,
+    } = testEnv;
+
+    const encoded = await encoder.encodeSetUserUseReserveAsCollateral(dai.address, true);
+    expect(await l2Pool.connect(user0.signer)['setUserUseReserveAsCollateral(bytes32)'](encoded))
+      .to.emit(l2Pool, 'ReserveUsedAsCollateralEnabled')
+      .withArgs(dai.address, user0.address);
+
+    const userData = await helpersContract.getUserReserveData(dai.address, user0.address);
+    expect(userData.usageAsCollateralEnabled).to.be.true;
+  });
+
   it('Borrow', async () => {
     const {
       deployer,
@@ -229,6 +273,51 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
       );
 
     expect(await usdc.balanceOf(deployer.address)).to.be.eq(borrowAmount);
+  });
+
+  it('swapBorrowRateMode to stable', async () => {
+    const { deployer, dai, usdc, helpersContract } = testEnv;
+    const currentInterestRateMode = RateMode.Variable;
+    const encoded = await encoder.encodeSwapBorrowRateMode(usdc.address, currentInterestRateMode);
+    const userDataBefore = await helpersContract.getUserReserveData(usdc.address, deployer.address);
+    expect(userDataBefore.currentStableDebt).to.be.eq(0);
+    expect(userDataBefore.currentVariableDebt).to.be.gt(0);
+
+    expect(await l2Pool.connect(deployer.signer)['swapBorrowRateMode(bytes32)'](encoded))
+      .to.emit(l2Pool, 'SwapBorrowRateMode')
+      .withArgs(usdc.address, deployer.address, Number(currentInterestRateMode));
+
+    const userDataAfter = await helpersContract.getUserReserveData(usdc.address, deployer.address);
+
+    expect(userDataAfter.currentStableDebt).to.be.gt(0);
+    expect(userDataAfter.currentVariableDebt).to.be.eq(0);
+  });
+
+  it('rebalanceStableBorrowRate (revert expected)', async () => {
+    // The test only checks that the value is translated properly, not that the underlying function is run correctly.
+    // see other rebalance tests for that
+    const { deployer, usdc } = testEnv;
+    const encoded = await encoder.encodeRebalanceStableBorrowRate(usdc.address, deployer.address);
+    await expect(
+      l2Pool.connect(deployer.signer)['rebalanceStableBorrowRate(bytes32)'](encoded)
+    ).to.be.revertedWith(ProtocolErrors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET);
+  });
+
+  it('swapBorrowRateMode to variable', async () => {
+    const { deployer, dai, usdc, helpersContract } = testEnv;
+    const currentInterestRateMode = RateMode.Stable;
+    const encoded = await encoder.encodeSwapBorrowRateMode(usdc.address, currentInterestRateMode);
+    const userDataBefore = await helpersContract.getUserReserveData(usdc.address, deployer.address);
+    expect(userDataBefore.currentStableDebt).to.be.gt(0);
+    expect(userDataBefore.currentVariableDebt).to.be.eq(0);
+
+    expect(await l2Pool.connect(deployer.signer)['swapBorrowRateMode(bytes32)'](encoded))
+      .to.emit(l2Pool, 'SwapBorrowRateMode')
+      .withArgs(usdc.address, deployer.address, Number(currentInterestRateMode));
+
+    const userDataAfter = await helpersContract.getUserReserveData(usdc.address, deployer.address);
+    expect(userDataAfter.currentStableDebt).to.be.eq(0);
+    expect(userDataAfter.currentVariableDebt).to.be.gt(0);
   });
 
   it('Repay some', async () => {
@@ -349,5 +438,257 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
 
     const userBalance = await aDai.balanceOf(user0.address);
     expect(userBalance).to.be.eq(0, 'invalid amount withdrawn');
+  });
+
+  it('liquidationCall', async () => {
+    const {
+      dai,
+      usdc,
+      users: [depositor, borrower, liquidator],
+      oracle,
+      pool,
+      helpersContract,
+    } = testEnv;
+
+    //mints DAI to depositor
+    const amountDAItoDeposit = parseUnits('5000', 18);
+    await dai.connect(depositor.signer)['mint(uint256)'](amountDAItoDeposit);
+    await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(depositor.signer)
+      .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
+
+    //user 2 deposits  usdc
+    const amountUSDCtoDeposit = parseUnits('1000', 6);
+    await usdc.connect(borrower.signer)['mint(uint256)'](parseUnits('1000', 6));
+    await usdc.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(borrower.signer)
+      .deposit(usdc.address, amountUSDCtoDeposit, borrower.address, '0');
+
+    const userGlobalData = await pool.getUserAccountData(borrower.address);
+    const daiPrice = await oracle.getAssetPrice(dai.address);
+
+    const amountDAIToBorrow = userGlobalData.availableBorrowsBase
+      .mul(9500)
+      .div(10000)
+      .div(daiPrice)
+      .mul(BigNumber.from(10).pow(18));
+
+    await pool
+      .connect(borrower.signer)
+      .borrow(dai.address, amountDAIToBorrow, RateMode.Stable, '0', borrower.address);
+
+    const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
+    expect(userGlobalDataAfter.currentLiquidationThreshold).to.be.equal(8500, INVALID_HF);
+
+    // Increases price
+    await oracle.setAssetPrice(dai.address, daiPrice.mul(2));
+    const userGlobalDataPriceChange = await pool.getUserAccountData(borrower.address);
+    expect(userGlobalDataPriceChange.healthFactor).to.be.lt(parseUnits('1', 18), INVALID_HF);
+
+    //mints dai to the liquidator
+    await dai.connect(liquidator.signer)['mint(uint256)'](parseUnits('1000', 18));
+
+    //approve protocol to access the liquidator wallet
+    await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    const daiReserveDataBefore = await getReserveData(helpersContract, dai.address);
+    const usdcReserveDataBefore = await getReserveData(helpersContract, usdc.address);
+
+    const userReserveDataBefore = await getUserData(
+      pool,
+      helpersContract,
+      dai.address,
+      borrower.address
+    );
+
+    const amountToLiquidate = userReserveDataBefore.currentStableDebt.div(2);
+
+    await increaseTime(100);
+
+    const encoded = await encoder.encodeLiquidationCall(
+      usdc.address,
+      dai.address,
+      borrower.address,
+      amountToLiquidate,
+      false
+    );
+
+    const tx = await l2Pool
+      .connect(liquidator.signer)
+      ['liquidationCall(bytes32,bytes32)'](encoded[0], encoded[1]);
+
+    const userReserveDataAfter = await getUserData(
+      pool,
+      helpersContract,
+      dai.address,
+      borrower.address
+    );
+
+    const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const usdcReserveDataAfter = await getReserveData(helpersContract, usdc.address);
+
+    const collateralPrice = await oracle.getAssetPrice(usdc.address);
+    const principalPrice = await oracle.getAssetPrice(dai.address);
+
+    const collateralDecimals = (await helpersContract.getReserveConfigurationData(usdc.address))
+      .decimals;
+    const principalDecimals = (await helpersContract.getReserveConfigurationData(dai.address))
+      .decimals;
+
+    const expectedCollateralLiquidated = principalPrice
+      .mul(amountToLiquidate)
+      .percentMul(10500)
+      .mul(BigNumber.from(10).pow(collateralDecimals))
+      .div(collateralPrice.mul(BigNumber.from(10).pow(principalDecimals)));
+
+    if (!tx.blockNumber) {
+      expect(false, 'Invalid block number');
+      return;
+    }
+    const txTimestamp = BigNumber.from(
+      (await hre.ethers.provider.getBlock(tx.blockNumber)).timestamp
+    );
+
+    const stableDebtBeforeTx = calcExpectedStableDebtTokenBalance(
+      userReserveDataBefore.principalStableDebt,
+      userReserveDataBefore.stableBorrowRate,
+      userReserveDataBefore.stableRateLastUpdated,
+      txTimestamp
+    );
+
+    expect(userReserveDataAfter.currentStableDebt).to.be.closeTo(
+      stableDebtBeforeTx.sub(amountToLiquidate),
+      2,
+      'Invalid user debt after liquidation'
+    );
+
+    //the liquidity index of the principal reserve needs to be bigger than the index before
+    expect(daiReserveDataAfter.liquidityIndex).to.be.gte(
+      daiReserveDataBefore.liquidityIndex,
+      'Invalid liquidity index'
+    );
+
+    //the principal APY after a liquidation needs to be lower than the APY before
+    expect(daiReserveDataAfter.liquidityRate).to.be.lt(
+      daiReserveDataBefore.liquidityRate,
+      'Invalid liquidity APY'
+    );
+
+    expect(daiReserveDataAfter.totalLiquidity).to.be.closeTo(
+      daiReserveDataBefore.totalLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal total liquidity'
+    );
+
+    expect(usdcReserveDataAfter.totalLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.totalLiquidity.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral total liquidity'
+    );
+
+    expect(daiReserveDataAfter.availableLiquidity).to.be.closeTo(
+      daiReserveDataBefore.availableLiquidity.add(amountToLiquidate),
+      2,
+      'Invalid principal available liquidity'
+    );
+
+    expect(usdcReserveDataAfter.availableLiquidity).to.be.closeTo(
+      usdcReserveDataBefore.availableLiquidity.sub(expectedCollateralLiquidated),
+      2,
+      'Invalid collateral available liquidity'
+    );
+    await oracle.setAssetPrice(dai.address, daiPrice);
+  });
+
+  it('liquidationCall max value', async () => {
+    const {
+      dai,
+      aUsdc,
+      usdc,
+      users: [depositor, borrower, liquidator],
+      oracle,
+      pool,
+      helpersContract,
+    } = testEnv;
+
+    //mints DAI to depositor
+    const amountDAItoDeposit = parseUnits('5000', 18);
+    await dai.connect(depositor.signer)['mint(uint256)'](amountDAItoDeposit);
+    await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(depositor.signer)
+      .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
+
+    //user 2 deposits  usdc
+    const amountUSDCtoDeposit = parseUnits('1000', 6);
+    await usdc.connect(borrower.signer)['mint(uint256)'](parseUnits('1000', 6));
+    await usdc.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(borrower.signer)
+      .deposit(usdc.address, amountUSDCtoDeposit, borrower.address, '0');
+
+    const userGlobalData = await pool.getUserAccountData(borrower.address);
+    const daiPrice = await oracle.getAssetPrice(dai.address);
+
+    const amountDAIToBorrow = userGlobalData.availableBorrowsBase
+      .mul(9500)
+      .div(10000)
+      .div(daiPrice)
+      .mul(BigNumber.from(10).pow(18));
+
+    await pool
+      .connect(borrower.signer)
+      .borrow(dai.address, amountDAIToBorrow, RateMode.Stable, '0', borrower.address);
+
+    const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
+    expect(userGlobalDataAfter.currentLiquidationThreshold).to.be.equal(8500, INVALID_HF);
+
+    // Increase price
+    await oracle.setAssetPrice(dai.address, daiPrice.mul(2));
+    const userGlobalDataPriceChange = await pool.getUserAccountData(borrower.address);
+    expect(userGlobalDataPriceChange.healthFactor).to.be.lt(parseUnits('1', 18), INVALID_HF);
+
+    //mints dai to the liquidator
+    await dai.connect(liquidator.signer)['mint(uint256)'](parseUnits('1000', 18));
+
+    //approve protocol to access the liquidator wallet
+    await dai.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    const userReserveDataBefore = await getUserData(
+      pool,
+      helpersContract,
+      dai.address,
+      borrower.address
+    );
+
+    const encoded = await encoder.encodeLiquidationCall(
+      usdc.address,
+      dai.address,
+      borrower.address,
+      MAX_UINT_AMOUNT,
+      true
+    );
+
+    const liquidatorAUSDCBefore = await aUsdc.balanceOf(liquidator.address);
+
+    const tx = await l2Pool
+      .connect(liquidator.signer)
+      ['liquidationCall(bytes32,bytes32)'](encoded[0], encoded[1]);
+
+    const userReserveDataAfter = await getUserData(
+      pool,
+      helpersContract,
+      dai.address,
+      borrower.address
+    );
+
+    expect(await aUsdc.balanceOf(liquidator.address)).to.be.gt(liquidatorAUSDCBefore);
+    expect(
+      userReserveDataAfter.currentStableDebt.add(userReserveDataAfter.currentVariableDebt)
+    ).to.be.lt(
+      userReserveDataBefore.currentStableDebt.add(userReserveDataBefore.currentVariableDebt)
+    );
   });
 });

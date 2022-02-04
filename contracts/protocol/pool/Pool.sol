@@ -364,7 +364,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address user,
     uint256 debtToCover,
     bool receiveAToken
-  ) external virtual override {
+  ) public virtual override {
     LiquidationLogic.executeLiquidationCall(
       _reserves,
       _usersConfig,

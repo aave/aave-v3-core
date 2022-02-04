@@ -155,4 +155,89 @@ library CalldataLogic {
 
     return (asset, amount, interestRateMode, deadline, permitV);
   }
+
+  function decodeSwapBorrowRateMode(mapping(uint256 => address) storage reservesList, bytes32 args)
+    internal
+    view
+    returns (address, uint256)
+  {
+    uint16 assetId;
+    uint256 interestRateMode;
+
+    assembly {
+      assetId := and(args, 0xFFFF)
+      interestRateMode := and(shr(16, args), 0xFF)
+    }
+
+    return (reservesList[assetId], interestRateMode);
+  }
+
+  function decodeRebalanceStableBorrowRate(
+    mapping(uint256 => address) storage reservesList,
+    bytes32 args
+  ) internal view returns (address, address) {
+    uint16 assetId;
+    address user;
+    assembly {
+      assetId := and(args, 0xFFFF)
+      user := and(shr(16, args), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+    }
+    return (reservesList[assetId], user);
+  }
+
+  function decodeSetUserUseReserveAsCollateral(
+    mapping(uint256 => address) storage reservesList,
+    bytes32 args
+  ) internal view returns (address, bool) {
+    uint16 assetId;
+    bool useAsCollateral;
+    assembly {
+      assetId := and(args, 0xFFFF)
+      useAsCollateral := and(shr(16, args), 0x1)
+    }
+    return (reservesList[assetId], useAsCollateral);
+  }
+
+  function decodeLiquidationCall(
+    mapping(uint256 => address) storage reservesList,
+    bytes32 args1,
+    bytes32 args2
+  )
+    internal
+    view
+    returns (
+      address,
+      address,
+      address,
+      uint256,
+      bool
+    )
+  {
+    uint16 collateralAssetId;
+    uint16 debtAssetId;
+    address user;
+    uint256 debtToCover;
+    bool receiveAToken;
+
+    assembly {
+      collateralAssetId := and(args1, 0xFFFF)
+      debtAssetId := and(shr(16, args1), 0xFFFF)
+      user := and(shr(32, args1), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+
+      debtToCover := and(args2, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
+      receiveAToken := and(shr(128, args2), 0x1)
+    }
+
+    if (debtToCover == type(uint128).max) {
+      debtToCover = type(uint256).max;
+    }
+
+    return (
+      reservesList[collateralAssetId],
+      reservesList[debtAssetId],
+      user,
+      debtToCover,
+      receiveAToken
+    );
+  }
 }
