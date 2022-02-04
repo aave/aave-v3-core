@@ -388,7 +388,7 @@ interface IPool {
   /**
    * @notice Allows a borrower to swap his debt between stable and variable mode, or vice versa
    * @param asset The address of the underlying asset borrowed
-   * @param interestRateMode The rate mode that the user wants to swap to: 1 for Stable, 2 for Variable
+   * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
   function swapBorrowRateMode(address asset, uint256 interestRateMode) external;
 
