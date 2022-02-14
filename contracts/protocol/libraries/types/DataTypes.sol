@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 library DataTypes {
@@ -174,7 +174,6 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 fromEModeCategory;
-    uint8 toEModeCategory;
   }
 
   struct FlashloanParams {
@@ -202,6 +201,15 @@ library DataTypes {
     uint16 referralCode;
     uint256 flashLoanPremiumToProtocol;
     uint256 flashLoanPremiumTotal;
+  }
+
+  struct FlashLoanRepaymentParams {
+    uint256 amount;
+    uint256 totalPremium;
+    uint256 flashLoanPremiumToProtocol;
+    address asset;
+    address receiverAddress;
+    uint16 referralCode;
   }
 
   struct CalculateUserAccountDataParams {
@@ -246,5 +254,15 @@ library DataTypes {
     uint256 reserveFactor;
     address reserve;
     address aToken;
+  }
+
+  struct InitReserveParams {
+    address asset;
+    address aTokenAddress;
+    address stableDebtAddress;
+    address variableDebtAddress;
+    address interestRateStrategyAddress;
+    uint16 reservesCount;
+    uint16 maxNumberReserves;
   }
 }

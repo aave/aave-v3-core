@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IPool} from '../../../interfaces/IPool.sol';
@@ -55,6 +55,7 @@ library ConfiguratorLogic {
       input.aTokenImpl,
       abi.encodeWithSelector(
         IInitializableAToken.initialize.selector,
+        pool,
         input.treasury,
         input.underlyingAsset,
         input.incentivesController,
@@ -69,6 +70,7 @@ library ConfiguratorLogic {
       input.stableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -82,6 +84,7 @@ library ConfiguratorLogic {
       input.variableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -134,6 +137,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableAToken.initialize.selector,
+      cachedPool,
       input.treasury,
       input.asset,
       input.incentivesController,
@@ -164,6 +168,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
@@ -201,6 +206,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
@@ -243,7 +249,7 @@ library ConfiguratorLogic {
 
   /**
    * @notice Upgrades the implementation and makes call to the proxy
-   * @dev In the current plementation the call is used to initialize the new implementation.
+   * @dev The call is used to initialize the new implementation.
    * @param proxyAddress The address of the proxy
    * @param implementation The address of the new implementation
    * @param  initParams The parameters to the call after the upgrade

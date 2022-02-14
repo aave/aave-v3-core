@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
@@ -119,7 +119,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
 
     (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();
 
-    usageAsCollateralEnabled = liquidationThreshold > 0;
+    usageAsCollateralEnabled = liquidationThreshold != 0;
   }
 
   /**

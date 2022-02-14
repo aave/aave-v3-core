@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
@@ -173,7 +173,6 @@ library BorrowLogic {
    * @dev  Emits the `Repay()` event
    * @param reserves The state of all the reserves
    * @param reservesList The addresses of all the active reserves
-   * @param reserve The data of the reserve of the asset being repaid
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the repay function
    * @return The actual amount being repaid
@@ -181,16 +180,16 @@ library BorrowLogic {
   function executeRepay(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory params
   ) external returns (uint256) {
+    DataTypes.ReserveData storage reserve = reserves[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
     (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
       params.onBehalfOf,
-      reserve
+      reserveCache
     );
 
     ValidationLogic.validateRepay(
@@ -278,24 +277,15 @@ library BorrowLogic {
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
-    IERC20 stableDebtToken = IERC20(reserveCache.stableDebtTokenAddress);
-    IERC20 variableDebtToken = IERC20(reserveCache.variableDebtTokenAddress);
-    uint256 stableDebt = IERC20(stableDebtToken).balanceOf(user);
+    ValidationLogic.validateRebalanceStableBorrowRate(reserve, reserveCache, asset);
 
-    ValidationLogic.validateRebalanceStableBorrowRate(
-      reserve,
-      reserveCache,
-      asset,
-      stableDebtToken,
-      variableDebtToken,
-      reserveCache.aTokenAddress
-    );
+    IStableDebtToken stableDebtToken = IStableDebtToken(reserveCache.stableDebtTokenAddress);
+    uint256 stableDebt = IERC20(address(stableDebtToken)).balanceOf(user);
 
-    IStableDebtToken(address(stableDebtToken)).burn(user, stableDebt);
+    stableDebtToken.burn(user, stableDebt);
 
-    (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = IStableDebtToken(
-      address(stableDebtToken)
-    ).mint(user, user, stableDebt, reserve.currentStableBorrowRate);
+    (, reserveCache.nextTotalStableDebt, reserveCache.nextAvgStableBorrowRate) = stableDebtToken
+      .mint(user, user, stableDebt, reserve.currentStableBorrowRate);
 
     reserve.updateInterestRates(reserveCache, asset, 0, 0);
 
@@ -320,7 +310,10 @@ library BorrowLogic {
 
     reserve.updateState(reserveCache);
 
-    (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(msg.sender, reserve);
+    (uint256 stableDebt, uint256 variableDebt) = Helpers.getUserCurrentDebt(
+      msg.sender,
+      reserveCache
+    );
 
     ValidationLogic.validateSwapRateMode(
       reserve,

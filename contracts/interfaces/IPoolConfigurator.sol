@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 import {ConfiguratorInputTypes} from '../protocol/libraries/types/ConfiguratorInputTypes.sol';
@@ -223,8 +223,8 @@ interface IPoolConfigurator {
    * @param newFlashloanPremiumTotal The new premium, expressed in bps
    **/
   event FlashloanPremiumTotalUpdated(
-    uint256 oldFlashloanPremiumTotal,
-    uint256 newFlashloanPremiumTotal
+    uint128 oldFlashloanPremiumTotal,
+    uint128 newFlashloanPremiumTotal
   );
 
   /**
@@ -233,8 +233,8 @@ interface IPoolConfigurator {
    * @param newFlashloanPremiumToProtocol The new premium, expressed in bps
    **/
   event FlashloanPremiumToProtocolUpdated(
-    uint256 oldFlashloanPremiumToProtocol,
-    uint256 newFlashloanPremiumToProtocol
+    uint128 oldFlashloanPremiumToProtocol,
+    uint128 newFlashloanPremiumToProtocol
   );
 
   /**
@@ -272,6 +272,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Configures borrowing on a reserve.
+   * @dev Can only be disabled (set to false) if stable borrowing is disabled
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if borrowing needs to be enabled, false otherwise
    **/
@@ -295,6 +296,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Enable or disable stable rate borrowing on a reserve.
+   * @dev Can only be enabled (set to true) if borrowing is enabled
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if stable rate borrowing needs to be enabled, false otherwise
    **/
@@ -395,6 +397,8 @@ interface IPoolConfigurator {
    * @notice Adds a new efficiency mode (eMode) category.
    * @dev If zero is provided as oracle address, the default asset oracles will be used to compute the overall debt and
    * overcollateralization of the users using this category.
+   * @dev The new ltv and liquidation threshold must be greater than the base
+   * ltvs and liquidation thresholds of all assets within the eMode category
    * @param categoryId The id of the category to be configured
    * @param ltv The ltv associated with the category
    * @param liquidationThreshold The liquidation threshold associated with the category
@@ -432,7 +436,7 @@ interface IPoolConfigurator {
    * @dev The premium is calculated on the total amount borrowed
    * @param newFlashloanPremiumTotal The total flashloan premium
    */
-  function updateFlashloanPremiumTotal(uint256 newFlashloanPremiumTotal) external;
+  function updateFlashloanPremiumTotal(uint128 newFlashloanPremiumTotal) external;
 
   /**
    * @notice Updates the flash loan premium collected by protocol reserves
@@ -440,7 +444,7 @@ interface IPoolConfigurator {
    * @dev The premium to protocol is calculated on the total flashloan premium
    * @param newFlashloanPremiumToProtocol The part of the flashloan premium sent to the protocol treasury
    */
-  function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol) external;
+  function updateFlashloanPremiumToProtocol(uint128 newFlashloanPremiumToProtocol) external;
 
   /**
    * @notice Sets the debt ceiling for an asset.

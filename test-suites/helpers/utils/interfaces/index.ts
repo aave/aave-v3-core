@@ -29,8 +29,8 @@ export interface ReserveData {
   averageStableBorrowRate: BigNumber;
   variableBorrowRate: BigNumber;
   stableBorrowRate: BigNumber;
-  supplyUtilizationRate: BigNumber;
-  borrowUtilizationRate: BigNumber;
+  supplyUsageRatio: BigNumber;
+  borrowUsageRatio: BigNumber;
   liquidityIndex: BigNumber;
   variableBorrowIndex: BigNumber;
   aTokenAddress: string;

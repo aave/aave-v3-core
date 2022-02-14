@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -99,7 +99,6 @@ library ValidationLogic {
 
   struct ValidateBorrowLocalVars {
     uint256 currentLtv;
-    uint256 currentLiquidationThreshold;
     uint256 collateralNeededInBaseCurrency;
     uint256 userCollateralInBaseCurrency;
     uint256 userDebtInBaseCurrency;
@@ -212,7 +211,7 @@ library ValidationLogic {
       vars.userCollateralInBaseCurrency,
       vars.userDebtInBaseCurrency,
       vars.currentLtv,
-      vars.currentLiquidationThreshold,
+      ,
       vars.healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
@@ -228,8 +227,8 @@ library ValidationLogic {
       })
     );
 
-    require(vars.userCollateralInBaseCurrency > 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
-    require(vars.currentLtv > 0, Errors.LTV_VALIDATION_FAILED);
+    require(vars.userCollateralInBaseCurrency != 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
+    require(vars.currentLtv != 0, Errors.LTV_VALIDATION_FAILED);
 
     require(
       vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
@@ -301,7 +300,7 @@ library ValidationLogic {
     uint256 stableDebt,
     uint256 variableDebt
   ) internal view {
-    require(amountSent > 0, Errors.INVALID_AMOUNT);
+    require(amountSent != 0, Errors.INVALID_AMOUNT);
     require(
       amountSent != type(uint256).max || msg.sender == onBehalfOf,
       Errors.NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
@@ -326,8 +325,8 @@ library ValidationLogic {
     );
 
     require(
-      (stableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
+      (stableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
+        (variableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.NO_DEBT_OF_SELECTED_TYPE
     );
   }
@@ -357,9 +356,9 @@ library ValidationLogic {
     require(!isFrozen, Errors.RESERVE_FROZEN);
 
     if (currentRateMode == DataTypes.InterestRateMode.STABLE) {
-      require(stableDebt > 0, Errors.NO_OUTSTANDING_STABLE_DEBT);
+      require(stableDebt != 0, Errors.NO_OUTSTANDING_STABLE_DEBT);
     } else if (currentRateMode == DataTypes.InterestRateMode.VARIABLE) {
-      require(variableDebt > 0, Errors.NO_OUTSTANDING_VARIABLE_DEBT);
+      require(variableDebt != 0, Errors.NO_OUTSTANDING_VARIABLE_DEBT);
       /**
        * user wants to swap to stable, before swapping we need to ensure that
        * 1. stable borrow rate is enabled on the reserve
@@ -387,17 +386,11 @@ library ValidationLogic {
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
-   * @param stableDebtToken The stable debt token instance
-   * @param variableDebtToken The variable debt token instance
-   * @param aTokenAddress The address of the aToken contract
    */
   function validateRebalanceStableBorrowRate(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
-    address reserveAddress,
-    IERC20 stableDebtToken,
-    IERC20 variableDebtToken,
-    address aTokenAddress
+    address reserveAddress
   ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.RESERVE_INACTIVE);
@@ -437,7 +430,7 @@ library ValidationLogic {
     DataTypes.ReserveCache memory reserveCache,
     uint256 userBalance
   ) internal pure {
-    require(userBalance > 0, Errors.UNDERLYING_BALANCE_ZERO);
+    require(userBalance != 0, Errors.UNDERLYING_BALANCE_ZERO);
 
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.RESERVE_INACTIVE);
@@ -520,12 +513,12 @@ library ValidationLogic {
     );
 
     vars.isCollateralEnabled =
-      collateralReserve.configuration.getLiquidationThreshold() > 0 &&
+      collateralReserve.configuration.getLiquidationThreshold() != 0 &&
       userConfig.isUsingAsCollateral(collateralReserve.id);
 
     //if collateral isn't enabled as collateral by user, it cannot be liquidated
     require(vars.isCollateralEnabled, Errors.COLLATERAL_CANNOT_BE_LIQUIDATED);
-    require(params.totalDebt > 0, Errors.SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+    require(params.totalDebt != 0, Errors.SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   }
 
   /**
@@ -661,7 +654,7 @@ library ValidationLogic {
   ) internal view {
     // category is invalid if the liq threshold is not set
     require(
-      categoryId == 0 || eModeCategories[categoryId].liquidationThreshold > 0,
+      categoryId == 0 || eModeCategories[categoryId].liquidationThreshold != 0,
       Errors.INCONSISTENT_EMODE_CATEGORY
     );
 
@@ -672,7 +665,7 @@ library ValidationLogic {
 
     // if user is trying to set another category than default we require that
     // either the user is not borrowing, or it's borrowing assets of categoryId
-    if (categoryId > 0) {
+    if (categoryId != 0) {
       unchecked {
         for (uint256 i = 0; i < reservesCount; i++) {
           if (userConfig.isBorrowing(i)) {

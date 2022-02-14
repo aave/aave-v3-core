@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -42,9 +42,8 @@ library BridgeLogic {
    * @dev Emits the `ReserveUsedAsCollateralEnabled` if asset is set as collateral
    * @param reserves The state of all the reserves
    * @param reservesList The list of the addresses of all the active reserves
-   * @param reserve The reserve to mint to
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
-   * @param asset The address of the asset
+   * @param asset The address of the underlying asset to mint aTokens of
    * @param amount The amount to mint
    * @param onBehalfOf The address that will receive the aTokens
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
@@ -53,13 +52,13 @@ library BridgeLogic {
   function executeMintUnbacked(
     mapping(address => DataTypes.ReserveData) storage reserves,
     mapping(uint256 => address) storage reservesList,
-    DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
   ) external {
+    DataTypes.ReserveData storage reserve = reserves[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);

@@ -13,6 +13,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     INCONSISTENT_EMODE_CATEGORY,
     HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD,
     COLLATERAL_CANNOT_COVER_NEW_BORROW,
+    INVALID_EMODE_CATEGORY_PARAMS,
   } = ProtocolErrors;
 
   let snapSetup: string;
@@ -548,6 +549,75 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     expect(user4Data.healthFactor).to.be.gt(parseEther('1'));
   });
 
+  it('Admin sets LTV of stablecoins eMode category to zero (revert expected)', async () => {
+    const {
+      configurator,
+      pool,
+      users: [, user1],
+    } = testEnv;
+
+    const { id } = CATEGORIES.STABLECOINS;
+
+    const eModeData = await pool.getEModeCategoryData(id);
+    const newLtv = BigNumber.from(0);
+
+    await expect(
+      configurator.setEModeCategory(
+        id,
+        newLtv,
+        eModeData.liquidationThreshold,
+        eModeData.liquidationBonus,
+        eModeData.priceSource,
+        eModeData.label
+      )
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
+  });
+
+  it('Admin sets Liquidation Threshold of stablecoins eMode category to zero (revert expected)', async () => {
+    const { configurator, pool } = testEnv;
+
+    const { id } = CATEGORIES.STABLECOINS;
+
+    const eModeData = await pool.getEModeCategoryData(id);
+    const newLiquidationThreshold = BigNumber.from(0);
+
+    await expect(
+      configurator.setEModeCategory(
+        id,
+        eModeData.ltv,
+        newLiquidationThreshold,
+        eModeData.liquidationBonus,
+        eModeData.priceSource,
+        eModeData.label
+      )
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
+  });
+
+  it('Admin lowers LTV of stablecoins eMode category below an asset within the eModes individual LTV (revert expected)', async () => {
+    const { configurator, pool, dai, usdc, helpersContract } = testEnv;
+
+    const { id } = CATEGORIES.STABLECOINS;
+
+    const eModeData = await pool.getEModeCategoryData(id);
+
+    // find the min LTV of assets in eMode and submit a new LTV lower
+    const daiLtv = (await helpersContract.getReserveConfigurationData(dai.address)).ltv;
+    const usdcLtv = (await helpersContract.getReserveConfigurationData(usdc.address)).ltv;
+    const maxExistingLtv = daiLtv.sub(usdcLtv).gte(0) ? daiLtv : usdcLtv;
+    const newLtv = maxExistingLtv.sub(1);
+
+    await expect(
+      configurator.setEModeCategory(
+        id,
+        newLtv,
+        eModeData.liquidationThreshold,
+        eModeData.liquidationBonus,
+        eModeData.priceSource,
+        eModeData.label
+      )
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
+  });
+
   it('Admin lowers LTV of stablecoins eMode category, decreasing user borrowing power', async () => {
     const {
       configurator,
@@ -560,7 +630,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     const userDataBefore = await pool.getUserAccountData(user1.address);
 
     const eModeData = await pool.getEModeCategoryData(id);
-    const newLtv = BigNumber.from(eModeData.ltv.toString()).div(2);
+    const newLtv = BigNumber.from('9500');
 
     expect(
       await configurator.setEModeCategory(
@@ -605,6 +675,28 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     );
   });
 
+  it('Admin lowers LT of stablecoins eMode category below an asset within the eModes individual LT (revert expected)', async () => {
+    const { configurator, pool } = testEnv;
+
+    const { id } = CATEGORIES.STABLECOINS;
+
+    const eModeData = await pool.getEModeCategoryData(id);
+
+    const newLtv = BigNumber.from(8300);
+    const newLt = BigNumber.from(8500);
+
+    await expect(
+      configurator.setEModeCategory(
+        id,
+        newLtv,
+        newLt,
+        eModeData.liquidationBonus,
+        eModeData.priceSource,
+        eModeData.label
+      )
+    ).to.be.revertedWith(INVALID_EMODE_CATEGORY_PARAMS);
+  });
+
   it('Admin lowers LT of stablecoins eMode category, decreasing user health factor', async () => {
     const {
       configurator,
@@ -617,7 +709,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
     const userDataBefore = await pool.getUserAccountData(user1.address);
 
     const eModeData = await pool.getEModeCategoryData(id);
-    const newLt = BigNumber.from('8000');
+    const newLt = eModeData.ltv;
+
     expect(
       await configurator.setEModeCategory(
         id,

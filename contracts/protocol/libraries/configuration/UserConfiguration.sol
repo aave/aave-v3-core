@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {Errors} from '../helpers/Errors.sol';
@@ -152,7 +152,7 @@ library UserConfiguration {
   /**
    * @notice Checks if a user has not been using any reserve for borrowing or supply
    * @param self The configuration object
-   * @return True if the user has been borrowing any reserve, false otherwise
+   * @return True if the user has not been borrowing or supplying any reserve, false otherwise
    **/
   function isEmpty(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
     return self.data == 0;
@@ -185,7 +185,7 @@ library UserConfiguration {
 
       address assetAddress = reservesList[assetId];
       uint256 ceiling = reservesData[assetAddress].configuration.getDebtCeiling();
-      if (ceiling > 0) {
+      if (ceiling != 0) {
         return (true, assetAddress, ceiling);
       }
     }
@@ -207,7 +207,7 @@ library UserConfiguration {
       uint256 firstCollateralPosition = collateralData & ~(collateralData - 1);
       uint256 id;
 
-      while ((firstCollateralPosition >>= 2) > 0) {
+      while ((firstCollateralPosition >>= 2) != 0) {
         id += 1;
       }
       return id;

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
@@ -66,7 +66,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     _;
   }
 
-  uint256 internal constant CONFIGURATOR_REVISION = 0x1;
+  uint256 public constant CONFIGURATOR_REVISION = 0x1;
 
   /// @inheritdoc VersionedInitializable
   function getRevision() internal pure virtual override returns (uint256) {
@@ -126,6 +126,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   /// @inheritdoc IPoolConfigurator
   function setReserveBorrowing(address asset, bool enabled) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    if (!enabled) {
+      require(!currentConfig.getStableRateBorrowingEnabled(), Errors.STABLE_BORROWING_ENABLED);
+    }
     currentConfig.setBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig);
     emit ReserveBorrowing(asset, enabled);
@@ -180,6 +183,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     onlyRiskOrPoolAdmins
   {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+    if (enabled) {
+      require(currentConfig.getBorrowingEnabled(), Errors.BORROWING_NOT_ENABLED);
+    }
     currentConfig.setStableRateBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig);
     emit ReserveStableRateBorrowing(asset, enabled);
@@ -307,6 +313,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     address oracle,
     string calldata label
   ) external override onlyRiskOrPoolAdmins {
+    require(ltv != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
+    require(liquidationThreshold != 0, Errors.INVALID_EMODE_CATEGORY_PARAMS);
+
     // validation of the parameters: the LTV can
     // only be lower or equal than the liquidation threshold
     // (otherwise a loan against the asset would cause instantaneous liquidation)
@@ -323,6 +332,18 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
         PercentageMath.PERCENTAGE_FACTOR,
       Errors.INVALID_EMODE_CATEGORY_PARAMS
     );
+
+    address[] memory reserves = _pool.getReservesList();
+    for (uint256 i = 0; i < reserves.length; i++) {
+      DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(reserves[i]);
+      if (categoryId == currentConfig.getEModeCategory()) {
+        require(ltv > currentConfig.getLtv(), Errors.INVALID_EMODE_CATEGORY_PARAMS);
+        require(
+          liquidationThreshold > currentConfig.getLiquidationThreshold(),
+          Errors.INVALID_EMODE_CATEGORY_PARAMS
+        );
+      }
+    }
 
     _pool.configureEModeCategory(
       categoryId,
@@ -345,7 +366,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
-    if (newCategoryId > 0) {
+    if (newCategoryId != 0) {
       DataTypes.EModeCategory memory categoryData = _pool.getEModeCategoryData(newCategoryId);
       require(
         categoryData.liquidationThreshold > currentConfig.getLiquidationThreshold(),
@@ -406,7 +427,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateFlashloanPremiumTotal(uint256 newFlashloanPremiumTotal)
+  function updateFlashloanPremiumTotal(uint128 newFlashloanPremiumTotal)
     external
     override
     onlyPoolAdmin
@@ -415,13 +436,13 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
     );
-    uint256 oldFlashloanPremiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
+    uint128 oldFlashloanPremiumTotal = _pool.FLASHLOAN_PREMIUM_TOTAL();
     _pool.updateFlashloanPremiums(newFlashloanPremiumTotal, _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL());
     emit FlashloanPremiumTotalUpdated(oldFlashloanPremiumTotal, newFlashloanPremiumTotal);
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateFlashloanPremiumToProtocol(uint256 newFlashloanPremiumToProtocol)
+  function updateFlashloanPremiumToProtocol(uint128 newFlashloanPremiumToProtocol)
     external
     override
     onlyPoolAdmin
@@ -430,7 +451,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
       newFlashloanPremiumToProtocol <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
     );
-    uint256 oldFlashloanPremiumToProtocol = _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
+    uint128 oldFlashloanPremiumToProtocol = _pool.FLASHLOAN_PREMIUM_TO_PROTOCOL();
     _pool.updateFlashloanPremiums(_pool.FLASHLOAN_PREMIUM_TOTAL(), newFlashloanPremiumToProtocol);
     emit FlashloanPremiumToProtocolUpdated(
       oldFlashloanPremiumToProtocol,

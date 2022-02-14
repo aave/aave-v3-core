@@ -9,7 +9,7 @@ import {
   getMockPool,
   getPoolConfiguratorProxy,
 } from '@aave/deploy-v3/dist/helpers/contract-getters';
-import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { deployMockPool } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import {
   ACLManager__factory,
