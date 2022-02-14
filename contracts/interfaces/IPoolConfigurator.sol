@@ -272,6 +272,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Configures borrowing on a reserve.
+   * @dev Can only be disabled (set to false) if stable borrowing is disabled
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if borrowing needs to be enabled, false otherwise
    **/
@@ -295,6 +296,7 @@ interface IPoolConfigurator {
 
   /**
    * @notice Enable or disable stable rate borrowing on a reserve.
+   * @dev Can only be enabled (set to true) if borrowing is enabled
    * @param asset The address of the underlying asset of the reserve
    * @param enabled True if stable rate borrowing needs to be enabled, false otherwise
    **/
