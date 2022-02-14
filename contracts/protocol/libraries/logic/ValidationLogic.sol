@@ -396,7 +396,8 @@ library ValidationLogic {
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
-    uint256 totalDebt = stableDebtToken.totalSupply() + variableDebtToken.totalSupply();
+    uint256 totalDebt = IERC20(reserveCache.stableDebtTokenAddress).totalSupply() +
+      IERC20(reserveCache.variableDebtTokenAddress).totalSupply();
 
     (uint256 liquidityRateVariableDebtOnly, , ) = IReserveInterestRateStrategy(
       reserve.interestRateStrategyAddress
@@ -410,7 +411,7 @@ library ValidationLogic {
           averageStableBorrowRate: 0,
           reserveFactor: reserveCache.reserveFactor,
           reserve: reserveAddress,
-          aToken: aTokenAddress
+          aToken: reserveCache.aTokenAddress
         })
       );
 
