@@ -123,11 +123,13 @@ library ValidationLogic {
     uint256 amountInBaseCurrency;
     uint256 assetUnit;
     address eModePriceSource;
+    address siloedBorrowingAddress;
     bool isActive;
     bool isFrozen;
     bool isPaused;
     bool borrowingEnabled;
     bool stableRateBorrowingEnabled;
+    bool siloedBorrowingEnabled;
   }
 
   /**
@@ -292,6 +294,14 @@ library ValidationLogic {
       uint256 maxLoanSizeStable = vars.availableLiquidity.percentMul(params.maxStableLoanPercent);
 
       require(params.amount <= maxLoanSizeStable, Errors.AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
+    }
+
+    (vars.siloedBorrowingEnabled, vars.siloedBorrowingAddress) = params
+      .userConfig
+      .getSiloedBorrowingState(reservesData, reserves);
+
+    if (vars.siloedBorrowingEnabled) {
+      require(vars.siloedBorrowingAddress == params.asset, Errors.SILOED_BORROWING_VIOLATION);
     }
   }
 

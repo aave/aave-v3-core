@@ -141,6 +141,18 @@ library UserConfiguration {
   }
 
   /**
+   * @notice Checks if a user has been borrowing only one asset
+   * @dev this uses a simple trick - if a number is a power of two (only one bit set) then n & (n - 1) == 0
+   * @dev since odd bits are used to track borrowed assets, the bitmap is shifted left by 1 bit
+   * @param self The configuration object
+   * @return True if the user has been supplying as collateral one reserve, false otherwise
+   **/
+  function isBorrowingOne(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
+    uint256 borrowingData = self.data & (BORROWING_MASK << 1);
+    return borrowingData != 0 && (borrowingData & (borrowingData - 1) == 0);
+  }
+
+  /**
    * @notice Checks if a user has been borrowing from any reserve
    * @param self The configuration object
    * @return True if the user has been borrowing any reserve, false otherwise
@@ -181,7 +193,7 @@ library UserConfiguration {
     )
   {
     if (isUsingAsCollateralOne(self)) {
-      uint256 assetId = _getFirstAssetAsCollateralId(self);
+      uint256 assetId = _getFirstAssetIdByMask(self, COLLATERAL_MASK);
 
       address assetAddress = reservesList[assetId];
       uint256 ceiling = reservesData[assetAddress].configuration.getDebtCeiling();
@@ -192,22 +204,38 @@ library UserConfiguration {
     return (false, address(0), 0);
   }
 
+  function getSiloedBorrowingState(
+    DataTypes.UserConfigurationMap memory self,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reservesList
+  ) internal view returns (bool, address) {
+    if (isBorrowingOne(self)) {
+      uint256 assetId = _getFirstAssetIdByMask(self, BORROWING_MASK);
+      address assetAddress = reservesList[assetId];
+      if (reservesData[assetAddress].configuration.getSiloedBorrowing()) {
+        return (true, assetAddress);
+      }
+    }
+
+    return (false, address(0));
+  }
+
   /**
    * @notice Returns the address of the first asset used as collateral by the user
    * @param self The configuration object
    * @return The index of the first collateral asset inside the list of reserves
    */
-  function _getFirstAssetAsCollateralId(DataTypes.UserConfigurationMap memory self)
+  function _getFirstAssetIdByMask(DataTypes.UserConfigurationMap memory self, uint256 mask)
     internal
     pure
     returns (uint256)
   {
     unchecked {
-      uint256 collateralData = self.data & COLLATERAL_MASK;
-      uint256 firstCollateralPosition = collateralData & ~(collateralData - 1);
+      uint256 bitmapData = self.data & mask;
+      uint256 firstAssetPosition = bitmapData & ~(bitmapData - 1);
       uint256 id;
 
-      while ((firstCollateralPosition >>= 2) != 0) {
+      while ((firstAssetPosition >>= 2) != 0) {
         id += 1;
       }
       return id;

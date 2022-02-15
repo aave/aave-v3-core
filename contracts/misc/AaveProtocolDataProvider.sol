@@ -157,6 +157,15 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /**
+   * @notice Returns the siloed borrowing flag
+   * @param asset The address of the underlying asset of the reserve
+   * @return True if the asset is siloed for borrowing
+   **/
+  function getSiloedBorrowing(address asset) external view returns (bool) {
+    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getSiloedBorrowing();
+  }
+
+  /**
    * @notice Returns the protocol fee on the liquidation bonus
    * @param asset The address of the underlying asset of the reserve
    * @return The protocol fee on liquidation

@@ -265,6 +265,19 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setSiloedBorrowing(address asset, bool siloed) external override onlyRiskOrPoolAdmins {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    bool oldState = currentConfig.getSiloedBorrowing();
+
+    currentConfig.setSiloedBorrowing(siloed);
+
+    _pool.setConfiguration(asset, currentConfig);
+
+    emit SiloedBorrowingChanged(asset, oldState, siloed);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setBorrowCap(address asset, uint256 newBorrowCap)
     external
     override

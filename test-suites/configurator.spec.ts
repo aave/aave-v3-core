@@ -892,6 +892,34 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     );
   });
 
+  it('Sets siloed borrowing through the pool admin', async () => {
+    const { configurator, helpersContract, weth, poolAdmin } = testEnv;
+
+    const oldSiloedBorrowing = await helpersContract.getSiloedBorrowing(weth.address);
+
+    expect(await configurator.connect(poolAdmin.signer).setSiloedBorrowing(weth.address, true))
+      .to.emit(configurator, 'SiloedBorrowingChanged')
+      .withArgs(weth.address, oldSiloedBorrowing, true);
+
+    const newSiloedBorrowing = await helpersContract.getSiloedBorrowing(weth.address);
+
+    expect(newSiloedBorrowing).to.be.eq(true, 'Invalid siloed borrowing state');
+  });
+
+  it('Sets siloed borrowing through the pool admin', async () => {
+    const { configurator, helpersContract, weth, poolAdmin } = testEnv;
+
+    const oldSiloedBorrowing = await helpersContract.getSiloedBorrowing(weth.address);
+
+    expect(await configurator.connect(poolAdmin.signer).setSiloedBorrowing(weth.address, false))
+      .to.emit(configurator, 'SiloedBorrowingChanged')
+      .withArgs(weth.address, oldSiloedBorrowing, false);
+
+    const newSiloedBorrowing = await helpersContract.getSiloedBorrowing(weth.address);
+
+    expect(newSiloedBorrowing).to.be.eq(false, 'Invalid siloed borrowing state');
+  });
+
   it('Sets a debt ceiling through the pool admin', async () => {
     const { configurator, helpersContract, weth, poolAdmin } = testEnv;
 
