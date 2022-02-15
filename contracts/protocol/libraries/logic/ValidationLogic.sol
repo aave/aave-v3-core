@@ -296,14 +296,14 @@ library ValidationLogic {
       require(params.amount <= maxLoanSizeStable, Errors.AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
     }
 
-    (vars.siloedBorrowingEnabled, vars.siloedBorrowingAddress) = params
-      .userConfig
-      .getSiloedBorrowingState(reservesData, reserves);
+    if (params.userConfig.isBorrowingAny()) {
+      (vars.siloedBorrowingEnabled, vars.siloedBorrowingAddress) = params
+        .userConfig
+        .getSiloedBorrowingState(reservesData, reserves);
 
-    if (vars.siloedBorrowingEnabled) {
-      require(vars.siloedBorrowingAddress == params.asset, Errors.SILOED_BORROWING_VIOLATION);
-    } else {
-      if (params.userConfig.isBorrowingAny()) {
+      if (vars.siloedBorrowingEnabled) {
+        require(vars.siloedBorrowingAddress == params.asset, Errors.SILOED_BORROWING_VIOLATION);
+      } else {
         require(
           !params.reserveCache.reserveConfiguration.getSiloedBorrowing(),
           Errors.SILOED_BORROWING_VIOLATION
