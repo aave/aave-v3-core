@@ -319,7 +319,7 @@ library ValidationLogic {
    * @param interestRateMode The interest rate mode of the debt being repaid
    * @param onBehalfOf The address of the user msg.sender is repaying for
    * @param stableDebt The borrow balance of the user
-   * @param variableDebt The borrow0.79776 balance of the user
+   * @param variableDebt The borrow balance of the user
    */
   function validateRepay(
     DataTypes.ReserveCache memory reserveCache,
