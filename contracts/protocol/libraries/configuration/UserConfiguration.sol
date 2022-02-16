@@ -204,6 +204,14 @@ library UserConfiguration {
     return (false, address(0), 0);
   }
 
+  /**
+   * @notice Returns the siloed borrowing state for the user
+   * @param self The configuration object
+   * @param reservesData The data of all the reserves
+   * @param reservesList The reserve list
+   * @return True if the user has borrowed a siloed asset, false otherwise
+   * @return The address of the only borrowed asset
+   */
   function getSiloedBorrowingState(
     DataTypes.UserConfigurationMap memory self,
     mapping(address => DataTypes.ReserveData) storage reservesData,
@@ -221,9 +229,9 @@ library UserConfiguration {
   }
 
   /**
-   * @notice Returns the address of the first asset used as collateral by the user
+   * @notice Returns the address of the first asset flagged in the bitmap given the corresponding bitmask
    * @param self The configuration object
-   * @return The index of the first collateral asset inside the list of reserves
+   * @return The index of the first asset flagged in the bitmap once the corresponding mask is applied
    */
   function _getFirstAssetIdByMask(DataTypes.UserConfigurationMap memory self, uint256 mask)
     internal
