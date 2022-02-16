@@ -159,4 +159,21 @@ makeSuite('Siloed borrowing', (testEnv: TestEnv) => {
         .borrow(usdc.address, usdcBorrowAmount, RateMode.Variable, '0', users[1].address)
     ).to.be.revertedWith(SILOED_BORROWING_VIOLATION);
   });
+
+  it('User 1 borrows more DAI', async () => {
+    const { users, pool, dai, variableDebtDai } = testEnv;
+
+    const daiBorrowAmount = utils.parseEther('1');
+
+    const debtBefore = await variableDebtDai.balanceOf(users[1].address);
+
+    await pool
+      .connect(users[1].signer)
+      .borrow(dai.address, daiBorrowAmount, RateMode.Variable, '0', users[1].address);
+
+    const debtAfter = await variableDebtDai.balanceOf(users[1].address);
+
+    //large interval to account for interest generated
+    expect(debtAfter).to.be.closeTo(debtBefore.add(daiBorrowAmount), 10000000);
+  });
 });
