@@ -36,8 +36,8 @@ library ValidationLogic {
   using Address for address;
 
   // Factor to apply to "only-variable-debt" liquidity rate to get threshold for rebalancing, expressed in bps
-  // A factor of 9000 results in 90%
-  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 9000;
+  // A value of 0.9e4 results in 90%
+  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 0.9e4;
 
   // Minimum health factor allowed under any circumstance
   // A value of 0.95e18 results in 0.95
