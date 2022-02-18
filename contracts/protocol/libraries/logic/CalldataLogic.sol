@@ -9,6 +9,14 @@ import {DataTypes} from '../types/DataTypes.sol';
  * @notice Library to decode calldata, used to optimize calldata size in L2Pool for transaction cost reduction
  */
 library CalldataLogic {
+  /**
+   * @notice Decodes compressed supply params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed supply params
+   * @return The address of the underlying reserve
+   * @return The amount to supply
+   * @return The referralCode
+   */
   function decodeSupplyParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
@@ -30,6 +38,16 @@ library CalldataLogic {
     return (reservesList[assetId], amount, referralCode);
   }
 
+  /**
+   * @notice Decodes compressed supply params to standard params along with permit params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed supply with permit params
+   * @return The address of the underlying reserve
+   * @return The amount to supply
+   * @return The referralCode
+   * @return The deadline of the permit
+   * @return The V value of the permit signature
+   */
   function decodeSupplyWithPermitParams(
     mapping(uint256 => address) storage reservesList,
     bytes32 args
@@ -40,16 +58,14 @@ library CalldataLogic {
       address,
       uint256,
       uint16,
-      uint32,
+      uint256,
       uint8
     )
   {
-    uint32 deadline;
+    uint256 deadline;
     uint8 permitV;
 
-    bytes32 supplyParams;
     assembly {
-      supplyParams := and(args, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
       deadline := and(shr(160, args), 0xFFFFFFFF)
       permitV := and(shr(192, args), 0xFF)
     }
@@ -58,6 +74,13 @@ library CalldataLogic {
     return (asset, amount, referralCode, deadline, permitV);
   }
 
+  /**
+   * @notice Decodes compressed withdraw params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed withdraw params
+   * @return The address of the underlying reserve
+   * @return The amount to withdraw
+   */
   function decodeWithdrawParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
@@ -75,6 +98,15 @@ library CalldataLogic {
     return (reservesList[assetId], amount);
   }
 
+  /**
+   * @notice Decodes compressed borrow params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed borrow params
+   * @return The address of the underlying reserve
+   * @return The amount to borrow
+   * @return The interestRateMode, 1 for stable or 2 for variable debt
+   * @return The referralCode
+   */
   function decodeBorrowParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
@@ -100,6 +132,14 @@ library CalldataLogic {
     return (reservesList[assetId], amount, interestRateMode, referralCode);
   }
 
+  /**
+   * @notice Decodes compressed repay params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed repay params
+   * @return The address of the underlying reserve
+   * @return The amount to repay
+   * @return The interestRateMode, 1 for stable or 2 for variable debt
+   */
   function decodeRepayParams(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
@@ -126,6 +166,16 @@ library CalldataLogic {
     return (reservesList[assetId], amount, interestRateMode);
   }
 
+  /**
+   * @notice Decodes compressed repay params to standard params along with permit params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed repay with permit params
+   * @return The address of the underlying reserve
+   * @return The amount to repay
+   * @return The interestRateMode, 1 for stable or 2 for variable debt
+   * @return The deadline of the permit
+   * @return The V value of the permit signature
+   */
   function decodeRepayWithPermitParams(
     mapping(uint256 => address) storage reservesList,
     bytes32 args
@@ -136,11 +186,11 @@ library CalldataLogic {
       address,
       uint256,
       uint256,
-      uint32,
+      uint256,
       uint8
     )
   {
-    uint32 deadline;
+    uint256 deadline;
     uint8 permitV;
 
     (address asset, uint256 amount, uint256 interestRateMode) = decodeRepayParams(
@@ -156,6 +206,13 @@ library CalldataLogic {
     return (asset, amount, interestRateMode, deadline, permitV);
   }
 
+  /**
+   * @notice Decodes compressed swap borrow rate mode params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed swap borrow rate mode params
+   * @return The address of the underlying reserve
+   * @return The interest rate mode, 1 for stable 2 for variable debt
+   */
   function decodeSwapBorrowRateMode(mapping(uint256 => address) storage reservesList, bytes32 args)
     internal
     view
@@ -172,6 +229,13 @@ library CalldataLogic {
     return (reservesList[assetId], interestRateMode);
   }
 
+  /**
+   * @notice Decodes compressed rebalance stable borrow rate params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed rabalance stable borrow rate params
+   * @return The address of the underlying reserve
+   * @return The address of the user to rebalance
+   */
   function decodeRebalanceStableBorrowRate(
     mapping(uint256 => address) storage reservesList,
     bytes32 args
@@ -185,6 +249,13 @@ library CalldataLogic {
     return (reservesList[assetId], user);
   }
 
+  /**
+   * @notice Decodes compressed set user use reserve as collateral params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args The packed set user use reserve as collateral params
+   * @return The address of the underlying reserve
+   * @return True if to set using as collateral, false otherwise
+   */
   function decodeSetUserUseReserveAsCollateral(
     mapping(uint256 => address) storage reservesList,
     bytes32 args
@@ -198,6 +269,17 @@ library CalldataLogic {
     return (reservesList[assetId], useAsCollateral);
   }
 
+  /**
+   * @notice Decodes compressed liquidation call params to standard params
+   * @param reservesList The addresses of all the active reserves
+   * @param args1 The first half of packed liquidation call params
+   * @param args2 The second half of the packed liquidation call params
+   * @return The address of the underlying collateral asset
+   * @return The address of the underlying debt asset
+   * @return The address of the user to liquidate
+   * @return The amount of debt to cover
+   * @return True if receiving aTokens, false otherwise
+   */
   function decodeLiquidationCall(
     mapping(uint256 => address) storage reservesList,
     bytes32 args1,

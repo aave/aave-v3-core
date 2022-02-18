@@ -25,7 +25,7 @@ contract L2Pool is IL2Pool, Pool {
     bytes32 r,
     bytes32 s
   ) external override {
-    (address asset, uint256 amount, uint16 referralCode, uint32 deadline, uint8 v) = CalldataLogic
+    (address asset, uint256 amount, uint16 referralCode, uint256 deadline, uint8 v) = CalldataLogic
       .decodeSupplyWithPermitParams(_reservesList, args);
 
     supplyWithPermit(asset, amount, msg.sender, referralCode, deadline, v, r, s);
@@ -66,7 +66,7 @@ contract L2Pool is IL2Pool, Pool {
       address asset,
       uint256 amount,
       uint256 interestRateMode,
-      uint32 deadline,
+      uint256 deadline,
       uint8 v
     ) = CalldataLogic.decodeRepayWithPermitParams(_reservesList, args);
 
