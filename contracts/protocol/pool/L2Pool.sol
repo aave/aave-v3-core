@@ -3,11 +3,21 @@ pragma solidity ^0.8.10;
 import {Pool} from './Pool.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IL2Pool} from '../../interfaces/IL2Pool.sol';
-import {SupplyLogic} from '../libraries/logic/SupplyLogic.sol';
 import {CalldataLogic} from '../libraries/logic/CalldataLogic.sol';
 
+/**
+ * @title L2Pool
+ * @author Aave
+ * @notice Calldata optimized extension of the Pool contract allowing users to pass compact calldata representation to reduce transaction costs on rollups.
+ */
 contract L2Pool is IL2Pool, Pool {
-  constructor(IPoolAddressesProvider provider) Pool(provider) {}
+  /**
+   * @dev Constructor.
+   * @param provider The address of the PoolAddressesProvider contract
+   */
+  constructor(IPoolAddressesProvider provider) Pool(provider) {
+    // Intentionally left blank
+  }
 
   /// @inheritdoc IL2Pool
   function supply(bytes32 args) external override {
@@ -71,6 +81,16 @@ contract L2Pool is IL2Pool, Pool {
     ) = CalldataLogic.decodeRepayWithPermitParams(_reservesList, args);
 
     return repayWithPermit(asset, amount, interestRateMode, msg.sender, deadline, v, r, s);
+  }
+
+  /// @inheritdoc IL2Pool
+  function repayWithATokens(bytes32 args) external override returns (uint256) {
+    (address asset, uint256 amount, uint256 interestRateMode) = CalldataLogic.decodeRepayParams(
+      _reservesList,
+      args
+    );
+
+    return repayWithATokens(asset, amount, interestRateMode);
   }
 
   /// @inheritdoc IL2Pool

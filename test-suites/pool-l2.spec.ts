@@ -347,6 +347,46 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
     expect(userBalance).to.be.eq(balanceBefore.sub(repayAmount), 'invalid amount repaid');
   });
 
+  it('Repay some with aTokens', async () => {
+    const {
+      deployer,
+      usdc,
+      aUsdc,
+      users: [, user1],
+    } = testEnv;
+
+    await usdc.connect(deployer.signer).approve(l2Pool.address, MAX_UINT_AMOUNT);
+
+    const data = await l2Pool.getReserveData(usdc.address);
+    const vDebtToken = VariableDebtToken__factory.connect(
+      data.variableDebtTokenAddress,
+      deployer.signer
+    );
+
+    const repayAmount = parseUnits('10', 6);
+    expect(await aUsdc.connect(user1.signer).transfer(deployer.address, repayAmount));
+
+    const balanceBefore = await usdc.balanceOf(deployer.address);
+    const debtBefore = await vDebtToken.balanceOf(deployer.address);
+
+    const encoded = await encoder.encodeRepayWithATokensParams(
+      usdc.address,
+      repayAmount,
+      RateMode.Variable
+    );
+
+    expect(await l2Pool.connect(deployer.signer)['repayWithATokens(bytes32)'](encoded))
+      .to.emit(l2Pool, 'Repay')
+      .withArgs(usdc.address, deployer.address, deployer.address, repayAmount, true);
+
+    const userDebt = await vDebtToken.balanceOf(deployer.address);
+    const userBalance = await usdc.balanceOf(deployer.address);
+    const userABalance = await aUsdc.balanceOf(deployer.address);
+    expect(userDebt).to.be.eq(debtBefore.sub(repayAmount), 'invalid amount repaid');
+    expect(userBalance).to.be.eq(balanceBefore, 'user balance changed');
+    expect(userABalance).to.be.eq(0, 'invalid amount repaid');
+  });
+
   it('Repay remainder with permit', async () => {
     const { deployer, usdc } = testEnv;
 

@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
+/**
+ * @title IL2Pool
+ * @author Aave
+ * @notice Defines the basic extension interface for an L2 Aave Pool.
+ **/
 interface IL2Pool {
   /**
    * @notice Calldata efficient wrapper of the supply function on behalf of the caller
@@ -81,6 +86,18 @@ interface IL2Pool {
     bytes32 r,
     bytes32 s
   ) external returns (uint256);
+
+  /**
+   * @notice Calldata efficient wrapper of the repayWithATokens function
+   * @param args Arguments for the repayWithATokens function packed in one bytes32
+   *    104 bits             8 bits               128 bits       16 bits
+   * | 0-padding | shortenedInterestRateMode | shortenedAmount | assetId |
+   * @dev the shortenedAmount is cast to 256 bits at decode time, if type(uint128).max the value will be expanded to
+   * type(uint256).max
+   * @dev assetId is the index of the asset in the reservesList.
+   * @return The final amount repaid
+   */
+  function repayWithATokens(bytes32 args) external returns (uint256);
 
   /**
    * @notice Calldata efficient wrapper of the swapBorrowRateMode function
