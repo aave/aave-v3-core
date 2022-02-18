@@ -161,8 +161,8 @@ library UserConfiguration {
   /**
    * @notice Returns the Isolation Mode state of the user
    * @param self The configuration object
-   * @param reservesData The data of all the reserves
-   * @param reservesList The reserve list
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @return True if the user is in isolation mode, false otherwise
    * @return The address of the only asset used as collateral
    * @return The debt ceiling of the reserve

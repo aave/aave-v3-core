@@ -58,20 +58,20 @@ library BorrowLogic {
    * Aave protocol proportionally to their collateralization power. For isolated positions, it also increases the
    * isolated debt.
    * @dev  Emits the `Borrow()` event
-   * @param reserves The state of all the reserves
+   * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the borrow function
    */
   function executeBorrow(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteBorrowParams memory params
   ) public {
-    DataTypes.ReserveData storage reserve = reserves[params.asset];
+    DataTypes.ReserveData storage reserve = reservesData[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
@@ -80,10 +80,10 @@ library BorrowLogic {
       bool isolationModeActive,
       address isolationModeCollateralAddress,
       uint256 isolationModeDebtCeiling
-    ) = userConfig.getIsolationModeState(reserves, reservesList);
+    ) = userConfig.getIsolationModeState(reservesData, reservesList);
 
     ValidationLogic.validateBorrow(
-      reserves,
+      reservesData,
       reservesList,
       eModeCategories,
       DataTypes.ValidateBorrowParams({
@@ -131,7 +131,7 @@ library BorrowLogic {
     }
 
     if (isolationModeActive) {
-      uint256 nextIsolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+      uint256 nextIsolationModeTotalDebt = reservesData[isolationModeCollateralAddress]
         .isolationModeTotalDebt += (params.amount /
         10 **
           (reserveCache.reserveConfiguration.getDecimals() -
@@ -171,19 +171,19 @@ library BorrowLogic {
    * equivalent amount of debt for the user by burning the corresponding debt token. For isolated positions, it also
    * reduces the isolated debt.
    * @dev  Emits the `Repay()` event
-   * @param reserves The state of all the reserves
+   * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the repay function
    * @return The actual amount being repaid
    */
   function executeRepay(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ExecuteRepayParams memory params
   ) external returns (uint256) {
-    DataTypes.ReserveData storage reserve = reserves[params.asset];
+    DataTypes.ReserveData storage reserve = reservesData[params.asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
     reserve.updateState(reserveCache);
 
@@ -236,7 +236,7 @@ library BorrowLogic {
     }
 
     IsolationModeLogic.updateIsolatedDebtIfIsolated(
-      reserves,
+      reservesData,
       reservesList,
       userConfig,
       reserveCache,
@@ -265,7 +265,7 @@ library BorrowLogic {
    * rate borrows might need to be rebalanced to bring back equilibrium between the borrow and supply APYs.
    * @dev The rules that define if a position can be rebalanced are implemented in `ValidationLogic.validateRebalanceStableBorrowRate()`
    * @dev Emits the `RebalanceStableBorrowRate()` event
-   * @param reserve The data of the reserve of the asset being repaid
+   * @param reserve The state of the reserve of the asset being repaid
    * @param asset The asset of the position being rebalanced
    * @param user The user being rebalanced
    */
@@ -295,7 +295,7 @@ library BorrowLogic {
   /**
    * @notice Implements the swap borrow rate feature. Borrowers can swap from variable to stable positions at any time.
    * @dev Emits the `Swap()` event
-   * @param reserve The data of the reserve of the asset being repaid
+   * @param reserve The of the reserve of the asset being repaid
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param asset The asset of the position being swapped
    * @param interestRateMode The current interest rate mode of the position being swapped
