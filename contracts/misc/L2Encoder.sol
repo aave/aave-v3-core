@@ -160,7 +160,7 @@ contract L2Encoder {
    * @dev Without an onBehalfOf parameter as the compact calls to L2Pool will use msg.sender as onBehalfOf
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
-   * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
+   * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `interestRateMode`
    * @param interestRateMode The interest rate mode at of the debt the user wants to repay: 1 for Stable, 2 for Variable
    * @return compact representation of repay parameters
    */

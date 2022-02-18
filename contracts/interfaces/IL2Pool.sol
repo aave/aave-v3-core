@@ -130,7 +130,7 @@ interface IL2Pool {
    * @notice Calldata efficient wrapper of the liquidationCall function
    * @param args1 part of the arguments for the liquidationCall function packed in one bytes32
    *    64 bits      160 bits       16 bits         16 bits
-   * | 0-padding | user address | debtAssetID | collateralAssetId |
+   * | 0-padding | user address | debtAssetId | collateralAssetId |
    * @param args2 part of the arguments for the liquidationCall function packed in one bytes32
    *    127 bits       1 bit             128 bits
    * | 0-padding | receiveAToken | shortenedDebtToCover |
