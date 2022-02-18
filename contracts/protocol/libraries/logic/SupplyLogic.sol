@@ -182,9 +182,9 @@ library SupplyLogic {
   ) external {
     DataTypes.ReserveData storage reserve = reservesData[params.asset];
 
-    ValidationLogic.validateTransfer(reservesData[params.asset]);
+    ValidationLogic.validateTransfer(reserve);
 
-    uint256 reserveId = reservesData[params.asset].id;
+    uint256 reserveId = reserve.id;
 
     if (params.from != params.to && params.amount != 0) {
       DataTypes.UserConfigurationMap storage fromConfig = usersConfig[params.from];
@@ -219,7 +219,7 @@ library SupplyLogic {
             params.asset
           )
         ) {
-          toConfig.setUsingAsCollateral(reserve.id, true);
+          toConfig.setUsingAsCollateral(reserveId, true);
           emit ReserveUsedAsCollateralEnabled(params.asset, params.to);
         }
       }
