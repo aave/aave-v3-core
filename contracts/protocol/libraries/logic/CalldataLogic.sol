@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
-import {DataTypes} from '../types/DataTypes.sol';
-
 /**
  * @title CalldataLogic library
  * @author Aave
