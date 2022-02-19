@@ -299,7 +299,7 @@ library ValidationLogic {
     if (params.userConfig.isBorrowingAny()) {
       (vars.siloedBorrowingEnabled, vars.siloedBorrowingAddress) = params
         .userConfig
-        .getSiloedBorrowingState(reservesData, reserves);
+        .getSiloedBorrowingState(reservesData, reservesList);
 
       if (vars.siloedBorrowingEnabled) {
         require(vars.siloedBorrowingAddress == params.asset, Errors.SILOED_BORROWING_VIOLATION);
