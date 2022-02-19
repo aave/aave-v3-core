@@ -61,14 +61,14 @@ library FlashLoanLogic {
    * @dev At the end of the transaction the pool will pull amount borrowed + fee from the receiver,
    * if the receiver have not approved the pool the transaction will revert.
    * @dev Emits the `FlashLoan()` event
-   * @param reserves The state of all the reserves
-   * @param reservesList The list of addresses of all the active reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the flashloan function
    */
   function executeFlashLoan(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap storage userConfig,
@@ -78,7 +78,7 @@ library FlashLoanLogic {
     // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
-    ValidationLogic.validateFlashloan(params.assets, params.amounts, reserves);
+    ValidationLogic.validateFlashloan(params.assets, params.amounts, reservesData);
 
     FlashLoanLocalVars memory vars;
 
@@ -92,7 +92,7 @@ library FlashLoanLogic {
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.currentAmount = params.amounts[vars.i];
       vars.totalPremiums[vars.i] = vars.currentAmount.percentMul(vars.flashloanPremiumTotal);
-      IAToken(reserves[params.assets[vars.i]].aTokenAddress).transferUnderlyingTo(
+      IAToken(reservesData[params.assets[vars.i]].aTokenAddress).transferUnderlyingTo(
         params.receiverAddress,
         vars.currentAmount
       );
@@ -118,7 +118,7 @@ library FlashLoanLogic {
         DataTypes.InterestRateMode.NONE
       ) {
         _handleFlashLoanRepayment(
-          reserves[vars.currentAsset],
+          reservesData[vars.currentAsset],
           DataTypes.FlashLoanRepaymentParams({
             asset: vars.currentAsset,
             receiverAddress: params.receiverAddress,
@@ -132,7 +132,7 @@ library FlashLoanLogic {
         // If the user chose to not return the funds, the system checks if there is enough collateral and
         // eventually opens a debt position
         BorrowLogic.executeBorrow(
-          reserves,
+          reservesData,
           reservesList,
           eModeCategories,
           userConfig,

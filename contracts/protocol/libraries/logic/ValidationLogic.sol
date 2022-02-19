@@ -135,13 +135,13 @@ library ValidationLogic {
   /**
    * @notice Validates a borrow action.
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.ValidateBorrowParams memory params
   ) internal view {
@@ -230,7 +230,7 @@ library ValidationLogic {
 
     ) = GenericLogic.calculateUserAccountData(
       reservesData,
-      reserves,
+      reservesList,
       eModeCategories,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: params.userConfig,
@@ -554,7 +554,7 @@ library ValidationLogic {
   /**
    * @notice Validates the health factor of a user.
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param user The user to validate health factor of
@@ -564,7 +564,7 @@ library ValidationLogic {
    */
   function validateHealthFactor(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     address user,
@@ -575,7 +575,7 @@ library ValidationLogic {
     (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) = GenericLogic
       .calculateUserAccountData(
         reservesData,
-        reserves,
+        reservesList,
         eModeCategories,
         DataTypes.CalculateUserAccountDataParams({
           userConfig: userConfig,
@@ -597,7 +597,7 @@ library ValidationLogic {
   /**
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn.
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
@@ -608,7 +608,7 @@ library ValidationLogic {
    */
   function validateHFAndLtv(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     address asset,
@@ -621,7 +621,7 @@ library ValidationLogic {
 
     (, bool hasZeroLtvCollateral) = validateHealthFactor(
       reservesData,
-      reserves,
+      reservesList,
       eModeCategories,
       userConfig,
       from,
@@ -646,17 +646,17 @@ library ValidationLogic {
 
   /**
    * @notice Validates a drop reserve action.
-   * @param reserves a mapping storing the list of reserves
+   * @param reservesList The addresses of all the active reserves
    * @param reserve The reserve object
    * @param asset The address of the reserve's underlying asset
    **/
   function validateDropReserve(
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.ReserveData storage reserve,
     address asset
   ) internal view {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
-    require(reserve.id != 0 || reserves[0] == asset, Errors.ASSET_NOT_LISTED);
+    require(reserve.id != 0 || reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     require(IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0, Errors.STABLE_DEBT_NOT_ZERO);
     require(
       IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0,
@@ -667,8 +667,8 @@ library ValidationLogic {
 
   /**
    * @notice Validates the action of setting efficiency mode.
-   * @param reservesData the data mapping of the reserves
-   * @param reserves a mapping storing the list of reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories a mapping storing configurations for all efficiency mode categories
    * @param userConfig the user configuration
    * @param reservesCount The total number of valid reserves
@@ -676,7 +676,7 @@ library ValidationLogic {
    **/
   function validateSetUserEMode(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     uint256 reservesCount,
@@ -699,7 +699,7 @@ library ValidationLogic {
       unchecked {
         for (uint256 i = 0; i < reservesCount; i++) {
           if (userConfig.isBorrowing(i)) {
-            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reserves[i]]
+            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reservesList[i]]
               .configuration;
             require(
               configuration.getEModeCategory() == categoryId,
@@ -716,15 +716,15 @@ library ValidationLogic {
    * set as collateral, mint unbacked, and liquidate
    * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that
    * generate transfers of aTokens
-   * @param reservesData the data mapping of the reserves
-   * @param reserves a mapping storing the list of reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param userConfig the user configuration
    * @param asset The address of the asset being validated as collateral
    * @return True if the asset can be activated as collateral, false otherwise
    **/
   function validateUseAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset
   ) internal view returns (bool) {
@@ -732,7 +732,7 @@ library ValidationLogic {
       return true;
     }
 
-    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reserves);
+    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reservesList);
     DataTypes.ReserveConfigurationMap memory configuration = reservesData[asset].configuration;
 
     return (!isolationModeActive && configuration.getDebtCeiling() == 0);

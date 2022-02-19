@@ -21,24 +21,24 @@ library IsolationModeLogic {
 
   /**
    * @notice updated the isolated debt whenever a position collateralized by an isolated asset is repaid or liquidated
-   * @param reserves The state of all the reserves
+   * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig The user configuration mapping
    * @param reserveCache The cached data of the reserve
    * @param repayAmount The amount being repaid
    */
   function updateIsolatedDebtIfIsolated(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveCache memory reserveCache,
     uint256 repayAmount
   ) internal {
     (bool isolationModeActive, address isolationModeCollateralAddress, ) = userConfig
-      .getIsolationModeState(reserves, reservesList);
+      .getIsolationModeState(reservesData, reservesList);
 
     if (isolationModeActive) {
-      uint128 isolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+      uint128 isolationModeTotalDebt = reservesData[isolationModeCollateralAddress]
         .isolationModeTotalDebt;
 
       uint128 isolatedDebtRepaid = (repayAmount /
@@ -49,10 +49,10 @@ library IsolationModeLogic {
       // since the debt ceiling does not take into account the interest accrued, it might happen that amount
       // repaid > debt in isolation mode
       if (isolationModeTotalDebt <= isolatedDebtRepaid) {
-        reserves[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
+        reservesData[isolationModeCollateralAddress].isolationModeTotalDebt = 0;
         emit IsolationModeTotalDebtUpdated(isolationModeCollateralAddress, 0);
       } else {
-        uint256 nextIsolationModeTotalDebt = reserves[isolationModeCollateralAddress]
+        uint256 nextIsolationModeTotalDebt = reservesData[isolationModeCollateralAddress]
           .isolationModeTotalDebt = isolationModeTotalDebt - isolatedDebtRepaid;
         emit IsolationModeTotalDebtUpdated(
           isolationModeCollateralAddress,
