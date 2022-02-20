@@ -8,7 +8,8 @@ import {CalldataLogic} from '../libraries/logic/CalldataLogic.sol';
 /**
  * @title L2Pool
  * @author Aave
- * @notice Calldata optimized extension of the Pool contract allowing users to pass compact calldata representation to reduce transaction costs on rollups.
+ * @notice Calldata optimized extension of the Pool contract allowing users to pass compact calldata representation
+ * to reduce transaction costs on rollups.
  */
 contract L2Pool is IL2Pool, Pool {
   /**
