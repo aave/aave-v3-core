@@ -17,7 +17,7 @@ import {IACLManager} from '../../../interfaces/IACLManager.sol';
  * @author Aave, inspired by the Openzeppelin ERC20 implementation
  * @notice Basic ERC20 implementation
  **/
-abstract contract IncentivizedERC20 is IERC20Detailed, Context {
+abstract contract IncentivizedERC20 is Context, IERC20Detailed {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 

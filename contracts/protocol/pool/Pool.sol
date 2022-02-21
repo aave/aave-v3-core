@@ -36,7 +36,7 @@ import {PoolStorage} from './PoolStorage.sol';
  * @dev All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
  **/
-contract Pool is VersionedInitializable, IPool, PoolStorage {
+contract Pool is VersionedInitializable, PoolStorage, IPool {
   using ReserveLogic for DataTypes.ReserveData;
 
   uint256 public constant POOL_REVISION = 0x1;
