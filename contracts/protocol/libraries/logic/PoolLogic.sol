@@ -130,17 +130,17 @@ library PoolLogic {
   /**
    * @notice Drop a reserve
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param asset The address of the underlying asset of the reserve
    **/
   function executeDropReserve(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     address asset
   ) external {
     DataTypes.ReserveData storage reserve = reservesData[asset];
-    ValidationLogic.validateDropReserve(reserves, reserve, asset);
-    reserves[reservesData[asset].id] = address(0);
+    ValidationLogic.validateDropReserve(reservesList, reserve, asset);
+    reservesList[reservesData[asset].id] = address(0);
     delete reservesData[asset];
   }
 
