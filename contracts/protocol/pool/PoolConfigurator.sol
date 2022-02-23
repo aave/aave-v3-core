@@ -478,6 +478,12 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(totalATokens == 0, Errors.RESERVE_LIQUIDITY_NOT_ZERO);
   }
 
+    function _checkNoBorrowers(address asset) internal view {
+    uint256 totalDebt = IPoolDataProvider(_addressesProvider.getPoolDataProvider())
+      .getTotalDebt(asset);
+    require(totalDebt == 0, Errors.RESERVE_DEBT_NOT_ZERO);
+  }
+
   function _onlyPoolAdmin() internal view {
     IACLManager aclManager = IACLManager(_addressesProvider.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
