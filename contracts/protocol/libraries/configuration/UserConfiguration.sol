@@ -143,12 +143,11 @@ library UserConfiguration {
   /**
    * @notice Checks if a user has been borrowing only one asset
    * @dev this uses a simple trick - if a number is a power of two (only one bit set) then n & (n - 1) == 0
-   * @dev since odd bits are used to track borrowed assets, the bitmap is shifted left by 1 bit
    * @param self The configuration object
    * @return True if the user has been supplying as collateral one reserve, false otherwise
    **/
   function isBorrowingOne(DataTypes.UserConfigurationMap memory self) internal pure returns (bool) {
-    uint256 borrowingData = self.data & (BORROWING_MASK << 1);
+    uint256 borrowingData = self.data & BORROWING_MASK;
     return borrowingData != 0 && (borrowingData & (borrowingData - 1) == 0);
   }
 

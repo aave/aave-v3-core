@@ -25,16 +25,21 @@ makeSuite('Siloed borrowing', (testEnv: TestEnv) => {
     expect(siloed).to.be.equal(true, 'Invalid siloed state for DAI');
   });
 
-  it('User 0 supplies DAI, User 1 supplies ETH, borrows DAI', async () => {
-    const { users, pool, dai, weth, variableDebtDai } = testEnv;
+  it('User 0 supplies DAI, User 1 supplies ETH and USDC, borrows DAI', async () => {
+    const { users, pool, dai, weth, usdc, variableDebtDai } = testEnv;
 
     const wethSupplyAmount = utils.parseEther('1');
     const daiBorrowAmount = utils.parseEther('10');
     const daiSupplyAmount = utils.parseEther('1000');
+    const usdcSupplyAmount = utils.parseUnits('1000',6);
 
     await dai.connect(users[0].signer)['mint(address,uint256)'](users[0].address, daiSupplyAmount);
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[0].signer).supply(dai.address, daiSupplyAmount, users[0].address, '0');
+
+    await usdc.connect(users[1].signer)['mint(address,uint256)'](users[1].address, usdcSupplyAmount);
+    await usdc.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[1].signer).supply(usdc.address, usdcSupplyAmount, users[1].address, '0');
 
     await weth
       .connect(users[1].signer)
