@@ -19,3 +19,5 @@ coverage
 .coverage_contracts
 coverage.json
 deployments/
+
+out/
