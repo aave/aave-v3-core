@@ -159,7 +159,8 @@ export enum ProtocolErrors {
   ADDRESSES_PROVIDER_ALREADY_ADDED = '86', // 'Reserve has already been added to reserve list'
   POOL_ADDRESSES_DO_NOT_MATCH = '87', // 'The token implementation pool address and the pool address provided by the initializing pool do not match'
   STABLE_BORROWING_ENABLED = '88', // 'Stable borrowing is enabled'
-
+  SILOED_BORROWING_VIOLATION = '89', // user is trying to violate the siloed borrowing rule
+  RESERVE_DEBT_NOT_ZERO = '90', // the total debt of the reserve needs to be 0
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
 

@@ -157,6 +157,15 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /**
+   * @notice Returns the siloed borrowing flag
+   * @param asset The address of the underlying asset of the reserve
+   * @return True if the asset is siloed for borrowing
+   **/
+  function getSiloedBorrowing(address asset) external view returns (bool) {
+    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getSiloedBorrowing();
+  }
+
+  /**
    * @notice Returns the protocol fee on the liquidation bonus
    * @param asset The address of the underlying asset of the reserve
    * @return The protocol fee on liquidation
@@ -256,6 +265,20 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
       asset
     );
     return IERC20Detailed(reserve.aTokenAddress).totalSupply();
+  }
+
+  /**
+   * @notice Returns the total debt for a given asset
+   * @param asset The address of the underlying asset of the reserve
+   * @return The total debt for asset
+   **/
+  function getTotalDebt(address asset) external view override returns (uint256) {
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
+    return
+      IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply() +
+      IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply();
   }
 
   /**
