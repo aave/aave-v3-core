@@ -96,7 +96,7 @@ contract L2Pool is Pool, IL2Pool {
 
   /// @inheritdoc IL2Pool
   function swapBorrowRateMode(bytes32 args) external override {
-    (address asset, uint256 interestRateMode) = CalldataLogic.decodeSwapBorrowRateMode(
+    (address asset, uint256 interestRateMode) = CalldataLogic.decodeSwapBorrowRateModeParams(
       _reservesList,
       args
     );
@@ -105,7 +105,7 @@ contract L2Pool is Pool, IL2Pool {
 
   /// @inheritdoc IL2Pool
   function rebalanceStableBorrowRate(bytes32 args) external override {
-    (address asset, address user) = CalldataLogic.decodeRebalanceStableBorrowRate(
+    (address asset, address user) = CalldataLogic.decodeRebalanceStableBorrowRateParams(
       _reservesList,
       args
     );
@@ -114,7 +114,7 @@ contract L2Pool is Pool, IL2Pool {
 
   /// @inheritdoc IL2Pool
   function setUserUseReserveAsCollateral(bytes32 args) external override {
-    (address asset, bool useAsCollateral) = CalldataLogic.decodeSetUserUseReserveAsCollateral(
+    (address asset, bool useAsCollateral) = CalldataLogic.decodeSetUserUseReserveAsCollateralParams(
       _reservesList,
       args
     );
@@ -129,7 +129,7 @@ contract L2Pool is Pool, IL2Pool {
       address user,
       uint256 debtToCover,
       bool receiveAToken
-    ) = CalldataLogic.decodeLiquidationCall(_reservesList, args1, args2);
+    ) = CalldataLogic.decodeLiquidationCallParams(_reservesList, args1, args2);
     liquidationCall(collateralAsset, debtAsset, user, debtToCover, receiveAToken);
   }
 }

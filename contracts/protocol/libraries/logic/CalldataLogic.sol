@@ -211,11 +211,10 @@ library CalldataLogic {
    * @return The address of the underlying reserve
    * @return The interest rate mode, 1 for stable 2 for variable debt
    */
-  function decodeSwapBorrowRateMode(mapping(uint256 => address) storage reservesList, bytes32 args)
-    internal
-    view
-    returns (address, uint256)
-  {
+  function decodeSwapBorrowRateModeParams(
+    mapping(uint256 => address) storage reservesList,
+    bytes32 args
+  ) internal view returns (address, uint256) {
     uint16 assetId;
     uint256 interestRateMode;
 
@@ -234,7 +233,7 @@ library CalldataLogic {
    * @return The address of the underlying reserve
    * @return The address of the user to rebalance
    */
-  function decodeRebalanceStableBorrowRate(
+  function decodeRebalanceStableBorrowRateParams(
     mapping(uint256 => address) storage reservesList,
     bytes32 args
   ) internal view returns (address, address) {
@@ -254,7 +253,7 @@ library CalldataLogic {
    * @return The address of the underlying reserve
    * @return True if to set using as collateral, false otherwise
    */
-  function decodeSetUserUseReserveAsCollateral(
+  function decodeSetUserUseReserveAsCollateralParams(
     mapping(uint256 => address) storage reservesList,
     bytes32 args
   ) internal view returns (address, bool) {
@@ -278,7 +277,7 @@ library CalldataLogic {
    * @return The amount of debt to cover
    * @return True if receiving aTokens, false otherwise
    */
-  function decodeLiquidationCall(
+  function decodeLiquidationCallParams(
     mapping(uint256 => address) storage reservesList,
     bytes32 args1,
     bytes32 args2
