@@ -189,6 +189,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.borrowingEnabled).to.be.eq(true);
 
     // Disable borrowing
+    await configurator.connect(poolAdmin.signer).setReserveStableRateBorrowing(dai.address, false);
     await configurator.connect(poolAdmin.signer).setReserveBorrowing(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);

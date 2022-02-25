@@ -31,13 +31,13 @@ library PoolLogic {
   /**
    * @notice Initialize an asset reserve and add the reserve to the list of reserves
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param params Additional parameters needed for initiation
    * @return true if appended, false if inserted at existing empty spot
    **/
   function executeInitReserve(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.InitReserveParams memory params
   ) external returns (bool) {
     require(Address.isContract(params.asset), Errors.NOT_CONTRACT);
@@ -48,20 +48,21 @@ library PoolLogic {
       params.interestRateStrategyAddress
     );
 
-    bool reserveAlreadyAdded = reservesData[params.asset].id != 0 || reserves[0] == params.asset;
+    bool reserveAlreadyAdded = reservesData[params.asset].id != 0 ||
+      reservesList[0] == params.asset;
     require(!reserveAlreadyAdded, Errors.RESERVE_ALREADY_ADDED);
 
     for (uint16 i = 0; i < params.reservesCount; i++) {
-      if (reserves[i] == address(0)) {
+      if (reservesList[i] == address(0)) {
         reservesData[params.asset].id = i;
-        reserves[i] = params.asset;
+        reservesList[i] = params.asset;
         return false;
       }
     }
 
     require(params.reservesCount < params.maxNumberReserves, Errors.NO_MORE_RESERVES_ALLOWED);
     reservesData[params.asset].id = params.reservesCount;
-    reserves[params.reservesCount] = params.asset;
+    reservesList[params.reservesCount] = params.asset;
     return true;
   }
 
@@ -129,24 +130,24 @@ library PoolLogic {
   /**
    * @notice Drop a reserve
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param asset The address of the underlying asset of the reserve
    **/
   function executeDropReserve(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     address asset
   ) external {
     DataTypes.ReserveData storage reserve = reservesData[asset];
-    ValidationLogic.validateDropReserve(reserves, reserve, asset);
-    reserves[reservesData[asset].id] = address(0);
+    ValidationLogic.validateDropReserve(reservesList, reserve, asset);
+    reservesList[reservesData[asset].id] = address(0);
     delete reservesData[asset];
   }
 
   /**
    * @notice Returns the user account data across all the reserves
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional params needed for the calculation
    * @return totalCollateralBase The total collateral of the user in the base currency used by the price feed
@@ -158,7 +159,7 @@ library PoolLogic {
    **/
   function executeGetUserAccountData(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.CalculateUserAccountDataParams memory params
   )
@@ -180,7 +181,7 @@ library PoolLogic {
       currentLiquidationThreshold,
       healthFactor,
 
-    ) = GenericLogic.calculateUserAccountData(reservesData, reserves, eModeCategories, params);
+    ) = GenericLogic.calculateUserAccountData(reservesData, reservesList, eModeCategories, params);
 
     availableBorrowsBase = GenericLogic.calculateAvailableBorrows(
       totalCollateralBase,

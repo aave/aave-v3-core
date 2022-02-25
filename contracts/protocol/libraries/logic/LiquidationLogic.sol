@@ -91,14 +91,14 @@ library LiquidationLogic {
    * covers `debtToCover` amount of debt of the user getting liquidated, and receives
    * a proportional amount of the `collateralAsset` plus a bonus to cover market risk
    * @dev Emits the `LiquidationCall()` event
-   * @param reserves The state of all the reserves
+   * @param reservesData The state of all the reserves
    * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
    * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params The additional parameters needed to execute the liquidation function
    **/
   function executeLiquidationCall(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(address => DataTypes.UserConfigurationMap) storage usersConfig,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
@@ -106,8 +106,8 @@ library LiquidationLogic {
   ) external {
     LiquidationCallLocalVars memory vars;
 
-    DataTypes.ReserveData storage collateralReserve = reserves[params.collateralAsset];
-    DataTypes.ReserveData storage debtReserve = reserves[params.debtAsset];
+    DataTypes.ReserveData storage collateralReserve = reservesData[params.collateralAsset];
+    DataTypes.ReserveData storage debtReserve = reservesData[params.debtAsset];
     DataTypes.UserConfigurationMap storage userConfig = usersConfig[params.user];
     vars.debtReserveCache = debtReserve.cache();
     debtReserve.updateState(vars.debtReserveCache);
@@ -120,7 +120,7 @@ library LiquidationLogic {
     vars.oracle = IPriceOracleGetter(params.priceOracle);
 
     (, , , , vars.healthFactor, ) = GenericLogic.calculateUserAccountData(
-      reserves,
+      reservesData,
       reservesList,
       eModeCategories,
       DataTypes.CalculateUserAccountDataParams({
@@ -221,7 +221,7 @@ library LiquidationLogic {
     );
 
     IsolationModeLogic.updateIsolatedDebtIfIsolated(
-      reserves,
+      reservesData,
       reservesList,
       userConfig,
       vars.debtReserveCache,
@@ -240,7 +240,7 @@ library LiquidationLogic {
         DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
         if (
           ValidationLogic.validateUseAsCollateral(
-            reserves,
+            reservesData,
             reservesList,
             liquidatorConfig,
             params.collateralAsset
