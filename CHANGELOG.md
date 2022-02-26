@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.14.0](https://www.github.com/aave/aave-v3-core/compare/v1.13.1...v1.14.0) (2022-02-21)
+
+
+### Features
+
+* clean dependencies and upgrade child dependencies ([7ca97ca](https://www.github.com/aave/aave-v3-core/commit/7ca97ca4cd6e9aad74583a4a1ca5ebe3fae44c64))
+* removed obsolete files for the certora tools ([d7e0e7c](https://www.github.com/aave/aave-v3-core/commit/d7e0e7c37c0741b54afde3354d0be4a619fafde5))
+
+
+### Bug Fixes
+
+* `reserves` renamed to `reservesData` or `reservesList` when fitting ([3a6b928](https://www.github.com/aave/aave-v3-core/commit/3a6b928abb9ad6920582064704673e84f4b543dd))
+* Cleanup naming and remove duplicate tests ([6ed5891](https://www.github.com/aave/aave-v3-core/commit/6ed589163ae30b235206dc571b98091f08dc5bad))
+* Fix typo in package contributors tag ([14a3b6d](https://www.github.com/aave/aave-v3-core/commit/14a3b6d503d71d080c145e7fbcdacbe68b2b11ba))
+* Moved getUserAccountData logic to PoolLogic to minimize contract size ([b07bdab](https://www.github.com/aave/aave-v3-core/commit/b07bdab921705788f38e130f75a10a1444cbc6b1))
+* Natspec for `IPool::swapBorrowRateMode()` ([5b016fc](https://www.github.com/aave/aave-v3-core/commit/5b016fc699ef816204cf1e0fe1178285f53cf83c))
+* Place interface extension declaration at the end ([19c015e](https://www.github.com/aave/aave-v3-core/commit/19c015ec76efc229da6b59fafa9f640d56e7f157))
+* Rename reserves to reservesList ([4b0af0b](https://www.github.com/aave/aave-v3-core/commit/4b0af0bbb200e76dfedc7adf923c80e74fae37cb))
+* Revert dependencies to last working state ([ff4d987](https://www.github.com/aave/aave-v3-core/commit/ff4d98765cea9b07f3e61f5b5e0efc472a06addc))
+* typo in tech paper ([d6b9cbc](https://www.github.com/aave/aave-v3-core/commit/d6b9cbc55adf88c4cb7dd6df11941167fd119b3d))
+* Update contributors etc in package.json ([60fc967](https://www.github.com/aave/aave-v3-core/commit/60fc967fa8037bb856c0c39c1e433fabafab255c))
+* Update gas optimization numbers ([8719929](https://www.github.com/aave/aave-v3-core/commit/8719929597742e697cd8824cd29d9a786f3ec0eb))
+
 ### [1.13.1](https://www.github.com/aave/aave-v3-core/compare/v1.13.0...v1.13.1) (2022-01-27)
 
 

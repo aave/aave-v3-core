@@ -36,7 +36,7 @@ import {PoolStorage} from './PoolStorage.sol';
  * @dev All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
  **/
-contract Pool is VersionedInitializable, IPool, PoolStorage {
+contract Pool is VersionedInitializable, PoolStorage, IPool {
   using ReserveLogic for DataTypes.ReserveData;
 
   uint256 public constant POOL_REVISION = 0x1;
@@ -146,7 +146,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
-  ) external virtual override {
+  ) public virtual override {
     SupplyLogic.executeSupply(
       _reserves,
       _reservesList,
@@ -170,7 +170,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
-  ) external virtual override {
+  ) public virtual override {
     IERC20WithPermit(asset).permit(
       msg.sender,
       address(this),
@@ -198,7 +198,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     address to
-  ) external virtual override returns (uint256) {
+  ) public virtual override returns (uint256) {
     return
       SupplyLogic.executeWithdraw(
         _reserves,
@@ -223,7 +223,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 interestRateMode,
     uint16 referralCode,
     address onBehalfOf
-  ) external virtual override {
+  ) public virtual override {
     BorrowLogic.executeBorrow(
       _reserves,
       _reservesList,
@@ -252,7 +252,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     uint256 interestRateMode,
     address onBehalfOf
-  ) external virtual override returns (uint256) {
+  ) public virtual override returns (uint256) {
     return
       BorrowLogic.executeRepay(
         _reserves,
@@ -278,7 +278,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
-  ) external virtual override returns (uint256) {
+  ) public virtual override returns (uint256) {
     {
       IERC20WithPermit(asset).permit(
         msg.sender,
@@ -307,7 +307,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address asset,
     uint256 amount,
     uint256 interestRateMode
-  ) external virtual override returns (uint256) {
+  ) public virtual override returns (uint256) {
     return
       BorrowLogic.executeRepay(
         _reserves,
@@ -324,7 +324,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function swapBorrowRateMode(address asset, uint256 interestRateMode) external virtual override {
+  function swapBorrowRateMode(address asset, uint256 interestRateMode) public virtual override {
     BorrowLogic.executeSwapBorrowRateMode(
       _reserves[asset],
       _usersConfig[msg.sender],
@@ -334,13 +334,13 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
   }
 
   /// @inheritdoc IPool
-  function rebalanceStableBorrowRate(address asset, address user) external virtual override {
+  function rebalanceStableBorrowRate(address asset, address user) public virtual override {
     BorrowLogic.executeRebalanceStableBorrowRate(_reserves[asset], asset, user);
   }
 
   /// @inheritdoc IPool
   function setUserUseReserveAsCollateral(address asset, bool useAsCollateral)
-    external
+    public
     virtual
     override
   {
@@ -364,7 +364,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address user,
     uint256 debtToCover,
     bool receiveAToken
-  ) external virtual override {
+  ) public virtual override {
     LiquidationLogic.executeLiquidationCall(
       _reserves,
       _usersConfig,
@@ -393,7 +393,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     address onBehalfOf,
     bytes calldata params,
     uint16 referralCode
-  ) external virtual override {
+  ) public virtual override {
     DataTypes.FlashloanParams memory flashParams = DataTypes.FlashloanParams({
       receiverAddress: receiverAddress,
       assets: assets,
@@ -429,7 +429,7 @@ contract Pool is VersionedInitializable, IPool, PoolStorage {
     uint256 amount,
     bytes calldata params,
     uint16 referralCode
-  ) external virtual override {
+  ) public virtual override {
     DataTypes.FlashloanSimpleParams memory flashParams = DataTypes.FlashloanSimpleParams({
       receiverAddress: receiverAddress,
       asset: asset,
