@@ -1,44 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.10;
 
-import 'ds-test/test.sol';
-
 import {UserConfiguration} from './../../contracts/protocol/libraries/configuration/UserConfiguration.sol';
 import {DataTypes} from './../../contracts/protocol/libraries/types/DataTypes.sol';
 import {ReserveConfiguration} from './../../contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 
-contract UserConfigTestHelper is DSTest {
-  function assertEq(bool a, bool b) internal {
-    if (a != b) {
-      emit log('Error: a == b not satisfied [bool]');
-      fail();
-    }
-  }
+import {TestHelper} from './TestHelper.sol';
 
-  function assertEq(
-    bool a,
-    bool b,
-    string memory err
-  ) internal {
-    if (a != b) {
-      emit log_named_string('Error', err);
-      assertEq(a, b);
-    }
-  }
-
-  function _countBitsOn(uint256 a) internal returns (uint256) {
-    uint256 counter = 0;
-    while (a > 0) {
-      if (a & 1 == 1) {
-        counter++;
-      }
-      a >>= 1;
-    }
-    return counter;
-  }
-}
-
-contract ContractTest is UserConfigTestHelper {
+contract ContractTest is TestHelper {
   using UserConfiguration for DataTypes.UserConfigurationMap;
 
   DataTypes.UserConfigurationMap internal config;

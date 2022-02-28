@@ -11,6 +11,8 @@
     "node": ">=16.0.0"
   },
   "scripts": {
+    "setup:foundry": "foundryup && git submodule update --init",
+    "install:foundry": "curl -L https://foundry.paradigm.xyz | bash",
     "size": "npm run compile && npm run hardhat size-contracts",
     "auth-registry": "npx dotenv-cli -- bash -c 'npm config set //npm.pkg.github.com/:_authToken \"$NODE_AUTH_TOKEN\"'",
     "run-env": "npm run auth-registry && npm i && tail -f /dev/null",
