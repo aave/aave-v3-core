@@ -211,6 +211,14 @@ interface IPoolConfigurator {
   event DebtCeilingChanged(address indexed asset, uint256 oldDebtCeiling, uint256 newDebtCeiling);
 
   /**
+   * @dev Emitted when the the siloed borrowing state for an asset is changed.
+   * @param asset The address of the underlying asset of the reserve
+   * @param oldState The old siloed borrowing state
+   * @param newState The new siloed borrowing state
+   **/
+  event SiloedBorrowingChanged(address indexed asset, bool oldState, bool newState);
+
+  /**
    * @dev Emitted when the bridge protocol fee is updated.
    * @param oldBridgeProtocolFee The old protocol fee, expressed in bps
    * @param newBridgeProtocolFee The new protocol fee, expressed in bps
@@ -451,4 +459,10 @@ interface IPoolConfigurator {
    * @param newDebtCeiling The new debt ceiling
    */
   function setDebtCeiling(address asset, uint256 newDebtCeiling) external;
+
+  /**
+   * @notice Sets siloed borrowing for an asset
+   * @param siloed The new siloed borrowing state
+   */
+  function setSiloedBorrowing(address asset, bool siloed) external;
 }
