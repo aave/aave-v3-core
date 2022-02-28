@@ -1,6 +1,6 @@
 {
   "name": "@aave/core-v3",
-  "version": "1.13.1",
+  "version": "1.14.0",
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
@@ -24,6 +24,8 @@
     "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test-suites/*.spec.ts",
     "test-fuzz": "forge test",
     "test-scenarios": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
+    "test-l2pool": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/pool-l2.spec.ts",
+    "test-subgraph:scenarios": ". ./setup-test-env.sh  && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
     "ci:test": ". ./setup-test-env.sh  && npm run test",
     "ci:clean": "rm -rf ./artifacts ./cache ./types ./temp-artifacts",
     "prepublish": "npm run compile"
