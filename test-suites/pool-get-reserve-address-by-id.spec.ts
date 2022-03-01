@@ -18,7 +18,7 @@ makeSuite('Pool: getReservesList', (testEnv: TestEnv) => {
 
     const reserveData = await pool.getReserveData(usdc.address);
 
-    const reserveAddress = await pool.getReservesList(reserveData.id);
+    const reserveAddress = await pool.getReserveAddressById(reserveData.id);
 
     await expect(reserveAddress).to.be.eq(usdc.address);
   });
@@ -28,7 +28,7 @@ makeSuite('Pool: getReservesList', (testEnv: TestEnv) => {
 
     // MAX_NUMBER_RESERVES is always greater than reservesCount
     const maxNumberOfReserves = await pool.MAX_NUMBER_RESERVES();
-    const reserveAddress = await pool.getReservesList(maxNumberOfReserves.add(1));
+    const reserveAddress = await pool.getReserveAddressById(maxNumberOfReserves +1);
 
     await expect(reserveAddress).to.be.eq(ZERO_ADDRESS);
   });
