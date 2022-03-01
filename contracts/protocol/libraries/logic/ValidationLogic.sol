@@ -35,24 +35,12 @@ library ValidationLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
 
-  /**
-   * @dev This constant represents the delta between the maximum variable borrow rate and liquidity rate below which
-   * stable rate rebalances up are allowed when the usage ratio > `REBALANCE_UP_USAGE_RATIO_THRESHOLD`
-   * Expressed in bps, a factor of 0.4e4 results in 40.00%
-   */
-  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 0.4e4;
+  // Factor to apply to "only-variable-debt" liquidity rate to get threshold for rebalancing, expressed in bps
+  // A value of 0.9e4 results in 90%
+  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 0.9e4;
 
-  /**
-   * @dev This constant represents the minimum borrow usage ratio threshold at which rebalances up are possible
-   * Expressed in ray, a rate of 0.95e27 results in 95%
-   */
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95e27;
-
-  /**
-   * @dev This constant represents below which health factor value it is possible to liquidate
-   * the maximum percentage of borrower's debt.
-   * A value of 0.95e18 results in 0.95
-   */
+  // Minimum health factor allowed under any circumstance
+  // A value of 0.95e18 results in 0.95
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
 
   /**
@@ -111,7 +99,6 @@ library ValidationLogic {
 
   struct ValidateBorrowLocalVars {
     uint256 currentLtv;
-    uint256 currentLiquidationThreshold;
     uint256 collateralNeededInBaseCurrency;
     uint256 userCollateralInBaseCurrency;
     uint256 userDebtInBaseCurrency;
@@ -124,23 +111,25 @@ library ValidationLogic {
     uint256 amountInBaseCurrency;
     uint256 assetUnit;
     address eModePriceSource;
+    address siloedBorrowingAddress;
     bool isActive;
     bool isFrozen;
     bool isPaused;
     bool borrowingEnabled;
     bool stableRateBorrowingEnabled;
+    bool siloedBorrowingEnabled;
   }
 
   /**
    * @notice Validates a borrow action.
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional params needed for the validation
    */
   function validateBorrow(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.ValidateBorrowParams memory params
   ) internal view {
@@ -224,12 +213,12 @@ library ValidationLogic {
       vars.userCollateralInBaseCurrency,
       vars.userDebtInBaseCurrency,
       vars.currentLtv,
-      vars.currentLiquidationThreshold,
+      ,
       vars.healthFactor,
 
     ) = GenericLogic.calculateUserAccountData(
       reservesData,
-      reserves,
+      reservesList,
       eModeCategories,
       DataTypes.CalculateUserAccountDataParams({
         userConfig: params.userConfig,
@@ -240,8 +229,8 @@ library ValidationLogic {
       })
     );
 
-    require(vars.userCollateralInBaseCurrency > 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
-    require(vars.currentLtv > 0, Errors.LTV_VALIDATION_FAILED);
+    require(vars.userCollateralInBaseCurrency != 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
+    require(vars.currentLtv != 0, Errors.LTV_VALIDATION_FAILED);
 
     require(
       vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
@@ -294,6 +283,21 @@ library ValidationLogic {
 
       require(params.amount <= maxLoanSizeStable, Errors.AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
     }
+
+    if (params.userConfig.isBorrowingAny()) {
+      (vars.siloedBorrowingEnabled, vars.siloedBorrowingAddress) = params
+        .userConfig
+        .getSiloedBorrowingState(reservesData, reservesList);
+
+      if (vars.siloedBorrowingEnabled) {
+        require(vars.siloedBorrowingAddress == params.asset, Errors.SILOED_BORROWING_VIOLATION);
+      } else {
+        require(
+          !params.reserveCache.reserveConfiguration.getSiloedBorrowing(),
+          Errors.SILOED_BORROWING_VIOLATION
+        );
+      }
+    }
   }
 
   /**
@@ -313,7 +317,7 @@ library ValidationLogic {
     uint256 stableDebt,
     uint256 variableDebt
   ) internal view {
-    require(amountSent > 0, Errors.INVALID_AMOUNT);
+    require(amountSent != 0, Errors.INVALID_AMOUNT);
     require(
       amountSent != type(uint256).max || msg.sender == onBehalfOf,
       Errors.NO_EXPLICIT_AMOUNT_TO_REPAY_ON_BEHALF
@@ -338,8 +342,8 @@ library ValidationLogic {
     );
 
     require(
-      (stableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebt > 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
+      (stableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
+        (variableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
       Errors.NO_DEBT_OF_SELECTED_TYPE
     );
   }
@@ -369,9 +373,9 @@ library ValidationLogic {
     require(!isFrozen, Errors.RESERVE_FROZEN);
 
     if (currentRateMode == DataTypes.InterestRateMode.STABLE) {
-      require(stableDebt > 0, Errors.NO_OUTSTANDING_STABLE_DEBT);
+      require(stableDebt != 0, Errors.NO_OUTSTANDING_STABLE_DEBT);
     } else if (currentRateMode == DataTypes.InterestRateMode.VARIABLE) {
-      require(variableDebt > 0, Errors.NO_OUTSTANDING_VARIABLE_DEBT);
+      require(variableDebt != 0, Errors.NO_OUTSTANDING_VARIABLE_DEBT);
       /**
        * user wants to swap to stable, before swapping we need to ensure that
        * 1. stable borrow rate is enabled on the reserve
@@ -394,45 +398,43 @@ library ValidationLogic {
 
   /**
    * @notice Validates a stable borrow rate rebalance action.
+   * @dev Rebalancing is accepted when depositors are earning <= 90% of their earnings in pure supply/demand market (variable rate only)
+   * For this to be the case, there has to be quite large stable debt with an interest rate below the current variable rate.
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
-   * @param stableDebtToken The stable debt token instance
-   * @param variableDebtToken The variable debt token instance
-   * @param aTokenAddress The address of the aToken contract
    */
   function validateRebalanceStableBorrowRate(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
-    address reserveAddress,
-    IERC20 stableDebtToken,
-    IERC20 variableDebtToken,
-    address aTokenAddress
+    address reserveAddress
   ) internal view {
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
-    //if the usage ratio is below the threshold, no rebalances are needed
-    uint256 totalDebt = (stableDebtToken.totalSupply() + variableDebtToken.totalSupply())
-      .wadToRay();
-    uint256 availableLiquidity = IERC20(reserveAddress).balanceOf(aTokenAddress).wadToRay();
-    uint256 borrowUsageRatio = totalDebt == 0
-      ? 0
-      : totalDebt.rayDiv(availableLiquidity + totalDebt);
+    uint256 totalDebt = IERC20(reserveCache.stableDebtTokenAddress).totalSupply() +
+      IERC20(reserveCache.variableDebtTokenAddress).totalSupply();
 
-    //if the usage ratio is higher than the threshold and liquidity rate less than the maximum allowed based
-    // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
-
-    uint256 currentLiquidityRate = reserveCache.currLiquidityRate;
-    uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
+    (uint256 liquidityRateVariableDebtOnly, , ) = IReserveInterestRateStrategy(
       reserve.interestRateStrategyAddress
-    ).getMaxVariableBorrowRate();
+    ).calculateInterestRates(
+        DataTypes.CalculateInterestRatesParams({
+          unbacked: reserve.unbacked,
+          liquidityAdded: 0,
+          liquidityTaken: 0,
+          totalStableDebt: 0,
+          totalVariableDebt: totalDebt,
+          averageStableBorrowRate: 0,
+          reserveFactor: reserveCache.reserveFactor,
+          reserve: reserveAddress,
+          aToken: reserveCache.aTokenAddress
+        })
+      );
 
     require(
-      borrowUsageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD &&
-        currentLiquidityRate <=
-        maxVariableBorrowRate.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
+      reserveCache.currLiquidityRate <=
+        liquidityRateVariableDebtOnly.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
       Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
   }
@@ -446,7 +448,7 @@ library ValidationLogic {
     DataTypes.ReserveCache memory reserveCache,
     uint256 userBalance
   ) internal pure {
-    require(userBalance > 0, Errors.UNDERLYING_BALANCE_ZERO);
+    require(userBalance != 0, Errors.UNDERLYING_BALANCE_ZERO);
 
     (bool isActive, , , , bool isPaused) = reserveCache.reserveConfiguration.getFlags();
     require(isActive, Errors.RESERVE_INACTIVE);
@@ -529,18 +531,18 @@ library ValidationLogic {
     );
 
     vars.isCollateralEnabled =
-      collateralReserve.configuration.getLiquidationThreshold() > 0 &&
+      collateralReserve.configuration.getLiquidationThreshold() != 0 &&
       userConfig.isUsingAsCollateral(collateralReserve.id);
 
     //if collateral isn't enabled as collateral by user, it cannot be liquidated
     require(vars.isCollateralEnabled, Errors.COLLATERAL_CANNOT_BE_LIQUIDATED);
-    require(params.totalDebt > 0, Errors.SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
+    require(params.totalDebt != 0, Errors.SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER);
   }
 
   /**
    * @notice Validates the health factor of a user.
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param user The user to validate health factor of
@@ -550,7 +552,7 @@ library ValidationLogic {
    */
   function validateHealthFactor(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     address user,
@@ -561,7 +563,7 @@ library ValidationLogic {
     (, , , , uint256 healthFactor, bool hasZeroLtvCollateral) = GenericLogic
       .calculateUserAccountData(
         reservesData,
-        reserves,
+        reservesList,
         eModeCategories,
         DataTypes.CalculateUserAccountDataParams({
           userConfig: userConfig,
@@ -583,7 +585,7 @@ library ValidationLogic {
   /**
    * @notice Validates the health factor of a user and the ltv of the asset being withdrawn.
    * @param reservesData The state of all the reserves
-   * @param reserves The addresses of all the active reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param userConfig The state of the user for the specific reserve
    * @param asset The asset for which the ltv will be validated
@@ -594,7 +596,7 @@ library ValidationLogic {
    */
   function validateHFAndLtv(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     address asset,
@@ -607,7 +609,7 @@ library ValidationLogic {
 
     (, bool hasZeroLtvCollateral) = validateHealthFactor(
       reservesData,
-      reserves,
+      reservesList,
       eModeCategories,
       userConfig,
       from,
@@ -632,17 +634,17 @@ library ValidationLogic {
 
   /**
    * @notice Validates a drop reserve action.
-   * @param reserves a mapping storing the list of reserves
+   * @param reservesList The addresses of all the active reserves
    * @param reserve The reserve object
    * @param asset The address of the reserve's underlying asset
    **/
   function validateDropReserve(
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.ReserveData storage reserve,
     address asset
   ) internal view {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
-    require(reserve.id != 0 || reserves[0] == asset, Errors.ASSET_NOT_LISTED);
+    require(reserve.id != 0 || reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     require(IERC20(reserve.stableDebtTokenAddress).totalSupply() == 0, Errors.STABLE_DEBT_NOT_ZERO);
     require(
       IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0,
@@ -653,8 +655,8 @@ library ValidationLogic {
 
   /**
    * @notice Validates the action of setting efficiency mode.
-   * @param reservesData the data mapping of the reserves
-   * @param reserves a mapping storing the list of reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories a mapping storing configurations for all efficiency mode categories
    * @param userConfig the user configuration
    * @param reservesCount The total number of valid reserves
@@ -662,7 +664,7 @@ library ValidationLogic {
    **/
   function validateSetUserEMode(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.UserConfigurationMap memory userConfig,
     uint256 reservesCount,
@@ -670,7 +672,7 @@ library ValidationLogic {
   ) internal view {
     // category is invalid if the liq threshold is not set
     require(
-      categoryId == 0 || eModeCategories[categoryId].liquidationThreshold > 0,
+      categoryId == 0 || eModeCategories[categoryId].liquidationThreshold != 0,
       Errors.INCONSISTENT_EMODE_CATEGORY
     );
 
@@ -681,11 +683,11 @@ library ValidationLogic {
 
     // if user is trying to set another category than default we require that
     // either the user is not borrowing, or it's borrowing assets of categoryId
-    if (categoryId > 0) {
+    if (categoryId != 0) {
       unchecked {
         for (uint256 i = 0; i < reservesCount; i++) {
           if (userConfig.isBorrowing(i)) {
-            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reserves[i]]
+            DataTypes.ReserveConfigurationMap memory configuration = reservesData[reservesList[i]]
               .configuration;
             require(
               configuration.getEModeCategory() == categoryId,
@@ -702,15 +704,15 @@ library ValidationLogic {
    * set as collateral, mint unbacked, and liquidate
    * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that
    * generate transfers of aTokens
-   * @param reservesData the data mapping of the reserves
-   * @param reserves a mapping storing the list of reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param userConfig the user configuration
    * @param asset The address of the asset being validated as collateral
    * @return True if the asset can be activated as collateral, false otherwise
    **/
   function validateUseAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset
   ) internal view returns (bool) {
@@ -718,7 +720,7 @@ library ValidationLogic {
       return true;
     }
 
-    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reserves);
+    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reservesList);
     DataTypes.ReserveConfigurationMap memory configuration = reservesData[asset].configuration;
 
     return (!isolationModeActive && configuration.getDebtCeiling() == 0);

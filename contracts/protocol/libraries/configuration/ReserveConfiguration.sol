@@ -20,6 +20,7 @@ library ReserveConfiguration {
   uint256 internal constant STABLE_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant BORROWABLE_IN_ISOLATION_MASK =   0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 internal constant SILOED_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -38,7 +39,8 @@ library ReserveConfiguration {
   uint256 internal constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
   uint256 internal constant IS_PAUSED_START_BIT_POSITION = 60;
   uint256 internal constant BORROWABLE_IN_ISOLATION_START_BIT_POSITION = 61;
-  /// @dev bits 62 63 reserved
+  uint256 internal constant SILOED_BORROWING_START_BIT_POSITION = 62;
+  /// @dev bit 63 reserved
 
   uint256 internal constant RESERVE_FACTOR_START_BIT_POSITION = 64;
   uint256 internal constant BORROW_CAP_START_BIT_POSITION = 80;
@@ -133,9 +135,9 @@ library ReserveConfiguration {
    * @param self The reserve configuration
    * @return The liquidation bonus
    **/
-  function getLiquidationBonus(DataTypes.ReserveConfigurationMap storage self)
+  function getLiquidationBonus(DataTypes.ReserveConfigurationMap memory self)
     internal
-    view
+    pure
     returns (uint256)
   {
     return (self.data & ~LIQUIDATION_BONUS_MASK) >> LIQUIDATION_BONUS_START_BIT_POSITION;
@@ -261,6 +263,35 @@ library ReserveConfiguration {
     returns (bool)
   {
     return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
+  }
+
+  /**
+   * @notice Sets the siloed borrowing flag for the reserve.
+   * @dev When this flag is set to true, users borrowing this asset will not be allowed to borrow any other asset.
+   * @param self The reserve configuration
+   * @param siloed True if the asset is siloed
+   **/
+  function setSiloedBorrowing(DataTypes.ReserveConfigurationMap memory self, bool siloed)
+    internal
+    pure
+  {
+    self.data =
+      (self.data & SILOED_BORROWING_MASK) |
+      (uint256(siloed ? 1 : 0) << SILOED_BORROWING_START_BIT_POSITION);
+  }
+
+  /**
+   * @notice Gets the siloed borrowing flag for the reserve.
+   * @dev When this flag is set to true, users borrowing this asset will not be allowed to borrow any other asset.
+   * @param self The reserve configuration
+   * @return The siloed borrowing flag
+   **/
+  function getSiloedBorrowing(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (bool)
+  {
+    return (self.data & ~SILOED_BORROWING_MASK) != 0;
   }
 
   /**

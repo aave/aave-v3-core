@@ -371,11 +371,19 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     expect(await strategyInstance.getStableRateSlope2()).to.be.eq(
       rateStrategyStableTwo.stableRateSlope2
     );
+    expect(await strategyInstance.getMaxVariableBorrowRate()).to.be.eq(
+      BigNumber.from(rateStrategyStableTwo.baseVariableBorrowRate)
+        .add(BigNumber.from(rateStrategyStableTwo.variableRateSlope1))
+        .add(BigNumber.from(rateStrategyStableTwo.variableRateSlope2))
+    );
     expect(await strategyInstance.MAX_EXCESS_USAGE_RATIO()).to.be.eq(
       BigNumber.from(1).ray().sub(rateStrategyStableTwo.optimalUsageRatio)
     );
     expect(await strategyInstance.MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO()).to.be.eq(
       BigNumber.from(1).ray().sub(rateStrategyStableTwo.optimalStableToTotalDebtRatio)
+    );
+    expect(await strategyInstance.getStableRateExcessOffset()).to.be.eq(
+      rateStrategyStableTwo.stableRateExcessOffset
     );
   });
 

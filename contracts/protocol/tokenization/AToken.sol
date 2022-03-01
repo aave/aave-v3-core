@@ -51,6 +51,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
 
   /// @inheritdoc IInitializableAToken
   function initialize(
+    IPool initializingPool,
     address treasury,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
@@ -59,6 +60,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     string calldata aTokenSymbol,
     bytes calldata params
   ) external override initializer {
+    require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
     _setName(aTokenName);
     _setSymbol(aTokenSymbol);
     _setDecimals(aTokenDecimals);
@@ -87,7 +89,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) public virtual override onlyPool returns (bool) {
+  ) external virtual override onlyPool returns (bool) {
     return _mintScaled(caller, onBehalfOf, amount, index);
   }
 
@@ -97,7 +99,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address receiverOfUnderlying,
     uint256 amount,
     uint256 index
-  ) external override onlyPool {
+  ) external virtual override onlyPool {
     _burnScaled(from, receiverOfUnderlying, amount, index);
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
@@ -109,7 +111,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     if (amount == 0) {
       return;
     }
-    mint(address(POOL), _treasury, amount, index);
+    _mintScaled(address(POOL), _treasury, amount, index);
   }
 
   /// @inheritdoc IAToken
@@ -129,6 +131,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   function balanceOf(address user)
     public
     view
+    virtual
     override(IncentivizedERC20, IERC20)
     returns (uint256)
   {
@@ -136,7 +139,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IERC20
-  function totalSupply() public view override(IncentivizedERC20, IERC20) returns (uint256) {
+  function totalSupply() public view virtual override(IncentivizedERC20, IERC20) returns (uint256) {
     uint256 currentSupplyScaled = super.totalSupply();
 
     if (currentSupplyScaled == 0) {
@@ -157,12 +160,12 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IAToken
-  function transferUnderlyingTo(address target, uint256 amount) external override onlyPool {
+  function transferUnderlyingTo(address target, uint256 amount) external virtual override onlyPool {
     IERC20(_underlyingAsset).safeTransfer(target, amount);
   }
 
   /// @inheritdoc IAToken
-  function handleRepayment(address user, uint256 amount) external override onlyPool {
+  function handleRepayment(address user, uint256 amount) external virtual override onlyPool {
     // Intentionally left blank
   }
 

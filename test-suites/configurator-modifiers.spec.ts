@@ -28,7 +28,6 @@ makeSuite('PoolConfigurator: Modifiers', (testEnv: TestEnv) => {
         underlyingAsset: randomAddress,
         treasury: randomAddress,
         incentivesController: randomAddress,
-        underlyingAssetName: 'MOCK',
         aTokenName: 'MOCK',
         aTokenSymbol: 'MOCK',
         variableDebtTokenName: 'MOCK',

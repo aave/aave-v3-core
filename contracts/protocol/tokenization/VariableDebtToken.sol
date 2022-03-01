@@ -25,7 +25,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x1;
 
   /**
    * @dev Constructor.
@@ -40,6 +40,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
+    IPool initializingPool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
@@ -47,6 +48,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
+    require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
@@ -89,7 +91,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
     address onBehalfOf,
     uint256 amount,
     uint256 index
-  ) external override onlyPool returns (bool, uint256) {
+  ) external virtual override onlyPool returns (bool, uint256) {
     if (user != onBehalfOf) {
       _decreaseBorrowAllowance(onBehalfOf, user, amount);
     }
@@ -98,11 +100,11 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
 
   /// @inheritdoc IVariableDebtToken
   function burn(
-    address user,
+    address from,
     uint256 amount,
     uint256 index
-  ) external override onlyPool returns (uint256) {
-    _burnScaled(user, address(0), amount, index);
+  ) external virtual override onlyPool returns (uint256) {
+    _burnScaled(from, address(0), amount, index);
     return scaledTotalSupply();
   }
 
@@ -112,7 +114,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
   }
 
   /// @inheritdoc EIP712Base
-  function _EIP712BaseId() internal view virtual override returns (string memory) {
+  function _EIP712BaseId() internal view override returns (string memory) {
     return name();
   }
 

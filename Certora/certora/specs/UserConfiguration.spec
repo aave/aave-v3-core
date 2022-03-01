@@ -6,6 +6,9 @@ methods {
 	isUsingAsCollateral(uint256) returns bool envfree
 	isBorrowingAny() returns bool envfree
  	isEmpty() returns bool envfree
+	isUsingAsCollateralAny() returns bool envfree
+	isUsingAsCollateralOne() returns bool envfree
+	isIsolated() returns bool envfree
 }
 
 invariant empty(uint256 reserveIndex) 
@@ -21,7 +24,8 @@ invariant borrowing(uint256 reserveIndex )
 invariant collateralOrBorrowing(uint256 reserveIndex ) 
 	(isUsingAsCollateral(reserveIndex) || isBorrowing(reserveIndex)) <=>  isUsingAsCollateralOrBorrowing(reserveIndex) 
 
-
+invariant isolated(calldataarg args)
+    !isUsingAsCollateralOne() => !isIsolated()
 
 rule setBorrowing(uint256 reserveIndex, bool borrowing)
 {

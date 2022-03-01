@@ -388,7 +388,7 @@ interface IPool {
   /**
    * @notice Allows a borrower to swap his debt between stable and variable mode, or vice versa
    * @param asset The address of the underlying asset borrowed
-   * @param interestRateMode The rate mode that the user wants to swap to: 1 for Stable, 2 for Variable
+   * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
   function swapBorrowRateMode(address asset, uint256 interestRateMode) external;
 
@@ -638,8 +638,8 @@ interface IPool {
    * @param flashLoanPremiumToProtocol The part of the premium sent to the protocol treasury, expressed in bps
    */
   function updateFlashloanPremiums(
-    uint256 flashLoanPremiumTotal,
-    uint256 flashLoanPremiumToProtocol
+    uint128 flashLoanPremiumTotal,
+    uint128 flashLoanPremiumToProtocol
   ) external;
 
   /**
@@ -688,7 +688,7 @@ interface IPool {
    * @notice Returns the total fee on flash loans
    * @return The total fee on flashloans
    */
-  function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint256);
+  function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint128);
 
   /**
    * @notice Returns the part of the bridge fees sent to protocol
@@ -700,13 +700,13 @@ interface IPool {
    * @notice Returns the part of the flashloan fees sent to protocol
    * @return The flashloan fee sent to the protocol treasury
    */
-  function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint256);
+  function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint128);
 
   /**
    * @notice Returns the maximum number of reserves supported to be listed in this Pool
    * @return The maximum number of reserves supported
    */
-  function MAX_NUMBER_RESERVES() external view returns (uint256);
+  function MAX_NUMBER_RESERVES() external view returns (uint16);
 
   /**
    * @notice Mints the assets accrued through the reserve factor to the treasury in the form of aTokens
