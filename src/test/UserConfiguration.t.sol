@@ -6,11 +6,18 @@ import {DataTypes} from './../../contracts/protocol/libraries/types/DataTypes.so
 import {ReserveConfiguration} from './../../contracts/protocol/libraries/configuration/ReserveConfiguration.sol';
 
 import {TestHelper} from './TestHelper.sol';
+import {Vm} from './../Vm.sol';
 
-contract ContractTest is TestHelper {
+contract UserConfigurationTest is TestHelper {
   using UserConfiguration for DataTypes.UserConfigurationMap;
+  using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
+
+  Vm constant VM = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
 
   DataTypes.UserConfigurationMap internal config;
+
+  mapping(address => DataTypes.ReserveData) internal reservesData;
+  mapping(uint256 => address) internal reservesList;
 
   function testSetBorrowing(
     uint256 data,
@@ -110,12 +117,94 @@ contract ContractTest is TestHelper {
     assertEq(config.isEmpty(), data == 0);
   }
 
-  function testGetIsolationModeState() public {
-    require(false, 'TO BE IMPLEMENTED');
+  function testGetIsolationModeState(
+    address[6] calldata assets,
+    uint256[6] calldata assetConfigurationMaps,
+    uint40[6] calldata debtCeilings,
+    uint8 collateralCount,
+    uint8 borrowCount
+  ) public {
+    VM.assume(collateralCount <= 3 && borrowCount <= 3);
+    if (collateralCount == 0) {
+      borrowCount = 0;
+    }
+
+    bool expectedIsolated = collateralCount == 1 &&
+      debtCeilings[0] > 0 &&
+      debtCeilings[0] < type(uint32).max;
+
+    uint256 reservesCount = 0;
+    config = DataTypes.UserConfigurationMap({data: 0});
+
+    for (uint256 i = 0; i < collateralCount + borrowCount; i++) {
+      reservesList[reservesCount++] = assets[i];
+      DataTypes.ReserveConfigurationMap memory assetConfig = DataTypes.ReserveConfigurationMap({
+        data: assetConfigurationMaps[i] & ReserveConfiguration.DEBT_CEILING_MASK
+      });
+
+      if (i < collateralCount) {
+        if (expectedIsolated) {
+          assetConfig.setDebtCeiling(debtCeilings[i]);
+        }
+        config.setUsingAsCollateral(i, true);
+      } else {
+        config.setBorrowing(i, true);
+      }
+      reservesData[assets[i]].configuration = assetConfig;
+    }
+
+    (bool isolated, address asset, uint256 ceiling) = config.getIsolationModeState(
+      reservesData,
+      reservesList
+    );
+
+    uint256 expectedCeiling = expectedIsolated ? debtCeilings[0] : 0;
+    address expectedAsset = expectedIsolated ? assets[0] : address(0);
+
+    assertEq(isolated, expectedIsolated);
+    assertEq(asset, expectedAsset);
+    assertEq(ceiling, expectedCeiling);
   }
 
-  function testGetSiloedBorrowingState() public {
-    require(false, 'TO BE IMPLEMENTED');
+  function testGetSiloedBorrowingState(
+    address[6] calldata assets,
+    uint256[6] calldata assetConfigurationMaps,
+    uint8 collateralCount,
+    uint8 borrowCount,
+    bool siloedBorrowing
+  ) public {
+    VM.assume(collateralCount <= 3 && borrowCount <= 3);
+    if (collateralCount == 0) {
+      borrowCount = 0;
+    }
+    if (siloedBorrowing) {
+      borrowCount = 1;
+    }
+
+    uint256 reservesCount = 0;
+    config = DataTypes.UserConfigurationMap({data: 0});
+
+    for (uint256 i = 0; i < collateralCount + borrowCount; i++) {
+      reservesList[reservesCount++] = assets[i];
+      DataTypes.ReserveConfigurationMap memory assetConfig = DataTypes.ReserveConfigurationMap({
+        data: assetConfigurationMaps[i] & ReserveConfiguration.SILOED_BORROWING_MASK
+      });
+
+      if (i < collateralCount) {
+        config.setUsingAsCollateral(i, true);
+      } else {
+        config.setBorrowing(i, true);
+        if (siloedBorrowing) {
+          assetConfig.setSiloedBorrowing(true);
+        }
+      }
+      reservesData[assets[i]].configuration = assetConfig;
+    }
+
+    (bool siloed, address siloedAsset) = config.getSiloedBorrowingState(reservesData, reservesList);
+
+    assertEq(siloed, siloedBorrowing);
+    assertEq(siloedAsset, siloedBorrowing ? assets[collateralCount] : address(0));
   }
 
   function Test_getFirstAssetIdByMask(uint256 data, bool collateralMask) internal {
@@ -126,7 +215,6 @@ contract ContractTest is TestHelper {
     );
 
     uint256 mapped = data & mask;
-
     uint256 id;
 
     while ((mapped >>= 1) & 1 == 0) {
