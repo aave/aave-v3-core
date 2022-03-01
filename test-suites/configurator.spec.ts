@@ -85,7 +85,8 @@ const getReserveData = async (helpersContract: AaveProtocolDataProvider, asset: 
 
 makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
   let baseConfigValues: ReserveConfigurationValues;
-  const { RESERVE_LIQUIDITY_NOT_ZERO, INVALID_DEBT_CEILING, RESERVE_DEBT_NOT_ZERO } = ProtocolErrors;
+  const { RESERVE_LIQUIDITY_NOT_ZERO, INVALID_DEBT_CEILING, RESERVE_DEBT_NOT_ZERO } =
+    ProtocolErrors;
 
   before(() => {
     const {
@@ -922,7 +923,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
 
   it('Resets the siloed borrowing mode. Tries to set siloed borrowing after the asset has been borrowed (revert expected)', async () => {
     const snap = await evmSnapshot();
-  
+
     const {
       configurator,
       weth,
@@ -957,7 +958,6 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     );
 
     await evmRevert(snap);
-
   });
 
   it('Sets a debt ceiling through the pool admin', async () => {

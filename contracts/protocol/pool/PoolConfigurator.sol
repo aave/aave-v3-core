@@ -265,8 +265,12 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setSiloedBorrowing(address asset, bool newSiloed) external override onlyRiskOrPoolAdmins {
-    if(newSiloed) {
+  function setSiloedBorrowing(address asset, bool newSiloed)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    if (newSiloed) {
       _checkNoBorrowers(asset);
     }
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
@@ -481,9 +485,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     require(totalATokens == 0, Errors.RESERVE_LIQUIDITY_NOT_ZERO);
   }
 
-    function _checkNoBorrowers(address asset) internal view {
-    uint256 totalDebt = IPoolDataProvider(_addressesProvider.getPoolDataProvider())
-      .getTotalDebt(asset);
+  function _checkNoBorrowers(address asset) internal view {
+    uint256 totalDebt = IPoolDataProvider(_addressesProvider.getPoolDataProvider()).getTotalDebt(
+      asset
+    );
     require(totalDebt == 0, Errors.RESERVE_DEBT_NOT_ZERO);
   }
 

@@ -10,8 +10,8 @@ import {DataTypes} from '../../libraries/types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
-import {EModeLogic} from './EModeLogic.sol';
 import {IsolationModeLogic} from './IsolationModeLogic.sol';
+import {EModeLogic} from './EModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -81,6 +81,8 @@ library LiquidationLogic {
     uint256 healthFactor;
     uint256 liquidationProtocolFeeAmount;
     uint256 closeFactor;
+    address collateralPriceSource;
+    address debtPriceSource;
     IAToken collateralAToken;
     IPriceOracleGetter oracle;
     DataTypes.ReserveCache debtReserveCache;
@@ -156,12 +158,31 @@ library LiquidationLogic {
       ? vars.maxLiquidatableDebt
       : params.debtToCover;
 
-    vars.liquidationBonus = EModeLogic.isInEModeCategory(
-      params.userEModeCategory,
-      collateralReserve.configuration.getEModeCategory()
-    )
-      ? eModeCategories[params.userEModeCategory].liquidationBonus
-      : collateralReserve.configuration.getLiquidationBonus();
+    vars.collateralPriceSource = params.collateralAsset;
+    vars.debtPriceSource = params.debtAsset;
+    vars.liquidationBonus = collateralReserve.configuration.getLiquidationBonus();
+
+    if (params.userEModeCategory != 0) {
+      address eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
+
+      if (
+        EModeLogic.isInEModeCategory(
+          params.userEModeCategory,
+          collateralReserve.configuration.getEModeCategory()
+        )
+      ) {
+        vars.liquidationBonus = eModeCategories[params.userEModeCategory].liquidationBonus;
+
+        if (eModePriceSource != address(0)) {
+          vars.collateralPriceSource = eModePriceSource;
+        }
+      }
+
+      // when in eMode, debt will always be in the same eMode category, can skip matching category check
+      if (eModePriceSource != address(0)) {
+        vars.debtPriceSource = eModePriceSource;
+      }
+    }
 
     (
       vars.maxCollateralToLiquidate,
@@ -170,8 +191,8 @@ library LiquidationLogic {
     ) = _calculateAvailableCollateralToLiquidate(
       collateralReserve,
       vars.debtReserveCache,
-      params.collateralAsset,
-      params.debtAsset,
+      vars.collateralPriceSource,
+      vars.debtPriceSource,
       vars.actualDebtToLiquidate,
       vars.userCollateralBalance,
       vars.liquidationBonus,

@@ -31,15 +31,19 @@ makeSuite('Siloed borrowing', (testEnv: TestEnv) => {
     const wethSupplyAmount = utils.parseEther('1');
     const daiBorrowAmount = utils.parseEther('10');
     const daiSupplyAmount = utils.parseEther('1000');
-    const usdcSupplyAmount = utils.parseUnits('1000',6);
+    const usdcSupplyAmount = utils.parseUnits('1000', 6);
 
     await dai.connect(users[0].signer)['mint(address,uint256)'](users[0].address, daiSupplyAmount);
     await dai.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[0].signer).supply(dai.address, daiSupplyAmount, users[0].address, '0');
 
-    await usdc.connect(users[1].signer)['mint(address,uint256)'](users[1].address, usdcSupplyAmount);
+    await usdc
+      .connect(users[1].signer)
+      ['mint(address,uint256)'](users[1].address, usdcSupplyAmount);
     await usdc.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(users[1].signer).supply(usdc.address, usdcSupplyAmount, users[1].address, '0');
+    await pool
+      .connect(users[1].signer)
+      .supply(usdc.address, usdcSupplyAmount, users[1].address, '0');
 
     await weth
       .connect(users[1].signer)
