@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { evmSnapshot, evmRevert, ZERO_ADDRESS } from '@aave/deploy-v3';
 
-makeSuite('Pool: getReserveAddressById', (testEnv: TestEnv) => {
+makeSuite('Pool: getReservesList', (testEnv: TestEnv) => {
   let snap: string;
 
   beforeEach(async () => {
@@ -18,17 +18,17 @@ makeSuite('Pool: getReserveAddressById', (testEnv: TestEnv) => {
 
     const reserveData = await pool.getReserveData(usdc.address);
 
-    const reserveAddress = await pool.getReserveAddressById(reserveData.id);
+    const reserveAddress = await pool.getReservesList(reserveData.id);
 
     await expect(reserveAddress).to.be.eq(usdc.address);
   });
 
-  it('User calls `getReserveAddressById` with a wrong id (id > reservesCount)', async () => {
+  it('User calls `getReservesList` with a wrong id (id > reservesCount)', async () => {
     const { pool } = testEnv;
 
     // MAX_NUMBER_RESERVES is always greater than reservesCount
     const maxNumberOfReserves = await pool.MAX_NUMBER_RESERVES();
-    const reserveAddress = await pool.getReserveAddressById(maxNumberOfReserves.add(1));
+    const reserveAddress = await pool.getReservesList(maxNumberOfReserves.add(1));
 
     await expect(reserveAddress).to.be.eq(ZERO_ADDRESS);
   });
