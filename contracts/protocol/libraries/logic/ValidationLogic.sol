@@ -35,24 +35,12 @@ library ValidationLogic {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using Address for address;
 
-  /**
-   * @dev This constant represents the delta between the maximum variable borrow rate and liquidity rate below which
-   * stable rate rebalances up are allowed when the usage ratio > `REBALANCE_UP_USAGE_RATIO_THRESHOLD`
-   * Expressed in bps, a factor of 0.4e4 results in 40.00%
-   */
-  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 0.4e4;
+  // Factor to apply to "only-variable-debt" liquidity rate to get threshold for rebalancing, expressed in bps
+  // A value of 0.9e4 results in 90%
+  uint256 public constant REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD = 0.9e4;
 
-  /**
-   * @dev This constant represents the minimum borrow usage ratio threshold at which rebalances up are possible
-   * Expressed in ray, a rate of 0.95e27 results in 95%
-   */
-  uint256 public constant REBALANCE_UP_USAGE_RATIO_THRESHOLD = 0.95e27;
-
-  /**
-   * @dev This constant represents below which health factor value it is possible to liquidate
-   * the maximum percentage of borrower's debt.
-   * A value of 0.95e18 results in 0.95
-   */
+  // Minimum health factor allowed under any circumstance
+  // A value of 0.95e18 results in 0.95
   uint256 public constant MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 0.95e18;
 
   /**
@@ -410,6 +398,8 @@ library ValidationLogic {
 
   /**
    * @notice Validates a stable borrow rate rebalance action.
+   * @dev Rebalancing is accepted when depositors are earning <= 90% of their earnings in pure supply/demand market (variable rate only)
+   * For this to be the case, there has to be quite large stable debt with an interest rate below the current variable rate.
    * @param reserve The reserve state on which the user is getting rebalanced
    * @param reserveCache The cached state of the reserve
    * @param reserveAddress The address of the reserve
@@ -423,30 +413,28 @@ library ValidationLogic {
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
-    //if the usage ratio is below the threshold, no rebalances are needed
-    uint256 totalDebt = (IERC20(reserveCache.stableDebtTokenAddress).totalSupply() +
-      IERC20(reserveCache.variableDebtTokenAddress).totalSupply()).wadToRay();
-    uint256 availableLiquidity = IERC20(reserveAddress)
-      .balanceOf(reserveCache.aTokenAddress)
-      .wadToRay();
-    uint256 borrowUsageRatio = totalDebt == 0
-      ? 0
-      : totalDebt.rayDiv(availableLiquidity + totalDebt);
+    uint256 totalDebt = IERC20(reserveCache.stableDebtTokenAddress).totalSupply() +
+      IERC20(reserveCache.variableDebtTokenAddress).totalSupply();
 
-    //if the usage ratio is higher than the threshold and liquidity rate less than the maximum allowed based
-    // on the max variable borrow rate, we allow rebalancing of the stable rate positions.
-    require(
-      borrowUsageRatio >= REBALANCE_UP_USAGE_RATIO_THRESHOLD,
-      Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
-    );
-
-    uint256 maxVariableBorrowRate = IReserveInterestRateStrategy(
+    (uint256 liquidityRateVariableDebtOnly, , ) = IReserveInterestRateStrategy(
       reserve.interestRateStrategyAddress
-    ).getMaxVariableBorrowRate();
+    ).calculateInterestRates(
+        DataTypes.CalculateInterestRatesParams({
+          unbacked: reserve.unbacked,
+          liquidityAdded: 0,
+          liquidityTaken: 0,
+          totalStableDebt: 0,
+          totalVariableDebt: totalDebt,
+          averageStableBorrowRate: 0,
+          reserveFactor: reserveCache.reserveFactor,
+          reserve: reserveAddress,
+          aToken: reserveCache.aTokenAddress
+        })
+      );
 
     require(
       reserveCache.currLiquidityRate <=
-        maxVariableBorrowRate.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
+        liquidityRateVariableDebtOnly.percentMul(REBALANCE_UP_LIQUIDITY_RATE_THRESHOLD),
       Errors.INTEREST_RATE_REBALANCE_CONDITIONS_NOT_MET
     );
   }
