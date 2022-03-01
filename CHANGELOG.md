@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.14.1](https://www.github.com/aave/aave-v3-core/compare/v1.14.0...v1.14.1) (2022-03-01)
+
+
+### Bug Fixes
+
+* Improve consistency of function naming of CalldataLogic ([1a5517d](https://www.github.com/aave/aave-v3-core/commit/1a5517d28b531d673e6ac81e59b552d1280e7d7e))
+* Use memory instead of storage in `getLiquidationBonus` ([deccf52](https://www.github.com/aave/aave-v3-core/commit/deccf529ad8d300f8a0e768cc8d9bf6d48b7699f))
+
 ## [1.14.0](https://www.github.com/aave/aave-v3-core/compare/v1.13.1...v1.14.0) (2022-02-21)
 
 
