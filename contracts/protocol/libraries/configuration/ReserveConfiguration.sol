@@ -135,9 +135,9 @@ library ReserveConfiguration {
    * @param self The reserve configuration
    * @return The liquidation bonus
    **/
-  function getLiquidationBonus(DataTypes.ReserveConfigurationMap storage self)
+  function getLiquidationBonus(DataTypes.ReserveConfigurationMap memory self)
     internal
-    view
+    pure
     returns (uint256)
   {
     return (self.data & ~LIQUIDATION_BONUS_MASK) >> LIQUIDATION_BONUS_START_BIT_POSITION;
