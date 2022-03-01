@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
@@ -7,8 +7,8 @@ contract MockPool {
   // Reserved storage space to avoid layout collisions.
   uint256[100] private ______gap;
 
-  address _addressesProvider;
-  address[] _reserveList;
+  address internal _addressesProvider;
+  address[] internal _reserveList;
 
   function initialize(address provider) external {
     _addressesProvider = provider;
@@ -42,7 +42,12 @@ contract MockPoolInherited is Pool {
     _maxNumberOfReserves = newMaxNumberOfReserves;
   }
 
-  function MAX_NUMBER_RESERVES() public view override returns (uint256) {
+  function MAX_NUMBER_RESERVES() public view override returns (uint16) {
     return _maxNumberOfReserves;
+  }
+
+  function dropReserve(address asset) external override {
+    _reservesList[_reserves[asset].id] = address(0);
+    delete _reserves[asset];
   }
 }

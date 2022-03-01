@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -13,9 +13,9 @@ contract MockFlashLoanReceiver is FlashLoanReceiverBase {
   event ExecutedWithFail(address[] _assets, uint256[] _amounts, uint256[] _premiums);
   event ExecutedWithSuccess(address[] _assets, uint256[] _amounts, uint256[] _premiums);
 
-  bool _failExecution;
-  uint256 _amountToApprove;
-  bool _simulateEOA;
+  bool internal _failExecution;
+  uint256 internal _amountToApprove;
+  bool internal _simulateEOA;
 
   constructor(IPoolAddressesProvider provider) FlashLoanReceiverBase(provider) {}
 

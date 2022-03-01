@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
@@ -11,7 +11,7 @@ import {DataTypes} from '../protocol/libraries/types/DataTypes.sol';
  **/
 interface IPool {
   /**
-   * @notice Emitted on mintUnbacked()
+   * @dev Emitted on mintUnbacked()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the supply
    * @param onBehalfOf The beneficiary of the supplied assets, receiving the aTokens
@@ -27,15 +27,16 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on backUnbacked()
+   * @dev Emitted on backUnbacked()
    * @param reserve The address of the underlying asset of the reserve
    * @param backer The address paying for the backing
    * @param amount The amount added as backing
+   * @param fee The amount paid in fees
    **/
   event BackUnbacked(address indexed reserve, address indexed backer, uint256 amount, uint256 fee);
 
   /**
-   * @notice Emitted on supply()
+   * @dev Emitted on supply()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address initiating the supply
    * @param onBehalfOf The beneficiary of the supply, receiving the aTokens
@@ -51,8 +52,8 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on withdraw()
-   * @param reserve The address of the underlyng asset being withdrawn
+   * @dev Emitted on withdraw()
+   * @param reserve The address of the underlying asset being withdrawn
    * @param user The address initiating the withdrawal, owner of aTokens
    * @param to The address that will receive the underlying
    * @param amount The amount to be withdrawn
@@ -60,7 +61,7 @@ interface IPool {
   event Withdraw(address indexed reserve, address indexed user, address indexed to, uint256 amount);
 
   /**
-   * @notice Emitted on borrow() and flashLoan() when debt needs to be opened
+   * @dev Emitted on borrow() and flashLoan() when debt needs to be opened
    * @param reserve The address of the underlying asset being borrowed
    * @param user The address of the user initiating the borrow(), receiving the funds on borrow() or just
    * initiator of the transaction on flashLoan()
@@ -81,7 +82,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on repay()
+   * @dev Emitted on repay()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The beneficiary of the repayment, getting his debt reduced
    * @param repayer The address of the user initiating the repay(), providing the funds
@@ -97,7 +98,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on swapBorrowRateMode()
+   * @dev Emitted on swapBorrowRateMode()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user swapping his rate mode
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
@@ -109,42 +110,42 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted on borrow(), repay() and liquidationCall() when using isolated assets
+   * @dev Emitted on borrow(), repay() and liquidationCall() when using isolated assets
    * @param asset The address of the underlying asset of the reserve
    * @param totalDebt The total isolation mode debt for the reserve
    */
   event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
-   * @notice Emitted when the user selects a certain asset category for eMode
+   * @dev Emitted when the user selects a certain asset category for eMode
    * @param user The address of the user
    * @param categoryId The category id
    **/
   event UserEModeSet(address indexed user, uint8 categoryId);
 
   /**
-   * @notice Emitted on setUserUseReserveAsCollateral()
+   * @dev Emitted on setUserUseReserveAsCollateral()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user enabling the usage as collateral
    **/
   event ReserveUsedAsCollateralEnabled(address indexed reserve, address indexed user);
 
   /**
-   * @notice Emitted on setUserUseReserveAsCollateral()
+   * @dev Emitted on setUserUseReserveAsCollateral()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user enabling the usage as collateral
    **/
   event ReserveUsedAsCollateralDisabled(address indexed reserve, address indexed user);
 
   /**
-   * @notice Emitted on rebalanceStableBorrowRate()
+   * @dev Emitted on rebalanceStableBorrowRate()
    * @param reserve The address of the underlying asset of the reserve
    * @param user The address of the user for which the rebalance has been executed
    **/
   event RebalanceStableBorrowRate(address indexed reserve, address indexed user);
 
   /**
-   * @notice Emitted on flashLoan()
+   * @dev Emitted on flashLoan()
    * @param target The address of the flash loan receiver contract
    * @param initiator The address initiating the flash loan
    * @param asset The address of the asset being flash borrowed
@@ -164,12 +165,12 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted when a borrower is liquidated.
+   * @dev Emitted when a borrower is liquidated.
    * @param collateralAsset The address of the underlying asset used as collateral, to receive as result of the liquidation
    * @param debtAsset The address of the underlying borrowed asset to be repaid with the liquidation
    * @param user The address of the borrower getting liquidated
    * @param debtToCover The debt amount of borrowed `asset` the liquidator wants to cover
-   * @param liquidatedCollateralAmount The amount of collateral received by the liiquidator
+   * @param liquidatedCollateralAmount The amount of collateral received by the liquidator
    * @param liquidator The address of the liquidator
    * @param receiveAToken True if the liquidators wants to receive the collateral aTokens, `false` if he wants
    * to receive the underlying collateral asset directly
@@ -185,7 +186,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted when the state of a reserve is updated.
+   * @dev Emitted when the state of a reserve is updated.
    * @param reserve The address of the underlying asset of the reserve
    * @param liquidityRate The next liquidity rate
    * @param stableBorrowRate The next stable borrow rate
@@ -203,7 +204,7 @@ interface IPool {
   );
 
   /**
-   * @notice Emitted when the protocol treasury receives minted aTokens from the accrued interest.
+   * @dev Emitted when the protocol treasury receives minted aTokens from the accrued interest.
    * @param reserve The address of the reserve
    * @param amountMinted The amount minted to the treasury
    **/
@@ -367,10 +368,11 @@ interface IPool {
   ) external returns (uint256);
 
   /**
-   * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the equivalent debt tokens
+   * @notice Repays a borrowed `amount` on a specific reserve using the reserve aTokens, burning the
+   * equivalent debt tokens
    * - E.g. User repays 100 USDC using 100 aUSDC, burning 100 variable/stable debt tokens
-   * @dev  Passing uint256.max as amount will clean up any residual aToken dust balance, if the user aToken balance is not enough to
-   * cover the whole debt
+   * @dev  Passing uint256.max as amount will clean up any residual aToken dust balance, if the user aToken
+   * balance is not enough to cover the whole debt
    * @param asset The address of the borrowed underlying asset previously borrowed
    * @param amount The amount to repay
    * - Send the value type(uint256).max in order to repay the whole debt for `asset` on the specific `debtMode`
@@ -384,9 +386,9 @@ interface IPool {
   ) external returns (uint256);
 
   /**
-   * @notice Allows a borrower to swap his debt between stable and variable mode, or viceversa
+   * @notice Allows a borrower to swap his debt between stable and variable mode, or vice versa
    * @param asset The address of the underlying asset borrowed
-   * @param interestRateMode The rate mode that the user wants to swap to: 1 for Stable, 2 for Variable
+   * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    **/
   function swapBorrowRateMode(address asset, uint256 interestRateMode) external;
 
@@ -394,8 +396,8 @@ interface IPool {
    * @notice Rebalances the stable interest rate of a user to the current stable rate defined on the reserve.
    * - Users can be rebalanced if the following conditions are satisfied:
    *     1. Usage ratio is above 95%
-   *     2. the current supply APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too much has been
-   *        borrowed at a stable rate and suppliers are not earning enough
+   *     2. the current supply APY is below REBALANCE_UP_THRESHOLD * maxVariableBorrowRate, which means that too
+   *        much has been borrowed at a stable rate and suppliers are not earning enough
    * @param asset The address of the underlying asset borrowed
    * @param user The address of the user to be rebalanced
    **/
@@ -430,9 +432,9 @@ interface IPool {
   /**
    * @notice Allows smartcontracts to access the liquidity of the pool within one transaction,
    * as long as the amount taken plus a fee is returned.
-   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
-   * For further details please visit https://developers.aave.com
-   * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanReceiver interface
+   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept
+   * into consideration. For further details please visit https://developers.aave.com
+   * @param receiverAddress The address of the contract receiving the funds, implementing IFlashLoanReceiver interface
    * @param assets The addresses of the assets being flash-borrowed
    * @param amounts The amounts of the assets being flash-borrowed
    * @param interestRateModes Types of the debt to open if the flash loan is not returned:
@@ -457,9 +459,9 @@ interface IPool {
   /**
    * @notice Allows smartcontracts to access the liquidity of the pool within one transaction,
    * as long as the amount taken plus a fee is returned.
-   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept into consideration.
-   * For further details please visit https://developers.aave.com
-   * @param receiverAddress The address of the contract receiving the funds, implementing the IFlashLoanSimpleReceiver interface
+   * @dev IMPORTANT There are security concerns for developers of flashloan receiver contracts that must be kept
+   * into consideration. For further details please visit https://developers.aave.com
+   * @param receiverAddress The address of the contract receiving the funds, implementing IFlashLoanSimpleReceiver interface
    * @param asset The address of the asset being flash-borrowed
    * @param amount The amount of the asset being flash-borrowed
    * @param params Variadic packed params to pass to the receiver as extra information
@@ -576,7 +578,7 @@ interface IPool {
   /**
    * @notice Returns the state and configuration of the reserve
    * @param asset The address of the underlying asset of the reserve
-   * @return The state of the reserve
+   * @return The state and configuration data of the reserve
    **/
   function getReserveData(address asset) external view returns (DataTypes.ReserveData memory);
 
@@ -614,21 +616,23 @@ interface IPool {
 
   /**
    * @notice Updates the protocol fee on the bridging
-   * @param bridgeProtocolFee The part of the premium sent to protocol
+   * @param bridgeProtocolFee The part of the premium sent to the protocol treasury
    */
   function updateBridgeProtocolFee(uint256 bridgeProtocolFee) external;
 
   /**
-   * @notice Updates flash loan premiums. Flash loan premium consist in 2 parts
-   * - A part is sent to aToken holders as extra balance
-   * - A part is collected by the protocol reserves
+   * @notice Updates flash loan premiums. Flash loan premium consists of two parts:
+   * - A part is sent to aToken holders as extra, one time accumulated interest
+   * - A part is collected by the protocol treasury
+   * @dev The total premium is calculated on the total borrowed amount
+   * @dev The premium to protocol is calculated on the total premium, being a percentage of `flashLoanPremiumTotal`
    * @dev Only callable by the PoolConfigurator contract
-   * @param flashLoanPremiumTotal The total premium in bps
-   * @param flashLoanPremiumToProtocol The part of the premium sent to protocol
+   * @param flashLoanPremiumTotal The total premium, expressed in bps
+   * @param flashLoanPremiumToProtocol The part of the premium sent to the protocol treasury, expressed in bps
    */
   function updateFlashloanPremiums(
-    uint256 flashLoanPremiumTotal,
-    uint256 flashLoanPremiumToProtocol
+    uint128 flashLoanPremiumTotal,
+    uint128 flashLoanPremiumToProtocol
   ) external;
 
   /**
@@ -669,7 +673,7 @@ interface IPool {
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate
-   * @return The percentage of available liquidity to borrow
+   * @return The percentage of available liquidity to borrow, expressed in bps
    */
   function MAX_STABLE_RATE_BORROW_SIZE_PERCENT() external view returns (uint256);
 
@@ -677,31 +681,43 @@ interface IPool {
    * @notice Returns the total fee on flash loans
    * @return The total fee on flashloans
    */
-  function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint256);
+  function FLASHLOAN_PREMIUM_TOTAL() external view returns (uint128);
 
   /**
    * @notice Returns the part of the bridge fees sent to protocol
-   * @return The bridge fee sent to the protocol
+   * @return The bridge fee sent to the protocol treasury
    */
   function BRIDGE_PROTOCOL_FEE() external view returns (uint256);
 
   /**
    * @notice Returns the part of the flashloan fees sent to protocol
-   * @return The flashloan fee sent to the protocol
+   * @return The flashloan fee sent to the protocol treasury
    */
-  function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint256);
+  function FLASHLOAN_PREMIUM_TO_PROTOCOL() external view returns (uint128);
 
   /**
    * @notice Returns the maximum number of reserves supported to be listed in this Pool
    * @return The maximum number of reserves supported
    */
-  function MAX_NUMBER_RESERVES() external view returns (uint256);
+  function MAX_NUMBER_RESERVES() external view returns (uint16);
 
   /**
    * @notice Mints the assets accrued through the reserve factor to the treasury in the form of aTokens
    * @param assets The list of reserves for which the minting needs to be executed
    **/
   function mintToTreasury(address[] calldata assets) external;
+
+  /**
+   * @notice Rescue and transfer tokens locked in this contract
+   * @param token The address of the token
+   * @param to The address of the recipient
+   * @param amount The amount of token to transfer
+   */
+  function rescueTokens(
+    address token,
+    address to,
+    uint256 amount
+  ) external;
 
   /**
    * @notice Supplies an `amount` of underlying asset into the reserve, receiving in return overlying aTokens.

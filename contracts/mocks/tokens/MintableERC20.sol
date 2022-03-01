@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {ERC20} from '../../dependencies/openzeppelin/contracts/ERC20.sol';
@@ -15,6 +15,7 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
   bytes32 public constant PERMIT_TYPEHASH =
     keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
+  // Map of address nonces (address => nonce)
   mapping(address => uint256) internal _nonces;
 
   bytes32 public DOMAIN_SEPARATOR;
@@ -38,6 +39,7 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
     _setupDecimals(decimals);
   }
 
+  /// @inheritdoc IERC20WithPermit
   function permit(
     address owner,
     address spender,

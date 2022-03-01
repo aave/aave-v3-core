@@ -10,13 +10,15 @@ import {
   ZERO_ADDRESS,
 } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { impersonateAddress } from '@aave/deploy-v3';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { parseUnits } from 'ethers/lib/utils';
 
 makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
   const {
     INVALID_RESERVE_FACTOR,
     INVALID_RESERVE_PARAMS,
     INVALID_LIQ_BONUS,
-    FLASHLOAN_PREMIUMS_MISMATCH,
     FLASHLOAN_PREMIUM_INVALID,
     RESERVE_LIQUIDITY_NOT_ZERO,
     INVALID_BORROW_CAP,
@@ -118,27 +120,6 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     );
   });
 
-  it('Tries to update flashloan premium total < FLASHLOAN_PREMIUM_TO_PROTOCOL (revert expected)', async () => {
-    const { configurator } = testEnv;
-
-    const newPremiumToProtocol = 40;
-    const newPremiumTotal = 100;
-    const wrongPremiumTotal = 39;
-
-    // Update FLASHLOAN_PREMIUM_TO_PROTOCOL to non-zero
-    expect(await configurator.updateFlashloanPremiumTotal(newPremiumTotal))
-      .to.emit(configurator, 'FlashloanPremiumTotalUpdated')
-      .withArgs(newPremiumTotal);
-
-    expect(await configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol))
-      .to.emit(configurator, 'FlashloanPremiumToProtocolUpdated')
-      .withArgs(newPremiumToProtocol);
-
-    await expect(configurator.updateFlashloanPremiumTotal(wrongPremiumTotal)).to.be.revertedWith(
-      FLASHLOAN_PREMIUMS_MISMATCH
-    );
-  });
-
   it('Tries to update flashloan premium to protocol > PERCENTAGE_FACTOR (revert expected)', async () => {
     const { configurator } = testEnv;
 
@@ -146,15 +127,6 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
     await expect(
       configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
     ).to.be.revertedWith(FLASHLOAN_PREMIUM_INVALID);
-  });
-
-  it('Tries to update flashloan premium to protocol > FLASHLOAN_PREMIUM_TOTAL (revert expected)', async () => {
-    const { configurator } = testEnv;
-
-    const newPremiumToProtocol = 101;
-    await expect(
-      configurator.updateFlashloanPremiumToProtocol(newPremiumToProtocol)
-    ).to.be.revertedWith(FLASHLOAN_PREMIUMS_MISMATCH);
   });
 
   it('Tries to update borrowCap > MAX_BORROW_CAP (revert expected)', async () => {
@@ -307,5 +279,44 @@ makeSuite('PoolConfigurator: Edge cases', (testEnv: TestEnv) => {
       configurator.setReserveActive(dai.address, false),
       RESERVE_LIQUIDITY_NOT_ZERO
     ).to.be.revertedWith(RESERVE_LIQUIDITY_NOT_ZERO);
+  });
+
+  it('Tries to withdraw from an inactive reserve (revert expected)', async () => {
+    const { dai, pool, configurator, helpersContract } = testEnv;
+    const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '1000');
+    const userAddress = await pool.signer.getAddress();
+
+    // Impersonate configurator
+    const impConfig = await impersonateAddress(configurator.address);
+    await topUpNonPayableWithEther(pool.signer, [configurator.address], parseUnits('10', 18));
+
+    // Top up user
+    expect(await dai['mint(uint256)'](amountDAItoDeposit));
+
+    // Approve protocol to access depositor wallet
+    expect(await dai.approve(pool.address, MAX_UINT_AMOUNT));
+
+    // User 1 deposits 1000 DAI
+    expect(await pool.deposit(dai.address, amountDAItoDeposit, userAddress, '0'));
+
+    // get configuration
+    const daiConfiguration: BigNumber = (await pool.getConfiguration(dai.address)).data;
+    const activeMask = BigNumber.from(
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFF'
+    );
+
+    // Set new configuration with active turned off
+    expect(
+      await pool
+        .connect(impConfig.signer)
+        .setConfiguration(dai.address, { data: daiConfiguration.and(activeMask) })
+    );
+
+    const updatedConfiguration = await helpersContract.getReserveConfigurationData(dai.address);
+    expect(updatedConfiguration.isActive).to.false;
+
+    await expect(pool.withdraw(dai.address, amountDAItoDeposit, userAddress)).to.be.revertedWith(
+      ProtocolErrors.RESERVE_INACTIVE
+    );
   });
 });

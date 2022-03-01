@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 import {IPriceOracleGetter} from './IPriceOracleGetter.sol';
@@ -11,21 +11,21 @@ import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
  */
 interface IAaveOracle is IPriceOracleGetter {
   /**
-   * @notice Emitted after the base currency is set
+   * @dev Emitted after the base currency is set
    * @param baseCurrency The base currency of used for price quotes
    * @param baseCurrencyUnit The unit of the base currency
    */
   event BaseCurrencySet(address indexed baseCurrency, uint256 baseCurrencyUnit);
 
   /**
-   * @notice Emitted after the price source of an asset is updated
+   * @dev Emitted after the price source of an asset is updated
    * @param asset The address of the asset
    * @param source The price source of the asset
    */
   event AssetSourceUpdated(address indexed asset, address indexed source);
 
   /**
-   * @notice Emitted after the address of fallback oracle is updated
+   * @dev Emitted after the address of fallback oracle is updated
    * @param fallbackOracle The address of the fallback oracle
    */
   event FallbackOracleUpdated(address indexed fallbackOracle);

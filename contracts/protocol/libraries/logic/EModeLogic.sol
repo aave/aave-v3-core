@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {GPv2SafeERC20} from '../../../dependencies/gnosis/contracts/GPv2SafeERC20.sol';
@@ -32,15 +32,15 @@ library EModeLogic {
    * @notice Updates the user efficiency mode category
    * @dev Will revert if user is borrowing non-compatible asset or change will drop HF < HEALTH_FACTOR_LIQUIDATION_THRESHOLD
    * @dev Emits the `UserEModeSet` event
-   * @param reserves The state of all the reserves
-   * @param reservesList The list of the addresses of all the active reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param usersEModeCategory The state of all users efficiency mode category
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the setUserEMode function
    */
   function executeSetUserEMode(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     mapping(address => uint8) storage usersEModeCategory,
@@ -48,7 +48,7 @@ library EModeLogic {
     DataTypes.ExecuteSetUserEModeParams memory params
   ) external {
     ValidationLogic.validateSetUserEMode(
-      reserves,
+      reservesData,
       reservesList,
       eModeCategories,
       userConfig,
@@ -61,7 +61,7 @@ library EModeLogic {
 
     if (prevCategoryId != 0) {
       ValidationLogic.validateHealthFactor(
-        reserves,
+        reservesData,
         reservesList,
         eModeCategories,
         userConfig,

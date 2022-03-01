@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 /**
@@ -6,10 +6,13 @@ pragma solidity 0.8.10;
  * @author Aave
  * @notice Provides functions to perform percentage calculations
  * @dev Percentages are defined by default with 2 decimals of precision (100.00). The precision is indicated by PERCENTAGE_FACTOR
- * @dev Operations are rounded half up
+ * @dev Operations are rounded. If a value is >=.5, will be rounded up, otherwise rounded down.
  **/
 library PercentageMath {
-  uint256 internal constant PERCENTAGE_FACTOR = 1e4; //percentage plus two decimals
+  // Maximum percentage factor (100.00%)
+  uint256 internal constant PERCENTAGE_FACTOR = 1e4;
+
+  // Half percentage factor (50.00%)
   uint256 internal constant HALF_PERCENTAGE_FACTOR = 0.5e4;
 
   /**

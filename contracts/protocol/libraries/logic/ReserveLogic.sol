@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -103,8 +103,8 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example to accumulate
-   * the flashloan fee to the reserve, and spread it between all the suppliers.
+   * @notice Accumulates a predefined amount of asset to the reserve as a fixed, instantaneous income. Used for example
+   * to accumulate the flashloan fee to the reserve, and spread it between all the suppliers.
    * @param reserve The reserve object
    * @param totalLiquidity The total liquidity available in the reserve
    * @param amount The amount to accumulate
@@ -183,7 +183,9 @@ library ReserveLogic {
       vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       DataTypes.CalculateInterestRatesParams({
-        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() > 0 ? reserve.unbacked : 0,
+        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() != 0
+          ? reserve.unbacked
+          : 0,
         liquidityAdded: liquidityAdded,
         liquidityTaken: liquidityTaken,
         totalStableDebt: reserveCache.nextTotalStableDebt,
@@ -285,7 +287,7 @@ library ReserveLogic {
     reserveCache.nextVariableBorrowIndex = reserveCache.currVariableBorrowIndex;
 
     //only cumulating if there is any income being produced
-    if (reserveCache.currLiquidityRate > 0) {
+    if (reserveCache.currLiquidityRate != 0) {
       uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
         reserveCache.currLiquidityRate,
         reserveCache.reserveLastUpdateTimestamp
@@ -314,7 +316,8 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Creates a cache object to avoid repeated storage reads and external contract calls when updating state and interest rates.
+   * @notice Creates a cache object to avoid repeated storage reads and external contract calls when updating state and
+   * interest rates.
    * @param reserve The reserve object for which the cache will be filled
    * @return The cache object
    */

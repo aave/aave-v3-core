@@ -9,7 +9,7 @@ import {
   SequencerOracle,
   SequencerOracle__factory,
 } from '../types';
-import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
@@ -66,7 +66,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
         .setPriceOracleSentinel(priceOracleSentinel.address)
     )
       .to.emit(addressesProvider, 'PriceOracleSentinelUpdated')
-      .withArgs(priceOracleSentinel.address);
+      .withArgs(ZERO_ADDRESS, priceOracleSentinel.address);
 
     expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(priceOracleSentinel.address);
 

@@ -23,8 +23,10 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
   it('Reserves should initially have protocol liquidation fee set to 0', async () => {
     const { dai, usdc, helpersContract } = testEnv;
 
-    let usdcLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(usdc.address);
-    let daiLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(dai.address);
+    const usdcLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      usdc.address
+    );
+    const daiLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(dai.address);
 
     expect(usdcLiquidationProtocolFee).to.be.equal('0');
     expect(daiLiquidationProtocolFee).to.be.equal('0');
@@ -33,14 +35,21 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
   it('Sets the protocol liquidation fee to 1000 (10.00%)', async () => {
     const { configurator, dai, usdc, helpersContract } = testEnv;
 
+    const oldUsdcLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      usdc.address
+    );
+    const oldDaiLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      dai.address
+    );
+
     const liquidationProtocolFee = 1000;
 
     expect(await configurator.setLiquidationProtocolFee(usdc.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(usdc.address, liquidationProtocolFee);
+      .withArgs(usdc.address, oldUsdcLiquidationProtocolFee, liquidationProtocolFee);
     expect(await configurator.setLiquidationProtocolFee(dai.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(dai.address, liquidationProtocolFee);
+      .withArgs(dai.address, oldDaiLiquidationProtocolFee, liquidationProtocolFee);
 
     const usdcLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
       usdc.address
@@ -54,14 +63,21 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
   it('Sets the protocol liquidation fee to 10000 (100.00%) equal to PERCENTAGE_FACTOR', async () => {
     const { configurator, dai, usdc, helpersContract } = testEnv;
 
+    const oldUsdcLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      usdc.address
+    );
+    const oldDaiLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      dai.address
+    );
+
     const liquidationProtocolFee = 10000;
 
     expect(await configurator.setLiquidationProtocolFee(usdc.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(usdc.address, liquidationProtocolFee);
+      .withArgs(usdc.address, oldUsdcLiquidationProtocolFee, liquidationProtocolFee);
     expect(await configurator.setLiquidationProtocolFee(dai.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
-      .withArgs(dai.address, liquidationProtocolFee);
+      .withArgs(dai.address, oldDaiLiquidationProtocolFee, liquidationProtocolFee);
 
     const usdcLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
       usdc.address

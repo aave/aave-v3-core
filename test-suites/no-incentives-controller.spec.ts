@@ -11,7 +11,7 @@ import {
   StableDebtToken__factory,
   VariableDebtToken__factory,
 } from '../types';
-import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/tx';
+import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { makeSuite } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { setBlocktime, timeLatest } from '../helpers/misc-utils';
@@ -56,7 +56,6 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
       underlyingAsset: string;
       treasury: string;
       incentivesController: string;
-      underlyingAssetName: string;
       aTokenName: string;
       aTokenSymbol: string;
       variableDebtTokenName: string;
@@ -74,7 +73,6 @@ makeSuite('Reserve Without Incentives Controller', (testEnv) => {
         underlyingAsset: mockToken.address,
         treasury: ZERO_ADDRESS,
         incentivesController: ZERO_ADDRESS,
-        underlyingAssetName: 'MOCK',
         aTokenName: 'AMOCK',
         aTokenSymbol: 'AMOCK',
         variableDebtTokenName: 'VMOCK',

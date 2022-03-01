@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -40,26 +40,25 @@ library BridgeLogic {
    * @dev Essentially a supply without transferring the underlying.
    * @dev Emits the `MintUnbacked` event
    * @dev Emits the `ReserveUsedAsCollateralEnabled` if asset is set as collateral
-   * @param reserves The state of all the reserves
-   * @param reservesList The list of the addresses of all the active reserves
-   * @param reserve The reserve to mint to
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
-   * @param asset The address of the asset
+   * @param asset The address of the underlying asset to mint aTokens of
    * @param amount The amount to mint
    * @param onBehalfOf The address that will receive the aTokens
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    **/
   function executeMintUnbacked(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
-    DataTypes.ReserveData storage reserve,
     DataTypes.UserConfigurationMap storage userConfig,
     address asset,
     uint256 amount,
     address onBehalfOf,
     uint16 referralCode
   ) external {
+    DataTypes.ReserveData storage reserve = reservesData[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
 
     reserve.updateState(reserveCache);
@@ -83,7 +82,7 @@ library BridgeLogic {
     );
 
     if (isFirstSupply) {
-      if (ValidationLogic.validateUseAsCollateral(reserves, reservesList, userConfig, asset)) {
+      if (ValidationLogic.validateUseAsCollateral(reservesData, reservesList, userConfig, asset)) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
       }

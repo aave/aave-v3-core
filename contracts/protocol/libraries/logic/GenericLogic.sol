@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
@@ -50,8 +50,8 @@ library GenericLogic {
    * @notice Calculates the user data across the reserves.
    * @dev It includes the total liquidity/collateral/borrow balances in the base currency used by the price feed,
    * the average Loan To Value, the average Liquidation Ratio, and the Health factor.
-   * @param reservesData The data of all the reserves
-   * @param reserves The list of the available reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional parameters needed for the calculation
    * @return The total collateral of the user in the base currency used by the price feed
@@ -63,7 +63,7 @@ library GenericLogic {
    **/
   function calculateUserAccountData(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.CalculateUserAccountDataParams memory params
   )
@@ -100,7 +100,7 @@ library GenericLogic {
         continue;
       }
 
-      vars.currentReserveAddress = reserves[vars.i];
+      vars.currentReserveAddress = reservesList[vars.i];
 
       if (vars.currentReserveAddress == address(0)) {
         unchecked {
@@ -196,8 +196,8 @@ library GenericLogic {
   }
 
   /**
-   * @notice Calculates the maximum amount that can be borrowed depending on the available collateral, the total debt and the
-   * average Loan To Value
+   * @notice Calculates the maximum amount that can be borrowed depending on the available collateral, the total debt
+   * and the average Loan To Value
    * @param totalCollateralInBaseCurrency The total collateral in the base currency used by the price feed
    * @param totalDebtInBaseCurrency The total borrow balance in the base currency used by the price feed
    * @param ltv The average loan to value
@@ -220,8 +220,9 @@ library GenericLogic {
 
   /**
    * @notice Calculates total debt of the user in the based currency used to normalize the values of the assets
-   * @dev This fetches the `balanceOf` of the stable and variable debt tokens for the user. For gas reasons, the Variable
-   *      debt balance is calculated by fetching `scaledBalancesOf` * normalized debt, which is cheaper than fetching `balanceOf`
+   * @dev This fetches the `balanceOf` of the stable and variable debt tokens for the user. For gas reasons, the
+   * variable debt balance is calculated by fetching `scaledBalancesOf` normalized debt, which is cheaper than
+   * fetching `balanceOf`
    * @param user The address of the user
    * @param reserve The data of the reserve for which the total debt of the user is being calculated
    * @param assetPrice The price of the asset for which the total debt of the user is being calculated
@@ -253,7 +254,8 @@ library GenericLogic {
 
   /**
    * @notice Calculates total aToken balance of the user in the based currency used by the price oracle
-   * @dev For gas reasons, the aToken balance is calculated by fetching `scaledBalancesOf` * normalized debt, which is cheaper than fetching `balanceOf`
+   * @dev For gas reasons, the aToken balance is calculated by fetching `scaledBalancesOf` normalized debt, which
+   * is cheaper than fetching `balanceOf`
    * @param user The address of the user
    * @param reserve The data of the reserve for which the total aToken balance of the user is being calculated
    * @param assetPrice The price of the asset for which the total aToken balance of the user is being calculated

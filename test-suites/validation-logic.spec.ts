@@ -1,13 +1,16 @@
 import { expect } from 'chai';
-import { utils } from 'ethers';
+import { utils, constants } from 'ethers';
+import { parseUnits } from '@ethersproject/units';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { RateMode, ProtocolErrors } from '../helpers/types';
-import { setAutomine, setAutomineEvm } from '../helpers/misc-utils';
+import { impersonateAccountsHardhat, setAutomine, setAutomineEvm } from '../helpers/misc-utils';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { ethers } from 'hardhat';
-import { parseUnits } from '@ethersproject/units';
 import { waitForTx, evmSnapshot, evmRevert, getVariableDebtToken } from '@aave/deploy-v3';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -186,6 +189,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(configBefore.borrowingEnabled).to.be.eq(true);
 
     // Disable borrowing
+    await configurator.connect(poolAdmin.signer).setReserveStableRateBorrowing(dai.address, false);
     await configurator.connect(poolAdmin.signer).setReserveBorrowing(dai.address, false);
 
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
@@ -732,7 +736,12 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateSetUseReserveAsCollateral() when reserve is not active (revert expected)', async () => {
-    const { pool, configurator, helpersContract, poolAdmin, users, dai } = testEnv;
+    /**
+     * Since its not possible to deactivate a reserve with existing suppliers, making the user have
+     * aToken balance (aDAI) its not technically possible to end up in this situation.
+     * However, we impersonate the Pool to get some aDAI and make the test possible
+     */
+    const { pool, configurator, helpersContract, poolAdmin, users, dai, aDai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -744,6 +753,11 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     const configAfter = await helpersContract.getReserveConfigurationData(dai.address);
     expect(configAfter.isActive).to.be.eq(false);
     expect(configAfter.isFrozen).to.be.eq(false);
+
+    await impersonateAccountsHardhat([pool.address]);
+    const poolSigner = await hre.ethers.getSigner(pool.address);
+    await topUpNonPayableWithEther(user.signer, [pool.address], utils.parseEther('1'));
+    expect(await aDai.connect(poolSigner).mint(user.address, user.address, 1, 1));
 
     await expect(
       pool.connect(user.signer).setUserUseReserveAsCollateral(dai.address, true)
@@ -868,14 +882,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     expect(
       await configurator
         .connect(poolAdmin.signer)
-        .setEModeCategory(
-          '101',
-          '9800',
-          '9900',
-          '10100',
-          ethers.constants.AddressZero,
-          'INCONSISTENT'
-        )
+        .setEModeCategory('101', '9800', '9900', '10100', constants.AddressZero, 'INCONSISTENT')
     );
 
     await pool.connect(user.signer).setUserEMode(101);
@@ -920,7 +927,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
     await configurator
       .connect(poolAdmin.signer)
-      .setEModeCategory('101', '9800', '9900', '10100', ethers.constants.AddressZero, 'NO-ASSETS');
+      .setEModeCategory('101', '9800', '9900', '10100', constants.AddressZero, 'NO-ASSETS');
 
     await pool.connect(user.signer).setUserEMode(101);
 
@@ -962,6 +969,53 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
       .connect(user.signer)
       .borrow(usdc.address, amountUSDCToBorrow, RateMode.Variable, 0, user.address);
 
+    await expect(
+      pool.connect(user.signer).withdraw(dai.address, parseUnits('500', 18), user.address)
+    ).to.be.revertedWith(HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);
+  });
+
+  it('validateHFAndLtv() with HF < 1 for 0 LTV asset (revert expected)', async () => {
+    const {
+      usdc,
+      dai,
+      pool,
+      oracle,
+      poolAdmin,
+      configurator,
+      helpersContract,
+      users: [user, usdcProvider],
+    } = testEnv;
+
+    // Supply usdc
+    await usdc.connect(usdcProvider.signer)['mint(uint256)'](parseUnits('1000', 6));
+    await usdc.connect(usdcProvider.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(usdcProvider.signer)
+      .supply(usdc.address, parseUnits('1000', 6), usdcProvider.address, 0);
+
+    // Supply dai
+    await dai.connect(user.signer)['mint(uint256)'](parseUnits('1000', 18));
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(user.signer).supply(dai.address, parseUnits('1000', 18), user.address, 0);
+
+    // Borrow usdc
+    await pool
+      .connect(user.signer)
+      .borrow(usdc.address, parseUnits('500', 6), RateMode.Variable, 0, user.address);
+
+    // Drop LTV
+    const daiData = await helpersContract.getReserveConfigurationData(dai.address);
+
+    await configurator
+      .connect(poolAdmin.signer)
+      .configureReserveAsCollateral(
+        dai.address,
+        0,
+        daiData.liquidationThreshold,
+        daiData.liquidationBonus
+      );
+
+    // Withdraw all my dai
     await expect(
       pool.connect(user.signer).withdraw(dai.address, parseUnits('500', 18), user.address)
     ).to.be.revertedWith(HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD);

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 interface IPoolDataProvider {
@@ -42,4 +42,11 @@ interface IPoolDataProvider {
    * @return The total supply of the aToken
    **/
   function getATokenTotalSupply(address asset) external view returns (uint256);
+
+  /**
+   * @notice Returns the total debt for a given asset
+   * @param asset The address of the underlying asset of the reserve
+   * @return The total debt for asset
+   **/
+  function getTotalDebt(address asset) external view returns (uint256);
 }

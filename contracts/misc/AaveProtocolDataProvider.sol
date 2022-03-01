@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IERC20Detailed} from '../dependencies/openzeppelin/contracts/IERC20Detailed.sol';
@@ -15,7 +15,7 @@ import {IPoolDataProvider} from '../interfaces/IPoolDataProvider.sol';
 /**
  * @title AaveProtocolDataProvider
  * @author Aave
- * @notice Peripherial contract to gather and extract information from the Pool.
+ * @notice Peripheral contract to collect and pre-process information from the Pool.
  */
 contract AaveProtocolDataProvider is IPoolDataProvider {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -119,7 +119,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
 
     (isActive, isFrozen, borrowingEnabled, stableBorrowRateEnabled, ) = configuration.getFlags();
 
-    usageAsCollateralEnabled = liquidationThreshold > 0;
+    usageAsCollateralEnabled = liquidationThreshold != 0;
   }
 
   /**
@@ -134,7 +134,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /**
-   * @notice Returns the caps paramters of the reserve
+   * @notice Returns the caps parameters of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return borrowCap The borrow cap of the reserve
    * @return supplyCap The supply cap of the reserve
@@ -154,6 +154,15 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    **/
   function getPaused(address asset) external view returns (bool isPaused) {
     (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getFlags();
+  }
+
+  /**
+   * @notice Returns the siloed borrowing flag
+   * @param asset The address of the underlying asset of the reserve
+   * @return True if the asset is siloed for borrowing
+   **/
+  function getSiloedBorrowing(address asset) external view returns (bool) {
+    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getSiloedBorrowing();
   }
 
   /**
@@ -256,6 +265,20 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
       asset
     );
     return IERC20Detailed(reserve.aTokenAddress).totalSupply();
+  }
+
+  /**
+   * @notice Returns the total debt for a given asset
+   * @param asset The address of the underlying asset of the reserve
+   * @return The total debt for asset
+   **/
+  function getTotalDebt(address asset) external view override returns (uint256) {
+    DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
+      asset
+    );
+    return
+      IERC20Detailed(reserve.stableDebtTokenAddress).totalSupply() +
+      IERC20Detailed(reserve.variableDebtTokenAddress).totalSupply();
   }
 
   /**

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {Errors} from '../helpers/Errors.sol';
@@ -20,6 +20,7 @@ library ReserveConfiguration {
   uint256 internal constant STABLE_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant PAUSED_MASK =                    0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant BORROWABLE_IN_ISOLATION_MASK =   0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFFFFFFFFFFFFFFF; // prettier-ignore
+  uint256 internal constant SILOED_BORROWING_MASK =          0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant RESERVE_FACTOR_MASK =            0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant BORROW_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFF; // prettier-ignore
   uint256 internal constant SUPPLY_CAP_MASK =                0xFFFFFFFFFFFFFFFFFFFFFFFFFF000000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // prettier-ignore
@@ -38,7 +39,8 @@ library ReserveConfiguration {
   uint256 internal constant STABLE_BORROWING_ENABLED_START_BIT_POSITION = 59;
   uint256 internal constant IS_PAUSED_START_BIT_POSITION = 60;
   uint256 internal constant BORROWABLE_IN_ISOLATION_START_BIT_POSITION = 61;
-  /// @dev bits 62 63 reserved
+  uint256 internal constant SILOED_BORROWING_START_BIT_POSITION = 62;
+  /// @dev bit 63 reserved
 
   uint256 internal constant RESERVE_FACTOR_START_BIT_POSITION = 64;
   uint256 internal constant BORROW_CAP_START_BIT_POSITION = 80;
@@ -133,9 +135,9 @@ library ReserveConfiguration {
    * @param self The reserve configuration
    * @return The liquidation bonus
    **/
-  function getLiquidationBonus(DataTypes.ReserveConfigurationMap storage self)
+  function getLiquidationBonus(DataTypes.ReserveConfigurationMap memory self)
     internal
-    view
+    pure
     returns (uint256)
   {
     return (self.data & ~LIQUIDATION_BONUS_MASK) >> LIQUIDATION_BONUS_START_BIT_POSITION;
@@ -230,8 +232,10 @@ library ReserveConfiguration {
 
   /**
    * @notice Sets the borrowable in isolation flag for the reserve.
-   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed amount will be accumulated in the isolated collateral's total debt exposure.
-   * Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep consistency in the debt ceiling calculations.
+   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed
+   * amount will be accumulated in the isolated collateral's total debt exposure.
+   * @dev Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep
+   * consistency in the debt ceiling calculations.
    * @param self The reserve configuration
    * @param borrowable True if the asset is borrowable
    **/
@@ -246,8 +250,10 @@ library ReserveConfiguration {
 
   /**
    * @notice Gets the borrowable in isolation flag for the reserve.
-   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the borrowed amount will be accumulated in the isolated collateral's total debt exposure.
-   * Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep consistency in the debt ceiling calculations.
+   * @dev If the returned flag is true, the asset is borrowable against isolated collateral. Assets borrowed with
+   * isolated collateral is accounted for in the isolated collateral's total debt exposure.
+   * @dev Only assets of the same family (eg USD stablecoins) should be borrowable in isolation mode to keep
+   * consistency in the debt ceiling calculations.
    * @param self The reserve configuration
    * @return The borrowable in isolation flag
    **/
@@ -257,6 +263,35 @@ library ReserveConfiguration {
     returns (bool)
   {
     return (self.data & ~BORROWABLE_IN_ISOLATION_MASK) != 0;
+  }
+
+  /**
+   * @notice Sets the siloed borrowing flag for the reserve.
+   * @dev When this flag is set to true, users borrowing this asset will not be allowed to borrow any other asset.
+   * @param self The reserve configuration
+   * @param siloed True if the asset is siloed
+   **/
+  function setSiloedBorrowing(DataTypes.ReserveConfigurationMap memory self, bool siloed)
+    internal
+    pure
+  {
+    self.data =
+      (self.data & SILOED_BORROWING_MASK) |
+      (uint256(siloed ? 1 : 0) << SILOED_BORROWING_START_BIT_POSITION);
+  }
+
+  /**
+   * @notice Gets the siloed borrowing flag for the reserve.
+   * @dev When this flag is set to true, users borrowing this asset will not be allowed to borrow any other asset.
+   * @param self The reserve configuration
+   * @return The siloed borrowing flag
+   **/
+  function getSiloedBorrowing(DataTypes.ReserveConfigurationMap memory self)
+    internal
+    pure
+    returns (bool)
+  {
+    return (self.data & ~SILOED_BORROWING_MASK) != 0;
   }
 
   /**
@@ -485,7 +520,7 @@ library ReserveConfiguration {
     return (self.data & ~UNBACKED_MINT_CAP_MASK) >> UNBACKED_MINT_CAP_START_BIT_POSITION;
   }
 
-  /*
+  /**
    * @notice Sets the eMode asset category
    * @param self The reserve configuration
    * @param category The asset category when the user selects the eMode
@@ -544,7 +579,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @notice Gets the configuration paramters of the reserve from storage
+   * @notice Gets the configuration parameters of the reserve from storage
    * @param self The reserve configuration
    * @return The state param representing ltv
    * @return The state param representing liquidation threshold
@@ -578,7 +613,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @notice Gets the caps  paramters of the reserve from storage
+   * @notice Gets the caps parameters of the reserve from storage
    * @param self The reserve configuration
    * @return The state param representing borrow cap
    * @return The state param representing supply cap.

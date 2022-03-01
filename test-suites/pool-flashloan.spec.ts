@@ -23,14 +23,13 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
   } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
-  const PREMIUM_TO_PROTOCOL = 3;
-  const PREMIUM_TO_LP = TOTAL_PREMIUM - PREMIUM_TO_PROTOCOL;
+  const PREMIUM_TO_PROTOCOL = 3000;
 
   before(async () => {
     _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
   });
 
-  it('Configurator sets total premium = 9 bps, premium to protocol = 3 bps', async () => {
+  it('Configurator sets total premium = 9 bps, premium to protocol = 30%', async () => {
     const { configurator, pool } = testEnv;
     await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
     await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
@@ -67,11 +66,11 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const wethFlashBorrowedAmount = ethers.utils.parseEther('0.8');
     const daiFlashBorrowedAmount = ethers.utils.parseEther('0.3');
     const wethTotalFees = wethFlashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
-    const wethFeesToProtocol = wethFlashBorrowedAmount.mul(PREMIUM_TO_PROTOCOL).div(10000);
-    const wethFeesToLp = wethFlashBorrowedAmount.mul(PREMIUM_TO_LP).div(10000);
+    const wethFeesToProtocol = wethTotalFees.mul(PREMIUM_TO_PROTOCOL).div(10000);
+    const wethFeesToLp = wethTotalFees.sub(wethFeesToProtocol);
     const daiTotalFees = daiFlashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
-    const daiFeesToProtocol = daiFlashBorrowedAmount.mul(PREMIUM_TO_PROTOCOL).div(10000);
-    const daiFeesToLp = daiFlashBorrowedAmount.mul(PREMIUM_TO_LP).div(10000);
+    const daiFeesToProtocol = daiTotalFees.mul(PREMIUM_TO_PROTOCOL).div(10000);
+    const daiFeesToLp = daiTotalFees.sub(daiFeesToProtocol);
 
     const wethLiquidityIndexAdded = wethFeesToLp
       .mul(BigNumber.from(10).pow(27))
@@ -196,7 +195,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(totalLiquidityBefore.add(totalFees)).to.be.closeTo(totalLiquidityAfter, 2);
   });
   it('Takes an ETH flashloan with mode = 0 as big as the available liquidity', async () => {
-    const { pool, helpersContract, weth, aWETH } = testEnv;
+    const { pool, helpersContract, weth, aWETH, deployer } = testEnv;
 
     let reserveData = await helpersContract.getReserveData(weth.address);
 
@@ -205,8 +204,8 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const flashBorrowedAmount = totalLiquidityBefore;
 
     const totalFees = flashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
-    const feesToProtocol = flashBorrowedAmount.mul(PREMIUM_TO_PROTOCOL).div(10000);
-    const feesToLp = flashBorrowedAmount.mul(PREMIUM_TO_LP).div(10000);
+    const feesToProtocol = totalFees.mul(PREMIUM_TO_PROTOCOL).div(10000);
+    const feesToLp = totalFees.sub(feesToProtocol);
     const liquidityIndexBefore = reserveData.liquidityIndex;
     const liquidityIndexAdded = feesToLp
       .mul(BigNumber.from(10).pow(27))
@@ -216,16 +215,27 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const reservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
 
-    const txResult = await pool.flashLoan(
-      _mockFlashLoanReceiver.address,
-      [weth.address],
-      [flashBorrowedAmount],
-      [0],
-      _mockFlashLoanReceiver.address,
-      '0x10',
-      '0'
-    );
-
+    expect(
+      await pool.flashLoan(
+        _mockFlashLoanReceiver.address,
+        [weth.address],
+        [flashBorrowedAmount],
+        [0],
+        _mockFlashLoanReceiver.address,
+        '0x10',
+        '0'
+      )
+    )
+      .to.emit(pool, 'FlashLoan')
+      .withArgs(
+        _mockFlashLoanReceiver.address,
+        deployer.address,
+        weth.address,
+        flashBorrowedAmount,
+        0,
+        flashBorrowedAmount.mul(9).div(10000),
+        0
+      );
     await pool.mintToTreasury([weth.address]);
 
     reserveData = await helpersContract.getReserveData(weth.address);
@@ -241,7 +251,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(currentLiquidityIndex).to.be.equal(liquidityIndexBefore.add(liquidityIndexAdded));
     expect(
       reservesAfter.sub(feesToProtocol).mul(liquidityIndexBefore).div(currentLiquidityIndex)
-    ).to.be.equal(reservesBefore);
+    ).to.be.closeTo(reservesBefore, 2);
   });
   it('Takes WETH flashloan, does not return the funds with mode = 0 (revert expected)', async () => {
     const { pool, weth, users } = testEnv;
@@ -326,17 +336,32 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     let totalLiquidityBefore = reserveData.totalAToken;
 
-    await pool
-      .connect(caller.signer)
-      .flashLoan(
+    const borrowAmount = ethers.utils.parseEther('0.0571');
+
+    expect(
+      await pool
+        .connect(caller.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [weth.address],
+          [borrowAmount],
+          [2],
+          caller.address,
+          '0x10',
+          '0'
+        )
+    )
+      .to.emit(pool, 'FlashLoan')
+      .withArgs(
         _mockFlashLoanReceiver.address,
-        [weth.address],
-        [ethers.utils.parseEther('0.0571')],
-        [2],
         caller.address,
-        '0x10',
-        '0'
+        weth.address,
+        borrowAmount,
+        2,
+        0,
+        0
       );
+
     const { variableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       weth.address
     );
@@ -412,8 +437,8 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const flashBorrowedAmount = await convertToCurrencyDecimals(usdc.address, '500');
     const totalFees = flashBorrowedAmount.mul(TOTAL_PREMIUM).div(10000);
-    const feesToProtocol = flashBorrowedAmount.mul(PREMIUM_TO_PROTOCOL).div(10000);
-    const feesToLp = flashBorrowedAmount.mul(PREMIUM_TO_LP).div(10000);
+    const feesToProtocol = totalFees.mul(PREMIUM_TO_PROTOCOL).div(10000);
+    const feesToLp = totalFees.sub(feesToProtocol);
     const liquidityIndexAdded = feesToLp
       .mul(ethers.BigNumber.from(10).pow(27))
       .div(await aUsdc.totalSupply());
@@ -560,17 +585,21 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
-    await pool
-      .connect(caller.signer)
-      .flashLoan(
-        _mockFlashLoanReceiver.address,
-        [weth.address],
-        [flashAmount],
-        [1],
-        caller.address,
-        '0x10',
-        '0'
-      );
+    expect(
+      await pool
+        .connect(caller.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [weth.address],
+          [flashAmount],
+          [1],
+          caller.address,
+          '0x10',
+          '0'
+        )
+    )
+      .to.emit(pool, 'FlashLoan')
+      .withArgs(_mockFlashLoanReceiver.address, caller.address, weth.address, flashAmount, 1, 0, 0);
 
     const { stableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       weth.address

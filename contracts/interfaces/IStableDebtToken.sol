@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 import {IInitializableDebtToken} from './IInitializableDebtToken.sol';
@@ -11,7 +11,7 @@ import {IInitializableDebtToken} from './IInitializableDebtToken.sol';
  **/
 interface IStableDebtToken is IInitializableDebtToken {
   /**
-   * @notice Emitted when new stable debt is minted
+   * @dev Emitted when new stable debt is minted
    * @param user The address of the user who triggered the minting
    * @param onBehalfOf The recipient of stable debt tokens
    * @param amount The amount minted (user entered amount + balance increase from interest)
@@ -33,8 +33,8 @@ interface IStableDebtToken is IInitializableDebtToken {
   );
 
   /**
-   * @notice Emitted when new stable debt is burned
-   * @param user The address of the user
+   * @dev Emitted when new stable debt is burned
+   * @param from The address from which the debt will be burned
    * @param amount The amount being burned (user entered amount - balance increase from interest)
    * @param currentBalance The current balance of the user
    * @param balanceIncrease The the increase in balance since the last action of the user
@@ -42,7 +42,7 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param newTotalSupply The next total supply of the stable debt token after the action
    **/
   event Burn(
-    address indexed user,
+    address indexed from,
     uint256 amount,
     uint256 currentBalance,
     uint256 balanceIncrease,
@@ -61,7 +61,7 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @param rate The rate of the debt being minted
    * @return True if it is the first borrow, false otherwise
    * @return The total stable debt
-   * @return The average stale borrow rate
+   * @return The average stable borrow rate
    **/
   function mint(
     address user,
@@ -82,12 +82,12 @@ interface IStableDebtToken is IInitializableDebtToken {
    * and the rate of the previous debt
    * @dev In some instances, a burn transaction will emit a mint event
    * if the amount to burn is less than the interest the user earned
-   * @param user The address of the user getting his debt burned
+   * @param from The address from which the debt will be burned
    * @param amount The amount of debt tokens getting burned
    * @return The total stable debt
    * @return The average stable borrow rate
    **/
-  function burn(address user, uint256 amount) external returns (uint256, uint256);
+  function burn(address from, uint256 amount) external returns (uint256, uint256);
 
   /**
    * @notice Returns the average rate of all the stable rate loans.
@@ -144,4 +144,10 @@ interface IStableDebtToken is IInitializableDebtToken {
    * @return The debt balance of the user since the last burn/mint action
    **/
   function principalBalanceOf(address user) external view returns (uint256);
+
+  /**
+   * @notice Returns the address of the underlying asset of this stableDebtToken (E.g. WETH for stableDebtWETH)
+   * @return The address of the underlying asset
+   **/
+  function UNDERLYING_ASSET_ADDRESS() external view returns (address);
 }

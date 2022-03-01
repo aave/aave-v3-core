@@ -1,11 +1,13 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {IPriceOracle} from '../../interfaces/IPriceOracle.sol';
 
 contract PriceOracle is IPriceOracle {
-  mapping(address => uint256) prices;
-  uint256 ethPriceUsd;
+  // Map of asset prices (asset => price)
+  mapping(address => uint256) internal prices;
+
+  uint256 internal ethPriceUsd;
 
   event AssetPriceUpdated(address asset, uint256 price, uint256 timestamp);
   event EthPriceUpdated(uint256 price, uint256 timestamp);

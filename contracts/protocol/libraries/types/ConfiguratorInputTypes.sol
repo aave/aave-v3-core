@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 library ConfiguratorInputTypes {
@@ -11,7 +11,6 @@ library ConfiguratorInputTypes {
     address underlyingAsset;
     address treasury;
     address incentivesController;
-    string underlyingAssetName;
     string aTokenName;
     string aTokenSymbol;
     string variableDebtTokenName;

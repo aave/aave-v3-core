@@ -1,1 +1,0 @@
-certoraRun specs/harness/StableDebtTokenHarness.sol:StableDebtTokenHarness --solc solc6.12 --solc_args '--optimize' --verify StableDebtTokenHarness:specs/StableDebtToken.spec --settings -assumeUnwindCond,-b=4 --cache StableToken --cloud

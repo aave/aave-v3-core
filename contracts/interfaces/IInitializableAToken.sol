@@ -1,7 +1,8 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
+import {IPool} from './IPool.sol';
 
 /**
  * @title IInitializableAToken
@@ -10,7 +11,7 @@ import {IAaveIncentivesController} from './IAaveIncentivesController.sol';
  **/
 interface IInitializableAToken {
   /**
-   * @notice Emitted when an aToken is initialized
+   * @dev Emitted when an aToken is initialized
    * @param underlyingAsset The address of the underlying asset
    * @param pool The address of the associated pool
    * @param treasury The address of the treasury
@@ -33,6 +34,7 @@ interface IInitializableAToken {
 
   /**
    * @notice Initializes the aToken
+   * @param pool The pool contract that is initializing this contract
    * @param treasury The address of the Aave treasury, receiving the fees on this aToken
    * @param underlyingAsset The address of the underlying asset of this aToken (E.g. WETH for aWETH)
    * @param incentivesController The smart contract managing potential incentives distribution
@@ -42,6 +44,7 @@ interface IInitializableAToken {
    * @param params A set of encoded parameters for additional initialization
    */
   function initialize(
+    IPool pool,
     address treasury,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,

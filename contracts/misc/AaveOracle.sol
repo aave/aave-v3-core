@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
 import {AggregatorInterface} from '../dependencies/chainlink/AggregatorInterface.sol';
@@ -18,11 +18,17 @@ import {IAaveOracle} from '../interfaces/IAaveOracle.sol';
  */
 contract AaveOracle is IAaveOracle {
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
+
+  // Map of asset price sources (asset => priceSource)
   mapping(address => AggregatorInterface) private assetsSources;
+
   IPriceOracleGetter private _fallbackOracle;
   address public immutable override BASE_CURRENCY;
   uint256 public immutable override BASE_CURRENCY_UNIT;
 
+  /**
+   * @dev Only asset listing or pool admin can call functions marked by this modifier.
+   **/
   modifier onlyAssetListingOrPoolAdmins() {
     _onlyAssetListingOrPoolAdmins();
     _;
