@@ -4,5 +4,6 @@ out = 'out'
 libs = ['lib']
 remappings = ['ds-test/=lib/ds-test/src/']
 fuzz_runs = 10000
+optimizer = false
 
 # See more config options https://github.com/gakonst/foundry/tree/master/config
