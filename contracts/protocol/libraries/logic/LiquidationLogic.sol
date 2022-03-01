@@ -11,6 +11,7 @@ import {ReserveLogic} from './ReserveLogic.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
 import {IsolationModeLogic} from './IsolationModeLogic.sol';
+import {EModeLogic} from './EModeLogic.sol';
 import {UserConfiguration} from '../../libraries/configuration/UserConfiguration.sol';
 import {ReserveConfiguration} from '../../libraries/configuration/ReserveConfiguration.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
@@ -164,7 +165,12 @@ library LiquidationLogic {
     if (params.userEModeCategory != 0) {
       address eModePriceSource = eModeCategories[params.userEModeCategory].priceSource;
 
-      if (params.userEModeCategory == collateralReserve.configuration.getEModeCategory()) {
+      if (
+        EModeLogic.isInEModeCategory(
+          params.userEModeCategory,
+          collateralReserve.configuration.getEModeCategory()
+        )
+      ) {
         vars.liquidationBonus = eModeCategories[params.userEModeCategory].liquidationBonus;
 
         if (eModePriceSource != address(0)) {
