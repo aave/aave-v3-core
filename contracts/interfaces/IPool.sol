@@ -611,7 +611,7 @@ interface IPool {
   /**
    * @notice Returns the address of the underlying asset of a reserve by the reserve id as stored in the DataTypes.ReserveData struct
    * @param id The id of the reserve as stored in the DataTypes.ReserveData struct
-   * @return The addresses of the reserve associated with id
+   * @return The address of the reserve associated with id
    **/
   function getReserveAddressById(uint16 id) external view returns (address);
 
