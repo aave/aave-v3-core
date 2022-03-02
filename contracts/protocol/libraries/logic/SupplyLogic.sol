@@ -79,7 +79,7 @@ library SupplyLogic {
           reservesData,
           reservesList,
           userConfig,
-          params.asset
+          reserveCache.reserveConfiguration
         )
       ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
@@ -216,7 +216,7 @@ library SupplyLogic {
             reservesData,
             reservesList,
             toConfig,
-            params.asset
+            reserve.configuration
           )
         ) {
           toConfig.setUsingAsCollateral(reserveId, true);
@@ -264,7 +264,7 @@ library SupplyLogic {
 
     if (useAsCollateral) {
       require(
-        ValidationLogic.validateUseAsCollateral(reservesData, reservesList, userConfig, asset),
+        ValidationLogic.validateUseAsCollateral(reservesData, reservesList, userConfig, reserveCache.reserveConfiguration),
         Errors.USER_IN_ISOLATION_MODE
       );
 

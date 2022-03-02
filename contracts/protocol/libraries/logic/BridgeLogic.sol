@@ -82,7 +82,14 @@ library BridgeLogic {
     );
 
     if (isFirstSupply) {
-      if (ValidationLogic.validateUseAsCollateral(reservesData, reservesList, userConfig, asset)) {
+      if (
+        ValidationLogic.validateUseAsCollateral(
+          reservesData,
+          reservesList,
+          userConfig,
+          reserveCache.reserveConfiguration
+        )
+      ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
         emit ReserveUsedAsCollateralEnabled(asset, onBehalfOf);
       }

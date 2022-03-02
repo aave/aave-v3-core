@@ -264,7 +264,7 @@ library LiquidationLogic {
             reservesData,
             reservesList,
             liquidatorConfig,
-            params.collateralAsset
+            collateralReserve.configuration
           )
         ) {
           liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
