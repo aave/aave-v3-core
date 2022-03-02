@@ -602,11 +602,18 @@ interface IPool {
   ) external;
 
   /**
-   * @notice Returns the list of the initialized reserves
+   * @notice Returns the list of the underlying assets of all the initialized reserves
    * @dev It does not include dropped reserves
-   * @return The addresses of the reserves
+   * @return The addresses of the underlying assets of the initialized reserves
    **/
   function getReservesList() external view returns (address[] memory);
+
+  /**
+   * @notice Returns the address of the underlying asset of a reserve by the reserve id as stored in the DataTypes.ReserveData struct
+   * @param id The id of the reserve as stored in the DataTypes.ReserveData struct
+   * @return The address of the reserve associated with id
+   **/
+  function getReserveAddressById(uint16 id) external view returns (address);
 
   /**
    * @notice Returns the PoolAddressesProvider connected to this contract
