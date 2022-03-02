@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.14.2](https://www.github.com/aave/aave-v3-core/compare/v1.14.1...v1.14.2) (2022-03-02)
+
+
+### Bug Fixes
+
+* Replace `...PriceAddress` with `...PriceSource` ([10a8667](https://www.github.com/aave/aave-v3-core/commit/10a8667b08c2e3daa1d87b1a7348154081c3903d))
+* Use `EModeLogic::isInEModeCategory` in `executeLiquidationCall` ([28f72fe](https://www.github.com/aave/aave-v3-core/commit/28f72fe82496044d23d4ea3f20298cec9918404b))
+
 ### [1.14.1](https://www.github.com/aave/aave-v3-core/compare/v1.14.0...v1.14.1) (2022-03-01)
 
 
