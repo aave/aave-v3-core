@@ -121,15 +121,6 @@ library LiquidationLogic {
       })
     );
 
-    (
-      vars.collateralAToken,
-      vars.collateralPriceSource,
-      vars.debtPriceSource,
-      vars.liquidationBonus
-    ) = _getConfigurationData(eModeCategories, collateralReserve, params);
-
-    vars.userCollateralBalance = vars.collateralAToken.balanceOf(params.user);
-
     (vars.userVariableDebt, vars.userTotalDebt, vars.actualDebtToLiquidate) = _calculateDebt(
       vars.debtReserveCache,
       params,
@@ -146,6 +137,15 @@ library LiquidationLogic {
         priceOracleSentinel: params.priceOracleSentinel
       })
     );
+
+    (
+      vars.collateralAToken,
+      vars.collateralPriceSource,
+      vars.debtPriceSource,
+      vars.liquidationBonus
+    ) = _getConfigurationData(eModeCategories, collateralReserve, params);
+
+    vars.userCollateralBalance = vars.collateralAToken.balanceOf(params.user);
 
     (
       vars.maxCollateralToLiquidate,
