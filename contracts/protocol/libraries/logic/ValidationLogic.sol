@@ -457,14 +457,14 @@ library ValidationLogic {
 
   /**
    * @notice Validates a flashloan action.
+   * @param reservesData The state of all the reserves
    * @param assets The assets being flash-borrowed
    * @param amounts The amounts for each asset being borrowed
-   * @param reservesData The state of all the reserves
    */
   function validateFlashloan(
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     address[] memory assets,
-    uint256[] memory amounts,
-    mapping(address => DataTypes.ReserveData) storage reservesData
+    uint256[] memory amounts
   ) internal view {
     require(assets.length == amounts.length, Errors.INCONSISTENT_FLASHLOAN_PARAMS);
     for (uint256 i = 0; i < assets.length; i++) {
