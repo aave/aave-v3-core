@@ -707,22 +707,20 @@ library ValidationLogic {
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig the user configuration
-   * @param asset The address of the asset being validated as collateral
+   * @param reserveConfig The reserve configuration
    * @return True if the asset can be activated as collateral, false otherwise
    **/
   function validateUseAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
-    address asset
+    DataTypes.ReserveConfigurationMap memory reserveConfig
   ) internal view returns (bool) {
     if (!userConfig.isUsingAsCollateralAny()) {
       return true;
     }
-
     (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reservesList);
-    DataTypes.ReserveConfigurationMap memory configuration = reservesData[asset].configuration;
 
-    return (!isolationModeActive && configuration.getDebtCeiling() == 0);
+    return (!isolationModeActive && reserveConfig.getDebtCeiling() == 0);
   }
 }

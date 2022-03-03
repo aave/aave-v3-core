@@ -367,8 +367,8 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   ) public virtual override {
     LiquidationLogic.executeLiquidationCall(
       _reserves,
-      _usersConfig,
       _reservesList,
+      _usersConfig,
       _eModeCategories,
       DataTypes.ExecuteLiquidationCallParams({
         reservesCount: _reservesCount,
