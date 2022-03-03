@@ -72,7 +72,7 @@ library LiquidationLogic {
     uint256 userVariableDebt;
     uint256 userTotalDebt;
     uint256 actualDebtToLiquidate;
-    uint256 maxCollateralToLiquidate;
+    uint256 actualCollateralToLiquidate;
     uint256 liquidationBonus;
     uint256 healthFactor;
     uint256 liquidationProtocolFeeAmount;
@@ -148,7 +148,7 @@ library LiquidationLogic {
     vars.userCollateralBalance = vars.collateralAToken.balanceOf(params.user);
 
     (
-      vars.maxCollateralToLiquidate,
+      vars.actualCollateralToLiquidate,
       vars.actualDebtToLiquidate,
       vars.liquidationProtocolFeeAmount
     ) = _calculateAvailableCollateralToLiquidate(
@@ -200,7 +200,7 @@ library LiquidationLogic {
 
     // If the collateral being liquidated is equal to the user balance,
     // we set the currency as not being used as collateral anymore
-    if (vars.maxCollateralToLiquidate == vars.userCollateralBalance) {
+    if (vars.actualCollateralToLiquidate == vars.userCollateralBalance) {
       userConfig.setUsingAsCollateral(collateralReserve.id, false);
       emit ReserveUsedAsCollateralDisabled(params.collateralAsset, params.user);
     }
@@ -222,7 +222,7 @@ library LiquidationLogic {
       params.debtAsset,
       params.user,
       vars.actualDebtToLiquidate,
-      vars.maxCollateralToLiquidate,
+      vars.actualCollateralToLiquidate,
       msg.sender,
       params.receiveAToken
     );
@@ -230,6 +230,7 @@ library LiquidationLogic {
 
   /**
    * @notice Burns the collateral aTokens and transfers the underlying to the liquidator.
+   * @dev   The function also updates the state and the interest rate of the collateral reserve.
    * @param collateralReserve The data of the collateral reserve
    * @param params The additional parameters needed to execute the liquidation function
    * @param vars The executeLiquidationCall() function local vars
@@ -245,20 +246,22 @@ library LiquidationLogic {
       collateralReserveCache,
       params.collateralAsset,
       0,
-      vars.maxCollateralToLiquidate
+      vars.actualCollateralToLiquidate
     );
 
     // Burn the equivalent amount of aToken, sending the underlying to the liquidator
     vars.collateralAToken.burn(
       params.user,
       msg.sender,
-      vars.maxCollateralToLiquidate,
+      vars.actualCollateralToLiquidate,
       collateralReserveCache.nextLiquidityIndex
     );
   }
 
   /**
    * @notice Liquidates the user aTokens by transferring them to the liquidator.
+   * @dev   The function also checks the state of the liquidator and activates the aToken as collateral
+   *        as in standard transfers if the isolation mode constraints are respected.
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
@@ -279,7 +282,7 @@ library LiquidationLogic {
     vars.collateralAToken.transferOnLiquidation(
       params.user,
       msg.sender,
-      vars.maxCollateralToLiquidate
+      vars.actualCollateralToLiquidate
     );
 
     if (liquidatorPreviousATokenBalance == 0) {
@@ -300,6 +303,7 @@ library LiquidationLogic {
 
   /**
    * @notice Burns the debt tokens of the user up to the amount being repaid by the liquidator.
+   * @dev The function alters the `debtReserveCache` state in `vars` to update the debt related data.
    * @param params The additional parameters needed to execute the liquidation function
    * @param vars the executeLiquidationCall() function local vars
    */
