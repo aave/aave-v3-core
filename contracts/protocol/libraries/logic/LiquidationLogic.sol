@@ -232,9 +232,8 @@ library LiquidationLogic {
    * @notice Burns the collateral aTokens and transfers the underlying to the liquidator.
    * @param collateralReserve The data of the collateral reserve
    * @param params The additional parameters needed to execute the liquidation function
-   * @param vars the executeLiquidationCall() function local vars
+   * @param vars The executeLiquidationCall() function local vars
    */
-
   function _burnCollateralATokens(
     DataTypes.ReserveData storage collateralReserve,
     DataTypes.ExecuteLiquidationCallParams memory params,
@@ -339,7 +338,10 @@ library LiquidationLogic {
    * @dev If the Health Factor is below CLOSE_FACTOR_HF_THRESHOLD, the close factor is increased to MAX_LIQUIDATION_CLOSE_FACTOR
    * @param debtReserveCache The reserve cache data object of the debt reserve
    * @param params The additional parameters needed to execute the liquidation function
-   * @param healthFactor the health factor of the position
+   * @param healthFactor The health factor of the position
+   * @return The variable debt of the user
+   * @return The total debt of the user
+   * @return The actual debt to liquidate as a function of the closeFactor
    */
   function _calculateDebt(
     DataTypes.ReserveCache memory debtReserveCache,
@@ -379,6 +381,10 @@ library LiquidationLogic {
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param collateralReserve The data of the collateral reserve
    * @param params The additional parameters needed to execute the liquidation function
+   * @return The collateral aToken
+   * @return The address to use as price source for the collateral
+   * @return The address to use as price source for the debt
+   * @return The liquidation bonus to apply to the collateral
    */
   function _getConfigurationData(
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
