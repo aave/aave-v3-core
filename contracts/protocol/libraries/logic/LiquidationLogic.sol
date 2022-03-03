@@ -267,9 +267,8 @@ library LiquidationLogic {
    * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
    * @param collateralReserve The data of the collateral reserve
    * @param params The additional parameters needed to execute the liquidation function
-   * @param vars the executeLiquidationCall() function local vars
+   * @param vars The executeLiquidationCall() function local vars
    */
-
   function _liquidateATokens(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
