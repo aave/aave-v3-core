@@ -78,7 +78,7 @@ library FlashLoanLogic {
     // is altered to (validation -> user payload -> cache -> updateState -> changeState -> updateRates) for flashloans.
     // This is done to protect against reentrance and rate manipulation within the user specified payload.
 
-    ValidationLogic.validateFlashloan(params.assets, params.amounts, reservesData);
+    ValidationLogic.validateFlashloan(reservesData, params.assets, params.amounts);
 
     FlashLoanLocalVars memory vars;
 
