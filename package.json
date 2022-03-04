@@ -1,6 +1,6 @@
 {
   "name": "@aave/core-v3",
-  "version": "1.14.2",
+  "version": "1.14.3-beta.0",
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
@@ -30,8 +30,8 @@
     "prepublish": "npm run compile"
   },
   "devDependencies": {
-    "@aave/deploy-v3": "^1.21.0",
-    "@aave/periphery-v3": "^1.13.0",
+    "@aave/deploy-v3": "^1.21.1-beta.4",
+    "@aave/periphery-v3": "^1.13.1-beta.1",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
     "@tenderly/hardhat-tenderly": "^1.1.0-beta.5",
     "@typechain/ethers-v5": "^7.2.0",
