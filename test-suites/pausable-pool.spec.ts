@@ -329,7 +329,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
   });
 
   it('Configurator pauses Pool with a ZERO_ADDRESS reserve', async () => {
-    const { poolAdmin, emergencyAdmin } = testEnv;
+    const { poolAdmin, emergencyAdmin, deployer } = testEnv;
 
     const snapId = await evmSnapshot();
 
@@ -353,7 +353,10 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     // Deploy a new PoolAddressesProvider
     const MARKET_ID = '1';
     const poolAddressesProvider = await (
-      await new PoolAddressesProvider__factory(await getFirstSigner()).deploy(MARKET_ID)
+      await new PoolAddressesProvider__factory(await getFirstSigner()).deploy(
+        MARKET_ID,
+        deployer.address
+      )
     ).deployed();
 
     // Set the ACL admin

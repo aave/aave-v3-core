@@ -38,7 +38,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
 
     // Deploy SequencerOracle
     sequencerOracle = await (
-      await new SequencerOracle__factory(deployer.signer).deploy()
+      await new SequencerOracle__factory(deployer.signer).deploy(deployer.address)
     ).deployed();
 
     priceOracleSentinel = await (
