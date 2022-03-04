@@ -30,10 +30,12 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
 
   /**
    * @dev Constructor.
-   * @param marketId The identifier of the market
+   * @param marketId The identifier of the market.
+   * @param owner The owner address of this contract.
    */
-  constructor(string memory marketId) {
+  constructor(string memory marketId, address owner) {
     _setMarketId(marketId);
+    transferOwnership(owner);
   }
 
   /// @inheritdoc IPoolAddressesProvider

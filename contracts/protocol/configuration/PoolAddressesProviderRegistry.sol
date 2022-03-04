@@ -22,6 +22,14 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   // Map of address provider list indexes (addressesProvider => indexInList)
   mapping(address => uint256) private _addressesProvidersIndexes;
 
+  /**
+   * @dev Constructor.
+   * @param owner The owner address of this contract.
+   */
+  constructor(address owner) {
+    transferOwnership(owner);
+  }
+
   /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
     return _addressesProvidersList;

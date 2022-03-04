@@ -9,6 +9,14 @@ contract SequencerOracle is ISequencerOracle, Ownable {
   uint256 internal _timestampGotUp;
 
   /**
+   * @dev Constructor.
+   * @param owner The owner address of this contract
+   */
+  constructor(address owner) {
+    transferOwnership(owner);
+  }
+
+  /**
    * @notice Updates the health status of the sequencer.
    * @param isDown True if the sequencer is down, false otherwise
    * @param timestamp The timestamp of last time the sequencer got up
