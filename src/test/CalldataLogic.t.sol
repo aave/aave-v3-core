@@ -19,18 +19,20 @@ contract CalldataLogicTest is TestHelper {
 
   mapping(uint256 => address) reservesList;
 
+  uint256 constant RESERVE_COUNT = 128;
+
   function setUp() public {
-    for (uint256 i = 0; i < 128; i++) {
+    for (uint256 i = 0; i < RESERVE_COUNT; i++) {
       reservesList[i] = address(uint160(400 + i));
     }
   }
 
   function testDecodeSupplyParams(
-    uint16 assetId,
+    uint8 assetId,
     uint128 amount,
     uint16 referralCode
   ) public {
-    VM.assume(assetId < 128);
+    VM.assume(assetId < RESERVE_COUNT);
 
     bytes32 args;
     assembly {
@@ -43,18 +45,19 @@ contract CalldataLogicTest is TestHelper {
     );
 
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_amount, amount);
     assertEq(_referralCode, referralCode);
   }
 
   function testDecodeSupplyWithPermitParams(
-    uint16 assetId,
+    uint8 assetId,
     uint128 amount,
     uint16 referralCode,
-    uint256 deadLine,
+    uint32 deadLine,
     uint8 permitV
   ) public {
-    VM.assume(assetId < 128 && deadLine < type(uint32).max);
+    VM.assume(assetId < RESERVE_COUNT);
 
     bytes32 args;
     assembly {
@@ -76,13 +79,15 @@ contract CalldataLogicTest is TestHelper {
     ) = CalldataLogic.decodeSupplyWithPermitParams(reservesList, args);
 
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_amount, amount);
     assertEq(_referralCode, referralCode);
     assertEq(_deadLine, deadLine);
     assertEq(_permitV, permitV);
   }
 
-  function testDecodeWithdrawParams(uint16 assetId, uint128 amount) public {
+  function testDecodeWithdrawParams(uint8 assetId, uint128 amount) public {
+    VM.assume(assetId < RESERVE_COUNT);
     bytes32 args;
     assembly {
       args := add(assetId, shl(16, amount))
@@ -93,15 +98,17 @@ contract CalldataLogicTest is TestHelper {
     uint256 expectedAmount = amount == type(uint128).max ? type(uint256).max : uint256(amount);
 
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_amount, expectedAmount);
   }
 
   function testDecodeBorrowParams(
-    uint16 assetId,
+    uint8 assetId,
     uint128 amount,
     bool stableRateMode,
     uint16 referralCode
   ) public {
+    VM.assume(assetId < RESERVE_COUNT);
     uint256 interestRateMode = stableRateMode ? 1 : 2;
 
     bytes32 args;
@@ -120,16 +127,18 @@ contract CalldataLogicTest is TestHelper {
     ) = CalldataLogic.decodeBorrowParams(reservesList, args);
 
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_amount, amount);
     assertEq(_interestRateMode, interestRateMode);
     assertEq(_referralCode, referralCode);
   }
 
   function testDecodeRepayParams(
-    uint16 assetId,
+    uint8 assetId,
     uint128 amount,
     bool stableRateMode
   ) public {
+    VM.assume(assetId < RESERVE_COUNT);
     uint256 interestRateMode = stableRateMode ? 1 : 2;
     uint256 expectedAmount = amount == type(uint128).max ? type(uint256).max : amount;
 
@@ -144,6 +153,7 @@ contract CalldataLogicTest is TestHelper {
     );
 
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_amount, expectedAmount);
     assertEq(_interestRateMode, interestRateMode);
   }
@@ -158,12 +168,13 @@ contract CalldataLogicTest is TestHelper {
   }
 
   function testDecodeRepayWithPermitParams(
-    uint16 assetId,
+    uint8 assetId,
     uint128 amount,
     bool stableRateMode,
     uint32 deadline,
     uint8 permitV
   ) public {
+    VM.assume(assetId < RESERVE_COUNT);
     DecodeRepayWithPermitHelper memory vars;
 
     vars.expectedAmount = amount == type(uint128).max ? type(uint256).max : amount;
@@ -188,13 +199,15 @@ contract CalldataLogicTest is TestHelper {
     ) = CalldataLogic.decodeRepayWithPermitParams(reservesList, args);
 
     assertEq(vars._asset, reservesList[assetId]);
+    assertNotEq(vars._asset, address(0));
     assertEq(vars._amount, vars.expectedAmount);
     assertEq(vars._interestRateMode, stableRateMode ? 1 : 2);
     assertEq(vars._deadline, uint256(deadline));
     assertEq(vars._permitV, permitV);
   }
 
-  function testDecodeSwapBorrowRateModeParams(uint16 assetId, bool stableRateMode) public {
+  function testDecodeSwapBorrowRateModeParams(uint8 assetId, bool stableRateMode) public {
+    VM.assume(assetId < RESERVE_COUNT);
     uint256 interestRateMode = stableRateMode ? 1 : 2;
     bytes32 args;
     assembly {
@@ -207,10 +220,12 @@ contract CalldataLogicTest is TestHelper {
     );
 
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_interestRateMode, interestRateMode);
   }
 
-  function testDecodeRebalanceStableBorrowRateParams(uint16 assetId, address user) public {
+  function testDecodeRebalanceStableBorrowRateParams(uint8 assetId, address user) public {
+    VM.assume(assetId < RESERVE_COUNT);
     bytes32 args;
     assembly {
       args := add(assetId, shl(16, user))
@@ -221,12 +236,14 @@ contract CalldataLogicTest is TestHelper {
       args
     );
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_user, user);
   }
 
-  function testDecodeSetUserUseReserveAsCollateralParams(uint16 assetId, bool useAsCollateral)
+  function testDecodeSetUserUseReserveAsCollateralParams(uint8 assetId, bool useAsCollateral)
     public
   {
+    VM.assume(assetId < RESERVE_COUNT);
     bytes32 args;
     assembly {
       args := add(assetId, shl(16, useAsCollateral))
@@ -236,6 +253,7 @@ contract CalldataLogicTest is TestHelper {
       .decodeSetUserUseReserveAsCollateralParams(reservesList, args);
 
     assertEq(_asset, reservesList[assetId]);
+    assertNotEq(_asset, address(0));
     assertEq(_useAsCollateral, useAsCollateral);
   }
 
@@ -249,12 +267,13 @@ contract CalldataLogicTest is TestHelper {
   }
 
   function testDecodeLiquidationCallParams(
-    uint16 collateralAssetId,
-    uint16 debtAssetId,
+    uint8 collateralAssetId,
+    uint8 debtAssetId,
     address user,
     uint128 debtToCover,
     bool receiveAToken
   ) public {
+    VM.assume(collateralAssetId < RESERVE_COUNT && debtAssetId < RESERVE_COUNT);
     DecodeLiquidationCallParamsHelper memory vars;
 
     bytes32 args1;
@@ -276,7 +295,9 @@ contract CalldataLogicTest is TestHelper {
     ) = CalldataLogic.decodeLiquidationCallParams(reservesList, args1, args2);
 
     assertEq(vars.collateralAsset, reservesList[collateralAssetId]);
+    assertNotEq(vars.collateralAsset, address(0));
     assertEq(vars.debtAsset, reservesList[debtAssetId]);
+    assertNotEq(vars.debtAsset, address(0));
     assertEq(vars.user, user);
     assertEq(vars.debtToCover, vars.expectedDebtToCover);
     assertEq(vars.receiveAToken, receiveAToken);
