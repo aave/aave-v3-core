@@ -13,10 +13,10 @@ import {TestHelper} from './TestHelper.sol';
 contract ReserveConfigurationTest is TestHelper {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-Vm constant VM = Vm(HEVM_ADDRESS);
+  Vm constant VM = Vm(HEVM_ADDRESS);
 
   function testSetLtv(uint256 data, uint256 ltv) public {
-    VM.assume(ltv <= ReserveConfiguration.MAX_VALID_LTV);
+    ltv = bound(ltv, 0, type(uint16).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: data & ReserveConfiguration.LTV_MASK
     });
@@ -25,7 +25,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetLtvTooHigh(uint256 data, uint256 ltv) public {
-    VM.assume(ltv > ReserveConfiguration.MAX_VALID_LTV);
+    ltv = bound(ltv, ReserveConfiguration.MAX_VALID_LTV + 1, type(uint256).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: data & ReserveConfiguration.LTV_MASK
     });
@@ -34,8 +34,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetLtv(uint256 data, uint256 ltv) public {
-    // Notice that the mask may support values that is significantly larger than the max value.
-    VM.assume(ltv <= type(uint16).max);
+    ltv = bound(ltv, 0, type(uint16).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LTV_MASK) | ltv
     });
@@ -43,8 +42,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetLiquidationThreshold(uint256 data, uint256 threshold) public {
-    VM.assume(threshold <= ReserveConfiguration.MAX_VALID_LIQUIDATION_THRESHOLD);
-
+    threshold = bound(threshold, 0, type(uint16).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_THRESHOLD_MASK)
     });
@@ -59,7 +57,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetLiquidationThreshold(uint256 data, uint256 threshold) public {
-    VM.assume(threshold > ReserveConfiguration.MAX_VALID_LIQUIDATION_THRESHOLD);
+    threshold = bound(
+      threshold,
+      ReserveConfiguration.MAX_VALID_LIQUIDATION_THRESHOLD + 1,
+      type(uint256).max
+    );
 
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_THRESHOLD_MASK)
@@ -70,7 +72,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetLiquidationThreshold(uint256 data, uint256 threshold) public {
-    VM.assume(threshold <= type(uint16).max);
+    threshold = bound(threshold, 0, ReserveConfiguration.MAX_VALID_LIQUIDATION_THRESHOLD);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_THRESHOLD_MASK) |
         (threshold << ReserveConfiguration.LIQUIDATION_THRESHOLD_START_BIT_POSITION)
@@ -79,8 +81,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetLiquidationBonus(uint256 data, uint256 bonus) public {
-    VM.assume(bonus <= ReserveConfiguration.MAX_VALID_LIQUIDATION_BONUS);
-
+    bonus = bound(bonus, 0, ReserveConfiguration.MAX_VALID_LIQUIDATION_BONUS);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_BONUS_MASK)
     });
@@ -95,7 +96,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetLiquidationBonus(uint256 data, uint256 bonus) public {
-    VM.assume(bonus > ReserveConfiguration.MAX_VALID_LIQUIDATION_BONUS);
+    bonus = bound(bonus, ReserveConfiguration.MAX_VALID_LIQUIDATION_BONUS + 1, type(uint256).max);
 
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_BONUS_MASK)
@@ -106,7 +107,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetLiquidationBonus(uint256 data, uint256 bonus) public {
-    VM.assume(bonus <= type(uint16).max);
+    bonus = bound(bonus, 0, ReserveConfiguration.MAX_VALID_LIQUIDATION_BONUS);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_BONUS_MASK) |
         (bonus << ReserveConfiguration.LIQUIDATION_BONUS_START_BIT_POSITION)
@@ -115,7 +116,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetDecimals(uint256 data, uint256 decimals) public {
-    VM.assume(decimals <= type(uint8).max);
+    decimals = bound(decimals, 0, ReserveConfiguration.MAX_VALID_DECIMALS);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.DECIMALS_MASK)
     });
@@ -130,7 +131,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetDecimals(uint256 data, uint256 decimals) public {
-    VM.assume(decimals > type(uint8).max);
+    decimals = bound(decimals, ReserveConfiguration.MAX_VALID_DECIMALS + 1, type(uint256).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.DECIMALS_MASK)
     });
@@ -139,7 +140,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetDecimals(uint256 data, uint256 decimals) public {
-    VM.assume(decimals <= type(uint8).max);
+    decimals = bound(decimals, 0, ReserveConfiguration.MAX_VALID_DECIMALS);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.DECIMALS_MASK) |
         (decimals << ReserveConfiguration.RESERVE_DECIMALS_START_BIT_POSITION)
@@ -302,7 +303,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetReserveFactor(uint256 data, uint256 reserveFactor) public {
-    VM.assume(reserveFactor <= ReserveConfiguration.MAX_VALID_RESERVE_FACTOR);
+    reserveFactor = bound(reserveFactor, 0, ReserveConfiguration.MAX_VALID_RESERVE_FACTOR);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.RESERVE_FACTOR_MASK)
     });
@@ -317,7 +318,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetReserveFactor(uint256 data, uint256 reserveFactor) public {
-    VM.assume(reserveFactor > ReserveConfiguration.MAX_VALID_RESERVE_FACTOR);
+    reserveFactor = bound(
+      reserveFactor,
+      ReserveConfiguration.MAX_VALID_RESERVE_FACTOR + 1,
+      type(uint256).max
+    );
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.RESERVE_FACTOR_MASK)
     });
@@ -326,7 +331,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetReserveFactor(uint256 data, uint256 reserveFactor) public {
-    VM.assume(reserveFactor <= type(uint16).max);
+    reserveFactor = bound(reserveFactor, 0, ReserveConfiguration.MAX_VALID_RESERVE_FACTOR);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.RESERVE_FACTOR_MASK) |
         (reserveFactor << ReserveConfiguration.RESERVE_FACTOR_START_BIT_POSITION)
@@ -335,7 +340,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetBorrowCap(uint256 data, uint256 borrowCap) public {
-    VM.assume(borrowCap <= ReserveConfiguration.MAX_VALID_BORROW_CAP);
+    borrowCap = bound(borrowCap, 0, ReserveConfiguration.MAX_VALID_BORROW_CAP);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.BORROW_CAP_MASK)
     });
@@ -350,7 +355,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetBorrowCap(uint256 data, uint256 borrowCap) public {
-    VM.assume(borrowCap > ReserveConfiguration.MAX_VALID_BORROW_CAP);
+    borrowCap = bound(borrowCap, ReserveConfiguration.MAX_VALID_BORROW_CAP + 1, type(uint256).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.BORROW_CAP_MASK)
     });
@@ -359,7 +364,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetBorrowCap(uint256 data, uint256 borrowCap) public {
-    VM.assume(borrowCap < 2**36);
+    borrowCap = bound(borrowCap, 0, ReserveConfiguration.MAX_VALID_BORROW_CAP);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.BORROW_CAP_MASK) |
         (borrowCap << ReserveConfiguration.BORROW_CAP_START_BIT_POSITION)
@@ -368,7 +373,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetSupplyCap(uint256 data, uint256 supplyCap) public {
-    VM.assume(supplyCap <= ReserveConfiguration.MAX_VALID_SUPPLY_CAP);
+    supplyCap = bound(supplyCap, 0, ReserveConfiguration.MAX_VALID_SUPPLY_CAP);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.SUPPLY_CAP_MASK)
     });
@@ -383,7 +388,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetSupplyCap(uint256 data, uint256 supplyCap) public {
-    VM.assume(supplyCap > ReserveConfiguration.MAX_VALID_SUPPLY_CAP);
+    supplyCap = bound(supplyCap, ReserveConfiguration.MAX_VALID_SUPPLY_CAP + 1, type(uint256).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.SUPPLY_CAP_MASK)
     });
@@ -392,7 +397,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetSupplyCap(uint256 data, uint256 supplyCap) public {
-    VM.assume(supplyCap < 2**36);
+    supplyCap = bound(supplyCap, 0, ReserveConfiguration.MAX_VALID_SUPPLY_CAP);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.SUPPLY_CAP_MASK) |
         (supplyCap << ReserveConfiguration.SUPPLY_CAP_START_BIT_POSITION)
@@ -401,7 +406,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetDebtCeiling(uint256 data, uint256 debtCeiling) public {
-    VM.assume(debtCeiling <= ReserveConfiguration.MAX_VALID_DEBT_CEILING);
+    debtCeiling = bound(debtCeiling, 0, ReserveConfiguration.MAX_VALID_DEBT_CEILING);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.DEBT_CEILING_MASK)
     });
@@ -416,7 +421,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetDebtCeiling(uint256 data, uint256 debtCeiling) public {
-    VM.assume(debtCeiling > ReserveConfiguration.MAX_VALID_DEBT_CEILING);
+    debtCeiling = bound(
+      debtCeiling,
+      ReserveConfiguration.MAX_VALID_DEBT_CEILING + 1,
+      type(uint256).max
+    );
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.DEBT_CEILING_MASK)
     });
@@ -425,7 +434,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetDebtCeiling(uint256 data, uint256 debtCeiling) public {
-    VM.assume(debtCeiling < 2**36);
+    debtCeiling = bound(debtCeiling, 0, ReserveConfiguration.MAX_VALID_DEBT_CEILING);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.DEBT_CEILING_MASK) |
         (debtCeiling << ReserveConfiguration.DEBT_CEILING_START_BIT_POSITION)
@@ -434,7 +443,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetLiquidationProtocolFee(uint256 data, uint256 liquidationProtocolFee) public {
-    VM.assume(liquidationProtocolFee <= ReserveConfiguration.MAX_VALID_LIQUIDATION_PROTOCOL_FEE);
+    liquidationProtocolFee = bound(
+      liquidationProtocolFee,
+      0,
+      ReserveConfiguration.MAX_VALID_LIQUIDATION_PROTOCOL_FEE
+    );
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_PROTOCOL_FEE_MASK)
     });
@@ -449,7 +462,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetLiquidationProtocolFee(uint256 data, uint256 liquidationProtocolFee) public {
-    VM.assume(liquidationProtocolFee > ReserveConfiguration.MAX_VALID_LIQUIDATION_PROTOCOL_FEE);
+    liquidationProtocolFee = bound(
+      liquidationProtocolFee,
+      ReserveConfiguration.MAX_VALID_LIQUIDATION_PROTOCOL_FEE + 1,
+      type(uint256).max
+    );
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_PROTOCOL_FEE_MASK)
     });
@@ -458,7 +475,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetLiquidationProtocolFee(uint256 data, uint256 liquidationProtocolFee) public {
-    VM.assume(liquidationProtocolFee < type(uint16).max);
+    liquidationProtocolFee = bound(
+      liquidationProtocolFee,
+      0,
+      ReserveConfiguration.MAX_VALID_LIQUIDATION_PROTOCOL_FEE
+    );
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.LIQUIDATION_PROTOCOL_FEE_MASK) |
         (liquidationProtocolFee << ReserveConfiguration.LIQUIDATION_PROTOCOL_FEE_START_BIT_POSITION)
@@ -467,7 +488,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetUnbackedMintCap(uint256 data, uint256 unbackedMintCap) public {
-    VM.assume(unbackedMintCap <= ReserveConfiguration.MAX_VALID_UNBACKED_MINT_CAP);
+    unbackedMintCap = bound(unbackedMintCap, 0, ReserveConfiguration.MAX_VALID_UNBACKED_MINT_CAP);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.UNBACKED_MINT_CAP_MASK)
     });
@@ -482,6 +503,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetUnbackedMintCap(uint256 data, uint256 unbackedMintCap) public {
+    unbackedMintCap = bound(
+      unbackedMintCap,
+      ReserveConfiguration.MAX_VALID_UNBACKED_MINT_CAP + 1,
+      type(uint256).max
+    );
     VM.assume(unbackedMintCap > ReserveConfiguration.MAX_VALID_UNBACKED_MINT_CAP);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.UNBACKED_MINT_CAP_MASK)
@@ -491,7 +517,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetUnbackedMintCap(uint256 data, uint256 unbackedMintCap) public {
-    VM.assume(unbackedMintCap < type(uint16).max);
+    unbackedMintCap = bound(unbackedMintCap, 0, ReserveConfiguration.MAX_VALID_UNBACKED_MINT_CAP);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.UNBACKED_MINT_CAP_MASK) |
         (unbackedMintCap << ReserveConfiguration.UNBACKED_MINT_CAP_START_BIT_POSITION)
@@ -500,7 +526,8 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testSetEModeCategory(uint256 data, uint256 category) public {
-    VM.assume(category <= ReserveConfiguration.MAX_VALID_EMODE_CATEGORY);
+    category = bound(category, 0, ReserveConfiguration.MAX_VALID_EMODE_CATEGORY);
+    uint256 category = bound(category, 0, type(uint8).max);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.EMODE_CATEGORY_MASK)
     });
@@ -515,7 +542,11 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testFailSetEModeCategory(uint256 data, uint256 category) public {
-    VM.assume(category > ReserveConfiguration.MAX_VALID_EMODE_CATEGORY);
+    category = bound(
+      category,
+      ReserveConfiguration.MAX_VALID_EMODE_CATEGORY + 1,
+      type(uint256).max
+    );
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.EMODE_CATEGORY_MASK)
     });
@@ -524,7 +555,7 @@ Vm constant VM = Vm(HEVM_ADDRESS);
   }
 
   function testGetEModeCategory(uint256 data, uint256 category) public {
-    VM.assume(category < type(uint8).max);
+    category = bound(category, 0, ReserveConfiguration.MAX_VALID_EMODE_CATEGORY);
     DataTypes.ReserveConfigurationMap memory config = DataTypes.ReserveConfigurationMap({
       data: (data & ReserveConfiguration.EMODE_CATEGORY_MASK) |
         (category << ReserveConfiguration.EMODE_CATEGORY_START_BIT_POSITION)
