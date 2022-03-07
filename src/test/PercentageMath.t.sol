@@ -9,8 +9,7 @@ import {Vm} from './../Vm.sol';
 contract PercentageMathTest is DSTest {
   using PercentageMath for uint256;
 
-  Vm constant VM = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
-
+Vm constant VM = Vm(HEVM_ADDRESS);
   function testPercentMul(uint256 a, uint256 b) public {
     bool safe = b == 0 || a <= (type(uint256).max - PercentageMath.HALF_PERCENTAGE_FACTOR) / b;
     VM.assume(safe);

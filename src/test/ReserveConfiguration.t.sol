@@ -13,7 +13,7 @@ import {TestHelper} from './TestHelper.sol';
 contract ReserveConfigurationTest is TestHelper {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-  Vm constant VM = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+Vm constant VM = Vm(HEVM_ADDRESS);
 
   function testSetLtv(uint256 data, uint256 ltv) public {
     VM.assume(ltv <= ReserveConfiguration.MAX_VALID_LTV);

@@ -10,7 +10,7 @@ import {Vm} from './../Vm.sol';
 contract WadRayMathTest is DSTest {
   using WadRayMath for uint256;
 
-  Vm constant VM = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+  Vm constant VM = Vm(HEVM_ADDRESS);
 
   function testWadMul(uint256 a, uint256 b) public {
     bool safe = b == 0 || a <= (type(uint256).max - WadRayMath.HALF_WAD) / b;

@@ -15,7 +15,7 @@ import {TestHelper} from './TestHelper.sol';
 contract CalldataLogicTest is TestHelper {
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-  Vm constant VM = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+  Vm constant VM = Vm(HEVM_ADDRESS);
 
   mapping(uint256 => address) reservesList;
 

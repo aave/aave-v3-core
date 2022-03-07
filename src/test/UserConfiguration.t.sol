@@ -12,7 +12,7 @@ contract UserConfigurationTest is TestHelper {
   using UserConfiguration for DataTypes.UserConfigurationMap;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
 
-  Vm constant VM = Vm(0x7109709ECfa91a80626fF3989D68f67F5b1DD12D);
+  Vm constant VM = Vm(HEVM_ADDRESS);
 
   DataTypes.UserConfigurationMap internal config;
 
