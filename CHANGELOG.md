@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.15.0](https://www.github.com/aave/aave-v3-core/compare/v1.14.2...v1.15.0) (2022-03-04)
+
+
+### Features
+
+* add owner constructor parameter to contracts that inherits Ownable to support CREATE2 factory deployment ([b6cc245](https://www.github.com/aave/aave-v3-core/commit/b6cc245b7e78e7d27b7af3e045cceff58e477231))
+* bump beta deploy package ([fbcf885](https://www.github.com/aave/aave-v3-core/commit/fbcf885269285b36b54cc741da7922d257255a44))
+* refactored executeLiquidationCall function ([63e43ef](https://www.github.com/aave/aave-v3-core/commit/63e43eff1c36a8d7e96c86f9655e7af31fe7e81f))
+
+
+### Bug Fixes
+
+* add owner parameters to test suites ([6e96821](https://www.github.com/aave/aave-v3-core/commit/6e968212d088ab6c9911b85dc454e4b989db7d6f))
+* Move reservesData param to the beginning of the param list ([0872cb4](https://www.github.com/aave/aave-v3-core/commit/0872cb4c30e79566f09a0320168d0bd1f5111a29))
+
 ### [1.14.2](https://www.github.com/aave/aave-v3-core/compare/v1.14.1...v1.14.2) (2022-03-02)
 
 
