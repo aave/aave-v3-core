@@ -70,9 +70,9 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
 
     expect(await addressesProvider.getPriceOracleSentinel()).to.be.eq(priceOracleSentinel.address);
 
-    const answer = await sequencerOracle.latestAnswer();
-    expect(answer[0]).to.be.eq(false);
+    const answer = await sequencerOracle.latestRoundData();
     expect(answer[1]).to.be.eq(0);
+    expect(answer[3]).to.be.eq(0);
   });
 
   it('Pooladmin updates grace period for sentinel', async () => {
@@ -212,8 +212,8 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
     expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
-    const currAnswer = await sequencerOracle.latestAnswer();
-    waitForTx(await sequencerOracle.setAnswer(true, currAnswer[1]));
+    const currAnswer = await sequencerOracle.latestRoundData();
+    waitForTx(await sequencerOracle.setAnswer(true, currAnswer[3]));
   });
 
   it('Tries to liquidate borrower when sequencer is down (HF > 0.95) (revert expected)', async () => {
@@ -431,8 +431,8 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   });
 
   it('Turn off sequencer + increase time more than grace period', async () => {
-    const currAnswer = await sequencerOracle.latestAnswer();
-    await waitForTx(await sequencerOracle.setAnswer(true, currAnswer[1]));
+    const currAnswer = await sequencerOracle.latestRoundData();
+    await waitForTx(await sequencerOracle.setAnswer(true, currAnswer[3]));
     await increaseTime(GRACE_PERIOD.mul(2).toNumber());
   });
 
