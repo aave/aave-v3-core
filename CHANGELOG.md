@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.16.0](https://www.github.com/aave/aave-v3-core/compare/v1.15.0...v1.16.0) (2022-03-15)
+
+
+### Features
+
+* updated price oracle sentinel interface ([f6b71f5](https://www.github.com/aave/aave-v3-core/commit/f6b71f508db2a9a6f966bc6d606198eebaaefbb9))
+
+
+### Bug Fixes
+
+* Fix docstrings of ISequencerOracle ([4391fd4](https://www.github.com/aave/aave-v3-core/commit/4391fd4c8f29fb81c966fd4510df89d0acdb8404))
+
 ## [1.15.0](https://www.github.com/aave/aave-v3-core/compare/v1.14.2...v1.15.0) (2022-03-04)
 
 
