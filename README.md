@@ -49,14 +49,14 @@ You can join at the [Discord](http://aave.com/discord) channel or at the [Govern
 
 ## Getting Started
 
-You can install `@aave/aave-v3-core` as an NPM package in your Hardhat or Truffle project to import the contracts and interfaces:
+You can install `@aave/core-v3` as an NPM package in your Hardhat or Truffle project to import the contracts and interfaces:
 
-`npm install @aave/aave-v3-core`
+`npm install @aave/core-v3`
 
 Import at Solidity files:
 
 ```
-import {IPool} from "@aave/aave-v3-core/contracts/interfaces/IPool.sol";
+import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
 
 contract Misc {
 
@@ -72,7 +72,7 @@ The JSON artifacts with the ABI and Bytecode are also included into the bundled 
 Import JSON file via Node JS `require`:
 
 ```
-const PoolV3Artifact = require('@aave/aave-v3-core/artifacts/contracts/protocol/pool/Pool.sol/Pool.json');
+const PoolV3Artifact = require('@aave/core-v3/artifacts/contracts/protocol/pool/Pool.sol/Pool.json');
 
 // Log the ABI into console
 console.log(PoolV3Artifact.abi)
