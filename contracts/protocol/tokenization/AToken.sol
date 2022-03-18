@@ -28,7 +28,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   bytes32 public constant PERMIT_TYPEHASH =
     keccak256('Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)');
 
-  uint256 public constant ATOKEN_REVISION = 0x1;
+  uint256 public constant ATOKEN_REVISION = 0x2;
 
   address internal _treasury;
   address internal _underlyingAsset;
@@ -196,6 +196,37 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /**
+   * @dev Overrides the base function to fully implement IAToken
+   * @dev see `IncentivizedERC20.DOMAIN_SEPARATOR()` for more detailed documentation
+   */
+  function DOMAIN_SEPARATOR() public view override(IAToken, EIP712Base) returns (bytes32) {
+    return super.DOMAIN_SEPARATOR();
+  }
+
+  /**
+   * @dev Overrides the base function to fully implement IAToken
+   * @dev see `IncentivizedERC20.nonces()` for more detailed documentation
+   */
+  function nonces(address owner) public view override(IAToken, EIP712Base) returns (uint256) {
+    return super.nonces(owner);
+  }
+
+  /// @inheritdoc IAToken
+  function setTreasuryAddress(address treasury) external onlyPoolAdmin {
+    _treasury = treasury;
+  }
+
+  /// @inheritdoc IAToken
+  function rescueTokens(
+    address token,
+    address to,
+    uint256 amount
+  ) external override onlyPoolAdmin {
+    require(token != _underlyingAsset, Errors.UNDERLYING_CANNOT_BE_RESCUED);
+    IERC20(token).safeTransfer(to, amount);
+  }
+
+  /**
    * @notice Transfers the aTokens between two users. Validates the transfer
    * (ie checks for valid HF after the transfer) if required
    * @param from The source address
@@ -239,34 +270,8 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     _transfer(from, to, amount, true);
   }
 
-  /**
-   * @dev Overrides the base function to fully implement IAToken
-   * @dev see `IncentivizedERC20.DOMAIN_SEPARATOR()` for more detailed documentation
-   */
-  function DOMAIN_SEPARATOR() public view override(IAToken, EIP712Base) returns (bytes32) {
-    return super.DOMAIN_SEPARATOR();
-  }
-
-  /**
-   * @dev Overrides the base function to fully implement IAToken
-   * @dev see `IncentivizedERC20.nonces()` for more detailed documentation
-   */
-  function nonces(address owner) public view override(IAToken, EIP712Base) returns (uint256) {
-    return super.nonces(owner);
-  }
-
   /// @inheritdoc EIP712Base
   function _EIP712BaseId() internal view override returns (string memory) {
     return name();
-  }
-
-  /// @inheritdoc IAToken
-  function rescueTokens(
-    address token,
-    address to,
-    uint256 amount
-  ) external override onlyPoolAdmin {
-    require(token != _underlyingAsset, Errors.UNDERLYING_CANNOT_BE_RESCUED);
-    IERC20(token).safeTransfer(to, amount);
   }
 }

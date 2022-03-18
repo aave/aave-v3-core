@@ -147,4 +147,13 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
     address to,
     uint256 amount
   ) external;
+
+  /**
+   * @notice Sets the treasury address 
+   * @param treasury The treasury address
+   */
+  function setTreasuryAddress(address treasury) external onlyPoolAdmin {
+    _treasury = treasury;
+  }
+
 }
