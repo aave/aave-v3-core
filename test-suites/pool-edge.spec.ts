@@ -19,6 +19,7 @@ import {
   InitializableImmutableAdminUpgradeabilityProxy,
   ERC20__factory,
 } from '../types';
+import { getProxyImplementation } from '../helpers/contracts-helpers';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -77,18 +78,8 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const poolProxyAddress = await addressesProvider.getPool();
-    const poolProxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      poolProxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const oldPoolImpl = await poolProxy.callStatic.implementation();
+    const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Upgrade the Pool
     expect(
@@ -440,18 +431,8 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const poolProxyAddress = await addressesProvider.getPool();
-    const poolProxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      poolProxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const oldPoolImpl = await poolProxy.callStatic.implementation();
+    const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Upgrade the Pool
     expect(
@@ -618,18 +599,11 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       log: false,
     });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const proxyAddress = await addressesProvider.getAddress(POOL_ID);
-    const proxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      proxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const implementationAddress = await proxy.callStatic.implementation();
+    const implementationAddress = await getProxyImplementation(
+      addressesProvider.address,
+      proxyAddress
+    );
 
     // Upgrade the Pool
     expect(
