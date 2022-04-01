@@ -279,7 +279,7 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     ).wait();
     expect(await getProxyAdmin(proxy.address)).to.be.eq(initialProxyAdmin.address);
 
-    let contractToRegister = MockPeripheryContractV1__factory.connect(
+    const contractToRegister = MockPeripheryContractV1__factory.connect(
       proxy.address,
       proxyAdminOwner.signer
     );
@@ -306,16 +306,16 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
 
     expect(
       await addressesProvider
-      .connect(currentAddressesProviderOwner.signer)
+        .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(newRegisteredContractId, impleV2.address)
     );
 
-    contractToRegister = MockPeripheryContractV2__factory.connect(
+    const upgradedContract = MockPeripheryContractV2__factory.connect(
       proxy.address,
       proxyAdminOwner.signer
     );
-    expect(await contractToRegister.getManager()).to.be.eq(initialManager.address);
-    expect(await contractToRegister.getAddressesProvider()).to.be.eq(addressesProvider.address);
+    expect(await upgradedContract.getManager()).to.be.eq(initialManager.address);
+    expect(await upgradedContract.getAddressesProvider()).to.be.eq(addressesProvider.address);
   });
 
   it('Owner updates the implementation of a proxy which is already initialized', async () => {
