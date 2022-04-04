@@ -21,7 +21,11 @@ import {
   L2Encoder__factory,
 } from '../types';
 import { ethers, getChainId } from 'hardhat';
-import { buildPermitParams, getSignatureFromTypedData } from '../helpers/contracts-helpers';
+import {
+  buildPermitParams,
+  getProxyImplementation,
+  getSignatureFromTypedData,
+} from '../helpers/contracts-helpers';
 import { getTestWallets } from './helpers/utils/wallets';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { parseUnits } from 'ethers/lib/utils';
@@ -74,18 +78,8 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
       log: false,
     });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const poolProxyAddress = await addressesProvider.getPool();
-    const poolProxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      poolProxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const oldPoolImpl = await poolProxy.callStatic.implementation();
+    const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Upgrade the Pool
     expect(

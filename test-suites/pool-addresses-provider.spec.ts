@@ -1,28 +1,19 @@
 import hre from 'hardhat';
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { createRandomAddress, impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { createRandomAddress } from '../helpers/misc-utils';
 import { ProtocolErrors } from '../helpers/types';
 import { ZERO_ADDRESS } from '../helpers/constants';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { deployPool, deployMockPool } from '@aave/deploy-v3/dist/helpers/contract-deployments';
-import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
-import { InitializableImmutableAdminUpgradeabilityProxy } from '../types';
-
-const getProxyImplementation = async (addressesProviderAddress: string, proxyAddress: string) => {
-  // Impersonate PoolAddressesProvider
-  await impersonateAccountsHardhat([addressesProviderAddress]);
-  const addressesProviderSigner = await hre.ethers.getSigner(addressesProviderAddress);
-
-  const proxy = (await hre.ethers.getContractAt(
-    'InitializableImmutableAdminUpgradeabilityProxy',
-    proxyAddress,
-    addressesProviderSigner
-  )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-  const implementationAddress = await proxy.callStatic.implementation();
-  return implementationAddress;
-};
+import {
+  evmSnapshot,
+  evmRevert,
+  getFirstSigner,
+  InitializableAdminUpgradeabilityProxy__factory,
+} from '@aave/deploy-v3';
+import { MockPeripheryContractV1__factory, MockPeripheryContractV2__factory } from '../types';
+import { getProxyAdmin, getProxyImplementation } from '../helpers/contracts-helpers';
 
 makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
   const { OWNABLE_ONLY_OWNER } = ProtocolErrors;
@@ -249,6 +240,82 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     expect(registeredAddressAfter).to.be.not.eq(registeredAddress);
     await expect(getProxyImplementation(addressesProvider.address, registeredAddress)).to.be
       .reverted;
+  });
+
+  it('Owner registers an existing contract (with proxy) and upgrade it', async () => {
+    const { addressesProvider, users, poolAdmin } = testEnv;
+    const proxyAdminOwner = users[0];
+
+    const currentAddressesProviderOwner = users[1];
+    const initialManager = users[1];
+    const initialProxyAdmin = users[2];
+
+    const newRegisteredContractId = hre.ethers.utils.keccak256(
+      hre.ethers.utils.toUtf8Bytes('NEW_REGISTERED_CONTRACT')
+    );
+
+    // Deploy the periphery contract that will be registered in the PoolAddressesProvider
+    const proxy = await (
+      await new InitializableAdminUpgradeabilityProxy__factory(await getFirstSigner()).deploy()
+    ).deployed();
+
+    // Implementation
+    const impleV1 = await (
+      await new MockPeripheryContractV1__factory(await getFirstSigner()).deploy()
+    ).deployed();
+    await impleV1.initialize(initialManager.address, 123);
+
+    // Initialize proxy
+    const incentivesInit = impleV1.interface.encodeFunctionData('initialize', [
+      initialManager.address,
+      123,
+    ]);
+    await (
+      await proxy['initialize(address,address,bytes)'](
+        impleV1.address, // logic
+        initialProxyAdmin.address, // admin
+        incentivesInit // data
+      )
+    ).wait();
+    expect(await getProxyAdmin(proxy.address)).to.be.eq(initialProxyAdmin.address);
+
+    const contractToRegister = MockPeripheryContractV1__factory.connect(
+      proxy.address,
+      proxyAdminOwner.signer
+    );
+    expect(await contractToRegister.getManager()).to.be.eq(initialManager.address);
+
+    // Register the periphery contract into the PoolAddressesProvider
+    expect(await proxy.connect(initialProxyAdmin.signer).changeAdmin(addressesProvider.address));
+    expect(await getProxyAdmin(proxy.address)).to.be.eq(addressesProvider.address);
+    expect(
+      await addressesProvider
+        .connect(currentAddressesProviderOwner.signer)
+        .setAddress(newRegisteredContractId, proxy.address)
+    );
+    expect(await addressesProvider.getAddress(newRegisteredContractId)).to.be.eq(proxy.address);
+
+    // Upgrade periphery contract to V2 from PoolAddressesProvider
+    // Note the new implementation contract should has a proper `initialize` function signature
+
+    // New implementation
+    const impleV2 = await (
+      await new MockPeripheryContractV2__factory(await getFirstSigner()).deploy()
+    ).deployed();
+    await impleV2.initialize(addressesProvider.address);
+
+    expect(
+      await addressesProvider
+        .connect(currentAddressesProviderOwner.signer)
+        .setAddressAsProxy(newRegisteredContractId, impleV2.address)
+    );
+
+    const upgradedContract = MockPeripheryContractV2__factory.connect(
+      proxy.address,
+      proxyAdminOwner.signer
+    );
+    expect(await upgradedContract.getManager()).to.be.eq(initialManager.address);
+    expect(await upgradedContract.getAddressesProvider()).to.be.eq(addressesProvider.address);
   });
 
   it('Owner updates the implementation of a proxy which is already initialized', async () => {

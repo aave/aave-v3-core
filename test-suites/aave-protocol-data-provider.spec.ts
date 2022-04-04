@@ -6,6 +6,7 @@ import { getMockPool, ZERO_ADDRESS } from '@aave/deploy-v3';
 import { InitializableImmutableAdminUpgradeabilityProxy } from '../types';
 import { impersonateAccountsHardhat } from '../helpers/misc-utils';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { getProxyImplementation } from '../helpers/contracts-helpers';
 
 makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
   const MKR_ADDRESS = '0x9f8F72aA9304c8B593d555F12eF6589cC3A579A2';
@@ -18,18 +19,8 @@ makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
     // Deploy a mock Pool
     const mockPool = await hre.deployments.deploy('MockPool', { from: deployer });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const poolProxyAddress = await addressesProvider.getPool();
-    const poolProxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      poolProxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const oldPoolImpl = await poolProxy.callStatic.implementation();
+    const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Update the addressesProvider with a mock pool
     expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPool.address))
