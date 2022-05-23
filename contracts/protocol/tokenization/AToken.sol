@@ -123,8 +123,6 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     // Being a normal transfer, the Transfer() and BalanceTransfer() are emitted
     // so no need to emit a specific event here
     _transfer(from, to, value, false);
-
-    emit Transfer(from, to, value);
   }
 
   /// @inheritdoc IERC20
@@ -216,7 +214,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     uint256 fromBalanceBefore = super.balanceOf(from).rayMul(index);
     uint256 toBalanceBefore = super.balanceOf(to).rayMul(index);
 
-    super._transfer(from, to, amount.rayDiv(index).toUint128());
+    super._transfer(from, to, amount, index);
 
     if (validate) {
       POOL.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);

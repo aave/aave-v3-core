@@ -125,4 +125,15 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
       emit Burn(user, target, amountToBurn, balanceIncrease, index);
     }
   }
+
+  function _transfer(
+    address sender,
+    address recipient,
+    uint256 amount,
+    uint256 index
+  ) internal {
+    super._transfer(sender, recipient, amount.rayDiv(index).toUint128());
+
+    emit Transfer(sender, recipient, amount);
+  }
 }
