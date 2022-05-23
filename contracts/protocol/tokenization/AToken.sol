@@ -220,7 +220,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
       POOL.finalizeTransfer(underlyingAsset, from, to, amount, fromBalanceBefore, toBalanceBefore);
     }
 
-    emit BalanceTransfer(from, to, amount, index);
+    emit BalanceTransfer(from, to, amount.rayDiv(index), index);
   }
 
   /**
