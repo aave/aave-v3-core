@@ -143,11 +143,10 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
     _userState[sender].additionalData = index.toUint128();
     _userState[recipient].additionalData = index.toUint128();
 
-    emit Mint(sender, sender, senderBalanceIncrease, senderBalanceIncrease, index);
-    emit Mint(recipient, recipient, recipientBalanceIncrease, recipientBalanceIncrease, index);
-
     super._transfer(sender, recipient, amount.rayDiv(index).toUint128());
 
     emit Transfer(sender, recipient, amount);
+    emit Mint(sender, sender, senderBalanceIncrease, senderBalanceIncrease, index);
+    emit Mint(recipient, recipient, recipientBalanceIncrease, recipientBalanceIncrease, index);
   }
 }
