@@ -396,31 +396,28 @@ makeSuite('AToken: Events', (testEnv: TestEnv) => {
     expect(bobBalanceAfter).to.be.closeTo(bobBalanceBefore.add(balances.balance[bob.address]), 2);
   };
 
-  it('Alice supplies 1000 DAI, withdraws 200 to Bob, withdraws 5 to Bob', async () => {
+  it('Alice supplies 300000 DAI, withdraws 200000 to Bob, withdraws 5 to Bob', async () => {
     const { pool, dai, aDai, weth } = testEnv;
 
     let rcpt;
     let aliceBalanceBefore = await aDai.balanceOf(alice.address);
     let bobBalanceBefore = await aDai.balanceOf(bob.address);
 
-    log('- Alice supplies 1000 DAI');
-    rcpt = await supply(pool, alice, dai.address, '1000', alice.address, DEBUG);
+    log('- Alice supplies 300000 DAI');
+    rcpt = await supply(pool, alice, dai.address, '300000', alice.address, DEBUG);
     updateBalances(balances, aDai, rcpt);
 
     log('- Increase index due to great borrow of DAI');
     await increaseSupplyIndex(pool, borrower, weth.address, dai.address);
 
-    log('- Alice withdraws 200 DAI to Bob');
-    rcpt = await withdraw(pool, alice, dai.address, '200', bob.address, DEBUG);
+    log('- Alice withdraws 200000 DAI to Bob');
+    rcpt = await withdraw(pool, alice, dai.address, '200000', bob.address, DEBUG);
     updateBalances(balances, aDai, rcpt);
 
     log('- Increase index due to great borrow of DAI');
     await increaseSupplyIndex(pool, borrower, weth.address, dai.address);
-    await advanceTimeAndBlock(1000000000000000);
 
     log('- Alice withdraws 5 DAI to Bob');
-    await printBalance('alice', aDai, alice.address);
-    await printBalance('bob', aDai, bob.address);
     rcpt = await withdraw(pool, alice, dai.address, '5', bob.address, DEBUG);
     updateBalances(balances, aDai, rcpt);
 

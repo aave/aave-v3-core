@@ -30,13 +30,13 @@ const log = (str: string) => {
   if (DEBUG) console.log(str);
 };
 
-const printBalance = async (name: string, aToken: any, userAddress: string) => {
+const printBalance = async (name: string, debtToken: VariableDebtToken, userAddress: string) => {
   console.log(
     name,
     'balanceOf',
-    await ethers.utils.formatEther(await aToken.balanceOf(userAddress)),
+    await ethers.utils.formatEther(await debtToken.balanceOf(userAddress)),
     'scaledBalance',
-    await ethers.utils.formatEther(await aToken.scaledBalanceOf(userAddress))
+    await ethers.utils.formatEther(await debtToken.scaledBalanceOf(userAddress))
   );
 };
 
