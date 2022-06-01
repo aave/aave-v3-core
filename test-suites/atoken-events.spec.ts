@@ -372,7 +372,7 @@ makeSuite('AToken: Events', (testEnv: TestEnv) => {
     }
 
     log('- Alice withdraws 200 DAI to Bob');
-    rcpt = await supply(pool, alice, dai.address, '200', bob.address, DEBUG);
+    rcpt = await withdraw(pool, alice, dai.address, '200', bob.address, DEBUG);
     updateBalances(balances, aDai, rcpt);
 
     if (DEBUG) {

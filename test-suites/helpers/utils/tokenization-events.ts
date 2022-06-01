@@ -154,7 +154,7 @@ export const withdraw = async (
     ]);
     matchEvent(rcpt, 'Mint', aToken, aToken.address, [
       user.address,
-      to,
+      user.address,
       balanceIncrease.sub(amount),
       balanceIncrease,
       indexAfter,
