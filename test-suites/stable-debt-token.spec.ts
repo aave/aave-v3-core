@@ -198,7 +198,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const rawMintEvents = tx.logs.filter(
       ({ topics, address }) => topics[0] === mintEventSig && address == stableDebtToken.address
     );
-    const { amount: mintAmount, balanceIncrease } = stableDebtToken.interface.parseLog(
+    const { value: mintAmount, balanceIncrease } = stableDebtToken.interface.parseLog(
       rawMintEvents[0]
     ).args;
 

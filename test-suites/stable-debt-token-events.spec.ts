@@ -82,11 +82,11 @@ const updateBalances = (
 ) => {
   let events = getStableDebtTokenEvent(stableDebtDai, receipt, 'Mint');
   for (const ev of events) {
-    balances.balance[ev.onBehalfOf] = balances.balance[ev.onBehalfOf]?.add(ev.amount);
+    balances.balance[ev.onBehalfOf] = balances.balance[ev.onBehalfOf]?.add(ev.value);
   }
   events = getStableDebtTokenEvent(stableDebtDai, receipt, 'Burn');
   for (const ev of events) {
-    balances.balance[ev.from] = balances.balance[ev.from]?.sub(ev.amount.add(ev.balanceIncrease));
+    balances.balance[ev.from] = balances.balance[ev.from]?.sub(ev.value.add(ev.balanceIncrease));
     balances.balance[ev.from] = balances.balance[ev.from]?.add(ev.balanceIncrease);
   }
 };

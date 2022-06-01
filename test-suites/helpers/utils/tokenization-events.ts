@@ -51,7 +51,7 @@ const STABLE_DEBT_TOKEN_EVENTS = [
     args: [
       'user',
       'onBehalfOf',
-      'amount',
+      'value',
       'currentBalance',
       'balanceIncrease',
       'newRate',
@@ -63,7 +63,7 @@ const STABLE_DEBT_TOKEN_EVENTS = [
     sig: 'Burn(address,uint256,uint256,uint256,uint256,uint256)',
     args: [
       'from',
-      'amount',
+      'value',
       'currentBalance',
       'balanceIncrease',
       'avgStableRate',
@@ -584,7 +584,7 @@ export const printStableDebtTokenEvents = (
 
       let i = 0;
       for (const arg of eventSig.args) {
-        parsed[i] = ['amount', 'currentBalance', 'balanceIncrease'].includes(arg)
+        parsed[i] = ['value', 'currentBalance', 'balanceIncrease'].includes(arg)
           ? ethers.utils.formatEther(rawParsed[arg])
           : rawParsed[arg];
         i++;
