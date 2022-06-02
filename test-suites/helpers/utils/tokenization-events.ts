@@ -46,6 +46,7 @@ const VARIABLE_DEBT_TOKEN_EVENTS = [
   },
 ];
 const STABLE_DEBT_TOKEN_EVENTS = [
+  { sig: 'Transfer(address,address,uint256)', args: ['from', 'to', 'value'] },
   {
     sig: 'Mint(address,address,uint256,uint256,uint256,uint256,uint256,uint256)',
     args: [

@@ -9,6 +9,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { evmRevert, evmSnapshot, increaseTime, waitForTx } from '@aave/deploy-v3';
 import { StableDebtToken__factory } from '../types';
+import { getStableDebtTokenEvent } from './helpers/utils/tokenization-events';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
@@ -183,24 +184,11 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       borrowOnBehalfAmount.add(borrowAmount)
     );
 
-    const transferEventSig = utils.keccak256(
-      utils.toUtf8Bytes('Transfer(address,address,uint256)')
-    );
-    const mintEventSig = utils.keccak256(
-      utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256,uint256,uint256,uint256)')
-    );
+    const parsedTransferEvents = getStableDebtTokenEvent(stableDebtToken, tx, 'Transfer');
+    const transferAmount = parsedTransferEvents[0].value;
 
-    const rawTransferEvents = tx.logs.filter(
-      ({ topics, address }) => topics[0] === transferEventSig && address == stableDebtToken.address
-    );
-    const transferAmount = stableDebtToken.interface.parseLog(rawTransferEvents[0]).args.value;
-
-    const rawMintEvents = tx.logs.filter(
-      ({ topics, address }) => topics[0] === mintEventSig && address == stableDebtToken.address
-    );
-    const { value: mintAmount, balanceIncrease } = stableDebtToken.interface.parseLog(
-      rawMintEvents[0]
-    ).args;
+    const parsedMintEvents = getStableDebtTokenEvent(stableDebtToken, tx, 'Mint');
+    const { value: mintAmount, balanceIncrease } = parsedMintEvents[0];
 
     expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
     expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);
