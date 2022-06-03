@@ -136,8 +136,9 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
     address asset,
     uint256 amount,
     uint256 fee
-  ) external virtual override onlyBridge {
-    BridgeLogic.executeBackUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
+  ) external virtual override onlyBridge returns (uint256) {
+    return
+      BridgeLogic.executeBackUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
   }
 
   /// @inheritdoc IPool
