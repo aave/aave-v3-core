@@ -62,14 +62,7 @@ const STABLE_DEBT_TOKEN_EVENTS = [
   },
   {
     sig: 'Burn(address,uint256,uint256,uint256,uint256,uint256)',
-    args: [
-      'from',
-      'value',
-      'currentBalance',
-      'balanceIncrease',
-      'avgStableRate',
-      'newTotalSupply',
-    ],
+    args: ['from', 'value', 'currentBalance', 'balanceIncrease', 'avgStableRate', 'newTotalSupply'],
   },
 ];
 
@@ -212,6 +205,11 @@ export const transfer = async (
     addedScaledBalance,
     indexAfter,
   ]);
+  matchEvent(rcpt, 'Transfer', aToken, aToken.address, [
+    ZERO_ADDRESS,
+    user.address,
+    fromBalanceIncrease,
+  ]);
   matchEvent(rcpt, 'Mint', aToken, aToken.address, [
     user.address,
     user.address,
@@ -219,13 +217,16 @@ export const transfer = async (
     fromBalanceIncrease,
     indexAfter,
   ]);
-  matchEvent(rcpt, 'Mint', aToken, aToken.address, [
-    to,
-    to,
-    toBalanceIncrease,
-    toBalanceIncrease,
-    indexAfter,
-  ]);
+  if (toBalanceIncrease.gt(0)) {
+    matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, to, toBalanceIncrease]);
+    matchEvent(rcpt, 'Mint', aToken, aToken.address, [
+      to,
+      to,
+      toBalanceIncrease,
+      toBalanceIncrease,
+      indexAfter,
+    ]);
+  }
 
   return rcpt;
 };
