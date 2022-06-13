@@ -14,7 +14,13 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode } from '../helpers/types';
 import { Pool, AToken } from '../types';
 import { makeSuite, SignerWithAddress, TestEnv } from './helpers/make-suite';
-import { supply, transfer, withdraw, getATokenEvent } from './helpers/utils/tokenization-events';
+import {
+  supply,
+  transfer,
+  withdraw,
+  getATokenEvent,
+  transferFrom,
+} from './helpers/utils/tokenization-events';
 
 const DEBUG = false;
 
@@ -92,16 +98,16 @@ const updateBalances = (balances: any, aToken: AToken, receipt: TransactionRecei
 };
 
 makeSuite('AToken: Events', (testEnv: TestEnv) => {
-  let alice, bob, borrower, borrower2;
+  let alice, bob, eve, borrower, borrower2;
 
   let snapId;
 
   before(async () => {
     const { users, pool, dai, weth } = testEnv;
-    [alice, bob, borrower, borrower2] = users;
+    [alice, bob, eve, borrower, borrower2] = users;
 
     const amountToMint = await convertToCurrencyDecimals(dai.address, '10000000');
-    const usersToInit = [alice, bob, borrower, borrower2];
+    const usersToInit = [alice, bob, eve, borrower, borrower2];
     for (const user of usersToInit) {
       await dai.connect(user.signer)['mint(uint256)'](amountToMint);
       await weth.connect(user.signer)['mint(uint256)'](amountToMint);
@@ -118,6 +124,7 @@ makeSuite('AToken: Events', (testEnv: TestEnv) => {
       balance: {
         [alice.address]: BigNumber.from(0),
         [bob.address]: BigNumber.from(0),
+        [eve.address]: BigNumber.from(0),
       },
     };
   });
@@ -396,7 +403,7 @@ makeSuite('AToken: Events', (testEnv: TestEnv) => {
     expect(bobBalanceAfter).to.be.closeTo(bobBalanceBefore.add(balances.balance[bob.address]), 2);
   };
 
-  it('Alice supplies 300000 DAI, withdraws 200000 to Bob, withdraws 5 to Bob', async () => {
+  it('Alice supplies 300000, withdraws 200000 to Bob, withdraws 5 to Bob', async () => {
     const { pool, dai, aDai, weth } = testEnv;
 
     let rcpt;
@@ -442,7 +449,7 @@ makeSuite('AToken: Events', (testEnv: TestEnv) => {
     expect(bobBalanceAfter).to.be.closeTo(bobBalanceBefore.add(balances.balance[bob.address]), 2);
   });
 
-  it('Bob supplies 1000 DAI, Alice supplies 200 on behalf of Bob, Bob withdraws 200 on behalf of Alice', async () => {
+  it('Bob supplies 1000, Alice supplies 200 on behalf of Bob, Bob withdraws 200 on behalf of Alice', async () => {
     const { pool, dai, aDai, weth } = testEnv;
 
     let rcpt;
@@ -486,5 +493,66 @@ makeSuite('AToken: Events', (testEnv: TestEnv) => {
       2
     );
     expect(bobBalanceAfter).to.be.closeTo(bobBalanceBefore.add(balances.balance[bob.address]), 2);
+  });
+
+  it('Alice supplies 1000 DAI and approves aDai to Bob, Bob transfers 500 to himself and 300 to Eve, index change, principal goes back to Alice', async () => {
+    const { pool, dai, aDai, weth } = testEnv;
+
+    let rcpt;
+    let aliceBalanceBefore = await aDai.balanceOf(alice.address);
+    let bobBalanceBefore = await aDai.balanceOf(bob.address);
+    let eveBalanceBefore = await aDai.balanceOf(eve.address);
+
+    log('- Alice supplies 1000 DAI');
+    rcpt = await supply(pool, alice, dai.address, '1000', alice.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+
+    log('- Alice approves aDai to Bob');
+    await aDai.connect(alice.signer).approve(bob.address, MAX_UINT_AMOUNT);
+
+    log('- Bob transfers 500 aDai from Alice to himself');
+    rcpt = await transferFrom(pool, bob, alice.address, dai.address, '500', bob.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+
+    log('- Bob transfers 300 aDai from Alice to Eve');
+    rcpt = await transferFrom(pool, bob, alice.address, dai.address, '300', eve.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+
+    log('- Increase index due to great borrow of DAI');
+    await increaseSupplyIndex(pool, borrower, weth.address, dai.address);
+
+    log('- Bob transfers 500 back to Alice');
+    rcpt = await transfer(pool, bob, dai.address, '500', alice.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+
+    log('- Eve transfers 500 back to Alice');
+    rcpt = await transfer(pool, eve, dai.address, '300', alice.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+
+    if (DEBUG) {
+      await printBalance('alice', aDai, alice.address);
+      await printBalance('bob', aDai, bob.address);
+      await printBalance('eve', aDai, eve.address);
+    }
+
+    // Check final balances
+    rcpt = await supply(pool, alice, dai.address, '1', alice.address, false);
+    updateBalances(balances, aDai, rcpt);
+    const aliceBalanceAfter = await aDai.balanceOf(alice.address);
+
+    rcpt = await supply(pool, bob, dai.address, '1', bob.address, false);
+    updateBalances(balances, aDai, rcpt);
+    const bobBalanceAfter = await aDai.balanceOf(bob.address);
+
+    rcpt = await supply(pool, eve, dai.address, '1', eve.address, false);
+    updateBalances(balances, aDai, rcpt);
+    const eveBalanceAfter = await aDai.balanceOf(eve.address);
+
+    expect(aliceBalanceAfter).to.be.closeTo(
+      aliceBalanceBefore.add(balances.balance[alice.address]),
+      2
+    );
+    expect(bobBalanceAfter).to.be.closeTo(bobBalanceBefore.add(balances.balance[bob.address]), 2);
+    expect(eveBalanceAfter).to.be.closeTo(eveBalanceBefore.add(balances.balance[eve.address]), 2);
   });
 });

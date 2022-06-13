@@ -220,7 +220,64 @@ export const transfer = async (
   if (toBalanceIncrease.gt(0)) {
     matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, to, toBalanceIncrease]);
     matchEvent(rcpt, 'Mint', aToken, aToken.address, [
+      user.address,
       to,
+      toBalanceIncrease,
+      toBalanceIncrease,
+      indexAfter,
+    ]);
+  }
+
+  return rcpt;
+};
+
+export const transferFrom = async (
+  pool: Pool,
+  user: SignerWithAddress,
+  origin: string,
+  underlying: string,
+  amountToConvert: string,
+  to: string,
+  debug: boolean = false
+) => {
+  const amount = await convertToCurrencyDecimals(underlying, amountToConvert);
+  const { aTokenAddress } = await pool.getReserveData(underlying);
+  const aToken = AToken__factory.connect(aTokenAddress, user.signer);
+
+  const fromPreviousIndex = await aToken.getPreviousIndex(origin);
+  const toPreviousIndex = await aToken.getPreviousIndex(to);
+
+  const tx = await aToken.connect(user.signer).transferFrom(origin, to, amount);
+  const rcpt = await tx.wait();
+
+  const indexAfter = await pool.getReserveNormalizedIncome(underlying);
+  const addedScaledBalance = amount.rayDiv(indexAfter);
+  const fromScaledBalance = (await aToken.scaledBalanceOf(origin)).add(addedScaledBalance);
+  const toScaledBalance = (await aToken.scaledBalanceOf(to)).sub(addedScaledBalance);
+  const fromBalanceIncrease = getBalanceIncrease(fromScaledBalance, fromPreviousIndex, indexAfter);
+  const toBalanceIncrease = getBalanceIncrease(toScaledBalance, toPreviousIndex, indexAfter);
+
+  if (debug) printATokenEvents(aToken, rcpt);
+
+  matchEvent(rcpt, 'Transfer', aToken, aToken.address, [origin, to, amount]);
+  matchEvent(rcpt, 'BalanceTransfer', aToken, aToken.address, [
+    origin,
+    to,
+    addedScaledBalance,
+    indexAfter,
+  ]);
+  matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, origin, fromBalanceIncrease]);
+  matchEvent(rcpt, 'Mint', aToken, aToken.address, [
+    user.address,
+    origin,
+    fromBalanceIncrease,
+    fromBalanceIncrease,
+    indexAfter,
+  ]);
+  if (toBalanceIncrease.gt(0)) {
+    matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, to, toBalanceIncrease]);
+    matchEvent(rcpt, 'Mint', aToken, aToken.address, [
+      user.address,
       to,
       toBalanceIncrease,
       toBalanceIncrease,
