@@ -1,5 +1,14 @@
 # Changelog
 
+### [1.16.1](https://www.github.com/aave/aave-v3-core/compare/v1.16.0...v1.16.1) (2022-04-05)
+
+
+### Bug Fixes
+
+* add comment for undocumentted parameter ([ba0e4ee](https://www.github.com/aave/aave-v3-core/commit/ba0e4ee72cc3060fc55294aeac0a7bbb9caf3087))
+* Add helpers for proxy contracts (eip1967 slots) ([d82be43](https://www.github.com/aave/aave-v3-core/commit/d82be4350d1778c269b5f7d875bdf5025fcff0bd))
+* Fix ts type of contract in tests ([12373ca](https://www.github.com/aave/aave-v3-core/commit/12373ca09d4e2cec32546dc87285d516c1d9f261))
+
 ## [1.16.0](https://www.github.com/aave/aave-v3-core/compare/v1.15.0...v1.16.0) (2022-03-15)
 
 
