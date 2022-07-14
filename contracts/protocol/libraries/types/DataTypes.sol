@@ -239,9 +239,11 @@ library DataTypes {
 
   struct ValidateLiquidationCallParams {
     ReserveCache debtReserveCache;
+    address debtAsset;
     uint256 totalDebt;
     uint256 healthFactor;
     address priceOracleSentinel;
+    address oracle;
   }
 
   struct CalculateInterestRatesParams {

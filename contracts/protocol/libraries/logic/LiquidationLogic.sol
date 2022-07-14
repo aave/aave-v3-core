@@ -132,9 +132,11 @@ library LiquidationLogic {
       collateralReserve,
       DataTypes.ValidateLiquidationCallParams({
         debtReserveCache: vars.debtReserveCache,
+        debtAsset: params.debtAsset,
         totalDebt: vars.userTotalDebt,
         healthFactor: vars.healthFactor,
-        priceOracleSentinel: params.priceOracleSentinel
+        priceOracleSentinel: params.priceOracleSentinel,
+        oracle: params.priceOracle
       })
     );
 
