@@ -22,6 +22,12 @@ interface IPriceOracleSentinel {
   event GracePeriodUpdated(uint256 newGracePeriod);
 
   /**
+   * @dev Emitted after the price expiration time is updated
+   * @param newPriceExpirationTime The new price expiration time
+   */
+  event PriceExpirationTimeUpdated(uint256 newPriceExpirationTime);
+
+  /**
    * @notice Returns the PoolAddressesProvider
    * @return The address of the PoolAddressesProvider contract
    */
@@ -30,16 +36,23 @@ interface IPriceOracleSentinel {
   /**
    * @notice Returns true if the `borrow` operation is allowed.
    * @dev Operation not allowed when PriceOracle is down or grace period not passed.
+   * @param priceOracle The address of the price oracle
+   * @param asset The address of the asset to borrow
    * @return True if the `borrow` operation is allowed, false otherwise.
    */
-  function isBorrowAllowed() external view returns (bool);
+  function isBorrowAllowed(address priceOracle, address asset) external view returns (bool);
 
   /**
    * @notice Returns true if the `liquidation` operation is allowed.
    * @dev Operation not allowed when PriceOracle is down or grace period not passed.
+   * @param priceOracle The address of the price oracle
+   * @param debtAsset The address of the debt asset to liquidate
    * @return True if the `liquidation` operation is allowed, false otherwise.
    */
-  function isLiquidationAllowed() external view returns (bool);
+  function isLiquidationAllowed(address priceOracle, address debtAsset)
+    external
+    view
+    returns (bool);
 
   /**
    * @notice Updates the address of the sequencer oracle
@@ -54,6 +67,12 @@ interface IPriceOracleSentinel {
   function setGracePeriod(uint256 newGracePeriod) external;
 
   /**
+   * @notice Updates the price expiration time
+   * @param newPriceExpirationTime The value of the new price expiration time
+   */
+  function setPriceExpirationTime(uint256 newPriceExpirationTime) external;
+
+  /**
    * @notice Returns the SequencerOracle
    * @return The address of the sequencer oracle contract
    */
@@ -64,4 +83,10 @@ interface IPriceOracleSentinel {
    * @return The duration of the grace period
    */
   function getGracePeriod() external view returns (uint256);
+
+  /**
+   * @notice Returns the price expiration time
+   * @return The duration after the price of assets can be considered as expired or stale (in seconds)
+   */
+  function getPriceExpirationTime() external view returns (uint256);
 }

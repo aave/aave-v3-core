@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
+import {AggregatorV3Interface} from '../../dependencies/chainlink/AggregatorV3Interface.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IPriceOracleSentinel} from '../../interfaces/IPriceOracleSentinel.sol';
 import {ISequencerOracle} from '../../interfaces/ISequencerOracle.sol';
 import {IACLManager} from '../../interfaces/IACLManager.sol';
+import {IAaveOracle} from '../../interfaces/IAaveOracle.sol';
 
 /**
  * @title PriceOracleSentinel
@@ -42,30 +44,40 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
 
   uint256 internal _gracePeriod;
 
+  uint256 internal _priceExpirationTime;
+
   /**
    * @dev Constructor
    * @param provider The address of the PoolAddressesProvider
    * @param oracle The address of the SequencerOracle
    * @param gracePeriod The duration of the grace period in seconds
+   * @param priceExpirationTime The expiration time of asset prices in seconds
    */
   constructor(
     IPoolAddressesProvider provider,
     ISequencerOracle oracle,
-    uint256 gracePeriod
+    uint256 gracePeriod,
+    uint256 priceExpirationTime
   ) {
     ADDRESSES_PROVIDER = provider;
     _sequencerOracle = oracle;
     _gracePeriod = gracePeriod;
+    _priceExpirationTime = priceExpirationTime;
   }
 
   /// @inheritdoc IPriceOracleSentinel
-  function isBorrowAllowed() public view override returns (bool) {
-    return _isUpAndGracePeriodPassed();
+  function isBorrowAllowed(address priceOracle, address asset) public view override returns (bool) {
+    return _isUpAndGracePeriodPassed() && !_isPriceStale(priceOracle, asset);
   }
 
   /// @inheritdoc IPriceOracleSentinel
-  function isLiquidationAllowed() public view override returns (bool) {
-    return _isUpAndGracePeriodPassed();
+  function isLiquidationAllowed(address priceOracle, address debtAsset)
+    public
+    view
+    override
+    returns (bool)
+  {
+    return _isUpAndGracePeriodPassed() && !_isPriceStale(priceOracle, debtAsset);
   }
 
   /**
@@ -75,6 +87,19 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   function _isUpAndGracePeriodPassed() internal view returns (bool) {
     (, int256 answer, , uint256 lastUpdateTimestamp, ) = _sequencerOracle.latestRoundData();
     return answer == 0 && block.timestamp - lastUpdateTimestamp > _gracePeriod;
+  }
+
+  /**
+   * @notice Checks the price of the asset is not stale. It can be considered stale if the time passed since the last
+   * is longer than the price expiration time.
+   * @param priceOracle The address of the price oracle
+   * @param asset The address of the asset to check its price status
+   * @return True if the price is stale, false otherwise
+   */
+  function _isPriceStale(address priceOracle, address asset) internal view returns (bool) {
+    address source = IAaveOracle(priceOracle).getSourceOfAsset(asset);
+    (, , , uint256 updatedAt, ) = AggregatorV3Interface(source).latestRoundData();
+    return (block.timestamp - updatedAt) > _priceExpirationTime;
   }
 
   /// @inheritdoc IPriceOracleSentinel
@@ -90,6 +115,12 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   }
 
   /// @inheritdoc IPriceOracleSentinel
+  function setPriceExpirationTime(uint256 newPriceExpirationTime) public onlyRiskOrPoolAdmins {
+    _priceExpirationTime = newPriceExpirationTime;
+    emit PriceExpirationTimeUpdated(newPriceExpirationTime);
+  }
+
+  /// @inheritdoc IPriceOracleSentinel
   function getSequencerOracle() public view returns (address) {
     return address(_sequencerOracle);
   }
@@ -97,5 +128,10 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
   /// @inheritdoc IPriceOracleSentinel
   function getGracePeriod() public view returns (uint256) {
     return _gracePeriod;
+  }
+
+  /// @inheritdoc IPriceOracleSentinel
+  function getPriceExpirationTime() public view returns (uint256) {
+    return _priceExpirationTime;
   }
 }

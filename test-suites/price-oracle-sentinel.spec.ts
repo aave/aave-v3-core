@@ -1,24 +1,37 @@
 import { expect } from 'chai';
-import { BigNumber, utils } from 'ethers';
+import { BigNumber, BigNumberish, utils } from 'ethers';
 import { timeLatest } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import {
+  AaveOracle,
+  MockAggregator__factory,
   PriceOracleSentinel,
   PriceOracleSentinel__factory,
   SequencerOracle,
   SequencerOracle__factory,
 } from '../types';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
-import { makeSuite, TestEnv } from './helpers/make-suite';
+import { makeSuite, SignerWithAddress, TestEnv } from './helpers/make-suite';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { calcExpectedVariableDebtTokenBalance } from './helpers/utils/calculations';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
-import './helpers/utils/wadraymath';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { waitForTx, increaseTime } from '@aave/deploy-v3';
+import { waitForTx, increaseTime, evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import './helpers/utils/wadraymath';
 
 declare var hre: HardhatRuntimeEnvironment;
+
+const setPriceWithMockAggregator = async (
+  poolAdmin: SignerWithAddress,
+  aaveOracle: AaveOracle,
+  asset: string,
+  price: BigNumberish
+) => {
+  const oracle = await new MockAggregator__factory(poolAdmin.signer).deploy(price);
+  await aaveOracle.connect(poolAdmin.signer).setAssetSources([asset], [oracle.address]);
+  return oracle;
+};
 
 makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   const {
@@ -31,10 +44,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   let sequencerOracle: SequencerOracle;
   let priceOracleSentinel: PriceOracleSentinel;
 
-  const GRACE_PERIOD = BigNumber.from(60 * 60);
+  const GRACE_PERIOD = BigNumber.from(60 * 60); // 1h
+  const PRICE_EXPIRATION_TIME = BigNumber.from(10 * 60); // 10 min
 
   before(async () => {
-    const { addressesProvider, deployer, oracle } = testEnv;
+    const { addressesProvider, deployer } = testEnv;
 
     // Deploy SequencerOracle
     sequencerOracle = await (
@@ -45,19 +59,13 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       await new PriceOracleSentinel__factory(await getFirstSigner()).deploy(
         addressesProvider.address,
         sequencerOracle.address,
-        GRACE_PERIOD
+        GRACE_PERIOD,
+        PRICE_EXPIRATION_TIME
       )
     ).deployed();
-
-    await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
   });
 
-  after(async () => {
-    const { aaveOracle, addressesProvider } = testEnv;
-    await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
-  });
-
-  it('Admin sets a PriceOracleSentinel and activate it for DAI and WETH', async () => {
+  it.only('Admin sets a PriceOracleSentinel and activate it for DAI and WETH', async () => {
     const { addressesProvider, poolAdmin } = testEnv;
 
     expect(
@@ -75,7 +83,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     expect(answer[3]).to.be.eq(0);
   });
 
-  it('Pooladmin updates grace period for sentinel', async () => {
+  it.only('PoolAdmin updates grace period for sentinel', async () => {
     const { poolAdmin } = testEnv;
 
     const newGracePeriod = 0;
@@ -87,7 +95,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(newGracePeriod);
   });
 
-  it('Risk admin updates grace period for sentinel', async () => {
+  it.only('Risk admin updates grace period for sentinel', async () => {
     const { riskAdmin } = testEnv;
 
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(0);
@@ -97,7 +105,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(GRACE_PERIOD);
   });
 
-  it('User tries to set grace period for sentinel', async () => {
+  it.only('User tries to set grace period for sentinel (revert expected)', async () => {
     const {
       users: [user],
     } = testEnv;
@@ -109,7 +117,45 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     expect(await priceOracleSentinel.getGracePeriod()).to.not.be.eq(0);
   });
 
-  it('Pooladmin update the sequencer oracle', async () => {
+  it.only('PoolAdmin updates price expiration time for sentinel', async () => {
+    const { poolAdmin } = testEnv;
+
+    const newGracePeriod = 0;
+
+    expect(await priceOracleSentinel.getPriceExpirationTime()).to.be.eq(PRICE_EXPIRATION_TIME);
+    expect(await priceOracleSentinel.connect(poolAdmin.signer).setPriceExpirationTime(0))
+      .to.emit(priceOracleSentinel, 'PriceExpirationTimeUpdated')
+      .withArgs(0);
+    expect(await priceOracleSentinel.getPriceExpirationTime()).to.be.eq(newGracePeriod);
+  });
+
+  it.only('Risk admin updates price expiration time for sentinel', async () => {
+    const { riskAdmin } = testEnv;
+
+    expect(await priceOracleSentinel.getPriceExpirationTime()).to.be.eq(0);
+    expect(
+      await priceOracleSentinel
+        .connect(riskAdmin.signer)
+        .setPriceExpirationTime(PRICE_EXPIRATION_TIME)
+    )
+      .to.emit(priceOracleSentinel, 'PriceExpirationTimeUpdated')
+      .withArgs(PRICE_EXPIRATION_TIME);
+    expect(await priceOracleSentinel.getPriceExpirationTime()).to.be.eq(PRICE_EXPIRATION_TIME);
+  });
+
+  it.only('User tries to set price expiration time for sentinel (revert expected)', async () => {
+    const {
+      users: [user],
+    } = testEnv;
+
+    expect(await priceOracleSentinel.getPriceExpirationTime()).to.be.eq(PRICE_EXPIRATION_TIME);
+    await expect(
+      priceOracleSentinel.connect(user.signer).setPriceExpirationTime(0)
+    ).to.be.revertedWith(CALLER_NOT_RISK_OR_POOL_ADMIN);
+    expect(await priceOracleSentinel.getPriceExpirationTime()).to.not.be.eq(0);
+  });
+
+  it.only('PoolAdmin updates the sequencer oracle', async () => {
     const { poolAdmin } = testEnv;
 
     const newSequencerOracle = ZERO_ADDRESS;
@@ -132,7 +178,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(sequencerOracle.address);
   });
 
-  it('User tries to update sequencer oracle', async () => {
+  it.only('User tries to update sequencer oracle (revert expected)', async () => {
     const {
       users: [user],
     } = testEnv;
@@ -145,13 +191,13 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(sequencerOracle.address);
   });
 
-  it('Borrow DAI', async () => {
+  it.only('User borrow DAI', async () => {
     const {
       dai,
       weth,
       users: [depositor, borrower, borrower2],
       pool,
-      oracle,
+      aaveOracle,
     } = testEnv;
 
     //mints DAI to depositor
@@ -186,7 +232,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
 
       //user 2 borrows
       const userGlobalData = await pool.getUserAccountData(currBorrower.address);
-      const daiPrice = await oracle.getAssetPrice(dai.address);
+      const daiPrice = await aaveOracle.getAssetPrice(dai.address);
 
       const amountDAIToBorrow = await convertToCurrencyDecimals(
         dai.address,
@@ -199,16 +245,23 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     }
   });
 
-  it('Kill sequencer and drop health factor below 1', async () => {
+  it.only('Kill sequencer and drop health factor below 1', async () => {
     const {
       dai,
+      poolAdmin,
       users: [, borrower],
       pool,
-      oracle,
+      aaveOracle,
     } = testEnv;
 
-    const daiPrice = await oracle.getAssetPrice(dai.address);
-    await oracle.setAssetPrice(dai.address, daiPrice.percentMul(11000));
+    const daiPrice = await aaveOracle.getAssetPrice(dai.address);
+    await setPriceWithMockAggregator(
+      poolAdmin,
+      aaveOracle,
+      dai.address,
+      daiPrice.percentMul(11000)
+    );
+
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
     expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
@@ -216,7 +269,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     waitForTx(await sequencerOracle.setAnswer(true, currAnswer[3]));
   });
 
-  it('Tries to liquidate borrower when sequencer is down (HF > 0.95) (revert expected)', async () => {
+  it.only('Tries to liquidate borrower when sequencer is down (HF > 0.95) (revert expected)', async () => {
     const {
       pool,
       dai,
@@ -241,28 +294,34 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
-  it('Drop health factor lower', async () => {
+  it.only('Drop health factor lower', async () => {
     const {
       dai,
+      poolAdmin,
       users: [, borrower],
       pool,
-      oracle,
+      aaveOracle,
     } = testEnv;
 
-    const daiPrice = await oracle.getAssetPrice(dai.address);
-    await oracle.setAssetPrice(dai.address, daiPrice.percentMul(11000));
+    const daiPrice = await aaveOracle.getAssetPrice(dai.address);
+    await setPriceWithMockAggregator(
+      poolAdmin,
+      aaveOracle,
+      dai.address,
+      daiPrice.percentMul(11000)
+    );
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
     expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
   });
 
-  it('Liquidates borrower when sequencer is down (HF < 0.95)', async () => {
+  it.only('Liquidates borrower when sequencer is down (HF < 0.95)', async () => {
     const {
       pool,
       dai,
       weth,
       users: [, borrower],
-      oracle,
+      aaveOracle,
       helpersContract,
       deployer,
     } = testEnv;
@@ -310,8 +369,8 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
     const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
-    const collateralPrice = await oracle.getAssetPrice(weth.address);
-    const principalPrice = await oracle.getAssetPrice(dai.address);
+    const collateralPrice = await aaveOracle.getAssetPrice(weth.address);
+    const principalPrice = await aaveOracle.getAssetPrice(dai.address);
 
     const collateralDecimals = (await helpersContract.getReserveConfigurationData(weth.address))
       .decimals;
@@ -383,13 +442,12 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     ).to.be.true;
   });
 
-  it('User tries to borrow (revert expected)', async () => {
+  it.only('User tries to borrow (revert expected)', async () => {
     const {
       dai,
       weth,
       users: [, , , user],
       pool,
-      oracle,
     } = testEnv;
 
     await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
@@ -405,11 +463,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
-  it('Turn on sequencer', async () => {
+  it.only('Turn on sequencer', async () => {
     await waitForTx(await sequencerOracle.setAnswer(false, await timeLatest()));
   });
 
-  it('User tries to borrow (revert expected)', async () => {
+  it.only('User tries to borrow (revert expected)', async () => {
     const {
       dai,
       weth,
@@ -430,13 +488,13 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
-  it('Turn off sequencer + increase time more than grace period', async () => {
+  it.only('Turn off sequencer + increase time more than grace period', async () => {
     const currAnswer = await sequencerOracle.latestRoundData();
     await waitForTx(await sequencerOracle.setAnswer(true, currAnswer[3]));
     await increaseTime(GRACE_PERIOD.mul(2).toNumber());
   });
 
-  it('User tries to borrow (revert expected)', async () => {
+  it.only('User tries to borrow (revert expected)', async () => {
     const {
       dai,
       weth,
@@ -457,12 +515,51 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
   });
 
-  it('Turn on sequencer + increase time past grace period', async () => {
+  it.only('Turn on sequencer + increase time past grace period', async () => {
     await waitForTx(await sequencerOracle.setAnswer(false, await timeLatest()));
     await increaseTime(GRACE_PERIOD.mul(2).toNumber());
   });
 
-  it('User tries to borrow', async () => {
+  it.only('User tries to borrow DAI while its price is stale (revert expected)', async () => {
+    const {
+      dai,
+      weth,
+      users: [, , , user],
+      pool,
+      aaveOracle,
+    } = testEnv;
+
+    const snapId = await evmSnapshot();
+
+    const oracleSourceAddress = await aaveOracle.getSourceOfAsset(dai.address);
+    const oracleSource = MockAggregator__factory.connect(oracleSourceAddress, user.signer);
+    const { updatedAt: updatedAtBefore } = await oracleSource.latestRoundData();
+
+    // Mock the last update of DAI price
+    const newUpdatedAt = (await timeLatest()).sub(PRICE_EXPIRATION_TIME);
+    await oracleSource.setLastUpdateTimestamp(newUpdatedAt);
+    const { updatedAt: updatedAtAfter } = await oracleSource.latestRoundData();
+    expect(updatedAtAfter).to.be.not.eq(updatedAtBefore);
+    expect(updatedAtAfter).to.be.eq(newUpdatedAt);
+
+    expect(await priceOracleSentinel.isBorrowAllowed(aaveOracle.address, dai.address)).to.be.false;
+
+    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
+    await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user.signer)
+      .supply(weth.address, utils.parseUnits('0.06775', 18), user.address, 0);
+
+    await expect(
+      pool
+        .connect(user.signer)
+        .borrow(dai.address, utils.parseUnits('100', 18), RateMode.Variable, 0, user.address)
+    ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
+
+    await evmRevert(snapId);
+  });
+
+  it.only('User borrows more DAI', async () => {
     const {
       dai,
       weth,
@@ -483,28 +580,73 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     );
   });
 
-  it('Increase health factor', async () => {
+  it.only('Increase health factor', async () => {
     const {
+      poolAdmin,
       dai,
       users: [, borrower],
       pool,
-      oracle,
+      aaveOracle,
     } = testEnv;
-    const daiPrice = await oracle.getAssetPrice(dai.address);
-    await oracle.setAssetPrice(dai.address, daiPrice.percentMul(9500));
+
+    const daiPrice = await aaveOracle.getAssetPrice(dai.address);
+    await setPriceWithMockAggregator(poolAdmin, aaveOracle, dai.address, daiPrice.percentMul(9500));
     const userGlobalData = await pool.getUserAccountData(borrower.address);
 
     expect(userGlobalData.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
     expect(userGlobalData.healthFactor).to.be.gt(utils.parseUnits('0.95', 18), INVALID_HF);
   });
 
-  it('Liquidates borrower when sequencer is up again', async () => {
+  it.only('Tries to liquidate borrower when debt price is stale (revert expected)', async () => {
+    const {
+      pool,
+      dai,
+      weth,
+      users: [, borrower, , user],
+      helpersContract,
+      aaveOracle,
+    } = testEnv;
+
+    const snapId = await evmSnapshot();
+    const oracleSourceAddress = await aaveOracle.getSourceOfAsset(dai.address);
+    const oracleSource = MockAggregator__factory.connect(oracleSourceAddress, user.signer);
+    const { updatedAt: updatedAtBefore } = await oracleSource.latestRoundData();
+
+    // Mock the last update of DAI price
+    const newUpdatedAt = (await timeLatest()).sub(PRICE_EXPIRATION_TIME);
+    await oracleSource.setLastUpdateTimestamp(newUpdatedAt);
+    const { updatedAt: updatedAtAfter } = await oracleSource.latestRoundData();
+    expect(updatedAtAfter).to.be.not.eq(updatedAtBefore);
+    expect(updatedAtAfter).to.be.eq(newUpdatedAt);
+
+    expect(await priceOracleSentinel.isLiquidationAllowed(aaveOracle.address, dai.address)).to.be
+      .false;
+
+    await dai['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '1000'));
+    await dai.approve(pool.address, MAX_UINT_AMOUNT);
+
+    const userReserveDataBefore = await getUserData(
+      pool,
+      helpersContract,
+      dai.address,
+      borrower.address
+    );
+
+    const amountToLiquidate = userReserveDataBefore.currentVariableDebt.div(2);
+    await expect(
+      pool.liquidationCall(weth.address, dai.address, borrower.address, amountToLiquidate, true)
+    ).to.be.revertedWith(PRICE_ORACLE_SENTINEL_CHECK_FAILED);
+
+    await evmRevert(snapId);
+  });
+
+  it.only('Liquidates borrower when sequencer is up again', async () => {
     const {
       pool,
       dai,
       weth,
       users: [, , borrower],
-      oracle,
+      aaveOracle,
       helpersContract,
       deployer,
     } = testEnv;
@@ -550,13 +692,11 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       borrower.address
     );
 
-    const userGlobalDataAfter = await pool.getUserAccountData(borrower.address);
-
     const daiReserveDataAfter = await getReserveData(helpersContract, dai.address);
     const ethReserveDataAfter = await getReserveData(helpersContract, weth.address);
 
-    const collateralPrice = await oracle.getAssetPrice(weth.address);
-    const principalPrice = await oracle.getAssetPrice(dai.address);
+    const collateralPrice = await aaveOracle.getAssetPrice(weth.address);
+    const principalPrice = await aaveOracle.getAssetPrice(dai.address);
 
     const collateralDecimals = (await helpersContract.getReserveConfigurationData(weth.address))
       .decimals;
