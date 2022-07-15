@@ -38,6 +38,16 @@ contract MockAggregator {
       uint80 answeredInRound
     )
   {
-    return (_roundId, _latestAnswer, _startedAt, block.timestamp, _roundId);
+    return (
+      _roundId,
+      _latestAnswer,
+      _startedAt,
+      _updatedAt == 0 ? block.timestamp : _updatedAt,
+      _roundId
+    );
+  }
+
+  function setLastUpdateTimestamp(uint256 updatedAt) external {
+    _updatedAt = updatedAt;
   }
 }
