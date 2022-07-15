@@ -525,8 +525,8 @@ library ValidationLogic {
       params.priceOracleSentinel == address(0) ||
         params.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
         IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(
-          params.debtAsset,
-          params.oracle
+          params.oracle,
+          params.debtAsset
         ),
       Errors.PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
