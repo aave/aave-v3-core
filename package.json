@@ -30,8 +30,8 @@
     "prepublish": "npm run compile"
   },
   "devDependencies": {
-    "@aave/deploy-v3": "^1.21.1-beta.4",
-    "@aave/periphery-v3": "^1.13.1-beta.1",
+    "@aave/deploy-v3": "1.26.0",
+    "@aave/periphery-v3": "1.18.0",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
     "@tenderly/hardhat-tenderly": "^1.1.0-beta.5",
     "@typechain/ethers-v5": "^7.2.0",
@@ -45,7 +45,7 @@
     "defender-relay-client": "^1.7.0",
     "dotenv": "^8.2.0",
     "eth-sig-util": "2.5.3",
-    "ethereum-waffle": "3.0.2",
+    "ethereum-waffle": "^3.2.0",
     "ethereumjs-util": "7.0.2",
     "ethers": "^5.4.7",
     "globby": "^11.0.1",
