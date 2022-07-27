@@ -15,7 +15,7 @@ import {
 } from '@aave/deploy-v3';
 import { getReserveData, getUserData } from './helpers/utils/helpers';
 import { getTxCostAndTimestamp } from './helpers/actions';
-import AaveConfig from '@aave/deploy-v3/dist/markets/aave';
+import AaveConfig from '@aave/deploy-v3/dist/markets/test';
 import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import {
   calcExpectedReserveDataAfterMintUnbacked,
