@@ -47,7 +47,7 @@
     "eth-sig-util": "2.5.3",
     "ethereum-waffle": "3.2.0",
     "ethereumjs-util": "7.0.2",
-    "ethers": "5.6.1",
+    "ethers": "5.5.3",
     "globby": "11.0.1",
     "hardhat": "2.6.8",
     "hardhat-contract-sizer": "2.0.3",
