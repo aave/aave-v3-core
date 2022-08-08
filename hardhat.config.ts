@@ -1,9 +1,9 @@
 import path from 'path';
-import { HardhatUserConfig } from 'hardhat/types';
+import {HardhatUserConfig} from 'hardhat/types';
 // @ts-ignore
-import { accounts } from './test-wallets.js';
-import { COVERAGE_CHAINID, HARDHAT_CHAINID } from './helpers/constants';
-import { buildForkConfig } from './helper-hardhat-config';
+import {accounts} from './test-wallets.js';
+import {COVERAGE_CHAINID, HARDHAT_CHAINID} from './helpers/constants';
+import {buildForkConfig} from './helper-hardhat-config';
 
 require('dotenv').config();
 
@@ -17,7 +17,7 @@ import '@tenderly/hardhat-tenderly';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import 'hardhat-dependency-compiler';
-import { DEFAULT_NAMED_ACCOUNTS } from '@aave/deploy-v3';
+import {DEFAULT_NAMED_ACCOUNTS} from '@aave/deploy-v3';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const HARDFORK = 'london';
@@ -48,7 +48,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
-    bail: false,
+    bail: true,
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT || '',
@@ -72,7 +72,7 @@ const hardhatConfig: HardhatUserConfig = {
       throwOnCallFailures: true,
       forking: buildForkConfig(),
       allowUnlimitedContractSize: true,
-      accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
+      accounts: accounts.map(({secretKey, balance}: {secretKey: string; balance: string}) => ({
         privateKey: secretKey,
         balance,
       })),
