@@ -165,13 +165,6 @@ library LiquidationLogic {
     if (vars.userTotalDebt == vars.actualDebtToLiquidate) {
       userConfig.setBorrowing(debtReserve.id, false);
     }
-    
-    // If the collateral being liquidated is equal to the user balance,
-    // we set the currency as not being used as collateral anymore
-    if (vars.actualCollateralToLiquidate == vars.userCollateralBalance) {
-      userConfig.setUsingAsCollateral(collateralReserve.id, false);
-      emit ReserveUsedAsCollateralDisabled(params.collateralAsset, params.user);
-    }
 
     _burnDebtTokens(params, vars);
 
@@ -203,6 +196,13 @@ library LiquidationLogic {
         vars.collateralAToken.RESERVE_TREASURY_ADDRESS(),
         vars.liquidationProtocolFeeAmount
       );
+    }
+
+    // If the collateral being liquidated is equal to the user balance,
+    // we set the currency as not being used as collateral anymore
+    if (vars.actualCollateralToLiquidate == vars.userCollateralBalance) {
+      userConfig.setUsingAsCollateral(collateralReserve.id, false);
+      emit ReserveUsedAsCollateralDisabled(params.collateralAsset, params.user);
     }
 
     // Transfers the debt asset being repaid to the aToken, where the liquidity is kept
