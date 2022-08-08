@@ -128,6 +128,14 @@ library SupplyLogic {
 
     reserve.updateInterestRates(reserveCache, params.asset, 0, amountToWithdraw);
 
+    bool isCollateral;
+
+    if ((isCollateral = userConfig.isUsingAsCollateral(reserve.id))) {
+      if (amountToWithdraw == userBalance) {
+        userConfig.setUsingAsCollateral(reserve.id, false);
+        emit ReserveUsedAsCollateralDisabled(params.asset, msg.sender);
+      }
+    }
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,
       params.to,
@@ -135,7 +143,7 @@ library SupplyLogic {
       reserveCache.nextLiquidityIndex
     );
 
-    if (userConfig.isUsingAsCollateral(reserve.id)) {
+    if (isCollateral) {
       if (userConfig.isBorrowingAny()) {
         ValidationLogic.validateHFAndLtv(
           reservesData,
@@ -148,11 +156,6 @@ library SupplyLogic {
           params.oracle,
           params.userEModeCategory
         );
-      }
-
-      if (amountToWithdraw == userBalance) {
-        userConfig.setUsingAsCollateral(reserve.id, false);
-        emit ReserveUsedAsCollateralDisabled(params.asset, msg.sender);
       }
     }
 
@@ -264,7 +267,12 @@ library SupplyLogic {
 
     if (useAsCollateral) {
       require(
-        ValidationLogic.validateUseAsCollateral(reservesData, reservesList, userConfig, reserveCache.reserveConfiguration),
+        ValidationLogic.validateUseAsCollateral(
+          reservesData,
+          reservesList,
+          userConfig,
+          reserveCache.reserveConfiguration
+        ),
         Errors.USER_IN_ISOLATION_MODE
       );
 
