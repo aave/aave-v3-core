@@ -25,6 +25,7 @@ interface IScaledBalanceToken {
 
   /**
    * @dev Emitted after scaled balance tokens are burned
+   * @dev If the burn function does not involve a transfer of the underlying asset, the target defaults to zero address
    * @param from The address from which the scaled tokens will be burned
    * @param target The address that will receive the underlying, if any
    * @param value The scaled amount being burned (user entered amount - balance increase from interest)
