@@ -421,24 +421,25 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
 
     const daiData = await pool.getReserveData(dai.address);
-    const variableDebtToken = await getStableDebtToken(daiData.variableDebtTokenAddress);
+    const stableDebtToken = await getStableDebtToken(daiData.stableDebtTokenAddress);
 
     // User1 approves User2 to borrow 1000 DAI
     expect(
-      await variableDebtToken
+      await stableDebtToken
         .connect(user1.signer)
         .approveDelegation(user2.address, utils.parseUnits('1000', 18))
     );
-
     const userDataBefore = await pool.getUserAccountData(user1.address);
 
     // Turn off automining to simulate actions in same block
     await setAutomine(false);
 
     // User2 borrows 2 DAI on behalf of User1
-    await pool
-      .connect(user2.signer)
-      .borrow(dai.address, utils.parseEther('2'), RateMode.Stable, 0, user1.address);
+    expect(
+      await pool
+        .connect(user2.signer)
+        .borrow(dai.address, utils.parseEther('2'), RateMode.Stable, 0, user1.address)
+    );
 
     // Turn on automining, but not mine a new block until next tx
     await setAutomineEvm(true);
@@ -449,7 +450,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
         .repay(dai.address, utils.parseEther('2'), RateMode.Stable, user1.address)
     );
 
-    expect(await variableDebtToken.balanceOf(user1.address)).to.be.eq(0);
+    expect(await stableDebtToken.balanceOf(user1.address)).to.be.eq(0);
     expect(await dai.balanceOf(user2.address)).to.be.eq(utils.parseEther('2'));
     expect(await dai.balanceOf(aDai.address)).to.be.eq(utils.parseEther('1000'));
 
