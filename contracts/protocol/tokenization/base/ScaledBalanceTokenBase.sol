@@ -76,9 +76,7 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
     require(amountScaled != 0, Errors.INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(onBehalfOf);
-    uint256 balanceIncrease = scaledBalance.rayMul(index) -
-      scaledBalance.rayMul(_userState[onBehalfOf].additionalData);
-
+    uint256 balanceIncrease = scaledBalance.rayMul(index - _userState[onBehalfOf].additionalData);
     _userState[onBehalfOf].additionalData = index.toUint128();
 
     _mint(onBehalfOf, amountScaled.toUint128());
@@ -109,8 +107,7 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
     require(amountScaled != 0, Errors.INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
-    uint256 balanceIncrease = scaledBalance.rayMul(index) -
-      scaledBalance.rayMul(_userState[user].additionalData);
+    uint256 balanceIncrease = scaledBalance.rayMul(index - _userState[user].additionalData);
 
     _userState[user].additionalData = index.toUint128();
 
