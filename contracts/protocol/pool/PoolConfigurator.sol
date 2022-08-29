@@ -199,9 +199,6 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
-    if (enabled) {
-      require(currentConfig.getBorrowingEnabled(), Errors.BORROWING_NOT_ENABLED);
-    }
     currentConfig.setFlashLoanEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig);
     emit ReserveFlashLoaning(asset, enabled);
