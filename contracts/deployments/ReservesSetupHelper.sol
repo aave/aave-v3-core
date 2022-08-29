@@ -44,7 +44,6 @@ contract ReservesSetupHelper is Ownable {
 
       if (inputParams[i].borrowingEnabled) {
         configurator.setReserveBorrowing(inputParams[i].asset, true);
-        configurator.setReserveFlashLoaning(inputParams[i].asset, inputParams[i].flashLoanEnabled);
 
         configurator.setBorrowCap(inputParams[i].asset, inputParams[i].borrowCap);
         configurator.setReserveStableRateBorrowing(
@@ -52,6 +51,7 @@ contract ReservesSetupHelper is Ownable {
           inputParams[i].stableBorrowingEnabled
         );
       }
+      configurator.setReserveFlashLoaning(inputParams[i].asset, inputParams[i].flashLoanEnabled);
       configurator.setSupplyCap(inputParams[i].asset, inputParams[i].supplyCap);
       configurator.setReserveFactor(inputParams[i].asset, inputParams[i].reserveFactor);
     }
