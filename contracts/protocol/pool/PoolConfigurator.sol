@@ -69,7 +69,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   uint256 public constant CONFIGURATOR_REVISION = 0x1;
 
   /// @inheritdoc VersionedInitializable
-  function getRevision() internal pure virtual override returns (uint256) {
+  function getRevision() internal virtual override pure returns (uint256) {
     return CONFIGURATOR_REVISION;
   }
 
@@ -189,6 +189,22 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
     currentConfig.setStableRateBorrowingEnabled(enabled);
     _pool.setConfiguration(asset, currentConfig);
     emit ReserveStableRateBorrowing(asset, enabled);
+  }
+
+  /// @inheritdoc IPoolConfigurator
+  function setReserveFlashLoaning(address asset, bool enabled)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    if (enabled) {
+      require(currentConfig.getBorrowingEnabled(), Errors.BORROWING_NOT_ENABLED);
+    }
+    currentConfig.setFlashLoanEnabled(enabled);
+    _pool.setConfiguration(asset, currentConfig);
+    emit ReserveFlashLoaning(asset, enabled);
   }
 
   /// @inheritdoc IPoolConfigurator

@@ -472,6 +472,7 @@ library ValidationLogic {
         .configuration;
       require(!configuration.getPaused(), Errors.RESERVE_PAUSED);
       require(configuration.getActive(), Errors.RESERVE_INACTIVE);
+      require(configuration.getFlashLoanEnabled(), Errors.FLASHLOAN_DISABLED);
     }
   }
 
