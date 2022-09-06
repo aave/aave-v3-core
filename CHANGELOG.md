@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.3](https://github.com/aave/aave-v3-core/compare/v1.16.2...v1.16.3) (2022-09-06)
+
+
+### Bug Fixes
+
+* make InterestRateStrategy contract inheritable ([0311475](https://github.com/aave/aave-v3-core/commit/0311475614ed7a6c4befba99a7567ee27454f942))
+
 ## [1.16.2](https://github.com/aave/aave-v3-core/compare/v1.16.1...v1.16.2) (2022-07-28)
 
 
