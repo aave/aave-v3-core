@@ -552,7 +552,7 @@ library ReserveConfiguration {
   /**
    * @dev Set whether or not FlashLoaning this asset is enabled
    * @param self The reserve configuration
-   * @param flashLoanEnabled boolean to indicated if Flashloans should be enabled (1) or disabled (0)
+   * @param flashLoanEnabled True if the asset is flashloanable, false otherwise
    */
   function setFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self, bool flashLoanEnabled)
     internal
