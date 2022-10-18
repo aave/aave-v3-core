@@ -378,7 +378,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   /**
    * @notice Returns whether the reserve has FlashLoans enabled or disabled
    * @param asset The address of the underlying asset of the reserve
-   * @return enabled True if FlashLoans are enabled, False if disabled
+   * @return True if FlashLoans are enabled, false otherwise
    * */
   function getFlashLoanEnabled(address asset) external view returns (bool) {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
