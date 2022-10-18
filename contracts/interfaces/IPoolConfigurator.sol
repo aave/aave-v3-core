@@ -321,7 +321,7 @@ interface IPoolConfigurator {
    * @notice Enable or disable flashloans on a reserve
    * @dev Can only be enabled (set to true) if borrowing is enabled
    * @param asset The address of the underlying asset of the reserve
-   * @param enabled True if flashloans need to be enabled, false to disable falshloans
+   * @param enabled True if flashloans need to be enabled, false otherwise
    */
   function setReserveFlashLoaning(address asset, bool enabled) external;
 
