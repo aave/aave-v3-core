@@ -35,7 +35,7 @@ interface IPoolConfigurator {
   /**
    * @dev Emitted when flashloans are enabled or disabled on a reserve.
    * @param asset The address of the underlying asset of the reserve
-   * @param enabled True if flashloans are enabled, False if flashloans are disabled
+   * @param enabled True if flashloans are enabled, false otherwise
    */
   event ReserveFlashLoaning(address indexed asset, bool enabled);
 
