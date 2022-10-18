@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import {BigNumber} from 'ethers';
 
 export interface SymbolMap<T> {
   [symbol: string]: T;
@@ -161,6 +161,7 @@ export enum ProtocolErrors {
   STABLE_BORROWING_ENABLED = '88', // 'Stable borrowing is enabled'
   SILOED_BORROWING_VIOLATION = '89', // user is trying to violate the siloed borrowing rule
   RESERVE_DEBT_NOT_ZERO = '90', // the total debt of the reserve needs to be 0
+  FLASHLOAN_DISABLED = '91', // FlashLoaning for this asset is disabled
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
 
