@@ -22,6 +22,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE,
     INVALID_FLASHLOAN_EXECUTOR_RETURN,
     FLASHLOAN_DISABLED,
+    BORROWING_NOT_ENABLED,
   } = ProtocolErrors;
 
   const TOTAL_PREMIUM = 9;
@@ -578,6 +579,46 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     const callerDebt = await usdcDebtToken.balanceOf(caller.address);
 
     expect(callerDebt.toString()).to.be.equal('500000000', 'Invalid user debt');
+  });
+
+  it('Disable USDC borrowing. Caller deposits 5 WETH as collateral, Takes a USDC flashloan with mode = 2, does not return the funds. Revert creating borrow position (revert expected)', async () => {
+    const {usdc, pool, weth, configurator, users, helpersContract} = testEnv;
+
+    const caller = users[2];
+
+    expect(await configurator.setReserveStableRateBorrowing(usdc.address, false));
+    expect(await configurator.setReserveBorrowing(usdc.address, false));
+
+    let usdcConfiguration = await helpersContract.getReserveConfigurationData(usdc.address);
+    expect(usdcConfiguration.borrowingEnabled).to.be.equal(false);
+
+    await weth
+      .connect(caller.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '5'));
+
+    await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    const amountToDeposit = await convertToCurrencyDecimals(weth.address, '5');
+
+    await pool.connect(caller.signer).deposit(weth.address, amountToDeposit, caller.address, '0');
+
+    await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
+
+    const flashloanAmount = await convertToCurrencyDecimals(usdc.address, '500');
+
+    await expect(
+      pool
+        .connect(caller.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [usdc.address],
+          [flashloanAmount],
+          [2],
+          caller.address,
+          '0x10',
+          '0'
+        )
+    ).to.be.revertedWith(BORROWING_NOT_ENABLED);
   });
 
   it('Caller deposits 1000 DAI as collateral, Takes a WETH flashloan with mode = 0, does not approve the transfer of the funds', async () => {
