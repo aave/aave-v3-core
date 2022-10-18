@@ -566,6 +566,7 @@ library ReserveConfiguration {
   /**
    * @notice Gets the flashloanable flag for the reserve
    * @param self The reserve configuration
+   * @return The flashloanable flag
    */
   function getFlashLoanEnabled(DataTypes.ReserveConfigurationMap memory self)
     internal
