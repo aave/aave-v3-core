@@ -602,8 +602,6 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await pool.connect(caller.signer).deposit(weth.address, amountToDeposit, caller.address, '0');
 
-    await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
-
     const flashloanAmount = await convertToCurrencyDecimals(usdc.address, '500');
 
     await expect(
