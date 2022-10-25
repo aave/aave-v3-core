@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
-import {ReserveConfiguration} from '../../protocol/libraries/configuration/ReserveConfiguration.sol';
+import {
+  ReserveConfiguration
+} from '../../protocol/libraries/configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
 
 contract MockReserveConfiguration {
@@ -107,6 +109,16 @@ contract MockReserveConfiguration {
     DataTypes.ReserveConfigurationMap memory config = configuration;
     config.setEModeCategory(categoryId);
     configuration = config;
+  }
+
+  function setFlashLoanEnabled(bool enabled) external {
+    DataTypes.ReserveConfigurationMap memory config = configuration;
+    config.setFlashLoanEnabled(enabled);
+    configuration = config;
+  }
+
+  function getFlashLoanEnabled() external view returns (bool) {
+    return configuration.getFlashLoanEnabled();
   }
 
   function setSupplyCap(uint256 supplyCap) external {
