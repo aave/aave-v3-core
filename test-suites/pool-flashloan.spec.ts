@@ -284,7 +284,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       )
     ).to.be.revertedWith(FLASHLOAN_DISABLED);
 
-    await expect(await configurator.setReserveFlashLoaning(weth.address, true))
+    expect(await configurator.setReserveFlashLoaning(weth.address, true))
       .to.emit(configurator, 'ReserveFlashLoaning')
       .withArgs(weth.address, true);
 
