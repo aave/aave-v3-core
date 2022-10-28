@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
@@ -191,8 +191,8 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
-  function calculateInterestRates(DataTypes.CalculateInterestRatesParams calldata params)
-    external
+  function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory params)
+    public
     view
     override
     returns (
