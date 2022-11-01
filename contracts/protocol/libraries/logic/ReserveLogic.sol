@@ -98,8 +98,17 @@ library ReserveLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache
   ) internal {
+    // If time didn't pass since last stored timestamp, skip state update
+    //solium-disable-next-line
+    if (reserve.lastUpdateTimestamp == uint40(block.timestamp)) {
+      return;
+    }
+
     _updateIndexes(reserve, reserveCache);
     _accrueToTreasury(reserve, reserveCache);
+
+    //solium-disable-next-line
+    reserve.lastUpdateTimestamp = uint40(block.timestamp);
   }
 
   /**
@@ -283,9 +292,6 @@ library ReserveLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache
   ) internal {
-    reserveCache.nextLiquidityIndex = reserveCache.currLiquidityIndex;
-    reserveCache.nextVariableBorrowIndex = reserveCache.currVariableBorrowIndex;
-
     //only cumulating if there is any income being produced
     if (reserveCache.currLiquidityRate != 0) {
       uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
@@ -310,9 +316,6 @@ library ReserveLogic {
         reserve.variableBorrowIndex = reserveCache.nextVariableBorrowIndex.toUint128();
       }
     }
-
-    //solium-disable-next-line
-    reserve.lastUpdateTimestamp = uint40(block.timestamp);
   }
 
   /**
@@ -330,8 +333,9 @@ library ReserveLogic {
 
     reserveCache.reserveConfiguration = reserve.configuration;
     reserveCache.reserveFactor = reserveCache.reserveConfiguration.getReserveFactor();
-    reserveCache.currLiquidityIndex = reserve.liquidityIndex;
-    reserveCache.currVariableBorrowIndex = reserve.variableBorrowIndex;
+    reserveCache.currLiquidityIndex = reserveCache.nextLiquidityIndex = reserve.liquidityIndex;
+    reserveCache.currVariableBorrowIndex = reserveCache.nextVariableBorrowIndex = reserve
+      .variableBorrowIndex;
     reserveCache.currLiquidityRate = reserve.currentLiquidityRate;
     reserveCache.currVariableBorrowRate = reserve.currentVariableBorrowRate;
 
@@ -342,8 +346,10 @@ library ReserveLogic {
     reserveCache.reserveLastUpdateTimestamp = reserve.lastUpdateTimestamp;
 
     reserveCache.currScaledVariableDebt = reserveCache.nextScaledVariableDebt = IVariableDebtToken(
-      reserveCache.variableDebtTokenAddress
-    ).scaledTotalSupply();
+      reserveCache
+        .variableDebtTokenAddress
+    )
+      .scaledTotalSupply();
 
     (
       reserveCache.currPrincipalStableDebt,
