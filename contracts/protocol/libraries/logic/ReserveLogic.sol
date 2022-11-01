@@ -98,12 +98,6 @@ library ReserveLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache
   ) internal {
-    // If time didn't pass since last stored timestamp, skip state update
-    //solium-disable-next-line
-    if (reserveCache.reserveLastUpdateTimestamp == uint40(block.timestamp)) {
-      return;
-    }
-
     _updateIndexes(reserve, reserveCache);
     _accrueToTreasury(reserve, reserveCache);
   }
