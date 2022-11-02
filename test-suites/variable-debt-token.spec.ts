@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
-import { impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { impersonateAccountsHardhat, setAutomine, setAutomineEvm } from '../helpers/misc-utils';
 import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { makeSuite, TestEnv } from './helpers/make-suite';
@@ -10,6 +10,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import {
   evmRevert,
   evmSnapshot,
+  getVariableDebtToken,
   increaseTime,
   waitForTx,
 } from '@aave/deploy-v3';
