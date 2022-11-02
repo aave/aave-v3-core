@@ -13,15 +13,19 @@ import { getStableDebtTokenEvent } from './helpers/utils/tokenization-events';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
-  const { CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN } = ProtocolErrors;
+  const {CALLER_MUST_BE_POOL, CALLER_NOT_POOL_ADMIN} = ProtocolErrors;
+
   let snap: string;
 
-  before(async () => {
+  beforeEach(async () => {
     snap = await evmSnapshot();
+  });
+  afterEach(async () => {
+    await evmRevert(snap);
   });
 
   it('Check initialization', async () => {
-    const { pool, weth, dai, helpersContract, users } = testEnv;
+    const {pool, weth, dai, helpersContract, users} = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
     const stableDebtContract = StableDebtToken__factory.connect(
@@ -71,7 +75,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('Tries to mint not being the Pool (revert expected)', async () => {
-    const { deployer, dai, helpersContract } = testEnv;
+    const {deployer, dai, helpersContract} = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -87,7 +91,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('Tries to burn not being the Pool (revert expected)', async () => {
-    const { deployer, dai, helpersContract } = testEnv;
+    const {deployer, dai, helpersContract} = testEnv;
 
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
@@ -99,14 +103,14 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
 
     const name = await stableDebtContract.name();
 
-    expect(name).to.be.equal('Aave Testnet stable debt bearing DAI');
+    expect(name).to.be.equal('Aave Testnet Stable Debt DAI');
     await expect(stableDebtContract.burn(deployer.address, '1')).to.be.revertedWith(
       CALLER_MUST_BE_POOL
     );
   });
 
   it('Tries to transfer debt tokens (revert expected)', async () => {
-    const { users, dai, helpersContract } = testEnv;
+    const {users, dai, helpersContract} = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
     const stableDebtContract = StableDebtToken__factory.connect(
@@ -120,7 +124,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('Check Mint and Transfer events when borrowing on behalf', async () => {
-    const snapId = await evmSnapshot();
+    // const snapId = await evmSnapshot();
     const {
       pool,
       weth,
@@ -195,11 +199,11 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     expect(expectedDebtIncreaseUser1).to.be.eq(balanceIncrease);
     expect(afterDebtBalanceUser2).to.be.eq(beforeDebtBalanceUser2);
 
-    await evmRevert(snapId);
+    // await evmRevert(snapId);
   });
 
   it('Tries to approve debt tokens (revert expected)', async () => {
-    const { users, dai, helpersContract } = testEnv;
+    const {users, dai, helpersContract} = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
     const stableDebtContract = StableDebtToken__factory.connect(
@@ -216,7 +220,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('Tries to increase allowance of debt tokens (revert expected)', async () => {
-    const { users, dai, helpersContract } = testEnv;
+    const {users, dai, helpersContract} = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
     const stableDebtContract = StableDebtToken__factory.connect(
@@ -230,7 +234,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('Tries to decrease allowance of debt tokens (revert expected)', async () => {
-    const { users, dai, helpersContract } = testEnv;
+    const {users, dai, helpersContract} = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
     const stableDebtContract = StableDebtToken__factory.connect(
@@ -244,7 +248,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('Tries to transferFrom (revert expected)', async () => {
-    const { users, dai, helpersContract } = testEnv;
+    const {users, dai, helpersContract} = testEnv;
     const daiStableDebtTokenAddress = (await helpersContract.getReserveTokensAddresses(dai.address))
       .stableDebtTokenAddress;
     const stableDebtContract = StableDebtToken__factory.connect(
@@ -268,13 +272,13 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     // progress time by a year, to accrue significant debt.
     // then let user 2 withdraw sufficient funds such that secondTerm (userStableRate * burnAmount) >= averageRate * supply
     // if we do not have user 1 deposit as well, we will have issues getting past previousSupply <= amount, as amount > supply for secondTerm to be > firstTerm.
-    await evmRevert(snap);
+    // await evmRevert(snap);
     const rateGuess1 = BigNumber.from(RAY);
     const rateGuess2 = BigNumber.from(10).pow(30);
     const amount1 = BigNumber.from(2);
     const amount2 = BigNumber.from(1);
 
-    const { deployer, pool, dai, helpersContract, users } = testEnv;
+    const {deployer, pool, dai, helpersContract, users} = testEnv;
 
     // Impersonate the Pool
     await topUpNonPayableWithEther(deployer.signer, [pool.address], utils.parseEther('1'));
@@ -304,8 +308,8 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
   });
 
   it('setIncentivesController() ', async () => {
-    const snapshot = await evmSnapshot();
-    const { dai, helpersContract, poolAdmin, aclManager, deployer } = testEnv;
+    // const snapshot = await evmSnapshot();
+    const {dai, helpersContract, poolAdmin, aclManager, deployer} = testEnv;
     const config = await helpersContract.getReserveTokensAddresses(dai.address);
     const stableDebt = StableDebtToken__factory.connect(
       config.stableDebtTokenAddress,
@@ -318,7 +322,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     expect(await stableDebt.connect(poolAdmin.signer).setIncentivesController(ZERO_ADDRESS));
     expect(await stableDebt.getIncentivesController()).to.be.eq(ZERO_ADDRESS);
 
-    await evmRevert(snapshot);
+    // await evmRevert(snapshot);
   });
 
   it('setIncentivesController() from not pool admin (revert expected)', async () => {
@@ -335,5 +339,112 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     await expect(
       stableDebt.connect(user.signer).setIncentivesController(ZERO_ADDRESS)
     ).to.be.revertedWith(CALLER_NOT_POOL_ADMIN);
+  });
+
+  it('User borrows and repays in same block with zero fees', async () => {
+    const {pool, users, dai, aDai, usdc, stableDebtDai} = testEnv;
+    const user = users[0];
+
+    // We need some debt.
+    await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
+    await usdc.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user.signer)
+      .deposit(usdc.address, utils.parseEther('2000'), user.address, 0);
+    await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
+    await dai.connect(user.signer).transfer(aDai.address, utils.parseEther('2000'));
+    await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    const userDataBefore = await pool.getUserAccountData(user.address);
+    expect(await stableDebtDai.balanceOf(user.address)).to.be.eq(0);
+
+    // Turn off automining - pretty sure that coverage is getting messed up here.
+    await setAutomine(false);
+    // Borrow 500 dai
+    await pool
+      .connect(user.signer)
+      .borrow(dai.address, utils.parseEther('500'), RateMode.Stable, 0, user.address);
+
+    // Turn on automining, but not mine a new block until next tx
+    await setAutomineEvm(true);
+    expect(
+      await pool
+        .connect(user.signer)
+        .repay(dai.address, utils.parseEther('500'), RateMode.Stable, user.address)
+    );
+
+    expect(await stableDebtDai.balanceOf(user.address)).to.be.eq(0);
+    expect(await dai.balanceOf(user.address)).to.be.eq(0);
+    expect(await dai.balanceOf(aDai.address)).to.be.eq(utils.parseEther('2000'));
+
+    const userDataAfter = await pool.getUserAccountData(user.address);
+    expect(userDataBefore.totalCollateralBase).to.be.lte(userDataAfter.totalCollateralBase);
+    expect(userDataBefore.healthFactor).to.be.lte(userDataAfter.healthFactor);
+    expect(userDataBefore.totalDebtBase).to.be.eq(userDataAfter.totalDebtBase);
+  });
+
+  it('User borrows and repays in same block using credit delegation with zero fees', async () => {
+    const {
+      pool,
+      dai,
+      aDai,
+      weth,
+      users: [user1, user2, user3],
+    } = testEnv;
+
+    // Add liquidity
+    await dai.connect(user3.signer)['mint(uint256)'](utils.parseUnits('1000', 18));
+    await dai.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user3.signer)
+      .supply(dai.address, utils.parseUnits('1000', 18), user3.address, 0);
+
+    // User1 supplies 10 WETH
+    await dai.connect(user1.signer)['mint(uint256)'](utils.parseUnits('100', 18));
+    await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await weth.connect(user1.signer)['mint(uint256)'](utils.parseUnits('10', 18));
+    await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(user1.signer)
+      .supply(weth.address, utils.parseUnits('10', 18), user1.address, 0);
+
+    const daiData = await pool.getReserveData(dai.address);
+    const stableDebtToken = await getStableDebtToken(daiData.stableDebtTokenAddress);
+
+    // User1 approves User2 to borrow 1000 DAI
+    expect(
+      await stableDebtToken
+        .connect(user1.signer)
+        .approveDelegation(user2.address, utils.parseUnits('1000', 18))
+    );
+    const userDataBefore = await pool.getUserAccountData(user1.address);
+
+    // Turn off automining to simulate actions in same block
+    await setAutomine(false);
+
+    // User2 borrows 2 DAI on behalf of User1
+    expect(
+      await pool
+        .connect(user2.signer)
+        .borrow(dai.address, utils.parseEther('2'), RateMode.Stable, 0, user1.address)
+    );
+
+    // Turn on automining, but not mine a new block until next tx
+    await setAutomineEvm(true);
+
+    expect(
+      await pool
+        .connect(user1.signer)
+        .repay(dai.address, utils.parseEther('2'), RateMode.Stable, user1.address)
+    );
+
+    expect(await stableDebtToken.balanceOf(user1.address)).to.be.eq(0);
+    expect(await dai.balanceOf(user2.address)).to.be.eq(utils.parseEther('2'));
+    expect(await dai.balanceOf(aDai.address)).to.be.eq(utils.parseEther('1000'));
+
+    const userDataAfter = await pool.getUserAccountData(user1.address);
+    expect(userDataBefore.totalCollateralBase).to.be.lte(userDataAfter.totalCollateralBase);
+    expect(userDataBefore.healthFactor).to.be.lte(userDataAfter.healthFactor);
+    expect(userDataBefore.totalDebtBase).to.be.eq(userDataAfter.totalDebtBase);
   });
 });

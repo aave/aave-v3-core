@@ -4,6 +4,11 @@ import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';
 import { tEthereumAddress, tStringTokenSmallUnits } from './types';
 import { MintableERC20 } from '../types/MintableERC20';
 import { getContract } from '@aave/deploy-v3';
+import { impersonateAccountsHardhat } from './misc-utils';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { InitializableImmutableAdminUpgradeabilityProxy } from '../types';
+
+declare var hre: HardhatRuntimeEnvironment;
 
 export type MockTokenMap = { [symbol: string]: MintableERC20 };
 
@@ -104,3 +109,31 @@ export const buildDelegationWithSigParams = (
     deadline,
   },
 });
+
+export const getProxyImplementation = async (proxyAdminAddress: string, proxyAddress: string) => {
+  // Impersonate proxy admin
+  await impersonateAccountsHardhat([proxyAdminAddress]);
+  const proxyAdminSigner = await hre.ethers.getSigner(proxyAdminAddress);
+
+  const proxy = (await hre.ethers.getContractAt(
+    'InitializableImmutableAdminUpgradeabilityProxy',
+    proxyAddress,
+    proxyAdminSigner
+  )) as InitializableImmutableAdminUpgradeabilityProxy;
+
+  const implementationAddress = await proxy.callStatic.implementation();
+  return implementationAddress;
+};
+
+export const getProxyAdmin = async (proxyAddress: string) => {
+  const EIP1967_ADMIN_SLOT = '0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103';
+  const adminStorageSlot = await hre.ethers.provider.getStorageAt(
+    proxyAddress,
+    EIP1967_ADMIN_SLOT,
+    'latest'
+  );
+  const adminAddress = ethers.utils.defaultAbiCoder
+    .decode(['address'], adminStorageSlot)
+    .toString();
+  return ethers.utils.getAddress(adminAddress);
+};

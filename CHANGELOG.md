@@ -1,5 +1,48 @@
 # Changelog
 
+## [1.16.2](https://github.com/aave/aave-v3-core/compare/v1.16.1...v1.16.2) (2022-07-28)
+
+
+### Features
+
+* bump ci node.js to 16 ([82a11d2](https://github.com/aave/aave-v3-core/commit/82a11d2f4b7a2b747def6a5bfe1a52fd5a30a9ee))
+* set to hardhat 2.10.0 and ethers to 5.6.9 ([9b50898](https://github.com/aave/aave-v3-core/commit/9b50898f6dbace6c2228e4bd41c081ff4afa7324))
+
+
+### Bug Fixes
+
+* dependencies ([f844a45](https://github.com/aave/aave-v3-core/commit/f844a4596b22fd16ec2516fa1e72c6d223481710))
+* load market test data correctly, fix atoken/debt token names ([72d1264](https://github.com/aave/aave-v3-core/commit/72d1264d1e6a285663828e37c52b9078525ca291))
+* remove npm ci cache, bump gas reporter to fixed version 1.0.8 set ethers to fixed version 5.6.1 ([bbb2dfd](https://github.com/aave/aave-v3-core/commit/bbb2dfde6c754c4e0552e78f43c5c09a6474805f))
+* upgrade periphery and deploy library to latest version ([902b48a](https://github.com/aave/aave-v3-core/commit/902b48aca1b53435fb302c0ba462c79beb1b57b8))
+* use ethers 5.5.3 to prevent different @ethersproject/bignumber version ([5411930](https://github.com/aave/aave-v3-core/commit/541193012dfd3c7ee1cb0dc2dfc11db091876145))
+
+
+### Miscellaneous Chores
+
+* release 1.16.2 ([32901d1](https://github.com/aave/aave-v3-core/commit/32901d1e541b38e2273ae896c43323a02a2ed744))
+
+### [1.16.1](https://www.github.com/aave/aave-v3-core/compare/v1.16.0...v1.16.1) (2022-04-05)
+
+
+### Bug Fixes
+
+* add comment for undocumentted parameter ([ba0e4ee](https://www.github.com/aave/aave-v3-core/commit/ba0e4ee72cc3060fc55294aeac0a7bbb9caf3087))
+* Add helpers for proxy contracts (eip1967 slots) ([d82be43](https://www.github.com/aave/aave-v3-core/commit/d82be4350d1778c269b5f7d875bdf5025fcff0bd))
+* Fix ts type of contract in tests ([12373ca](https://www.github.com/aave/aave-v3-core/commit/12373ca09d4e2cec32546dc87285d516c1d9f261))
+
+## [1.16.0](https://www.github.com/aave/aave-v3-core/compare/v1.15.0...v1.16.0) (2022-03-15)
+
+
+### Features
+
+* updated price oracle sentinel interface ([f6b71f5](https://www.github.com/aave/aave-v3-core/commit/f6b71f508db2a9a6f966bc6d606198eebaaefbb9))
+
+
+### Bug Fixes
+
+* Fix docstrings of ISequencerOracle ([4391fd4](https://www.github.com/aave/aave-v3-core/commit/4391fd4c8f29fb81c966fd4510df89d0acdb8404))
+
 ## [1.15.0](https://www.github.com/aave/aave-v3-core/compare/v1.14.2...v1.15.0) (2022-03-04)
 
 

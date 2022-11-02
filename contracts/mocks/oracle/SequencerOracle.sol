@@ -27,7 +27,22 @@ contract SequencerOracle is ISequencerOracle, Ownable {
   }
 
   /// @inheritdoc ISequencerOracle
-  function latestAnswer() external view override returns (bool, uint256) {
-    return (_isDown, _timestampGotUp);
+  function latestRoundData()
+    external
+    view
+    override
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    )
+  {
+    int256 isDown;
+    if (_isDown) {
+      isDown = 1;
+    }
+    return (0, isDown, 0, _timestampGotUp, 0);
   }
 }
