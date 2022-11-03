@@ -192,7 +192,7 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     const transferAmount = parsedTransferEvents[0].value;
 
     const parsedMintEvents = getStableDebtTokenEvent(stableDebtToken, tx, 'Mint');
-    const { value: mintAmount, balanceIncrease } = parsedMintEvents[0];
+    const { amount: mintAmount, balanceIncrease } = parsedMintEvents[0];
 
     expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
     expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);

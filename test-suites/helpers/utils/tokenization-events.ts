@@ -52,7 +52,7 @@ const STABLE_DEBT_TOKEN_EVENTS = [
     args: [
       'user',
       'onBehalfOf',
-      'value',
+      'amount',
       'currentBalance',
       'balanceIncrease',
       'newRate',
@@ -62,7 +62,7 @@ const STABLE_DEBT_TOKEN_EVENTS = [
   },
   {
     sig: 'Burn(address,uint256,uint256,uint256,uint256,uint256)',
-    args: ['from', 'value', 'currentBalance', 'balanceIncrease', 'avgStableRate', 'newTotalSupply'],
+    args: ['from', 'amount', 'currentBalance', 'balanceIncrease', 'avgStableRate', 'newTotalSupply'],
   },
 ];
 
