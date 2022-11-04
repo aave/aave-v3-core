@@ -300,7 +300,9 @@ library ReserveLogic {
       reserve.liquidityIndex = reserveCache.nextLiquidityIndex.toUint128();
     }
 
-    // Variable borrow side only gets updated if there is any accrual of variable debt
+    // Variable borrow index only gets updated if there is any variable debt.
+    // We assume that in that case the variable borrow rate is positive, to avoid
+    // over-optimization
     if (reserveCache.currScaledVariableDebt != 0) {
       uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
         reserveCache.currVariableBorrowRate,
