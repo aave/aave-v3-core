@@ -301,8 +301,9 @@ library ReserveLogic {
     }
 
     // Variable borrow index only gets updated if there is any variable debt.
-    // We assume that in that case the variable borrow rate is positive, to avoid
-    // over-optimization
+    // reserveCache.currVariableBorrowRate != 0 is not a correct validation,
+    // because a positive base variable rate can be stored on
+    // reserveCache.currVariableBorrowRate, but the index should not increase
     if (reserveCache.currScaledVariableDebt != 0) {
       uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
         reserveCache.currVariableBorrowRate,
