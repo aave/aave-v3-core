@@ -191,11 +191,12 @@ library LiquidationLogic {
 
     // Transfer fee to treasury if it is non-zero
     if (vars.liquidationProtocolFeeAmount != 0) {
-      uint256 index = collateralReserve.getNormalizedIncome();
-      uint256 aTokenAmount = vars.liquidationProtocolFeeAmount.rayDiv(index);
-      uint256 aTokenBalance = vars.collateralAToken.scaledBalanceOf(params.user);
-      if (aTokenAmount > aTokenBalance) {
-        vars.liquidationProtocolFeeAmount = aTokenBalance.rayMul(index);
+      uint256 liquidityIndex = collateralReserve.getNormalizedIncome();
+      uint256 scaledDownLiquidationProtocolFee = vars.liquidationProtocolFeeAmount.rayDiv(liquidityIndex);
+      uint256 scaledDownUserBalance = vars.collateralAToken.scaledBalanceOf(params.user);
+      // To avoid trying to send more aTokens than available on balance, due to 1 wei imprecision
+      if (scaledDownLiquidationProtocolFee > scaledDownUserBalance) {
+        vars.liquidationProtocolFeeAmount = scaledDownUserBalance.rayMul(liquidityIndex);
       }
       vars.collateralAToken.transferOnLiquidation(
         params.user,
