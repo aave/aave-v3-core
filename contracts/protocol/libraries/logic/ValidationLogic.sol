@@ -54,10 +54,11 @@ library ValidationLogic {
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be supplied
    */
-  function validateSupply(DataTypes.ReserveCache memory reserveCache, uint256 amount)
-    internal
-    view
-  {
+  function validateSupply(
+    DataTypes.ReserveCache memory reserveCache,
+    DataTypes.ReserveData storage reserve,
+    uint256 amount
+  ) internal view {
     require(amount != 0, Errors.INVALID_AMOUNT);
 
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
@@ -72,7 +73,9 @@ library ValidationLogic {
       supplyCap == 0 ||
         (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
           reserveCache.nextLiquidityIndex
-        ) + amount) <=
+        ) +
+          uint256(reserve.accruedToTreasury).rayMul(reserveCache.nextLiquidityIndex) +
+          amount) <=
         supplyCap * (10**reserveCache.reserveConfiguration.getDecimals()),
       Errors.SUPPLY_CAP_EXCEEDED
     );
@@ -650,7 +653,10 @@ library ValidationLogic {
       IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0,
       Errors.VARIABLE_DEBT_SUPPLY_NOT_ZERO
     );
-    require(IERC20(reserve.aTokenAddress).totalSupply() == 0, Errors.ATOKEN_SUPPLY_NOT_ZERO);
+    require(
+      IERC20(reserve.aTokenAddress).totalSupply() == 0 && reserve.accruedToTreasury == 0,
+      Errors.ATOKEN_SUPPLY_NOT_ZERO
+    );
   }
 
   /**
