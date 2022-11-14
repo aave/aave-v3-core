@@ -937,7 +937,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     await advanceTimeAndBlock(10000);
 
-    // "Clean" update, that should not increase the liquidity index, only variable borrow
+    // "Clean" update, that should not increase the liquidity index, only stable borrow
     await pool
       .connect(depositor.signer)
       .deposit(
