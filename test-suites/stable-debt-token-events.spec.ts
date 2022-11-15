@@ -215,11 +215,6 @@ makeSuite('StableDebtToken: Events', (testEnv: TestEnv) => {
       aliceBalanceBefore.add(balances.balance[alice.address]),
       2
     );
-    log(
-      'check',
-      aliceBalanceAfter.toString(),
-      aliceBalanceBefore.add(balances.balance[alice.address]).toString()
-    );
   };
 
   it('Alice borrows 100 DAI, Bob borrows 100 DAI, Alice borrows 50 DAI, repays 150 DAI and repays 100 DAI on behalf of Bob, borrows 10 DAI more (without index change)', async () => {
