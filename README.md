@@ -45,7 +45,7 @@ Formal Verification
 
 ## Connect with the community
 
-You can join at the [Discord](http://aave.com/discord) channel or at the [Governance Forum](https://governance.aave.com/) for asking questions about the protocol or talk about Aave with other peers.
+You can join the [Discord](http://aave.com/discord) channel or the [Governance Forum](https://governance.aave.com/) to ask questions about the protocol or talk about Aave with other peers.
 
 ## Getting Started
 
@@ -67,7 +67,7 @@ contract Misc {
 }
 ```
 
-The JSON artifacts with the ABI and Bytecode are also included into the bundled NPM package at `artifacts/` directory.
+The JSON artifacts with the ABI and Bytecode are also included in the bundled NPM package at `artifacts/` directory.
 
 Import JSON file via Node JS `require`:
 
@@ -80,12 +80,12 @@ console.log(PoolV3Artifact.abi)
 
 ## Setup
 
-The repository uses Docker Compose to manage sensitive keys and load the configuration. Prior any action like test or deploy, you must run `docker-compose up` to start the `contracts-env` container, and then connect to the container console via `docker-compose exec contracts-env bash`.
+The repository uses Docker Compose to manage sensitive keys and load the configuration. Prior to any action like test or deploy, you must run `docker-compose up` to start the `contracts-env` container, and then connect to the container console via `docker-compose exec contracts-env bash`.
 
 Follow the next steps to setup the repository:
 
 - Install `docker` and `docker-compose`
-- Create an enviroment file named `.env` and fill the next enviroment variables
+- Create an environment file named `.env` and fill the next environment variables
 
 ```
 # Add Alchemy or Infura provider keys, alchemy takes preference at the config level
