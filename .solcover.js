@@ -3,6 +3,7 @@ const cp = require('child_process');
 
 module.exports = {
   client: require('ganache-cli'),
+  configureYulOptimizer: true,
   skipFiles: ['./mocks', './interfaces', './dependencies'],
   mocha: {
     enableTimeouts: false,
@@ -12,6 +13,6 @@ module.exports = {
   },
   onCompileComplete: function () {
     console.log('onCompileComplete hook');
-    cp.execSync('. ./setup-test-env.sh', { stdio: 'inherit' });
+    cp.execSync('. ./setup-test-env.sh', {stdio: 'inherit'});
   },
 };
