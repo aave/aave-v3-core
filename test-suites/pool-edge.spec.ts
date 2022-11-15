@@ -3,7 +3,7 @@ import {BigNumber, BigNumberish, utils} from 'ethers';
 import {impersonateAccountsHardhat} from '../helpers/misc-utils';
 import {MAX_UINT_AMOUNT, ZERO_ADDRESS} from '../helpers/constants';
 import {deployMintableERC20} from '@aave/deploy-v3/dist/helpers/contract-deployments';
-import {ProtocolErrors} from '../helpers/types';
+import {ProtocolErrors, RateMode} from '../helpers/types';
 import {getFirstSigner} from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import {topUpNonPayableWithEther} from './helpers/utils/funds';
 import {makeSuite, TestEnv} from './helpers/make-suite';
@@ -14,6 +14,7 @@ import {
   getPoolLibraries,
   MockFlashLoanReceiver,
   getMockFlashLoanReceiver,
+  advanceTimeAndBlock,
 } from '@aave/deploy-v3';
 import {
   MockPoolInherited__factory,
@@ -24,10 +25,64 @@ import {
   Pool__factory,
   ERC20__factory,
 } from '../types';
-import {getProxyImplementation} from '../helpers/contracts-helpers';
+import {convertToCurrencyDecimals, getProxyImplementation} from '../helpers/contracts-helpers';
 import {ethers} from 'hardhat';
 
 declare var hre: HardhatRuntimeEnvironment;
+
+// Setup function to have 1 user with DAI deposits, and another user with WETH collateral
+// and DAI borrowings at an indicated borrowing mode
+const setupPositions = async (testEnv: TestEnv, borrowingMode: RateMode) => {
+  const {
+    pool,
+    dai,
+    weth,
+    oracle,
+    users: [depositor, borrower],
+  } = testEnv;
+
+  // mints DAI to depositor
+  await dai
+    .connect(depositor.signer)
+    ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '20000'));
+
+  // approve protocol to access depositor wallet
+  await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+  // user 1 deposits 1000 DAI
+  const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '10000');
+
+  await pool
+    .connect(depositor.signer)
+    .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
+  // user 2 deposits 1 ETH
+  const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
+
+  // mints WETH to borrower
+  await weth
+    .connect(borrower.signer)
+    ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+
+  // approve protocol to access the borrower wallet
+  await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+  await pool
+    .connect(borrower.signer)
+    .deposit(weth.address, amountETHtoDeposit, borrower.address, '0');
+
+  //user 2 borrows
+
+  const userGlobalData = await pool.getUserAccountData(borrower.address);
+  const daiPrice = await oracle.getAssetPrice(dai.address);
+
+  const amountDAIToBorrow = await convertToCurrencyDecimals(
+    dai.address,
+    userGlobalData.availableBorrowsBase.div(daiPrice).mul(5000).div(10000).toString()
+  );
+  await pool
+    .connect(borrower.signer)
+    .borrow(dai.address, amountDAIToBorrow, borrowingMode, '0', borrower.address);
+};
 
 makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -963,5 +1018,111 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     await pool.connect(collectorSigner).withdraw(weth.address, MAX_UINT_AMOUNT, collectorAddress);
 
     await configurator.setReserveActive(weth.address, false);
+  });
+
+  it('LendingPool Reserve Factor 100%. Only variable borrowings. Validates that variable borrow index accrue, liquidity index not, and the Collector receives accruedToTreasury allocation after interest accrues', async () => {
+    const {
+      configurator,
+      pool,
+      aDai,
+      dai,
+      users: [depositor],
+    } = testEnv;
+
+    await setupPositions(testEnv, RateMode.Variable);
+
+    // Set the RF to 100%
+    await configurator.setReserveFactor(dai.address, '10000');
+
+    const reserveDataBefore = await pool.getReserveData(dai.address);
+
+    await advanceTimeAndBlock(10000);
+
+    // Deposit to "settle" the liquidity index accrual from pre-RF increase to 100%
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter1 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter1.variableBorrowIndex).to.be.gt(reserveDataBefore.variableBorrowIndex);
+    expect(reserveDataAfter1.accruedToTreasury).to.be.gt(reserveDataBefore.accruedToTreasury);
+    expect(reserveDataAfter1.liquidityIndex).to.be.gt(reserveDataBefore.liquidityIndex);
+
+    await advanceTimeAndBlock(10000);
+
+    // "Clean" update, that should not increase the liquidity index, only variable borrow
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter2 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter2.variableBorrowIndex).to.be.gt(reserveDataAfter1.variableBorrowIndex);
+    expect(reserveDataAfter2.accruedToTreasury).to.be.gt(reserveDataAfter1.accruedToTreasury);
+    expect(reserveDataAfter2.liquidityIndex).to.be.eq(reserveDataAfter1.liquidityIndex);
+  });
+
+  it('LendingPool Reserve Factor 100%. Only stable borrowings. Validates that neither variable borrow index nor liquidity index increase, but the Collector receives accruedToTreasury allocation after interest accrues', async () => {
+    const {
+      configurator,
+      pool,
+      aDai,
+      dai,
+      users: [depositor],
+    } = testEnv;
+
+    await setupPositions(testEnv, RateMode.Stable);
+
+    // Set the RF to 100%
+    await configurator.setReserveFactor(dai.address, '10000');
+
+    const reserveDataBefore = await pool.getReserveData(dai.address);
+
+    await advanceTimeAndBlock(10000);
+
+    // Deposit to "settle" the liquidity index accrual from pre-RF increase to 100%
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter1 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter1.variableBorrowIndex).to.be.eq(reserveDataBefore.variableBorrowIndex);
+    expect(reserveDataAfter1.accruedToTreasury).to.be.gt(reserveDataBefore.accruedToTreasury);
+    expect(reserveDataAfter1.liquidityIndex).to.be.gt(reserveDataBefore.liquidityIndex);
+
+    await advanceTimeAndBlock(10000);
+
+    // "Clean" update, that should not increase the liquidity index, only stable borrow
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter2 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter2.variableBorrowIndex).to.be.eq(reserveDataAfter1.variableBorrowIndex);
+    expect(reserveDataAfter2.accruedToTreasury).to.be.gt(reserveDataAfter1.accruedToTreasury);
+    expect(reserveDataAfter2.liquidityIndex).to.be.eq(reserveDataAfter1.liquidityIndex);
   });
 });

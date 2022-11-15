@@ -327,20 +327,6 @@ library ValidationLogic {
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
-    uint256 variableDebtPreviousIndex = IScaledBalanceToken(reserveCache.variableDebtTokenAddress)
-      .getPreviousIndex(onBehalfOf);
-
-    uint40 stableRatePreviousTimestamp = IStableDebtToken(reserveCache.stableDebtTokenAddress)
-      .getUserLastUpdated(onBehalfOf);
-
-    require(
-      (stableRatePreviousTimestamp < uint40(block.timestamp) &&
-        interestRateMode == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
-          interestRateMode == DataTypes.InterestRateMode.VARIABLE),
-      Errors.SAME_BLOCK_BORROW_REPAY
-    );
-
     require(
       (stableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
         (variableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),

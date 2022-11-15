@@ -26,6 +26,114 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
   });
 
+  it('position should be liquidated when turn on liquidation protocol fee.', async () => {
+    const { pool, users, usdc, weth, oracle, configurator, helpersContract } = testEnv;
+
+    const depositor = users[0];
+    const borrower = users[1];
+    const liquidator = users[2];
+
+    //1, prepare asset price.
+    await oracle.setAssetPrice(usdc.address, '1000000000000000'); //weth = 1000 usdc
+
+    //2, depositor deposit 100000 usdc and 10 eth
+    await usdc
+      .connect(depositor.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '10000'));
+    await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(depositor.signer)
+      .supply(
+        usdc.address,
+        await convertToCurrencyDecimals(usdc.address, '10000'),
+        depositor.address,
+        0
+      );
+
+    await weth
+      .connect(depositor.signer)
+      ['mint(uint256)'](convertToCurrencyDecimals(weth.address, '10'));
+    await weth.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(depositor.signer)
+      .supply(weth.address, convertToCurrencyDecimals(weth.address, '10'), depositor.address, 0);
+
+    //3, borrower deposit 10 eth, borrow 5000 usdc
+    await weth
+      .connect(borrower.signer)
+      ['mint(uint256)'](convertToCurrencyDecimals(weth.address, '10'));
+    await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(borrower.signer)
+      .supply(weth.address, convertToCurrencyDecimals(weth.address, '10'), borrower.address, 0);
+
+    await pool
+      .connect(borrower.signer)
+      .borrow(
+        usdc.address,
+        await convertToCurrencyDecimals(usdc.address, '5000'),
+        RateMode.Variable,
+        0,
+        borrower.address
+      );
+
+    //4, liquidator deposit 10000 usdc and borrow 5 eth.
+    await usdc
+      .connect(liquidator.signer)
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '20000'));
+    await usdc.connect(liquidator.signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(liquidator.signer)
+      .supply(
+        usdc.address,
+        await convertToCurrencyDecimals(usdc.address, '10000'),
+        liquidator.address,
+        0
+      );
+
+    await pool
+      .connect(liquidator.signer)
+      .borrow(
+        weth.address,
+        convertToCurrencyDecimals(weth.address, '5'),
+        RateMode.Variable,
+        0,
+        liquidator.address
+      );
+
+    //5, advance block to make ETH income index > 1
+    await increaseTime(86400);
+
+    //6, decrease weth price to allow liquidation
+    await oracle.setAssetPrice(usdc.address, '20000000000000000'); //weth = 500 usdc
+
+    //7, turn on liquidation protocol fee
+    expect(await configurator.setLiquidationProtocolFee(weth.address, 500));
+    const wethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
+      weth.address
+    );
+    expect(wethLiquidationProtocolFee).to.be.eq(500);
+
+    const tryMaxTimes = 20;
+    for (let i = 1; i <= tryMaxTimes; i++) {
+      const tmpSnap = await evmSnapshot();
+      await increaseTime(i);
+      expect(
+        await pool
+          .connect(liquidator.signer)
+          .liquidationCall(weth.address, usdc.address, borrower.address, MAX_UINT_AMOUNT, false)
+      );
+
+      if (i !== tryMaxTimes) {
+        await evmRevert(tmpSnap);
+      }
+    }
+
+    expect(await weth.balanceOf(liquidator.address)).to.be.gt(
+      convertToCurrencyDecimals(weth.address, '5')
+    );
+  });
+
   it('Sets the WETH protocol liquidation fee to 1000 (10.00%)', async () => {
     const { configurator, weth, aave, helpersContract } = testEnv;
 

@@ -118,7 +118,6 @@ export enum ProtocolErrors {
   HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '45', // 'Health factor is not below the threshold'
   COLLATERAL_CANNOT_BE_LIQUIDATED = '46', // 'The collateral chosen cannot be liquidated'
   SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '47', // 'User did not borrow the specified currency'
-  SAME_BLOCK_BORROW_REPAY = '48', // 'Borrow and repay in same block is not allowed'
   INCONSISTENT_FLASHLOAN_PARAMS = '49', // 'Inconsistent flashloan parameters'
   BORROW_CAP_EXCEEDED = '50', // 'Borrow cap is exceeded'
   SUPPLY_CAP_EXCEEDED = '51', // 'Supply cap is exceeded'
