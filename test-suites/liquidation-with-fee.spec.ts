@@ -1,42 +1,47 @@
-import { expect } from 'chai';
-import { BigNumber, utils } from 'ethers';
-import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
-import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
-import { ProtocolErrors, RateMode } from '../helpers/types';
-import { AToken__factory } from '../types';
-import { calcExpectedStableDebtTokenBalance } from './helpers/utils/calculations';
-import { getReserveData, getUserData } from './helpers/utils/helpers';
-import { makeSuite } from './helpers/make-suite';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { waitForTx, increaseTime, evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import {expect} from 'chai';
+import {BigNumber} from 'ethers';
+import {MAX_UINT_AMOUNT, oneEther} from '../helpers/constants';
+import {convertToCurrencyDecimals} from '../helpers/contracts-helpers';
+import {ProtocolErrors, RateMode} from '../helpers/types';
+import {AToken__factory} from '../types';
+import {calcExpectedStableDebtTokenBalance} from './helpers/utils/calculations';
+import {getReserveData, getUserData} from './helpers/utils/helpers';
+import {makeSuite} from './helpers/make-suite';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {waitForTx, increaseTime, evmSnapshot, evmRevert} from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
-  const { INVALID_HF } = ProtocolErrors;
+  const {INVALID_HF} = ProtocolErrors;
 
   before(async () => {
-    const { addressesProvider, oracle } = testEnv;
+    const {addressesProvider, oracle} = testEnv;
 
     await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
   });
 
   after(async () => {
-    const { aaveOracle, addressesProvider } = testEnv;
+    const {aaveOracle, addressesProvider} = testEnv;
     await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
   });
 
   it('position should be liquidated when turn on liquidation protocol fee.', async () => {
-    const { pool, users, usdc, weth, oracle, configurator, helpersContract } = testEnv;
+    const {
+      pool,
+      users: [depositor, borrower, liquidator],
+      usdc,
+      weth,
+      oracle,
+      configurator,
+      helpersContract,
+    } = testEnv;
 
-    const depositor = users[0];
-    const borrower = users[1];
-    const liquidator = users[2];
+    const snapId = await evmSnapshot();
 
-    //1, prepare asset price.
-    await oracle.setAssetPrice(usdc.address, '1000000000000000'); //weth = 1000 usdc
+    const daiPrice = await oracle.getAssetPrice(usdc.address);
 
-    //2, depositor deposit 100000 usdc and 10 eth
+    //1. Depositor supplies 10000 USDC and 10 ETH
     await usdc
       .connect(depositor.signer)
       ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '10000'));
@@ -52,32 +57,38 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
 
     await weth
       .connect(depositor.signer)
-      ['mint(uint256)'](convertToCurrencyDecimals(weth.address, '10'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '10'));
     await weth.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
-      .supply(weth.address, convertToCurrencyDecimals(weth.address, '10'), depositor.address, 0);
+      .supply(
+        weth.address,
+        await convertToCurrencyDecimals(weth.address, '10'),
+        depositor.address,
+        0
+      );
 
-    //3, borrower deposit 10 eth, borrow 5000 usdc
+    //2. Borrower supplies 10 ETH, and borrows as much USDC as it can
     await weth
       .connect(borrower.signer)
-      ['mint(uint256)'](convertToCurrencyDecimals(weth.address, '10'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '10'));
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
-      .supply(weth.address, convertToCurrencyDecimals(weth.address, '10'), borrower.address, 0);
-
-    await pool
-      .connect(borrower.signer)
-      .borrow(
-        usdc.address,
-        await convertToCurrencyDecimals(usdc.address, '5000'),
-        RateMode.Variable,
-        0,
-        borrower.address
+      .supply(
+        weth.address,
+        await convertToCurrencyDecimals(weth.address, '10'),
+        borrower.address,
+        0
       );
 
-    //4, liquidator deposit 10000 usdc and borrow 5 eth.
+    const {availableBorrowsBase} = await pool.getUserAccountData(borrower.address);
+    let toBorrow = availableBorrowsBase.div(daiPrice);
+    await pool
+      .connect(borrower.signer)
+      .borrow(usdc.address, toBorrow, RateMode.Variable, 0, borrower.address);
+
+    //3. Liquidator supplies 10000 USDC and borrow 5 ETH
     await usdc
       .connect(liquidator.signer)
       ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '20000'));
@@ -95,19 +106,19 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
       .connect(liquidator.signer)
       .borrow(
         weth.address,
-        convertToCurrencyDecimals(weth.address, '5'),
+        await convertToCurrencyDecimals(weth.address, '1'),
         RateMode.Variable,
         0,
         liquidator.address
       );
 
-    //5, advance block to make ETH income index > 1
+    //4. Advance block to make ETH income index > 1
     await increaseTime(86400);
 
-    //6, decrease weth price to allow liquidation
-    await oracle.setAssetPrice(usdc.address, '20000000000000000'); //weth = 500 usdc
+    //5. Decrease weth price to allow liquidation
+    await oracle.setAssetPrice(usdc.address, '8000000000000000'); //weth = 500 usdc
 
-    //7, turn on liquidation protocol fee
+    //7. Turn on liquidation protocol fee
     expect(await configurator.setLiquidationProtocolFee(weth.address, 500));
     const wethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
       weth.address
@@ -128,14 +139,15 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
         await evmRevert(tmpSnap);
       }
     }
-
     expect(await weth.balanceOf(liquidator.address)).to.be.gt(
-      convertToCurrencyDecimals(weth.address, '5')
+      await convertToCurrencyDecimals(weth.address, '5')
     );
+
+    await evmRevert(snapId);
   });
 
   it('Sets the WETH protocol liquidation fee to 1000 (10.00%)', async () => {
-    const { configurator, weth, aave, helpersContract } = testEnv;
+    const {configurator, weth, aave, helpersContract} = testEnv;
 
     const oldWethLiquidationProtocolFee = await helpersContract.getLiquidationProtocolFee(
       weth.address
