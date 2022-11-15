@@ -454,10 +454,7 @@ library ValidationLogic {
   ) internal view {
     require(assets.length == amounts.length, Errors.INCONSISTENT_FLASHLOAN_PARAMS);
     for (uint256 i = 0; i < assets.length; i++) {
-      DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
-        .configuration;
-      require(!configuration.getPaused(), Errors.RESERVE_PAUSED);
-      require(configuration.getActive(), Errors.RESERVE_INACTIVE);
+      validateFlashloanSimple(reservesData[assets[i]]);
     }
   }
 
@@ -469,6 +466,7 @@ library ValidationLogic {
     DataTypes.ReserveConfigurationMap memory configuration = reserve.configuration;
     require(!configuration.getPaused(), Errors.RESERVE_PAUSED);
     require(configuration.getActive(), Errors.RESERVE_INACTIVE);
+    require(configuration.getFlashLoanEnabled(), Errors.FLASHLOAN_DISABLED);
   }
 
   struct ValidateLiquidationCallLocalVars {
