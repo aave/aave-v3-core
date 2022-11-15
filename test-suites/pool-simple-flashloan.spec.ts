@@ -18,8 +18,11 @@ import { waitForTx } from '@aave/deploy-v3';
 makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   let _mockFlashLoanSimpleReceiver = {} as MockFlashLoanSimpleReceiver;
 
-  const { ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE, INVALID_FLASHLOAN_EXECUTOR_RETURN } =
-    ProtocolErrors;
+  const {
+    ERC20_TRANSFER_AMOUNT_EXCEEDS_BALANCE,
+    INVALID_FLASHLOAN_EXECUTOR_RETURN,
+    FLASHLOAN_DISABLED,
+  } = ProtocolErrors;
   const TOTAL_PREMIUM = 9;
   const PREMIUM_TO_PROTOCOL = 3000;
 
@@ -176,6 +179,30 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
     expect(
       reservesAfter.sub(feesToProtocol).mul(liquidityIndexBefore).div(currentLiquidityIndex)
     ).to.be.equal(reservesBefore);
+  });
+
+  it('Takes a simple ETH flashloan after flashloaning disabled', async () => {
+    const { pool, configurator, helpersContract, weth } = testEnv;
+
+    expect(await configurator.setReserveFlashLoaning(weth.address, false));
+    let wethFlashLoanEnabled = await helpersContract.getFlashLoanEnabled(weth.address);
+    expect(wethFlashLoanEnabled).to.be.equal(false);
+
+    const wethFlashBorrowedAmount = ethers.utils.parseEther('0.8');
+
+    await expect(
+      pool.flashLoanSimple(
+        _mockFlashLoanSimpleReceiver.address,
+        weth.address,
+        wethFlashBorrowedAmount,
+        '0x10',
+        '0'
+      )
+    ).to.be.revertedWith(FLASHLOAN_DISABLED);
+
+    expect(await configurator.setReserveFlashLoaning(weth.address, true));
+    wethFlashLoanEnabled = await helpersContract.getFlashLoanEnabled(weth.address);
+    expect(wethFlashLoanEnabled).to.be.equal(true);
   });
 
   it('Takes WETH flashloan, does not return the funds (revert expected)', async () => {
