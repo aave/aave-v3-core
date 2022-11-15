@@ -8,7 +8,14 @@ import {getFirstSigner} from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import {topUpNonPayableWithEther} from './helpers/utils/funds';
 import {makeSuite, TestEnv} from './helpers/make-suite';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {evmSnapshot, evmRevert, getPoolLibraries, advanceTimeAndBlock} from '@aave/deploy-v3';
+import {
+  evmSnapshot,
+  evmRevert,
+  getPoolLibraries,
+  MockFlashLoanReceiver,
+  getMockFlashLoanReceiver,
+  advanceTimeAndBlock,
+} from '@aave/deploy-v3';
 import {
   MockPoolInherited__factory,
   MockReserveInterestRateStrategy__factory,
@@ -16,10 +23,10 @@ import {
   VariableDebtToken__factory,
   AToken__factory,
   Pool__factory,
-  InitializableImmutableAdminUpgradeabilityProxy,
   ERC20__factory,
 } from '../types';
 import {convertToCurrencyDecimals, getProxyImplementation} from '../helpers/contracts-helpers';
+import {ethers} from 'hardhat';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -89,14 +96,21 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     DEBT_CEILING_NOT_ZERO,
     ASSET_NOT_LISTED,
     ZERO_ADDRESS_NOT_VALID,
+    UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO,
+    SUPPLY_CAP_EXCEEDED,
+    RESERVE_LIQUIDITY_NOT_ZERO,
   } = ProtocolErrors;
 
   const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = 2500;
   const MAX_NUMBER_RESERVES = 128;
+  const TOTAL_PREMIUM = 9;
+  const PREMIUM_TO_PROTOCOL = 3000;
 
   const POOL_ID = utils.formatBytes32String('POOL');
 
   let snap: string;
+
+  let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   beforeEach(async () => {
     snap = await evmSnapshot();
@@ -846,6 +860,164 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
 
     initInputParams[0].variableDebtTokenImpl = variableDebtTokenImp.address;
     expect(await configurator.initReserves(initInputParams));
+  });
+
+  it('dropReserve(). Only allows to drop a reserve if both the aToken supply and accruedToTreasury are 0', async () => {
+    const {
+      configurator,
+      pool,
+      weth,
+      aWETH,
+      dai,
+      users: [user0],
+    } = testEnv;
+
+    _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
+
+    await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
+    await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
+
+    const userAddress = user0.address;
+    const amountToDeposit = ethers.utils.parseEther('1');
+
+    await weth['mint(uint256)'](amountToDeposit);
+
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
+
+    const wethFlashBorrowedAmount = ethers.utils.parseEther('0.8');
+
+    await pool.flashLoan(
+      _mockFlashLoanReceiver.address,
+      [weth.address],
+      [wethFlashBorrowedAmount],
+      [0],
+      _mockFlashLoanReceiver.address,
+      '0x10',
+      '0'
+    );
+
+    await pool.connect(user0.signer).withdraw(weth.address, MAX_UINT_AMOUNT, userAddress);
+
+    await expect(
+      configurator.dropReserve(weth.address),
+      'dropReserve() should not be possible as there are funds'
+    ).to.be.revertedWith(UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO);
+
+    await pool.mintToTreasury([weth.address]);
+
+    // Impersonate Collector
+    const collectorAddress = await aWETH.RESERVE_TREASURY_ADDRESS();
+    await topUpNonPayableWithEther(user0.signer, [collectorAddress], utils.parseEther('1'));
+    await impersonateAccountsHardhat([collectorAddress]);
+    const collectorSigner = await hre.ethers.getSigner(collectorAddress);
+    await pool.connect(collectorSigner).withdraw(weth.address, MAX_UINT_AMOUNT, collectorAddress);
+
+    await configurator.dropReserve(weth.address);
+  });
+
+  it('validateSupply(). Only allows to supply if amount + (scaled aToken supply + accruedToTreasury) <= supplyCap', async () => {
+    const {
+      configurator,
+      pool,
+      weth,
+      aWETH,
+      users: [user0],
+    } = testEnv;
+
+    _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
+
+    await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
+    await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
+
+    const userAddress = user0.address;
+    const amountToDeposit = ethers.utils.parseEther('100000');
+
+    await weth['mint(uint256)'](amountToDeposit.add(ethers.utils.parseEther('30')));
+
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
+
+    const wethFlashBorrowedAmount = ethers.utils.parseEther('100000');
+
+    await pool.flashLoan(
+      _mockFlashLoanReceiver.address,
+      [weth.address],
+      [wethFlashBorrowedAmount],
+      [0],
+      _mockFlashLoanReceiver.address,
+      '0x10',
+      '0'
+    );
+
+    // At this point the totalSupply + accruedToTreasury is ~100090 WETH, with 100063 from supply and ~27 from accruedToTreasury
+    // so to properly test the supply cap condition:
+    // - Set supply cap above that, at 110 WETH
+    // - Try to supply 30 WETH more . Should work if not taken into account accruedToTreasury, but will not
+    // - Try to supply 5 WETH more. Should work
+
+    await configurator.setSupplyCap(weth.address, BigNumber.from('100000').add('110'));
+
+    await expect(
+      pool.deposit(weth.address, ethers.utils.parseEther('30'), userAddress, '0')
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
+
+    await pool.deposit(weth.address, ethers.utils.parseEther('5'), userAddress, '0');
+  });
+
+  it('_checkNoSuppliers() (PoolConfigurator). Properly disables actions if aToken supply == 0, but accruedToTreasury != 0', async () => {
+    const {
+      configurator,
+      pool,
+      weth,
+      aWETH,
+      users: [user0],
+    } = testEnv;
+
+    _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
+
+    await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
+    await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
+
+    const userAddress = user0.address;
+    const amountToDeposit = ethers.utils.parseEther('100000');
+
+    await weth['mint(uint256)'](amountToDeposit.add(ethers.utils.parseEther('30')));
+
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
+
+    const wethFlashBorrowedAmount = ethers.utils.parseEther('100000');
+
+    await pool.flashLoan(
+      _mockFlashLoanReceiver.address,
+      [weth.address],
+      [wethFlashBorrowedAmount],
+      [0],
+      _mockFlashLoanReceiver.address,
+      '0x10',
+      '0'
+    );
+
+    await pool.connect(user0.signer).withdraw(weth.address, MAX_UINT_AMOUNT, userAddress);
+
+    await expect(configurator.setReserveActive(weth.address, false)).to.be.revertedWith(
+      RESERVE_LIQUIDITY_NOT_ZERO
+    );
+
+    await pool.mintToTreasury([weth.address]);
+
+    // Impersonate Collector
+    const collectorAddress = await aWETH.RESERVE_TREASURY_ADDRESS();
+    await topUpNonPayableWithEther(user0.signer, [collectorAddress], utils.parseEther('1'));
+    await impersonateAccountsHardhat([collectorAddress]);
+    const collectorSigner = await hre.ethers.getSigner(collectorAddress);
+    await pool.connect(collectorSigner).withdraw(weth.address, MAX_UINT_AMOUNT, collectorAddress);
+
+    await configurator.setReserveActive(weth.address, false);
   });
 
   it('LendingPool Reserve Factor 100%. Only variable borrowings. Validates that variable borrow index accrue, liquidity index not, and the Collector receives accruedToTreasury allocation after interest accrues', async () => {

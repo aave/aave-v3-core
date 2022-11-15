@@ -63,7 +63,7 @@ library BridgeLogic {
 
     reserve.updateState(reserveCache);
 
-    ValidationLogic.validateSupply(reserveCache, amount);
+    ValidationLogic.validateSupply(reserveCache, reserve, amount);
 
     uint256 unbackedMintCap = reserveCache.reserveConfiguration.getUnbackedMintCap();
     uint256 reserveDecimals = reserveCache.reserveConfiguration.getDecimals();
@@ -127,7 +127,8 @@ library BridgeLogic {
     uint256 added = backingAmount + fee;
 
     reserveCache.nextLiquidityIndex = reserve.cumulateToLiquidityIndex(
-      IERC20(reserveCache.aTokenAddress).totalSupply(),
+      IERC20(reserveCache.aTokenAddress).totalSupply() +
+        uint256(reserve.accruedToTreasury).rayMul(reserveCache.nextLiquidityIndex),
       feeToLP
     );
 

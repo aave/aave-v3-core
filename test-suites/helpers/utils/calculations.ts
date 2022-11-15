@@ -269,7 +269,9 @@ export const calcExpectedReserveDataAfterBackUnbacked = (
 
   expectedReserveData.liquidityIndex = cumulateToLiquidityIndex(
     expectedReserveData.liquidityIndex,
-    totalSupply,
+    totalSupply.add(
+      expectedReserveData.accruedToTreasuryScaled.rayMul(expectedReserveData.liquidityIndex)
+    ),
     premiumToLP
   );
 

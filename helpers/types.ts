@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import {BigNumber} from 'ethers';
 
 export interface SymbolMap<T> {
   [symbol: string]: T;
@@ -123,7 +123,7 @@ export enum ProtocolErrors {
   SUPPLY_CAP_EXCEEDED = '51', // 'Supply cap is exceeded'
   UNBACKED_MINT_CAP_EXCEEDED = '52', // 'Unbacked mint cap is exceeded'
   DEBT_CEILING_EXCEEDED = '53', // 'Debt ceiling is exceeded'
-  ATOKEN_SUPPLY_NOT_ZERO = '54', // 'AToken supply is not zero'
+  UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO = '54', // 'Claimable rights over underlying not zero (aToken supply or accruedToTreasury)'
   STABLE_DEBT_NOT_ZERO = '55', // 'Stable debt supply is not zero'
   VARIABLE_DEBT_SUPPLY_NOT_ZERO = '56', // 'Variable debt supply is not zero'
   LTV_VALIDATION_FAILED = '57', // 'Ltv validation failed'
