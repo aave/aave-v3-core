@@ -10,7 +10,7 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
   let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   const {
-    ATOKEN_SUPPLY_NOT_ZERO,
+    UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO,
     STABLE_DEBT_NOT_ZERO,
     VARIABLE_DEBT_SUPPLY_NOT_ZERO,
     ASSET_NOT_LISTED,
@@ -46,7 +46,7 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
 
     await pool.deposit(dai.address, depositedAmount, deployer.address, 0);
 
-    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(ATOKEN_SUPPLY_NOT_ZERO);
+    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO);
 
     await pool.connect(user1.signer).deposit(weth.address, depositedAmount, user1.address, 0);
 
@@ -71,7 +71,7 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
     );
 
     expect(await pool.connect(user1.signer).repay(dai.address, MAX_UINT_AMOUNT, 2, user1.address));
-    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(ATOKEN_SUPPLY_NOT_ZERO);
+    await expect(configurator.dropReserve(dai.address)).to.be.revertedWith(UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO);
   });
 
   it('User 1 withdraw DAI, drop DAI reserve should succeed', async () => {

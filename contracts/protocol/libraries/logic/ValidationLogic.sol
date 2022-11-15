@@ -71,11 +71,8 @@ library ValidationLogic {
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
     require(
       supplyCap == 0 ||
-        (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
-          reserveCache.nextLiquidityIndex
-        ) +
-          uint256(reserve.accruedToTreasury).rayMul(reserveCache.nextLiquidityIndex) +
-          amount) <=
+        ((IAToken(reserveCache.aTokenAddress).scaledTotalSupply() +
+          uint256(reserve.accruedToTreasury)).rayMul(reserveCache.nextLiquidityIndex) + amount) <=
         supplyCap * (10**reserveCache.reserveConfiguration.getDecimals()),
       Errors.SUPPLY_CAP_EXCEEDED
     );
@@ -655,7 +652,7 @@ library ValidationLogic {
     );
     require(
       IERC20(reserve.aTokenAddress).totalSupply() == 0 && reserve.accruedToTreasury == 0,
-      Errors.ATOKEN_SUPPLY_NOT_ZERO
+      Errors.UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO
     );
   }
 
