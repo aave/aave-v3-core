@@ -15,7 +15,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @dev Emitted during the transfer action
    * @param from The user whose tokens are being transferred
    * @param to The recipient
-   * @param value The amount being transferred
+   * @param value The scaled amount being transferred
    * @param index The next liquidity index of the reserve
    **/
   event BalanceTransfer(address indexed from, address indexed to, uint256 value, uint256 index);

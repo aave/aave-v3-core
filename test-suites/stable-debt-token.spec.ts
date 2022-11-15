@@ -1,14 +1,15 @@
-import {expect} from 'chai';
-import {BigNumber, utils} from 'ethers';
-import {ProtocolErrors, RateMode} from '../helpers/types';
-import {MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS} from '../helpers/constants';
-import {impersonateAccountsHardhat, setAutomine, setAutomineEvm} from '../helpers/misc-utils';
-import {makeSuite, TestEnv} from './helpers/make-suite';
-import {topUpNonPayableWithEther} from './helpers/utils/funds';
-import {convertToCurrencyDecimals} from '../helpers/contracts-helpers';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {evmRevert, evmSnapshot, getStableDebtToken, increaseTime, waitForTx} from '@aave/deploy-v3';
-import {StableDebtToken__factory} from '../types';
+import { expect } from 'chai';
+import { BigNumber, utils } from 'ethers';
+import { ProtocolErrors, RateMode } from '../helpers/types';
+import { MAX_UINT_AMOUNT, RAY, ZERO_ADDRESS } from '../helpers/constants';
+import { impersonateAccountsHardhat, setAutomine, setAutomineEvm } from '../helpers/misc-utils';
+import { makeSuite, TestEnv } from './helpers/make-suite';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { evmRevert, evmSnapshot, getStableDebtToken, increaseTime, waitForTx } from '@aave/deploy-v3';
+import { StableDebtToken__factory } from '../types';
+import { getStableDebtTokenEvent } from './helpers/utils/tokenization-events';
 declare var hre: HardhatRuntimeEnvironment;
 
 makeSuite('StableDebtToken', (testEnv: TestEnv) => {
@@ -187,24 +188,11 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       borrowOnBehalfAmount.add(borrowAmount)
     );
 
-    const transferEventSig = utils.keccak256(
-      utils.toUtf8Bytes('Transfer(address,address,uint256)')
-    );
-    const mintEventSig = utils.keccak256(
-      utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256,uint256,uint256,uint256)')
-    );
+    const parsedTransferEvents = getStableDebtTokenEvent(stableDebtToken, tx, 'Transfer');
+    const transferAmount = parsedTransferEvents[0].value;
 
-    const rawTransferEvents = tx.logs.filter(
-      ({topics, address}) => topics[0] === transferEventSig && address == stableDebtToken.address
-    );
-    const transferAmount = stableDebtToken.interface.parseLog(rawTransferEvents[0]).args.value;
-
-    const rawMintEvents = tx.logs.filter(
-      ({topics, address}) => topics[0] === mintEventSig && address == stableDebtToken.address
-    );
-    const {amount: mintAmount, balanceIncrease} = stableDebtToken.interface.parseLog(
-      rawMintEvents[0]
-    ).args;
+    const parsedMintEvents = getStableDebtTokenEvent(stableDebtToken, tx, 'Mint');
+    const { amount: mintAmount, balanceIncrease } = parsedMintEvents[0];
 
     expect(expectedDebtIncreaseUser1.add(borrowOnBehalfAmount)).to.be.eq(transferAmount);
     expect(borrowOnBehalfAmount.add(balanceIncrease)).to.be.eq(mintAmount);

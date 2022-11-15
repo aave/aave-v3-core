@@ -1,12 +1,12 @@
-import {expect} from 'chai';
-import {utils} from 'ethers';
-import {impersonateAccountsHardhat, setAutomine, setAutomineEvm} from '../helpers/misc-utils';
-import {MAX_UINT_AMOUNT, ZERO_ADDRESS} from '../helpers/constants';
-import {ProtocolErrors, RateMode} from '../helpers/types';
-import {makeSuite, TestEnv} from './helpers/make-suite';
-import {topUpNonPayableWithEther} from './helpers/utils/funds';
-import {convertToCurrencyDecimals} from '../helpers/contracts-helpers';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import { expect } from 'chai';
+import { utils } from 'ethers';
+import { impersonateAccountsHardhat, setAutomine, setAutomineEvm } from '../helpers/misc-utils';
+import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { ProtocolErrors, RateMode } from '../helpers/types';
+import { makeSuite, TestEnv } from './helpers/make-suite';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import {
   evmRevert,
   evmSnapshot,
@@ -14,8 +14,9 @@ import {
   increaseTime,
   waitForTx,
 } from '@aave/deploy-v3';
-import {VariableDebtToken__factory} from '../types';
+import { VariableDebtToken__factory } from '../types';
 import './helpers/utils/wadraymath';
+import { getVariableDebtTokenEvent } from './helpers/utils/tokenization-events';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -364,29 +365,13 @@ makeSuite('VariableDebtToken', (testEnv: TestEnv) => {
 
     const interest = afterDebtBalanceUser1.sub(borrowAmount).sub(borrowOnBehalfAmount);
 
-    const transferEventSig = utils.keccak256(
-      utils.toUtf8Bytes('Transfer(address,address,uint256)')
-    );
-
-    const rawTransferEvents = tx.logs.filter(
-      ({topics, address}) => topics[0] === transferEventSig && address == variableDebtToken.address
-    );
-    const parsedTransferEvent = variableDebtToken.interface.parseLog(rawTransferEvents[0]);
-    const transferAmount = parsedTransferEvent.args.value;
-
+    const parsedTransferEvents = getVariableDebtTokenEvent(variableDebtToken, tx, 'Transfer');
+    const transferAmount = parsedTransferEvents[0].value;
     expect(transferAmount).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
 
-    const mintEventSig = utils.keccak256(
-      utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256)')
-    );
-    const rawMintEvents = tx.logs.filter(
-      ({topics, address}) => topics[0] === mintEventSig && address == variableDebtToken.address
-    );
-
-    const parsedMintEvent = variableDebtToken.interface.parseLog(rawMintEvents[0]);
-
-    expect(parsedMintEvent.args.value).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
-    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(interest, 2);
+    const parsedMintEvents = getVariableDebtTokenEvent(variableDebtToken, tx, 'Mint');
+    expect(parsedMintEvents[0].value).to.be.closeTo(borrowOnBehalfAmount.add(interest), 2);
+    expect(parsedMintEvents[0].balanceIncrease).to.be.closeTo(interest, 2);
   });
 
   it('User borrows and repays in same block with zero fees', async () => {
