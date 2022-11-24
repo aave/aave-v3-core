@@ -1,9 +1,9 @@
-import {expect} from 'chai';
-import {BigNumber} from 'ethers';
-import {deployMockReserveConfiguration} from '@aave/deploy-v3/dist/helpers/contract-deployments';
-import {ProtocolErrors} from '../helpers/types';
-import {evmSnapshot, evmRevert} from '@aave/deploy-v3';
-import {MockReserveConfiguration} from '../types';
+import { expect } from 'chai';
+import { BigNumber } from '@ethersproject/bignumber';
+import { deployMockReserveConfiguration } from '@aave/deploy-v3/dist/helpers/contract-deployments';
+import { ProtocolErrors } from '../helpers/types';
+import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import { MockReserveConfiguration } from '../types';
 
 describe('ReserveConfiguration', async () => {
   let snap: string;
@@ -260,7 +260,7 @@ describe('ReserveConfiguration', async () => {
   it('setLtv() with ltv > MAX_VALID_LTV (revert expected)', async () => {
     expect(await configMock.getLtv()).to.be.eq(ZERO);
 
-    const {INVALID_LTV} = ProtocolErrors;
+    const { INVALID_LTV } = ProtocolErrors;
 
     // setLTV to MAX_VALID_LTV + 1
     await expect(configMock.setLtv(MAX_VALID_LTV.add(1))).to.be.revertedWith(INVALID_LTV);
@@ -288,7 +288,7 @@ describe('ReserveConfiguration', async () => {
   it('setLiquidationThreshold() with threshold > MAX_VALID_LIQUIDATION_THRESHOLD (revert expected)', async () => {
     expect(await configMock.getLiquidationThreshold()).to.be.eq(ZERO);
 
-    const {INVALID_LIQ_THRESHOLD} = ProtocolErrors;
+    const { INVALID_LIQ_THRESHOLD } = ProtocolErrors;
 
     // setLiquidationThreshold to MAX_VALID_LIQUIDATION_THRESHOLD + 1
     await expect(
@@ -318,7 +318,7 @@ describe('ReserveConfiguration', async () => {
   it('setDecimals() with decimals > MAX_VALID_DECIMALS (revert expected)', async () => {
     expect(await configMock.getDecimals()).to.be.eq(ZERO);
 
-    const {INVALID_DECIMALS} = ProtocolErrors;
+    const { INVALID_DECIMALS } = ProtocolErrors;
 
     // setDecimals to MAX_VALID_DECIMALS + 1
     await expect(configMock.setDecimals(MAX_VALID_DECIMALS.add(1))).to.be.revertedWith(
@@ -338,7 +338,7 @@ describe('ReserveConfiguration', async () => {
   it('setEModeCategory() with categoryID > MAX_VALID_EMODE_CATEGORY (revert expected)', async () => {
     expect(await configMock.getEModeCategory()).to.be.eq(ZERO);
 
-    const {INVALID_EMODE_CATEGORY} = ProtocolErrors;
+    const { INVALID_EMODE_CATEGORY } = ProtocolErrors;
 
     await expect(configMock.setEModeCategory(MAX_VALID_EMODE_CATEGORY.add(1))).to.be.revertedWith(
       INVALID_EMODE_CATEGORY

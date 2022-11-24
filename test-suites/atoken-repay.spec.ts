@@ -58,7 +58,7 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
     } = testEnv;
     const repayAmount = utils.parseEther('25');
 
-    await expect(pool.connect(user1.address).repayWithATokens(dai.address, repayAmount, 2)).to.be
+    await expect(pool.connect(user1.signer).repayWithATokens(dai.address, repayAmount, 2)).to.be
       .reverted;
   });
 

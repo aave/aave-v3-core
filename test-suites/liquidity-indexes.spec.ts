@@ -1,8 +1,9 @@
-import {expect} from 'chai';
-import {BigNumber, ethers} from 'ethers';
-import {MAX_UINT_AMOUNT} from '../helpers/constants';
-import {makeSuite, TestEnv} from './helpers/make-suite';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import { expect } from 'chai';
+import { BigNumber } from '@ethersproject/bignumber';
+import { ethers } from 'ethers';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { makeSuite, TestEnv } from './helpers/make-suite';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import {
   evmSnapshot,
   evmRevert,

@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { BigNumber, BigNumberish, utils } from 'ethers';
+import { BigNumberish, utils } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { deployDefaultReserveInterestRateStrategy } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { PERCENTAGE_FACTOR } from '../helpers/constants';
 import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';

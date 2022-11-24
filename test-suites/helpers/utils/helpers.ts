@@ -1,5 +1,6 @@
 import { expect } from 'chai';
-import { logger, utils, BigNumber, Contract } from 'ethers';
+import { logger, utils, Contract } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt } from '@ethersproject/providers';
 import { getContract } from '@aave/deploy-v3';
 import {
