@@ -1,4 +1,5 @@
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
+import '../wadraymath';
 
 export interface UserReserveData {
   scaledATokenBalance: BigNumber;

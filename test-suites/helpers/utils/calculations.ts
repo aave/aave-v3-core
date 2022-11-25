@@ -1,8 +1,8 @@
 import { ONE_YEAR, RAY, MAX_UINT_AMOUNT, PERCENTAGE_FACTOR } from '../../../helpers/constants';
 import { IReserveParams, iMultiPoolsAssets, RateMode } from '../../../helpers/types';
-import './wadraymath';
 import { ReserveData, UserReserveData } from './interfaces';
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
+import './wadraymath';
 import { expect } from 'chai';
 
 interface Configuration {

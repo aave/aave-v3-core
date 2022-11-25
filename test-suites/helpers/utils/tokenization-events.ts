@@ -1,5 +1,6 @@
 import { ethers } from 'hardhat';
-import { utils, BigNumber } from 'ethers';
+import { utils } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { TransactionReceipt } from '@ethersproject/providers';
 import {
   AToken,
@@ -18,6 +19,7 @@ import { getTxCostAndTimestamp } from '../actions';
 import { RateMode } from '../../../helpers/types';
 import { convertToCurrencyDecimals } from '../../../helpers/contracts-helpers';
 import { matchEvent } from './helpers';
+import './wadraymath';
 
 const ATOKEN_EVENTS = [
   { sig: 'Transfer(address,address,uint256)', args: ['from', 'to', 'value'] },
@@ -62,7 +64,14 @@ const STABLE_DEBT_TOKEN_EVENTS = [
   },
   {
     sig: 'Burn(address,uint256,uint256,uint256,uint256,uint256)',
-    args: ['from', 'amount', 'currentBalance', 'balanceIncrease', 'avgStableRate', 'newTotalSupply'],
+    args: [
+      'from',
+      'amount',
+      'currentBalance',
+      'balanceIncrease',
+      'avgStableRate',
+      'newTotalSupply',
+    ],
   },
 ];
 

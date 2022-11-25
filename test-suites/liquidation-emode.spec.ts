@@ -215,7 +215,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     expect(userReserveDataAfter.currentVariableDebt).to.be.closeTo(
       userReserveDataBefore.currentVariableDebt.sub(amountToLiquidate),
-      2,
+      3,
       'Invalid user borrow balance after liquidation'
     );
 

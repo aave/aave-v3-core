@@ -38,7 +38,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
 
     await expect(
       pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
-    ).to.be.revertedWith('2');
+    ).to.be.revertedWith('27');
 
     await configurator.setReserveActive(weth.address, true);
 
@@ -46,7 +46,7 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
 
     await expect(
       pool.liquidationCall(weth.address, dai.address, user.address, utils.parseEther('1000'), false)
-    ).to.be.revertedWith('2');
+    ).to.be.revertedWith('27');
 
     await configurator.setReserveActive(dai.address, true);
   });

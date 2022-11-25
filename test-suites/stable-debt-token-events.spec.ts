@@ -1,13 +1,18 @@
-import {evmSnapshot, evmRevert, advanceTimeAndBlock, MintableERC20__factory} from '@aave/deploy-v3';
-import {expect} from 'chai';
-import {ethers} from 'hardhat';
-import {BigNumber} from 'ethers';
-import {TransactionReceipt} from '@ethersproject/providers';
-import {MAX_UINT_AMOUNT} from '../helpers/constants';
-import {convertToCurrencyDecimals} from '../helpers/contracts-helpers';
-import {RateMode} from '../helpers/types';
-import {Pool, StableDebtToken} from '../types';
-import {makeSuite, SignerWithAddress, TestEnv} from './helpers/make-suite';
+import {
+  evmSnapshot,
+  evmRevert,
+  advanceTimeAndBlock,
+  MintableERC20__factory,
+} from '@aave/deploy-v3';
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
+import { BigNumber } from '@ethersproject/bignumber';
+import { TransactionReceipt } from '@ethersproject/providers';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { RateMode } from '../helpers/types';
+import { Pool, StableDebtToken } from '../types';
+import { makeSuite, SignerWithAddress, TestEnv } from './helpers/make-suite';
 import {
   supply,
   stableBorrow,
@@ -55,7 +60,7 @@ const increaseSupplyIndex = async (
       '0'
     );
 
-  const {aTokenAddress} = await pool.getReserveData(assetToIncrease);
+  const { aTokenAddress } = await pool.getReserveData(assetToIncrease);
   const availableLiquidity = await borrowingToken.balanceOf(aTokenAddress);
   await pool
     .connect(depositor.signer)
@@ -92,7 +97,7 @@ makeSuite('StableDebtToken: Events', (testEnv: TestEnv) => {
   let snapId;
 
   before(async () => {
-    const {users, pool, dai, weth} = testEnv;
+    const { users, pool, dai, weth } = testEnv;
     [alice, bob, depositor, depositor2] = users;
 
     const amountToMint = await convertToCurrencyDecimals(dai.address, '10000000');
@@ -140,7 +145,7 @@ makeSuite('StableDebtToken: Events', (testEnv: TestEnv) => {
   });
 
   const testMultipleBorrowsAndRepays = async (indexChange: boolean) => {
-    const {pool, dai, stableDebtDai, weth} = testEnv;
+    const { pool, dai, stableDebtDai, weth } = testEnv;
 
     let rcpt;
     let aliceBalanceBefore = await stableDebtDai.balanceOf(alice.address);
@@ -226,7 +231,7 @@ makeSuite('StableDebtToken: Events', (testEnv: TestEnv) => {
   });
 
   const testMultipleBorrowsAndRepaysOnBehalf = async (indexChange: boolean) => {
-    const {pool, dai, stableDebtDai, weth} = testEnv;
+    const { pool, dai, stableDebtDai, weth } = testEnv;
 
     let rcpt;
     let aliceBalanceBefore = await stableDebtDai.balanceOf(alice.address);
@@ -341,7 +346,7 @@ makeSuite('StableDebtToken: Events', (testEnv: TestEnv) => {
   });
 
   const testMultipleBorrowsOnBehalfAndRepaysOnBehalf = async (indexChange: boolean) => {
-    const {pool, dai, stableDebtDai, weth} = testEnv;
+    const { pool, dai, stableDebtDai, weth } = testEnv;
 
     let rcpt;
     let aliceBalanceBefore = await stableDebtDai.balanceOf(alice.address);
