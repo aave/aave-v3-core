@@ -75,9 +75,6 @@
     "Pol Sendra <pol@aave.com>"
   ],
   "license": "BUSL-1.1",
-  "dependencies": {
-    "tmp-promise": "^3.0.2"
-  },
   "keywords": [
     "aave",
     "protocol",
