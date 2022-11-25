@@ -2,7 +2,6 @@ const accounts = require(`./test-wallets.js`).accounts;
 const cp = require('child_process');
 
 module.exports = {
-  client: require('ganache-cli'),
   configureYulOptimizer: true,
   skipFiles: ['./mocks', './interfaces', './dependencies'],
   mocha: {
