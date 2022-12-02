@@ -163,7 +163,11 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   }
 
   /// @inheritdoc IAToken
-  function handleRepayment(address user, uint256 amount) external virtual override onlyPool {
+  function handleRepayment(
+    address user,
+    address onBehalfOf,
+    uint256 amount
+  ) external virtual override onlyPool {
     // Intentionally left blank
   }
 

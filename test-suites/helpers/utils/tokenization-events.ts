@@ -1,3 +1,4 @@
+import { MockATokenRepayment__factory } from './../../../types/factories/mocks/tokens/MockATokenRepayment__factory';
 import { ethers } from 'hardhat';
 import { utils } from 'ethers';
 import { BigNumber } from '@ethersproject/bignumber';
@@ -20,6 +21,7 @@ import { RateMode } from '../../../helpers/types';
 import { convertToCurrencyDecimals } from '../../../helpers/contracts-helpers';
 import { matchEvent } from './helpers';
 import './wadraymath';
+import { expect } from 'chai';
 
 const ATOKEN_EVENTS = [
   { sig: 'Transfer(address,address,uint256)', args: ['from', 'to', 'value'] },
@@ -369,6 +371,11 @@ export const repayVariableBorrow = async (
     .connect(user.signer)
     .repay(underlying, amount, RateMode.Variable, onBehalfOf);
   const rcpt = await tx.wait();
+
+  // check handleRepayment function is correctly called
+  await expect(tx)
+    .to.emit(MockATokenRepayment__factory.connect(aTokenAddress, user.signer), 'MockRepayment')
+    .withArgs(user.address, onBehalfOf, amount);
 
   const indexAfter = await pool.getReserveNormalizedVariableDebt(underlying);
   const addedScaledBalance = amount.rayDiv(indexAfter);
