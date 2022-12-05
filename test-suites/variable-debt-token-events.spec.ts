@@ -11,7 +11,7 @@ import { TransactionReceipt } from '@ethersproject/providers';
 import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode } from '../helpers/types';
-import { Pool, VariableDebtToken } from '../types';
+import { MockATokenRepayment__factory, Pool, VariableDebtToken } from '../types';
 import { makeSuite, SignerWithAddress, TestEnv } from './helpers/make-suite';
 import {
   supply,
@@ -99,7 +99,7 @@ makeSuite('VariableDebtToken: Events', (testEnv: TestEnv) => {
   let snapId;
 
   before(async () => {
-    const { users, pool, dai, weth } = testEnv;
+    const { users, pool, dai, weth, configurator, aDai, deployer } = testEnv;
     [alice, bob, depositor, depositor2] = users;
 
     const amountToMint = await convertToCurrencyDecimals(dai.address, '10000000');
@@ -120,6 +120,20 @@ makeSuite('VariableDebtToken: Events', (testEnv: TestEnv) => {
     await pool
       .connect(depositor2.signer)
       .supply(dai.address, amountToMint, depositor2.address, '0');
+
+    const aTokenRepayImpl = await new MockATokenRepayment__factory(deployer.signer).deploy(
+      pool.address
+    );
+
+    await configurator.updateAToken({
+      asset: dai.address,
+      treasury: await aDai.RESERVE_TREASURY_ADDRESS(),
+      incentivesController: await aDai.getIncentivesController(),
+      name: await aDai.name(),
+      symbol: await aDai.symbol(),
+      implementation: aTokenRepayImpl.address,
+      params: '0x',
+    });
   });
 
   beforeEach(async () => {

@@ -72,7 +72,7 @@ methods {
 	mintToTreasury(uint256 amount, uint256 index) => DISPATCHER(true)
 	transferOnLiquidation(address from, address to, uint256 value) => DISPATCHER(true)
 	transferUnderlyingTo(address user, uint256 amount) => DISPATCHER(true)
-	handleRepayment(address user, uint256 amount) => DISPATCHER(true)
+	handleRepayment(address user,  address onBehalfOf, uint256 amount) => DISPATCHER(true)
 	permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s) => DISPATCHER(true)
 	
 	//Debt Tokens

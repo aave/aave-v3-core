@@ -1,3 +1,4 @@
+import { MockATokenRepayment } from './../types/mocks/tokens/MockATokenRepayment';
 import { waitForTx, increaseTime, ZERO_ADDRESS } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
@@ -6,6 +7,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode } from '../helpers/types';
 import { makeSuite } from './helpers/make-suite';
 import { getATokenEvent, getVariableDebtTokenEvent } from './helpers/utils/tokenization-events';
+import { MockATokenRepayment__factory } from '../types';
 
 makeSuite('AToken: Mint and Burn Event Accounting', (testEnv) => {
   let firstDaiDeposit;
@@ -20,16 +22,29 @@ makeSuite('AToken: Mint and Burn Event Accounting', (testEnv) => {
   let accruedDebt1: BigNumber = BigNumber.from(0);
   let accruedDebt2: BigNumber = BigNumber.from(0);
   let accruedDebt3: BigNumber = BigNumber.from(0);
+  let aTokenRepayImpl: MockATokenRepayment;
 
   const transferEventSignature = utils.keccak256(
     utils.toUtf8Bytes('Transfer(address,address,uint256)')
   );
 
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
-    const { dai } = testEnv;
+    const { dai, configurator, aDai, deployer, pool } = testEnv;
     firstDaiDeposit = await convertToCurrencyDecimals(dai.address, '10000');
     secondDaiDeposit = await convertToCurrencyDecimals(dai.address, '20000');
     thirdDaiDeposit = await convertToCurrencyDecimals(dai.address, '50000');
+
+    aTokenRepayImpl = await new MockATokenRepayment__factory(deployer.signer).deploy(pool.address);
+
+    await configurator.updateAToken({
+      asset: dai.address,
+      treasury: await aDai.RESERVE_TREASURY_ADDRESS(),
+      incentivesController: await aDai.getIncentivesController(),
+      name: await aDai.name(),
+      symbol: await aDai.symbol(),
+      implementation: aTokenRepayImpl.address,
+      params: '0x',
+    });
   });
 
   it('User 1 supplies DAI', async () => {
@@ -314,6 +329,7 @@ makeSuite('AToken: Mint and Burn Event Accounting', (testEnv) => {
   it('User 2 repays all remaining DAI', async () => {
     const {
       dai,
+      aDai,
       variableDebtDai,
       users: [, borrower],
       pool,
@@ -338,6 +354,7 @@ makeSuite('AToken: Mint and Burn Event Accounting', (testEnv) => {
     const repayTx = await pool
       .connect(borrower.signer)
       .repay(dai.address, MAX_UINT_AMOUNT, RateMode.Variable, borrower.address);
+
     const repayReceipt = await repayTx.wait();
 
     const daiBalanceAfter = await dai.balanceOf(borrower.address);
@@ -372,6 +389,11 @@ makeSuite('AToken: Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedBurnEvent.value).to.be.closeTo(totalBurned, 2);
     expect(parsedBurnEvent.balanceIncrease).to.be.closeTo(accruedDebt3, 2);
     expect(borrowerDaiData.currentVariableDebt).to.be.equal(0);
+
+    // check handleRepayment function is correctly called
+    await expect(repayTx)
+      .to.emit(aTokenRepayImpl.attach(aDai.address), 'MockRepayment')
+      .withArgs(borrower.address, borrower.address, daiRepaid);
   });
 
   it('User 1 withdraws all deposited funds and interest', async () => {

@@ -1,3 +1,4 @@
+import { MockATokenRepayment__factory } from './../types/factories/mocks/tokens/MockATokenRepayment__factory';
 import { expect } from 'chai';
 import { BigNumber } from 'ethers';
 import { MAX_UINT_AMOUNT, oneEther } from '../helpers/constants';
@@ -22,10 +23,25 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
   let oracleBaseDecimals: number;
 
   before(async () => {
-    const { aaveOracle, addressesProvider, oracle } = testEnv;
+    const { aaveOracle, addressesProvider, oracle, deployer, pool, configurator, aDai, dai } =
+      testEnv;
     oracleBaseDecimals = (await (await aaveOracle.BASE_CURRENCY_UNIT()).toString().length) - 1;
 
     await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
+
+    const aTokenRepayImpl = await new MockATokenRepayment__factory(deployer.signer).deploy(
+      pool.address
+    );
+
+    await configurator.updateAToken({
+      asset: dai.address,
+      treasury: await aDai.RESERVE_TREASURY_ADDRESS(),
+      incentivesController: await aDai.getIncentivesController(),
+      name: await aDai.name(),
+      symbol: await aDai.symbol(),
+      implementation: aTokenRepayImpl.address,
+      params: '0x',
+    });
   });
 
   after(async () => {
@@ -139,6 +155,7 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     const {
       pool,
       dai,
+      aDai,
       weth,
       users: [, borrower],
       oracle,
@@ -282,6 +299,11 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
       (await helpersContract.getUserReserveData(weth.address, deployer.address))
         .usageAsCollateralEnabled
     ).to.be.true;
+
+    // check handleRepayment function is correctly called
+    await expect(tx)
+      .to.emit(MockATokenRepayment__factory.connect(aDai.address, borrower.signer), 'MockRepayment')
+      .withArgs(deployer.address, borrower.address, amountToLiquidate);
   });
 
   it('User 3 deposits 2000 USDC, user 4 0.12 WETH, user 4 borrows - drops HF, liquidates the borrow', async () => {

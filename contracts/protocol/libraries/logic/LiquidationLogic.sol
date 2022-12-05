@@ -223,6 +223,7 @@ library LiquidationLogic {
 
     IAToken(vars.debtReserveCache.aTokenAddress).handleRepayment(
       msg.sender,
+      params.user,
       vars.actualDebtToLiquidate
     );
 

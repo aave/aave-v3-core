@@ -248,7 +248,11 @@ library FlashLoanLogic {
       amountPlusPremium
     );
 
-    IAToken(reserveCache.aTokenAddress).handleRepayment(params.receiverAddress, amountPlusPremium);
+    IAToken(reserveCache.aTokenAddress).handleRepayment(
+      params.receiverAddress,
+      params.receiverAddress,
+      amountPlusPremium
+    );
 
     emit FlashLoan(
       params.receiverAddress,

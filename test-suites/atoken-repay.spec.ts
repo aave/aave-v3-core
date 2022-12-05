@@ -1,3 +1,5 @@
+import { MockATokenRepayment } from './../types/mocks/tokens/MockATokenRepayment';
+import { MockATokenRepayment__factory } from './../types/factories/mocks/tokens/MockATokenRepayment__factory';
 import {
   waitForTx,
   evmSnapshot,
@@ -14,16 +16,21 @@ import { setBlocktime, timeLatest } from '../helpers/misc-utils';
 import { RateMode } from '../helpers/types';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
+import { AaveDistributionManager__factory } from '@aave/deploy-v3/dist/types/typechain/factories/@aave/safety-module/contracts/stake';
 
 makeSuite('AToken: Repay', (testEnv: TestEnv) => {
   let snapShot: string;
+  let aTokenRepayImpl: MockATokenRepayment;
 
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
     const {
       weth,
       pool,
       dai,
+      aDai,
       users: [user0, user1],
+      deployer,
+      configurator,
     } = testEnv;
 
     const daiAmount = utils.parseEther('100');
@@ -33,6 +40,18 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     await waitForTx(await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT));
     await waitForTx(await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
+
+    aTokenRepayImpl = await new MockATokenRepayment__factory(deployer.signer).deploy(pool.address);
+
+    await configurator.updateAToken({
+      asset: dai.address,
+      treasury: await aDai.RESERVE_TREASURY_ADDRESS(),
+      incentivesController: await aDai.getIncentivesController(),
+      name: await aDai.name(),
+      symbol: await aDai.symbol(),
+      implementation: aTokenRepayImpl.address,
+      params: '0x',
+    });
 
     expect(await pool.connect(user0.signer).deposit(dai.address, daiAmount, user0.address, 0));
     expect(await pool.connect(user1.signer).deposit(weth.address, wethAmount, user1.address, 0));
@@ -84,7 +103,8 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     await expect(pool.connect(user1.signer).repayWithATokens(dai.address, repayAmount, 2))
       .to.emit(pool, 'Repay')
-      .withArgs(dai.address, user1.address, user1.address, repayAmount, true);
+      .withArgs(dai.address, user1.address, user1.address, repayAmount, true)
+      .and.not.to.emit(aTokenRepayImpl.attach(aDai.address), 'MockRepayment');
     const balanceAfter = await aDai.balanceOf(user1.address);
     const debtAfter = await variableDebtDai.balanceOf(user1.address);
 
@@ -112,13 +132,17 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     const debtBefore = await variableDebtDai.balanceOf(user1.address, { blockTag: 'pending' });
 
-    const tx = await waitForTx(
-      await pool.connect(user1.signer).repayWithATokens(dai.address, MAX_UINT_AMOUNT, 2)
-    );
+    const action = await pool
+      .connect(user1.signer)
+      .repayWithATokens(dai.address, MAX_UINT_AMOUNT, 2);
+
+    const tx = await waitForTx(action);
 
     const repayEventSignature = utils.keccak256(
       utils.toUtf8Bytes('Repay(address,address,address,uint256,bool)')
     );
+
+    await expect(action).to.not.emit(aTokenRepayImpl.attach(aDai.address), 'MockRepayment');
 
     const rawRepayEvents = tx.logs.filter((log) => log.topics[0] === repayEventSignature);
     const parsedRepayEvent = pool.interface.parseLog(rawRepayEvents[0]);
@@ -155,9 +179,13 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
     const debtBefore = await variableDebtDai.balanceOf(user1.address, { blockTag: 'pending' });
     expect(debtBefore).to.be.gt(parseUnits('50', 18));
 
-    const tx = await waitForTx(
-      await pool.connect(user1.signer).repayWithATokens(dai.address, MAX_UINT_AMOUNT, 2)
-    );
+    const action = await pool
+      .connect(user1.signer)
+      .repayWithATokens(dai.address, MAX_UINT_AMOUNT, 2);
+
+    const tx = await waitForTx(action);
+
+    await expect(action).to.not.emit(aTokenRepayImpl.attach(aDai.address), 'MockRepayment');
 
     const repayEventSignature = utils.keccak256(
       utils.toUtf8Bytes('Repay(address,address,address,uint256,bool)')
@@ -206,7 +234,11 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
 
     // Now we repay 250 with aTokens
     const repayAmount = parseUnits('250', 18);
-    await pool.connect(user.signer).repayWithATokens(dai.address, repayAmount, RateMode.Variable);
+    const action = await pool
+      .connect(user.signer)
+      .repayWithATokens(dai.address, repayAmount, RateMode.Variable);
+
+    await expect(action).to.not.emit(aTokenRepayImpl.attach(aDai.address), 'MockRepayment');
 
     const reserveData = await pool.getReserveData(dai.address);
     const strategy = DefaultReserveInterestRateStrategy__factory.connect(
