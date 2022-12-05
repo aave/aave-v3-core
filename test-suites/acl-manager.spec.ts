@@ -55,9 +55,9 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     await expect(
       aclManager.connect(flashBorrowAdmin.signer).addFlashBorrower(flashBorrower.address)
     ).to.be.revertedWith(
-      `'AccessControl: account ${flashBorrowAdmin.address.toLowerCase()} is missing role ${
+      `AccessControl: account ${flashBorrowAdmin.address.toLowerCase()} is missing role ${
         constants.HashZero
-      }'`
+      }`
     );
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(false);
@@ -108,7 +108,7 @@ makeSuite('Access Control List Manager', (testEnv: TestEnv) => {
     await expect(
       aclManager.connect(deployer.signer).removeFlashBorrower(flashBorrower.address)
     ).to.be.revertedWith(
-      `'AccessControl: account ${deployer.address.toLowerCase()} is missing role ${FLASH_BORROW_ADMIN_ROLE}'`
+      `AccessControl: account ${deployer.address.toLowerCase()} is missing role ${FLASH_BORROW_ADMIN_ROLE}`
     );
 
     expect(await aclManager.isFlashBorrower(flashBorrower.address)).to.be.eq(true);

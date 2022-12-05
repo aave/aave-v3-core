@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import {BigNumber} from '@ethersproject/bignumber';
 
 export interface SymbolMap<T> {
   [symbol: string]: T;
@@ -118,13 +118,12 @@ export enum ProtocolErrors {
   HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '45', // 'Health factor is not below the threshold'
   COLLATERAL_CANNOT_BE_LIQUIDATED = '46', // 'The collateral chosen cannot be liquidated'
   SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '47', // 'User did not borrow the specified currency'
-  SAME_BLOCK_BORROW_REPAY = '48', // 'Borrow and repay in same block is not allowed'
   INCONSISTENT_FLASHLOAN_PARAMS = '49', // 'Inconsistent flashloan parameters'
   BORROW_CAP_EXCEEDED = '50', // 'Borrow cap is exceeded'
   SUPPLY_CAP_EXCEEDED = '51', // 'Supply cap is exceeded'
   UNBACKED_MINT_CAP_EXCEEDED = '52', // 'Unbacked mint cap is exceeded'
   DEBT_CEILING_EXCEEDED = '53', // 'Debt ceiling is exceeded'
-  ATOKEN_SUPPLY_NOT_ZERO = '54', // 'AToken supply is not zero'
+  UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO = '54', // 'Claimable rights over underlying not zero (aToken supply or accruedToTreasury)'
   STABLE_DEBT_NOT_ZERO = '55', // 'Stable debt supply is not zero'
   VARIABLE_DEBT_SUPPLY_NOT_ZERO = '56', // 'Variable debt supply is not zero'
   LTV_VALIDATION_FAILED = '57', // 'Ltv validation failed'
@@ -161,6 +160,7 @@ export enum ProtocolErrors {
   STABLE_BORROWING_ENABLED = '88', // 'Stable borrowing is enabled'
   SILOED_BORROWING_VIOLATION = '89', // user is trying to violate the siloed borrowing rule
   RESERVE_DEBT_NOT_ZERO = '90', // the total debt of the reserve needs to be 0
+  FLASHLOAN_DISABLED = '91', // FlashLoaning for this asset is disabled
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
 

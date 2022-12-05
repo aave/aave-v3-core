@@ -1,3 +1,4 @@
+import { MockATokenRepayment } from './../types/mocks/tokens/MockATokenRepayment';
 import { waitForTx, increaseTime, ZERO_ADDRESS } from '@aave/deploy-v3';
 import { expect } from 'chai';
 import { BigNumber, utils } from 'ethers';
@@ -5,8 +6,10 @@ import { MAX_UINT_AMOUNT } from '../helpers/constants';
 import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { RateMode } from '../helpers/types';
 import { makeSuite } from './helpers/make-suite';
+import { getATokenEvent, getVariableDebtTokenEvent } from './helpers/utils/tokenization-events';
+import { MockATokenRepayment__factory } from '../types';
 
-makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
+makeSuite('AToken: Mint and Burn Event Accounting', (testEnv) => {
   let firstDaiDeposit;
   let secondDaiDeposit;
   let thirdDaiDeposit;
@@ -19,32 +22,32 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
   let accruedDebt1: BigNumber = BigNumber.from(0);
   let accruedDebt2: BigNumber = BigNumber.from(0);
   let accruedDebt3: BigNumber = BigNumber.from(0);
+  let aTokenRepayImpl: MockATokenRepayment;
 
   const transferEventSignature = utils.keccak256(
     utils.toUtf8Bytes('Transfer(address,address,uint256)')
   );
 
-  const aTokenMintEventSignature = utils.keccak256(
-    utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256)')
-  );
-  const aTokenBurnEventSignature = utils.keccak256(
-    utils.toUtf8Bytes('Burn(address,address,uint256,uint256,uint256)')
-  );
-  const vDebtTokenMintEventSignature = utils.keccak256(
-    utils.toUtf8Bytes('Mint(address,address,uint256,uint256,uint256)')
-  );
-  const vDebtTokenBurnEventSignature = utils.keccak256(
-    utils.toUtf8Bytes('Burn(address,address,uint256,uint256,uint256)')
-  );
-
   before('User 0 deposits 100 DAI, user 1 deposits 1 WETH, borrows 50 DAI', async () => {
-    const { dai } = testEnv;
+    const { dai, configurator, aDai, deployer, pool } = testEnv;
     firstDaiDeposit = await convertToCurrencyDecimals(dai.address, '10000');
     secondDaiDeposit = await convertToCurrencyDecimals(dai.address, '20000');
     thirdDaiDeposit = await convertToCurrencyDecimals(dai.address, '50000');
+
+    aTokenRepayImpl = await new MockATokenRepayment__factory(deployer.signer).deploy(pool.address);
+
+    await configurator.updateAToken({
+      asset: dai.address,
+      treasury: await aDai.RESERVE_TREASURY_ADDRESS(),
+      incentivesController: await aDai.getIncentivesController(),
+      name: await aDai.name(),
+      symbol: await aDai.symbol(),
+      implementation: aTokenRepayImpl.address,
+      params: '0x',
+    });
   });
 
-  it('User 1 Deposit dai', async () => {
+  it('User 1 supplies DAI', async () => {
     const {
       dai,
       aDai,
@@ -83,7 +86,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(aDaiBalance).to.be.equal(firstDaiDeposit);
   });
 
-  it('User 1 - Deposit dai on behalf of user 2', async () => {
+  it('User 1 supplies DAI on behalf of user 2', async () => {
     const {
       dai,
       aDai,
@@ -122,7 +125,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(aDaiBalance).to.be.equal(firstDaiDeposit);
   });
 
-  it('User 2 - deposit ETH, borrow Dai', async () => {
+  it('User 2 supplies ETH,and borrows DAI', async () => {
     const {
       dai,
       weth,
@@ -131,17 +134,17 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
       helpersContract,
     } = testEnv;
 
-    //user 2 deposits 100 ETH
+    // user 2 deposits 100 ETH
     const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '20000');
 
-    //mints WETH to borrower
+    // mints WETH to borrower
     await waitForTx(
       await weth
         .connect(borrower.signer)
         ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '20000'))
     );
 
-    //approve protocol to access the borrower wallet
+    // approve protocol to access the borrower wallet
     await waitForTx(await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
     await waitForTx(
@@ -150,7 +153,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
         .deposit(weth.address, amountETHtoDeposit, borrower.address, '0')
     );
 
-    // Borrow dai
+    // Borrow DAI
     firstDaiBorrow = await convertToCurrencyDecimals(dai.address, '5000');
 
     await waitForTx(
@@ -168,7 +171,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(borrowerDaiData.currentVariableDebt).to.be.equal(firstDaiBorrow);
   });
 
-  it('User 2 - borrow more Dai - confirm mint event includes accrued interest', async () => {
+  it('User 2 borrows more DAI - confirm mint event includes accrued interest', async () => {
     const {
       dai,
       variableDebtDai,
@@ -197,11 +200,9 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const parsedTransferEvent = variableDebtDai.interface.parseLog(rawTransferEvents[0]);
 
     // get mint event
-    const rawMintEvents = borrowReceipt.logs.filter(
-      (log) => log.topics[0] === vDebtTokenMintEventSignature
-    );
-    expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
-    const parsedMintEvent = variableDebtDai.interface.parseLog(rawMintEvents[0]);
+    const parsedMintEvents = getVariableDebtTokenEvent(variableDebtDai, borrowReceipt, 'Mint');
+    expect(parsedMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
+    const parsedMintEvent = parsedMintEvents[0];
 
     // check transfer event parameters
     expect(parsedTransferEvent.args.from).to.equal(ZERO_ADDRESS);
@@ -209,32 +210,30 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event parameters
-    expect(parsedMintEvent.args.caller).to.equal(borrower.address);
-    expect(parsedMintEvent.args.onBehalfOf).to.equal(borrower.address);
-    expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
-    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(accruedDebt1, 2);
+    expect(parsedMintEvent.caller).to.equal(borrower.address);
+    expect(parsedMintEvent.onBehalfOf).to.equal(borrower.address);
+    expect(parsedMintEvent.value).to.be.closeTo(totalMinted, 2);
+    expect(parsedMintEvent.balanceIncrease).to.be.closeTo(accruedDebt1, 2);
   });
 
-  it('User 1 - deposit more Dai - confirm mint event includes accrued interest', async () => {
+  it('User 1 - supplies more DAI - confirm mint event includes accrued interest', async () => {
     const {
       dai,
       aDai,
       users: [depositor],
       pool,
-      helpersContract,
     } = testEnv;
 
     await increaseTime(86400);
 
-    //mints DAI to depositor
+    // mints DAI to depositor
     await waitForTx(
       await dai
         .connect(depositor.signer)
         ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '20000'))
     );
 
-    //user 1 deposits 2000 DAI
-
+    // user 1 deposits 2000 DAI
     const depositTx = await waitForTx(
       await pool
         .connect(depositor.signer)
@@ -253,11 +252,9 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const parsedTransferEvent = aDai.interface.parseLog(rawTransferEvents[1]);
 
     // get mint event
-    const rawMintEvents = depositTx.logs.filter(
-      (log) => log.topics[0] === aTokenMintEventSignature
-    );
-    expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
-    const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
+    const parsedMintEvents = getATokenEvent(aDai, depositTx, 'Mint');
+    expect(parsedMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
+    const parsedMintEvent = parsedMintEvents[0];
 
     // check transfer event parameters
     expect(parsedTransferEvent.args.from).to.equal(ZERO_ADDRESS);
@@ -265,13 +262,13 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event parameters
-    expect(parsedMintEvent.args.caller).to.equal(depositor.address);
-    expect(parsedMintEvent.args.onBehalfOf).to.equal(depositor.address);
-    expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
-    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(accruedInterest1, 2);
+    expect(parsedMintEvent.caller).to.equal(depositor.address);
+    expect(parsedMintEvent.onBehalfOf).to.equal(depositor.address);
+    expect(parsedMintEvent.value).to.be.closeTo(totalMinted, 2);
+    expect(parsedMintEvent.balanceIncrease).to.be.closeTo(accruedInterest1, 2);
   });
 
-  it('User 1 - deposit more Dai again - confirm mint event includes accrued interest', async () => {
+  it('User 1 supplies more DAI again - confirm mint event includes accrued interest', async () => {
     const {
       dai,
       aDai,
@@ -282,14 +279,14 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
 
     await increaseTime(86400);
 
-    //mints DAI to depositor
+    // mints DAI to depositor
     await waitForTx(
       await dai
         .connect(depositor.signer)
         ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '50000'))
     );
 
-    //user 1 deposits 2000 DAI
+    // user 1 deposits 2000 DAI
     const depositTx = await pool
       .connect(depositor.signer)
       .deposit(dai.address, thirdDaiDeposit, depositor.address, '0');
@@ -312,11 +309,9 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const parsedTransferEvent = aDai.interface.parseLog(rawTransferEvents[1]);
 
     // get mint event
-    const rawMintEvents = depositReceipt.logs.filter(
-      (log) => log.topics[0] === aTokenMintEventSignature
-    );
-    expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
-    const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
+    const parsedMintEvents = getATokenEvent(aDai, depositReceipt, 'Mint');
+    expect(parsedMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
+    const parsedMintEvent = parsedMintEvents[0];
 
     // check transfer event
     expect(parsedTransferEvent.args.from).to.equal(ZERO_ADDRESS);
@@ -324,16 +319,17 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event
-    expect(parsedMintEvent.args.caller).to.equal(depositor.address);
-    expect(parsedMintEvent.args.onBehalfOf).to.equal(depositor.address);
-    expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
-    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(accruedInterest2, 2);
-    expect(parsedMintEvent.args.index).to.equal(daiReserveData.liquidityIndex);
+    expect(parsedMintEvent.caller).to.equal(depositor.address);
+    expect(parsedMintEvent.onBehalfOf).to.equal(depositor.address);
+    expect(parsedMintEvent.value).to.be.closeTo(totalMinted, 2);
+    expect(parsedMintEvent.balanceIncrease).to.be.closeTo(accruedInterest2, 2);
+    expect(parsedMintEvent.index).to.equal(daiReserveData.liquidityIndex);
   });
 
-  it('User 2 - repay all remaining dai', async () => {
+  it('User 2 repays all remaining DAI', async () => {
     const {
       dai,
+      aDai,
       variableDebtDai,
       users: [, borrower],
       pool,
@@ -358,6 +354,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const repayTx = await pool
       .connect(borrower.signer)
       .repay(dai.address, MAX_UINT_AMOUNT, RateMode.Variable, borrower.address);
+
     const repayReceipt = await repayTx.wait();
 
     const daiBalanceAfter = await dai.balanceOf(borrower.address);
@@ -378,11 +375,9 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const parsedTransferEvent = variableDebtDai.interface.parseLog(rawTransferEvents[0]);
 
     // get burn event
-    const rawBurnEvents = repayReceipt.logs.filter(
-      (log) => log.topics[0] === vDebtTokenBurnEventSignature
-    );
-    expect(rawBurnEvents.length).to.equal(1, 'Incorrect number of Burn Events');
-    const parsedBurnEvent = variableDebtDai.interface.parseLog(rawBurnEvents[0]);
+    const parsedBurnEvents = getVariableDebtTokenEvent(variableDebtDai, repayReceipt, 'Burn');
+    expect(parsedBurnEvents.length).to.equal(1, 'Incorrect number of Burn Events');
+    const parsedBurnEvent = parsedBurnEvents[0];
 
     // check burn parameters
     expect(parsedTransferEvent.args.from).to.equal(borrower.address);
@@ -390,13 +385,18 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalBurned, 2);
 
     // check burn parameters
-    expect(parsedBurnEvent.args.from).to.equal(borrower.address);
-    expect(parsedBurnEvent.args.value).to.be.closeTo(totalBurned, 2);
-    expect(parsedBurnEvent.args.balanceIncrease).to.be.closeTo(accruedDebt3, 2);
+    expect(parsedBurnEvent.from).to.equal(borrower.address);
+    expect(parsedBurnEvent.value).to.be.closeTo(totalBurned, 2);
+    expect(parsedBurnEvent.balanceIncrease).to.be.closeTo(accruedDebt3, 2);
     expect(borrowerDaiData.currentVariableDebt).to.be.equal(0);
+
+    // check handleRepayment function is correctly called
+    await expect(repayTx)
+      .to.emit(aTokenRepayImpl.attach(aDai.address), 'MockRepayment')
+      .withArgs(borrower.address, borrower.address, daiRepaid);
   });
 
-  it('User 1 - withdraws all deposited funds and interest', async () => {
+  it('User 1 withdraws all deposited funds and interest', async () => {
     const {
       dai,
       aDai,
@@ -433,11 +433,9 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const parsedTransferEvent = aDai.interface.parseLog(rawTransferEvents[0]);
 
     // get burn event
-    const rawBurnEvents = withdrawReceipt.logs.filter(
-      (log) => log.topics[0] === aTokenBurnEventSignature
-    );
-    expect(rawBurnEvents.length).to.equal(1, 'Incorrect number of Burn Events');
-    const parsedBurnEvent = aDai.interface.parseLog(rawBurnEvents[0]);
+    const parsedBurnEvents = getATokenEvent(aDai, withdrawReceipt, 'Burn');
+    expect(parsedBurnEvents.length).to.equal(1, 'Incorrect number of Burn Events');
+    const parsedBurnEvent = parsedBurnEvents[0];
 
     // check transfer parameters
     expect(parsedTransferEvent.args.from).to.equal(depositor.address);
@@ -445,30 +443,30 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalBurned, 2);
 
     // check burn parameters
-    expect(parsedBurnEvent.args.from).to.equal(depositor.address);
-    expect(parsedBurnEvent.args.target).to.equal(depositor.address);
-    expect(parsedBurnEvent.args.value).to.be.closeTo(totalBurned, 2);
-    expect(parsedBurnEvent.args.balanceIncrease).to.be.closeTo(accruedInterest3, 2);
-    expect(parsedBurnEvent.args.index).to.equal(daiReserveData.liquidityIndex);
+    expect(parsedBurnEvent.from).to.equal(depositor.address);
+    expect(parsedBurnEvent.target).to.equal(depositor.address);
+    expect(parsedBurnEvent.value).to.be.closeTo(totalBurned, 2);
+    expect(parsedBurnEvent.balanceIncrease).to.be.closeTo(accruedInterest3, 2);
+    expect(parsedBurnEvent.index).to.equal(daiReserveData.liquidityIndex);
   });
 
-  it('User 2 - borrow, pass time and repay dai less than accrued debt', async () => {
+  it('User 2 borrows, pass time and repay DAI less than accrued debt', async () => {
     const {
       dai,
       variableDebtDai,
       users: [depositor, borrower],
       pool,
     } = testEnv;
-    // User 1 - Deposit dai
+
+    // User 1 - Deposit DAI
     await waitForTx(
       await pool
         .connect(depositor.signer)
         .deposit(dai.address, firstDaiDeposit, depositor.address, '0')
     );
 
-    // User 2 - Borrow dai
+    // User 2 - Borrow DAI
     const borrowAmount = await convertToCurrencyDecimals(dai.address, '8000');
-
     await waitForTx(
       await pool
         .connect(borrower.signer)
@@ -485,7 +483,7 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     // approve protocol to access depositor wallet
     await waitForTx(await dai.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
 
-    // repay dai loan
+    // repay DAI loan
     const repayTx = await pool
       .connect(borrower.signer)
       .repay(dai.address, smallRepay, RateMode.Variable, borrower.address);
@@ -502,11 +500,9 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const parsedTransferEvent = variableDebtDai.interface.parseLog(rawTransferEvents[0]);
 
     // get mint event
-    const rawMintEvents = repayReceipt.logs.filter(
-      (log) => log.topics[0] === vDebtTokenMintEventSignature
-    );
-    expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
-    const parsedMintEvent = variableDebtDai.interface.parseLog(rawMintEvents[0]);
+    const parsedMintEvents = getVariableDebtTokenEvent(variableDebtDai, repayReceipt, 'Mint');
+    expect(parsedMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
+    const parsedMintEvent = parsedMintEvents[0];
 
     // check transfer event
     expect(parsedTransferEvent.args.from).to.equal(ZERO_ADDRESS);
@@ -514,13 +510,13 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event
-    expect(parsedMintEvent.args.caller).to.equal(borrower.address);
-    expect(parsedMintEvent.args.onBehalfOf).to.equal(borrower.address);
-    expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
-    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(totalMinted.add(smallRepay), 2);
+    expect(parsedMintEvent.caller).to.equal(borrower.address);
+    expect(parsedMintEvent.onBehalfOf).to.equal(borrower.address);
+    expect(parsedMintEvent.value).to.be.closeTo(totalMinted, 2);
+    expect(parsedMintEvent.balanceIncrease).to.be.closeTo(totalMinted.add(smallRepay), 2);
   });
 
-  it('User 1 - withdraw amount less than accrued interest', async () => {
+  it('User 1 withdraws amount less than accrued interest', async () => {
     const {
       dai,
       aDai,
@@ -549,11 +545,9 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     const parsedTransferEvent = aDai.interface.parseLog(rawTransferEvents[0]);
 
     // get mint event
-    const rawMintEvents = withdrawReceipt.logs.filter(
-      (log) => log.topics[0] === aTokenMintEventSignature
-    );
-    expect(rawMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
-    const parsedMintEvent = aDai.interface.parseLog(rawMintEvents[0]);
+    const parsedMintEvents = getATokenEvent(aDai, withdrawReceipt, 'Mint');
+    expect(parsedMintEvents.length).to.equal(1, 'Incorrect number of Mint Events');
+    const parsedMintEvent = parsedMintEvents[0];
 
     // check transfer event
     expect(parsedTransferEvent.args.from).to.equal(ZERO_ADDRESS);
@@ -561,10 +555,10 @@ makeSuite('AToken Mint and Burn Event Accounting', (testEnv) => {
     expect(parsedTransferEvent.args.value).to.be.closeTo(totalMinted, 2);
 
     // check mint event
-    expect(parsedMintEvent.args.caller).to.equal(depositor.address);
-    expect(parsedMintEvent.args.onBehalfOf).to.equal(depositor.address);
-    expect(parsedMintEvent.args.value).to.be.closeTo(totalMinted, 2);
-    expect(parsedMintEvent.args.balanceIncrease).to.be.closeTo(totalMinted.add(smallWithdrawal), 2);
-    expect(parsedMintEvent.args.index).to.equal(daiReserveData.liquidityIndex);
+    expect(parsedMintEvent.caller).to.equal(depositor.address);
+    expect(parsedMintEvent.onBehalfOf).to.equal(depositor.address);
+    expect(parsedMintEvent.value).to.be.closeTo(totalMinted, 2);
+    expect(parsedMintEvent.balanceIncrease).to.be.closeTo(totalMinted.add(smallWithdrawal), 2);
+    expect(parsedMintEvent.index).to.equal(daiReserveData.liquidityIndex);
   });
 });

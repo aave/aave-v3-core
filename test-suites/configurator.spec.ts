@@ -1075,4 +1075,29 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const { helpersContract } = testEnv;
     expect(await helpersContract.getDebtCeilingDecimals()).to.be.eq(2);
   });
+
+  it('Check that the reserves have flashloans enabled', async () => {
+    const { weth, aave, usdc, dai, helpersContract } = testEnv;
+
+    const wethFlashLoanEnabled = await helpersContract.getFlashLoanEnabled(weth.address);
+    expect(wethFlashLoanEnabled).to.be.equal(true);
+
+    const aaveFlashLoanEnabled = await helpersContract.getFlashLoanEnabled(aave.address);
+    expect(aaveFlashLoanEnabled).to.be.equal(true);
+
+    const usdcFlashLoanEnabled = await helpersContract.getFlashLoanEnabled(usdc.address);
+    expect(usdcFlashLoanEnabled).to.be.equal(true);
+
+    const daiFlashLoanEnabled = await helpersContract.getFlashLoanEnabled(dai.address);
+    expect(daiFlashLoanEnabled).to.be.equal(true);
+  });
+
+  it('Disable weth flashloans', async () => {
+    const { weth, configurator, helpersContract } = testEnv;
+
+    expect(await configurator.setReserveFlashLoaning(weth.address, false));
+
+    const wethFlashLoanEnabled = await helpersContract.getFlashLoanEnabled(weth.address);
+    expect(wethFlashLoanEnabled).to.be.equal(false);
+  });
 });

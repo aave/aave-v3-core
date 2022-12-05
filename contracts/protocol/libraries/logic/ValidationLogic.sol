@@ -54,10 +54,11 @@ library ValidationLogic {
    * @param reserveCache The cached data of the reserve
    * @param amount The amount to be supplied
    */
-  function validateSupply(DataTypes.ReserveCache memory reserveCache, uint256 amount)
-    internal
-    view
-  {
+  function validateSupply(
+    DataTypes.ReserveCache memory reserveCache,
+    DataTypes.ReserveData storage reserve,
+    uint256 amount
+  ) internal view {
     require(amount != 0, Errors.INVALID_AMOUNT);
 
     (bool isActive, bool isFrozen, , , bool isPaused) = reserveCache
@@ -70,9 +71,8 @@ library ValidationLogic {
     uint256 supplyCap = reserveCache.reserveConfiguration.getSupplyCap();
     require(
       supplyCap == 0 ||
-        (IAToken(reserveCache.aTokenAddress).scaledTotalSupply().rayMul(
-          reserveCache.nextLiquidityIndex
-        ) + amount) <=
+        ((IAToken(reserveCache.aTokenAddress).scaledTotalSupply() +
+          uint256(reserve.accruedToTreasury)).rayMul(reserveCache.nextLiquidityIndex) + amount) <=
         supplyCap * (10**reserveCache.reserveConfiguration.getDecimals()),
       Errors.SUPPLY_CAP_EXCEEDED
     );
@@ -327,20 +327,6 @@ library ValidationLogic {
     require(isActive, Errors.RESERVE_INACTIVE);
     require(!isPaused, Errors.RESERVE_PAUSED);
 
-    uint256 variableDebtPreviousIndex = IScaledBalanceToken(reserveCache.variableDebtTokenAddress)
-      .getPreviousIndex(onBehalfOf);
-
-    uint40 stableRatePreviousTimestamp = IStableDebtToken(reserveCache.stableDebtTokenAddress)
-      .getUserLastUpdated(onBehalfOf);
-
-    require(
-      (stableRatePreviousTimestamp < uint40(block.timestamp) &&
-        interestRateMode == DataTypes.InterestRateMode.STABLE) ||
-        (variableDebtPreviousIndex < reserveCache.nextVariableBorrowIndex &&
-          interestRateMode == DataTypes.InterestRateMode.VARIABLE),
-      Errors.SAME_BLOCK_BORROW_REPAY
-    );
-
     require(
       (stableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.STABLE) ||
         (variableDebt != 0 && interestRateMode == DataTypes.InterestRateMode.VARIABLE),
@@ -468,10 +454,7 @@ library ValidationLogic {
   ) internal view {
     require(assets.length == amounts.length, Errors.INCONSISTENT_FLASHLOAN_PARAMS);
     for (uint256 i = 0; i < assets.length; i++) {
-      DataTypes.ReserveConfigurationMap memory configuration = reservesData[assets[i]]
-        .configuration;
-      require(!configuration.getPaused(), Errors.RESERVE_PAUSED);
-      require(configuration.getActive(), Errors.RESERVE_INACTIVE);
+      validateFlashloanSimple(reservesData[assets[i]]);
     }
   }
 
@@ -483,6 +466,7 @@ library ValidationLogic {
     DataTypes.ReserveConfigurationMap memory configuration = reserve.configuration;
     require(!configuration.getPaused(), Errors.RESERVE_PAUSED);
     require(configuration.getActive(), Errors.RESERVE_INACTIVE);
+    require(configuration.getFlashLoanEnabled(), Errors.FLASHLOAN_DISABLED);
   }
 
   struct ValidateLiquidationCallLocalVars {
@@ -650,7 +634,10 @@ library ValidationLogic {
       IERC20(reserve.variableDebtTokenAddress).totalSupply() == 0,
       Errors.VARIABLE_DEBT_SUPPLY_NOT_ZERO
     );
-    require(IERC20(reserve.aTokenAddress).totalSupply() == 0, Errors.ATOKEN_SUPPLY_NOT_ZERO);
+    require(
+      IERC20(reserve.aTokenAddress).totalSupply() == 0 && reserve.accruedToTreasury == 0,
+      Errors.UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO
+    );
   }
 
   /**

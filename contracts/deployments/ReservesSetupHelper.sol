@@ -21,6 +21,7 @@ contract ReservesSetupHelper is Ownable {
     uint256 supplyCap;
     bool stableBorrowingEnabled;
     bool borrowingEnabled;
+    bool flashLoanEnabled;
   }
 
   /**
@@ -50,6 +51,7 @@ contract ReservesSetupHelper is Ownable {
           inputParams[i].stableBorrowingEnabled
         );
       }
+      configurator.setReserveFlashLoaning(inputParams[i].asset, inputParams[i].flashLoanEnabled);
       configurator.setSupplyCap(inputParams[i].asset, inputParams[i].supplyCap);
       configurator.setReserveFactor(inputParams[i].asset, inputParams[i].reserveFactor);
     }

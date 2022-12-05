@@ -192,6 +192,19 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
+  function setReserveFlashLoaning(address asset, bool enabled)
+    external
+    override
+    onlyRiskOrPoolAdmins
+  {
+    DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
+
+    currentConfig.setFlashLoanEnabled(enabled);
+    _pool.setConfiguration(asset, currentConfig);
+    emit ReserveFlashLoaning(asset, enabled);
+  }
+
+  /// @inheritdoc IPoolConfigurator
   function setReserveActive(address asset, bool active) external override onlyPoolAdmin {
     if (!active) _checkNoSuppliers(asset);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
@@ -480,9 +493,11 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   function _checkNoSuppliers(address asset) internal view {
-    uint256 totalATokens = IPoolDataProvider(_addressesProvider.getPoolDataProvider())
-      .getATokenTotalSupply(asset);
-    require(totalATokens == 0, Errors.RESERVE_LIQUIDITY_NOT_ZERO);
+    (, uint256 accruedToTreasury, uint256 totalATokens, , , , , , , , , ) = IPoolDataProvider(
+      _addressesProvider.getPoolDataProvider()
+    ).getReserveData(asset);
+
+    require(totalATokens == 0 && accruedToTreasury == 0, Errors.RESERVE_LIQUIDITY_NOT_ZERO);
   }
 
   function _checkNoBorrowers(address asset) internal view {
