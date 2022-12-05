@@ -219,7 +219,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
   it('Liquidate the whole WETH collateral with 10% liquidation fee, asset should not be set as collateralized anymore', async () => {
     const { pool, users, dai, usdc, weth, aWETH, oracle, configurator } = testEnv;
 
-    configurator.setLiquidationProtocolFee(weth.address, "1000"); // 10%
+    await configurator.setLiquidationProtocolFee(weth.address, '1000'); // 10%
 
     const depositor = users[0];
     const borrower = users[1];
@@ -241,7 +241,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
     // Deposit usdc
     await usdc
       .connect(depositor.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000'));
+      ['mint(uint256)'](await convertToCurrencyDecimals(usdc.address, '1000000'));
     await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
@@ -305,10 +305,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
     // $USDC_debt = 1000 * 0.005 = 5
 
     const wethData = await pool.getReserveData(weth.address);
-    const aWETHToken = AToken__factory.connect(
-      wethData.aTokenAddress,
-      depositor.signer
-    );
+    const aWETHToken = AToken__factory.connect(wethData.aTokenAddress, depositor.signer);
 
     expect(await aWETHToken.balanceOf(borrower.address)).to.be.gt(0);
 
@@ -316,6 +313,7 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
       (await pool.getUserConfiguration(borrower.address)).data
     );
 
+    expect(await usdc.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT));
     expect(
       await pool
         .connect(depositor.signer)
