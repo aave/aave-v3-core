@@ -216,18 +216,20 @@ export const transfer = async (
     addedScaledBalance,
     indexAfter,
   ]);
-  matchEvent(rcpt, 'Transfer', aToken, aToken.address, [
-    ZERO_ADDRESS,
-    user.address,
-    fromBalanceIncrease,
-  ]);
-  matchEvent(rcpt, 'Mint', aToken, aToken.address, [
-    user.address,
-    user.address,
-    fromBalanceIncrease,
-    fromBalanceIncrease,
-    indexAfter,
-  ]);
+  if (fromBalanceIncrease.gt(0)) {
+    matchEvent(rcpt, 'Transfer', aToken, aToken.address, [
+      ZERO_ADDRESS,
+      user.address,
+      fromBalanceIncrease,
+    ]);
+    matchEvent(rcpt, 'Mint', aToken, aToken.address, [
+      user.address,
+      user.address,
+      fromBalanceIncrease,
+      fromBalanceIncrease,
+      indexAfter,
+    ]);
+  }
   if (toBalanceIncrease.gt(0)) {
     matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, to, toBalanceIncrease]);
     matchEvent(rcpt, 'Mint', aToken, aToken.address, [
@@ -277,14 +279,20 @@ export const transferFrom = async (
     addedScaledBalance,
     indexAfter,
   ]);
-  matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, origin, fromBalanceIncrease]);
-  matchEvent(rcpt, 'Mint', aToken, aToken.address, [
-    user.address,
-    origin,
-    fromBalanceIncrease,
-    fromBalanceIncrease,
-    indexAfter,
-  ]);
+  if (fromBalanceIncrease.gt(0)) {
+    matchEvent(rcpt, 'Transfer', aToken, aToken.address, [
+      ZERO_ADDRESS,
+      origin,
+      fromBalanceIncrease,
+    ]);
+    matchEvent(rcpt, 'Mint', aToken, aToken.address, [
+      user.address,
+      origin,
+      fromBalanceIncrease,
+      fromBalanceIncrease,
+      indexAfter,
+    ]);
+  }
   if (toBalanceIncrease.gt(0)) {
     matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, to, toBalanceIncrease]);
     matchEvent(rcpt, 'Mint', aToken, aToken.address, [
