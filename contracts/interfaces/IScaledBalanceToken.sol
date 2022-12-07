@@ -10,9 +10,9 @@ interface IScaledBalanceToken {
   /**
    * @dev Emitted after the mint action
    * @param caller The address performing the mint
-   * @param onBehalfOf The address of the user that will receive the minted scaled balance tokens
-   * @param value The scaled amount being minted (based on user entered amount and balance increase from interest)
-   * @param balanceIncrease The increase in scaled balance since the last action of 'onBehalfOf'
+   * @param onBehalfOf The address of the user that will receive the minted tokens
+   * @param value The scaled-up amount being minted (based on user entered amount and balance increase from interest)
+   * @param balanceIncrease The increase in scaled-up balance since the last action of 'onBehalfOf'
    * @param index The next liquidity index of the reserve
    **/
   event Mint(
@@ -24,12 +24,12 @@ interface IScaledBalanceToken {
   );
 
   /**
-   * @dev Emitted after scaled balance tokens are burned
+   * @dev Emitted after the burn action
    * @dev If the burn function does not involve a transfer of the underlying asset, the target defaults to zero address
-   * @param from The address from which the scaled tokens will be burned
+   * @param from The address from which the tokens will be burned
    * @param target The address that will receive the underlying, if any
-   * @param value The scaled amount being burned (user entered amount - balance increase from interest)
-   * @param balanceIncrease The increase in scaled balance since the last action of 'from'
+   * @param value The scaled-up amount being burned (user entered amount - balance increase from interest)
+   * @param balanceIncrease The increase in scaled-up balance since the last action of 'from'
    * @param index The next liquidity index of the reserve
    **/
   event Burn(
