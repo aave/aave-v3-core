@@ -30,8 +30,8 @@
     "prepublish": "npm run compile"
   },
   "devDependencies": {
-    "@aave/deploy-v3": "1.50.0-beta.2",
-    "@aave/periphery-v3": "^1.21.0",
+    "@aave/deploy-v3": "1.51.0",
+    "@aave/periphery-v3": "1.21.4",
     "@ethersproject/bignumber": "^5.6.2",
     "@nomicfoundation/hardhat-chai-matchers": "1.0.5",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
