@@ -202,8 +202,11 @@ export const transfer = async (
 
   const indexAfter = await pool.getReserveNormalizedIncome(underlying);
   const addedScaledBalance = amount.rayDiv(indexAfter);
-  const fromScaledBalance = (await aToken.scaledBalanceOf(user.address)).add(addedScaledBalance);
-  const toScaledBalance = (await aToken.scaledBalanceOf(to)).sub(addedScaledBalance);
+
+  // The amount of scaled balance transferred is 0 if self-transfer
+  const deltaScaledBalance = user.address == to ? BigNumber.from(0) : addedScaledBalance;
+  const fromScaledBalance = (await aToken.scaledBalanceOf(user.address)).add(deltaScaledBalance);
+  const toScaledBalance = (await aToken.scaledBalanceOf(to)).sub(deltaScaledBalance);
   const fromBalanceIncrease = getBalanceIncrease(fromScaledBalance, fromPreviousIndex, indexAfter);
   const toBalanceIncrease = getBalanceIncrease(toScaledBalance, toPreviousIndex, indexAfter);
 
@@ -230,7 +233,7 @@ export const transfer = async (
       indexAfter,
     ]);
   }
-  if (toBalanceIncrease.gt(0)) {
+  if (user.address != to && toBalanceIncrease.gt(0)) {
     matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, to, toBalanceIncrease]);
     matchEvent(rcpt, 'Mint', aToken, aToken.address, [
       user.address,
@@ -265,8 +268,11 @@ export const transferFrom = async (
 
   const indexAfter = await pool.getReserveNormalizedIncome(underlying);
   const addedScaledBalance = amount.rayDiv(indexAfter);
-  const fromScaledBalance = (await aToken.scaledBalanceOf(origin)).add(addedScaledBalance);
-  const toScaledBalance = (await aToken.scaledBalanceOf(to)).sub(addedScaledBalance);
+
+  // The amount of scaled balance transferred is 0 if self-transfer
+  const deltaScaledBalance = origin == to ? BigNumber.from(0) : addedScaledBalance;
+  const fromScaledBalance = (await aToken.scaledBalanceOf(origin)).add(deltaScaledBalance);
+  const toScaledBalance = (await aToken.scaledBalanceOf(to)).sub(deltaScaledBalance);
   const fromBalanceIncrease = getBalanceIncrease(fromScaledBalance, fromPreviousIndex, indexAfter);
   const toBalanceIncrease = getBalanceIncrease(toScaledBalance, toPreviousIndex, indexAfter);
 
@@ -293,7 +299,7 @@ export const transferFrom = async (
       indexAfter,
     ]);
   }
-  if (toBalanceIncrease.gt(0)) {
+  if (origin != to && toBalanceIncrease.gt(0)) {
     matchEvent(rcpt, 'Transfer', aToken, aToken.address, [ZERO_ADDRESS, to, toBalanceIncrease]);
     matchEvent(rcpt, 'Mint', aToken, aToken.address, [
       user.address,
