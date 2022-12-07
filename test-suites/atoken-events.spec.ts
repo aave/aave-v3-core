@@ -20,6 +20,7 @@ import {
   withdraw,
   getATokenEvent,
   transferFrom,
+  printATokenEvents,
 } from './helpers/utils/tokenization-events';
 
 const DEBUG = false;
@@ -379,6 +380,111 @@ makeSuite('AToken: Events', (testEnv: TestEnv) => {
     }
 
     log('- Alice withdraws 200 DAI to Bob');
+    rcpt = await withdraw(pool, alice, dai.address, '200', bob.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+
+    if (DEBUG) {
+      await printBalance('alice', aDai, alice.address);
+      await printBalance('bob', aDai, bob.address);
+    }
+
+    // Check final balances
+    rcpt = await supply(pool, alice, dai.address, '1', alice.address, false);
+    updateBalances(balances, aDai, rcpt);
+    const aliceBalanceAfter = await aDai.balanceOf(alice.address);
+
+    rcpt = await supply(pool, bob, dai.address, '1', bob.address, false);
+    updateBalances(balances, aDai, rcpt);
+    const bobBalanceAfter = await aDai.balanceOf(bob.address);
+
+    expect(aliceBalanceAfter).to.be.closeTo(
+      aliceBalanceBefore.add(balances.balance[alice.address]),
+      2
+    );
+    expect(bobBalanceAfter).to.be.closeTo(bobBalanceBefore.add(balances.balance[bob.address]), 2);
+  };
+
+  it('Alice supplies 1000, transfers 100 to Bob, transfers 500 to itself, Bob transfers 500 from Alice to itself, withdraws 400 to Bob (without index change)', async () => {
+    await testMultipleTransfersAndWithdrawals(false);
+  });
+
+  it('Alice supplies 1000, transfers 100 to Bob, transfers 500 to itself, Bob transfers 500 from Alice to itself, withdraws 400 to Bob  (with index change)', async () => {
+    await testMultipleTransfersAndWithdrawals(true);
+  });
+
+  const testMultipleTransfersAndWithdrawals = async (indexChange: boolean) => {
+    const { pool, dai, aDai, weth } = testEnv;
+
+    let rcpt;
+    let balanceTransferEv;
+    let aliceBalanceBefore = await aDai.balanceOf(alice.address);
+    let bobBalanceBefore = await aDai.balanceOf(bob.address);
+
+    log('- Alice supplies 1000 DAI');
+    rcpt = await supply(pool, alice, dai.address, '1000', alice.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+
+    if (indexChange) {
+      log('- Increase index due to great borrow of DAI');
+      await increaseSupplyIndex(pool, borrower, weth.address, dai.address);
+    }
+
+    log('- Alice transfers 100 DAI to Bob');
+    let [fromScaledBefore, toScaledBefore] = await Promise.all([
+      aDai.scaledBalanceOf(alice.address),
+      aDai.scaledBalanceOf(bob.address),
+    ]);
+    rcpt = await transfer(pool, alice, dai.address, '100', bob.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+    balanceTransferEv = getATokenEvent(aDai, rcpt, 'BalanceTransfer')[0];
+    expect(await aDai.scaledBalanceOf(alice.address)).to.be.eq(
+      fromScaledBefore.sub(balanceTransferEv.value),
+      'Scaled balance emitted in BalanceTransfer event does not match'
+    );
+    expect(await aDai.scaledBalanceOf(bob.address)).to.be.eq(
+      toScaledBefore.add(balanceTransferEv.value),
+      'Scaled balance emitted in BalanceTransfer event does not match'
+    );
+
+    if (indexChange) {
+      log('- Increase index due to great borrow of DAI');
+      await increaseSupplyIndex(pool, borrower, weth.address, dai.address);
+    }
+
+    log('- Alice transfers 500 DAI to itself');
+    fromScaledBefore = await aDai.scaledBalanceOf(alice.address);
+    rcpt = await transfer(pool, alice, dai.address, '500', alice.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+    expect(await aDai.scaledBalanceOf(alice.address)).to.be.eq(
+      fromScaledBefore,
+      'Scaled balance should remain the same'
+    );
+
+    if (indexChange) {
+      log('- Increase index due to great borrow of DAI');
+      await increaseSupplyIndex(pool, borrower, weth.address, dai.address);
+    }
+
+    log('- Bob transfersFrom Alice 500 DAI to Alice');
+    fromScaledBefore = await aDai.scaledBalanceOf(alice.address);
+    expect(
+      await aDai
+        .connect(alice.signer)
+        .approve(bob.address, await convertToCurrencyDecimals(dai.address, '500'))
+    );
+    rcpt = await transferFrom(pool, bob, alice.address, dai.address, '500', alice.address, DEBUG);
+    updateBalances(balances, aDai, rcpt);
+    expect(await aDai.scaledBalanceOf(alice.address)).to.be.eq(
+      fromScaledBefore,
+      'Scaled balance should remain the same'
+    );
+
+    if (indexChange) {
+      log('- Increase index due to great borrow of DAI');
+      await increaseSupplyIndex(pool, borrower, weth.address, dai.address);
+    }
+
+    log('- Alice withdraws 400 DAI to Bob');
     rcpt = await withdraw(pool, alice, dai.address, '200', bob.address, DEBUG);
     updateBalances(balances, aDai, rcpt);
 
