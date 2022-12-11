@@ -15,6 +15,11 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
   uint256 internal immutable _stableRateSlope1;
   uint256 internal immutable _stableRateSlope2;
 
+  // Not used, only defined for interface compatibility
+  uint256 public constant MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO = 0;
+  uint256 public constant MAX_EXCESS_USAGE_RATIO = 0;
+  uint256 public constant OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = 0;
+
   uint256 internal _liquidityRate;
   uint256 internal _stableBorrowRate;
   uint256 internal _variableBorrowRate;
@@ -84,5 +89,15 @@ contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
 
   function getMaxVariableBorrowRate() external view override returns (uint256) {
     return _baseVariableBorrowRate + _variableRateSlope1 + _variableRateSlope2;
+  }
+
+  // Not used, only defined for interface compatibility
+  function getBaseStableBorrowRate() external pure override returns (uint256) {
+    return 0;
+  }
+
+  // Not used, only defined for interface compatibility
+  function getStableRateExcessOffset() external pure override returns (uint256) {
+    return 0;
   }
 }
