@@ -548,7 +548,7 @@ library ReserveConfiguration {
   }
 
   /**
-   * @notice Sets the flashloanble flag for the reserve
+   * @notice Sets the flashloanable flag for the reserve
    * @param self The reserve configuration
    * @param flashLoanEnabled True if the asset is flashloanable, false otherwise
    */
