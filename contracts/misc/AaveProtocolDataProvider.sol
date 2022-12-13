@@ -57,7 +57,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
     }
     return reservesTokens;
   }
-  
+
   /// @inheritdoc IPoolDataProvider
   function getAllATokens() external view override returns (TokenData[] memory) {
     IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
@@ -286,5 +286,5 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
       .getConfiguration(asset);
 
     return configuration.getFlashLoanEnabled();
-   }
+  }
 }

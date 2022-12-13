@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {WadRayMath} from '../../protocol/libraries/math/WadRayMath.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
-import {IDefaultInterestRateStrategy} from "../../interfaces/IDefaultInterestRateStrategy.sol";
+import {IDefaultInterestRateStrategy} from '../../interfaces/IDefaultInterestRateStrategy.sol';
 
 contract MockReserveInterestRateStrategy is IDefaultInterestRateStrategy {
   uint256 public immutable OPTIMAL_USAGE_RATIO;
