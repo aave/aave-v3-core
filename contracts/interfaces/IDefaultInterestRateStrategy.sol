@@ -78,7 +78,7 @@ interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
 
   /**
    * @notice Returns the base stable borrow rate
-   * @return The base stable borrow rate
+   * @return The base stable borrow rate, expressed in ray
    */
   function getBaseStableBorrowRate() external view returns (uint256);
 
