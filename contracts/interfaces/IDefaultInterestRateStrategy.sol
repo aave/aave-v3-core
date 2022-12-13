@@ -37,8 +37,8 @@ interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
   function MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO() external view returns (uint256);
 
   /**
-   * @notice Returns the address for the PoolAddressesProvider contract.
-   * @return The PoolAddressesProvider contract address.
+   * @notice Returns the address of the PoolAddressesProvider
+   * @return The address of the PoolAddressesProvider contract
    */
   function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
 
