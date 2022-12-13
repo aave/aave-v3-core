@@ -51,7 +51,7 @@ interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
   /**
    * @notice Returns the variable rate slope above optimal usage ratio
    * @dev Its the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
-   * @return The variable rate slope
+   * @return The variable rate slope, expressed in ray
    */
   function getVariableRateSlope2() external view returns (uint256);
 
