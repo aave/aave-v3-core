@@ -29,7 +29,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   /**
-   * @notice Constructor
+   * @notice Constructor.
    * @param addressesProvider address for the PoolAddressesProvider contract.
    */
   constructor(IPoolAddressesProvider addressesProvider) {
