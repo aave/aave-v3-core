@@ -15,7 +15,8 @@
       "files": "*.sol",
       "options": {
         "semi": true,
-        "printWidth": 100
+        "printWidth": 100,
+        "visibility": false
       }
     }
   ]
