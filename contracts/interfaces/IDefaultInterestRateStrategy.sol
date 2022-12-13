@@ -58,7 +58,7 @@ interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
   /**
    * @notice Returns the stable rate slope below optimal usage ratio
    * @dev Its the stable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
-   * @return The stable rate slope
+   * @return The stable rate slope, expressed in ray
    */
   function getStableRateSlope1() external view returns (uint256);
 
