@@ -11,7 +11,7 @@ import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
  */
 interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
   /**
-   * @notice This constant represents the usage ratio at which the pool aims to obtain most competitive borrow rates.
+   * @notice Returns the usage ratio at which the pool aims to obtain most competitive borrow rates.
    * @return The optimal usage ratio, expressed in ray.
    */
   function OPTIMAL_USAGE_RATIO() external view returns (uint256);
