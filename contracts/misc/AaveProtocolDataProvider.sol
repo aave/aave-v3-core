@@ -27,12 +27,16 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
+  /**
+   * @notice Constructor
+   * @param addressesProvider address for the PoolAddressesProvider contract.
+   */
   constructor(IPoolAddressesProvider addressesProvider) {
     ADDRESSES_PROVIDER = addressesProvider;
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getAllReservesTokens() external view returns (TokenData[] memory) {
+  function getAllReservesTokens() external view override returns (TokenData[] memory) {
     IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
     TokenData[] memory reservesTokens = new TokenData[](reserves.length);
@@ -54,7 +58,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
   
   /// @inheritdoc IPoolDataProvider
-  function getAllATokens() external view returns (TokenData[] memory) {
+  function getAllATokens() external view override returns (TokenData[] memory) {
     IPool pool = IPool(ADDRESSES_PROVIDER.getPool());
     address[] memory reserves = pool.getReservesList();
     TokenData[] memory aTokens = new TokenData[](reserves.length);
@@ -72,6 +76,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   function getReserveConfigurationData(address asset)
     external
     view
+    override
     returns (
       uint256 decimals,
       uint256 ltv,
@@ -97,7 +102,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getReserveEModeCategory(address asset) external view returns (uint256) {
+  function getReserveEModeCategory(address asset) external view override returns (uint256) {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset);
     return configuration.getEModeCategory();
@@ -107,38 +112,39 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   function getReserveCaps(address asset)
     external
     view
+    override
     returns (uint256 borrowCap, uint256 supplyCap)
   {
     (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getCaps();
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getPaused(address asset) external view returns (bool isPaused) {
+  function getPaused(address asset) external view override returns (bool isPaused) {
     (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getFlags();
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getSiloedBorrowing(address asset) external view returns (bool) {
+  function getSiloedBorrowing(address asset) external view override returns (bool) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getSiloedBorrowing();
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getLiquidationProtocolFee(address asset) external view returns (uint256) {
+  function getLiquidationProtocolFee(address asset) external view override returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFee();
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getUnbackedMintCap(address asset) external view returns (uint256) {
+  function getUnbackedMintCap(address asset) external view override returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getUnbackedMintCap();
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getDebtCeiling(address asset) external view returns (uint256) {
+  function getDebtCeiling(address asset) external view override returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getDebtCeiling();
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getDebtCeilingDecimals() external pure returns (uint256) {
+  function getDebtCeilingDecimals() external pure override returns (uint256) {
     return ReserveConfiguration.DEBT_CEILING_DECIMALS;
   }
 
@@ -204,6 +210,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   function getUserReserveData(address asset, address user)
     external
     view
+    override
     returns (
       uint256 currentATokenBalance,
       uint256 currentStableDebt,
@@ -240,6 +247,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   function getReserveTokensAddresses(address asset)
     external
     view
+    override
     returns (
       address aTokenAddress,
       address stableDebtTokenAddress,
@@ -261,6 +269,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   function getInterestRateStrategyAddress(address asset)
     external
     view
+    override
     returns (address irStrategyAddress)
   {
     DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
@@ -271,7 +280,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getFlashLoanEnabled(address asset) external view returns (bool) {
+  function getFlashLoanEnabled(address asset) external view override returns (bool) {
     DataTypes.ReserveConfigurationMap memory configuration = IPool(ADDRESSES_PROVIDER.getPool())
       .getConfiguration(asset);
 

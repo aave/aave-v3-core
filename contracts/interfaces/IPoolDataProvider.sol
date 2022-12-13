@@ -1,11 +1,19 @@
 // SPDX-License-Identifier: AGPL-3.0
 pragma solidity ^0.8.0;
 
+import { IPoolAddressesProvider } from './IPoolAddressesProvider.sol';
+
 interface IPoolDataProvider {
   struct TokenData {
     string symbol;
     address tokenAddress;
   }
+
+  /**
+   * @notice Returns the address for the PoolAddressesProvider contract.
+   * @return The address for the PoolAddressesProvider contract
+   */
+  function ADDRESSES_PROVIDER() external view returns (IPoolAddressesProvider);
 
   /**
    * @notice Returns the list of the existing reserves in the pool.
