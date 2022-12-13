@@ -7,7 +7,7 @@ import {IPoolAddressesProvider} from './IPoolAddressesProvider.sol';
 /**
  * @title IDefaultInterestRateStrategy
  * @author Aave
- * @notice Default Interface for the calculation of the interest rates
+ * @notice Defines the basic interface of the DefaultReserveInterestRateStrategy
  */
 interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
   /**
