@@ -44,35 +44,35 @@ interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
 
   /**
    * @notice Returns the variable rate slope below optimal usage ratio
-   * @dev It is the variable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
+   * @dev It's the variable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
    * @return The variable rate slope, expressed in ray
    */
   function getVariableRateSlope1() external view returns (uint256);
 
   /**
    * @notice Returns the variable rate slope above optimal usage ratio
-   * @dev It is the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
+   * @dev It's the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
    * @return The variable rate slope, expressed in ray
    */
   function getVariableRateSlope2() external view returns (uint256);
 
   /**
    * @notice Returns the stable rate slope below optimal usage ratio
-   * @dev It is the stable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
+   * @dev It's the stable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
    * @return The stable rate slope, expressed in ray
    */
   function getStableRateSlope1() external view returns (uint256);
 
   /**
    * @notice Returns the stable rate slope above optimal usage ratio
-   * @dev It is the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
+   * @dev It's the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
    * @return The stable rate slope, expressed in ray
    */
   function getStableRateSlope2() external view returns (uint256);
 
   /**
    * @notice Returns the stable rate excess offset
-   * @dev It is an additional premium applied to the stable when stable debt > OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO
+   * @dev It's an additional premium applied to the stable when stable debt > OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO
    * @return The stable rate excess offset, expressed in ray
    */
   function getStableRateExcessOffset() external view returns (uint256);
