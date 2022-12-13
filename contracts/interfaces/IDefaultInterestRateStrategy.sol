@@ -17,7 +17,7 @@ interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
   function OPTIMAL_USAGE_RATIO() external view returns (uint256);
 
   /**
-   * @notice This constant represents the optimal stable debt to total debt ratio of the reserve.
+   * @notice Returns the optimal stable to total debt ratio of the reserve.
    * @return The optimal stable to total debt ratio, expressed in ray.
    */
   function OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO() external view returns (uint256);
