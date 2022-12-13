@@ -7,7 +7,7 @@ import {IERC20} from '../dependencies/openzeppelin/contracts/IERC20.sol';
  * @title IERC20WithPermit
  * @author Aave
  * @notice Interface for the permit function (EIP-2612)
- **/
+ */
 interface IERC20WithPermit is IERC20 {
   /**
    * @notice Allow passing a signed message to approve spending

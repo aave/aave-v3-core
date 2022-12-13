@@ -17,7 +17,7 @@ import {Errors} from '../libraries/helpers/Errors.sol';
  * point of usage and another from that one to 100%.
  * - An instance of this same contract, can't be used across different Aave markets, due to the caching
  *   of the PoolAddressesProvider
- **/
+ */
 contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -25,7 +25,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   /**
    * @dev This constant represents the usage ratio at which the pool aims to obtain most competitive borrow rates.
    * Expressed in ray
-   **/
+   */
   uint256 public immutable OPTIMAL_USAGE_RATIO;
 
   /**
@@ -38,14 +38,14 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * @dev This constant represents the excess usage ratio above the optimal. It's always equal to
    * 1-optimal usage ratio. Added as a constant here for gas optimizations.
    * Expressed in ray
-   **/
+   */
   uint256 public immutable MAX_EXCESS_USAGE_RATIO;
 
   /**
    * @dev This constant represents the excess stable debt ratio above the optimal. It's always equal to
    * 1-optimal stable to total debt ratio. Added as a constant here for gas optimizations.
    * Expressed in ray
-   **/
+   */
   uint256 public immutable MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO;
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
@@ -119,7 +119,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * @notice Returns the variable rate slope below optimal usage ratio
    * @dev Its the variable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
    * @return The variable rate slope
-   **/
+   */
   function getVariableRateSlope1() external view returns (uint256) {
     return _variableRateSlope1;
   }
@@ -128,7 +128,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * @notice Returns the variable rate slope above optimal usage ratio
    * @dev Its the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
    * @return The variable rate slope
-   **/
+   */
   function getVariableRateSlope2() external view returns (uint256) {
     return _variableRateSlope2;
   }
@@ -137,7 +137,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * @notice Returns the stable rate slope below optimal usage ratio
    * @dev Its the stable rate when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
    * @return The stable rate slope
-   **/
+   */
   function getStableRateSlope1() external view returns (uint256) {
     return _stableRateSlope1;
   }
@@ -146,7 +146,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * @notice Returns the stable rate slope above optimal usage ratio
    * @dev Its the variable rate when usage ratio > OPTIMAL_USAGE_RATIO
    * @return The stable rate slope
-   **/
+   */
   function getStableRateSlope2() external view returns (uint256) {
     return _stableRateSlope2;
   }
@@ -163,7 +163,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
   /**
    * @notice Returns the base stable borrow rate
    * @return The base stable borrow rate
-   **/
+   */
   function getBaseStableBorrowRate() public view returns (uint256) {
     return _variableRateSlope1 + _baseStableRateOffset;
   }
@@ -275,7 +275,7 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
    * @param currentVariableBorrowRate The current variable borrow rate of the reserve
    * @param currentAverageStableBorrowRate The current weighted average of all the stable rate loans
    * @return The weighted averaged borrow rate
-   **/
+   */
   function _getOverallBorrowRate(
     uint256 totalStableDebt,
     uint256 totalVariableDebt,

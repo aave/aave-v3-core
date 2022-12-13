@@ -9,7 +9,7 @@ import {IPool} from '../../interfaces/IPool.sol';
  * @author Aave
  * @notice Defines the basic interface of a flashloan-receiver contract.
  * @dev Implement this interface to develop a flashloan-compatible flashLoanReceiver contract
- **/
+ */
 interface IFlashLoanReceiver {
   /**
    * @notice Executes an operation after receiving the flash-borrowed assets

@@ -82,7 +82,7 @@ abstract contract DebtTokenBase is
    * @param delegator The address delegating the borrowing power
    * @param delegatee The address receiving the delegated borrowing power
    * @param amount The allowance amount being delegated.
-   **/
+   */
   function _approveDelegation(
     address delegator,
     address delegatee,
@@ -97,7 +97,7 @@ abstract contract DebtTokenBase is
    * @param delegator The address delegating the borrowing power
    * @param delegatee The address receiving the delegated borrowing power
    * @param amount The amount to subtract from the current allowance
-   **/
+   */
   function _decreaseBorrowAllowance(
     address delegator,
     address delegatee,

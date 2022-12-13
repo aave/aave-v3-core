@@ -15,7 +15,7 @@ library Helpers {
    * @param reserveCache The reserve cache data object
    * @return The stable debt balance
    * @return The variable debt balance
-   **/
+   */
   function getUserCurrentDebt(address user, DataTypes.ReserveCache memory reserveCache)
     internal
     view

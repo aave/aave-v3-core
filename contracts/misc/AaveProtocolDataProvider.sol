@@ -94,7 +94,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @return stableBorrowRateEnabled True if stable rate borrowing is enabled, false otherwise
    * @return isActive True if it is active, false otherwise
    * @return isFrozen True if it is frozen, false otherwise
-   **/
+   */
   function getReserveConfigurationData(address asset)
     external
     view
@@ -138,7 +138,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @param asset The address of the underlying asset of the reserve
    * @return borrowCap The borrow cap of the reserve
    * @return supplyCap The supply cap of the reserve
-   **/
+   */
   function getReserveCaps(address asset)
     external
     view
@@ -151,7 +151,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @notice Returns if the pool is paused
    * @param asset The address of the underlying asset of the reserve
    * @return isPaused True if the pool is paused, false otherwise
-   **/
+   */
   function getPaused(address asset) external view returns (bool isPaused) {
     (, , , , isPaused) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getFlags();
   }
@@ -160,7 +160,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @notice Returns the siloed borrowing flag
    * @param asset The address of the underlying asset of the reserve
    * @return True if the asset is siloed for borrowing
-   **/
+   */
   function getSiloedBorrowing(address asset) external view returns (bool) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getSiloedBorrowing();
   }
@@ -169,7 +169,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @notice Returns the protocol fee on the liquidation bonus
    * @param asset The address of the underlying asset of the reserve
    * @return The protocol fee on liquidation
-   **/
+   */
   function getLiquidationProtocolFee(address asset) external view returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFee();
   }
@@ -178,7 +178,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @notice Returns the unbacked mint cap of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return The unbacked mint cap of the reserve
-   **/
+   */
   function getUnbackedMintCap(address asset) external view returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getUnbackedMintCap();
   }
@@ -187,7 +187,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @notice Returns the debt ceiling of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return The debt ceiling of the reserve
-   **/
+   */
   function getDebtCeiling(address asset) external view returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getDebtCeiling();
   }
@@ -195,7 +195,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   /**
    * @notice Returns the debt ceiling decimals
    * @return The debt ceiling decimals
-   **/
+   */
   function getDebtCeilingDecimals() external pure returns (uint256) {
     return ReserveConfiguration.DEBT_CEILING_DECIMALS;
   }
@@ -215,7 +215,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @return liquidityIndex The liquidity index of the reserve
    * @return variableBorrowIndex The variable borrow index of the reserve
    * @return lastUpdateTimestamp The timestamp of the last update of the reserve
-   **/
+   */
   function getReserveData(address asset)
     external
     view
@@ -259,7 +259,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @notice Returns the total supply of aTokens for a given asset
    * @param asset The address of the underlying asset of the reserve
    * @return The total supply of the aToken
-   **/
+   */
   function getATokenTotalSupply(address asset) external view override returns (uint256) {
     DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
       asset
@@ -271,7 +271,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @notice Returns the total debt for a given asset
    * @param asset The address of the underlying asset of the reserve
    * @return The total debt for asset
-   **/
+   */
   function getTotalDebt(address asset) external view override returns (uint256) {
     DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
       asset
@@ -295,7 +295,7 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
    * @return stableRateLastUpdated The timestamp of the last update of the user stable rate
    * @return usageAsCollateralEnabled True if the user is using the asset as collateral, false
    *         otherwise
-   **/
+   */
   function getUserReserveData(address asset, address user)
     external
     view
@@ -385,5 +385,5 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
       .getConfiguration(asset);
 
     return configuration.getFlashLoanEnabled();
-   }
+  }
 }

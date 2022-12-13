@@ -18,7 +18,7 @@ import {IPoolDataProvider} from '../../interfaces/IPoolDataProvider.sol';
  * @title PoolConfigurator
  * @author Aave
  * @dev Implements the configuration methods for the Aave protocol
- **/
+ */
 contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
@@ -28,7 +28,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /**
    * @dev Only pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyPoolAdmin() {
     _onlyPoolAdmin();
     _;
@@ -36,7 +36,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /**
    * @dev Only emergency admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyEmergencyAdmin() {
     _onlyEmergencyAdmin();
     _;
@@ -44,7 +44,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /**
    * @dev Only emergency or pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyEmergencyOrPoolAdmin() {
     _onlyPoolOrEmergencyAdmin();
     _;
@@ -52,7 +52,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /**
    * @dev Only asset listing or pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyAssetListingOrPoolAdmins() {
     _onlyAssetListingOrPoolAdmins();
     _;
@@ -60,7 +60,7 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
 
   /**
    * @dev Only risk or pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyRiskOrPoolAdmins() {
     _onlyRiskOrPoolAdmins();
     _;

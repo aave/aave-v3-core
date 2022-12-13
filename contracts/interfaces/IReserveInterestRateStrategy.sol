@@ -12,13 +12,13 @@ interface IReserveInterestRateStrategy {
   /**
    * @notice Returns the base variable borrow rate
    * @return The base variable borrow rate, expressed in ray
-   **/
+   */
   function getBaseVariableBorrowRate() external view returns (uint256);
 
   /**
    * @notice Returns the maximum variable borrow rate
    * @return The maximum variable borrow rate, expressed in ray
-   **/
+   */
   function getMaxVariableBorrowRate() external view returns (uint256);
 
   /**
@@ -27,7 +27,7 @@ interface IReserveInterestRateStrategy {
    * @return liquidityRate The liquidity rate expressed in rays
    * @return stableBorrowRate The stable borrow rate expressed in rays
    * @return variableBorrowRate The variable borrow rate expressed in rays
-   **/
+   */
   function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory params)
     external
     view

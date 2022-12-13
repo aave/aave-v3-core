@@ -261,7 +261,7 @@ library ValidationLogic {
      * 2. Users cannot borrow from the reserve if their collateral is (mostly) the same currency
      *    they are borrowing, to prevent abuses.
      * 3. Users will be able to borrow only a portion of the total available liquidity
-     **/
+     */
 
     if (params.interestRateMode == DataTypes.InterestRateMode.STABLE) {
       //check if the borrow mode is stable and if stable rate borrowing is enabled on this reserve
@@ -368,7 +368,7 @@ library ValidationLogic {
        * 2. user is not trying to abuse the reserve by supplying
        * more collateral than he is borrowing, artificially lowering
        * the interest rate, borrowing at variable, and switching to stable
-       **/
+       */
       require(stableRateEnabled, Errors.STABLE_BORROWING_NOT_ENABLED);
 
       require(
@@ -621,7 +621,7 @@ library ValidationLogic {
    * @param reservesList The addresses of all the active reserves
    * @param reserve The reserve object
    * @param asset The address of the reserve's underlying asset
-   **/
+   */
   function validateDropReserve(
     mapping(uint256 => address) storage reservesList,
     DataTypes.ReserveData storage reserve,
@@ -648,7 +648,7 @@ library ValidationLogic {
    * @param userConfig the user configuration
    * @param reservesCount The total number of valid reserves
    * @param categoryId The id of the category
-   **/
+   */
   function validateSetUserEMode(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
@@ -696,7 +696,7 @@ library ValidationLogic {
    * @param userConfig the user configuration
    * @param reserveConfig The reserve configuration
    * @return True if the asset can be activated as collateral, false otherwise
-   **/
+   */
   function validateUseAsCollateral(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,

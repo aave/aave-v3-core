@@ -34,7 +34,7 @@ library PoolLogic {
    * @param reservesList The addresses of all the active reserves
    * @param params Additional parameters needed for initiation
    * @return true if appended, false if inserted at existing empty spot
-   **/
+   */
   function executeInitReserve(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
@@ -84,7 +84,7 @@ library PoolLogic {
    * @notice Mints the assets accrued through the reserve factor to the treasury in the form of aTokens
    * @param reservesData The state of all the reserves
    * @param assets The list of reserves for which the minting needs to be executed
-   **/
+   */
   function executeMintToTreasury(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     address[] calldata assets
@@ -132,7 +132,7 @@ library PoolLogic {
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param asset The address of the underlying asset of the reserve
-   **/
+   */
   function executeDropReserve(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
@@ -156,7 +156,7 @@ library PoolLogic {
    * @return currentLiquidationThreshold The liquidation threshold of the user
    * @return ltv The loan to value of The user
    * @return healthFactor The current health factor of the user
-   **/
+   */
   function executeGetUserAccountData(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
