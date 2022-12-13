@@ -3,6 +3,11 @@ pragma solidity ^0.8.0;
 
 import { IPoolAddressesProvider } from './IPoolAddressesProvider.sol';
 
+  /**
+   * @title IPoolDataProvider
+   * @author Aave
+   * @notice Defines the basic interface of a PoolDataProvider
+   */
 interface IPoolDataProvider {
   struct TokenData {
     string symbol;
@@ -60,7 +65,7 @@ interface IPoolDataProvider {
     );
 
   /**
-   * Returns the efficiency mode category of the reserve
+   * @notice Returns the efficiency mode category of the reserve
    * @param asset The address of the underlying asset of the reserve
    * @return The eMode id of the reserve
    */
