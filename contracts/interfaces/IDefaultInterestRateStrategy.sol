@@ -23,8 +23,8 @@ interface IDefaultInterestRateStrategy is IReserveInterestRateStrategy {
   function OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO() external view returns (uint256);
 
   /**
-   * @notice This constant represents the excess usage ratio above the optimal. It's always equal to
-   * 1-optimal usage ratio. Added as a constant here for gas optimizations.
+   * @notice Returns the excess usage ratio above the optimal.
+   * @dev It's always equal to 1-optimal usage ratio (added as constant for gas optimizations)
    * @return The max excess usage ratio, expressed in ray.
    */
   function MAX_EXCESS_USAGE_RATIO() external view returns (uint256);
