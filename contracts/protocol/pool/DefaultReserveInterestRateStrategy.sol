@@ -5,9 +5,10 @@ import {IERC20} from '../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
 import {PercentageMath} from '../libraries/math/PercentageMath.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
-import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
+import {IDefaultInterestRateStrategy} from "../../interfaces/IDefaultInterestRateStrategy.sol";
+import {IReserveInterestRateStrategy} from "../../interfaces/IReserveInterestRateStrategy.sol";
 
 /**
  * @title DefaultReserveInterestRateStrategy contract
@@ -18,20 +19,20 @@ import {Errors} from '../libraries/helpers/Errors.sol';
  * - An instance of this same contract, can't be used across different Aave markets, due to the caching
  *   of the PoolAddressesProvider
  **/
-contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
+contract DefaultReserveInterestRateStrategy is IDefaultInterestRateStrategy {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   uint256 public immutable OPTIMAL_USAGE_RATIO;
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   uint256 public immutable OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO;
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   uint256 public immutable MAX_EXCESS_USAGE_RATIO;
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   uint256 public immutable MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO;
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
@@ -101,42 +102,42 @@ contract DefaultReserveInterestRateStrategy is IReserveInterestRateStrategy {
     _stableRateExcessOffset = stableRateExcessOffset;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getVariableRateSlope1() external view returns (uint256) {
     return _variableRateSlope1;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getVariableRateSlope2() external view returns (uint256) {
     return _variableRateSlope2;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getStableRateSlope1() external view returns (uint256) {
     return _stableRateSlope1;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getStableRateSlope2() external view returns (uint256) {
     return _stableRateSlope2;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getStableRateExcessOffset() external view returns (uint256) {
     return _stableRateExcessOffset;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getBaseStableBorrowRate() public view returns (uint256) {
     return _variableRateSlope1 + _baseStableRateOffset;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getBaseVariableBorrowRate() external view override returns (uint256) {
     return _baseVariableBorrowRate;
   }
 
-  /// @inheritdoc IReserveInterestRateStrategy
+  /// @inheritdoc IDefaultInterestRateStrategy
   function getMaxVariableBorrowRate() external view override returns (uint256) {
     return _baseVariableBorrowRate + _variableRateSlope1 + _variableRateSlope2;
   }

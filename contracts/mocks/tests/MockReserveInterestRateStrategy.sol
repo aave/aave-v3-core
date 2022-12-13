@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.10;
 
-import {IReserveInterestRateStrategy} from '../../interfaces/IReserveInterestRateStrategy.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {WadRayMath} from '../../protocol/libraries/math/WadRayMath.sol';
 import {DataTypes} from '../../protocol/libraries/types/DataTypes.sol';
+import {IDefaultInterestRateStrategy} from "../../interfaces/IDefaultInterestRateStrategy.sol";
 
-contract MockReserveInterestRateStrategy is IReserveInterestRateStrategy {
+contract MockReserveInterestRateStrategy is IDefaultInterestRateStrategy {
   uint256 public immutable OPTIMAL_USAGE_RATIO;
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
   uint256 internal immutable _baseVariableBorrowRate;
