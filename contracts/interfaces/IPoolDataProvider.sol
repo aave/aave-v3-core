@@ -76,7 +76,7 @@ interface IPoolDataProvider {
    * @param asset The address of the underlying asset of the reserve
    * @return borrowCap The borrow cap of the reserve
    * @return supplyCap The supply cap of the reserve
-   **/
+   */
   function getReserveCaps(address asset)
     external
     view
