@@ -18,7 +18,7 @@ contract ATokenHarness is AToken {
   /**
    * @dev Calls burn with index == 1 RAY
    * @param amount the amount being burned
-   **/
+   */
   function burn(
     address user,
     address receiverOfUnderlying,
@@ -37,7 +37,7 @@ contract ATokenHarness is AToken {
   /**
    * @dev Calls mint with index == 1 RAY
    * @param amount the amount of tokens to mint
-   **/
+   */
   function mint(
     address user,
     address onBehalfOf,

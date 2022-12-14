@@ -24,7 +24,7 @@ import {IPoolDataProvider} from '../../contracts/interfaces/IPoolDataProvider.so
  * @title PoolConfigurator
  * @author Aave
  * @dev Implements the configuration methods for the Aave protocol
- **/
+ */
 contract PoolConfiguratorHarness is VersionedInitializable, IPoolConfigurator {
   using PercentageMath for uint256;
   using ReserveConfiguration for DataTypes.ReserveConfigurationMap;
