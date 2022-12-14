@@ -18,7 +18,7 @@ import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.so
  * point of usage and another from that one to 100%.
  * - An instance of this same contract, can't be used across different Aave markets, due to the caching
  *   of the PoolAddressesProvider
- **/
+ */
 contract DefaultReserveInterestRateStrategy is IDefaultInterestRateStrategy {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -239,7 +239,7 @@ contract DefaultReserveInterestRateStrategy is IDefaultInterestRateStrategy {
    * @param currentVariableBorrowRate The current variable borrow rate of the reserve
    * @param currentAverageStableBorrowRate The current weighted average of all the stable rate loans
    * @return The weighted averaged borrow rate
-   **/
+   */
   function _getOverallBorrowRate(
     uint256 totalStableDebt,
     uint256 totalVariableDebt,

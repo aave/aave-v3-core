@@ -16,7 +16,7 @@ contract StableDebtTokenHarness is StableDebtToken {
 
   /**
    Simplification: The user accumulates no interest (the balance increase is always 0).
-   **/
+   */
   function balanceOf(address account) public view override returns (uint256) {
     return IncentivizedERC20.balanceOf(account);
   }
