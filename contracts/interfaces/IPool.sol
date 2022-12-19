@@ -575,7 +575,7 @@ interface IPool {
    * "dynamic" variable index based on time, current stored index and virtual rate at the current
    * moment (approx. a borrower would get if opening a position). This means that is always used in
    * combination with variable debt supply/balances.
-   * If using this function externally, Consider that is possible to have an increasing normalized
+   * If using this function externally, consider that is possible to have an increasing normalized
    * variable debt that is not equivalent to how the variable debt index would be updated in storage
    * (e.g. only updates with non-zero variable debt supply)
    * @param asset The address of the underlying asset of the reserve
