@@ -235,7 +235,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address from,
     address to,
     uint128 amount
-  ) internal override {
+  ) internal virtual override {
     _transfer(from, to, amount, true);
   }
 
