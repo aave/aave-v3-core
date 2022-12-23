@@ -59,7 +59,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     string calldata aTokenName,
     string calldata aTokenSymbol,
     bytes calldata params
-  ) external override initializer {
+  ) public virtual override initializer {
     require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
     _setName(aTokenName);
     _setSymbol(aTokenSymbol);
@@ -210,7 +210,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address to,
     uint256 amount,
     bool validate
-  ) internal {
+  ) internal virtual {
     address underlyingAsset = _underlyingAsset;
 
     uint256 index = POOL.getReserveNormalizedIncome(underlyingAsset);
@@ -237,7 +237,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     address from,
     address to,
     uint128 amount
-  ) internal override {
+  ) internal virtual override {
     _transfer(from, to, amount, true);
   }
 
