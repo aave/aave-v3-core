@@ -218,15 +218,6 @@ library ReserveLogic {
     );
   }
 
-  struct AccrueToTreasuryLocalVars {
-    uint256 prevTotalStableDebt;
-    uint256 prevTotalVariableDebt;
-    uint256 currTotalVariableDebt;
-    uint256 cumulatedStableInterest;
-    uint256 totalDebtAccrued;
-    uint256 amountToMint;
-  }
-
   /**
    * @notice Mints part of the repaid interest to the reserve treasury as a function of the reserve factor for the
    * specific asset.
@@ -237,47 +228,35 @@ library ReserveLogic {
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache
   ) internal {
-    AccrueToTreasuryLocalVars memory vars;
-
     if (reserveCache.reserveFactor == 0) {
       return;
     }
 
-    //calculate the total variable debt at moment of the last interaction
-    vars.prevTotalVariableDebt = reserveCache.currScaledVariableDebt.rayMul(
-      reserveCache.currVariableBorrowIndex
-    );
-
-    //calculate the new total variable debt after accumulation of the interest on the index
-    vars.currTotalVariableDebt = reserveCache.currScaledVariableDebt.rayMul(
-      reserveCache.nextVariableBorrowIndex
+    // calculate the total variable debt increase after the moment of the last interaction
+    uint256 variableDebtIncrease = reserveCache.currScaledVariableDebt.rayMul(
+      reserveCache.nextVariableBorrowIndex - reserveCache.currVariableBorrowIndex
     );
 
     //calculate the stable debt until the last timestamp update
-    vars.cumulatedStableInterest = MathUtils.calculateCompoundedInterest(
+    uint256 cumulatedStableInterest = MathUtils.calculateCompoundedInterest(
       reserveCache.currAvgStableBorrowRate,
       reserveCache.stableDebtLastUpdateTimestamp,
       reserveCache.reserveLastUpdateTimestamp
     );
 
-    vars.prevTotalStableDebt = reserveCache.currPrincipalStableDebt.rayMul(
-      vars.cumulatedStableInterest
+    uint256 prevTotalStableDebt = reserveCache.currPrincipalStableDebt.rayMul(
+      cumulatedStableInterest
     );
 
     //debt accrued is the sum of the current debt minus the sum of the debt at the last update
-    vars.totalDebtAccrued =
-      vars.currTotalVariableDebt +
+    uint256 totalDebtAccrued = variableDebtIncrease +
       reserveCache.currTotalStableDebt -
-      vars.prevTotalVariableDebt -
-      vars.prevTotalStableDebt;
+      prevTotalStableDebt;
 
-    vars.amountToMint = vars.totalDebtAccrued.percentMul(reserveCache.reserveFactor);
+    uint256 amountToMint = totalDebtAccrued.percentMul(reserveCache.reserveFactor);
 
-    if (vars.amountToMint != 0) {
-      reserve.accruedToTreasury += vars
-        .amountToMint
-        .rayDiv(reserveCache.nextLiquidityIndex)
-        .toUint128();
+    if (amountToMint != 0) {
+      reserve.accruedToTreasury += amountToMint.rayDiv(reserveCache.nextLiquidityIndex).toUint128();
     }
   }
 
