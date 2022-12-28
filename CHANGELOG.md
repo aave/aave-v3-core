@@ -1,5 +1,54 @@
 # Changelog
 
+## [1.17.0](https://github.com/aave/aave-v3-core/compare/v1.16.2...v1.17.0) (2022-12-28)
+
+
+### Features
+
+* add additional flashloan scenario ([8888093](https://github.com/aave/aave-v3-core/commit/88880936a353d3dd5c9556d0fabb3f15ecd01c0c))
+* add unit test for reserve configuration ([49d0f4e](https://github.com/aave/aave-v3-core/commit/49d0f4e6baa5b78d31443617456331904db7dfdc))
+* bump to beta version ([348ce20](https://github.com/aave/aave-v3-core/commit/348ce204a7b30a9846dbe9637b17e86125137d6f))
+* enable and disable flashloans ([bb62572](https://github.com/aave/aave-v3-core/commit/bb625723211944a7325b505caf6199edf4b8ed2a))
+* remove borrow enabled requirement ([8b9221b](https://github.com/aave/aave-v3-core/commit/8b9221b822c0ecf1cc84831b51d4137072dc28d3))
+* switch bit used for flashloan enabled ([748818f](https://github.com/aave/aave-v3-core/commit/748818f0ef78c94fc45192165cbb3a24c23d63d9))
+* updated price oracle sentinel interface ([0457e71](https://github.com/aave/aave-v3-core/commit/0457e7176c89f91700e0aa63691dd0d9580b77db))
+* updates and tests ([8d12d79](https://github.com/aave/aave-v3-core/commit/8d12d798cee82ab2d2b210c35a9ca69089b5ded3))
+
+
+### Bug Fixes
+
+* Add license to L2Pool contract ([#765](https://github.com/aave/aave-v3-core/issues/765)) ([56fd7ba](https://github.com/aave/aave-v3-core/commit/56fd7ba792e084518c2852cc6158f214cfd3eb2e))
+* add validation to simpleFlashLoan ([bf652c2](https://github.com/aave/aave-v3-core/commit/bf652c2837d1403977e9cbc50e623dee21c5fcf4))
+* Avoid emitting events when balanceIncrease is zero ([#745](https://github.com/aave/aave-v3-core/issues/745)) ([43f34c9](https://github.com/aave/aave-v3-core/commit/43f34c90400d02f3959beeec21038464d924242a))
+* Capitalize license name of contracts ([fba69f0](https://github.com/aave/aave-v3-core/commit/fba69f087131abcb5945f6e817d5c7acb51badfa))
+* CEI to fix reentrancy risk with reentrant tokens (eg ERC777) ([#704](https://github.com/aave/aave-v3-core/issues/704)) ([7fbdc6e](https://github.com/aave/aave-v3-core/commit/7fbdc6ea5f657072fbdf9494db07f1769c38c1d9))
+* check revert msg and event emission ([284b492](https://github.com/aave/aave-v3-core/commit/284b49221e1947f689fd63da7c845f6b9c641f8b))
+* Complete interfaces of IReserveInterestRateStrategy and IPoolDataProvider ([#766](https://github.com/aave/aave-v3-core/issues/766)) ([a00dda8](https://github.com/aave/aave-v3-core/commit/a00dda8faf464f6b0d338cf7e902e5931e0edbea))
+* Fix condition of full liquidation of collateral ([#753](https://github.com/aave/aave-v3-core/issues/753)) ([56bcf5d](https://github.com/aave/aave-v3-core/commit/56bcf5d1ef378e9e5e7d09bcdb0bc42b4a1b645d))
+* Fix docs param in burnScaled ([6b504d4](https://github.com/aave/aave-v3-core/commit/6b504d4bced83e1ac64ab552d082387de042e5af))
+* Fix param of IAToken function ([1cb9ba1](https://github.com/aave/aave-v3-core/commit/1cb9ba198650c8582e12657c0ac9b21fa379ff06))
+* Fix test of inaccuracy when liquidationProtocolFee is on ([7d8b7bf](https://github.com/aave/aave-v3-core/commit/7d8b7bf5acf016e541beaa36e2e82783ff74b846))
+* Fix typo in docs ([#752](https://github.com/aave/aave-v3-core/issues/752)) ([9ccb1ab](https://github.com/aave/aave-v3-core/commit/9ccb1ab3c175d1e71404e875e623f1d161fd17e7))
+* Install the last package of periphery for the rewards contract update ([066259a](https://github.com/aave/aave-v3-core/commit/066259a79444b097da911021d120e1fe4a000ad6))
+* make InterestRateStrategy contract inheritable ([d06f8f2](https://github.com/aave/aave-v3-core/commit/d06f8f22296f44673b15f2b71df8d17a70b1ea88))
+* make InterestRateStrategy contract inheritable ([0311475](https://github.com/aave/aave-v3-core/commit/0311475614ed7a6c4befba99a7567ee27454f942))
+* Make transferOnLiq() virtual ([6968062](https://github.com/aave/aave-v3-core/commit/6968062ba1129b0e88ddb60408d235329a913fc9))
+* Minimize the IAaveIncentivesController with only the handleAction ([a33f931](https://github.com/aave/aave-v3-core/commit/a33f93119f53d01c69b9c65a20d552e19a175e76))
+* modify interface versions to support all minor 0.8.x vers ([9e95439](https://github.com/aave/aave-v3-core/commit/9e954393ea6c50aa00318e7f96a5867d0f49a460))
+* Optimize logic for atoken self-transfers ([6c3154e](https://github.com/aave/aave-v3-core/commit/6c3154eedb5e543bd564953058c40b7f19b42d41))
+* reentrancy in liquidationCall ([cd508a7](https://github.com/aave/aave-v3-core/commit/cd508a713d3cdd4e09c514fe0c47cf8f51383b07))
+* Reformat code ([84b900c](https://github.com/aave/aave-v3-core/commit/84b900ce583eb8b1174357c05882e4a9f1854c38))
+* remove formatting conflicts ([4c2cda0](https://github.com/aave/aave-v3-core/commit/4c2cda0f63326d986a7a7e68da32f9570623a450))
+* remove gitignore update ([d7aa26a](https://github.com/aave/aave-v3-core/commit/d7aa26af60d2b9f34c95316fe42c17f51115630b))
+* remove unrelated change ([a5ce86a](https://github.com/aave/aave-v3-core/commit/a5ce86a350f428e4a89bd0867254c7a898c72ca3))
+* solution to fix liquidation failed case. ([623730b](https://github.com/aave/aave-v3-core/commit/623730b3db4146281a11c5424938d339c4005357))
+* streamline test ([516e0e8](https://github.com/aave/aave-v3-core/commit/516e0e81263b2133c8640836ffa08afb112aacfa))
+* typo ([#717](https://github.com/aave/aave-v3-core/issues/717)) ([9666e99](https://github.com/aave/aave-v3-core/commit/9666e9912c956950e6a4682df5e381999411840b))
+* typos ([#715](https://github.com/aave/aave-v3-core/issues/715)) ([7dd869f](https://github.com/aave/aave-v3-core/commit/7dd869f68bbdb07ac94cf671bdf93c392c65af60))
+* update comment for setReserveFlashLoaning ([9d84549](https://github.com/aave/aave-v3-core/commit/9d84549a0a1e91246da0312068a59e37413f5aa8))
+* update deploy and periphery dependencies ([078fa28](https://github.com/aave/aave-v3-core/commit/078fa28584484209a0a1fac44cbc6ae827b719f6))
+* update hardhat dependencies and fix test-suite error codes ([#739](https://github.com/aave/aave-v3-core/issues/739)) ([a54692a](https://github.com/aave/aave-v3-core/commit/a54692a54eddf2c0d5531de86ae298c491a2b192))
+
 ## [1.16.2](https://github.com/aave/aave-v3-core/compare/v1.16.1...v1.16.2) (2022-07-28)
 
 
