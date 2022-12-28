@@ -41,7 +41,7 @@ import {Helpers} from '../../contracts/protocol/libraries/helpers/Helpers.sol';
  * @dev To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
  * @dev All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
- **/
+ */
 contract PoolHarnessForConfigurator is VersionedInitializable, IPool, PoolStorage {
   using WadRayMath for uint256;
   using ReserveLogic for DataTypes.ReserveData;
@@ -88,7 +88,7 @@ contract PoolHarnessForConfigurator is VersionedInitializable, IPool, PoolStorag
    * PoolAddressesProvider of the market.
    * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption on subsequent operations
    * @param provider The address of the PoolAddressesProvider
-   **/
+   */
   function initialize(IPoolAddressesProvider provider) external initializer {
     require(provider == _addressesProvider, Errors.PC_INVALID_CONFIGURATION);
     _maxStableRateBorrowSizePercent = 2500;

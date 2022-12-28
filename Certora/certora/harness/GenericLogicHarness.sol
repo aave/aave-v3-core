@@ -71,7 +71,7 @@ contract GenericLogic {
    * @return The average liquidation threshold of the user
    * @return The health factor of the user
    * @return True if the ltv is zero, false otherwise
-   **/
+   */
   function calculateUserAccountData()
     public
     returns (
@@ -226,7 +226,7 @@ contract GenericLogic {
    * @param totalDebtInBaseCurrency The total borrow balance in the base currency used by the price feed
    * @param ltv The average loan to value
    * @return The amount available to borrow in the base currency of the used by the price feed
-   **/
+   */
   function calculateAvailableBorrows(
     uint256 totalCollateralInBaseCurrency,
     uint256 totalDebtInBaseCurrency,

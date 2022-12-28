@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 import {IAaveIncentivesController} from '../../../interfaces/IAaveIncentivesController.sol';
@@ -9,7 +9,7 @@ import {IncentivizedERC20} from './IncentivizedERC20.sol';
  * @title MintableIncentivizedERC20
  * @author Aave
  * @notice Implements mint and burn functions for IncentivizedERC20
- **/
+ */
 abstract contract MintableIncentivizedERC20 is IncentivizedERC20 {
   /**
    * @dev Constructor.

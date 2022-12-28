@@ -23,7 +23,7 @@ import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
  * @title LiquidationLogic library
  * @author Aave
  * @notice Implements actions involving management of collateral in the protocol, the main one being the liquidations
- **/
+ */
 library LiquidationLogic {
   using WadRayMath for uint256;
   using PercentageMath for uint256;
@@ -92,7 +92,7 @@ library LiquidationLogic {
    * @param usersConfig The users configuration mapping that track the supplied/borrowed assets
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params The additional parameters needed to execute the liquidation function
-   **/
+   */
   function executeLiquidationCall(
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
@@ -166,6 +166,16 @@ library LiquidationLogic {
       userConfig.setBorrowing(debtReserve.id, false);
     }
 
+    // If the collateral being liquidated is equal to the user balance,
+    // we set the currency as not being used as collateral anymore
+    if (
+      vars.actualCollateralToLiquidate + vars.liquidationProtocolFeeAmount ==
+      vars.userCollateralBalance
+    ) {
+      userConfig.setUsingAsCollateral(collateralReserve.id, false);
+      emit ReserveUsedAsCollateralDisabled(params.collateralAsset, params.user);
+    }
+
     _burnDebtTokens(params, vars);
 
     debtReserve.updateInterestRates(
@@ -191,18 +201,20 @@ library LiquidationLogic {
 
     // Transfer fee to treasury if it is non-zero
     if (vars.liquidationProtocolFeeAmount != 0) {
+      uint256 liquidityIndex = collateralReserve.getNormalizedIncome();
+      uint256 scaledDownLiquidationProtocolFee = vars.liquidationProtocolFeeAmount.rayDiv(
+        liquidityIndex
+      );
+      uint256 scaledDownUserBalance = vars.collateralAToken.scaledBalanceOf(params.user);
+      // To avoid trying to send more aTokens than available on balance, due to 1 wei imprecision
+      if (scaledDownLiquidationProtocolFee > scaledDownUserBalance) {
+        vars.liquidationProtocolFeeAmount = scaledDownUserBalance.rayMul(liquidityIndex);
+      }
       vars.collateralAToken.transferOnLiquidation(
         params.user,
         vars.collateralAToken.RESERVE_TREASURY_ADDRESS(),
         vars.liquidationProtocolFeeAmount
       );
-    }
-
-    // If the collateral being liquidated is equal to the user balance,
-    // we set the currency as not being used as collateral anymore
-    if (vars.actualCollateralToLiquidate == vars.userCollateralBalance) {
-      userConfig.setUsingAsCollateral(collateralReserve.id, false);
-      emit ReserveUsedAsCollateralDisabled(params.collateralAsset, params.user);
     }
 
     // Transfers the debt asset being repaid to the aToken, where the liquidity is kept
@@ -214,6 +226,7 @@ library LiquidationLogic {
 
     IAToken(vars.debtReserveCache.aTokenAddress).handleRepayment(
       msg.sender,
+      params.user,
       vars.actualDebtToLiquidate
     );
 
@@ -465,7 +478,7 @@ library LiquidationLogic {
    * @return The maximum amount that is possible to liquidate given all the liquidation constraints (user balance, close factor)
    * @return The amount to repay with the liquidation
    * @return The fee taken from the liquidation bonus amount to be paid to the protocol
-   **/
+   */
   function _calculateAvailableCollateralToLiquidate(
     DataTypes.ReserveData storage collateralReserve,
     DataTypes.ReserveCache memory debtReserveCache,

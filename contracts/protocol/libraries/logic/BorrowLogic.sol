@@ -252,7 +252,11 @@ library BorrowLogic {
       );
     } else {
       IERC20(params.asset).safeTransferFrom(msg.sender, reserveCache.aTokenAddress, paybackAmount);
-      IAToken(reserveCache.aTokenAddress).handleRepayment(msg.sender, paybackAmount);
+      IAToken(reserveCache.aTokenAddress).handleRepayment(
+        msg.sender,
+        params.onBehalfOf,
+        paybackAmount
+      );
     }
 
     emit Repay(params.asset, params.onBehalfOf, msg.sender, paybackAmount, params.useATokens);

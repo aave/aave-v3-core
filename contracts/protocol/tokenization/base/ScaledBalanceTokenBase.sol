@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: agpl-3.0
+// SPDX-License-Identifier: AGPL-3.0
 pragma solidity 0.8.10;
 
 import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
@@ -12,7 +12,7 @@ import {MintableIncentivizedERC20} from './MintableIncentivizedERC20.sol';
  * @title ScaledBalanceTokenBase
  * @author Aave
  * @notice Basic ERC20 implementation of scaled balance token
- **/
+ */
 abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBalanceToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
@@ -65,7 +65,7 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
    * @param amount The amount of tokens getting minted
    * @param index The next liquidity index of the reserve
    * @return `true` if the the previous balance of the user was 0
-   **/
+   */
   function _mintScaled(
     address caller,
     address onBehalfOf,
@@ -98,7 +98,7 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
    * @param target The address that will receive the underlying, if any
    * @param amount The amount getting burned
    * @param index The variable debt index of the reserve
-   **/
+   */
   function _burnScaled(
     address user,
     address target,
@@ -125,5 +125,45 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
       emit Transfer(user, address(0), amountToBurn);
       emit Burn(user, target, amountToBurn, balanceIncrease, index);
     }
+  }
+
+  /**
+   * @notice Implements the basic logic to transfer scaled balance tokens between two users
+   * @dev It emits a mint event with the interest accrued per user
+   * @param sender The source address
+   * @param recipient The destination address
+   * @param amount The amount getting transferred
+   * @param index The next liquidity index of the reserve
+   */
+  function _transfer(
+    address sender,
+    address recipient,
+    uint256 amount,
+    uint256 index
+  ) internal {
+    uint256 senderScaledBalance = super.balanceOf(sender);
+    uint256 senderBalanceIncrease = senderScaledBalance.rayMul(index) -
+      senderScaledBalance.rayMul(_userState[sender].additionalData);
+
+    uint256 recipientScaledBalance = super.balanceOf(recipient);
+    uint256 recipientBalanceIncrease = recipientScaledBalance.rayMul(index) -
+      recipientScaledBalance.rayMul(_userState[recipient].additionalData);
+
+    _userState[sender].additionalData = index.toUint128();
+    _userState[recipient].additionalData = index.toUint128();
+
+    super._transfer(sender, recipient, amount.rayDiv(index).toUint128());
+
+    if (senderBalanceIncrease > 0) {
+      emit Transfer(address(0), sender, senderBalanceIncrease);
+      emit Mint(_msgSender(), sender, senderBalanceIncrease, senderBalanceIncrease, index);
+    }
+
+    if (sender != recipient && recipientBalanceIncrease > 0) {
+      emit Transfer(address(0), recipient, recipientBalanceIncrease);
+      emit Mint(_msgSender(), recipient, recipientBalanceIncrease, recipientBalanceIncrease, index);
+    }
+
+    emit Transfer(sender, recipient, amount);
   }
 }

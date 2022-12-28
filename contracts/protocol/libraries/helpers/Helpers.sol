@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import {IERC20} from '../../../dependencies/openzeppelin/contracts/IERC20.sol';
 import {DataTypes} from '../types/DataTypes.sol';
@@ -15,7 +15,7 @@ library Helpers {
    * @param reserveCache The reserve cache data object
    * @return The stable debt balance
    * @return The variable debt balance
-   **/
+   */
   function getUserCurrentDebt(address user, DataTypes.ReserveCache memory reserveCache)
     internal
     view

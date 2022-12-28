@@ -56,7 +56,7 @@ const executeAction = async (action: Action, users: SignerWithAddress[], testEnv
   }
 
   if (!expected || expected === '') {
-    throw `An expected resut for action ${name} is required`;
+    throw `An expected result for action ${name} is required`;
   }
 
   let rateMode: string = RateMode.None;

@@ -17,7 +17,7 @@ import {IACLManager} from '../../interfaces/IACLManager.sol';
 contract PriceOracleSentinel is IPriceOracleSentinel {
   /**
    * @dev Only pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
@@ -26,7 +26,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
 
   /**
    * @dev Only risk or pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyRiskOrPoolAdmins() {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(

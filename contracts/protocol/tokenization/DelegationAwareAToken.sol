@@ -29,7 +29,7 @@ contract DelegationAwareAToken is AToken {
   /**
    * @notice Delegates voting power of the underlying asset to a `delegatee` address
    * @param delegatee The address that will receive the delegation
-   **/
+   */
   function delegateUnderlyingTo(address delegatee) external onlyPoolAdmin {
     IDelegationToken(_underlyingAsset).delegate(delegatee);
     emit DelegateUnderlyingTo(delegatee);

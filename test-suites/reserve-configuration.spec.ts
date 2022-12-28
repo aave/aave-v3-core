@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { deployMockReserveConfiguration } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { ProtocolErrors } from '../helpers/types';
 import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
@@ -230,6 +230,13 @@ describe('ReserveConfiguration', async () => {
     expect(await configMock.getUnbackedMintCap()).to.be.eq(UNBACKED_MINT_CAP);
     expect(await configMock.setUnbackedMintCap(ZERO));
     expect(await configMock.getUnbackedMintCap()).to.be.eq(ZERO);
+  });
+
+  it('getFlashLoanEnabled()', async () => {
+    expect(await configMock.getFlashLoanEnabled()).to.be.eq(false);
+    expect(await configMock.setFlashLoanEnabled(true));
+    expect(await configMock.getFlashLoanEnabled()).to.be.eq(true);
+    expect(await configMock.setFlashLoanEnabled(false));
   });
 
   it('setLtv() with ltv = MAX_VALID_LTV', async () => {

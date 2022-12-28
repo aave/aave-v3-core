@@ -21,7 +21,7 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
  * @notice Implements a stable debt token to track the borrowing positions of users
  * at stable rate mode
  * @dev Transfer and approve functionalities are disabled since its a non-transferable token
- **/
+ */
 contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
@@ -264,7 +264,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @return The previous principal balance
    * @return The new principal balance
    * @return The balance increase
-   **/
+   */
   function _calculateBalanceIncrease(address user)
     internal
     view
@@ -335,7 +335,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @notice Calculates the total supply
    * @param avgRate The average rate at which the total supply increases
    * @return The debt balance of the user since the last burn/mint action
-   **/
+   */
   function _calcTotalSupply(uint256 avgRate) internal view returns (uint256) {
     uint256 principalSupply = super.totalSupply();
 
@@ -356,7 +356,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @param account The account receiving the debt tokens
    * @param amount The amount being minted
    * @param oldTotalSupply The total supply before the minting event
-   **/
+   */
   function _mint(
     address account,
     uint256 amount,
@@ -376,7 +376,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @param account The user getting his debt burned
    * @param amount The amount being burned
    * @param oldTotalSupply The total supply before the burning event
-   **/
+   */
   function _burn(
     address account,
     uint256 amount,
@@ -399,7 +399,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   /**
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
-   **/
+   */
   function transfer(address, uint256) external virtual override returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }

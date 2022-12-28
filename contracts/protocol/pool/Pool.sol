@@ -35,7 +35,7 @@ import {PoolStorage} from './PoolStorage.sol';
  * @dev To be covered by a proxy contract, owned by the PoolAddressesProvider of the specific market
  * @dev All admin functions are callable by the PoolConfigurator contract defined also in the
  *   PoolAddressesProvider
- **/
+ */
 contract Pool is VersionedInitializable, PoolStorage, IPool {
   using ReserveLogic for DataTypes.ReserveData;
 
@@ -44,7 +44,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
 
   /**
    * @dev Only pool configurator can call functions marked by this modifier.
-   **/
+   */
   modifier onlyPoolConfigurator() {
     _onlyPoolConfigurator();
     _;
@@ -52,7 +52,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
 
   /**
    * @dev Only pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyPoolAdmin() {
     _onlyPoolAdmin();
     _;
@@ -60,7 +60,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
 
   /**
    * @dev Only bridge can call functions marked by this modifier.
-   **/
+   */
   modifier onlyBridge() {
     _onlyBridge();
     _;
@@ -105,7 +105,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
    * PoolAddressesProvider of the market.
    * @dev Caching the address of the PoolAddressesProvider in order to reduce gas consumption on subsequent operations
    * @param provider The address of the PoolAddressesProvider
-   **/
+   */
   function initialize(IPoolAddressesProvider provider) external virtual initializer {
     require(provider == ADDRESSES_PROVIDER, Errors.INVALID_ADDRESSES_PROVIDER);
     _maxStableRateBorrowSizePercent = 0.25e4;
@@ -136,8 +136,9 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
     address asset,
     uint256 amount,
     uint256 fee
-  ) external virtual override onlyBridge {
-    BridgeLogic.executeBackUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
+  ) external virtual override onlyBridge returns (uint256) {
+    return
+      BridgeLogic.executeBackUnbacked(_reserves[asset], asset, amount, fee, _bridgeProtocolFee);
   }
 
   /// @inheritdoc IPool

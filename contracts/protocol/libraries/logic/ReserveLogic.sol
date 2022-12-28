@@ -43,7 +43,7 @@ library ReserveLogic {
    * @dev A value of 2*1e27 means for each unit of asset one unit of income has been accrued
    * @param reserve The reserve object
    * @return The normalized income, expressed in ray
-   **/
+   */
   function getNormalizedIncome(DataTypes.ReserveData storage reserve)
     internal
     view
@@ -69,7 +69,7 @@ library ReserveLogic {
    * @dev A value of 2*1e27 means that for each unit of debt, one unit worth of interest has been accumulated
    * @param reserve The reserve object
    * @return The normalized variable debt, expressed in ray
-   **/
+   */
   function getNormalizedDebt(DataTypes.ReserveData storage reserve)
     internal
     view
@@ -93,13 +93,22 @@ library ReserveLogic {
    * @notice Updates the liquidity cumulative index and the variable borrow index.
    * @param reserve The reserve object
    * @param reserveCache The caching layer for the reserve data
-   **/
+   */
   function updateState(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache
   ) internal {
+    // If time didn't pass since last stored timestamp, skip state update
+    //solium-disable-next-line
+    if (reserve.lastUpdateTimestamp == uint40(block.timestamp)) {
+      return;
+    }
+
     _updateIndexes(reserve, reserveCache);
     _accrueToTreasury(reserve, reserveCache);
+
+    //solium-disable-next-line
+    reserve.lastUpdateTimestamp = uint40(block.timestamp);
   }
 
   /**
@@ -109,7 +118,7 @@ library ReserveLogic {
    * @param totalLiquidity The total liquidity available in the reserve
    * @param amount The amount to accumulate
    * @return The next liquidity index of the reserve
-   **/
+   */
   function cumulateToLiquidityIndex(
     DataTypes.ReserveData storage reserve,
     uint256 totalLiquidity,
@@ -131,7 +140,7 @@ library ReserveLogic {
    * @param stableDebtTokenAddress The address of the overlying stable debt token contract
    * @param variableDebtTokenAddress The address of the overlying variable debt token contract
    * @param interestRateStrategyAddress The address of the interest rate strategy contract
-   **/
+   */
   function init(
     DataTypes.ReserveData storage reserve,
     address aTokenAddress,
@@ -163,7 +172,7 @@ library ReserveLogic {
    * @param reserveAddress The address of the reserve to be updated
    * @param liquidityAdded The amount of liquidity added to the protocol (supply or repay) in the previous action
    * @param liquidityTaken The amount of liquidity taken from the protocol (redeem or borrow)
-   **/
+   */
   function updateInterestRates(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache,
@@ -183,9 +192,7 @@ library ReserveLogic {
       vars.nextVariableRate
     ) = IReserveInterestRateStrategy(reserve.interestRateStrategyAddress).calculateInterestRates(
       DataTypes.CalculateInterestRatesParams({
-        unbacked: reserveCache.reserveConfiguration.getUnbackedMintCap() != 0
-          ? reserve.unbacked
-          : 0,
+        unbacked: reserve.unbacked,
         liquidityAdded: liquidityAdded,
         liquidityTaken: liquidityTaken,
         totalStableDebt: reserveCache.nextTotalStableDebt,
@@ -225,7 +232,7 @@ library ReserveLogic {
    * specific asset.
    * @param reserve The reserve to be updated
    * @param reserveCache The caching layer for the reserve data
-   **/
+   */
   function _accrueToTreasury(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache
@@ -278,15 +285,14 @@ library ReserveLogic {
    * @notice Updates the reserve indexes and the timestamp of the update.
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The cache layer holding the cached protocol data
-   **/
+   */
   function _updateIndexes(
     DataTypes.ReserveData storage reserve,
     DataTypes.ReserveCache memory reserveCache
   ) internal {
-    reserveCache.nextLiquidityIndex = reserveCache.currLiquidityIndex;
-    reserveCache.nextVariableBorrowIndex = reserveCache.currVariableBorrowIndex;
-
-    //only cumulating if there is any income being produced
+    // Only cumulating on the supply side if there is any income being produced
+    // The case of Reserve Factor 100% is not a problem (currentLiquidityRate == 0),
+    // as liquidity index should not be updated
     if (reserveCache.currLiquidityRate != 0) {
       uint256 cumulatedLiquidityInterest = MathUtils.calculateLinearInterest(
         reserveCache.currLiquidityRate,
@@ -296,23 +302,22 @@ library ReserveLogic {
         reserveCache.currLiquidityIndex
       );
       reserve.liquidityIndex = reserveCache.nextLiquidityIndex.toUint128();
-
-      //as the liquidity rate might come only from stable rate loans, we need to ensure
-      //that there is actual variable debt before accumulating
-      if (reserveCache.currScaledVariableDebt != 0) {
-        uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
-          reserveCache.currVariableBorrowRate,
-          reserveCache.reserveLastUpdateTimestamp
-        );
-        reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
-          reserveCache.currVariableBorrowIndex
-        );
-        reserve.variableBorrowIndex = reserveCache.nextVariableBorrowIndex.toUint128();
-      }
     }
 
-    //solium-disable-next-line
-    reserve.lastUpdateTimestamp = uint40(block.timestamp);
+    // Variable borrow index only gets updated if there is any variable debt.
+    // reserveCache.currVariableBorrowRate != 0 is not a correct validation,
+    // because a positive base variable rate can be stored on
+    // reserveCache.currVariableBorrowRate, but the index should not increase
+    if (reserveCache.currScaledVariableDebt != 0) {
+      uint256 cumulatedVariableBorrowInterest = MathUtils.calculateCompoundedInterest(
+        reserveCache.currVariableBorrowRate,
+        reserveCache.reserveLastUpdateTimestamp
+      );
+      reserveCache.nextVariableBorrowIndex = cumulatedVariableBorrowInterest.rayMul(
+        reserveCache.currVariableBorrowIndex
+      );
+      reserve.variableBorrowIndex = reserveCache.nextVariableBorrowIndex.toUint128();
+    }
   }
 
   /**
@@ -330,8 +335,9 @@ library ReserveLogic {
 
     reserveCache.reserveConfiguration = reserve.configuration;
     reserveCache.reserveFactor = reserveCache.reserveConfiguration.getReserveFactor();
-    reserveCache.currLiquidityIndex = reserve.liquidityIndex;
-    reserveCache.currVariableBorrowIndex = reserve.variableBorrowIndex;
+    reserveCache.currLiquidityIndex = reserveCache.nextLiquidityIndex = reserve.liquidityIndex;
+    reserveCache.currVariableBorrowIndex = reserveCache.nextVariableBorrowIndex = reserve
+      .variableBorrowIndex;
     reserveCache.currLiquidityRate = reserve.currentLiquidityRate;
     reserveCache.currVariableBorrowRate = reserve.currentVariableBorrowRate;
 

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { MAX_UINT_AMOUNT, RAY, WAD, HALF_RAY, HALF_WAD } from '../helpers/constants';
 import { WadRayMathWrapper, WadRayMathWrapper__factory } from '../types';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';

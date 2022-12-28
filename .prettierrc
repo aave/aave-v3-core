@@ -6,6 +6,12 @@
   "tabWidth": 2,
   "overrides": [
     {
+      "files": "*.ts",
+      "options": {
+        "bracketSpacing": true
+      }
+    },
+    {
       "files": "*.sol",
       "options": {
         "semi": true,

@@ -13,7 +13,7 @@ contract MockInitializableImple is VersionedInitializable {
   /**
    * @dev returns the revision number of the contract
    * Needs to be defined in the inherited class as a constant.
-   **/
+   */
   function getRevision() internal pure override returns (uint256) {
     return REVISION;
   }
@@ -47,7 +47,7 @@ contract MockInitializableImpleV2 is VersionedInitializable {
   /**
    * @dev returns the revision number of the contract
    * Needs to be defined in the inherited class as a constant.
-   **/
+   */
   function getRevision() internal pure override returns (uint256) {
     return REVISION;
   }
@@ -79,7 +79,7 @@ contract MockInitializableFromConstructorImple is VersionedInitializable {
   /**
    * @dev returns the revision number of the contract
    * Needs to be defined in the inherited class as a constant.
-   **/
+   */
   function getRevision() internal pure override returns (uint256) {
     return REVISION;
   }
@@ -101,7 +101,7 @@ contract MockReentrantInitializableImple is VersionedInitializable {
   /**
    * @dev returns the revision number of the contract
    * Needs to be defined in the inherited class as a constant.
-   **/
+   */
   function getRevision() internal pure override returns (uint256) {
     return REVISION;
   }
