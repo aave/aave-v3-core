@@ -41,7 +41,7 @@ Round 2 - December 2021
 - [SigmaPrime](./audits/27-01-2022_SigmaPrime_AaveV3.pdf)
 
 Formal Verification
-- [Certora](./Certora/certora/Verification_Report.pdf)
+- [Certora](./Certora/certora/Aave_V3_Formal_Verification_Report.pdf)
 
 ## Connect with the community
 
