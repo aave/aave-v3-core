@@ -4,7 +4,6 @@ pragma solidity 0.8.10;
 import {IPool} from '../../../interfaces/IPool.sol';
 import {IInitializableAToken} from '../../../interfaces/IInitializableAToken.sol';
 import {IInitializableDebtToken} from '../../../interfaces/IInitializableDebtToken.sol';
-import {IAaveIncentivesController} from '../../../interfaces/IAaveIncentivesController.sol';
 import {InitializableImmutableAdminUpgradeabilityProxy} from '../aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {DataTypes} from '../types/DataTypes.sol';
@@ -55,6 +54,7 @@ library ConfiguratorLogic {
       input.aTokenImpl,
       abi.encodeWithSelector(
         IInitializableAToken.initialize.selector,
+        pool,
         input.treasury,
         input.underlyingAsset,
         input.incentivesController,
@@ -69,6 +69,7 @@ library ConfiguratorLogic {
       input.stableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -82,6 +83,7 @@ library ConfiguratorLogic {
       input.variableDebtTokenImpl,
       abi.encodeWithSelector(
         IInitializableDebtToken.initialize.selector,
+        pool,
         input.underlyingAsset,
         input.incentivesController,
         input.underlyingAssetDecimals,
@@ -134,6 +136,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableAToken.initialize.selector,
+      cachedPool,
       input.treasury,
       input.asset,
       input.incentivesController,
@@ -164,6 +167,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
@@ -201,6 +205,7 @@ library ConfiguratorLogic {
 
     bytes memory encodedCall = abi.encodeWithSelector(
       IInitializableDebtToken.initialize.selector,
+      cachedPool,
       input.asset,
       input.incentivesController,
       decimals,
@@ -243,7 +248,7 @@ library ConfiguratorLogic {
 
   /**
    * @notice Upgrades the implementation and makes call to the proxy
-   * @dev In the current plementation the call is used to initialize the new implementation.
+   * @dev The call is used to initialize the new implementation.
    * @param proxyAddress The address of the proxy
    * @param implementation The address of the new implementation
    * @param  initParams The parameters to the call after the upgrade

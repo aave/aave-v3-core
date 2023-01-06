@@ -1,10 +1,11 @@
 import { expect } from 'chai';
-import { BigNumber, BigNumberish, utils } from 'ethers';
+import { BigNumberish, utils } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { deployDefaultReserveInterestRateStrategy } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { PERCENTAGE_FACTOR } from '../helpers/constants';
 import { AToken, DefaultReserveInterestRateStrategy, MintableERC20 } from '../types';
-import { strategyDAI } from '@aave/deploy-v3/dist/markets/aave/reservesConfigs';
-import { rateStrategyStableTwo } from '@aave/deploy-v3/dist/markets/aave/rateStrategies';
+import { strategyDAI } from '@aave/deploy-v3/dist/markets/test/reservesConfigs';
+import { rateStrategyStableTwo } from '@aave/deploy-v3/dist/markets/test/rateStrategies';
 import { TestEnv, makeSuite } from './helpers/make-suite';
 import { ProtocolErrors, RateMode } from '../helpers/types';
 import { formatUnits } from '@ethersproject/units';
@@ -370,6 +371,11 @@ makeSuite('InterestRateStrategy', (testEnv: TestEnv) => {
     );
     expect(await strategyInstance.getStableRateSlope2()).to.be.eq(
       rateStrategyStableTwo.stableRateSlope2
+    );
+    expect(await strategyInstance.getMaxVariableBorrowRate()).to.be.eq(
+      BigNumber.from(rateStrategyStableTwo.baseVariableBorrowRate)
+        .add(BigNumber.from(rateStrategyStableTwo.variableRateSlope1))
+        .add(BigNumber.from(rateStrategyStableTwo.variableRateSlope2))
     );
     expect(await strategyInstance.MAX_EXCESS_USAGE_RATIO()).to.be.eq(
       BigNumber.from(1).ray().sub(rateStrategyStableTwo.optimalUsageRatio)

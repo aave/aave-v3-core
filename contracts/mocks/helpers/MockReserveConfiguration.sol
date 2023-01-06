@@ -109,6 +109,16 @@ contract MockReserveConfiguration {
     configuration = config;
   }
 
+  function setFlashLoanEnabled(bool enabled) external {
+    DataTypes.ReserveConfigurationMap memory config = configuration;
+    config.setFlashLoanEnabled(enabled);
+    configuration = config;
+  }
+
+  function getFlashLoanEnabled() external view returns (bool) {
+    return configuration.getFlashLoanEnabled();
+  }
+
   function setSupplyCap(uint256 supplyCap) external {
     DataTypes.ReserveConfigurationMap memory config = configuration;
     config.setSupplyCap(supplyCap);

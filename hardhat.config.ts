@@ -7,22 +7,19 @@ import { buildForkConfig } from './helper-hardhat-config';
 
 require('dotenv').config();
 
-import '@nomiclabs/hardhat-ethers';
-import '@nomiclabs/hardhat-etherscan';
-import 'hardhat-gas-reporter';
-import '@typechain/hardhat';
-import '@typechain/ethers-v5';
+import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
 import '@tenderly/hardhat-tenderly';
-import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import 'hardhat-dependency-compiler';
+import '@nomicfoundation/hardhat-chai-matchers';
+
 import { DEFAULT_NAMED_ACCOUNTS } from '@aave/deploy-v3';
 
 const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const HARDFORK = 'london';
 
-const hardhatConfig: HardhatUserConfig = {
+const hardhatConfig = {
   gasReporter: {
     enabled: true,
   },
@@ -37,7 +34,7 @@ const hardhatConfig: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 20000,
+        runs: 100000,
       },
       evmVersion: 'london',
     },
@@ -48,7 +45,7 @@ const hardhatConfig: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
-    bail: false,
+    bail: true,
   },
   tenderly: {
     project: process.env.TENDERLY_PROJECT || '',

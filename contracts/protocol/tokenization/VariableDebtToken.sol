@@ -20,12 +20,12 @@ import {ScaledBalanceTokenBase} from './base/ScaledBalanceTokenBase.sol';
  * @notice Implements a variable debt token to track the borrowing positions of users
  * at variable rate mode
  * @dev Transfer and approve functionalities are disabled since its a non-transferable token
- **/
+ */
 contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x1;
 
   /**
    * @dev Constructor.
@@ -40,6 +40,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
+    IPool initializingPool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
@@ -47,6 +48,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
+    require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
@@ -98,11 +100,11 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
 
   /// @inheritdoc IVariableDebtToken
   function burn(
-    address user,
+    address from,
     uint256 amount,
     uint256 index
   ) external virtual override onlyPool returns (uint256) {
-    _burnScaled(user, address(0), amount, index);
+    _burnScaled(from, address(0), amount, index);
     return scaledTotalSupply();
   }
 
@@ -119,7 +121,7 @@ contract VariableDebtToken is DebtTokenBase, ScaledBalanceTokenBase, IVariableDe
   /**
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
-   **/
+   */
   function transfer(address, uint256) external virtual override returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }

@@ -21,23 +21,16 @@ import { MintableERC20 } from '../../types/MintableERC20';
 import { AToken } from '../../types/AToken';
 import { PoolConfigurator } from '../../types/PoolConfigurator';
 
-import chai from 'chai';
-// @ts-ignore
-import bignumberChai from 'chai-bignumber';
 import { PriceOracle } from '../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../types/PoolAddressesProvider';
 import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProviderRegistry';
 import { WETH9Mocked } from '../../types/WETH9Mocked';
-import { solidity } from 'ethereum-waffle';
 import { AaveOracle, ACLManager, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
 import { waitForTx, evmSnapshot, evmRevert, getEthersSigners } from '@aave/deploy-v3';
 
 declare var hre: HardhatRuntimeEnvironment;
-
-chai.use(bignumberChai());
-chai.use(solidity);
 
 export interface SignerWithAddress {
   signer: Signer;
@@ -130,10 +123,10 @@ export async function initializeMakeSuite() {
   testEnv.helpersContract = await getAaveProtocolDataProvider();
 
   const allTokens = await testEnv.helpersContract.getAllATokens();
-  const aDaiAddress = allTokens.find((aToken) => aToken.symbol === 'aDAI')?.tokenAddress;
-  const aUsdcAddress = allTokens.find((aToken) => aToken.symbol === 'aUSDC')?.tokenAddress;
-  const aWEthAddress = allTokens.find((aToken) => aToken.symbol === 'aWETH')?.tokenAddress;
-  const aAaveAddress = allTokens.find((aToken) => aToken.symbol === 'aAAVE')?.tokenAddress;
+  const aDaiAddress = allTokens.find((aToken) => aToken.symbol.includes('DAI'))?.tokenAddress;
+  const aUsdcAddress = allTokens.find((aToken) => aToken.symbol.includes('USDC'))?.tokenAddress;
+  const aWEthAddress = allTokens.find((aToken) => aToken.symbol.includes('WETH'))?.tokenAddress;
+  const aAaveAddress = allTokens.find((aToken) => aToken.symbol.includes('AAVE'))?.tokenAddress;
 
   const reservesTokens = await testEnv.helpersContract.getAllReservesTokens();
 

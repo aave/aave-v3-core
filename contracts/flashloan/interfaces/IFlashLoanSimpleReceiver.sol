@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
 import {IPool} from '../../interfaces/IPool.sol';
@@ -9,7 +9,7 @@ import {IPool} from '../../interfaces/IPool.sol';
  * @author Aave
  * @notice Defines the basic interface of a flashloan-receiver contract.
  * @dev Implement this interface to develop a flashloan-compatible flashLoanReceiver contract
- **/
+ */
 interface IFlashLoanSimpleReceiver {
   /**
    * @notice Executes an operation after receiving the flash-borrowed asset

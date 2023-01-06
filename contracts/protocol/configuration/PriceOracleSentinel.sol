@@ -17,7 +17,7 @@ import {IACLManager} from '../../interfaces/IACLManager.sol';
 contract PriceOracleSentinel is IPriceOracleSentinel {
   /**
    * @dev Only pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyPoolAdmin() {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(aclManager.isPoolAdmin(msg.sender), Errors.CALLER_NOT_POOL_ADMIN);
@@ -26,7 +26,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
 
   /**
    * @dev Only risk or pool admin can call functions marked by this modifier.
-   **/
+   */
   modifier onlyRiskOrPoolAdmins() {
     IACLManager aclManager = IACLManager(ADDRESSES_PROVIDER.getACLManager());
     require(
@@ -73,8 +73,8 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
    * @return True if the SequencerOracle is up and the grace period passed, false otherwise
    */
   function _isUpAndGracePeriodPassed() internal view returns (bool) {
-    (bool isDown, uint256 timestampGotUp) = _sequencerOracle.latestAnswer();
-    return !isDown && block.timestamp - timestampGotUp > _gracePeriod;
+    (, int256 answer, , uint256 lastUpdateTimestamp, ) = _sequencerOracle.latestRoundData();
+    return answer == 0 && block.timestamp - lastUpdateTimestamp > _gracePeriod;
   }
 
   /// @inheritdoc IPriceOracleSentinel

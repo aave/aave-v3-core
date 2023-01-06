@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 import { BigNumber, Event, utils } from 'ethers';
-import AaveConfig from '@aave/deploy-v3/dist/markets/aave';
+import AaveConfig from '@aave/deploy-v3/dist/markets/test';
 import { waitForTx, advanceTimeAndBlock } from '@aave/deploy-v3';
 import { getACLManager } from '@aave/deploy-v3/dist/helpers/contract-getters';
 import { ReserveData, UserReserveData } from './helpers/utils/interfaces';

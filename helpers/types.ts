@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import {BigNumber} from '@ethersproject/bignumber';
 
 export interface SymbolMap<T> {
   [symbol: string]: T;
@@ -81,7 +81,7 @@ export enum ProtocolErrors {
   INVALID_ADDRESSES_PROVIDER_ID = '8', // 'Invalid id for the pool addresses provider'
   NOT_CONTRACT = '9', // 'Address is not a contract'
   CALLER_NOT_POOL_CONFIGURATOR = '10', // 'The caller of the function is not the pool configurator'
-  CALLER_NOT_ATOKEN = '11', // 'The caller of the function is not an atoken'
+  CALLER_NOT_ATOKEN = '11', // 'The caller of the function is not an AToken'
   INVALID_ADDRESSES_PROVIDER = '12', // 'The address of the pool addresses provider is invalid'
   INVALID_FLASHLOAN_EXECUTOR_RETURN = '13', // 'Invalid return value of the flashloan executor function'
   RESERVE_ALREADY_ADDED = '14', // 'Reserve has already been added to reserve list'
@@ -118,13 +118,12 @@ export enum ProtocolErrors {
   HEALTH_FACTOR_NOT_BELOW_THRESHOLD = '45', // 'Health factor is not below the threshold'
   COLLATERAL_CANNOT_BE_LIQUIDATED = '46', // 'The collateral chosen cannot be liquidated'
   SPECIFIED_CURRENCY_NOT_BORROWED_BY_USER = '47', // 'User did not borrow the specified currency'
-  SAME_BLOCK_BORROW_REPAY = '48', // 'Borrow and repay in same block is not allowed'
   INCONSISTENT_FLASHLOAN_PARAMS = '49', // 'Inconsistent flashloan parameters'
   BORROW_CAP_EXCEEDED = '50', // 'Borrow cap is exceeded'
   SUPPLY_CAP_EXCEEDED = '51', // 'Supply cap is exceeded'
   UNBACKED_MINT_CAP_EXCEEDED = '52', // 'Unbacked mint cap is exceeded'
   DEBT_CEILING_EXCEEDED = '53', // 'Debt ceiling is exceeded'
-  ATOKEN_SUPPLY_NOT_ZERO = '54', // 'Atoken supply is not zero'
+  UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO = '54', // 'Claimable rights over underlying not zero (aToken supply or accruedToTreasury)'
   STABLE_DEBT_NOT_ZERO = '55', // 'Stable debt supply is not zero'
   VARIABLE_DEBT_SUPPLY_NOT_ZERO = '56', // 'Variable debt supply is not zero'
   LTV_VALIDATION_FAILED = '57', // 'Ltv validation failed'
@@ -157,7 +156,11 @@ export enum ProtocolErrors {
   INVALID_OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = '84', // 'Invalid optimal stable to total debt ratio'
   UNDERLYING_CANNOT_BE_RESCUED = '85', // 'The underlying asset cannot be rescued'
   ADDRESSES_PROVIDER_ALREADY_ADDED = '86', // 'Reserve has already been added to reserve list'
-
+  POOL_ADDRESSES_DO_NOT_MATCH = '87', // 'The token implementation pool address and the pool address provided by the initializing pool do not match'
+  STABLE_BORROWING_ENABLED = '88', // 'Stable borrowing is enabled'
+  SILOED_BORROWING_VIOLATION = '89', // user is trying to violate the siloed borrowing rule
+  RESERVE_DEBT_NOT_ZERO = '90', // the total debt of the reserve needs to be 0
+  FLASHLOAN_DISABLED = '91', // FlashLoaning for this asset is disabled
   // SafeCast
   SAFECAST_UINT128_OVERFLOW = "SafeCast: value doesn't fit in 128 bits",
 

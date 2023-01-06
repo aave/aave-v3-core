@@ -32,15 +32,15 @@ library EModeLogic {
    * @notice Updates the user efficiency mode category
    * @dev Will revert if user is borrowing non-compatible asset or change will drop HF < HEALTH_FACTOR_LIQUIDATION_THRESHOLD
    * @dev Emits the `UserEModeSet` event
-   * @param reserves The state of all the reserves
-   * @param reservesList The list of the addresses of all the active reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param usersEModeCategory The state of all users efficiency mode category
    * @param userConfig The user configuration mapping that tracks the supplied/borrowed assets
    * @param params The additional parameters needed to execute the setUserEMode function
    */
   function executeSetUserEMode(
-    mapping(address => DataTypes.ReserveData) storage reserves,
+    mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     mapping(address => uint8) storage usersEModeCategory,
@@ -48,7 +48,7 @@ library EModeLogic {
     DataTypes.ExecuteSetUserEModeParams memory params
   ) external {
     ValidationLogic.validateSetUserEMode(
-      reserves,
+      reservesData,
       reservesList,
       eModeCategories,
       userConfig,
@@ -61,7 +61,7 @@ library EModeLogic {
 
     if (prevCategoryId != 0) {
       ValidationLogic.validateHealthFactor(
-        reserves,
+        reservesData,
         reservesList,
         eModeCategories,
         userConfig,
@@ -82,7 +82,7 @@ library EModeLogic {
    * @return The eMode ltv
    * @return The eMode liquidation threshold
    * @return The eMode asset price
-   **/
+   */
   function getEModeConfiguration(
     DataTypes.EModeCategory storage category,
     IPriceOracleGetter oracle
@@ -110,7 +110,7 @@ library EModeLogic {
    * @param eModeUserCategory The user eMode category
    * @param eModeAssetCategory The asset eMode category
    * @return True if eMode is active and the asset belongs to the eMode category chosen by the user, false otherwise
-   **/
+   */
   function isInEModeCategory(uint256 eModeUserCategory, uint256 eModeAssetCategory)
     internal
     pure

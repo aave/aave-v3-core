@@ -9,12 +9,11 @@ Parameters
 
 Licensor: Aave
 
-Licensed Work: Aave V3 Core
-The Licensed Work is (c) 2021 Aave
+Licensed Work: Aave V3 Core. The Licensed Work is (c) 2022 Aave
 
-Additional Use Grant:
+Additional Use Grant: Any uses listed and defined at this [LICENSE](./LICENSE.md)
 
-Change Date:
+Change Date: The earlier of 27 January 2023 or a date specified at v3-license-date.aave.eth
 
 Change License: MIT
 

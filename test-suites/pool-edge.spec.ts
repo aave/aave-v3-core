@@ -1,25 +1,96 @@
 import { expect } from 'chai';
 import { BigNumber, BigNumberish, utils } from 'ethers';
-import { impersonateAccountsHardhat } from '../helpers/misc-utils';
-import { MAX_UINT_AMOUNT, ZERO_ADDRESS } from '../helpers/constants';
+import { impersonateAccountsHardhat, setAutomine } from '../helpers/misc-utils';
+import { MAX_UINT_AMOUNT, MAX_UNBACKED_MINT_CAP, ZERO_ADDRESS } from '../helpers/constants';
 import { deployMintableERC20 } from '@aave/deploy-v3/dist/helpers/contract-deployments';
-import { ProtocolErrors } from '../helpers/types';
-import { MockPoolInherited__factory } from '../types/factories/MockPoolInherited__factory';
+import { ProtocolErrors, RateMode } from '../helpers/types';
 import { getFirstSigner } from '@aave/deploy-v3/dist/helpers/utilities/signer';
 import { topUpNonPayableWithEther } from './helpers/utils/funds';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { evmSnapshot, evmRevert } from '@aave/deploy-v3';
 import {
+  evmSnapshot,
+  evmRevert,
+  getPoolLibraries,
+  MockFlashLoanReceiver,
+  getMockFlashLoanReceiver,
+  advanceTimeAndBlock,
+  getACLManager,
+} from '@aave/deploy-v3';
+import {
+  MockPoolInherited__factory,
   MockReserveInterestRateStrategy__factory,
   StableDebtToken__factory,
   VariableDebtToken__factory,
   AToken__factory,
   Pool__factory,
-  InitializableImmutableAdminUpgradeabilityProxy,
+  ERC20__factory,
 } from '../types';
+import { convertToCurrencyDecimals, getProxyImplementation } from '../helpers/contracts-helpers';
+import { ethers } from 'hardhat';
+import { deposit, getTxCostAndTimestamp } from './helpers/actions';
+import AaveConfig from '@aave/deploy-v3/dist/markets/test';
+import {
+  calcExpectedReserveDataAfterDeposit,
+  configuration as calculationsConfiguration,
+} from './helpers/utils/calculations';
+import { getReserveData } from './helpers/utils/helpers';
 
 declare var hre: HardhatRuntimeEnvironment;
+
+// Setup function to have 1 user with DAI deposits, and another user with WETH collateral
+// and DAI borrowings at an indicated borrowing mode
+const setupPositions = async (testEnv: TestEnv, borrowingMode: RateMode) => {
+  const {
+    pool,
+    dai,
+    weth,
+    oracle,
+    users: [depositor, borrower],
+  } = testEnv;
+
+  // mints DAI to depositor
+  await dai
+    .connect(depositor.signer)
+    ['mint(uint256)'](await convertToCurrencyDecimals(dai.address, '20000'));
+
+  // approve protocol to access depositor wallet
+  await dai.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+  // user 1 deposits 1000 DAI
+  const amountDAItoDeposit = await convertToCurrencyDecimals(dai.address, '10000');
+
+  await pool
+    .connect(depositor.signer)
+    .deposit(dai.address, amountDAItoDeposit, depositor.address, '0');
+  // user 2 deposits 1 ETH
+  const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
+
+  // mints WETH to borrower
+  await weth
+    .connect(borrower.signer)
+    ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+
+  // approve protocol to access the borrower wallet
+  await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+  await pool
+    .connect(borrower.signer)
+    .deposit(weth.address, amountETHtoDeposit, borrower.address, '0');
+
+  //user 2 borrows
+
+  const userGlobalData = await pool.getUserAccountData(borrower.address);
+  const daiPrice = await oracle.getAssetPrice(dai.address);
+
+  const amountDAIToBorrow = await convertToCurrencyDecimals(
+    dai.address,
+    userGlobalData.availableBorrowsBase.div(daiPrice).mul(5000).div(10000).toString()
+  );
+  await pool
+    .connect(borrower.signer)
+    .borrow(dai.address, amountDAIToBorrow, borrowingMode, '0', borrower.address);
+};
 
 makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
   const {
@@ -33,14 +104,21 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     DEBT_CEILING_NOT_ZERO,
     ASSET_NOT_LISTED,
     ZERO_ADDRESS_NOT_VALID,
+    UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO,
+    SUPPLY_CAP_EXCEEDED,
+    RESERVE_LIQUIDITY_NOT_ZERO,
   } = ProtocolErrors;
 
-  const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = '2500';
-  const MAX_NUMBER_RESERVES = '128';
+  const MAX_STABLE_RATE_BORROW_SIZE_PERCENT = 2500;
+  const MAX_NUMBER_RESERVES = 128;
+  const TOTAL_PREMIUM = 9;
+  const PREMIUM_TO_PROTOCOL = 3000;
 
   const POOL_ID = utils.formatBytes32String('POOL');
 
   let snap: string;
+
+  let _mockFlashLoanReceiver = {} as MockFlashLoanReceiver;
 
   beforeEach(async () => {
     snap = await evmSnapshot();
@@ -71,22 +149,13 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const poolProxyAddress = await addressesProvider.getPool();
-    const poolProxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      poolProxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const oldPoolImpl = await poolProxy.callStatic.implementation();
+    const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Upgrade the Pool
     expect(
@@ -149,6 +218,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });
@@ -432,22 +502,13 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const poolProxyAddress = await addressesProvider.getPool();
-    const poolProxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      poolProxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const oldPoolImpl = await poolProxy.callStatic.implementation();
+    const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Upgrade the Pool
     expect(
@@ -609,22 +670,16 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
         EModeLogic: (await hre.deployments.get('EModeLogic')).address,
         BridgeLogic: (await hre.deployments.get('BridgeLogic')).address,
         FlashLoanLogic: (await hre.deployments.get('FlashLoanLogic')).address,
+        PoolLogic: (await hre.deployments.get('PoolLogic')).address,
       },
       log: false,
     });
 
-    // Impersonate PoolAddressesProvider
-    await impersonateAccountsHardhat([addressesProvider.address]);
-    const addressesProviderSigner = await hre.ethers.getSigner(addressesProvider.address);
-
     const proxyAddress = await addressesProvider.getAddress(POOL_ID);
-    const proxy = (await hre.ethers.getContractAt(
-      'InitializableImmutableAdminUpgradeabilityProxy',
-      proxyAddress,
-      addressesProviderSigner
-    )) as InitializableImmutableAdminUpgradeabilityProxy;
-
-    const implementationAddress = await proxy.callStatic.implementation();
+    const implementationAddress = await getProxyImplementation(
+      addressesProvider.address,
+      proxyAddress
+    );
 
     // Upgrade the Pool
     expect(
@@ -725,5 +780,433 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     await expect(
       pool.connect(configSigner).resetIsolationModeTotalDebt(dai.address)
     ).to.be.revertedWith(DEBT_CEILING_NOT_ZERO);
+  });
+
+  it('Tries to initialize a reserve with an AToken, StableDebtToken, and VariableDebt each deployed with the wrong pool address (revert expected)', async () => {
+    const { pool, deployer, configurator, addressesProvider } = testEnv;
+
+    const NEW_POOL_IMPL_ARTIFACT = await hre.deployments.deploy('DummyPool', {
+      contract: 'Pool',
+      from: deployer.address,
+      args: [addressesProvider.address],
+      libraries: await getPoolLibraries(),
+      log: false,
+    });
+
+    const aTokenImp = await new AToken__factory(await getFirstSigner()).deploy(pool.address);
+    const stableDebtTokenImp = await new StableDebtToken__factory(deployer.signer).deploy(
+      pool.address
+    );
+    const variableDebtTokenImp = await new VariableDebtToken__factory(deployer.signer).deploy(
+      pool.address
+    );
+
+    const aTokenWrongPool = await new AToken__factory(await getFirstSigner()).deploy(
+      NEW_POOL_IMPL_ARTIFACT.address
+    );
+    const stableDebtTokenWrongPool = await new StableDebtToken__factory(deployer.signer).deploy(
+      NEW_POOL_IMPL_ARTIFACT.address
+    );
+    const variableDebtTokenWrongPool = await new VariableDebtToken__factory(deployer.signer).deploy(
+      NEW_POOL_IMPL_ARTIFACT.address
+    );
+
+    const mockErc20 = await new ERC20__factory(deployer.signer).deploy('mock', 'MOCK');
+    const mockRateStrategy = await new MockReserveInterestRateStrategy__factory(
+      await getFirstSigner()
+    ).deploy(addressesProvider.address, 0, 0, 0, 0, 0, 0);
+
+    // Init the reserve
+    const initInputParams: {
+      aTokenImpl: string;
+      stableDebtTokenImpl: string;
+      variableDebtTokenImpl: string;
+      underlyingAssetDecimals: BigNumberish;
+      interestRateStrategyAddress: string;
+      underlyingAsset: string;
+      treasury: string;
+      incentivesController: string;
+      underlyingAssetName: string;
+      aTokenName: string;
+      aTokenSymbol: string;
+      variableDebtTokenName: string;
+      variableDebtTokenSymbol: string;
+      stableDebtTokenName: string;
+      stableDebtTokenSymbol: string;
+      params: string;
+    }[] = [
+      {
+        aTokenImpl: aTokenImp.address,
+        stableDebtTokenImpl: stableDebtTokenImp.address,
+        variableDebtTokenImpl: variableDebtTokenImp.address,
+        underlyingAssetDecimals: 18,
+        interestRateStrategyAddress: mockRateStrategy.address,
+        underlyingAsset: mockErc20.address,
+        treasury: ZERO_ADDRESS,
+        incentivesController: ZERO_ADDRESS,
+        underlyingAssetName: 'MOCK',
+        aTokenName: 'AMOCK',
+        aTokenSymbol: 'AMOCK',
+        variableDebtTokenName: 'VMOCK',
+        variableDebtTokenSymbol: 'VMOCK',
+        stableDebtTokenName: 'SMOCK',
+        stableDebtTokenSymbol: 'SMOCK',
+        params: '0x10',
+      },
+    ];
+
+    initInputParams[0].aTokenImpl = aTokenWrongPool.address;
+    await expect(configurator.initReserves(initInputParams)).to.be.reverted;
+
+    initInputParams[0].aTokenImpl = aTokenImp.address;
+    initInputParams[0].stableDebtTokenImpl = stableDebtTokenWrongPool.address;
+    await expect(configurator.initReserves(initInputParams)).to.be.reverted;
+
+    initInputParams[0].stableDebtTokenImpl = stableDebtTokenImp.address;
+    initInputParams[0].variableDebtTokenImpl = variableDebtTokenWrongPool.address;
+    await expect(configurator.initReserves(initInputParams)).to.be.reverted;
+
+    initInputParams[0].variableDebtTokenImpl = variableDebtTokenImp.address;
+    expect(await configurator.initReserves(initInputParams));
+  });
+
+  it('dropReserve(). Only allows to drop a reserve if both the aToken supply and accruedToTreasury are 0', async () => {
+    const {
+      configurator,
+      pool,
+      weth,
+      aWETH,
+      dai,
+      users: [user0],
+    } = testEnv;
+
+    _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
+
+    await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
+    await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
+
+    const userAddress = user0.address;
+    const amountToDeposit = ethers.utils.parseEther('1');
+
+    await weth['mint(uint256)'](amountToDeposit);
+
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
+
+    const wethFlashBorrowedAmount = ethers.utils.parseEther('0.8');
+
+    await pool.flashLoan(
+      _mockFlashLoanReceiver.address,
+      [weth.address],
+      [wethFlashBorrowedAmount],
+      [0],
+      _mockFlashLoanReceiver.address,
+      '0x10',
+      '0'
+    );
+
+    await pool.connect(user0.signer).withdraw(weth.address, MAX_UINT_AMOUNT, userAddress);
+
+    await expect(
+      configurator.dropReserve(weth.address),
+      'dropReserve() should not be possible as there are funds'
+    ).to.be.revertedWith(UNDERLYING_CLAIMABLE_RIGHTS_NOT_ZERO);
+
+    await pool.mintToTreasury([weth.address]);
+
+    // Impersonate Collector
+    const collectorAddress = await aWETH.RESERVE_TREASURY_ADDRESS();
+    await topUpNonPayableWithEther(user0.signer, [collectorAddress], utils.parseEther('1'));
+    await impersonateAccountsHardhat([collectorAddress]);
+    const collectorSigner = await hre.ethers.getSigner(collectorAddress);
+    await pool.connect(collectorSigner).withdraw(weth.address, MAX_UINT_AMOUNT, collectorAddress);
+
+    await configurator.dropReserve(weth.address);
+  });
+
+  it('validateSupply(). Only allows to supply if amount + (scaled aToken supply + accruedToTreasury) <= supplyCap', async () => {
+    const {
+      configurator,
+      pool,
+      weth,
+      aWETH,
+      users: [user0],
+    } = testEnv;
+
+    _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
+
+    await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
+    await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
+
+    const userAddress = user0.address;
+    const amountToDeposit = ethers.utils.parseEther('100000');
+
+    await weth['mint(uint256)'](amountToDeposit.add(ethers.utils.parseEther('30')));
+
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
+
+    const wethFlashBorrowedAmount = ethers.utils.parseEther('100000');
+
+    await pool.flashLoan(
+      _mockFlashLoanReceiver.address,
+      [weth.address],
+      [wethFlashBorrowedAmount],
+      [0],
+      _mockFlashLoanReceiver.address,
+      '0x10',
+      '0'
+    );
+
+    // At this point the totalSupply + accruedToTreasury is ~100090 WETH, with 100063 from supply and ~27 from accruedToTreasury
+    // so to properly test the supply cap condition:
+    // - Set supply cap above that, at 110 WETH
+    // - Try to supply 30 WETH more . Should work if not taken into account accruedToTreasury, but will not
+    // - Try to supply 5 WETH more. Should work
+
+    await configurator.setSupplyCap(weth.address, BigNumber.from('100000').add('110'));
+
+    await expect(
+      pool.deposit(weth.address, ethers.utils.parseEther('30'), userAddress, '0')
+    ).to.be.revertedWith(SUPPLY_CAP_EXCEEDED);
+
+    await pool.deposit(weth.address, ethers.utils.parseEther('5'), userAddress, '0');
+  });
+
+  it('_checkNoSuppliers() (PoolConfigurator). Properly disables actions if aToken supply == 0, but accruedToTreasury != 0', async () => {
+    const {
+      configurator,
+      pool,
+      weth,
+      aWETH,
+      users: [user0],
+    } = testEnv;
+
+    _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
+
+    await configurator.updateFlashloanPremiumTotal(TOTAL_PREMIUM);
+    await configurator.updateFlashloanPremiumToProtocol(PREMIUM_TO_PROTOCOL);
+
+    const userAddress = user0.address;
+    const amountToDeposit = ethers.utils.parseEther('100000');
+
+    await weth['mint(uint256)'](amountToDeposit.add(ethers.utils.parseEther('30')));
+
+    await weth.approve(pool.address, MAX_UINT_AMOUNT);
+
+    await pool.deposit(weth.address, amountToDeposit, userAddress, '0');
+
+    const wethFlashBorrowedAmount = ethers.utils.parseEther('100000');
+
+    await pool.flashLoan(
+      _mockFlashLoanReceiver.address,
+      [weth.address],
+      [wethFlashBorrowedAmount],
+      [0],
+      _mockFlashLoanReceiver.address,
+      '0x10',
+      '0'
+    );
+
+    await pool.connect(user0.signer).withdraw(weth.address, MAX_UINT_AMOUNT, userAddress);
+
+    await expect(configurator.setReserveActive(weth.address, false)).to.be.revertedWith(
+      RESERVE_LIQUIDITY_NOT_ZERO
+    );
+
+    await pool.mintToTreasury([weth.address]);
+
+    // Impersonate Collector
+    const collectorAddress = await aWETH.RESERVE_TREASURY_ADDRESS();
+    await topUpNonPayableWithEther(user0.signer, [collectorAddress], utils.parseEther('1'));
+    await impersonateAccountsHardhat([collectorAddress]);
+    const collectorSigner = await hre.ethers.getSigner(collectorAddress);
+    await pool.connect(collectorSigner).withdraw(weth.address, MAX_UINT_AMOUNT, collectorAddress);
+
+    await configurator.setReserveActive(weth.address, false);
+  });
+
+  it('LendingPool Reserve Factor 100%. Only variable borrowings. Validates that variable borrow index accrue, liquidity index not, and the Collector receives accruedToTreasury allocation after interest accrues', async () => {
+    const {
+      configurator,
+      pool,
+      aDai,
+      dai,
+      users: [depositor],
+    } = testEnv;
+
+    await setupPositions(testEnv, RateMode.Variable);
+
+    // Set the RF to 100%
+    await configurator.setReserveFactor(dai.address, '10000');
+
+    const reserveDataBefore = await pool.getReserveData(dai.address);
+
+    await advanceTimeAndBlock(10000);
+
+    // Deposit to "settle" the liquidity index accrual from pre-RF increase to 100%
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter1 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter1.variableBorrowIndex).to.be.gt(reserveDataBefore.variableBorrowIndex);
+    expect(reserveDataAfter1.accruedToTreasury).to.be.gt(reserveDataBefore.accruedToTreasury);
+    expect(reserveDataAfter1.liquidityIndex).to.be.gt(reserveDataBefore.liquidityIndex);
+
+    await advanceTimeAndBlock(10000);
+
+    // "Clean" update, that should not increase the liquidity index, only variable borrow
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter2 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter2.variableBorrowIndex).to.be.gt(reserveDataAfter1.variableBorrowIndex);
+    expect(reserveDataAfter2.accruedToTreasury).to.be.gt(reserveDataAfter1.accruedToTreasury);
+    expect(reserveDataAfter2.liquidityIndex).to.be.eq(reserveDataAfter1.liquidityIndex);
+  });
+
+  it('LendingPool Reserve Factor 100%. Only stable borrowings. Validates that neither variable borrow index nor liquidity index increase, but the Collector receives accruedToTreasury allocation after interest accrues', async () => {
+    const {
+      configurator,
+      pool,
+      aDai,
+      dai,
+      users: [depositor],
+    } = testEnv;
+
+    await setupPositions(testEnv, RateMode.Stable);
+
+    // Set the RF to 100%
+    await configurator.setReserveFactor(dai.address, '10000');
+
+    const reserveDataBefore = await pool.getReserveData(dai.address);
+
+    await advanceTimeAndBlock(10000);
+
+    // Deposit to "settle" the liquidity index accrual from pre-RF increase to 100%
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter1 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter1.variableBorrowIndex).to.be.eq(reserveDataBefore.variableBorrowIndex);
+    expect(reserveDataAfter1.accruedToTreasury).to.be.gt(reserveDataBefore.accruedToTreasury);
+    expect(reserveDataAfter1.liquidityIndex).to.be.gt(reserveDataBefore.liquidityIndex);
+
+    await advanceTimeAndBlock(10000);
+
+    // "Clean" update, that should not increase the liquidity index, only stable borrow
+    await pool
+      .connect(depositor.signer)
+      .deposit(
+        dai.address,
+        await convertToCurrencyDecimals(dai.address, '1'),
+        depositor.address,
+        '0'
+      );
+
+    const reserveDataAfter2 = await pool.getReserveData(dai.address);
+
+    expect(reserveDataAfter2.variableBorrowIndex).to.be.eq(reserveDataAfter1.variableBorrowIndex);
+    expect(reserveDataAfter2.accruedToTreasury).to.be.gt(reserveDataAfter1.accruedToTreasury);
+    expect(reserveDataAfter2.liquidityIndex).to.be.eq(reserveDataAfter1.liquidityIndex);
+  });
+
+  it('Pool with non-zero unbacked keeps the same liquidity and debt rate, even while setting zero unbackedMintCap', async () => {
+    const {
+      configurator,
+      pool,
+      dai,
+      helpersContract,
+      users: [user1, user2, user3, bridge],
+    } = testEnv;
+
+    // Set configuration of reserve params
+    calculationsConfiguration.reservesParams = AaveConfig.ReservesConfig;
+
+    // User 3 supplies 1M DAI and borrows 0.25M DAI
+    const daiAmount = await convertToCurrencyDecimals(dai.address, '1000000');
+    expect(await dai.connect(user3.signer)['mint(uint256)'](daiAmount));
+    expect(await dai.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT));
+    expect(await pool.connect(user3.signer).deposit(dai.address, daiAmount, user3.address, '0'));
+    expect(
+      await pool
+        .connect(user3.signer)
+        .borrow(dai.address, daiAmount.div(4), RateMode.Variable, '0', user3.address)
+    );
+
+    // Time flies, indexes grow
+    await advanceTimeAndBlock(60 * 60 * 24 * 6);
+
+    // Add bridge
+    const aclManager = await getACLManager();
+    expect(await aclManager.addBridge(bridge.address));
+
+    // Set non-zero unbackedMintCap for DAI
+    expect(await configurator.setUnbackedMintCap(dai.address, MAX_UNBACKED_MINT_CAP));
+
+    // Bridge mints 1M unbacked aDAI on behalf of User 1
+    expect(
+      await pool.connect(bridge.signer).mintUnbacked(dai.address, daiAmount, user1.address, 0)
+    );
+
+    const reserveDataBefore = await getReserveData(helpersContract, dai.address);
+
+    expect(await dai.connect(user2.signer)['mint(uint256)'](daiAmount));
+    expect(await dai.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT));
+
+    // Next two txs should be mined in the same block
+    await setAutomine(false);
+
+    // Set zero unbackedMintCap for DAI
+    expect(await configurator.setUnbackedMintCap(dai.address, 0));
+
+    // User 2 supplies 10 DAI
+    const amountToDeposit = await convertToCurrencyDecimals(dai.address, '10');
+    const tx = await pool
+      .connect(user2.signer)
+      .deposit(dai.address, amountToDeposit, user2.address, '0');
+
+    // Start mining
+    await setAutomine(true);
+
+    const rcpt = await tx.wait();
+    const { txTimestamp } = await getTxCostAndTimestamp(rcpt);
+
+    const reserveDataAfter = await getReserveData(helpersContract, dai.address);
+    const expectedReserveData = calcExpectedReserveDataAfterDeposit(
+      amountToDeposit.toString(),
+      reserveDataBefore,
+      txTimestamp
+    );
+
+    // Unbacked amount should keep constant
+    expect(reserveDataAfter.unbacked).to.be.eq(reserveDataBefore.unbacked);
+
+    expect(reserveDataAfter.liquidityRate).to.be.eq(expectedReserveData.liquidityRate);
+    expect(reserveDataAfter.variableBorrowRate).to.be.eq(expectedReserveData.variableBorrowRate);
+    expect(reserveDataAfter.stableBorrowRate).to.be.eq(expectedReserveData.stableBorrowRate);
   });
 });

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 library DataTypes {
   struct ReserveData {
@@ -203,6 +203,15 @@ library DataTypes {
     uint256 flashLoanPremiumTotal;
   }
 
+  struct FlashLoanRepaymentParams {
+    uint256 amount;
+    uint256 totalPremium;
+    uint256 flashLoanPremiumToProtocol;
+    address asset;
+    address receiverAddress;
+    uint16 referralCode;
+  }
+
   struct CalculateUserAccountDataParams {
     UserConfigurationMap userConfig;
     uint256 reservesCount;
@@ -245,5 +254,15 @@ library DataTypes {
     uint256 reserveFactor;
     address reserve;
     address aToken;
+  }
+
+  struct InitReserveParams {
+    address asset;
+    address aTokenAddress;
+    address stableDebtAddress;
+    address variableDebtAddress;
+    address interestRateStrategyAddress;
+    uint16 reservesCount;
+    uint16 maxNumberReserves;
   }
 }

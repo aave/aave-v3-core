@@ -21,12 +21,12 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
  * @notice Implements a stable debt token to track the borrowing positions of users
  * at stable rate mode
  * @dev Transfer and approve functionalities are disabled since its a non-transferable token
- **/
+ */
 contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   using WadRayMath for uint256;
   using SafeCast for uint256;
 
-  uint256 public constant DEBT_TOKEN_REVISION = 0x2;
+  uint256 public constant DEBT_TOKEN_REVISION = 0x1;
 
   // Map of users address and the timestamp of their last update (userAddress => lastUpdateTimestamp)
   mapping(address => uint40) internal _timestamps;
@@ -49,6 +49,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
 
   /// @inheritdoc IInitializableDebtToken
   function initialize(
+    IPool initializingPool,
     address underlyingAsset,
     IAaveIncentivesController incentivesController,
     uint8 debtTokenDecimals,
@@ -56,6 +57,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     string memory debtTokenSymbol,
     bytes calldata params
   ) external override initializer {
+    require(initializingPool == POOL, Errors.POOL_ADDRESSES_DO_NOT_MATCH);
     _setName(debtTokenName);
     _setSymbol(debtTokenSymbol);
     _setDecimals(debtTokenDecimals);
@@ -184,19 +186,19 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   }
 
   /// @inheritdoc IStableDebtToken
-  function burn(address user, uint256 amount)
+  function burn(address from, uint256 amount)
     external
     virtual
     override
     onlyPool
     returns (uint256, uint256)
   {
-    (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(user);
+    (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(from);
 
     uint256 previousSupply = totalSupply();
     uint256 nextAvgStableRate = 0;
     uint256 nextSupply = 0;
-    uint256 userStableRate = _userState[user].additionalData;
+    uint256 userStableRate = _userState[from].additionalData;
 
     // Since the total supply and each single user debt accrue separately,
     // there might be accumulation errors so that the last borrower repaying
@@ -223,22 +225,22 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     }
 
     if (amount == currentBalance) {
-      _userState[user].additionalData = 0;
-      _timestamps[user] = 0;
+      _userState[from].additionalData = 0;
+      _timestamps[from] = 0;
     } else {
       //solium-disable-next-line
-      _timestamps[user] = uint40(block.timestamp);
+      _timestamps[from] = uint40(block.timestamp);
     }
     //solium-disable-next-line
     _totalSupplyTimestamp = uint40(block.timestamp);
 
     if (balanceIncrease > amount) {
       uint256 amountToMint = balanceIncrease - amount;
-      _mint(user, amountToMint, previousSupply);
-      emit Transfer(address(0), user, amountToMint);
+      _mint(from, amountToMint, previousSupply);
+      emit Transfer(address(0), from, amountToMint);
       emit Mint(
-        user,
-        user,
+        from,
+        from,
         amountToMint,
         currentBalance,
         balanceIncrease,
@@ -248,9 +250,9 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
       );
     } else {
       uint256 amountToBurn = amount - balanceIncrease;
-      _burn(user, amountToBurn, previousSupply);
-      emit Transfer(user, address(0), amountToBurn);
-      emit Burn(user, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
+      _burn(from, amountToBurn, previousSupply);
+      emit Transfer(from, address(0), amountToBurn);
+      emit Burn(from, amountToBurn, currentBalance, balanceIncrease, nextAvgStableRate, nextSupply);
     }
 
     return (nextSupply, nextAvgStableRate);
@@ -262,7 +264,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @return The previous principal balance
    * @return The new principal balance
    * @return The balance increase
-   **/
+   */
   function _calculateBalanceIncrease(address user)
     internal
     view
@@ -333,7 +335,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @notice Calculates the total supply
    * @param avgRate The average rate at which the total supply increases
    * @return The debt balance of the user since the last burn/mint action
-   **/
+   */
   function _calcTotalSupply(uint256 avgRate) internal view returns (uint256) {
     uint256 principalSupply = super.totalSupply();
 
@@ -354,7 +356,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @param account The account receiving the debt tokens
    * @param amount The amount being minted
    * @param oldTotalSupply The total supply before the minting event
-   **/
+   */
   function _mint(
     address account,
     uint256 amount,
@@ -374,7 +376,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @param account The user getting his debt burned
    * @param amount The amount being burned
    * @param oldTotalSupply The total supply before the burning event
-   **/
+   */
   function _burn(
     address account,
     uint256 amount,
@@ -397,7 +399,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   /**
    * @dev Being non transferrable, the debt token does not implement any of the
    * standard ERC20 functions for transfer and allowance.
-   **/
+   */
   function transfer(address, uint256) external virtual override returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }

@@ -151,7 +151,7 @@
           "name": "borrow",
           "args": {
             "reserve": "USDC",
-            "amount": "280",
+            "amount": "180",
             "borrowRateMode": "variable",
             "user": "1"
           },
@@ -169,7 +169,6 @@
         }
       ]
     },
-
     {
       "description": "User 1 borrows the remaining USDC (usage ratio = 100%) at variable. User 0 rebalances user 1",
       "actions": [
@@ -177,7 +176,7 @@
           "name": "borrow",
           "args": {
             "reserve": "USDC",
-            "amount": "20",
+            "amount": "170",
             "borrowRateMode": "variable",
             "user": "1"
           },
@@ -191,6 +190,83 @@
             "target": "1"
           },
           "expected": "success"
+        }
+      ]
+    },
+    {
+      "description": "User 0 deposits 1000 USDC, user 1 deposits 7 WETH, borrows 950 USDC at a variable rate, user 0 rebalances user 1 (revert expected)",
+      "actions": [
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "USDC",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "USDC",
+            "amount": "1000",
+            "user": "0"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "mint",
+          "args": {
+            "reserve": "WETH",
+            "amount": "7",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "approve",
+          "args": {
+            "reserve": "WETH",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "deposit",
+          "args": {
+            "reserve": "WETH",
+            "amount": "7",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "borrow",
+          "args": {
+            "reserve": "USDC",
+            "amount": "950",
+            "borrowRateMode": "variable",
+            "user": "1"
+          },
+          "expected": "success"
+        },
+        {
+          "name": "rebalanceStableBorrowRate",
+          "args": {
+            "reserve": "USDC",
+            "user": "0",
+            "target": "1"
+          },
+          "expected": "revert",
+          "revertMessage": "The user borrow is variable and cannot be rebalanced"
         }
       ]
     }

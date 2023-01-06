@@ -215,7 +215,7 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     expect(userReserveDataAfter.currentVariableDebt).to.be.closeTo(
       userReserveDataBefore.currentVariableDebt.sub(amountToLiquidate),
-      2,
+      3,
       'Invalid user borrow balance after liquidation'
     );
 
@@ -476,8 +476,8 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     const balanceAfter = await aDai.balanceOf(user1.address);
 
-    const debtPrice = await oracle.getAssetPrice(usdc.address);
-    const collateralPrice = await oracle.getAssetPrice(dai.address);
+    const debtPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
+    const collateralPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
 
     const expectedCollateralLiquidated = debtPrice
       .mul(toBorrow.div(2))
@@ -487,6 +487,135 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
 
     const collateralLiquidated = balanceBefore.sub(balanceAfter);
 
+    expect(collateralLiquidated).to.be.closeTo(expectedCollateralLiquidated, 2);
+  });
+
+  it('Liquidation of non-eMode collateral with eMode debt in eMode with custom price feed', async () => {
+    await evmRevert(snap);
+    snap = await evmSnapshot();
+
+    const {
+      helpersContract,
+      oracle,
+      configurator,
+      pool,
+      poolAdmin,
+      dai,
+      usdc,
+      weth,
+      aWETH,
+      users: [user1, user2],
+    } = testEnv;
+
+    // We need an extra oracle for prices. USe user address as asset in price oracle
+    const EMODE_ORACLE_ADDRESS = user1.address;
+    await oracle.setAssetPrice(EMODE_ORACLE_ADDRESS, utils.parseUnits('1', 8));
+    await oracle.setAssetPrice(dai.address, utils.parseUnits('0.99', 8));
+    await oracle.setAssetPrice(usdc.address, utils.parseUnits('1.01', 8));
+    await oracle.setAssetPrice(weth.address, utils.parseUnits('4000', 8));
+
+    // Create category
+    expect(
+      await configurator
+        .connect(poolAdmin.signer)
+        .setEModeCategory(
+          1,
+          CATEGORY.ltv,
+          CATEGORY.lt,
+          CATEGORY.lb,
+          EMODE_ORACLE_ADDRESS,
+          CATEGORY.label
+        )
+    );
+
+    const categoryData = await pool.getEModeCategoryData(CATEGORY.id);
+
+    expect(categoryData.ltv).to.be.equal(CATEGORY.ltv, 'invalid eMode category ltv');
+    expect(categoryData.liquidationThreshold).to.be.equal(
+      CATEGORY.lt,
+      'invalid eMode category liq threshold'
+    );
+    expect(categoryData.liquidationBonus).to.be.equal(
+      CATEGORY.lb,
+      'invalid eMode category liq bonus'
+    );
+    expect(categoryData.priceSource).to.be.equal(
+      EMODE_ORACLE_ADDRESS,
+      'invalid eMode category price source'
+    );
+
+    // Add Dai and USDC to category
+    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(dai.address, CATEGORY.id);
+    await configurator.connect(poolAdmin.signer).setAssetEModeCategory(usdc.address, CATEGORY.id);
+    expect(await helpersContract.getReserveEModeCategory(dai.address)).to.be.eq(CATEGORY.id);
+    expect(await helpersContract.getReserveEModeCategory(usdc.address)).to.be.eq(CATEGORY.id);
+
+    // User 1 supply 1 dai + 1 eth, user 2 supply 10000 usdc
+    const wethSupplyAmount = utils.parseUnits('1', 18);
+    const daiSupplyAmount = utils.parseUnits('1', 18);
+    const usdcSupplyAmount = utils.parseUnits('10000', 6);
+
+    expect(await dai.connect(user1.signer)['mint(uint256)'](daiSupplyAmount));
+    expect(await weth.connect(user1.signer)['mint(uint256)'](wethSupplyAmount));
+    expect(await usdc.connect(user2.signer)['mint(uint256)'](usdcSupplyAmount.mul(2)));
+
+    expect(await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
+    expect(await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
+    expect(await usdc.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT));
+
+    expect(await pool.connect(user1.signer).supply(dai.address, daiSupplyAmount, user1.address, 0));
+    expect(
+      await pool.connect(user1.signer).supply(weth.address, wethSupplyAmount, user1.address, 0)
+    );
+    expect(
+      await pool.connect(user2.signer).supply(usdc.address, usdcSupplyAmount, user2.address, 0)
+    );
+
+    // Activate emode
+    expect(await pool.connect(user1.signer).setUserEMode(CATEGORY.id));
+
+    // Borrow a as much usdc as possible
+    const userData = await pool.getUserAccountData(user1.address);
+    const toBorrow = userData.availableBorrowsBase.div(100);
+
+    expect(
+      await pool
+        .connect(user1.signer)
+        .borrow(usdc.address, toBorrow, RateMode.Variable, 0, user1.address)
+    );
+
+    // Drop weth price
+    const oraclePrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
+
+    const userGlobalDataBefore = await pool.getUserAccountData(user1.address);
+    expect(userGlobalDataBefore.healthFactor).to.be.gt(utils.parseUnits('1', 18));
+
+    await oracle.setAssetPrice(EMODE_ORACLE_ADDRESS, oraclePrice.mul(2));
+
+    const userGlobalDataAfter = await pool.getUserAccountData(user1.address);
+    expect(userGlobalDataAfter.healthFactor).to.be.lt(utils.parseUnits('1', 18), INVALID_HF);
+
+    const balanceBefore = await aWETH.balanceOf(user1.address);
+
+    // Liquidate
+    await pool
+      .connect(user2.signer)
+      .liquidationCall(weth.address, usdc.address, user1.address, toBorrow.div(2), false);
+
+    const balanceAfter = await aWETH.balanceOf(user1.address);
+
+    const debtPrice = await oracle.getAssetPrice(EMODE_ORACLE_ADDRESS);
+    const collateralPrice = await oracle.getAssetPrice(weth.address);
+
+    const wethConfig = await helpersContract.getReserveConfigurationData(weth.address);
+
+    const expectedCollateralLiquidated = debtPrice
+      .mul(toBorrow.div(2))
+      .percentMul(wethConfig.liquidationBonus)
+      .mul(BigNumber.from(10).pow(18))
+      .div(collateralPrice.mul(BigNumber.from(10).pow(6)));
+
+    const collateralLiquidated = balanceBefore.sub(balanceAfter);
     expect(collateralLiquidated).to.be.closeTo(expectedCollateralLiquidated, 2);
   });
 });

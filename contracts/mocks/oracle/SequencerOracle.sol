@@ -9,6 +9,14 @@ contract SequencerOracle is ISequencerOracle, Ownable {
   uint256 internal _timestampGotUp;
 
   /**
+   * @dev Constructor.
+   * @param owner The owner address of this contract
+   */
+  constructor(address owner) {
+    transferOwnership(owner);
+  }
+
+  /**
    * @notice Updates the health status of the sequencer.
    * @param isDown True if the sequencer is down, false otherwise
    * @param timestamp The timestamp of last time the sequencer got up
@@ -19,7 +27,22 @@ contract SequencerOracle is ISequencerOracle, Ownable {
   }
 
   /// @inheritdoc ISequencerOracle
-  function latestAnswer() external view override returns (bool, uint256) {
-    return (_isDown, _timestampGotUp);
+  function latestRoundData()
+    external
+    view
+    override
+    returns (
+      uint80 roundId,
+      int256 answer,
+      uint256 startedAt,
+      uint256 updatedAt,
+      uint80 answeredInRound
+    )
+  {
+    int256 isDown;
+    if (_isDown) {
+      isDown = 1;
+    }
+    return (0, isDown, 0, _timestampGotUp, 0);
   }
 }

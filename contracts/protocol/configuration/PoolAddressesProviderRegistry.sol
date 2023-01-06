@@ -11,7 +11,7 @@ import {IPoolAddressesProviderRegistry} from '../../interfaces/IPoolAddressesPro
  * @notice Main registry of PoolAddressesProvider of Aave markets.
  * @dev Used for indexing purposes of Aave protocol's markets. The id assigned to a PoolAddressesProvider refers to the
  * market it is connected with, for example with `1` for the Aave main market and `2` for the next created.
- **/
+ */
 contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistry {
   // Map of address provider ids (addressesProvider => id)
   mapping(address => uint256) private _addressesProviderToId;
@@ -21,6 +21,14 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
   address[] private _addressesProvidersList;
   // Map of address provider list indexes (addressesProvider => indexInList)
   mapping(address => uint256) private _addressesProvidersIndexes;
+
+  /**
+   * @dev Constructor.
+   * @param owner The owner address of this contract.
+   */
+  constructor(address owner) {
+    transferOwnership(owner);
+  }
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function getAddressesProvidersList() external view override returns (address[] memory) {
@@ -42,7 +50,7 @@ contract PoolAddressesProviderRegistry is Ownable, IPoolAddressesProviderRegistr
 
   /// @inheritdoc IPoolAddressesProviderRegistry
   function unregisterAddressesProvider(address provider) external override onlyOwner {
-    require(_addressesProviderToId[provider] > 0, Errors.ADDRESSES_PROVIDER_NOT_REGISTERED);
+    require(_addressesProviderToId[provider] != 0, Errors.ADDRESSES_PROVIDER_NOT_REGISTERED);
     uint256 oldId = _addressesProviderToId[provider];
     _idToAddressesProvider[oldId] = address(0);
     _addressesProviderToId[provider] = 0;

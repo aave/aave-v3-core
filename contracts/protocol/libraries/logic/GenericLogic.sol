@@ -50,8 +50,8 @@ library GenericLogic {
    * @notice Calculates the user data across the reserves.
    * @dev It includes the total liquidity/collateral/borrow balances in the base currency used by the price feed,
    * the average Loan To Value, the average Liquidation Ratio, and the Health factor.
-   * @param reservesData The data of all the reserves
-   * @param reserves The list of the available reserves
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
    * @param eModeCategories The configuration of all the efficiency mode categories
    * @param params Additional parameters needed for the calculation
    * @return The total collateral of the user in the base currency used by the price feed
@@ -60,10 +60,10 @@ library GenericLogic {
    * @return The average liquidation threshold of the user
    * @return The health factor of the user
    * @return True if the ltv is zero, false otherwise
-   **/
+   */
   function calculateUserAccountData(
     mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reserves,
+    mapping(uint256 => address) storage reservesList,
     mapping(uint8 => DataTypes.EModeCategory) storage eModeCategories,
     DataTypes.CalculateUserAccountDataParams memory params
   )
@@ -100,7 +100,7 @@ library GenericLogic {
         continue;
       }
 
-      vars.currentReserveAddress = reserves[vars.i];
+      vars.currentReserveAddress = reservesList[vars.i];
 
       if (vars.currentReserveAddress == address(0)) {
         unchecked {
@@ -202,7 +202,7 @@ library GenericLogic {
    * @param totalDebtInBaseCurrency The total borrow balance in the base currency used by the price feed
    * @param ltv The average loan to value
    * @return The amount available to borrow in the base currency of the used by the price feed
-   **/
+   */
   function calculateAvailableBorrows(
     uint256 totalCollateralInBaseCurrency,
     uint256 totalDebtInBaseCurrency,
@@ -228,7 +228,7 @@ library GenericLogic {
    * @param assetPrice The price of the asset for which the total debt of the user is being calculated
    * @param assetUnit The value representing one full unit of the asset (10^decimals)
    * @return The total debt of the user normalized to the base currency
-   **/
+   */
   function _getUserDebtInBaseCurrency(
     address user,
     DataTypes.ReserveData storage reserve,
@@ -261,7 +261,7 @@ library GenericLogic {
    * @param assetPrice The price of the asset for which the total aToken balance of the user is being calculated
    * @param assetUnit The value representing one full unit of the asset (10^decimals)
    * @return The total aToken balance of the user normalized to the base currency of the price oracle
-   **/
+   */
   function _getUserBalanceInBaseCurrency(
     address user,
     DataTypes.ReserveData storage reserve,
