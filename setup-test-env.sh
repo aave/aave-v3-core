@@ -11,7 +11,7 @@
 # the deploy library to not find the external
 # artifacts. 
 
-echo "[BASH] Setting up testnet enviroment"
+echo "[BASH] Setting up testnet environment"
 
 if [ ! "$COVERAGE" = true ]; then
     # remove hardhat and artifacts cache
@@ -39,4 +39,4 @@ cp -r node_modules/@aave/deploy-v3/artifacts/contracts/* temp-artifacts/deploy
 # Export MARKET_NAME variable to use Aave market as testnet deployment setup
 export MARKET_NAME="Test"
 export ENABLE_REWARDS="false"
-echo "[BASH] Testnet enviroment ready"
+echo "[BASH] Testnet environment ready"

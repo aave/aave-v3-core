@@ -632,8 +632,8 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(await configurator.connect(poolAdmin.signer).initReserves(initInputParams));
     const reservesListAfterInit = await pool.connect(configurator.signer).getReservesList();
 
-    let occurences = reservesListAfterInit.filter((v) => v == mockToken.address).length;
-    expect(occurences).to.be.eq(1, 'Asset has multiple occurrences in the reserves list');
+    let occurrences = reservesListAfterInit.filter((v) => v == mockToken.address).length;
+    expect(occurrences).to.be.eq(1, 'Asset has multiple occurrences in the reserves list');
 
     expect(reservesListAfterInit.length).to.be.eq(
       reservesListAfterDrop.length + 1,

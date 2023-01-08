@@ -728,7 +728,7 @@ contract PoolHarnessForConfigurator is VersionedInitializable, IPool, PoolStorag
   }
 
   /// @inheritdoc IPool
-  /// @dev Deprecated: mantained for compatibilty purposes
+  /// @dev Deprecated: maintained for compatibility purposes
   function deposit(
     address asset,
     uint256 amount,
