@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.17.1](https://github.com/aave/aave-v3-core/compare/v1.17.0...v1.17.1) (2023-01-10)
+
+
+### Bug Fixes
+
+* Add BUSL to tokenization contracts ([#784](https://github.com/aave/aave-v3-core/issues/784)) ([bf87c52](https://github.com/aave/aave-v3-core/commit/bf87c52825ac1d8847e870bfe238b702b2cdf7b8))
+* Fix typos ([#781](https://github.com/aave/aave-v3-core/issues/781)) ([8a39136](https://github.com/aave/aave-v3-core/commit/8a3913607df88afcc4b8cc63f3a876ebac7d148b))
+
 ## [1.17.0](https://github.com/aave/aave-v3-core/compare/v1.16.2...v1.17.0) (2022-12-28)
 
 
