@@ -239,7 +239,7 @@ rule integrityBurn(address user, address to, uint256 amount)
 	} 
 
     assert bounded_error_eq(totalSupplyAfter, totalSupplyBefore - amount, index), "total supply integrity"; // total supply reduced
-    assert bounded_error_eq(balanceAfterUser, balanceBeforeUser - amount, index), "integrity break";  // user burns ATokens to recieve underlying
+    assert bounded_error_eq(balanceAfterUser, balanceBeforeUser - amount, index), "integrity break";  // user burns ATokens to receive underlying
 
 }
 
@@ -271,16 +271,16 @@ rule additiveBurn(address user, address to, uint256 x, uint256 y)
 			"burn is not additive";
 }
 
-rule burnNoChangeToOther(address user, address recieverOfUnderlying, uint256 amount, uint256 index, address other) 
+rule burnNoChangeToOther(address user, address receiverOfUnderlying, uint256 amount, uint256 index, address other) 
 {
   
-	require other != user && other != recieverOfUnderlying;
+	require other != user && other != receiverOfUnderlying;
 	
 	env e;
 	uint256 otherDataBefore = additionalData(other);
 	uint256 otherBalanceBefore = balanceOf(other);
 	
-	burn(e, user, recieverOfUnderlying, amount, index);
+	burn(e, user, receiverOfUnderlying, amount, index);
 	
 	uint256 otherDataAfter = additionalData(other);
 	uint256 otherBalanceAfter = balanceOf(other);

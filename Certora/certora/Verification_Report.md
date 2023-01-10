@@ -17,10 +17,10 @@ The scope of this verification is Aave's governance system, particularly the fol
 * [`ReserveConfiguration.sol`](https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/libraries/configuration/ReserveConfiguration.sol) ([`Verification Results`](https://vaas-stg.certora.com/output/23658/633d0d7547a80788d266/?anonymousKey=83401dd8a786839159d64343adb7c70dd22c9c6c))
 * [`UserConfiguration.sol`](https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/libraries/configuration/UserConfiguration.sol) ([`Verification Results`](https://vaas-stg.certora.com/output/23658/6b970f07251caed97b46/?anonymousKey=eec671384cee54c5a44fc278db2a489cb6fc1ddd))
 
-And partial verificaiton of: 
+And partial verification of:
 * [`Pool.sol`](https://github.com/aave/aave-v3-core/blob/master/contracts/protocol/pool/Pool.sol) 
 
-The Certora Prover proved the implementation of the protocol is correct with respect to formal specifications written by the the Certora team.  The team also performed a manual audit of these contracts.
+The Certora Prover proved the implementation of the protocol is correct with respect to formal specifications written by the the Certora team. The team also performed a manual audit of these contracts.
 
 The specification program was modularized to optimize coverage. First, the tokenization contracts were found to uphold to the same properties the [Aave V2](https://hackmd.io/TYI3fetcQgmkAZF_ENSErA) tokenization did, as well as additional properties. On the main Pool contract, the focus of the verification was the protocol's storage of its reserves data, their classification to EModes - a new feature of the V3 protocol - and its compatibility with the user's action. This was done by modularly checking the userConfiguration and reservesConfiguration libraries first. 
  
@@ -101,7 +101,7 @@ Aave is a decentralized non-custodial liquidity markets protocol where users can
 
 ## Description of the specification files
 
-The specification contains six files, three for the tokenization part, one for the pool and one for each of the reserve and user configuration contracts. The tokens' contracts have similar specifications, using (up to slight modifications) properties based on Certora's aggregated experience with ERC20 verificartion.
+The specification contains six files, three for the tokenization part, one for the pool and one for each of the reserve and user configuration contracts. The tokens' contracts have similar specifications, using (up to slight modifications) properties based on Certora's aggregated experience with ERC20 verification.
 On the main Pool contract, the focus of the coverage was the protocol's storage of its reserves data, their classification to EModes - a new feature of the V3 protocol - and its compatibility with the user's action. This was done by modularly checking the userConfiguration and reservesConfiguration libraries first.
 
 ## Assumptions and Simplifications
@@ -121,7 +121,7 @@ We made the following assumptions during the verification process:
 
 In this document, verification conditions are either shown as logical formulas or Hoare triples of the form {p} C {q}. A verification condition given by a logical formula denotes an invariant that holds if every reachable state satisfies the condition.
 
-Hoare triples of the form {p} C {q} holds if any non-reverting execution of program C that starts in a state satsifying the precondition p ends in a state satisfying the postcondition q. The notation {p} C@withrevert {q} is similar but applies to both reverting and non-reverting executions. Preconditions and postconditions are similar to the Solidity require and assert statements.
+Hoare triples of the form {p} C {q} holds if any non-reverting execution of program C that starts in a state satisfying the precondition p ends in a state satisfying the postcondition q. The notation {p} C@withrevert {q} is similar but applies to both reverting and non-reverting executions. Preconditions and postconditions are similar to the Solidity require and assert statements.
 
 Formulas relate the results of method calls. In most cases, these methods are getters defined in the contracts, but in some cases they are getters we have added to our harness or definitions provided in the rules file. Undefined variables in the formulas are treated as arbitrary: the rule is checked for every possible value of the variables.
 
@@ -231,7 +231,7 @@ burn(u, u’, x); burn(u, u’, y) ~ burn(u, u’, x+y) at the same timestamp
     mint(user, onBehalfOf, amount, index) 
 { balanceOf(other) == bbo && (user != onBehalfOf => balanceOf(user) == bbu) }
 ```
-#### 9. Burn zero dosen't change balance ✔️
+#### 9. Burn zero doesn't change balance ✔️
 ```
 { b = balanceOf(user) } 
     burn(user, 0, index) 
