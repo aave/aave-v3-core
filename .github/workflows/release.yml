@@ -17,22 +17,16 @@ jobs:
         # these if statements ensure that a publication only occurs when
         # a new release is created:
         if: ${{ steps.release.outputs.release_created }}
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         if: ${{ steps.release.outputs.release_created }}
         with:
           node-version: ${{ matrix.node-version }}
-          # Use the Github Package registry
-          registry-url: https://npm.pkg.github.com/
           scope: '@aave'
       - run: npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
         if: ${{ steps.release.outputs.release_created }}
       - run: npm run ci:test
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.PAT_PACKAGES_REGISTRY_READ_ONLY }}
         if: ${{ steps.release.outputs.release_created }}
       - run: npm publish
         if: ${{ steps.release.outputs.release_created }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN }}
