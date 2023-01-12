@@ -348,8 +348,10 @@ library ReserveLogic {
     reserveCache.reserveLastUpdateTimestamp = reserve.lastUpdateTimestamp;
 
     reserveCache.currScaledVariableDebt = reserveCache.nextScaledVariableDebt = IVariableDebtToken(
-      reserveCache.variableDebtTokenAddress
-    ).scaledTotalSupply();
+      reserveCache
+        .variableDebtTokenAddress
+    )
+      .scaledTotalSupply();
 
     (
       reserveCache.currPrincipalStableDebt,
