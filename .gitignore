@@ -19,3 +19,11 @@ coverage
 .coverage_contracts
 coverage.json
 deployments/
+
+#certora
+.certora*
+.certora*.json
+**.last_conf*
+certora-logs
+certora_debug_log.txt
+resource_errors.json

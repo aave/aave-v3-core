@@ -1,0 +1,18 @@
+diff -ruN .gitignore .gitignore
+--- .gitignore	1970-01-01 02:00:00
++++ .gitignore	2022-12-15 19:39:47
+@@ -0,0 +1,2 @@
++*
++!.gitignore
+diff -ruN protocol/tokenization/StableDebtToken.sol protocol/tokenization/StableDebtToken.sol
+--- protocol/tokenization/StableDebtToken.sol	2022-12-15 19:40:24
++++ protocol/tokenization/StableDebtToken.sol	2022-12-18 02:11:16
+@@ -336,7 +336,7 @@
+    * @param avgRate The average rate at which the total supply increases
+    * @return The debt balance of the user since the last burn/mint action
+    */
+-  function _calcTotalSupply(uint256 avgRate) internal view returns (uint256) {
++  function _calcTotalSupply(uint256 avgRate) internal virtual view returns (uint256) {
+     uint256 principalSupply = super.totalSupply();
+ 
+     if (principalSupply == 0) {
