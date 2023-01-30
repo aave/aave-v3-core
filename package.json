@@ -45,7 +45,7 @@
     "dotenv": "8.2.0",
     "eth-sig-util": "2.5.3",
     "ethereumjs-util": "7.0.2",
-    "ethers": "5.6.9",
+    "ethers": "5.7.2",
     "hardhat": "2.12.2",
     "hardhat-contract-sizer": "2.0.3",
     "hardhat-dependency-compiler": "1.1.2",
