@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "outDir": "dist/",
+    "importHelpers": false,
+    "declaration": true,
+    "declarationMap": true,
+    "declarationDir": "dist/types",
+    "typeRoots": ["./typechain/*.d.ts", "./node_modules/@types"]
+  },
+  "include": ["helpers", "types", "hardhat.config.ts"]
+}
