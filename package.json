@@ -5,8 +5,10 @@
   "files": [
     "contracts",
     "artifacts",
-    "types"
+    "types",
+    "dist"
   ],
+  "main": "dist/helpers/index.js",
   "engines": {
     "node": ">=16.0.0"
   },
@@ -26,7 +28,8 @@
     "test-subgraph:scenarios": ". ./setup-test-env.sh  && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
     "ci:test": ". ./setup-test-env.sh  && npm run test",
     "ci:clean": "rm -rf ./artifacts ./cache ./types ./temp-artifacts",
-    "prepublish": "npm run compile"
+    "build": "tsc --project lib.tsconfig.json",
+    "prepublish": "npm run compile && npm run build"
   },
   "devDependencies": {
     "@aave/deploy-v3": "1.51.0",
@@ -42,7 +45,7 @@
     "dotenv": "8.2.0",
     "eth-sig-util": "2.5.3",
     "ethereumjs-util": "7.0.2",
-    "ethers": "5.6.9",
+    "ethers": "5.7.2",
     "hardhat": "2.12.2",
     "hardhat-contract-sizer": "2.0.3",
     "hardhat-dependency-compiler": "1.1.2",
