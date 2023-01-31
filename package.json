@@ -17,8 +17,8 @@
     "compile": "SKIP_LOAD=true hardhat compile",
     "compile:clean": "npm run ci:clean && npm run compile",
     "console:fork": "FORK=main hardhat console",
-    "prettier:check": "npx prettier -c 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
-    "prettier:write": "prettier --write 'tasks/**/*.ts' 'contracts/**/*.sol' 'helpers/**/*.ts'  'test-suites/**/*.ts' 'market-config/**/*.ts'",
+    "prettier:check": "prettier -c .",
+    "prettier:write": "prettier -w .",
     "coverage": ". ./setup-test-env.sh && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles test-suites/emptyrun.coverage.ts && rm -rf coverage.json coverage/ && COVERAGE=true npx hardhat coverage --temp temp-artifacts --testfiles 'test-suites/*.spec.ts'",
     "test": ". ./setup-test-env.sh && TS_NODE_TRANSPILE_ONLY=1 hardhat test test-suites/*.spec.ts",
     "test-scenarios": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/scenario.spec.ts",
@@ -26,7 +26,8 @@
     "test-subgraph:scenarios": ". ./setup-test-env.sh  && hardhat --network hardhatevm_docker test test-suites/__setup.spec.ts test-suites/subgraph-scenarios.spec.ts",
     "ci:test": ". ./setup-test-env.sh  && npm run test",
     "ci:clean": "rm -rf ./artifacts ./cache ./types ./temp-artifacts",
-    "prepublish": "npm run compile"
+    "prepublish": "npm run compile",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@aave/deploy-v3": "1.51.0",
@@ -48,20 +49,15 @@
     "hardhat-dependency-compiler": "1.1.2",
     "hardhat-deploy": "0.11.12",
     "hardhat-gas-reporter": "1.0.8",
-    "husky": "4.2.5",
+    "husky": "8.0.3",
+    "lint-staged": "13.1.0",
     "prettier": "2.4.1",
-    "prettier-plugin-solidity": "1.0.0-alpha.53",
-    "pretty-quick": "3.1.1",
+    "prettier-plugin-solidity": "1.1.1",
     "ts-node": "8.10.2",
     "tslint": "6.1.2",
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.3.0",
     "typescript": "^4.5.0"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged --pattern 'contracts/**/*.sol' --pattern 'helpers/**/*.ts'  --pattern 'test-suites**/*.ts' --pattern 'tasks/**/*.ts' --pattern 'markets/**/*.ts'"
-    }
   },
   "author": "Aave",
   "contributors": [
@@ -86,5 +82,8 @@
   "repository": {
     "type": "git",
     "url": "git://github.com/aave/aave-v3-core"
+  },
+  "lint-staged": {
+    "*.{ts,js,md,sol}": "prettier --write"
   }
 }
