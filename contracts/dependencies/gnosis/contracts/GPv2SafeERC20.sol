@@ -9,11 +9,7 @@ import {IERC20} from '../../openzeppelin/contracts/IERC20.sol';
 library GPv2SafeERC20 {
   /// @dev Wrapper around a call to the ERC20 function `transfer` that reverts
   /// also when the token returns `false`.
-  function safeTransfer(
-    IERC20 token,
-    address to,
-    uint256 value
-  ) internal {
+  function safeTransfer(IERC20 token, address to, uint256 value) internal {
     bytes4 selector_ = token.transfer.selector;
 
     // solhint-disable-next-line no-inline-assembly
@@ -34,12 +30,7 @@ library GPv2SafeERC20 {
 
   /// @dev Wrapper around a call to the ERC20 function `transferFrom` that
   /// reverts also when the token returns `false`.
-  function safeTransferFrom(
-    IERC20 token,
-    address from,
-    address to,
-    uint256 value
-  ) internal {
+  function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
     bytes4 selector_ = token.transferFrom.selector;
 
     // solhint-disable-next-line no-inline-assembly

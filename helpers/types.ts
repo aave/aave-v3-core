@@ -1,4 +1,4 @@
-import {BigNumber} from '@ethersproject/bignumber';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export interface SymbolMap<T> {
   [symbol: string]: T;

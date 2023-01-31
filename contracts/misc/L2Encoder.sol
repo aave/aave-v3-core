@@ -72,15 +72,7 @@ contract L2Encoder {
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
-  )
-    external
-    view
-    returns (
-      bytes32,
-      bytes32,
-      bytes32
-    )
-  {
+  ) external view returns (bytes32, bytes32, bytes32) {
     DataTypes.ReserveData memory data = POOL.getReserveData(asset);
 
     uint16 assetId = data.id;
@@ -205,15 +197,7 @@ contract L2Encoder {
     uint8 permitV,
     bytes32 permitR,
     bytes32 permitS
-  )
-    external
-    view
-    returns (
-      bytes32,
-      bytes32,
-      bytes32
-    )
-  {
+  ) external view returns (bytes32, bytes32, bytes32) {
     DataTypes.ReserveData memory data = POOL.getReserveData(asset);
 
     uint16 assetId = data.id;
@@ -259,11 +243,10 @@ contract L2Encoder {
    * @param interestRateMode The current interest rate mode of the position being swapped: 1 for Stable, 2 for Variable
    * @return compact representation of swap borrow rate mode parameters
    */
-  function encodeSwapBorrowRateMode(address asset, uint256 interestRateMode)
-    external
-    view
-    returns (bytes32)
-  {
+  function encodeSwapBorrowRateMode(
+    address asset,
+    uint256 interestRateMode
+  ) external view returns (bytes32) {
     DataTypes.ReserveData memory data = POOL.getReserveData(asset);
     uint16 assetId = data.id;
     uint8 shortenedInterestRateMode = interestRateMode.toUint8();
@@ -280,11 +263,10 @@ contract L2Encoder {
    * @param user The address of the user to be rebalanced
    * @return compact representation of rebalance stable borrow rate parameters
    */
-  function encodeRebalanceStableBorrowRate(address asset, address user)
-    external
-    view
-    returns (bytes32)
-  {
+  function encodeRebalanceStableBorrowRate(
+    address asset,
+    address user
+  ) external view returns (bytes32) {
     DataTypes.ReserveData memory data = POOL.getReserveData(asset);
     uint16 assetId = data.id;
 
@@ -301,11 +283,10 @@ contract L2Encoder {
    * @param useAsCollateral True if the user wants to use the supply as collateral, false otherwise
    * @return compact representation of set user use reserve as collateral parameters
    */
-  function encodeSetUserUseReserveAsCollateral(address asset, bool useAsCollateral)
-    external
-    view
-    returns (bytes32)
-  {
+  function encodeSetUserUseReserveAsCollateral(
+    address asset,
+    bool useAsCollateral
+  ) external view returns (bytes32) {
     DataTypes.ReserveData memory data = POOL.getReserveData(asset);
     uint16 assetId = data.id;
     bytes32 res;

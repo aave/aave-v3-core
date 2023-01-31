@@ -275,15 +275,17 @@ interface IPoolConfigurator {
    * @notice Updates the stable debt token implementation for the reserve.
    * @param input The stableDebtToken update parameters
    */
-  function updateStableDebtToken(ConfiguratorInputTypes.UpdateDebtTokenInput calldata input)
-    external;
+  function updateStableDebtToken(
+    ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
+  ) external;
 
   /**
    * @notice Updates the variable debt token implementation for the asset.
    * @param input The variableDebtToken update parameters
    */
-  function updateVariableDebtToken(ConfiguratorInputTypes.UpdateDebtTokenInput calldata input)
-    external;
+  function updateVariableDebtToken(
+    ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
+  ) external;
 
   /**
    * @notice Configures borrowing on a reserve.
@@ -370,8 +372,10 @@ interface IPoolConfigurator {
    * @param asset The address of the underlying asset of the reserve
    * @param newRateStrategyAddress The address of the new interest strategy contract
    */
-  function setReserveInterestRateStrategyAddress(address asset, address newRateStrategyAddress)
-    external;
+  function setReserveInterestRateStrategyAddress(
+    address asset,
+    address newRateStrategyAddress
+  ) external;
 
   /**
    * @notice Pauses or unpauses all the protocol reserves. In the paused state all the protocol interactions

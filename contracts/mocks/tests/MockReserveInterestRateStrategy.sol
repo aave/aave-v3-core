@@ -54,15 +54,13 @@ contract MockReserveInterestRateStrategy is IDefaultInterestRateStrategy {
     _variableBorrowRate = variableBorrowRate;
   }
 
-  function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory)
+  function calculateInterestRates(
+    DataTypes.CalculateInterestRatesParams memory
+  )
     external
     view
     override
-    returns (
-      uint256 liquidityRate,
-      uint256 stableBorrowRate,
-      uint256 variableBorrowRate
-    )
+    returns (uint256 liquidityRate, uint256 stableBorrowRate, uint256 variableBorrowRate)
   {
     return (_liquidityRate, _stableBorrowRate, _variableBorrowRate);
   }

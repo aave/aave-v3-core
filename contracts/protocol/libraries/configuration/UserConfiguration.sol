@@ -84,11 +84,10 @@ library UserConfiguration {
    * @param reserveIndex The index of the reserve in the bitmap
    * @return True if the user has been using a reserve for borrowing, false otherwise
    */
-  function isBorrowing(DataTypes.UserConfigurationMap memory self, uint256 reserveIndex)
-    internal
-    pure
-    returns (bool)
-  {
+  function isBorrowing(
+    DataTypes.UserConfigurationMap memory self,
+    uint256 reserveIndex
+  ) internal pure returns (bool) {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
       return (self.data >> (reserveIndex << 1)) & 1 != 0;
@@ -101,11 +100,10 @@ library UserConfiguration {
    * @param reserveIndex The index of the reserve in the bitmap
    * @return True if the user has been using a reserve as collateral, false otherwise
    */
-  function isUsingAsCollateral(DataTypes.UserConfigurationMap memory self, uint256 reserveIndex)
-    internal
-    pure
-    returns (bool)
-  {
+  function isUsingAsCollateral(
+    DataTypes.UserConfigurationMap memory self,
+    uint256 reserveIndex
+  ) internal pure returns (bool) {
     unchecked {
       require(reserveIndex < ReserveConfiguration.MAX_RESERVES_COUNT, Errors.INVALID_RESERVE_INDEX);
       return (self.data >> ((reserveIndex << 1) + 1)) & 1 != 0;
@@ -118,11 +116,9 @@ library UserConfiguration {
    * @param self The configuration object
    * @return True if the user has been supplying as collateral one reserve, false otherwise
    */
-  function isUsingAsCollateralOne(DataTypes.UserConfigurationMap memory self)
-    internal
-    pure
-    returns (bool)
-  {
+  function isUsingAsCollateralOne(
+    DataTypes.UserConfigurationMap memory self
+  ) internal pure returns (bool) {
     uint256 collateralData = self.data & COLLATERAL_MASK;
     return collateralData != 0 && (collateralData & (collateralData - 1) == 0);
   }
@@ -132,11 +128,9 @@ library UserConfiguration {
    * @param self The configuration object
    * @return True if the user has been supplying as collateral any reserve, false otherwise
    */
-  function isUsingAsCollateralAny(DataTypes.UserConfigurationMap memory self)
-    internal
-    pure
-    returns (bool)
-  {
+  function isUsingAsCollateralAny(
+    DataTypes.UserConfigurationMap memory self
+  ) internal pure returns (bool) {
     return self.data & COLLATERAL_MASK != 0;
   }
 
@@ -182,15 +176,7 @@ library UserConfiguration {
     DataTypes.UserConfigurationMap memory self,
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList
-  )
-    internal
-    view
-    returns (
-      bool,
-      address,
-      uint256
-    )
-  {
+  ) internal view returns (bool, address, uint256) {
     if (isUsingAsCollateralOne(self)) {
       uint256 assetId = _getFirstAssetIdByMask(self, COLLATERAL_MASK);
 
@@ -232,11 +218,10 @@ library UserConfiguration {
    * @param self The configuration object
    * @return The index of the first asset flagged in the bitmap once the corresponding mask is applied
    */
-  function _getFirstAssetIdByMask(DataTypes.UserConfigurationMap memory self, uint256 mask)
-    internal
-    pure
-    returns (uint256)
-  {
+  function _getFirstAssetIdByMask(
+    DataTypes.UserConfigurationMap memory self,
+    uint256 mask
+  ) internal pure returns (uint256) {
     unchecked {
       uint256 bitmapData = self.data & mask;
       uint256 firstAssetPosition = bitmapData & ~(bitmapData - 1);

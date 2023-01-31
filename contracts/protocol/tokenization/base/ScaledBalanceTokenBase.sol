@@ -39,12 +39,9 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
   }
 
   /// @inheritdoc IScaledBalanceToken
-  function getScaledUserBalanceAndSupply(address user)
-    external
-    view
-    override
-    returns (uint256, uint256)
-  {
+  function getScaledUserBalanceAndSupply(
+    address user
+  ) external view override returns (uint256, uint256) {
     return (super.balanceOf(user), super.totalSupply());
   }
 
@@ -99,12 +96,7 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
    * @param amount The amount getting burned
    * @param index The variable debt index of the reserve
    */
-  function _burnScaled(
-    address user,
-    address target,
-    uint256 amount,
-    uint256 index
-  ) internal {
+  function _burnScaled(address user, address target, uint256 amount, uint256 index) internal {
     uint256 amountScaled = amount.rayDiv(index);
     require(amountScaled != 0, Errors.INVALID_BURN_AMOUNT);
 
@@ -135,12 +127,7 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
    * @param amount The amount getting transferred
    * @param index The next liquidity index of the reserve
    */
-  function _transfer(
-    address sender,
-    address recipient,
-    uint256 amount,
-    uint256 index
-  ) internal {
+  function _transfer(address sender, address recipient, uint256 amount, uint256 index) internal {
     uint256 senderScaledBalance = super.balanceOf(sender);
     uint256 senderBalanceIncrease = senderScaledBalance.rayMul(index) -
       senderScaledBalance.rayMul(_userState[sender].additionalData);

@@ -32,10 +32,9 @@ interface IPoolAddressesProviderRegistry {
    * @param addressesProvider The address of the PoolAddressesProvider
    * @return The id of the PoolAddressesProvider or 0 if is not registered
    */
-  function getAddressesProviderIdByAddress(address addressesProvider)
-    external
-    view
-    returns (uint256);
+  function getAddressesProviderIdByAddress(
+    address addressesProvider
+  ) external view returns (uint256);
 
   /**
    * @notice Returns the address of a registered PoolAddressesProvider

@@ -44,12 +44,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param amount The amount being burned
    * @param index The next liquidity index of the reserve
    */
-  function burn(
-    address from,
-    address receiverOfUnderlying,
-    uint256 amount,
-    uint256 index
-  ) external;
+  function burn(address from, address receiverOfUnderlying, uint256 amount, uint256 index) external;
 
   /**
    * @notice Mints aTokens to the reserve treasury
@@ -64,11 +59,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param to The recipient
    * @param value The amount of tokens getting transferred
    */
-  function transferOnLiquidation(
-    address from,
-    address to,
-    uint256 value
-  ) external;
+  function transferOnLiquidation(address from, address to, uint256 value) external;
 
   /**
    * @notice Transfers the underlying asset to `target`.
@@ -87,11 +78,7 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param onBehalfOf The address of the user who will get his debt reduced/removed
    * @param amount The amount getting repaid
    */
-  function handleRepayment(
-    address user,
-    address onBehalfOf,
-    uint256 amount
-  ) external;
+  function handleRepayment(address user, address onBehalfOf, uint256 amount) external;
 
   /**
    * @notice Allow passing a signed message to approve spending
@@ -147,9 +134,5 @@ interface IAToken is IERC20, IScaledBalanceToken, IInitializableAToken {
    * @param to The address of the recipient
    * @param amount The amount of token to transfer
    */
-  function rescueTokens(
-    address token,
-    address to,
-    uint256 amount
-  ) external;
+  function rescueTokens(address token, address to, uint256 amount) external;
 }

@@ -86,15 +86,7 @@ library EModeLogic {
   function getEModeConfiguration(
     DataTypes.EModeCategory storage category,
     IPriceOracleGetter oracle
-  )
-    internal
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256
-    )
-  {
+  ) internal view returns (uint256, uint256, uint256) {
     uint256 eModeAssetPrice = 0;
     address eModePriceSource = category.priceSource;
 
@@ -111,11 +103,10 @@ library EModeLogic {
    * @param eModeAssetCategory The asset eMode category
    * @return True if eMode is active and the asset belongs to the eMode category chosen by the user, false otherwise
    */
-  function isInEModeCategory(uint256 eModeUserCategory, uint256 eModeAssetCategory)
-    internal
-    pure
-    returns (bool)
-  {
+  function isInEModeCategory(
+    uint256 eModeUserCategory,
+    uint256 eModeAssetCategory
+  ) internal pure returns (bool) {
     return (eModeUserCategory != 0 && eModeAssetCategory == eModeUserCategory);
   }
 }

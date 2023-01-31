@@ -73,7 +73,7 @@ library ValidationLogic {
       supplyCap == 0 ||
         ((IAToken(reserveCache.aTokenAddress).scaledTotalSupply() +
           uint256(reserve.accruedToTreasury)).rayMul(reserveCache.nextLiquidityIndex) + amount) <=
-        supplyCap * (10**reserveCache.reserveConfiguration.getDecimals()),
+        supplyCap * (10 ** reserveCache.reserveConfiguration.getDecimals()),
       Errors.SUPPLY_CAP_EXCEEDED
     );
   }
@@ -166,7 +166,7 @@ library ValidationLogic {
     vars.reserveDecimals = params.reserveCache.reserveConfiguration.getDecimals();
     vars.borrowCap = params.reserveCache.reserveConfiguration.getBorrowCap();
     unchecked {
-      vars.assetUnit = 10**vars.reserveDecimals;
+      vars.assetUnit = 10 ** vars.reserveDecimals;
     }
 
     if (vars.borrowCap != 0) {
@@ -194,7 +194,8 @@ library ValidationLogic {
 
       require(
         reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt +
-          (params.amount / 10**(vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS))
+          (params.amount /
+            10 ** (vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS))
             .toUint128() <=
           params.isolationModeDebtCeiling,
         Errors.DEBT_CEILING_EXCEEDED
