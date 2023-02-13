@@ -1,0 +1,63 @@
+name: certora
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Check key
+        env:
+          CERTORAKEY: ${{ secrets.CERTORAKEY }}
+        run: echo "key length" ${#CERTORAKEY}
+      
+      - name: Install python
+        uses: actions/setup-python@v2
+        with: { python-version: 3.9 }
+
+      - name: Install java
+        uses: actions/setup-java@v1
+        with: { java-version: "11", java-package: jre }
+
+      - name: Install certora cli
+        run: pip install certora-cli
+        
+      - name: Install solc
+        run: |
+          wget https://github.com/ethereum/solidity/releases/download/v0.8.10/solc-static-linux
+          chmod +x solc-static-linux
+          sudo mv solc-static-linux /usr/local/bin/solc8.10
+      
+      - name: Verify rule ${{ matrix.rule }}
+        run: |
+          cd certora
+          touch applyHarness.patch
+          make munged
+          cd ..
+          echo "key length" ${#CERTORAKEY}
+          sh certora/scripts/${{ matrix.rule }}
+        env:
+          CERTORAKEY: ${{ secrets.CERTORAKEY }}
+          
+    strategy:
+      fail-fast: false
+      max-parallel: 16
+      matrix:
+        rule:
+          - verifyAToken.sh
+          - verifyPool.sh getReserveNormalizedVariableDebtCheck
+          - verifyReserveConfiguration.sh
+          - verifyStableTokenCLI.sh
+          - verifyUserConfigCLI.sh
+          - verifyVariableTokenCLI.sh
