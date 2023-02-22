@@ -152,7 +152,10 @@ library ValidationLogic {
 
     require(
       params.priceOracleSentinel == address(0) ||
-        IPriceOracleSentinel(params.priceOracleSentinel).isBorrowAllowed(),
+        IPriceOracleSentinel(params.priceOracleSentinel).isBorrowAllowed(
+          params.oracle,
+          params.asset
+        ),
       Errors.PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
 
@@ -505,7 +508,10 @@ library ValidationLogic {
     require(
       params.priceOracleSentinel == address(0) ||
         params.healthFactor < MINIMUM_HEALTH_FACTOR_LIQUIDATION_THRESHOLD ||
-        IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(),
+        IPriceOracleSentinel(params.priceOracleSentinel).isLiquidationAllowed(
+          params.oracle,
+          params.debtAsset
+        ),
       Errors.PRICE_ORACLE_SENTINEL_CHECK_FAILED
     );
 
