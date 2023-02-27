@@ -147,4 +147,36 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
     expect(userData.totalCollateralBase).to.be.eq(parseUnits('10', 8));
     expect(userData.totalDebtBase).to.be.eq(0);
   });
+
+  it('User 1 deposit dai, DAI ltv drops to 0, transfers dai', async () => {
+    await evmRevert(snap);
+    const {
+      pool,
+      dai,
+      aDai,
+      users: [user1, user2],
+      configurator,
+      helpersContract,
+    } = testEnv;
+
+    const daiAmount = await convertToCurrencyDecimals(dai.address, '10');
+
+    await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
+
+    await pool.connect(user1.signer).supply(dai.address, daiAmount, user1.address, 0);
+
+    // Set DAI LTV = 0
+    expect(await configurator.configureReserveAsCollateral(dai.address, 0, 8000, 10500))
+      .to.emit(configurator, 'CollateralConfigurationChanged')
+      .withArgs(dai.address, 0, 8000, 10500);
+    const ltv = (await helpersContract.getReserveConfigurationData(dai.address)).ltv;
+    expect(ltv).to.be.equal(0);
+
+    // Transfer 0 LTV DAI to user2
+    await aDai.connect(user1.signer).transfer(user2.address, 1);
+    const userData = await helpersContract.getUserReserveData(dai.address, user2.address);
+    expect(userData.usageAsCollateralEnabled).to.be.eq(false);
+  });
 });
