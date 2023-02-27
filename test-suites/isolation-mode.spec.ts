@@ -40,8 +40,11 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   const mintAmount = withdrawAmount.mul(denominatorBP.sub(feeBps)).div(denominatorBP);
   const bridgeProtocolFeeBps = BigNumber.from(2000);
 
-  const { ASSET_NOT_BORROWABLE_IN_ISOLATION, DEBT_CEILING_EXCEEDED, USER_IN_ISOLATION_MODE } =
-    ProtocolErrors;
+  const {
+    ASSET_NOT_BORROWABLE_IN_ISOLATION,
+    DEBT_CEILING_EXCEEDED,
+    USER_IN_ISOLATION_MODE_OR_LTV_ZERO,
+  } = ProtocolErrors;
 
   let aclManager;
   let oracleBaseDecimals;
@@ -115,7 +118,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(users[1].signer).setUserUseReserveAsCollateral(weth.address, true)
-    ).to.be.revertedWith(USER_IN_ISOLATION_MODE);
+    ).to.be.revertedWith(USER_IN_ISOLATION_MODE_OR_LTV_ZERO);
 
     const userDataAfter = await helpersContract.getUserReserveData(weth.address, users[1].address);
     expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
@@ -150,7 +153,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user2.signer).setUserUseReserveAsCollateral(aave.address, true)
-    ).to.be.revertedWith(USER_IN_ISOLATION_MODE);
+    ).to.be.revertedWith(USER_IN_ISOLATION_MODE_OR_LTV_ZERO);
 
     const userDataAfter = await helpersContract.getUserReserveData(aave.address, user2.address);
     expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(false);
