@@ -212,7 +212,6 @@ library SupplyLogic {
       if (params.balanceToBefore == 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         if (
-          reserve.configuration.getLtv() != 0 &&
           ValidationLogic.validateUseAsCollateral(
             reservesData,
             reservesList,

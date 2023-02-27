@@ -703,6 +703,9 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveConfigurationMap memory reserveConfig
   ) internal view returns (bool) {
+    if (reserveConfig.getLtv() == 0) {
+      return false;
+    }
     if (!userConfig.isUsingAsCollateralAny()) {
       return true;
     }
