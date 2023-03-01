@@ -75,7 +75,7 @@ library SupplyLogic {
 
     if (isFirstSupply) {
       if (
-        ValidationLogic.validateUseAsCollateral(
+        ValidationLogic.validateAutomaticUseAsCollateral(
           reservesData,
           reservesList,
           userConfig,
@@ -212,7 +212,7 @@ library SupplyLogic {
       if (params.balanceToBefore == 0) {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         if (
-          ValidationLogic.validateUseAsCollateral(
+          ValidationLogic.validateAutomaticUseAsCollateral(
             reservesData,
             reservesList,
             toConfig,
