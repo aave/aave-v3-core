@@ -731,7 +731,7 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveConfigurationMap memory reserveConfig
   ) internal view returns (bool) {
-    if (reserveConfig.getDebtCeiling() == 0) {
+    if (reserveConfig.getDebtCeiling() != 0) {
       return false;
     }
     return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
