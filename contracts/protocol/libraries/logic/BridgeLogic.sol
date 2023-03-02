@@ -83,7 +83,7 @@ library BridgeLogic {
 
     if (isFirstSupply) {
       if (
-        ValidationLogic.validateAutomaticUseAsCollateral(
+        ValidationLogic.validateUseAsCollateral(
           reservesData,
           reservesList,
           userConfig,
