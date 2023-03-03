@@ -79,7 +79,8 @@ library SupplyLogic {
           reservesData,
           reservesList,
           userConfig,
-          reserveCache.reserveConfiguration
+          reserveCache.reserveConfiguration,
+          params.addressesProvider
         )
       ) {
         userConfig.setUsingAsCollateral(reserve.id, true);
@@ -216,7 +217,8 @@ library SupplyLogic {
             reservesData,
             reservesList,
             toConfig,
-            reserve.configuration
+            reserve.configuration,
+            params.addressesProvider
           )
         ) {
           toConfig.setUsingAsCollateral(reserveId, true);

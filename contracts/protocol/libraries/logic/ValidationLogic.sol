@@ -10,6 +10,8 @@ import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IPriceOracleSentinel} from '../../../interfaces/IPriceOracleSentinel.sol';
+import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
+import {IAccessControl} from '../../../dependencies/openzeppelin/contracts/IAccessControl.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
@@ -729,10 +731,11 @@ library ValidationLogic {
     mapping(address => DataTypes.ReserveData) storage reservesData,
     mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
-    DataTypes.ReserveConfigurationMap memory reserveConfig
+    DataTypes.ReserveConfigurationMap memory reserveConfig,
+    address addressesProvider
   ) internal view returns (bool) {
     if (reserveConfig.getDebtCeiling() != 0) {
-      return false;
+      return IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(keccak256('ISOLATED_COLLATERAL_SUPPLIER'), msg.sender);
     }
     return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
   }
