@@ -735,7 +735,7 @@ library ValidationLogic {
     address addressesProvider
   ) internal view returns (bool) {
     if (reserveConfig.getDebtCeiling() != 0) {
-      return IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, msg.sender);
+      if(!IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, msg.sender)) return false;
     }
     return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
   }

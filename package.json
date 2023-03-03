@@ -29,7 +29,8 @@
     "ci:test": ". ./setup-test-env.sh  && npm run test",
     "ci:clean": "rm -rf ./artifacts ./cache ./types ./temp-artifacts",
     "build": "tsc --project lib.tsconfig.json",
-    "prepublish": "npm run compile && npm run build"
+    "prepublish": "npm run compile && npm run build",
+    "test-iso": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/isolation-mode.spec.ts"
   },
   "devDependencies": {
     "@aave/deploy-v3": "1.51.0",

@@ -30,6 +30,10 @@ const expectEqual = (
 };
 
 makeSuite('Isolation mode', (testEnv: TestEnv) => {
+  const ISOLATED_COLLATERAL_SUPPLIER_ROLE = utils.keccak256(
+    utils.formatBytes32String('ISOLATED_COLLATERAL_SUPPLIER')
+  );
+
   const depositAmount = utils.parseEther('1000');
   const borrowAmount = utils.parseEther('200');
   const ceilingAmount = '10000';
@@ -84,7 +88,19 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await pool.connect(users[0].signer).supply(dai.address, depositAmount, users[0].address, 0);
   });
 
-  it('User 1 supply 2 aave. Checks that aave is activated as collateral ', async () => {
+  it('User 1 supply 2 aave. Checks that aave is not activated as collateral.', async () => {
+    const { users, pool, aave, helpersContract } = testEnv;
+    await aave.connect(users[1].signer)['mint(uint256)'](utils.parseEther('2'));
+    await aave.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool
+      .connect(users[1].signer)
+      .supply(aave.address, utils.parseEther('2'), users[1].address, 0);
+    const userData = await helpersContract.getUserReserveData(aave.address, users[1].address);
+
+    expect(userData.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 1 supply 2 aave. Enables collateral. Checks that aave is activated as isolated collateral.', async () => {
     const { users, pool, aave, helpersContract } = testEnv;
     await aave.connect(users[1].signer)['mint(uint256)'](utils.parseEther('2'));
     await aave.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -94,6 +110,25 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     await pool.connect(users[1].signer).setUserUseReserveAsCollateral(aave.address, true);
     const userData = await helpersContract.getUserReserveData(aave.address, users[1].address);
 
+    expect(userData.usageAsCollateralEnabled).to.be.eq(true);
+  });
+
+  it('User 1 as ISOLATED_COLLATERAL_SUPPLIER_ROLE supply 2 aave to user 2. Checks that aave is activated as isolated collateral.', async () => {
+    const { users, pool, aave, helpersContract, deployer } = testEnv;
+    await aave.connect(users[1].signer)['mint(uint256)'](utils.parseEther('2'));
+    await aave.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await aclManager
+      .connect(deployer.signer)
+      .grantRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, users[1].address);
+    const hasRole = await aclManager
+      .connect(deployer.signer)
+      .hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, users[1].address);
+    expect(hasRole).to.be.eq(true);
+
+    await pool
+      .connect(users[1].signer)
+      .supply(aave.address, utils.parseEther('2'), users[2].address, 0);
+    const userData = await helpersContract.getUserReserveData(aave.address, users[2].address);
     expect(userData.usageAsCollateralEnabled).to.be.eq(true);
   });
 
