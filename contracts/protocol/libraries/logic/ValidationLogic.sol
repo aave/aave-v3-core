@@ -51,6 +51,8 @@ library ValidationLogic {
    */
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
+  bytes32 public constant ISOLATED_COLLATERAL_SUPPLIER_ROLE = keccak256('ISOLATED_COLLATERAL_SUPPLIER');
+
   /**
    * @notice Validates a supply action.
    * @param reserveCache The cached data of the reserve
@@ -733,7 +735,7 @@ library ValidationLogic {
     address addressesProvider
   ) internal view returns (bool) {
     if (reserveConfig.getDebtCeiling() != 0) {
-      return IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(keccak256('ISOLATED_COLLATERAL_SUPPLIER'), msg.sender);
+      return IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, msg.sender);
     }
     return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
   }
