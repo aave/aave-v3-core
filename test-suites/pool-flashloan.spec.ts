@@ -194,17 +194,21 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const totalLiquidityBefore = reserveData.totalAToken;
 
-    await pool
-      .connect(authorizedUser.signer)
-      .flashLoan(
-        _mockFlashLoanReceiver.address,
-        [aave.address],
-        [flashBorrowedAmount],
-        [0],
-        _mockFlashLoanReceiver.address,
-        '0x10',
-        '0'
-      );
+    expect(
+      await pool
+        .connect(authorizedUser.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [aave.address],
+          [flashBorrowedAmount],
+          [0],
+          _mockFlashLoanReceiver.address,
+          '0x10',
+          '0'
+        )
+    )
+      .to.emit(_mockFlashLoanReceiver, 'ExecutedWithSuccess')
+      .withArgs([aave.address], [flashBorrowedAmount], [0]);
 
     await pool.mintToTreasury([aave.address]);
 
