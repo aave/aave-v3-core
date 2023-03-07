@@ -148,7 +148,7 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
     expect(userData.totalDebtBase).to.be.eq(0);
   });
 
-  it('User 1 deposit dai, DAI ltv drops to 0, transfers dai', async () => {
+  it('User 1 deposit dai, DAI ltv drops to 0, transfers dai, dai should not be enabled as collateral for receiver', async () => {
     await evmRevert(snap);
     const {
       pool,
