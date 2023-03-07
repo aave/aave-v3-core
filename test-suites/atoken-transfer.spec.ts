@@ -36,7 +36,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     expect(await aDai.getPreviousIndex(users[0].address)).to.be.gt(0);
 
-    expect(await aDai.connect(users[0].signer).transfer(users[0].address, amountDAItoDeposit))
+    await expect(aDai.connect(users[0].signer).transfer(users[0].address, amountDAItoDeposit))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[0].address, users[0].address, amountDAItoDeposit);
 
@@ -71,7 +71,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     expect(await pool.connect(users[0].signer).setUserUseReserveAsCollateral(dai.address, false));
 
-    expect(await aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoDeposit))
+    await expect(aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoDeposit))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[0].address, users[1].address, amountDAItoDeposit);
 
@@ -112,7 +112,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
         .deposit(dai.address, amountDAItoDeposit, users[0].address, '0')
     );
 
-    expect(await aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoTransfer))
+    await expect(aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoTransfer))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[0].address, users[1].address, amountDAItoTransfer);
     expect(await aDai.balanceOf(users[0].address)).to.be.eq(
@@ -124,7 +124,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
       INVALID_TO_BALANCE_AFTER_TRANSFER
     );
 
-    expect(await aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoTransfer))
+    await expect(aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoTransfer))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[0].address, users[1].address, amountDAItoTransfer);
     expect(await aDai.balanceOf(users[0].address)).to.be.eq(
@@ -136,7 +136,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
       INVALID_TO_BALANCE_AFTER_TRANSFER
     );
 
-    expect(await aDai.connect(users[0].signer).transfer(users[1].address, 0))
+    await expect(aDai.connect(users[0].signer).transfer(users[1].address, 0))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[0].address, users[1].address, 0);
     expect(await aDai.balanceOf(users[0].address)).to.be.eq(
@@ -168,7 +168,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
         .deposit(dai.address, amountDAItoDeposit, users[0].address, '0')
     );
 
-    expect(await aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoDeposit))
+    await expect(aDai.connect(users[0].signer).transfer(users[1].address, amountDAItoDeposit))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[0].address, users[1].address, amountDAItoDeposit);
 
@@ -232,7 +232,7 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
 
     const aDAItoTransfer = await convertToCurrencyDecimals(dai.address, '100');
 
-    expect(await aDai.connect(users[1].signer).transfer(users[0].address, aDAItoTransfer))
+    await expect(aDai.connect(users[1].signer).transfer(users[0].address, aDAItoTransfer))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[1].address, users[0].address, aDAItoTransfer);
 

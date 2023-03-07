@@ -60,8 +60,8 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
   it('Admin sets a PriceOracleSentinel and activate it for DAI and WETH', async () => {
     const { addressesProvider, poolAdmin } = testEnv;
 
-    expect(
-      await addressesProvider
+    await expect(
+      addressesProvider
         .connect(poolAdmin.signer)
         .setPriceOracleSentinel(priceOracleSentinel.address)
     )
@@ -81,7 +81,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const newGracePeriod = 0;
 
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(GRACE_PERIOD);
-    expect(await priceOracleSentinel.connect(poolAdmin.signer).setGracePeriod(0))
+    await expect(priceOracleSentinel.connect(poolAdmin.signer).setGracePeriod(0))
       .to.emit(priceOracleSentinel, 'GracePeriodUpdated')
       .withArgs(0);
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(newGracePeriod);
@@ -91,7 +91,7 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const { riskAdmin } = testEnv;
 
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(0);
-    expect(await priceOracleSentinel.connect(riskAdmin.signer).setGracePeriod(GRACE_PERIOD))
+    await expect(priceOracleSentinel.connect(riskAdmin.signer).setGracePeriod(GRACE_PERIOD))
       .to.emit(priceOracleSentinel, 'GracePeriodUpdated')
       .withArgs(GRACE_PERIOD);
     expect(await priceOracleSentinel.getGracePeriod()).to.be.eq(GRACE_PERIOD);
@@ -115,17 +115,15 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
     const newSequencerOracle = ZERO_ADDRESS;
 
     expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(sequencerOracle.address);
-    expect(
-      await priceOracleSentinel.connect(poolAdmin.signer).setSequencerOracle(newSequencerOracle)
+    await expect(
+      priceOracleSentinel.connect(poolAdmin.signer).setSequencerOracle(newSequencerOracle)
     )
       .to.emit(priceOracleSentinel, 'SequencerOracleUpdated')
       .withArgs(newSequencerOracle);
     expect(await priceOracleSentinel.getSequencerOracle()).to.be.eq(newSequencerOracle);
 
-    expect(
-      await priceOracleSentinel
-        .connect(poolAdmin.signer)
-        .setSequencerOracle(sequencerOracle.address)
+    await expect(
+      priceOracleSentinel.connect(poolAdmin.signer).setSequencerOracle(sequencerOracle.address)
     )
       .to.emit(priceOracleSentinel, 'SequencerOracleUpdated')
       .withArgs(sequencerOracle.address);

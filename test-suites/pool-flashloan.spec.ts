@@ -236,8 +236,8 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const reservesBefore = await aWETH.balanceOf(await aWETH.RESERVE_TREASURY_ADDRESS());
 
-    expect(
-      await pool.flashLoan(
+    await expect(
+      pool.flashLoan(
         _mockFlashLoanReceiver.address,
         [weth.address],
         [flashBorrowedAmount],
@@ -301,7 +301,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
       )
     ).to.be.revertedWith(FLASHLOAN_DISABLED);
 
-    expect(await configurator.setReserveFlashLoaning(weth.address, true))
+    await expect(configurator.setReserveFlashLoaning(weth.address, true))
       .to.emit(configurator, 'ReserveFlashLoaning')
       .withArgs(weth.address, true);
 
@@ -394,8 +394,8 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const borrowAmount = ethers.utils.parseEther('0.0571');
 
-    expect(
-      await pool
+    await expect(
+      pool
         .connect(caller.signer)
         .flashLoan(
           _mockFlashLoanReceiver.address,
@@ -692,8 +692,8 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
 
-    expect(
-      await pool
+    await expect(
+      pool
         .connect(caller.signer)
         .flashLoan(
           _mockFlashLoanReceiver.address,

@@ -58,8 +58,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const mockPool = await deployPool();
     const proxiedAddressId = utils.formatBytes32String('RANDOM_PROXIED');
 
-    expect(
-      await addressesProvider
+    await expect(
+      addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(proxiedAddressId, mockPool.address)
     )
@@ -79,8 +79,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const nonProxiedAddressId = utils.formatBytes32String('RANDOM_NON_PROXIED');
 
     const oldAddress = await addressesProvider.getAddress(nonProxiedAddressId);
-    expect(
-      await addressesProvider
+    await expect(
+      addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(nonProxiedAddressId, mockNonProxiedAddress)
     )
@@ -108,8 +108,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
     const oldNonProxiedAddress = await addressesProvider.getAddress(convertibleAddressId);
 
     // Add address as non proxy
-    expect(
-      await addressesProvider
+    await expect(
+      addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(convertibleAddressId, mockConvertibleAddress)
     )
@@ -122,8 +122,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       .reverted;
 
     // Unregister address as non proxy
-    expect(
-      await addressesProvider
+    await expect(
+      addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddress(convertibleAddressId, ZERO_ADDRESS)
     )
@@ -131,8 +131,8 @@ makeSuite('PoolAddressesProvider', (testEnv: TestEnv) => {
       .withArgs(convertibleAddressId, mockConvertibleAddress, ZERO_ADDRESS);
 
     // Add address as proxy
-    expect(
-      await addressesProvider
+    await expect(
+      addressesProvider
         .connect(currentAddressesProviderOwner.signer)
         .setAddressAsProxy(convertibleAddressId, mockConvertibleAddress)
     )
