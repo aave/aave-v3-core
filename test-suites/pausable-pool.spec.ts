@@ -387,7 +387,6 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     expect(await proxiedMockPool.addReserveToReservesList(ZERO_ADDRESS));
 
     // Update the PoolConfigurator impl with the PoolConfigurator
-    await expect(poolAddressesProvider.setPoolConfiguratorImpl(poolConfigurator.address));
     await expect(poolAddressesProvider.setPoolConfiguratorImpl(poolConfigurator.address))
       .to.emit(poolAddressesProvider, 'PoolConfiguratorUpdated')
       .withArgs(ZERO_ADDRESS, poolConfigurator.address);
