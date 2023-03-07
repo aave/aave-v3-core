@@ -156,7 +156,7 @@
             "user": "1",
             "onBehalfOf": "1",
             "borrowRateMode": "variable",
-            "timeTravel" : "365"
+            "timeTravel": "365"
           },
           "expected": "success"
         }

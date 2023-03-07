@@ -1,14 +1,14 @@
-import {expect} from 'chai';
-import {utils, constants} from 'ethers';
-import {parseUnits} from '@ethersproject/units';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {MAX_UINT_AMOUNT} from '../helpers/constants';
-import {RateMode, ProtocolErrors} from '../helpers/types';
-import {impersonateAccountsHardhat} from '../helpers/misc-utils';
-import {makeSuite, TestEnv} from './helpers/make-suite';
-import {convertToCurrencyDecimals} from '../helpers/contracts-helpers';
-import {waitForTx, evmSnapshot, evmRevert} from '@aave/deploy-v3';
-import {topUpNonPayableWithEther} from './helpers/utils/funds';
+import { expect } from 'chai';
+import { utils, constants } from 'ethers';
+import { parseUnits } from '@ethersproject/units';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { MAX_UINT_AMOUNT } from '../helpers/constants';
+import { RateMode, ProtocolErrors } from '../helpers/types';
+import { impersonateAccountsHardhat } from '../helpers/misc-utils';
+import { makeSuite, TestEnv } from './helpers/make-suite';
+import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
+import { waitForTx, evmSnapshot, evmRevert } from '@aave/deploy-v3';
+import { topUpNonPayableWithEther } from './helpers/utils/funds';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -34,13 +34,13 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   let snap: string;
 
   before(async () => {
-    const {addressesProvider, oracle} = testEnv;
+    const { addressesProvider, oracle } = testEnv;
 
     await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
   });
 
   after(async () => {
-    const {aaveOracle, addressesProvider} = testEnv;
+    const { aaveOracle, addressesProvider } = testEnv;
     await waitForTx(await addressesProvider.setPriceOracle(aaveOracle.address));
   });
 
@@ -52,7 +52,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateDeposit() when reserve is not active (revert expected)', async () => {
-    const {pool, poolAdmin, configurator, helpersContract, users, dai} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -73,7 +73,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateDeposit() when reserve is frozen (revert expected)', async () => {
-    const {pool, poolAdmin, configurator, helpersContract, users, dai} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -100,7 +100,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
      * If deposited normally it is not possible for us deactivate.
      */
 
-    const {pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     await usdc.connect(user.signer)['mint(uint256)'](utils.parseEther('10000'));
@@ -131,7 +131,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateBorrow() when reserve is frozen (revert expected)', async () => {
-    const {pool, poolAdmin, configurator, helpersContract, users, dai, usdc} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai, usdc } = testEnv;
     const user = users[0];
 
     await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
@@ -162,7 +162,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateBorrow() when amount == 0 (revert expected)', async () => {
-    const {pool, users, dai} = testEnv;
+    const { pool, users, dai } = testEnv;
     const user = users[0];
 
     await expect(
@@ -171,7 +171,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateBorrow() when borrowing is not enabled (revert expected)', async () => {
-    const {pool, poolAdmin, configurator, helpersContract, users, dai, usdc} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai, usdc } = testEnv;
     const user = users[0];
 
     await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
@@ -202,7 +202,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateBorrow() when stableRateBorrowing is not enabled', async () => {
-    const {pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
@@ -226,7 +226,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateBorrow() borrowing when user has already a HF < threshold', async () => {
-    const {pool, users, dai, usdc, oracle} = testEnv;
+    const { pool, users, dai, usdc, oracle } = testEnv;
     const user = users[0];
     const depositor = users[1];
 
@@ -289,7 +289,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     // ltv != 0
     // amount < aToken Balance
 
-    const {pool, users, dai, aDai, usdc} = testEnv;
+    const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
@@ -311,7 +311,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateBorrow() stable borrowing when amount > maxLoanSizeStable (revert expected)', async () => {
-    const {pool, users, dai, aDai, usdc} = testEnv;
+    const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
@@ -334,7 +334,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
   it('validateLiquidationCall() when healthFactor > threshold (revert expected)', async () => {
     // Liquidation something that is not liquidatable
-    const {pool, users, dai, usdc} = testEnv;
+    const { pool, users, dai, usdc } = testEnv;
     const depositor = users[0];
     const borrower = users[1];
 
@@ -383,7 +383,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
   it('validateRepay() when reserve is not active (revert expected)', async () => {
     // Unsure how we can end in this scenario. Would require that it could be deactivated after someone have borrowed
-    const {pool, users, dai, helpersContract, configurator, poolAdmin} = testEnv;
+    const { pool, users, dai, helpersContract, configurator, poolAdmin } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -407,7 +407,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     // (stableDebt > 0 && DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
     // (variableDebt > 0 &&	DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
 
-    const {pool, users, dai, aDai, usdc} = testEnv;
+    const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     // We need some debt
@@ -434,7 +434,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     // (stableDebt > 0 && DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.STABLE) ||
     // (variableDebt > 0 &&	DataTypes.InterestRateMode(rateMode) == DataTypes.InterestRateMode.VARIABLE),
 
-    const {pool, users, dai} = testEnv;
+    const { pool, users, dai } = testEnv;
     const user = users[0];
 
     // We need some debt
@@ -455,7 +455,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
   it('validateSwapRateMode() when reserve is not active', async () => {
     // Not clear when this would be useful in practice, as you should not be able to have debt if it is deactivated
-    const {pool, poolAdmin, configurator, helpersContract, users, dai, aDai} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai, aDai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -481,7 +481,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
 
   it('validateSwapRateMode() when reserve is frozen', async () => {
     // Not clear when this would be useful in practice, as you should not be able to have debt if it is deactivated
-    const {pool, poolAdmin, configurator, helpersContract, users, dai} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -506,7 +506,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateSwapRateMode() with currentRateMode not equal to stable or variable, (revert expected)', async () => {
-    const {pool, helpersContract, users, dai} = testEnv;
+    const { pool, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -519,7 +519,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateSwapRateMode() from variable to stable with stableBorrowing disabled (revert expected)', async () => {
-    const {pool, poolAdmin, configurator, helpersContract, users, dai} = testEnv;
+    const { pool, poolAdmin, configurator, helpersContract, users, dai } = testEnv;
     const user = users[0];
 
     await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('1000'));
@@ -566,7 +566,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
     // ltv != 0
     // stableDebt + variableDebt < aToken
 
-    const {pool, users, dai, aDai, usdc} = testEnv;
+    const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     await dai.connect(user.signer)['mint(uint256)'](utils.parseEther('2000'));
@@ -590,7 +590,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateRebalanceStableBorrowRate() when reserve is not active (revert expected)', async () => {
-    const {pool, configurator, helpersContract, poolAdmin, users, dai} = testEnv;
+    const { pool, configurator, helpersContract, poolAdmin, users, dai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -614,7 +614,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
      * aToken balance (aDAI) its not technically possible to end up in this situation.
      * However, we impersonate the Pool to get some aDAI and make the test possible
      */
-    const {pool, configurator, helpersContract, poolAdmin, users, dai, aDai} = testEnv;
+    const { pool, configurator, helpersContract, poolAdmin, users, dai, aDai } = testEnv;
     const user = users[0];
 
     const configBefore = await helpersContract.getReserveConfigurationData(dai.address);
@@ -642,7 +642,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateSetUseReserveAsCollateral() with userBalance == 0 (revert expected)', async () => {
-    const {pool, users, dai} = testEnv;
+    const { pool, users, dai } = testEnv;
     const user = users[0];
 
     await expect(
@@ -655,7 +655,7 @@ makeSuite('ValidationLogic: Edge cases', (testEnv: TestEnv) => {
   });
 
   it('validateFlashloan() with inconsistent params (revert expected)', async () => {
-    const {pool, users, dai, aDai, usdc} = testEnv;
+    const { pool, users, dai, aDai, usdc } = testEnv;
     const user = users[0];
 
     await expect(
