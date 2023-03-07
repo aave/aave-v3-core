@@ -1,3 +1,4 @@
+import '@nomicfoundation/hardhat-chai-matchers';
 import { deployDefaultReserveInterestRateStrategy } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { expect } from 'chai';
 import { BigNumber, ethers, Event, utils } from 'ethers';
@@ -593,17 +594,21 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const flashloanAmount = await convertToCurrencyDecimals(usdc.address, '500');
 
-    await pool
-      .connect(caller.signer)
-      .flashLoan(
-        _mockFlashLoanReceiver.address,
-        [usdc.address],
-        [flashloanAmount],
-        [2],
-        caller.address,
-        '0x10',
-        '0'
-      );
+    expect(
+      await pool
+        .connect(caller.signer)
+        .flashLoan(
+          _mockFlashLoanReceiver.address,
+          [usdc.address],
+          [flashloanAmount],
+          [2],
+          caller.address,
+          '0x10',
+          '0'
+        )
+    )
+      .to.emit(_mockFlashLoanReceiver, 'ExecutedWithSuccess')
+      .withArgs([usdc.address], [flashloanAmount], [0]);
     const { variableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       usdc.address
     );
