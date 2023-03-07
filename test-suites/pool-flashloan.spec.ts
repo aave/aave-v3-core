@@ -1,4 +1,3 @@
-import '@nomicfoundation/hardhat-chai-matchers';
 import { deployDefaultReserveInterestRateStrategy } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { expect } from 'chai';
 import { BigNumber, ethers, Event, utils } from 'ethers';
@@ -177,7 +176,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     }
   });
 
-  it('Takes an authorized AAVE flash loan with mode = 0, returns the funds correctly, premium should be 0', async () => {
+  it('Takes an authorized AAVE flash loan with mode = 0, returns the funds correctly', async () => {
     const {
       pool,
       helpersContract,
@@ -195,21 +194,17 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     const totalLiquidityBefore = reserveData.totalAToken;
 
-    await expect(
-      pool
-        .connect(authorizedUser.signer)
-        .flashLoan(
-          _mockFlashLoanReceiver.address,
-          [aave.address],
-          [flashBorrowedAmount],
-          [0],
-          _mockFlashLoanReceiver.address,
-          '0x10',
-          '0'
-        )
-    )
-      .to.emit(_mockFlashLoanReceiver, 'ExecutedWithSuccess')
-      .withArgs([aave.address], [flashBorrowedAmount], [0]);
+    await pool
+      .connect(authorizedUser.signer)
+      .flashLoan(
+        _mockFlashLoanReceiver.address,
+        [aave.address],
+        [flashBorrowedAmount],
+        [0],
+        _mockFlashLoanReceiver.address,
+        '0x10',
+        '0'
+      );
 
     await pool.mintToTreasury([aave.address]);
 
@@ -575,7 +570,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     ).to.be.revertedWith(COLLATERAL_BALANCE_IS_ZERO);
   });
 
-  it('Caller deposits 5 WETH as collateral, Takes a USDC flashloan with mode = 2, does not return the funds. A loan for caller is created, premium should be 0', async () => {
+  it('Caller deposits 5 WETH as collateral, Takes a USDC flashloan with mode = 2, does not return the funds. A loan for caller is created', async () => {
     const { usdc, pool, weth, users, helpersContract } = testEnv;
 
     const caller = users[2];
@@ -590,26 +585,21 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await pool.connect(caller.signer).deposit(weth.address, amountToDeposit, caller.address, '0');
 
+    await _mockFlashLoanReceiver.setFailExecutionTransfer(true);
+
     const flashloanAmount = await convertToCurrencyDecimals(usdc.address, '500');
 
-    await _mockFlashLoanReceiver.setFailExecutionTransfer(false);
-
-    await expect(
-      pool
-        .connect(caller.signer)
-        .flashLoan(
-          _mockFlashLoanReceiver.address,
-          [usdc.address],
-          [flashloanAmount],
-          [2],
-          caller.address,
-          '0x10',
-          '0'
-        )
-    )
-      .to.emit(_mockFlashLoanReceiver, 'ExecutedWithSuccess')
-      .withArgs([usdc.address], [flashloanAmount], [0]);
-
+    await pool
+      .connect(caller.signer)
+      .flashLoan(
+        _mockFlashLoanReceiver.address,
+        [usdc.address],
+        [flashloanAmount],
+        [2],
+        caller.address,
+        '0x10',
+        '0'
+      );
     const { variableDebtTokenAddress } = await helpersContract.getReserveTokensAddresses(
       usdc.address
     );
