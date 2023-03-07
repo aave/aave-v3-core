@@ -71,7 +71,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
 
   it('approve() with a ZERO_ADDRESS spender', async () => {
     const { users, aDai } = testEnv;
-    expect(await aDai.connect(users[0].signer).approve(ZERO_ADDRESS, MAX_UINT_AMOUNT))
+    await expect(aDai.connect(users[0].signer).approve(ZERO_ADDRESS, MAX_UINT_AMOUNT))
       .to.emit(aDai, 'Approval')
       .withArgs(users[0].address, ZERO_ADDRESS, MAX_UINT_AMOUNT);
   });
@@ -105,14 +105,14 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
 
   it('transfer() with a ZERO_ADDRESS recipient', async () => {
     const { users, aDai } = testEnv;
-    expect(await aDai.connect(users[1].signer).transfer(ZERO_ADDRESS, 0))
+    await expect(aDai.connect(users[1].signer).transfer(ZERO_ADDRESS, 0))
       .to.emit(aDai, 'Transfer')
       .withArgs(users[1].address, ZERO_ADDRESS, 0);
   });
 
   it('transfer() with a ZERO_ADDRESS origin', async () => {
     const { users, aDai } = testEnv;
-    expect(await aDai.connect(users[1].signer).transferFrom(ZERO_ADDRESS, users[1].address, 0))
+    await expect(aDai.connect(users[1].signer).transferFrom(ZERO_ADDRESS, users[1].address, 0))
       .to.emit(aDai, 'Transfer')
       .withArgs(ZERO_ADDRESS, users[1].address, 0);
   });
@@ -141,7 +141,7 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const mintingAmount = await convertToCurrencyDecimals(aDai.address, '100');
-    expect(
+    await expect(
       aDai
         .connect(poolSigner)
         .mint(ZERO_ADDRESS, ZERO_ADDRESS, mintingAmount, utils.parseUnits('1', 27))
@@ -174,8 +174,8 @@ makeSuite('AToken: Edge cases', (testEnv: TestEnv) => {
     const poolSigner = await hre.ethers.getSigner(pool.address);
 
     const burnAmount = await convertToCurrencyDecimals(aDai.address, '100');
-    expect(
-      await aDai
+    await expect(
+      aDai
         .connect(poolSigner)
         .burn(ZERO_ADDRESS, users[0].address, burnAmount, utils.parseUnits('1', 27))
     )

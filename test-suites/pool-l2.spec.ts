@@ -82,8 +82,8 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
     const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Upgrade the Pool
-    expect(
-      await addressesProvider.connect(poolAdmin.signer).setPoolImpl(L2POOL_IMPL_ARTIFACT.address)
+    await expect(
+      addressesProvider.connect(poolAdmin.signer).setPoolImpl(L2POOL_IMPL_ARTIFACT.address)
     )
       .to.emit(addressesProvider, 'PoolUpdated')
       .withArgs(oldPoolImpl, L2POOL_IMPL_ARTIFACT.address);
@@ -114,7 +114,7 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
 
     const encoded = await encoder.encodeSupplyParams(dai.address, amount, referralCode);
 
-    expect(await l2Pool.connect(user0.signer)['supply(bytes32)'](encoded))
+    await expect(l2Pool.connect(user0.signer)['supply(bytes32)'](encoded))
       .to.emit(l2Pool, 'Supply')
       .withArgs(dai.address, user0.address, user0.address, amount, referralCode);
 
@@ -157,10 +157,8 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
       s
     );
 
-    expect(
-      await l2Pool
-        .connect(deployer.signer)
-        ['supplyWithPermit(bytes32,bytes32,bytes32)'](encoded[0], r, s)
+    await expect(
+      l2Pool.connect(deployer.signer)['supplyWithPermit(bytes32,bytes32,bytes32)'](encoded[0], r, s)
     )
       .to.emit(l2Pool, 'Supply')
       .withArgs(dai.address, deployer.address, deployer.address, amount, referralCode);
@@ -178,7 +176,7 @@ makeSuite('Pool: L2 functions', (testEnv: TestEnv) => {
     } = testEnv;
 
     const encoded = await encoder.encodeSetUserUseReserveAsCollateral(dai.address, false);
-    expect(await l2Pool.connect(user0.signer)['setUserUseReserveAsCollateral(bytes32)'](encoded))
+    await expect(l2Pool.connect(user0.signer)['setUserUseReserveAsCollateral(bytes32)'](encoded))
       .to.emit(l2Pool, 'ReserveUsedAsCollateralDisabled')
       .withArgs(dai.address, user0.address);
 

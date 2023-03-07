@@ -366,18 +366,18 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     const aclManager = await (
       await new ACLManager__factory(await getFirstSigner()).deploy(poolAddressesProvider.address)
     ).deployed();
-    expect(await poolAddressesProvider.setACLManager(aclManager.address))
+    await expect(poolAddressesProvider.setACLManager(aclManager.address))
       .to.emit(poolAddressesProvider, 'ACLManagerUpdated')
       .withArgs(ZERO_ADDRESS, aclManager.address);
 
     // Set role of EmergencyAdmin
     const emergencyAdminRole = await aclManager.EMERGENCY_ADMIN_ROLE();
-    expect(await aclManager.addEmergencyAdmin(emergencyAdmin.address))
+    await expect(aclManager.addEmergencyAdmin(emergencyAdmin.address))
       .to.emit(aclManager, 'RoleGranted')
       .withArgs(emergencyAdminRole, emergencyAdmin.address, poolAdmin.address);
 
     // Update the Pool impl with a MockPool
-    expect(await poolAddressesProvider.setPoolImpl(mockPool.address))
+    await expect(poolAddressesProvider.setPoolImpl(mockPool.address))
       .to.emit(poolAddressesProvider, 'PoolUpdated')
       .withArgs(ZERO_ADDRESS, mockPool.address);
 
@@ -387,7 +387,8 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     expect(await proxiedMockPool.addReserveToReservesList(ZERO_ADDRESS));
 
     // Update the PoolConfigurator impl with the PoolConfigurator
-    expect(await poolAddressesProvider.setPoolConfiguratorImpl(poolConfigurator.address))
+    await expect(poolAddressesProvider.setPoolConfiguratorImpl(poolConfigurator.address));
+    await expect(poolAddressesProvider.setPoolConfiguratorImpl(poolConfigurator.address))
       .to.emit(poolAddressesProvider, 'PoolConfiguratorUpdated')
       .withArgs(ZERO_ADDRESS, poolConfigurator.address);
 

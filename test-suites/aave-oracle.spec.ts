@@ -45,8 +45,8 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     expect(priorSourcesPrices).to.eql(['0']);
 
     // Add asset source
-    expect(
-      await aaveOracle
+    await expect(
+      aaveOracle
         .connect(poolAdmin.signer)
         .setAssetSources([mockToken.address], [mockAggregator.address])
     )
@@ -69,10 +69,8 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     expect(daiSource).to.be.not.eq(ZERO_ADDRESS);
 
     // Update DAI source
-    expect(
-      await aaveOracle
-        .connect(poolAdmin.signer)
-        .setAssetSources([dai.address], [mockAggregator.address])
+    await expect(
+      aaveOracle.connect(poolAdmin.signer).setAssetSources([dai.address], [mockAggregator.address])
     )
       .to.emit(aaveOracle, 'AssetSourceUpdated')
       .withArgs(dai.address, mockAggregator.address);
@@ -113,10 +111,8 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     const { poolAdmin, aaveOracle, weth } = testEnv;
 
     // Add asset source for BASE_CURRENCY address
-    expect(
-      await aaveOracle
-        .connect(poolAdmin.signer)
-        .setAssetSources([weth.address], [mockAggregator.address])
+    await expect(
+      aaveOracle.connect(poolAdmin.signer).setAssetSources([weth.address], [mockAggregator.address])
     )
       .to.emit(aaveOracle, 'AssetSourceUpdated')
       .withArgs(weth.address, mockAggregator.address);
@@ -149,8 +145,8 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     expect(await aaveOracle.getSourceOfAsset(mockToken.address)).to.be.eq(ZERO_ADDRESS);
 
     // Add asset source
-    expect(
-      await aaveOracle
+    await expect(
+      aaveOracle
         .connect(poolAdmin.signer)
         .setAssetSources([mockToken.address], [zeroPriceMockAgg.address])
     )
@@ -173,8 +169,8 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     expect(await aaveOracle.getSourceOfAsset(mockToken.address)).to.be.eq(ZERO_ADDRESS);
 
     // Add asset source
-    expect(
-      await aaveOracle
+    await expect(
+      aaveOracle
         .connect(poolAdmin.signer)
         .setAssetSources([mockToken.address], [zeroPriceMockAgg.address])
     )
@@ -191,7 +187,7 @@ makeSuite('AaveOracle', (testEnv: TestEnv) => {
     expect(await aaveOracle.getFallbackOracle()).to.be.eq(oracle.address);
 
     // Update oracle source
-    expect(await aaveOracle.connect(poolAdmin.signer).setFallbackOracle(ONE_ADDRESS))
+    await expect(aaveOracle.connect(poolAdmin.signer).setFallbackOracle(ONE_ADDRESS))
       .to.emit(aaveOracle, 'FallbackOracleUpdated')
       .withArgs(ONE_ADDRESS);
 
