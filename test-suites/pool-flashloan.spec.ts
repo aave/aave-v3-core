@@ -1,4 +1,3 @@
-import '@nomicfoundation/hardhat-chai-matchers';
 import { deployDefaultReserveInterestRateStrategy } from '@aave/deploy-v3/dist/helpers/contract-deployments';
 import { expect } from 'chai';
 import { BigNumber, ethers, Event, utils } from 'ethers';
