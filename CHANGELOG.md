@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.17.2](https://github.com/aave/aave-v3-core/compare/v1.17.1...v1.17.2) (2023-01-31)
+
+
+### Bug Fixes
+
+* expose error list and types at npm package ([#809](https://github.com/aave/aave-v3-core/issues/809)) ([0334bf2](https://github.com/aave/aave-v3-core/commit/0334bf2d3452aaca256a4855ea9b3c04c74dfe8a))
+
 ## [1.17.1](https://github.com/aave/aave-v3-core/compare/v1.17.0...v1.17.1) (2023-01-10)
 
 

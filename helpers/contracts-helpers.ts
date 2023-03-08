@@ -2,15 +2,12 @@ import { ethers } from 'ethers';
 import { signTypedData_v4 } from 'eth-sig-util';
 import { fromRpcSig, ECDSASignature } from 'ethereumjs-util';
 import { tEthereumAddress, tStringTokenSmallUnits } from './types';
-import { MintableERC20 } from '../types/MintableERC20';
 import { getContract } from '@aave/deploy-v3';
 import { impersonateAccountsHardhat } from './misc-utils';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { InitializableImmutableAdminUpgradeabilityProxy } from '../types';
 
 declare var hre: HardhatRuntimeEnvironment;
-
-export type MockTokenMap = { [symbol: string]: MintableERC20 };
 
 export const convertToCurrencyDecimals = async (tokenAddress: tEthereumAddress, amount: string) => {
   const token = await getContract('IERC20Detailed', tokenAddress);

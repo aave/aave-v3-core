@@ -18,10 +18,10 @@ export const buildForkConfig = (): HardhatNetworkForkingUserConfig | undefined =
   let forkMode: HardhatNetworkForkingUserConfig | undefined;
   if (FORK) {
     forkMode = {
-      url: NETWORKS_RPC_URL[FORK],
+      url: NETWORKS_RPC_URL[FORK as eEthereumNetwork],
     };
-    if (FORK_BLOCK_NUMBER || BLOCK_TO_FORK[FORK]) {
-      forkMode.blockNumber = FORK_BLOCK_NUMBER || BLOCK_TO_FORK[FORK];
+    if (FORK_BLOCK_NUMBER || BLOCK_TO_FORK[FORK as eEthereumNetwork]) {
+      forkMode.blockNumber = FORK_BLOCK_NUMBER || BLOCK_TO_FORK[FORK as eEthereumNetwork];
     }
   }
   return forkMode;
