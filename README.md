@@ -51,6 +51,7 @@ V3 Round 2 - December 2021
 - [SigmaPrime](./audits/27-01-2022_SigmaPrime_AaveV3.pdf)
 
 Formal Verification - November 2021-January 2022
+
 - [Certora](./certora/Aave_V3_Formal_Verification_Report_Jan2022.pdf)
 
 ## Connect with the community
