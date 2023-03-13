@@ -158,8 +158,8 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Upgrade the Pool
-    expect(
-      await addressesProvider.connect(poolAdmin.signer).setPoolImpl(NEW_POOL_IMPL_ARTIFACT.address)
+    await expect(
+      addressesProvider.connect(poolAdmin.signer).setPoolImpl(NEW_POOL_IMPL_ARTIFACT.address)
     )
       .to.emit(addressesProvider, 'PoolUpdated')
       .withArgs(oldPoolImpl, NEW_POOL_IMPL_ARTIFACT.address);
@@ -303,7 +303,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect(await pool.connect(user0.signer).supply(dai.address, amount, user0.address, 0));
 
     // Disable asset as collateral
-    expect(await pool.connect(user0.signer).setUserUseReserveAsCollateral(dai.address, false))
+    await expect(pool.connect(user0.signer).setUserUseReserveAsCollateral(dai.address, false))
       .to.emit(pool, 'ReserveUsedAsCollateralDisabled')
       .withArgs(dai.address, user0.address);
 

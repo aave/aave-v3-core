@@ -23,7 +23,7 @@ makeSuite('AaveProtocolDataProvider: Edge cases', (testEnv: TestEnv) => {
     const oldPoolImpl = await getProxyImplementation(addressesProvider.address, poolProxyAddress);
 
     // Update the addressesProvider with a mock pool
-    expect(await addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPool.address))
+    await expect(addressesProvider.connect(poolAdmin.signer).setPoolImpl(mockPool.address))
       .to.emit(addressesProvider, 'PoolUpdated')
       .withArgs(oldPoolImpl, mockPool.address);
 

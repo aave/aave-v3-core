@@ -44,10 +44,10 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
 
     const liquidationProtocolFee = 1000;
 
-    expect(await configurator.setLiquidationProtocolFee(usdc.address, liquidationProtocolFee))
+    await expect(configurator.setLiquidationProtocolFee(usdc.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
       .withArgs(usdc.address, oldUsdcLiquidationProtocolFee, liquidationProtocolFee);
-    expect(await configurator.setLiquidationProtocolFee(dai.address, liquidationProtocolFee))
+    await expect(configurator.setLiquidationProtocolFee(dai.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
       .withArgs(dai.address, oldDaiLiquidationProtocolFee, liquidationProtocolFee);
 
@@ -72,10 +72,10 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
 
     const liquidationProtocolFee = 10000;
 
-    expect(await configurator.setLiquidationProtocolFee(usdc.address, liquidationProtocolFee))
+    await expect(configurator.setLiquidationProtocolFee(usdc.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
       .withArgs(usdc.address, oldUsdcLiquidationProtocolFee, liquidationProtocolFee);
-    expect(await configurator.setLiquidationProtocolFee(dai.address, liquidationProtocolFee))
+    await expect(configurator.setLiquidationProtocolFee(dai.address, liquidationProtocolFee))
       .to.emit(configurator, 'LiquidationProtocolFeeChanged')
       .withArgs(dai.address, oldDaiLiquidationProtocolFee, liquidationProtocolFee);
 
