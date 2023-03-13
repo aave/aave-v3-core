@@ -29,11 +29,7 @@ library SafeMath {
   /// @param y The subtrahend
   /// @param message The error msg
   /// @return z The difference of x and y
-  function sub(
-    uint256 x,
-    uint256 y,
-    string memory message
-  ) internal pure returns (uint256 z) {
+  function sub(uint256 x, uint256 y, string memory message) internal pure returns (uint256 z) {
     unchecked {
       require((z = x - y) <= x, message);
     }

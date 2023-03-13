@@ -155,16 +155,9 @@ contract DefaultReserveInterestRateStrategy is IDefaultInterestRateStrategy {
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
-  function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory params)
-    public
-    view
-    override
-    returns (
-      uint256,
-      uint256,
-      uint256
-    )
-  {
+  function calculateInterestRates(
+    DataTypes.CalculateInterestRatesParams memory params
+  ) public view override returns (uint256, uint256, uint256) {
     CalcInterestRatesLocalVars memory vars;
 
     vars.totalDebt = params.totalStableDebt + params.totalVariableDebt;

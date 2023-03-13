@@ -72,11 +72,7 @@ library PoolLogic {
    * @param to The address of the recipient
    * @param amount The amount of token to transfer
    */
-  function executeRescueTokens(
-    address token,
-    address to,
-    uint256 amount
-  ) external {
+  function executeRescueTokens(address token, address to, uint256 amount) external {
     IERC20(token).safeTransfer(to, amount);
   }
 

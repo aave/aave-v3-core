@@ -126,12 +126,10 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
    *
    * - the caller must have ``role``'s admin role.
    */
-  function grantRole(bytes32 role, address account)
-    public
-    virtual
-    override
-    onlyRole(getRoleAdmin(role))
-  {
+  function grantRole(
+    bytes32 role,
+    address account
+  ) public virtual override onlyRole(getRoleAdmin(role)) {
     _grantRole(role, account);
   }
 
@@ -144,12 +142,10 @@ abstract contract AccessControl is Context, IAccessControl, ERC165 {
    *
    * - the caller must have ``role``'s admin role.
    */
-  function revokeRole(bytes32 role, address account)
-    public
-    virtual
-    override
-    onlyRole(getRoleAdmin(role))
-  {
+  function revokeRole(
+    bytes32 role,
+    address account
+  ) public virtual override onlyRole(getRoleAdmin(role)) {
     _revokeRole(role, account);
   }
 

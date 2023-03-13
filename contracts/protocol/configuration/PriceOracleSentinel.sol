@@ -48,11 +48,7 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
    * @param oracle The address of the SequencerOracle
    * @param gracePeriod The duration of the grace period in seconds
    */
-  constructor(
-    IPoolAddressesProvider provider,
-    ISequencerOracle oracle,
-    uint256 gracePeriod
-  ) {
+  constructor(IPoolAddressesProvider provider, ISequencerOracle oracle, uint256 gracePeriod) {
     ADDRESSES_PROVIDER = provider;
     _sequencerOracle = oracle;
     _gracePeriod = gracePeriod;

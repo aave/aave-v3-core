@@ -20,11 +20,7 @@ contract MintableERC20 is IERC20WithPermit, ERC20 {
 
   bytes32 public DOMAIN_SEPARATOR;
 
-  constructor(
-    string memory name,
-    string memory symbol,
-    uint8 decimals
-  ) ERC20(name, symbol) {
+  constructor(string memory name, string memory symbol, uint8 decimals) ERC20(name, symbol) {
     uint256 chainId = block.chainid;
 
     DOMAIN_SEPARATOR = keccak256(

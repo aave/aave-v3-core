@@ -18,11 +18,7 @@ contract MockInitializableImple is VersionedInitializable {
     return REVISION;
   }
 
-  function initialize(
-    uint256 val,
-    string memory txt,
-    uint256[] memory vals
-  ) external initializer {
+  function initialize(uint256 val, string memory txt, uint256[] memory vals) external initializer {
     value = val;
     text = txt;
     values = vals;
@@ -52,11 +48,7 @@ contract MockInitializableImpleV2 is VersionedInitializable {
     return REVISION;
   }
 
-  function initialize(
-    uint256 val,
-    string memory txt,
-    uint256[] memory vals
-  ) public initializer {
+  function initialize(uint256 val, string memory txt, uint256[] memory vals) public initializer {
     value = val;
     text = txt;
     values = vals;

@@ -149,31 +149,14 @@ contract MockReserveConfiguration {
     return configuration.getUnbackedMintCap();
   }
 
-  function getFlags()
-    external
-    view
-    returns (
-      bool,
-      bool,
-      bool,
-      bool,
-      bool
-    )
-  {
+  function getFlags() external view returns (bool, bool, bool, bool, bool) {
     return configuration.getFlags();
   }
 
   function getParams()
     external
     view
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256,
-      uint256
-    )
+    returns (uint256, uint256, uint256, uint256, uint256, uint256)
   {
     return configuration.getParams();
   }

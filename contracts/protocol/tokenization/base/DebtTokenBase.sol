@@ -68,12 +68,10 @@ abstract contract DebtTokenBase is
   }
 
   /// @inheritdoc ICreditDelegationToken
-  function borrowAllowance(address fromUser, address toUser)
-    external
-    view
-    override
-    returns (uint256)
-  {
+  function borrowAllowance(
+    address fromUser,
+    address toUser
+  ) external view override returns (uint256) {
     return _borrowAllowances[fromUser][toUser];
   }
 
@@ -83,11 +81,7 @@ abstract contract DebtTokenBase is
    * @param delegatee The address receiving the delegated borrowing power
    * @param amount The allowance amount being delegated.
    */
-  function _approveDelegation(
-    address delegator,
-    address delegatee,
-    uint256 amount
-  ) internal {
+  function _approveDelegation(address delegator, address delegatee, uint256 amount) internal {
     _borrowAllowances[delegator][delegatee] = amount;
     emit BorrowAllowanceDelegated(delegator, delegatee, _underlyingAsset, amount);
   }
@@ -98,11 +92,7 @@ abstract contract DebtTokenBase is
    * @param delegatee The address receiving the delegated borrowing power
    * @param amount The amount to subtract from the current allowance
    */
-  function _decreaseBorrowAllowance(
-    address delegator,
-    address delegatee,
-    uint256 amount
-  ) internal {
+  function _decreaseBorrowAllowance(address delegator, address delegatee, uint256 amount) internal {
     uint256 newAllowance = _borrowAllowances[delegator][delegatee] - amount;
 
     _borrowAllowances[delegator][delegatee] = newAllowance;
