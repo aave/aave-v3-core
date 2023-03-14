@@ -91,7 +91,10 @@ library FlashLoanLogic {
 
     for (vars.i = 0; vars.i < params.assets.length; vars.i++) {
       vars.currentAmount = params.amounts[vars.i];
-      vars.totalPremiums[vars.i] = vars.currentAmount.percentMul(vars.flashloanPremiumTotal);
+      vars.totalPremiums[vars.i] = DataTypes.InterestRateMode(params.interestRateModes[vars.i]) ==
+        DataTypes.InterestRateMode.NONE
+        ? vars.currentAmount.percentMul(vars.flashloanPremiumTotal)
+        : 0;
       IAToken(reservesData[params.assets[vars.i]].aTokenAddress).transferUnderlyingTo(
         params.receiverAddress,
         vars.currentAmount
