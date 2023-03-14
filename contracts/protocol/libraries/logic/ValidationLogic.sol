@@ -739,7 +739,7 @@ library ValidationLogic {
     address addressesProvider
   ) internal view returns (bool) {
     if (reserveConfig.getDebtCeiling() != 0) {
-      // ensures only the ISOLATED_COLLATERAL_SUPPLIER_ROLE can enable collateral as side-effect of another action
+      // ensures only the ISOLATED_COLLATERAL_SUPPLIER_ROLE can enable collateral as side-effect of an action
       if(!IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, msg.sender)) return false;
     }
     return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
