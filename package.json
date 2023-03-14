@@ -29,8 +29,7 @@
     "ci:test": ". ./setup-test-env.sh  && npm run test",
     "ci:clean": "rm -rf ./artifacts ./cache ./types ./temp-artifacts",
     "build": "tsc --project lib.tsconfig.json",
-    "prepublish": "npm run compile && npm run build",
-    "test-flash": ". ./setup-test-env.sh && npx hardhat test test-suites/__setup.spec.ts test-suites/pool-flashloan.spec.ts"
+    "prepublish": "npm run compile && npm run build"
   },
   "devDependencies": {
     "@aave/deploy-v3": "1.51.0",
