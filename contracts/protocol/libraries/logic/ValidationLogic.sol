@@ -51,6 +51,9 @@ library ValidationLogic {
    */
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
+  /**
+  * @dev Role identifier for the role allowed to supply isolated reserves as collateral
+  */
   bytes32 public constant ISOLATED_COLLATERAL_SUPPLIER_ROLE = keccak256('ISOLATED_COLLATERAL_SUPPLIER');
 
   /**
@@ -667,7 +670,7 @@ library ValidationLogic {
       Errors.INCONSISTENT_EMODE_CATEGORY
     );
 
-    //eMode can always be enabled if the user hasn't supplied anything
+    // eMode can always be enabled if the user hasn't supplied anything
     if (userConfig.isEmpty()) {
       return;
     }
@@ -693,8 +696,8 @@ library ValidationLogic {
   /**
    * @notice Validates if an asset can be activated as collateral in the following actions: set as collateral, mint unbacked
    * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that
-   * generate transfers of aTokens
-   * @dev This is also used to ensure positions do not enable reserves with zero LTV as collateral 
+   * generate transfers of aTokens.
+   * This is also used to ensure positions do not enable reserves with zero LTV as collateral.
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig the user configuration
@@ -736,6 +739,7 @@ library ValidationLogic {
     address addressesProvider
   ) internal view returns (bool) {
     if (reserveConfig.getDebtCeiling() != 0) {
+      // ensures only the ISOLATED_COLLATERAL_SUPPLIER_ROLE can enable collateral as side-effect of another action
       if(!IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, msg.sender)) return false;
     }
     return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
