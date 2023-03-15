@@ -694,9 +694,8 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates if an asset can be activated as collateral in the following actions: set as collateral
-   * @dev This is used to ensure that the constraints for isolated assets are respected.
-   * This is also used to ensure positions do not enable reserves with zero LTV as collateral.
+   * @notice Validates the action of activating the asset as collateral.
+   * @dev Only possible if the asset has non-zero LTV and the user is not in isolation mode
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig the user configuration
