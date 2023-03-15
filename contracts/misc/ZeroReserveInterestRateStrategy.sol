@@ -14,39 +14,39 @@ import {IPoolAddressesProvider} from '../interfaces/IPoolAddressesProvider.sol';
  */
 contract ZeroReserveInterestRateStrategy is IDefaultInterestRateStrategy {
   /// @inheritdoc IDefaultInterestRateStrategy
-  uint256 public immutable OPTIMAL_USAGE_RATIO = 0;
+  uint256 public constant OPTIMAL_USAGE_RATIO = 0;
 
   /// @inheritdoc IDefaultInterestRateStrategy
-  uint256 public immutable OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = 0;
+  uint256 public constant OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO = 0;
 
   /// @inheritdoc IDefaultInterestRateStrategy
-  uint256 public immutable MAX_EXCESS_USAGE_RATIO = 0;
+  uint256 public constant MAX_EXCESS_USAGE_RATIO = 0;
 
   /// @inheritdoc IDefaultInterestRateStrategy
-  uint256 public immutable MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO = 0;
+  uint256 public constant MAX_EXCESS_STABLE_TO_TOTAL_DEBT_RATIO = 0;
 
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
 
   // Base variable borrow rate when usage rate = 0. Expressed in ray
-  uint256 internal immutable _baseVariableBorrowRate = 0;
+  uint256 internal constant _baseVariableBorrowRate = 0;
 
   // Slope of the variable interest curve when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO. Expressed in ray
-  uint256 internal immutable _variableRateSlope1 = 0;
+  uint256 internal constant _variableRateSlope1 = 0;
 
   // Slope of the variable interest curve when usage ratio > OPTIMAL_USAGE_RATIO. Expressed in ray
-  uint256 internal immutable _variableRateSlope2 = 0;
+  uint256 internal constant _variableRateSlope2 = 0;
 
   // Slope of the stable interest curve when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO. Expressed in ray
-  uint256 internal immutable _stableRateSlope1 = 0;
+  uint256 internal constant _stableRateSlope1 = 0;
 
   // Slope of the stable interest curve when usage ratio > OPTIMAL_USAGE_RATIO. Expressed in ray
-  uint256 internal immutable _stableRateSlope2 = 0;
+  uint256 internal constant _stableRateSlope2 = 0;
 
   // Premium on top of `_variableRateSlope1` for base stable borrowing rate
-  uint256 internal immutable _baseStableRateOffset = 0;
+  uint256 internal constant _baseStableRateOffset = 0;
 
   // Additional premium applied to stable rate when stable debt surpass `OPTIMAL_STABLE_TO_TOTAL_DEBT_RATIO`
-  uint256 internal immutable _stableRateExcessOffset = 0;
+  uint256 internal constant _stableRateExcessOffset = 0;
 
   /**
    * @dev Constructor.
