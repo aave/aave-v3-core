@@ -97,16 +97,9 @@ contract ZeroReserveInterestRateStrategy is IDefaultInterestRateStrategy {
   }
 
   /// @inheritdoc IReserveInterestRateStrategy
-  function calculateInterestRates(DataTypes.CalculateInterestRatesParams memory)
-    public
-    pure
-    override
-    returns (
-      uint256,
-      uint256,
-      uint256
-    )
-  {
+  function calculateInterestRates(
+    DataTypes.CalculateInterestRatesParams memory
+  ) public pure override returns (uint256, uint256, uint256) {
     return (0, 0, 0);
   }
 }
