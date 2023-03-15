@@ -40,10 +40,10 @@ contract L2Pool is Pool, IL2Pool {
   }
 
   /// @inheritdoc IL2Pool
-  function withdraw(bytes32 args) external override {
+  function withdraw(bytes32 args) external override returns (uint256) {
     (address asset, uint256 amount) = CalldataLogic.decodeWithdrawParams(_reservesList, args);
 
-    withdraw(asset, amount, msg.sender);
+    return withdraw(asset, amount, msg.sender);
   }
 
   /// @inheritdoc IL2Pool

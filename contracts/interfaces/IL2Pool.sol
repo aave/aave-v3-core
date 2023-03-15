@@ -39,8 +39,9 @@ interface IL2Pool {
    * @dev the shortenedAmount is cast to 256 bits at decode time, if type(uint128).max the value will be expanded to
    * type(uint256).max
    * @dev assetId is the index of the asset in the reservesList.
+   * @return The final amount withdrawn
    */
-  function withdraw(bytes32 args) external;
+  function withdraw(bytes32 args) external returns (uint256);
 
   /**
    * @notice Calldata efficient wrapper of the borrow function, borrowing on behalf of the caller
