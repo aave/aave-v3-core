@@ -40,8 +40,8 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
     const providersBefore = await registry.getAddressesProvidersList();
 
-    expect(
-      await registry.registerAddressesProvider(
+    await expect(
+      registry.registerAddressesProvider(
         NEW_ADDRESSES_PROVIDER_ADDRESS,
         NEW_ADDRESSES_PROVIDER_ID_2
       )
@@ -72,7 +72,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     const { users, registry } = testEnv;
 
     // Simulating an addresses provider using the users[2] wallet address
-    expect(await registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID_3))
+    await expect(registry.registerAddressesProvider(users[2].address, NEW_ADDRESSES_PROVIDER_ID_3))
       .to.emit(registry, 'AddressesProviderRegistered')
       .withArgs(users[2].address, NEW_ADDRESSES_PROVIDER_ID_3);
 
@@ -97,7 +97,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
       await registry.getAddressesProviderIdByAddress(NEW_ADDRESSES_PROVIDER_ADDRESS)
     ).to.be.equal(NEW_ADDRESSES_PROVIDER_ID_2);
 
-    expect(await registry.unregisterAddressesProvider(NEW_ADDRESSES_PROVIDER_ADDRESS))
+    await expect(registry.unregisterAddressesProvider(NEW_ADDRESSES_PROVIDER_ADDRESS))
       .to.emit(registry, 'AddressesProviderUnregistered')
       .withArgs(NEW_ADDRESSES_PROVIDER_ADDRESS, NEW_ADDRESSES_PROVIDER_ID_2);
 
@@ -177,8 +177,8 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
 
     const providersBefore = await registry.getAddressesProvidersList();
 
-    expect(
-      await registry.registerAddressesProvider(
+    await expect(
+      registry.registerAddressesProvider(
         NEW_ADDRESSES_PROVIDER_ADDRESS,
         NEW_ADDRESSES_PROVIDER_ID_2
       )
@@ -212,7 +212,7 @@ makeSuite('AddressesProviderRegistry', (testEnv: TestEnv) => {
     const providerToRemove = providersBefore[providersBefore.length - 1];
     const providerToRemoveId = await registry.getAddressesProviderIdByAddress(providerToRemove);
 
-    expect(await registry.unregisterAddressesProvider(providerToRemove))
+    await expect(registry.unregisterAddressesProvider(providerToRemove))
       .to.emit(registry, 'AddressesProviderUnregistered')
       .withArgs(providerToRemove, providerToRemoveId);
 

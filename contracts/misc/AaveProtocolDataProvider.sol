@@ -74,7 +74,9 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getReserveConfigurationData(address asset)
+  function getReserveConfigurationData(
+    address asset
+  )
     external
     view
     override
@@ -110,12 +112,9 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getReserveCaps(address asset)
-    external
-    view
-    override
-    returns (uint256 borrowCap, uint256 supplyCap)
-  {
+  function getReserveCaps(
+    address asset
+  ) external view override returns (uint256 borrowCap, uint256 supplyCap) {
     (borrowCap, supplyCap) = IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getCaps();
   }
 
@@ -150,7 +149,9 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getReserveData(address asset)
+  function getReserveData(
+    address asset
+  )
     external
     view
     override
@@ -208,7 +209,10 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getUserReserveData(address asset, address user)
+  function getUserReserveData(
+    address asset,
+    address user
+  )
     external
     view
     override
@@ -245,7 +249,9 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getReserveTokensAddresses(address asset)
+  function getReserveTokensAddresses(
+    address asset
+  )
     external
     view
     override
@@ -267,12 +273,9 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getInterestRateStrategyAddress(address asset)
-    external
-    view
-    override
-    returns (address irStrategyAddress)
-  {
+  function getInterestRateStrategyAddress(
+    address asset
+  ) external view override returns (address irStrategyAddress) {
     DataTypes.ReserveData memory reserve = IPool(ADDRESSES_PROVIDER.getPool()).getReserveData(
       asset
     );

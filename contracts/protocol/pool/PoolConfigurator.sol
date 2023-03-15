@@ -79,11 +79,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function initReserves(ConfiguratorInputTypes.InitReserveInput[] calldata input)
-    external
-    override
-    onlyAssetListingOrPoolAdmins
-  {
+  function initReserves(
+    ConfiguratorInputTypes.InitReserveInput[] calldata input
+  ) external override onlyAssetListingOrPoolAdmins {
     IPool cachedPool = _pool;
     for (uint256 i = 0; i < input.length; i++) {
       ConfiguratorLogic.executeInitReserve(cachedPool, input[i]);
@@ -97,29 +95,23 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateAToken(ConfiguratorInputTypes.UpdateATokenInput calldata input)
-    external
-    override
-    onlyPoolAdmin
-  {
+  function updateAToken(
+    ConfiguratorInputTypes.UpdateATokenInput calldata input
+  ) external override onlyPoolAdmin {
     ConfiguratorLogic.executeUpdateAToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateStableDebtToken(ConfiguratorInputTypes.UpdateDebtTokenInput calldata input)
-    external
-    override
-    onlyPoolAdmin
-  {
+  function updateStableDebtToken(
+    ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
+  ) external override onlyPoolAdmin {
     ConfiguratorLogic.executeUpdateStableDebtToken(_pool, input);
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateVariableDebtToken(ConfiguratorInputTypes.UpdateDebtTokenInput calldata input)
-    external
-    override
-    onlyPoolAdmin
-  {
+  function updateVariableDebtToken(
+    ConfiguratorInputTypes.UpdateDebtTokenInput calldata input
+  ) external override onlyPoolAdmin {
     ConfiguratorLogic.executeUpdateVariableDebtToken(_pool, input);
   }
 
@@ -177,11 +169,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setReserveStableRateBorrowing(address asset, bool enabled)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setReserveStableRateBorrowing(
+    address asset,
+    bool enabled
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     if (enabled) {
       require(currentConfig.getBorrowingEnabled(), Errors.BORROWING_NOT_ENABLED);
@@ -192,11 +183,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setReserveFlashLoaning(address asset, bool enabled)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setReserveFlashLoaning(
+    address asset,
+    bool enabled
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
     currentConfig.setFlashLoanEnabled(enabled);
@@ -222,11 +212,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setBorrowableInIsolation(address asset, bool borrowable)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setBorrowableInIsolation(
+    address asset,
+    bool borrowable
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     currentConfig.setBorrowableInIsolation(borrowable);
     _pool.setConfiguration(asset, currentConfig);
@@ -242,11 +231,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setReserveFactor(address asset, uint256 newReserveFactor)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setReserveFactor(
+    address asset,
+    uint256 newReserveFactor
+  ) external override onlyRiskOrPoolAdmins {
     require(newReserveFactor <= PercentageMath.PERCENTAGE_FACTOR, Errors.INVALID_RESERVE_FACTOR);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     uint256 oldReserveFactor = currentConfig.getReserveFactor();
@@ -256,11 +244,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setDebtCeiling(address asset, uint256 newDebtCeiling)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setDebtCeiling(
+    address asset,
+    uint256 newDebtCeiling
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
     uint256 oldDebtCeiling = currentConfig.getDebtCeiling();
@@ -278,11 +265,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setSiloedBorrowing(address asset, bool newSiloed)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setSiloedBorrowing(
+    address asset,
+    bool newSiloed
+  ) external override onlyRiskOrPoolAdmins {
     if (newSiloed) {
       _checkNoBorrowers(asset);
     }
@@ -298,11 +284,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setBorrowCap(address asset, uint256 newBorrowCap)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setBorrowCap(
+    address asset,
+    uint256 newBorrowCap
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     uint256 oldBorrowCap = currentConfig.getBorrowCap();
     currentConfig.setBorrowCap(newBorrowCap);
@@ -311,11 +296,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setSupplyCap(address asset, uint256 newSupplyCap)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setSupplyCap(
+    address asset,
+    uint256 newSupplyCap
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     uint256 oldSupplyCap = currentConfig.getSupplyCap();
     currentConfig.setSupplyCap(newSupplyCap);
@@ -324,11 +308,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setLiquidationProtocolFee(address asset, uint256 newFee)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setLiquidationProtocolFee(
+    address asset,
+    uint256 newFee
+  ) external override onlyRiskOrPoolAdmins {
     require(newFee <= PercentageMath.PERCENTAGE_FACTOR, Errors.INVALID_LIQUIDATION_PROTOCOL_FEE);
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     uint256 oldFee = currentConfig.getLiquidationProtocolFee();
@@ -392,11 +375,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setAssetEModeCategory(address asset, uint8 newCategoryId)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setAssetEModeCategory(
+    address asset,
+    uint8 newCategoryId
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
 
     if (newCategoryId != 0) {
@@ -413,11 +395,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setUnbackedMintCap(address asset, uint256 newUnbackedMintCap)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setUnbackedMintCap(
+    address asset,
+    uint256 newUnbackedMintCap
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveConfigurationMap memory currentConfig = _pool.getConfiguration(asset);
     uint256 oldUnbackedMintCap = currentConfig.getUnbackedMintCap();
     currentConfig.setUnbackedMintCap(newUnbackedMintCap);
@@ -426,11 +407,10 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function setReserveInterestRateStrategyAddress(address asset, address newRateStrategyAddress)
-    external
-    override
-    onlyRiskOrPoolAdmins
-  {
+  function setReserveInterestRateStrategyAddress(
+    address asset,
+    address newRateStrategyAddress
+  ) external override onlyRiskOrPoolAdmins {
     DataTypes.ReserveData memory reserve = _pool.getReserveData(asset);
     address oldRateStrategyAddress = reserve.interestRateStrategyAddress;
     _pool.setReserveInterestRateStrategyAddress(asset, newRateStrategyAddress);
@@ -460,11 +440,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateFlashloanPremiumTotal(uint128 newFlashloanPremiumTotal)
-    external
-    override
-    onlyPoolAdmin
-  {
+  function updateFlashloanPremiumTotal(
+    uint128 newFlashloanPremiumTotal
+  ) external override onlyPoolAdmin {
     require(
       newFlashloanPremiumTotal <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID
@@ -475,11 +453,9 @@ contract PoolConfigurator is VersionedInitializable, IPoolConfigurator {
   }
 
   /// @inheritdoc IPoolConfigurator
-  function updateFlashloanPremiumToProtocol(uint128 newFlashloanPremiumToProtocol)
-    external
-    override
-    onlyPoolAdmin
-  {
+  function updateFlashloanPremiumToProtocol(
+    uint128 newFlashloanPremiumToProtocol
+  ) external override onlyPoolAdmin {
     require(
       newFlashloanPremiumToProtocol <= PercentageMath.PERCENTAGE_FACTOR,
       Errors.FLASHLOAN_PREMIUM_INVALID

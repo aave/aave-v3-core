@@ -61,11 +61,10 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /// @inheritdoc IPoolAddressesProvider
-  function setAddressAsProxy(bytes32 id, address newImplementationAddress)
-    external
-    override
-    onlyOwner
-  {
+  function setAddressAsProxy(
+    bytes32 id,
+    address newImplementationAddress
+  ) external override onlyOwner {
     address proxyAddress = _addresses[id];
     address oldImplementationAddress = _getProxyImplementation(id);
     _updateImpl(id, newImplementationAddress);

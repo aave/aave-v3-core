@@ -47,9 +47,10 @@ library ConfiguratorLogic {
    * @param pool The Pool in which the reserve will be initialized
    * @param input The needed parameters for the initialization
    */
-  function executeInitReserve(IPool pool, ConfiguratorInputTypes.InitReserveInput calldata input)
-    public
-  {
+  function executeInitReserve(
+    IPool pool,
+    ConfiguratorInputTypes.InitReserveInput calldata input
+  ) public {
     address aTokenProxyAddress = _initTokenWithProxy(
       input.aTokenImpl,
       abi.encodeWithSelector(
@@ -233,10 +234,10 @@ library ConfiguratorLogic {
    * @param initParams The parameters that is passed to the implementation to initialize
    * @return The address of initialized proxy
    */
-  function _initTokenWithProxy(address implementation, bytes memory initParams)
-    internal
-    returns (address)
-  {
+  function _initTokenWithProxy(
+    address implementation,
+    bytes memory initParams
+  ) internal returns (address) {
     InitializableImmutableAdminUpgradeabilityProxy proxy = new InitializableImmutableAdminUpgradeabilityProxy(
         address(this)
       );

@@ -48,7 +48,9 @@ interface IPoolDataProvider {
    * @return isActive True if it is active, false otherwise
    * @return isFrozen True if it is frozen, false otherwise
    */
-  function getReserveConfigurationData(address asset)
+  function getReserveConfigurationData(
+    address asset
+  )
     external
     view
     returns (
@@ -77,10 +79,9 @@ interface IPoolDataProvider {
    * @return borrowCap The borrow cap of the reserve
    * @return supplyCap The supply cap of the reserve
    */
-  function getReserveCaps(address asset)
-    external
-    view
-    returns (uint256 borrowCap, uint256 supplyCap);
+  function getReserveCaps(
+    address asset
+  ) external view returns (uint256 borrowCap, uint256 supplyCap);
 
   /**
    * @notice Returns if the pool is paused
@@ -139,7 +140,9 @@ interface IPoolDataProvider {
    * @return variableBorrowIndex The variable borrow index of the reserve
    * @return lastUpdateTimestamp The timestamp of the last update of the reserve
    */
-  function getReserveData(address asset)
+  function getReserveData(
+    address asset
+  )
     external
     view
     returns (
@@ -186,7 +189,10 @@ interface IPoolDataProvider {
    * @return usageAsCollateralEnabled True if the user is using the asset as collateral, false
    *         otherwise
    */
-  function getUserReserveData(address asset, address user)
+  function getUserReserveData(
+    address asset,
+    address user
+  )
     external
     view
     returns (
@@ -208,7 +214,9 @@ interface IPoolDataProvider {
    * @return stableDebtTokenAddress The StableDebtToken address of the reserve
    * @return variableDebtTokenAddress The VariableDebtToken address of the reserve
    */
-  function getReserveTokensAddresses(address asset)
+  function getReserveTokensAddresses(
+    address asset
+  )
     external
     view
     returns (
@@ -222,10 +230,9 @@ interface IPoolDataProvider {
    * @param asset The address of the underlying asset of the reserve
    * @return irStrategyAddress The address of the Interest Rate strategy
    */
-  function getInterestRateStrategyAddress(address asset)
-    external
-    view
-    returns (address irStrategyAddress);
+  function getInterestRateStrategyAddress(
+    address asset
+  ) external view returns (address irStrategyAddress);
 
   /**
    * @notice Returns whether the reserve has FlashLoans enabled or disabled

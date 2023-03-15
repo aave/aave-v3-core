@@ -40,10 +40,9 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @dev Constructor.
    * @param pool The address of the Pool contract
    */
-  constructor(IPool pool)
-    DebtTokenBase()
-    IncentivizedERC20(pool, 'STABLE_DEBT_TOKEN_IMPL', 'STABLE_DEBT_TOKEN_IMPL', 0)
-  {
+  constructor(
+    IPool pool
+  ) DebtTokenBase() IncentivizedERC20(pool, 'STABLE_DEBT_TOKEN_IMPL', 'STABLE_DEBT_TOKEN_IMPL', 0) {
     // Intentionally left blank
   }
 
@@ -127,17 +126,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     address onBehalfOf,
     uint256 amount,
     uint256 rate
-  )
-    external
-    virtual
-    override
-    onlyPool
-    returns (
-      bool,
-      uint256,
-      uint256
-    )
-  {
+  ) external virtual override onlyPool returns (bool, uint256, uint256) {
     MintLocalVars memory vars;
 
     if (user != onBehalfOf) {
@@ -186,13 +175,10 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   }
 
   /// @inheritdoc IStableDebtToken
-  function burn(address from, uint256 amount)
-    external
-    virtual
-    override
-    onlyPool
-    returns (uint256, uint256)
-  {
+  function burn(
+    address from,
+    uint256 amount
+  ) external virtual override onlyPool returns (uint256, uint256) {
     (, uint256 currentBalance, uint256 balanceIncrease) = _calculateBalanceIncrease(from);
 
     uint256 previousSupply = totalSupply();
@@ -265,15 +251,9 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @return The new principal balance
    * @return The balance increase
    */
-  function _calculateBalanceIncrease(address user)
-    internal
-    view
-    returns (
-      uint256,
-      uint256,
-      uint256
-    )
-  {
+  function _calculateBalanceIncrease(
+    address user
+  ) internal view returns (uint256, uint256, uint256) {
     uint256 previousPrincipalBalance = super.balanceOf(user);
 
     if (previousPrincipalBalance == 0) {
@@ -290,17 +270,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
   }
 
   /// @inheritdoc IStableDebtToken
-  function getSupplyData()
-    external
-    view
-    override
-    returns (
-      uint256,
-      uint256,
-      uint256,
-      uint40
-    )
-  {
+  function getSupplyData() external view override returns (uint256, uint256, uint256, uint40) {
     uint256 avgRate = _avgStableRate;
     return (super.totalSupply(), _calcTotalSupply(avgRate), avgRate, _totalSupplyTimestamp);
   }
@@ -357,11 +327,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @param amount The amount being minted
    * @param oldTotalSupply The total supply before the minting event
    */
-  function _mint(
-    address account,
-    uint256 amount,
-    uint256 oldTotalSupply
-  ) internal {
+  function _mint(address account, uint256 amount, uint256 oldTotalSupply) internal {
     uint128 castAmount = amount.toUint128();
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance + castAmount;
@@ -377,11 +343,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
    * @param amount The amount being burned
    * @param oldTotalSupply The total supply before the burning event
    */
-  function _burn(
-    address account,
-    uint256 amount,
-    uint256 oldTotalSupply
-  ) internal {
+  function _burn(address account, uint256 amount, uint256 oldTotalSupply) internal {
     uint128 castAmount = amount.toUint128();
     uint128 oldAccountBalance = _userState[account].balance;
     _userState[account].balance = oldAccountBalance - castAmount;
@@ -412,11 +374,7 @@ contract StableDebtToken is DebtTokenBase, IncentivizedERC20, IStableDebtToken {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 
-  function transferFrom(
-    address,
-    address,
-    uint256
-  ) external virtual override returns (bool) {
+  function transferFrom(address, address, uint256) external virtual override returns (bool) {
     revert(Errors.OPERATION_NOT_SUPPORTED);
   }
 

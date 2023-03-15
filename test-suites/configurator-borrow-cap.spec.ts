@@ -121,10 +121,10 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     const { borrowCap: daiOldBorrowCap } = await helpersContract.getReserveCaps(dai.address);
 
     const newCap = 10;
-    expect(await configurator.setBorrowCap(usdc.address, newCap))
+    await expect(configurator.setBorrowCap(usdc.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(usdc.address, daiOldBorrowCap, newCap);
-    expect(await configurator.setBorrowCap(dai.address, newCap))
+    await expect(configurator.setBorrowCap(dai.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(dai.address, usdcOldBorrowCap, newCap);
 
@@ -179,10 +179,10 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     const { borrowCap: usdcOldBorrowCap } = await helpersContract.getReserveCaps(usdc.address);
     const { borrowCap: daiOldBorrowCap } = await helpersContract.getReserveCaps(dai.address);
 
-    expect(await configurator.setBorrowCap(usdc.address, newCap))
+    await expect(configurator.setBorrowCap(usdc.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(usdc.address, usdcOldBorrowCap, newCap);
-    expect(await configurator.setBorrowCap(dai.address, newCap))
+    await expect(configurator.setBorrowCap(dai.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(dai.address, daiOldBorrowCap, newCap);
 
@@ -224,7 +224,7 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     const { borrowCap: wethOldBorrowCap } = await helpersContract.getReserveCaps(weth.address);
 
     const newCap = 2;
-    expect(await configurator.setBorrowCap(weth.address, newCap))
+    await expect(configurator.setBorrowCap(weth.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(weth.address, wethOldBorrowCap, newCap);
 
@@ -307,10 +307,10 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     const { borrowCap: daiOldBorrowCap } = await helpersContract.getReserveCaps(dai.address);
 
     const newCap = '1000';
-    expect(await configurator.setBorrowCap(usdc.address, newCap))
+    await expect(configurator.setBorrowCap(usdc.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(usdc.address, usdcOldBorrowCap, newCap);
-    expect(await configurator.setBorrowCap(dai.address, newCap))
+    await expect(configurator.setBorrowCap(dai.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(dai.address, daiOldBorrowCap, newCap);
 
@@ -353,10 +353,10 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     const { borrowCap: daiOldBorrowCap } = await helpersContract.getReserveCaps(dai.address);
 
     const newCap = '200';
-    expect(await configurator.setBorrowCap(usdc.address, newCap))
+    await expect(configurator.setBorrowCap(usdc.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(usdc.address, usdcOldBorrowCap, newCap);
-    expect(await configurator.setBorrowCap(dai.address, newCap))
+    await expect(configurator.setBorrowCap(dai.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(dai.address, daiOldBorrowCap, newCap);
 
@@ -399,10 +399,10 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
     const { borrowCap: daiOldBorrowCap } = await helpersContract.getReserveCaps(dai.address);
 
     const newCap = MAX_BORROW_CAP;
-    expect(await configurator.setBorrowCap(usdc.address, newCap))
+    await expect(configurator.setBorrowCap(usdc.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(usdc.address, usdcOldBorrowCap, newCap);
-    expect(await configurator.setBorrowCap(dai.address, newCap))
+    await expect(configurator.setBorrowCap(dai.address, newCap))
       .to.emit(configurator, 'BorrowCapChanged')
       .withArgs(dai.address, daiOldBorrowCap, newCap);
 

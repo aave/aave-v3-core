@@ -28,7 +28,7 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
   it('Authorize a flash borrower', async () => {
     const { deployer, aclManager } = testEnv;
     const flashBorrowerRole = await aclManager.FLASH_BORROWER_ROLE();
-    expect(await aclManager.addFlashBorrower(deployer.address))
+    await expect(aclManager.addFlashBorrower(deployer.address))
       .to.emit(aclManager, 'RoleGranted')
       .withArgs(flashBorrowerRole, deployer.address, deployer.address);
   });

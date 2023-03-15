@@ -340,11 +340,10 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function setUserUseReserveAsCollateral(address asset, bool useAsCollateral)
-    public
-    virtual
-    override
-  {
+  function setUserUseReserveAsCollateral(
+    address asset,
+    bool useAsCollateral
+  ) public virtual override {
     SupplyLogic.executeUseReserveAsCollateral(
       _reserves,
       _reservesList,
@@ -449,18 +448,16 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function getReserveData(address asset)
-    external
-    view
-    virtual
-    override
-    returns (DataTypes.ReserveData memory)
-  {
+  function getReserveData(
+    address asset
+  ) external view virtual override returns (DataTypes.ReserveData memory) {
     return _reserves[asset];
   }
 
   /// @inheritdoc IPool
-  function getUserAccountData(address user)
+  function getUserAccountData(
+    address user
+  )
     external
     view
     virtual
@@ -490,46 +487,30 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function getConfiguration(address asset)
-    external
-    view
-    virtual
-    override
-    returns (DataTypes.ReserveConfigurationMap memory)
-  {
+  function getConfiguration(
+    address asset
+  ) external view virtual override returns (DataTypes.ReserveConfigurationMap memory) {
     return _reserves[asset].configuration;
   }
 
   /// @inheritdoc IPool
-  function getUserConfiguration(address user)
-    external
-    view
-    virtual
-    override
-    returns (DataTypes.UserConfigurationMap memory)
-  {
+  function getUserConfiguration(
+    address user
+  ) external view virtual override returns (DataTypes.UserConfigurationMap memory) {
     return _usersConfig[user];
   }
 
   /// @inheritdoc IPool
-  function getReserveNormalizedIncome(address asset)
-    external
-    view
-    virtual
-    override
-    returns (uint256)
-  {
+  function getReserveNormalizedIncome(
+    address asset
+  ) external view virtual override returns (uint256) {
     return _reserves[asset].getNormalizedIncome();
   }
 
   /// @inheritdoc IPool
-  function getReserveNormalizedVariableDebt(address asset)
-    external
-    view
-    virtual
-    override
-    returns (uint256)
-  {
+  function getReserveNormalizedVariableDebt(
+    address asset
+  ) external view virtual override returns (uint256) {
     return _reserves[asset].getNormalizedDebt();
   }
 
@@ -646,36 +627,29 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function setReserveInterestRateStrategyAddress(address asset, address rateStrategyAddress)
-    external
-    virtual
-    override
-    onlyPoolConfigurator
-  {
+  function setReserveInterestRateStrategyAddress(
+    address asset,
+    address rateStrategyAddress
+  ) external virtual override onlyPoolConfigurator {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].interestRateStrategyAddress = rateStrategyAddress;
   }
 
   /// @inheritdoc IPool
-  function setConfiguration(address asset, DataTypes.ReserveConfigurationMap calldata configuration)
-    external
-    virtual
-    override
-    onlyPoolConfigurator
-  {
+  function setConfiguration(
+    address asset,
+    DataTypes.ReserveConfigurationMap calldata configuration
+  ) external virtual override onlyPoolConfigurator {
     require(asset != address(0), Errors.ZERO_ADDRESS_NOT_VALID);
     require(_reserves[asset].id != 0 || _reservesList[0] == asset, Errors.ASSET_NOT_LISTED);
     _reserves[asset].configuration = configuration;
   }
 
   /// @inheritdoc IPool
-  function updateBridgeProtocolFee(uint256 protocolFee)
-    external
-    virtual
-    override
-    onlyPoolConfigurator
-  {
+  function updateBridgeProtocolFee(
+    uint256 protocolFee
+  ) external virtual override onlyPoolConfigurator {
     _bridgeProtocolFee = protocolFee;
   }
 
@@ -689,25 +663,19 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function configureEModeCategory(uint8 id, DataTypes.EModeCategory memory category)
-    external
-    virtual
-    override
-    onlyPoolConfigurator
-  {
+  function configureEModeCategory(
+    uint8 id,
+    DataTypes.EModeCategory memory category
+  ) external virtual override onlyPoolConfigurator {
     // category 0 is reserved for volatile heterogeneous assets and it's always disabled
     require(id != 0, Errors.EMODE_CATEGORY_RESERVED);
     _eModeCategories[id] = category;
   }
 
   /// @inheritdoc IPool
-  function getEModeCategoryData(uint8 id)
-    external
-    view
-    virtual
-    override
-    returns (DataTypes.EModeCategory memory)
-  {
+  function getEModeCategoryData(
+    uint8 id
+  ) external view virtual override returns (DataTypes.EModeCategory memory) {
     return _eModeCategories[id];
   }
 
@@ -733,12 +701,9 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function resetIsolationModeTotalDebt(address asset)
-    external
-    virtual
-    override
-    onlyPoolConfigurator
-  {
+  function resetIsolationModeTotalDebt(
+    address asset
+  ) external virtual override onlyPoolConfigurator {
     PoolLogic.executeResetIsolationModeTotalDebt(_reserves, asset);
   }
 

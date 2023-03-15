@@ -23,28 +23,35 @@ This repository contains the smart contracts source code and markets configurati
 Aave is a decentralized non-custodial liquidity markets protocol where users can participate as suppliers or borrowers. Suppliers provide liquidity to the market to earn a passive income, while borrowers are able to borrow in an overcollateralized (perpetually) or undercollateralized (one-block liquidity) fashion.
 
 ## Documentation
+
 See the link to the technical paper or visit the Aave Developer docs
+
 - [Technical Paper](./techpaper/Aave_V3_Technical_Paper.pdf)
 
 - [Developer Documentation](https://docs.aave.com/developers/)
 
 ## Audits and Formal Verification
+
 You can find all audit reports under the audits folder
 
 V3.0.1 - December 2022
+
 - [PeckShield](./audits/09-12-2022_PeckShield_AaveV3-0-1.pdf)
 - [SigmaPrime](./audits/23-12-2022_SigmaPrime_AaveV3-0-1.pdf)
 
 V3 Round 1 - October 2021
+
 - [ABDK](./audits/27-01-2022_ABDK_AaveV3.pdf)
 - [OpenZeppelin](./audits/01-11-2021_OpenZeppelin_AaveV3.pdf)
 - [Trail of Bits](./audits/07-01-2022_TrailOfBits_AaveV3.pdf)
 - [Peckshield](./audits/14-01-2022_PeckShield_AaveV3.pdf)
 
 V3 Round 2 - December 2021
+
 - [SigmaPrime](./audits/27-01-2022_SigmaPrime_AaveV3.pdf)
 
 Formal Verification - November 2021-January 2022
+
 - [Certora](./certora/Aave_V3_Formal_Verification_Report_Jan2022.pdf)
 
 ## Connect with the community

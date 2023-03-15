@@ -38,7 +38,7 @@ makeSuite('AToken: DelegationAwareAToken', (testEnv: TestEnv) => {
   it('Delegates to user 2', async () => {
     const { users } = testEnv;
 
-    expect(await delegationAToken.delegateUnderlyingTo(users[2].address))
+    await expect(delegationAToken.delegateUnderlyingTo(users[2].address))
       .to.emit(delegationAToken, 'DelegateUnderlyingTo')
       .withArgs(users[2].address);
 
