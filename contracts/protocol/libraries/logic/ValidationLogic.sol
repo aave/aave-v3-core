@@ -694,9 +694,8 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates if an asset can be activated as collateral in the following actions: set as collateral, mint unbacked
-   * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that
-   * generate transfers of aTokens.
+   * @notice Validates if an asset can be activated as collateral in the following actions: set as collateral
+   * @dev This is used to ensure that the constraints for isolated assets are respected.
    * This is also used to ensure positions do not enable reserves with zero LTV as collateral.
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
@@ -723,7 +722,7 @@ library ValidationLogic {
 
   /**
    * @notice Validates if an asset should be automatically activated as collateral in the following actions: supply, 
-   * transfer, and liquidate
+   * transfer, mint unbacked, and liquidate
    * @dev This is used to ensure that isolated assets are not enabled as collateral automatically
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves

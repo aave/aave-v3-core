@@ -127,7 +127,8 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
       asset,
       amount,
       onBehalfOf,
-      referralCode
+      referralCode,
+      address(ADDRESSES_PROVIDER)
     );
   }
 
