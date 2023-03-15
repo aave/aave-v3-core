@@ -526,33 +526,33 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     expect(aaveUserData.usageAsCollateralEnabled).to.be.eq(false);
   });
 
-  it('User 6 supplies isolation mode asset is liquidated by User 2', async () => {
-    const { weth, dai, aave, aAave, users, pool, helpersContract, oracle } = testEnv;
+  it('User 5 supplies isolation mode asset is liquidated by User 6', async () => {
+    const { dai, aave, users, pool, helpersContract, oracle } = testEnv;
 
     await evmRevert(snapshot);
     snapshot = await evmSnapshot();
-
+    // supply dai as user 6, so user 5 can borrow
     const daiAmount = utils.parseEther('700');
-    await dai.connect(users[5].signer)['mint(uint256)'](daiAmount);
-    await dai.connect(users[5].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(users[5].signer).supply(dai.address, daiAmount, users[5].address, 0);
+    await dai.connect(users[6].signer)['mint(uint256)'](daiAmount);
+    await dai.connect(users[6].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[6].signer).supply(dai.address, daiAmount, users[6].address, 0);
 
     const aaveAmount = utils.parseEther('.3');
-    await aave.connect(users[6].signer)['mint(uint256)'](aaveAmount);
-    await aave.connect(users[6].signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await pool.connect(users[6].signer).supply(aave.address, aaveAmount, users[6].address, 0);
-    await pool.connect(users[6].signer).setUserUseReserveAsCollateral(aave.address, true);
+    await aave.connect(users[5].signer)['mint(uint256)'](aaveAmount);
+    await aave.connect(users[5].signer).approve(pool.address, MAX_UINT_AMOUNT);
+    await pool.connect(users[5].signer).supply(aave.address, aaveAmount, users[5].address, 0);
+    await pool.connect(users[5].signer).setUserUseReserveAsCollateral(aave.address, true);
 
     // borrow with health factor just above 1
-    const userGlobalData = await pool.getUserAccountData(users[6].address);
+    const userGlobalData = await pool.getUserAccountData(users[5].address);
     const daiPrice = await oracle.getAssetPrice(dai.address);
     let amountDAIToBorrow = await convertToCurrencyDecimals(
       dai.address,
       userGlobalData.availableBorrowsBase.div(daiPrice.toString()).percentMul(9999).toString()
     );
     await pool
-      .connect(users[6].signer)
-      .borrow(dai.address, amountDAIToBorrow, RateMode.Variable, 0, users[6].address);
+      .connect(users[5].signer)
+      .borrow(dai.address, amountDAIToBorrow, RateMode.Variable, 0, users[5].address);
 
     // advance time so health factor is less than one and liquidate
     await advanceTimeAndBlock(86400 * 365 * 100);
@@ -560,17 +560,18 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       pool,
       helpersContract,
       dai.address,
-      users[6].address
+      users[5].address
     );
     const amountToLiquidate = userDaiReserveDataBefore.currentVariableDebt.div(2);
-    await dai.connect(users[5].signer)['mint(uint256)'](daiAmount);
+    await dai.connect(users[6].signer)['mint(uint256)'](daiAmount);
+    await dai.connect(users[6].signer).approve(pool.address, MAX_UINT_AMOUNT);
     const tx = await pool
-      .connect(users[5].signer)
-      .liquidationCall(aave.address, dai.address, users[6].address, amountToLiquidate, true);
+      .connect(users[6].signer)
+      .liquidationCall(aave.address, dai.address, users[5].address, amountToLiquidate, true);
     await tx.wait();
 
     // confirm the newly received aave tokens (in isolation mode) cannot be used as collateral
-    const userData = await helpersContract.getUserReserveData(aave.address, users[5].address);
+    const userData = await helpersContract.getUserReserveData(aave.address, users[6].address);
     expect(userData.usageAsCollateralEnabled).to.be.eq(false);
   });
 
