@@ -1,3 +1,4 @@
+import hre from 'hardhat';
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { ZeroReserveInterestRateStrategy__factory } from '../types';
@@ -194,7 +195,9 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
       addressesProvider,
       weth,
       dai,
-      users: [depositor, borrower],
+      variableDebtDai,
+      stableDebtDai,
+      users: [depositor, borrower, stableBorrower],
     } = testEnv;
 
     const zeroStrategy = await new ZeroReserveInterestRateStrategy__factory(deployer.signer).deploy(
@@ -215,7 +218,19 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
     expect(
       await pool
         .connect(borrower.signer)
-        .borrow(dai.address, utils.parseEther('1'), 1, 0, borrower.address)
+        .borrow(dai.address, utils.parseEther('1'), 2, 0, borrower.address)
+    );
+    expect(await weth.connect(stableBorrower.signer)['mint(uint256)'](mintedAmount));
+    expect(await weth.connect(stableBorrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
+    expect(
+      await pool
+        .connect(stableBorrower.signer)
+        .deposit(weth.address, mintedAmount, stableBorrower.address, 0)
+    );
+    expect(
+      await pool
+        .connect(stableBorrower.signer)
+        .borrow(dai.address, utils.parseEther('1'), 1, 0, stableBorrower.address)
     );
 
     // PoolAdmin updates IR strategy address
@@ -268,5 +283,12 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
     expect(reserveDataUpdated.currentLiquidityRate).to.be.eq(0);
     expect(reserveDataUpdated.currentVariableBorrowRate).to.be.eq(0);
     expect(reserveDataUpdated.currentStableBorrowRate).to.be.eq(0);
+
+    // Stable borrow gets rebalanced
+    await expect(
+      pool.connect(depositor.signer).rebalanceStableBorrowRate(dai.address, stableBorrower.address)
+    )
+      .to.emit(pool, 'RebalanceStableBorrowRate')
+      .withArgs(dai.address, stableBorrower.address);
   });
 });
