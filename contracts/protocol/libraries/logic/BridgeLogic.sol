@@ -56,8 +56,7 @@ library BridgeLogic {
     address asset,
     uint256 amount,
     address onBehalfOf,
-    uint16 referralCode,
-    address addressesProvider
+    uint16 referralCode
   ) external {
     DataTypes.ReserveData storage reserve = reservesData[asset];
     DataTypes.ReserveCache memory reserveCache = reserve.cache();
@@ -89,7 +88,7 @@ library BridgeLogic {
           reservesList,
           userConfig,
           reserveCache.reserveConfiguration,
-          addressesProvider
+          reserveCache.aTokenAddress
         )
       ) {
         userConfig.setUsingAsCollateral(reserve.id, true);

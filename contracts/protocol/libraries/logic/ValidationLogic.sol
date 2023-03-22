@@ -21,6 +21,7 @@ import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
 import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
+import {IncentivizedERC20} from '../../tokenization/base/IncentivizedERC20.sol';
 
 /**
  * @title ReserveLogic library
@@ -52,9 +53,10 @@ library ValidationLogic {
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
 
   /**
-  * @dev Role identifier for the role allowed to supply isolated reserves as collateral
-  */
-  bytes32 public constant ISOLATED_COLLATERAL_SUPPLIER_ROLE = keccak256('ISOLATED_COLLATERAL_SUPPLIER');
+   * @dev Role identifier for the role allowed to supply isolated reserves as collateral
+   */
+  bytes32 public constant ISOLATED_COLLATERAL_SUPPLIER_ROLE =
+    keccak256('ISOLATED_COLLATERAL_SUPPLIER');
 
   /**
    * @notice Validates a supply action.
@@ -734,11 +736,19 @@ library ValidationLogic {
     mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveConfigurationMap memory reserveConfig,
-    address addressesProvider
+    address aTokenAddress
   ) internal view returns (bool) {
     if (reserveConfig.getDebtCeiling() != 0) {
       // ensures only the ISOLATED_COLLATERAL_SUPPLIER_ROLE can enable collateral as side-effect of an action
-      if(!IAccessControl(IPoolAddressesProvider(addressesProvider).getACLManager()).hasRole(ISOLATED_COLLATERAL_SUPPLIER_ROLE, msg.sender)) return false;
+      IPoolAddressesProvider addressesProvider = IncentivizedERC20(aTokenAddress)
+        .POOL()
+        .ADDRESSES_PROVIDER();
+      if (
+        !IAccessControl(addressesProvider.getACLManager()).hasRole(
+          ISOLATED_COLLATERAL_SUPPLIER_ROLE,
+          msg.sender
+        )
+      ) return false;
     }
     return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
   }
