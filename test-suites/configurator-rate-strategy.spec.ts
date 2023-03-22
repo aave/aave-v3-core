@@ -290,5 +290,12 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
     )
       .to.emit(pool, 'RebalanceStableBorrowRate')
       .withArgs(dai.address, stableBorrower.address);
+
+    // Stable borrow can be rebalanced as many times the rebalancer likes
+    await expect(
+      pool.connect(depositor.signer).rebalanceStableBorrowRate(dai.address, stableBorrower.address)
+    )
+      .to.emit(pool, 'RebalanceStableBorrowRate')
+      .withArgs(dai.address, stableBorrower.address);
   });
 });
