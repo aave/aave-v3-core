@@ -113,7 +113,6 @@ library DataTypes {
     address priceOracle;
     uint8 userEModeCategory;
     address priceOracleSentinel;
-    address addressesProvider;
   }
 
   struct ExecuteSupplyParams {
@@ -121,7 +120,6 @@ library DataTypes {
     uint256 amount;
     address onBehalfOf;
     uint16 referralCode;
-    address addressesProvider;
   }
 
   struct ExecuteBorrowParams {
@@ -172,7 +170,6 @@ library DataTypes {
     uint256 reservesCount;
     address oracle;
     uint8 fromEModeCategory;
-    address addressesProvider;
   }
 
   struct FlashloanParams {

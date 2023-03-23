@@ -305,7 +305,7 @@ library LiquidationLogic {
           reservesList,
           liquidatorConfig,
           collateralReserve.configuration,
-          params.addressesProvider
+          collateralReserve.aTokenAddress
         )
       ) {
         liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);

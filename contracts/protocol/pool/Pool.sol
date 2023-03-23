@@ -127,8 +127,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
       asset,
       amount,
       onBehalfOf,
-      referralCode,
-      address(ADDRESSES_PROVIDER)
+      referralCode
     );
   }
 
@@ -157,8 +156,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
         asset: asset,
         amount: amount,
         onBehalfOf: onBehalfOf,
-        referralCode: referralCode,
-        addressesProvider: address(ADDRESSES_PROVIDER)
+        referralCode: referralCode
       })
     );
   }
@@ -191,8 +189,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
         asset: asset,
         amount: amount,
         onBehalfOf: onBehalfOf,
-        referralCode: referralCode,
-        addressesProvider: address(ADDRESSES_PROVIDER)
+        referralCode: referralCode
       })
     );
   }
@@ -383,8 +380,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
         receiveAToken: receiveAToken,
         priceOracle: ADDRESSES_PROVIDER.getPriceOracle(),
         userEModeCategory: _usersEModeCategory[user],
-        priceOracleSentinel: ADDRESSES_PROVIDER.getPriceOracleSentinel(),
-        addressesProvider: address(ADDRESSES_PROVIDER)
+        priceOracleSentinel: ADDRESSES_PROVIDER.getPriceOracleSentinel()
       })
     );
   }
@@ -612,8 +608,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
         balanceToBefore: balanceToBefore,
         reservesCount: _reservesCount,
         oracle: ADDRESSES_PROVIDER.getPriceOracle(),
-        fromEModeCategory: _usersEModeCategory[from],
-        addressesProvider: address(ADDRESSES_PROVIDER)
+        fromEModeCategory: _usersEModeCategory[from]
       })
     );
   }
@@ -772,8 +767,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
         asset: asset,
         amount: amount,
         onBehalfOf: onBehalfOf,
-        referralCode: referralCode,
-        addressesProvider: address(ADDRESSES_PROVIDER)
+        referralCode: referralCode
       })
     );
   }
