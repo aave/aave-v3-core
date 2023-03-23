@@ -300,11 +300,12 @@ library LiquidationLogic {
     if (liquidatorPreviousATokenBalance == 0) {
       DataTypes.UserConfigurationMap storage liquidatorConfig = usersConfig[msg.sender];
       if (
-        ValidationLogic.validateUseAsCollateral(
+        ValidationLogic.validateAutomaticUseAsCollateral(
           reservesData,
           reservesList,
           liquidatorConfig,
-          collateralReserve.configuration
+          collateralReserve.configuration,
+          collateralReserve.aTokenAddress
         )
       ) {
         liquidatorConfig.setUsingAsCollateral(collateralReserve.id, true);
