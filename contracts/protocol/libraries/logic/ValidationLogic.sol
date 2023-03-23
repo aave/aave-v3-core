@@ -723,7 +723,7 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates if an asset should be automatically activated as collateral in the following actions: supply, 
+   * @notice Validates if an asset should be automatically activated as collateral in the following actions: supply,
    * transfer, mint unbacked, and liquidate
    * @dev This is used to ensure that isolated assets are not enabled as collateral automatically
    * @param reservesData The state of all the reserves
