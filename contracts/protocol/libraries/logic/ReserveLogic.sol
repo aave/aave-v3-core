@@ -278,7 +278,7 @@ library ReserveLogic {
   }
 
   /**
-   * @notice Updates the reserve indexes and the timestamp of the update.
+   * @notice Updates the reserve indexes.
    * @param reserve The reserve reserve to be updated
    * @param reserveCache The cache layer holding the cached protocol data
    */
