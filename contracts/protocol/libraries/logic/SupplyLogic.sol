@@ -122,18 +122,20 @@ library SupplyLogic {
 
     if (params.amount == type(uint256).max) {
       amountToWithdraw = userBalance;
+      
+      bool isCollateral = userConfig.isUsingAsCollateral(reserve.id);
+
+      if (isCollateral) {
+        userConfig.setUsingAsCollateral(reserve.id, false);
+        emit ReserveUsedAsCollateralDisabled(params.asset, msg.sender);
+      }
     }
 
     ValidationLogic.validateWithdraw(reserveCache, amountToWithdraw, userBalance);
 
     reserve.updateInterestRates(reserveCache, params.asset, 0, amountToWithdraw);
 
-    bool isCollateral = userConfig.isUsingAsCollateral(reserve.id);
 
-    if (isCollateral && amountToWithdraw == userBalance) {
-      userConfig.setUsingAsCollateral(reserve.id, false);
-      emit ReserveUsedAsCollateralDisabled(params.asset, msg.sender);
-    }
 
     IAToken(reserveCache.aTokenAddress).burn(
       msg.sender,
