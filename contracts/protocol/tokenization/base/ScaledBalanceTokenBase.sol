@@ -4,7 +4,7 @@ pragma solidity 0.8.10;
 import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
-import {RayMathExplicitRounding} from '../../libraries/math/RayMathExplicitRounding.sol';
+import {RayMathExplicitRounding, Rounding} from '../../libraries/math/RayMathExplicitRounding.sol';
 import {IPool} from '../../../interfaces/IPool.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {MintableIncentivizedERC20} from './MintableIncentivizedERC20.sol';
