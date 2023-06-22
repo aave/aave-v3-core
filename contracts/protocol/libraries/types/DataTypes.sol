@@ -46,7 +46,7 @@ library DataTypes {
     //bit 59: stable rate borrowing enabled
     //bit 60: asset is paused
     //bit 61: borrowing in isolation mode is enabled
-    //bit 62: solioed borrowing enabled
+    //bit 62: siloed borrowing enabled
     //bit 63: flashloaning enabled
     //bit 64-79: reserve factor
     //bit 80-115 borrow cap in whole tokens, borrowCap == 0 => no cap
