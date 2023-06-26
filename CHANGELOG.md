@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.18.0](https://github.com/aave/aave-v3-core/compare/v1.17.2...v1.18.0) (2023-06-26)
+
+
+### Features
+
+* Add zero IR strategy ([#818](https://github.com/aave/aave-v3-core/issues/818)) ([ade6cf8](https://github.com/aave/aave-v3-core/commit/ade6cf86f296ee68e82077ca18a3218096516862))
+
+
+### Bug Fixes
+
+* communicate correct premium in case of debt-bearing flashloan ([#822](https://github.com/aave/aave-v3-core/issues/822)) ([7b2a284](https://github.com/aave/aave-v3-core/commit/7b2a2840e1bc7e1201fd4ed37cbbd8da967dda11))
+* Fix collateral behavior of zero-ltv assets ([#820](https://github.com/aave/aave-v3-core/issues/820)) ([ea48670](https://github.com/aave/aave-v3-core/commit/ea4867086d39f094303916e72e180f99d8149fd5))
+* Fix event checks in test cases ([#824](https://github.com/aave/aave-v3-core/issues/824)) ([29ff9b9](https://github.com/aave/aave-v3-core/commit/29ff9b9f89af7cd8255231bc5faf26c3ce0fb7ce))
+* linting ([#837](https://github.com/aave/aave-v3-core/issues/837)) ([97cb6ea](https://github.com/aave/aave-v3-core/commit/97cb6ead76ed69dbeae144a47f4dbef807f06082))
+* Return final withdraw amount in L2Pool withdraw fn ([#831](https://github.com/aave/aave-v3-core/issues/831)) ([37b4d1f](https://github.com/aave/aave-v3-core/commit/37b4d1f0e770ccb9ebdf50037c81582f3c79c5ee))
+
 ## [1.17.2](https://github.com/aave/aave-v3-core/compare/v1.17.1...v1.17.2) (2023-01-31)
 
 
