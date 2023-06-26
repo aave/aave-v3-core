@@ -4,5 +4,5 @@ certoraRun certora/harness/SimpleERC20.sol \
     --link ATokenHarness:_underlyingAsset=SimpleERC20 \
     --optimistic_loop \
     --solc solc8.10 \
-    --cloud master \
+    --cloud \
     --msg "aToken spec - all rules" 
