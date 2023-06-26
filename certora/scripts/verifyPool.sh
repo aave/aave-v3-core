@@ -8,6 +8,6 @@ certoraRun certora/harness/PoolHarness.sol \
   --settings -mediumTimeout=700,-depth=40 \
   --optimistic_loop \
   --solc solc8.10 \
-  --cloud master \
+  --cloud \
   --rules $1 \
   --msg "Pool"

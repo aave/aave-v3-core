@@ -3,5 +3,5 @@ certoraRun certora/harness/StableDebtTokenHarness.sol:StableDebtTokenHarness \
     --settings -assumeUnwindCond,-b=4 \
     --cache StableToken \
     --solc solc8.10 \
-    --cloud master \
+    --cloud \
     --msg "stableTokenCLI"

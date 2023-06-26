@@ -3,5 +3,5 @@ certoraRun certora/harness/UserConfigurationHarness.sol \
     --settings -useBitVectorTheory \
     --optimistic_loop \
     --solc solc8.10 \
-    --cloud master \
+    --cloud \
     --msg "UserConfiguration All spec" 

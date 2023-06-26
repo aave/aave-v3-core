@@ -7,7 +7,7 @@ import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 import { parseUnits } from 'ethers/lib/utils';
 
 makeSuite('LTV validation', (testEnv: TestEnv) => {
-  const { LTV_VALIDATION_FAILED } = ProtocolErrors;
+  const { LTV_VALIDATION_FAILED, USER_IN_ISOLATION_MODE_OR_LTV_ZERO } = ProtocolErrors;
 
   let snap: string;
   before(async () => {
@@ -146,5 +146,133 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
     const userData = await pool.getUserAccountData(user1.address);
     expect(userData.totalCollateralBase).to.be.eq(parseUnits('10', 8));
     expect(userData.totalDebtBase).to.be.eq(0);
+  });
+
+  it('User 1 deposit dai as collateral, ltv drops to 0, tries to enable as collateral (nothing should happen)', async () => {
+    await evmRevert(snap);
+    const {
+      pool,
+      dai,
+      users: [user1],
+      configurator,
+      helpersContract,
+    } = testEnv;
+
+    const daiAmount = await convertToCurrencyDecimals(dai.address, '10');
+
+    await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
+
+    await pool.connect(user1.signer).supply(dai.address, daiAmount, user1.address, 0);
+
+    // Set DAI LTV = 0
+    expect(await configurator.configureReserveAsCollateral(dai.address, 0, 8000, 10500))
+      .to.emit(configurator, 'CollateralConfigurationChanged')
+      .withArgs(dai.address, 0, 8000, 10500);
+    const ltv = (await helpersContract.getReserveConfigurationData(dai.address)).ltv;
+    expect(ltv).to.be.equal(0);
+
+    const userDataBefore = await helpersContract.getUserReserveData(dai.address, user1.address);
+    expect(userDataBefore.usageAsCollateralEnabled).to.be.eq(true);
+
+    await pool.connect(user1.signer).setUserUseReserveAsCollateral(dai.address, true);
+
+    const userDataAfter = await helpersContract.getUserReserveData(dai.address, user1.address);
+    expect(userDataAfter.usageAsCollateralEnabled).to.be.eq(true);
+  });
+
+  it('User 1 deposit zero ltv dai, tries to enable as collateral (revert expected)', async () => {
+    await evmRevert(snap);
+    const {
+      pool,
+      dai,
+      users: [user1],
+      configurator,
+      helpersContract,
+    } = testEnv;
+
+    // Clean user's state by withdrawing all aDAI
+    await pool.connect(user1.signer).withdraw(dai.address, MAX_UINT_AMOUNT, user1.address);
+
+    // Set DAI LTV = 0
+    expect(await configurator.configureReserveAsCollateral(dai.address, 0, 8000, 10500))
+      .to.emit(configurator, 'CollateralConfigurationChanged')
+      .withArgs(dai.address, 0, 8000, 10500);
+    const ltv = (await helpersContract.getReserveConfigurationData(dai.address)).ltv;
+    expect(ltv).to.be.equal(0);
+
+    const daiAmount = await convertToCurrencyDecimals(dai.address, '10');
+
+    await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
+
+    await pool.connect(user1.signer).supply(dai.address, daiAmount, user1.address, 0);
+
+    await expect(
+      pool.connect(user1.signer).setUserUseReserveAsCollateral(dai.address, true)
+    ).to.be.revertedWith(USER_IN_ISOLATION_MODE_OR_LTV_ZERO);
+  });
+
+  it('User 1 deposit zero ltv dai, dai should not be enabled as collateral', async () => {
+    await evmRevert(snap);
+    const {
+      pool,
+      dai,
+      users: [user1],
+      configurator,
+      helpersContract,
+    } = testEnv;
+
+    // Set DAI LTV = 0
+    expect(await configurator.configureReserveAsCollateral(dai.address, 0, 8000, 10500))
+      .to.emit(configurator, 'CollateralConfigurationChanged')
+      .withArgs(dai.address, 0, 8000, 10500);
+    const ltv = (await helpersContract.getReserveConfigurationData(dai.address)).ltv;
+    expect(ltv).to.be.equal(0);
+
+    const daiAmount = await convertToCurrencyDecimals(dai.address, '10');
+
+    await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
+
+    await pool.connect(user1.signer).supply(dai.address, daiAmount, user1.address, 0);
+
+    const userData = await helpersContract.getUserReserveData(dai.address, user1.address);
+    expect(userData.usageAsCollateralEnabled).to.be.eq(false);
+  });
+
+  it('User 1 deposit dai, DAI ltv drops to 0, transfers dai, dai should not be enabled as collateral for receiver', async () => {
+    await evmRevert(snap);
+    const {
+      pool,
+      dai,
+      aDai,
+      users: [user1, user2],
+      configurator,
+      helpersContract,
+    } = testEnv;
+
+    const daiAmount = await convertToCurrencyDecimals(dai.address, '10');
+
+    await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
+
+    await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
+
+    await pool.connect(user1.signer).supply(dai.address, daiAmount, user1.address, 0);
+
+    // Set DAI LTV = 0
+    expect(await configurator.configureReserveAsCollateral(dai.address, 0, 8000, 10500))
+      .to.emit(configurator, 'CollateralConfigurationChanged')
+      .withArgs(dai.address, 0, 8000, 10500);
+    const ltv = (await helpersContract.getReserveConfigurationData(dai.address)).ltv;
+    expect(ltv).to.be.equal(0);
+
+    // Transfer 0 LTV DAI to user2
+    await aDai.connect(user1.signer).transfer(user2.address, 1);
+    const userData = await helpersContract.getUserReserveData(dai.address, user2.address);
+    expect(userData.usageAsCollateralEnabled).to.be.eq(false);
   });
 });

@@ -131,7 +131,7 @@ export enum ProtocolErrors {
   PRICE_ORACLE_SENTINEL_CHECK_FAILED = '59', // 'Price oracle sentinel validation failed'
   ASSET_NOT_BORROWABLE_IN_ISOLATION = '60', // 'Asset is not borrowable in isolation mode'
   RESERVE_ALREADY_INITIALIZED = '61', // 'Reserve has already been initialized'
-  USER_IN_ISOLATION_MODE = '62', // 'User is in isolation mode'
+  USER_IN_ISOLATION_MODE_OR_LTV_ZERO = '62', // 'User is in isolation mode or ltv is zero'
   INVALID_LTV = '63', // 'Invalid ltv parameter for the reserve'
   INVALID_LIQ_THRESHOLD = '64', // 'Invalid liquidity threshold parameter for the reserve'
   INVALID_LIQ_BONUS = '65', // 'Invalid liquidity bonus parameter for the reserve'

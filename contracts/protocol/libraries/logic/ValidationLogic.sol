@@ -10,6 +10,8 @@ import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {IPriceOracleGetter} from '../../../interfaces/IPriceOracleGetter.sol';
 import {IAToken} from '../../../interfaces/IAToken.sol';
 import {IPriceOracleSentinel} from '../../../interfaces/IPriceOracleSentinel.sol';
+import {IPoolAddressesProvider} from '../../../interfaces/IPoolAddressesProvider.sol';
+import {IAccessControl} from '../../../dependencies/openzeppelin/contracts/IAccessControl.sol';
 import {ReserveConfiguration} from '../configuration/ReserveConfiguration.sol';
 import {UserConfiguration} from '../configuration/UserConfiguration.sol';
 import {Errors} from '../helpers/Errors.sol';
@@ -19,6 +21,7 @@ import {DataTypes} from '../types/DataTypes.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
 import {GenericLogic} from './GenericLogic.sol';
 import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
+import {IncentivizedERC20} from '../../tokenization/base/IncentivizedERC20.sol';
 
 /**
  * @title ReserveLogic library
@@ -48,6 +51,12 @@ library ValidationLogic {
    * A value of 1e18 results in 1
    */
   uint256 public constant HEALTH_FACTOR_LIQUIDATION_THRESHOLD = 1e18;
+
+  /**
+   * @dev Role identifier for the role allowed to supply isolated reserves as collateral
+   */
+  bytes32 public constant ISOLATED_COLLATERAL_SUPPLIER_ROLE =
+    keccak256('ISOLATED_COLLATERAL_SUPPLIER');
 
   /**
    * @notice Validates a supply action.
@@ -664,7 +673,7 @@ library ValidationLogic {
       Errors.INCONSISTENT_EMODE_CATEGORY
     );
 
-    //eMode can always be enabled if the user hasn't supplied anything
+    // eMode can always be enabled if the user hasn't supplied anything
     if (userConfig.isEmpty()) {
       return;
     }
@@ -688,10 +697,8 @@ library ValidationLogic {
   }
 
   /**
-   * @notice Validates if an asset can be activated as collateral in the following actions: supply, transfer,
-   * set as collateral, mint unbacked, and liquidate
-   * @dev This is used to ensure that the constraints for isolated assets are respected by all the actions that
-   * generate transfers of aTokens
+   * @notice Validates the action of activating the asset as collateral.
+   * @dev Only possible if the asset has non-zero LTV and the user is not in isolation mode
    * @param reservesData The state of all the reserves
    * @param reservesList The addresses of all the active reserves
    * @param userConfig the user configuration
@@ -704,11 +711,46 @@ library ValidationLogic {
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveConfigurationMap memory reserveConfig
   ) internal view returns (bool) {
+    if (reserveConfig.getLtv() == 0) {
+      return false;
+    }
     if (!userConfig.isUsingAsCollateralAny()) {
       return true;
     }
     (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reservesList);
 
     return (!isolationModeActive && reserveConfig.getDebtCeiling() == 0);
+  }
+
+  /**
+   * @notice Validates if an asset should be automatically activated as collateral in the following actions: supply,
+   * transfer, mint unbacked, and liquidate
+   * @dev This is used to ensure that isolated assets are not enabled as collateral automatically
+   * @param reservesData The state of all the reserves
+   * @param reservesList The addresses of all the active reserves
+   * @param userConfig the user configuration
+   * @param reserveConfig The reserve configuration
+   * @return True if the asset can be activated as collateral, false otherwise
+   */
+  function validateAutomaticUseAsCollateral(
+    mapping(address => DataTypes.ReserveData) storage reservesData,
+    mapping(uint256 => address) storage reservesList,
+    DataTypes.UserConfigurationMap storage userConfig,
+    DataTypes.ReserveConfigurationMap memory reserveConfig,
+    address aTokenAddress
+  ) internal view returns (bool) {
+    if (reserveConfig.getDebtCeiling() != 0) {
+      // ensures only the ISOLATED_COLLATERAL_SUPPLIER_ROLE can enable collateral as side-effect of an action
+      IPoolAddressesProvider addressesProvider = IncentivizedERC20(aTokenAddress)
+        .POOL()
+        .ADDRESSES_PROVIDER();
+      if (
+        !IAccessControl(addressesProvider.getACLManager()).hasRole(
+          ISOLATED_COLLATERAL_SUPPLIER_ROLE,
+          msg.sender
+        )
+      ) return false;
+    }
+    return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
   }
 }
