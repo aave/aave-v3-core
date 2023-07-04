@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.19.0](https://github.com/aave/aave-v3-core/compare/v1.18.0...v1.19.0) (2023-07-04)
+
+
+### Features
+
+* add OpenZeppelin SafeERC20 and Address dependencies ([#859](https://github.com/aave/aave-v3-core/issues/859)) ([493bb4d](https://github.com/aave/aave-v3-core/commit/493bb4dfd3e0a69f7c3fbf468bc8ef310da9960b))
+
+
+### Bug Fixes
+
+* add natspec docs to flags of reserve configuration map ([#854](https://github.com/aave/aave-v3-core/issues/854)) ([792c23e](https://github.com/aave/aave-v3-core/commit/792c23eed73d3791fde31f6d26c69bc62f3533bf))
+* remove initial config of fee params in pool initialize function ([#846](https://github.com/aave/aave-v3-core/issues/846)) ([3bb960b](https://github.com/aave/aave-v3-core/commit/3bb960b92bcb3d58d8bdcd2d2f924340ba812164))
+* Soften solidity version of FlashLoanBase contracts ([#861](https://github.com/aave/aave-v3-core/issues/861)) ([364a779](https://github.com/aave/aave-v3-core/commit/364a779efd9a7e42ec1882156d95a62f22ea3fc4))
+
 ## [1.18.0](https://github.com/aave/aave-v3-core/compare/v1.17.2...v1.18.0) (2023-06-26)
 
 
