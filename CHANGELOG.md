@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.1](https://github.com/aave/aave-v3-core/compare/v1.19.0...v1.19.1) (2023-07-04)
+
+
+### Bug Fixes
+
+* Fix prepublish step in CI ([#862](https://github.com/aave/aave-v3-core/issues/862)) ([ec2902a](https://github.com/aave/aave-v3-core/commit/ec2902a4a113c6584434d49742ee1a5616070f90))
+
 ## [1.19.0](https://github.com/aave/aave-v3-core/compare/v1.18.0...v1.19.0) (2023-07-04)
 
 
