@@ -12,6 +12,7 @@ import {FlashLoanLogic} from '../libraries/logic/FlashLoanLogic.sol';
 import {BorrowLogic} from '../libraries/logic/BorrowLogic.sol';
 import {LiquidationLogic} from '../libraries/logic/LiquidationLogic.sol';
 import {DataTypes} from '../libraries/types/DataTypes.sol';
+import {Calldata} from '../libraries/types/Calldata.sol';
 import {BridgeLogic} from '../libraries/logic/BridgeLogic.sol';
 import {IERC20WithPermit} from '../../interfaces/IERC20WithPermit.sol';
 import {IPoolAddressesProvider} from '../../interfaces/IPoolAddressesProvider.sol';
@@ -38,6 +39,7 @@ import {PoolStorage} from './PoolStorage.sol';
  */
 contract Pool is VersionedInitializable, PoolStorage, IPool {
   using ReserveLogic for DataTypes.ReserveData;
+  using Calldata for bytes;
 
   uint256 public constant POOL_REVISION = 0x1;
   IPoolAddressesProvider public immutable ADDRESSES_PROVIDER;
@@ -438,6 +440,82 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
       flashLoanPremiumTotal: _flashLoanPremiumTotal
     });
     FlashLoanLogic.executeFlashLoanSimple(_reserves[asset], flashParams);
+  }
+
+  /// @inheritdoc IPool
+  function multiCall(bytes calldata actions, bytes[] calldata params) public override {
+    uint len = actions.length;
+    require(len == params.length, Errors.INCONSISTENT_PARAMS_LENGTH);
+    for (uint i; i < len; ) {
+      MultiCallAction action = MultiCallAction(uint8(actions[i]));
+      bytes calldata param = params[i];
+      if (action == MultiCallAction.Supply) {
+        supply(
+          param.getAddress(0x00),
+          param.getUint256(0x20),
+          param.getAddress(0x40),
+          param.getUint16(0x60)
+        );
+      } else if (action == MultiCallAction.Borrow) {
+        borrow(
+          param.getAddress(0x00),
+          param.getUint256(0x20),
+          param.getUint256(0x40),
+          param.getUint16(0x60),
+          param.getAddress(0x80)
+        );
+      } else if (action == MultiCallAction.Repay) {
+        repay(
+          param.getAddress(0x00),
+          param.getUint256(0x20),
+          param.getUint256(0x40),
+          param.getAddress(0x60)
+        );
+      } else if (action == MultiCallAction.Withdraw) {
+        withdraw(param.getAddress(0x00), param.getUint256(0x20), param.getAddress(0x40));
+      } else if (action == MultiCallAction.SetUserUseReserveAsCollateral) {
+        setUserUseReserveAsCollateral(param.getAddress(0x00), param.getBool(0x20));
+      } else if (action == MultiCallAction.SwapBorrowRateMode) {
+        swapBorrowRateMode(param.getAddress(0x00), param.getUint256(0x20));
+      } else if (action == MultiCallAction.RebalanceStableBorrowRate) {
+        rebalanceStableBorrowRate(param.getAddress(0x00), param.getAddress(0x20));
+      } else if (action == MultiCallAction.SupplyWithPermit) {
+        supplyWithPermit(
+          param.getAddress(0x00),
+          param.getUint256(0x20),
+          param.getAddress(0x40),
+          param.getUint16(0x60),
+          param.getUint256(0x80),
+          param.getUint8(0xA0),
+          param.getBytes32(0xC0),
+          param.getBytes32(0xE0)
+        );
+      } else if (action == MultiCallAction.RepayWithPermit) {
+        repayWithPermit(
+          param.getAddress(0x00),
+          param.getUint256(0x20),
+          param.getUint256(0x40),
+          param.getAddress(0x60),
+          param.getUint256(0x80),
+          param.getUint8(0xA0),
+          param.getBytes32(0xC0),
+          param.getBytes32(0xE0)
+        );
+      } else if (action == MultiCallAction.RepayWithATokens) {
+        repayWithATokens(param.getAddress(0x00), param.getUint256(0x20), param.getUint256(0x40));
+      } else if (action == MultiCallAction.LiquidationCall) {
+        liquidationCall(
+          param.getAddress(0x00),
+          param.getAddress(0x20),
+          param.getAddress(0x40),
+          param.getUint256(0x60),
+          param.getBool(0x80)
+        );
+      }
+      unchecked {
+        i++;
+      }
+    }
   }
 
   /// @inheritdoc IPool
