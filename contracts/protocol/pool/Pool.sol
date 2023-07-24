@@ -451,14 +451,14 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
       bytes calldata param = params[i];
       if (action == MultiCallAction.Supply) {
         supply(
-          param.getAddress(0x00),
+          param.getAddress(),
           param.getUint256(0x20),
           param.getAddress(0x40),
           param.getUint16(0x60)
         );
       } else if (action == MultiCallAction.Borrow) {
         borrow(
-          param.getAddress(0x00),
+          param.getAddress(),
           param.getUint256(0x20),
           param.getUint256(0x40),
           param.getUint16(0x60),
@@ -466,22 +466,22 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
         );
       } else if (action == MultiCallAction.Repay) {
         repay(
-          param.getAddress(0x00),
+          param.getAddress(),
           param.getUint256(0x20),
           param.getUint256(0x40),
           param.getAddress(0x60)
         );
       } else if (action == MultiCallAction.Withdraw) {
-        withdraw(param.getAddress(0x00), param.getUint256(0x20), param.getAddress(0x40));
+        withdraw(param.getAddress(), param.getUint256(0x20), param.getAddress(0x40));
       } else if (action == MultiCallAction.SetUserUseReserveAsCollateral) {
-        setUserUseReserveAsCollateral(param.getAddress(0x00), param.getBool(0x20));
+        setUserUseReserveAsCollateral(param.getAddress(), param.getBool(0x20));
       } else if (action == MultiCallAction.SwapBorrowRateMode) {
-        swapBorrowRateMode(param.getAddress(0x00), param.getUint256(0x20));
+        swapBorrowRateMode(param.getAddress(), param.getUint256(0x20));
       } else if (action == MultiCallAction.RebalanceStableBorrowRate) {
-        rebalanceStableBorrowRate(param.getAddress(0x00), param.getAddress(0x20));
+        rebalanceStableBorrowRate(param.getAddress(), param.getAddress(0x20));
       } else if (action == MultiCallAction.SupplyWithPermit) {
         supplyWithPermit(
-          param.getAddress(0x00),
+          param.getAddress(),
           param.getUint256(0x20),
           param.getAddress(0x40),
           param.getUint16(0x60),
@@ -492,7 +492,7 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
         );
       } else if (action == MultiCallAction.RepayWithPermit) {
         repayWithPermit(
-          param.getAddress(0x00),
+          param.getAddress(),
           param.getUint256(0x20),
           param.getUint256(0x40),
           param.getAddress(0x60),
@@ -502,10 +502,10 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
           param.getBytes32(0xE0)
         );
       } else if (action == MultiCallAction.RepayWithATokens) {
-        repayWithATokens(param.getAddress(0x00), param.getUint256(0x20), param.getUint256(0x40));
+        repayWithATokens(param.getAddress(), param.getUint256(0x20), param.getUint256(0x40));
       } else if (action == MultiCallAction.LiquidationCall) {
         liquidationCall(
-          param.getAddress(0x00),
+          param.getAddress(),
           param.getAddress(0x20),
           param.getAddress(0x40),
           param.getUint256(0x60),
