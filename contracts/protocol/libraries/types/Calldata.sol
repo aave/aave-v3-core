@@ -7,39 +7,39 @@ library Calldata {
     }
   }
 
-  function getAddress(bytes calldata self, bytes1 offset) internal pure returns (address output) {
+  function getAddress(bytes calldata self, uint8 index) internal pure returns (address output) {
     assembly {
-      output := calldataload(add(self.offset, offset))
+      output := calldataload(add(self.offset, mul(index, 0x20)))
     }
   }
 
-  function getUint256(bytes calldata self, bytes1 offset) internal pure returns (uint output) {
+  function getUint256(bytes calldata self, uint8 index) internal pure returns (uint output) {
     assembly {
-      output := calldataload(add(self.offset, offset))
+      output := calldataload(add(self.offset, mul(index, 0x20)))
     }
   }
 
-  function getUint16(bytes calldata self, bytes1 offset) internal pure returns (uint16 output) {
+  function getUint16(bytes calldata self, uint8 index) internal pure returns (uint16 output) {
     assembly {
-      output := calldataload(add(self.offset, offset))
+      output := calldataload(add(self.offset, mul(index, 0x20)))
     }
   }
 
-  function getUint8(bytes calldata self, bytes1 offset) internal pure returns (uint8 output) {
+  function getUint8(bytes calldata self, uint8 index) internal pure returns (uint8 output) {
     assembly {
-      output := calldataload(add(self.offset, offset))
+      output := calldataload(add(self.offset, mul(index, 0x20)))
     }
   }
 
-  function getBool(bytes calldata self, bytes1 offset) internal pure returns (bool output) {
+  function getBool(bytes calldata self, uint8 index) internal pure returns (bool output) {
     assembly {
-      output := calldataload(add(self.offset, offset))
+      output := calldataload(add(self.offset, mul(index, 0x20)))
     }
   }
 
-  function getBytes32(bytes calldata self, bytes1 offset) internal pure returns (bytes32 output) {
+  function getBytes32(bytes calldata self, uint8 index) internal pure returns (bytes32 output) {
     assembly {
-      output := calldataload(add(self.offset, offset))
+      output := calldataload(add(self.offset, mul(index, 0x20)))
     }
   }
 }

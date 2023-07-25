@@ -450,66 +450,56 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
       MultiCallAction action = MultiCallAction(uint8(actions[i]));
       bytes calldata param = params[i];
       if (action == MultiCallAction.Supply) {
-        supply(
-          param.getAddress(),
-          param.getUint256(0x20),
-          param.getAddress(0x40),
-          param.getUint16(0x60)
-        );
+        supply(param.getAddress(), param.getUint256(1), param.getAddress(2), param.getUint16(3));
       } else if (action == MultiCallAction.Borrow) {
         borrow(
           param.getAddress(),
-          param.getUint256(0x20),
-          param.getUint256(0x40),
-          param.getUint16(0x60),
-          param.getAddress(0x80)
+          param.getUint256(1),
+          param.getUint256(2),
+          param.getUint16(3),
+          param.getAddress(4)
         );
       } else if (action == MultiCallAction.Repay) {
-        repay(
-          param.getAddress(),
-          param.getUint256(0x20),
-          param.getUint256(0x40),
-          param.getAddress(0x60)
-        );
+        repay(param.getAddress(), param.getUint256(1), param.getUint256(2), param.getAddress(3));
       } else if (action == MultiCallAction.Withdraw) {
-        withdraw(param.getAddress(), param.getUint256(0x20), param.getAddress(0x40));
+        withdraw(param.getAddress(), param.getUint256(1), param.getAddress(2));
       } else if (action == MultiCallAction.SetUserUseReserveAsCollateral) {
-        setUserUseReserveAsCollateral(param.getAddress(), param.getBool(0x20));
+        setUserUseReserveAsCollateral(param.getAddress(), param.getBool(1));
       } else if (action == MultiCallAction.SwapBorrowRateMode) {
-        swapBorrowRateMode(param.getAddress(), param.getUint256(0x20));
+        swapBorrowRateMode(param.getAddress(), param.getUint256(1));
       } else if (action == MultiCallAction.RebalanceStableBorrowRate) {
-        rebalanceStableBorrowRate(param.getAddress(), param.getAddress(0x20));
+        rebalanceStableBorrowRate(param.getAddress(), param.getAddress(1));
       } else if (action == MultiCallAction.SupplyWithPermit) {
         supplyWithPermit(
           param.getAddress(),
-          param.getUint256(0x20),
-          param.getAddress(0x40),
-          param.getUint16(0x60),
-          param.getUint256(0x80),
-          param.getUint8(0xA0),
-          param.getBytes32(0xC0),
-          param.getBytes32(0xE0)
+          param.getUint256(1),
+          param.getAddress(2),
+          param.getUint16(3),
+          param.getUint256(4),
+          param.getUint8(5),
+          param.getBytes32(6),
+          param.getBytes32(7)
         );
       } else if (action == MultiCallAction.RepayWithPermit) {
         repayWithPermit(
           param.getAddress(),
-          param.getUint256(0x20),
-          param.getUint256(0x40),
-          param.getAddress(0x60),
-          param.getUint256(0x80),
-          param.getUint8(0xA0),
-          param.getBytes32(0xC0),
-          param.getBytes32(0xE0)
+          param.getUint256(1),
+          param.getUint256(2),
+          param.getAddress(3),
+          param.getUint256(4),
+          param.getUint8(5),
+          param.getBytes32(6),
+          param.getBytes32(7)
         );
       } else if (action == MultiCallAction.RepayWithATokens) {
-        repayWithATokens(param.getAddress(), param.getUint256(0x20), param.getUint256(0x40));
+        repayWithATokens(param.getAddress(), param.getUint256(1), param.getUint256(2));
       } else if (action == MultiCallAction.LiquidationCall) {
         liquidationCall(
           param.getAddress(),
-          param.getAddress(0x20),
-          param.getAddress(0x40),
-          param.getUint256(0x60),
-          param.getBool(0x80)
+          param.getAddress(1),
+          param.getAddress(2),
+          param.getUint256(3),
+          param.getBool(4)
         );
       }
       unchecked {
