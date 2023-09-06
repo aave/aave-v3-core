@@ -88,5 +88,8 @@
   },
   "lint-staged": {
     "*.{ts,js,md,sol}": "prettier --write"
+  },
+  "dependencies": {
+    "hardhat-cannon": "2.5.4"
   }
 }
