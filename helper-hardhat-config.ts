@@ -31,6 +31,12 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
   [eEthereumNetwork.kovan]: ALCHEMY_KEY
     ? `https://eth-kovan.alchemyapi.io/v2/${ALCHEMY_KEY}`
     : `https://kovan.infura.io/v3/${INFURA_KEY}`,
+  [eEthereumNetwork.goerli]: ALCHEMY_KEY
+    ? `https://eth-goerli.alchemyapi.io/v2/${ALCHEMY_KEY}`
+    : `https://goerli.infura.io/v3/${INFURA_KEY}`,
+  [eEthereumNetwork.sepolia]: ALCHEMY_KEY
+    ? `https://eth-sepolia.alchemyapi.io/v2/${ALCHEMY_KEY}`
+    : `https://sepolia.infura.io/v3/${INFURA_KEY}`,
   [eEthereumNetwork.ropsten]: ALCHEMY_KEY
     ? `https://eth-ropsten.alchemyapi.io/v2/${ALCHEMY_KEY}`
     : `https://ropsten.infura.io/v3/${INFURA_KEY}`,
@@ -45,6 +51,8 @@ export const NETWORKS_RPC_URL: iParamsPerNetwork<string> = {
 export const BLOCK_TO_FORK: iParamsPerNetwork<number | undefined> = {
   [eEthereumNetwork.main]: 12406069,
   [eEthereumNetwork.kovan]: undefined,
+  [eEthereumNetwork.goerli]: undefined,
+  [eEthereumNetwork.sepolia]: undefined,
   [eEthereumNetwork.ropsten]: undefined,
   [eEthereumNetwork.coverage]: undefined,
   [eEthereumNetwork.hardhat]: undefined,

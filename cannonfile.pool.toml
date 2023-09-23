@@ -1,11 +1,17 @@
 name = "aave-v3-pool"
 version = "<%= package.version %>"
+description = "Aave's v3 Pool contract, main point of interaction with an Aave protocol's market"
 
 [setting.marketId]
 defaultValue = "Ethereum Aave Market"
 
 [setting.owner]
-defaultValue = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266" # Anvil's first address (Swap this out when deploying to a network)
+defaultValue = "0xc783df8a850f42e7F7e57013759C285caa701eB6" # Hardhat's first address (Swap this out when deploying to a network)
+
+# `salt` here only affects proxy contract
+[setting.salt]
+description = "Change this to a unique string when deploying multiple instances of the system. Note that only the proxy contract will be unique."
+defaultValue = "aave-v3-pool-official"
 
 [contract.ReserveConfiguration]
 artifact = 'contracts/protocol/libraries/configuration/ReserveConfiguration.sol:ReserveConfiguration'
@@ -46,23 +52,32 @@ artifact = 'contracts/protocol/libraries/logic/BridgeLogic.sol:BridgeLogic'
 artifact = "contracts/protocol/configuration/PoolAddressesProvider.sol:PoolAddressesProvider"
 args = [
   "<%= settings.marketId %>", # string memory marketId
-  "<%= settings.owner %>", # address owner
+  "<%= settings.owner %>" # address owner
 ]
+
+[contract.InitializableImmutableAdminUpgradeabilityProxy]
+artifact = "contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol:InitializableImmutableAdminUpgradeabilityProxy"
+args = ["<%= settings.owner %>"]
+func = "initialize"
+salt = "<%= settings.salt %>"
 
 [contract.Pool]
 artifact = "contracts/protocol/pool/Pool.sol:Pool"
+from = "<%= settings.owner %>"
+fromCall.func = "<%= settings.owner %>"
+func = "initialize"
 args = ["<%= contracts.PoolAddressesProvider.address %>"]
 
 libraries.BorrowLogic = "<%= contracts.BorrowLogic.address %>"
-libraries.ReserveConfiguration = "<%= contracts.ReserveConfiguration %>"
-libraries.PoolLogic = "<%= contracts.PoolLogic %>"
-libraries.ReserveLogic = "<%= contracts.ReserveLogic %>"
-libraries.EModeLogic = "<%= contracts.EModeLogic %>"
-libraries.SupplyLogic = "<%= contracts.SupplyLogic %>"
-libraries.FlashLoanLogic = "<%= contracts.FlashLoanLogic %>"
-libraries.LiquidationLogic = "<%= contracts.LiquidationLogic %>"
-libraries.DataTypes = "<%= contracts.DataTypes %>"
-libraries.BridgeLogic = "<%= contracts.BridgeLogic %>"
+libraries.ReserveConfiguration = "<%= contracts.ReserveConfiguration.address %>"
+libraries.PoolLogic = "<%= contracts.PoolLogic.address %>"
+libraries.ReserveLogic = "<%= contracts.ReserveLogic.address %>"
+libraries.EModeLogic = "<%= contracts.EModeLogic.address %>"
+libraries.SupplyLogic = "<%= contracts.SupplyLogic.address %>"
+libraries.FlashLoanLogic = "<%= contracts.FlashLoanLogic.address %>"
+libraries.LiquidationLogic = "<%= contracts.LiquidationLogic.address %>"
+libraries.DataTypes = "<%= contracts.DataTypes.address %>"
+libraries.BridgeLogic = "<%= contracts.BridgeLogic.address %>"
 
 depends = [
   "contract.PoolAddressesProvider", 
@@ -74,6 +89,19 @@ depends = [
   "contract.FlashLoanLogic",
   "contract.LiquidationLogic",
   "contract.DataTypes",
-  "contract.BridgeLogic",
+  "contract.BridgeLogic"
+]
 
+[invoke.upgrade_proxy]
+target = ["InitializableImmutableAdminUpgradeabilityProxy"]
+from = "<%= settings.owner %>"
+salt = "<%= settings.salt %>"
+fromCall.func = "admin"
+func = "upgradeTo"
+args = ["<%= contracts.Pool.address %>"]
+create2 = true
+
+depends = [
+  "contract.InitializableImmutableAdminUpgradeabilityProxy",
+  "contract.Pool"
 ]
