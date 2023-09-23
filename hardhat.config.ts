@@ -72,19 +72,31 @@ const hardhatConfig = {
       forking: buildForkConfig(),
       allowUnlimitedContractSize: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
-        privateKey: secretKey,
+        privateKey: process.env.PRIVATE_KEY,
         balance,
       })),
     },
     ganache: {
-      url: 'http://ganache:8545',
+      url: 'http://localhost:8545',
       accounts: {
-        mnemonic: 'fox sight canyon orphan hotel grow hedgehog build bless august weather swarm',
+        mnemonic:
+          'summer frozen alley foot sausage stairs become shoulder relax inmate quantum success',
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
         count: 20,
       },
     },
+    // cannon: {
+    //   accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
+    //     privateKey: process.env.PRIVATE_KEY,
+    //     balance,
+    //   })),
+    //   publisherPrivateKey: process.env.PRIVATE_KEY,
+    //   ipfsEndpoint: 'https://ipfs.infura.io:5001',
+    //   ipfsAuthorizationHeader: `Basic ${Buffer.from(
+    //     process.env.INFURA_IPFS_ID + ':' + process.env.INFURA_IPFS_SECRET
+    //   ).toString('base64')}`,
+    // },
   },
   namedAccounts: {
     ...DEFAULT_NAMED_ACCOUNTS,

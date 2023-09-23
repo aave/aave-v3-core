@@ -6,7 +6,7 @@ description = "Aave's v3 Pool contract, main point of interaction with an Aave p
 defaultValue = "Ethereum Aave Market"
 
 [setting.owner]
-defaultValue = "0xc783df8a850f42e7F7e57013759C285caa701eB6" # Hardhat's first address (Swap this out when deploying to a network)
+defaultValue = "0xf6F715157E510d94F9876718EF74a89a234D6A44" # Hardhat's first address (Swap this out when deploying to a network)
 
 # `salt` here only affects proxy contract
 [setting.salt]
@@ -94,12 +94,9 @@ depends = [
 
 [invoke.upgrade_proxy]
 target = ["InitializableImmutableAdminUpgradeabilityProxy"]
-from = "<%= settings.owner %>"
-salt = "<%= settings.salt %>"
 fromCall.func = "admin"
 func = "upgradeTo"
 args = ["<%= contracts.Pool.address %>"]
-create2 = true
 
 depends = [
   "contract.InitializableImmutableAdminUpgradeabilityProxy",
