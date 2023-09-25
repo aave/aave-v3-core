@@ -8,7 +8,6 @@ import { buildForkConfig } from './helper-hardhat-config';
 require('dotenv').config();
 
 import '@nomicfoundation/hardhat-toolbox';
-import 'hardhat-deploy';
 import '@tenderly/hardhat-tenderly';
 import 'hardhat-contract-sizer';
 import 'hardhat-dependency-compiler';
@@ -72,10 +71,10 @@ const hardhatConfig = {
       throwOnCallFailures: true,
       forking: buildForkConfig(),
       allowUnlimitedContractSize: true,
-      accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
-        privateKey: secretKey,
-        balance,
-      })),
+      // accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
+      //   privateKey: secretKey,
+      //   balance,
+      // })),
     },
     ganache: {
       url: 'http://localhost:8545',
