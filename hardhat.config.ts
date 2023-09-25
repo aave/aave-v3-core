@@ -22,6 +22,7 @@ const DEFAULT_BLOCK_GAS_LIMIT = 12450000;
 const HARDFORK = 'london';
 
 const hardhatConfig = {
+  defaultNetwork: 'cannon',
   gasReporter: {
     enabled: true,
   },
@@ -72,7 +73,7 @@ const hardhatConfig = {
       forking: buildForkConfig(),
       allowUnlimitedContractSize: true,
       accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
-        privateKey: process.env.PRIVATE_KEY,
+        privateKey: secretKey,
         balance,
       })),
     },
@@ -86,17 +87,6 @@ const hardhatConfig = {
         count: 20,
       },
     },
-    // cannon: {
-    //   accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
-    //     privateKey: process.env.PRIVATE_KEY,
-    //     balance,
-    //   })),
-    //   publisherPrivateKey: process.env.PRIVATE_KEY,
-    //   ipfsEndpoint: 'https://ipfs.infura.io:5001',
-    //   ipfsAuthorizationHeader: `Basic ${Buffer.from(
-    //     process.env.INFURA_IPFS_ID + ':' + process.env.INFURA_IPFS_SECRET
-    //   ).toString('base64')}`,
-    // },
   },
   namedAccounts: {
     ...DEFAULT_NAMED_ACCOUNTS,

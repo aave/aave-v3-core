@@ -35,7 +35,6 @@ artifact = 'contracts/protocol/libraries/logic/BorrowLogic.sol:BorrowLogic'
 artifact = 'contracts/protocol/libraries/logic/FlashLoanLogic.sol:FlashLoanLogic'
 
 libraries.BorrowLogic = "<%= contracts.BorrowLogic.address %>"
-
 depends = ["contract.BorrowLogic"]
 
 [contract.LiquidationLogic]
