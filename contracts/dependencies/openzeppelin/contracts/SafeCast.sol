@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 // OpenZeppelin Contracts v4.4.1 (utils/math/SafeCast.sol)
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 /**
  * @dev Wrappers over Solidity's uintXX/intXX casting operators with added overflow
