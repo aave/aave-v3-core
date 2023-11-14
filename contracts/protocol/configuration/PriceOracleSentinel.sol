@@ -69,8 +69,8 @@ contract PriceOracleSentinel is IPriceOracleSentinel {
    * @return True if the SequencerOracle is up and the grace period passed, false otherwise
    */
   function _isUpAndGracePeriodPassed() internal view returns (bool) {
-    (, int256 answer, , uint256 lastUpdateTimestamp, ) = _sequencerOracle.latestRoundData();
-    return answer == 0 && block.timestamp - lastUpdateTimestamp > _gracePeriod;
+    (, int256 answer, uint256 startedAt, , ) = _sequencerOracle.latestRoundData();
+    return answer == 0 && block.timestamp - startedAt > _gracePeriod;
   }
 
   /// @inheritdoc IPriceOracleSentinel
