@@ -15,6 +15,12 @@ library DataTypes {
     uint128 currentVariableBorrowRate;
     //the current stable borrow rate. Expressed in ray
     uint128 currentStableBorrowRate;
+    //the current treasury balance, scaled
+    uint128 accruedToTreasury;
+    //the outstanding unbacked aTokens minted through the bridging feature
+    uint128 unbacked;
+    //the outstanding debt borrowed against this asset in isolation mode
+    uint128 isolationModeTotalDebt;
     //timestamp of last update
     uint40 lastUpdateTimestamp;
     //the id of the reserve. Represents the position in the list of the active reserves
@@ -27,12 +33,6 @@ library DataTypes {
     address variableDebtTokenAddress;
     //address of the interest rate strategy
     address interestRateStrategyAddress;
-    //the current treasury balance, scaled
-    uint128 accruedToTreasury;
-    //the outstanding unbacked aTokens minted through the bridging feature
-    uint128 unbacked;
-    //the outstanding debt borrowed against this asset in isolation mode
-    uint128 isolationModeTotalDebt;
   }
 
   struct ReserveConfigurationMap {
@@ -62,8 +62,8 @@ library DataTypes {
 
   struct UserConfigurationMap {
     /**
-     * @dev Bitmap of the users collaterals and borrows. It is divided in pairs of bits, one pair per asset.
-     * The first bit indicates if an asset is used as collateral by the user, the second whether an
+     * @dev Bitmap of the users collaterals and borrows. It is divided into pairs of bits, one pair per asset.
+     * The first bit indicates if an asset is used as collateral by the user, the second is whether an
      * asset is borrowed by the user.
      */
     uint256 data;
