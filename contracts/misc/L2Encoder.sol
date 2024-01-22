@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {SafeCast} from '../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {IPool} from '../interfaces/IPool.sol';

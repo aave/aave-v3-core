@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import {AggregatorInterface} from '../dependencies/chainlink/AggregatorInterface.sol';
 import {Errors} from '../protocol/libraries/helpers/Errors.sol';
