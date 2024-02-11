@@ -1,0 +1,54 @@
+name = "aave-v3-config"
+version = "<%= package.version %>"
+description = "Aave's v3 Various Config contracts"
+
+[setting.owner]
+defaultValue = "0xc783df8a850f42e7F7e57013759C285caa701eB6" # Hardhat's first address (Swap this out when deploying to a network)
+
+# `salt` here only affects proxy contract
+[setting.salt]
+description = "Change this to a unique string when deploying multiple instances of the system. Note that only the proxy contract will be unique."
+defaultValue = "aave-v3-config-official"
+
+[import.pool_contract]
+source = 'aave-v3-pool'
+
+[contract.Proxy]
+artifact = "contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol:InitializableImmutableAdminUpgradeabilityProxy"
+from = "<%= settings.owner %>"
+func = "initialize"
+args = ["<%= settings.owner %>"]
+salt = "<%= settings.salt %>"
+
+
+[contract.PoolAddressesProvider]
+artifact = "contracts/protocol/configuration/PoolAddressesProvider.sol:PoolAddressesProvider"
+args = [
+  "<%= settings.marketId %>", # string memory marketId
+  "<%= settings.owner %>" # address owner
+]
+
+[contract.ACLManager]
+artifact = "contracts/protocol/configuration/ACLManager.sol:ACLManager"
+args = ["<%= contracts.PoolAddressesProvider.address %>"]
+depends = ["contract.PoolAddressesProvider"]
+
+
+[contract.PoolAddressesProviderRegistry]
+artifact = "contracts/protocol/configuration/PoolAddressesProviderRegistry.sol:PoolAddressesProviderRegistry"
+args = ["<%= settings.owner %>"]
+
+
+[contract.SequencerOracle]
+artifact = "contracts/mocks/oracle/SequencerOracle.sol:SequencerOracle"
+args = ["<%= settings.owner %>"]
+
+
+[contract.PriceOracleSentinel]
+artifact = "contracts/protocol/configuration/PriceOracleSentinel.sol:PriceOracleSentinel"
+args = [
+  "<%= contracts.PoolAddressesProvider.address %>",
+  "<%= contracts.SequencerOracle.address %>"
+]
+depends = ["contract.PoolAddressesProvider", "contract.SequencerOracle"]
+

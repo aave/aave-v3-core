@@ -1,0 +1,18 @@
+name = "aave-v3-flashloan"
+version = "<%= package.version %>"
+description = "Aave's v3 Flashloan Receiver contracts"
+
+[setting.marketId]
+defaultValue = "Aave Ethereum Market"
+
+[setting.owner]
+defaultValue = "0xc783df8a850f42e7F7e57013759C285caa701eB6" # Hardhat's first address (Swap this out when deploying to a different network)
+
+[contract.FlashLoanSimpleReceiverBase]
+artifact = "contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol:FlashLoanSimpleReceiverBase"
+args = ["<%= contracts.PoolAddressesProvider.address %>"]
+
+
+[contract.FlashLoanReceiverBase]
+artifact = "contracts/flashloan/base/FlashLoanReceiverBase.sol:FlashLoanReceiverBase"
+

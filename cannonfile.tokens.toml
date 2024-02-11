@@ -2,46 +2,26 @@ name = "aave-v3-tokens"
 version = "<%= package.version %>"
 description = "Aave's v3 Various Token contracts"
 
-[setting.owner]
-defaultValue = "0xc783df8a850f42e7F7e57013759C285caa701eB6" # Hardhat's first address (Swap this out when deploying to a network)
-
-[setting.treasury]
-defaultValue = "0x0000000000000000000000000000000000000000" # ETH Mainnet Aave Treasury Proxy address
-
-[setting.underlyingAsset]
-defaultValue = "0x0000000000000000000000000000000000000000" # ETH Mainnet Aave Treasury Proxy address
-
-[setting.incentivesController]
-defaultValue = "0x0000000000000000000000000000000000000000" # ETH Mainnet Aave Treasury Proxy address
-
-# `salt` here only affects proxy contract
-[setting.salt]
-description = "Change this to a unique string when deploying multiple instances of the system. Note that only the proxy contract will be unique."
-defaultValue = "aave-v3-pool-official"
-
-[import.pool_contract]
+[import.pool]
 source = 'aave-v3-pool'
-
-[contract.InitializableImmutableAdminUpgradeabilityProxy]
-artifact = "contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol:InitializableImmutableAdminUpgradeabilityProxy"
-args = ["<%= settings.owner %>"]
-fromCall.func = "<%= settings.owner %>"
-func = "initialize"
-salt = "<%= settings.salt %>"
 
 [contract.AToken]
 artifact = "contracts/protocol/tokenization/AToken.sol:AToken"
-func = "initialize"
-salt = "<%= settings.salt %>"
 args = [
-  "<%= imports.pool_contract.contracts.Pool.address %>", 
-  "<%= settings.treasury %>", 
-  "<%= settings.underlyingAsset %>", 
-  "<%= settings.incentivesController %>", 
-  0,
-  'ATOKEN_IMPL',
-  'ATOKEN_IMPL',
-  []
+  "<%= imports.pool.contracts.Pool.address %>"
 ]
+depends = ["import.pool"]
 
-depends = ["import.pool_contract"]
+[contract.StableDebtToken]
+artifact = "contracts/protocol/tokenization/StableDebtToken.sol:StableDebtToken"
+args = [
+  "<%= imports.pool.contracts.Pool.address %>"
+]
+depends = ["import.pool"]
+
+[contract.VariableDebtToken]
+artifact = "contracts/protocol/tokenization/VariableDebtToken.sol:VariableDebtToken"
+args = [
+  "<%= imports.pool.contracts.Pool.address %>"
+]
+depends = ["import.pool"]

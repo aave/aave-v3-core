@@ -61,6 +61,16 @@ const hardhatConfig = {
       throwOnTransactionFailures: true,
       throwOnCallFailures: true,
     },
+    local: {
+      url: 'http://localhost:8545',
+      chainId: 31337,
+      gas: 12000000, // Prevent gas estimation for better error results in tests
+    },
+    sepolia: {
+      url: 'https://eth-sepolia.g.alchemy.com/v2/oSkceFagLoSO4YoXMvKOGiSAeCkm8knd',
+      chainId: 11155111,
+      accounts: process.env.PRIVATE_KEY?.split(','),
+    },
     hardhat: {
       hardfork: HARDFORK,
       blockGasLimit: DEFAULT_BLOCK_GAS_LIMIT,
@@ -71,10 +81,16 @@ const hardhatConfig = {
       throwOnCallFailures: true,
       forking: buildForkConfig(),
       allowUnlimitedContractSize: true,
-      // accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
-      //   privateKey: secretKey,
-      //   balance,
-      // })),
+      accounts: accounts.map(({ secretKey, balance }: { secretKey: string; balance: string }) => ({
+        privateKey: secretKey,
+        balance,
+      })),
+    },
+    cannon: {
+      accounts: accounts.map(({ secretKey }: { secretKey: string; balance: string }) => secretKey),
+      url: 'http://localhost:8545',
+      chainId: 13370,
+      publicSourceCode: true,
     },
     ganache: {
       url: 'http://localhost:8545',
@@ -86,9 +102,6 @@ const hardhatConfig = {
         count: 20,
       },
     },
-  },
-  namedAccounts: {
-    ...DEFAULT_NAMED_ACCOUNTS,
   },
   external: {
     contracts: [

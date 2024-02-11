@@ -3,16 +3,17 @@ version = "<%= package.version %>"
 description = "Aave's v3 Pool contract, main point of interaction with an Aave protocol's market"
 
 [setting.marketId]
-defaultValue = "Ethereum Aave Market"
+defaultValue = "Aave Ethereum Market"
 
 [setting.owner]
-defaultValue = "0xc783df8a850f42e7F7e57013759C285caa701eB6" # Hardhat's first address (Swap this out when deploying to a network)
+defaultValue = "0xc783df8a850f42e7F7e57013759C285caa701eB6" # Hardhat's first address (Swap this out when deploying to a different network)
 
 # `salt` here only affects proxy contract
 [setting.salt]
 description = "Change this to a unique string when deploying multiple instances of the system. Note that only the proxy contract will be unique."
-defaultValue = "aave-v3-pool-official"
+defaultValue = "aave-v3-pool-eth"
 
+# Libraries
 [contract.ReserveConfiguration]
 artifact = 'contracts/protocol/libraries/configuration/ReserveConfiguration.sol:ReserveConfiguration'
 
@@ -54,17 +55,16 @@ args = [
   "<%= settings.owner %>" # address owner
 ]
 
-[contract.InitializableImmutableAdminUpgradeabilityProxy]
+[contract.Proxy]
 artifact = "contracts/protocol/libraries/aave-upgradeability/InitializableImmutableAdminUpgradeabilityProxy.sol:InitializableImmutableAdminUpgradeabilityProxy"
 args = ["<%= settings.owner %>"]
-func = "initialize"
 salt = "<%= settings.salt %>"
+create2 = true
+
 
 [contract.Pool]
 artifact = "contracts/protocol/pool/Pool.sol:Pool"
 from = "<%= settings.owner %>"
-fromCall.func = "<%= settings.owner %>"
-func = "initialize"
 args = ["<%= contracts.PoolAddressesProvider.address %>"]
 
 libraries.BorrowLogic = "<%= contracts.BorrowLogic.address %>"
@@ -92,12 +92,12 @@ depends = [
 ]
 
 [invoke.upgrade_proxy]
-target = ["InitializableImmutableAdminUpgradeabilityProxy"]
-fromCall.func = "admin"
+target = ["Proxy"]
+from = "<%= settings.owner %>"
 func = "upgradeTo"
 args = ["<%= contracts.Pool.address %>"]
 
 depends = [
-  "contract.InitializableImmutableAdminUpgradeabilityProxy",
+  "contract.Proxy",
   "contract.Pool"
 ]
