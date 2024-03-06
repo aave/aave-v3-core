@@ -936,7 +936,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     const wethAmount = utils.parseEther('1');
     const daiAmount = utils.parseEther('1000');
     // user 1 supplies WETH
-    await weth.connect(user1.signer)['mint(uint256)'](wethAmount);
+    await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, wethAmount);
 
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -1020,7 +1020,7 @@ makeSuite('PoolConfigurator', (testEnv: TestEnv) => {
     await configurator.connect(riskAdmin.signer).setDebtCeiling(weth.address, '0');
 
     // user 1 deposits
-    await weth.connect(user1.signer)['mint(uint256)']('100');
+    await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, '100');
 
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
 

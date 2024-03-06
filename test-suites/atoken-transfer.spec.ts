@@ -193,7 +193,11 @@ makeSuite('AToken: Transfer', (testEnv: TestEnv) => {
     const amountWETHtoDeposit = await convertToCurrencyDecimals(weth.address, '1');
     const amountWETHtoBorrow = await convertToCurrencyDecimals(weth.address, '0.1');
 
-    expect(await weth.connect(users[0].signer)['mint(uint256)'](amountWETHtoDeposit));
+    expect(
+      await weth
+        .connect(users[0].signer)
+        ['mint(address,uint256)'](users[0].address, amountWETHtoDeposit)
+    );
 
     expect(await weth.connect(users[0].signer).approve(pool.address, MAX_UINT_AMOUNT));
 

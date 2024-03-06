@@ -75,7 +75,9 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.3');
 
     //mints WETH to borrower
-    await weth.connect(borrower.signer)['mint(uint256)'](amountETHtoDeposit);
+    await weth
+      .connect(borrower.signer)
+      ['mint(address,uint256)'](borrower.address, amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -335,7 +337,9 @@ makeSuite('Pool Liquidation: Liquidator receiving aToken', (testEnv) => {
     const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.12');
 
     //mints WETH to borrower
-    await weth.connect(borrower.signer)['mint(uint256)'](amountETHtoDeposit);
+    await weth
+      .connect(borrower.signer)
+      ['mint(address,uint256)'](borrower.address, amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);

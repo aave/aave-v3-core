@@ -8,11 +8,11 @@ makeSuite('PoolConfigurator: Liquidation Protocol Fee', (testEnv: TestEnv) => {
   const { INVALID_LIQUIDATION_PROTOCOL_FEE } = ProtocolErrors;
 
   before(async () => {
-    const { weth, pool, dai, usdc } = testEnv;
+    const { weth, pool, dai, usdc, deployer } = testEnv;
 
     const mintedAmount = utils.parseEther('1000000000');
     await dai['mint(uint256)'](mintedAmount);
-    await weth['mint(uint256)'](mintedAmount);
+    await weth['mint(address,uint256)'](deployer.address, mintedAmount);
     await usdc['mint(uint256)'](mintedAmount);
 
     await dai.approve(pool.address, MAX_UINT_AMOUNT);

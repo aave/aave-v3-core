@@ -80,7 +80,10 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //mints WETH to borrower
     await weth
       .connect(borrower.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+      ['mint(address,uint256)'](
+        borrower.address,
+        await convertToCurrencyDecimals(weth.address, '1000')
+      );
 
     //approve protocol to access the borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -274,7 +277,10 @@ makeSuite('Pool Liquidation: Liquidator receiving the underlying asset', (testEn
     //mints WETH to borrower
     await weth
       .connect(borrower.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+      ['mint(address,uint256)'](
+        borrower.address,
+        await convertToCurrencyDecimals(weth.address, '1000')
+      );
 
     //approve protocol to access the borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);

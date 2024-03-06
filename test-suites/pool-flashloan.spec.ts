@@ -58,11 +58,11 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     expect(await pool.FLASHLOAN_PREMIUM_TO_PROTOCOL()).to.be.equal(PREMIUM_TO_PROTOCOL);
   });
   it('Deposits WETH into the reserve', async () => {
-    const { pool, weth, aave, dai } = testEnv;
+    const { pool, weth, aave, dai, deployer } = testEnv;
     const userAddress = await pool.signer.getAddress();
     const amountToDeposit = ethers.utils.parseEther('1');
 
-    await weth['mint(uint256)'](amountToDeposit);
+    await weth['mint(address,uint256)'](deployer.address, amountToDeposit);
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -438,7 +438,10 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
     // repays debt for later, so no interest accrue
     await weth
       .connect(caller.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+      ['mint(address,uint256)'](
+        caller.address,
+        await convertToCurrencyDecimals(weth.address, '1000')
+      );
     await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(caller.signer).repay(weth.address, MAX_UINT_AMOUNT, 2, caller.address);
   });
@@ -581,7 +584,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await weth
       .connect(caller.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '5'));
+      ['mint(address,uint256)'](caller.address, await convertToCurrencyDecimals(weth.address, '5'));
 
     await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -633,7 +636,7 @@ makeSuite('Pool: FlashLoan', (testEnv: TestEnv) => {
 
     await weth
       .connect(caller.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '5'));
+      ['mint(address,uint256)'](caller.address, await convertToCurrencyDecimals(weth.address, '5'));
 
     await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT);
 

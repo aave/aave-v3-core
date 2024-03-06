@@ -49,7 +49,9 @@ makeSuite('DebtToken: Permit Delegation', (testEnv: TestEnv) => {
     expect(await dai['mint(uint256)'](daiMintedAmount));
     expect(await dai.approve(pool.address, daiMintedAmount));
     expect(await pool.deposit(dai.address, daiMintedAmount, user1.address, 0));
-    expect(await weth.connect(user2.signer)['mint(uint256)'](wethMintedAmount));
+    expect(
+      await weth.connect(user2.signer)['mint(address,uint256)'](user2.address, wethMintedAmount)
+    );
     expect(await weth.connect(user2.signer).approve(pool.address, wethMintedAmount));
     expect(
       await pool.connect(user2.signer).deposit(weth.address, wethMintedAmount, user2.address, 0)
