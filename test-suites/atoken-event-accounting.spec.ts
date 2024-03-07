@@ -141,7 +141,10 @@ makeSuite('AToken: Mint and Burn Event Accounting', (testEnv) => {
     await waitForTx(
       await weth
         .connect(borrower.signer)
-        ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '20000'))
+        ['mint(address,uint256)'](
+          borrower.address,
+          await convertToCurrencyDecimals(weth.address, '20000')
+        )
     );
 
     // approve protocol to access the borrower wallet

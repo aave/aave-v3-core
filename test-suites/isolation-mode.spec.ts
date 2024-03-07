@@ -55,7 +55,17 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
   let snapshot;
 
   before(async () => {
-    const { configurator, dai, usdc, aave, users, poolAdmin } = testEnv;
+    const {
+      configurator,
+      dai,
+      usdc,
+      aave,
+      users,
+      poolAdmin,
+      aaveOracle,
+      addressesProvider,
+      oracle,
+    } = testEnv;
     calculationsConfiguration.reservesParams = AaveConfig.ReservesConfig;
 
     //set debt ceiling for aave
@@ -74,7 +84,6 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     );
 
     // configure oracle
-    const { aaveOracle, addressesProvider, oracle } = testEnv;
     oracleBaseDecimals = (await aaveOracle.BASE_CURRENCY_UNIT()).toString().length - 1;
     await waitForTx(await addressesProvider.setPriceOracle(oracle.address));
 
@@ -140,7 +149,9 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
 
   it('User 1 supply 1 eth. Checks that eth is NOT activated as collateral ', async () => {
     const { users, pool, weth, helpersContract } = testEnv;
-    await weth.connect(users[1].signer)['mint(uint256)'](utils.parseEther('1'));
+    await weth
+      .connect(users[1].signer)
+      ['mint(address,uint256)'](users[1].address, utils.parseEther('1'));
     await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[1].signer)
@@ -328,7 +339,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
       .withdraw(dai.address, utils.parseEther('100'), users[1].address);
 
     const wethAmount = utils.parseEther('1');
-    await weth.connect(users[2].signer)['mint(uint256)'](wethAmount);
+    await weth.connect(users[2].signer)['mint(address,uint256)'](users[2].address, wethAmount);
     await weth.connect(users[2].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[2].signer).supply(weth.address, wethAmount, users[2].address, 0);
 
@@ -503,7 +514,7 @@ makeSuite('Isolation mode', (testEnv: TestEnv) => {
     const { weth, dai, aave, aAave, users, pool, helpersContract } = testEnv;
 
     const wethAmount = utils.parseEther('1');
-    await weth.connect(users[5].signer)['mint(uint256)'](wethAmount);
+    await weth.connect(users[5].signer)['mint(address,uint256)'](users[5].address, wethAmount);
     await weth.connect(users[5].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(users[5].signer).supply(weth.address, wethAmount, users[5].address, 0);
 

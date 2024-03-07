@@ -35,7 +35,9 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
     expect(
       await pool.connect(depositor.signer).deposit(dai.address, mintedAmount, depositor.address, 0)
     );
-    expect(await weth.connect(borrower.signer)['mint(uint256)'](mintedAmount));
+    expect(
+      await weth.connect(borrower.signer)['mint(address,uint256)'](borrower.address, mintedAmount)
+    );
     expect(await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
     expect(
       await pool.connect(borrower.signer).deposit(weth.address, mintedAmount, borrower.address, 0)
@@ -116,7 +118,9 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
     expect(
       await pool.connect(depositor.signer).deposit(dai.address, mintedAmount, depositor.address, 0)
     );
-    expect(await weth.connect(borrower.signer)['mint(uint256)'](mintedAmount));
+    expect(
+      await weth.connect(borrower.signer)['mint(address,uint256)'](borrower.address, mintedAmount)
+    );
     expect(await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
     expect(
       await pool.connect(borrower.signer).deposit(weth.address, mintedAmount, borrower.address, 0)
@@ -210,7 +214,9 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
     expect(
       await pool.connect(depositor.signer).deposit(dai.address, mintedAmount, depositor.address, 0)
     );
-    expect(await weth.connect(borrower.signer)['mint(uint256)'](mintedAmount));
+    expect(
+      await weth.connect(borrower.signer)['mint(address,uint256)'](borrower.address, mintedAmount)
+    );
     expect(await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
     expect(
       await pool.connect(borrower.signer).deposit(weth.address, mintedAmount, borrower.address, 0)
@@ -220,7 +226,11 @@ makeSuite('PoolConfigurator: Set Rate Strategy', (testEnv: TestEnv) => {
         .connect(borrower.signer)
         .borrow(dai.address, utils.parseEther('1'), 2, 0, borrower.address)
     );
-    expect(await weth.connect(stableBorrower.signer)['mint(uint256)'](mintedAmount));
+    expect(
+      await weth
+        .connect(stableBorrower.signer)
+        ['mint(address,uint256)'](stableBorrower.address, mintedAmount)
+    );
     expect(await weth.connect(stableBorrower.signer).approve(pool.address, MAX_UINT_AMOUNT));
     expect(
       await pool

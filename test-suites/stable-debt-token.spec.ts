@@ -60,7 +60,9 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
         users[0].address,
         0
       );
-    await weth.connect(users[1].signer)['mint(uint256)'](utils.parseEther('10'));
+    await weth
+      .connect(users[1].signer)
+      ['mint(address,uint256)'](users[1].address, utils.parseEther('10'));
     await weth.connect(users[1].signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(users[1].signer)
@@ -147,7 +149,9 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
       .supply(usdc.address, utils.parseUnits('1000', 6), user3.address, 0);
 
     // User1 supplies 10 WETH
-    await weth.connect(user1.signer)['mint(uint256)'](utils.parseUnits('10', 18));
+    await weth
+      .connect(user1.signer)
+      ['mint(address,uint256)'](user1.address, utils.parseUnits('10', 18));
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user1.signer)
@@ -408,7 +412,9 @@ makeSuite('StableDebtToken', (testEnv: TestEnv) => {
     // User1 supplies 10 WETH
     await dai.connect(user1.signer)['mint(uint256)'](utils.parseUnits('100', 18));
     await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
-    await weth.connect(user1.signer)['mint(uint256)'](utils.parseUnits('10', 18));
+    await weth
+      .connect(user1.signer)
+      ['mint(address,uint256)'](user1.address, utils.parseUnits('10', 18));
     await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user1.signer)

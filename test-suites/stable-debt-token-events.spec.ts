@@ -49,7 +49,10 @@ const increaseSupplyIndex = async (
 
   await collateralToken
     .connect(depositor.signer)
-    ['mint(uint256)'](await convertToCurrencyDecimals(collateralToken.address, '10000000'));
+    ['mint(address,uint256)'](
+      depositor.address,
+      await convertToCurrencyDecimals(collateralToken.address, '10000000')
+    );
   await collateralToken.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
   await pool
     .connect(depositor.signer)
@@ -104,7 +107,7 @@ makeSuite('StableDebtToken: Events', (testEnv: TestEnv) => {
     const usersToInit = [alice, bob, depositor, depositor2];
     for (const user of usersToInit) {
       await dai.connect(user.signer)['mint(uint256)'](amountToMint);
-      await weth.connect(user.signer)['mint(uint256)'](amountToMint);
+      await weth.connect(user.signer)['mint(address,uint256)'](user.address, amountToMint);
       await dai.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
       await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     }

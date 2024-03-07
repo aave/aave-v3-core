@@ -69,7 +69,10 @@ const setupPositions = async (testEnv: TestEnv, borrowingMode: RateMode) => {
   // mints WETH to borrower
   await weth
     .connect(borrower.signer)
-    ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+    ['mint(address,uint256)'](
+      borrower.address,
+      await convertToCurrencyDecimals(weth.address, '1000')
+    );
 
   // approve protocol to access the borrower wallet
   await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -876,7 +879,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       pool,
       weth,
       aWETH,
-      dai,
+      deployer,
       users: [user0],
     } = testEnv;
 
@@ -888,7 +891,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const userAddress = user0.address;
     const amountToDeposit = ethers.utils.parseEther('1');
 
-    await weth['mint(uint256)'](amountToDeposit);
+    await weth['mint(address,uint256)'](deployer.address, amountToDeposit);
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -930,7 +933,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       configurator,
       pool,
       weth,
-      aWETH,
+      deployer,
       users: [user0],
     } = testEnv;
 
@@ -942,7 +945,10 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const userAddress = user0.address;
     const amountToDeposit = ethers.utils.parseEther('100000');
 
-    await weth['mint(uint256)'](amountToDeposit.add(ethers.utils.parseEther('30')));
+    await weth['mint(address,uint256)'](
+      deployer.address,
+      amountToDeposit.add(ethers.utils.parseEther('30'))
+    );
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 
@@ -982,6 +988,7 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
       weth,
       aWETH,
       users: [user0],
+      deployer,
     } = testEnv;
 
     _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
@@ -992,7 +999,10 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     const userAddress = user0.address;
     const amountToDeposit = ethers.utils.parseEther('100000');
 
-    await weth['mint(uint256)'](amountToDeposit.add(ethers.utils.parseEther('30')));
+    await weth['mint(address,uint256)'](
+      deployer.address,
+      amountToDeposit.add(ethers.utils.parseEther('30'))
+    );
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 

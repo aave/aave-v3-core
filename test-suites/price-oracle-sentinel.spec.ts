@@ -172,7 +172,9 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       const borrowers = [borrower, borrower2];
       const currBorrower = borrowers[i];
       //mints WETH to borrower
-      await weth.connect(currBorrower.signer)['mint(uint256)'](amountETHtoDeposit);
+      await weth
+        .connect(currBorrower.signer)
+        ['mint(address,uint256)'](currBorrower.address, amountETHtoDeposit);
 
       //approve protocol to access borrower wallet
       await weth.connect(currBorrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -390,7 +392,9 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       oracle,
     } = testEnv;
 
-    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
+    await weth
+      .connect(user.signer)
+      ['mint(address,uint256)'](user.address, utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -415,7 +419,9 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool,
     } = testEnv;
 
-    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
+    await weth
+      .connect(user.signer)
+      ['mint(address,uint256)'](user.address, utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -442,7 +448,9 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool,
     } = testEnv;
 
-    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
+    await weth
+      .connect(user.signer)
+      ['mint(address,uint256)'](user.address, utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)
@@ -468,7 +476,9 @@ makeSuite('PriceOracleSentinel', (testEnv: TestEnv) => {
       pool,
     } = testEnv;
 
-    await weth.connect(user.signer)['mint(uint256)'](utils.parseUnits('0.06775', 18));
+    await weth
+      .connect(user.signer)
+      ['mint(address,uint256)'](user.address, utils.parseUnits('0.06775', 18));
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(user.signer)

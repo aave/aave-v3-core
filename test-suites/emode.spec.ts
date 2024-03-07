@@ -6,7 +6,7 @@ import { convertToCurrencyDecimals } from '../helpers/contracts-helpers';
 import { makeSuite, TestEnv } from './helpers/make-suite';
 import './helpers/utils/wadraymath';
 import { parseUnits, formatUnits, parseEther } from '@ethersproject/units';
-import { evmSnapshot, evmRevert, VariableDebtToken__factory } from '@aave/deploy-v3';
+import { evmSnapshot, evmRevert, VariableDebtToken__factory, aave } from '@aave/deploy-v3';
 
 makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
   const {
@@ -45,14 +45,16 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       weth,
       users: [user0, user1, user2],
       aaveOracle,
+      aave,
+      oracle,
     } = testEnv;
     const mintAmount = utils.parseEther('10000');
 
     await dai.connect(user0.signer)['mint(uint256)'](mintAmount);
     await usdc.connect(user0.signer)['mint(uint256)'](mintAmount);
-    await weth.connect(user0.signer)['mint(uint256)'](mintAmount);
+    await weth.connect(user0.signer)['mint(address,uint256)'](user0.address, mintAmount);
     await usdc.connect(user1.signer)['mint(uint256)'](mintAmount);
-    await weth.connect(user1.signer)['mint(uint256)'](mintAmount);
+    await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, mintAmount);
     await dai.connect(user2.signer)['mint(uint256)'](mintAmount);
 
     await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -251,9 +253,9 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       helpersContract,
       weth,
       users: [, user1],
-      oracle,
+      aaveOracle,
     } = testEnv;
-    const wethPrice = await oracle.getAssetPrice(weth.address);
+    const wethPrice = await aaveOracle.getAssetPrice(weth.address);
 
     const userDataBeforeSupply = await pool.getUserAccountData(user1.address);
 
@@ -456,7 +458,11 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       user4.signer
     );
 
-    expect(await weth.connect(user3.signer)['mint(uint256)'](parseUnits('100', 18)));
+    expect(
+      await weth
+        .connect(user3.signer)
+        ['mint(address,uint256)'](user3.address, parseUnits('100', 18))
+    );
     expect(await weth.connect(user3.signer).approve(pool.address, MAX_UINT_AMOUNT));
     expect(
       await pool.connect(user3.signer).supply(weth.address, parseUnits('100', 18), user3.address, 0)
@@ -760,7 +766,7 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
       pool,
       dai,
       usdc,
-      oracle,
+      aaveOracle,
       users: [, , user2],
     } = testEnv;
 
@@ -769,8 +775,8 @@ makeSuite('EfficiencyMode', (testEnv: TestEnv) => {
 
     expect(await pool.connect(user2.signer).supply(dai.address, daiAmount, user2.address, 0));
 
-    const daiPrice = await oracle.getAssetPrice(dai.address);
-    const usdcPrice = await oracle.getAssetPrice(usdc.address);
+    const daiPrice = await aaveOracle.getAssetPrice(dai.address);
+    const usdcPrice = await aaveOracle.getAssetPrice(usdc.address);
 
     const dataBefore = await pool.getUserAccountData(user2.address);
     const expectedCollateralDaiPrice = daiAmount.wadMul(daiPrice);

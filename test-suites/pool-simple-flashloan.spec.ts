@@ -44,11 +44,11 @@ makeSuite('Pool: Simple FlashLoan', (testEnv: TestEnv) => {
   });
 
   it('Deposits WETH into the reserve', async () => {
-    const { pool, weth, aave, dai } = testEnv;
+    const { pool, weth, aave, dai, deployer } = testEnv;
     const userAddress = await pool.signer.getAddress();
     const amountToDeposit = ethers.utils.parseEther('1');
 
-    await weth['mint(uint256)'](amountToDeposit);
+    await weth['mint(address,uint256)'](deployer.address, amountToDeposit);
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 

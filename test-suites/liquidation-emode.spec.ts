@@ -300,7 +300,9 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     const usdcSupplyAmount = utils.parseUnits('10000', 6);
 
     expect(await dai.connect(user1.signer)['mint(uint256)'](daiSupplyAmount));
-    expect(await weth.connect(user1.signer)['mint(uint256)'](wethSupplyAmount));
+    expect(
+      await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, wethSupplyAmount)
+    );
     expect(await usdc.connect(user2.signer)['mint(uint256)'](usdcSupplyAmount.mul(2)));
 
     expect(await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
@@ -428,7 +430,9 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     const usdcSupplyAmount = utils.parseUnits('10000', 6);
 
     expect(await dai.connect(user1.signer)['mint(uint256)'](daiSupplyAmount));
-    expect(await weth.connect(user1.signer)['mint(uint256)'](wethSupplyAmount));
+    expect(
+      await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, wethSupplyAmount)
+    );
     expect(await usdc.connect(user2.signer)['mint(uint256)'](usdcSupplyAmount.mul(2)));
 
     expect(await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
@@ -556,7 +560,9 @@ makeSuite('Pool Liquidation: Liquidates borrows in eMode with price change', (te
     const usdcSupplyAmount = utils.parseUnits('10000', 6);
 
     expect(await dai.connect(user1.signer)['mint(uint256)'](daiSupplyAmount));
-    expect(await weth.connect(user1.signer)['mint(uint256)'](wethSupplyAmount));
+    expect(
+      await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, wethSupplyAmount)
+    );
     expect(await usdc.connect(user2.signer)['mint(uint256)'](usdcSupplyAmount.mul(2)));
 
     expect(await dai.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));

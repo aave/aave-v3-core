@@ -1,6 +1,6 @@
 {
   "name": "@aave/core-v3",
-  "version": "1.19.2",
+  "version": "1.19.2-beta.2",
   "description": "Aave Protocol V3 core smart contracts",
   "files": [
     "contracts",
@@ -33,8 +33,8 @@
     "prepublish": "npm run compile && npm run build"
   },
   "devDependencies": {
-    "@aave/deploy-v3": "1.51.0",
-    "@aave/periphery-v3": "1.21.4",
+    "@aave/deploy-v3": "1.56.1",
+    "@aave/periphery-v3": "2.5.1",
     "@ethersproject/bignumber": "^5.6.2",
     "@nomicfoundation/hardhat-chai-matchers": "1.0.5",
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
@@ -46,13 +46,12 @@
     "dotenv": "8.2.0",
     "eth-sig-util": "2.5.3",
     "ethereumjs-util": "7.0.2",
-    "ethers": "5.7.2",
     "hardhat": "2.12.2",
     "hardhat-contract-sizer": "2.0.3",
     "hardhat-dependency-compiler": "1.1.2",
     "hardhat-deploy": "0.11.12",
-    "hardhat-gas-reporter": "1.0.8",
     "husky": "8.0.3",
+    "jsondiffpatch": "0.4.1",
     "lint-staged": "13.1.0",
     "prettier": "2.8.4",
     "prettier-plugin-solidity": "1.1.3",

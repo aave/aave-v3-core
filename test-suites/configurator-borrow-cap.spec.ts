@@ -16,17 +16,18 @@ makeSuite('PoolConfigurator: Borrow Cap', (testEnv: TestEnv) => {
       dai,
       usdc,
       users: [user1],
+      deployer,
     } = testEnv;
 
     const mintedAmount = utils.parseEther('1000000000');
     // minting for main user
     expect(await dai['mint(uint256)'](mintedAmount));
-    expect(await weth['mint(uint256)'](mintedAmount));
+    expect(await weth['mint(address,uint256)'](deployer.address, mintedAmount));
     expect(await usdc['mint(uint256)'](mintedAmount));
 
     // minting for lp user
     expect(await dai.connect(user1.signer)['mint(uint256)'](mintedAmount));
-    expect(await weth.connect(user1.signer)['mint(uint256)'](mintedAmount));
+    expect(await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, mintedAmount));
     expect(await usdc.connect(user1.signer)['mint(uint256)'](mintedAmount));
 
     expect(await dai.approve(pool.address, MAX_UINT_AMOUNT));

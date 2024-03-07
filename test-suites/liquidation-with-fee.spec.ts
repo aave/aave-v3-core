@@ -57,7 +57,10 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
 
     await weth
       .connect(depositor.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '10'));
+      ['mint(address,uint256)'](
+        depositor.address,
+        await convertToCurrencyDecimals(weth.address, '10')
+      );
     await weth.connect(depositor.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(depositor.signer)
@@ -71,7 +74,10 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     //2. Borrower supplies 10 ETH, and borrows as much USDC as it can
     await weth
       .connect(borrower.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '10'));
+      ['mint(address,uint256)'](
+        borrower.address,
+        await convertToCurrencyDecimals(weth.address, '10')
+      );
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
@@ -210,7 +216,10 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     //mints WETH to borrower
     await weth
       .connect(borrower.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+      ['mint(address,uint256)'](
+        borrower.address,
+        await convertToCurrencyDecimals(weth.address, '1000')
+      );
 
     //approve protocol to access the borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -445,7 +454,10 @@ makeSuite('Pool Liquidation: Add fee to liquidations', (testEnv) => {
     //mints WETH to borrower
     await weth
       .connect(borrower.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(weth.address, '1000'));
+      ['mint(address,uint256)'](
+        borrower.address,
+        await convertToCurrencyDecimals(weth.address, '1000')
+      );
 
     //approve protocol to access the borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
