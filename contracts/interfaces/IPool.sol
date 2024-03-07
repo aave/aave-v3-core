@@ -218,6 +218,21 @@ interface IPool {
    * @param referralCode Code used to register the integrator originating the operation, for potential rewards.
    *   0 if the action is executed directly by the user, without any middle-man
    */
+
+  enum MultiCallAction {
+    Supply,
+    Borrow,
+    Repay,
+    Withdraw,
+    SetUserUseReserveAsCollateral,
+    SwapBorrowRateMode,
+    RebalanceStableBorrowRate,
+    SupplyWithPermit,
+    RepayWithPermit,
+    RepayWithATokens,
+    LiquidationCall
+  }
+
   function mintUnbacked(
     address asset,
     uint256 amount,
@@ -463,6 +478,14 @@ interface IPool {
     bytes calldata params,
     uint16 referralCode
   ) external;
+
+  /**
+   * @notice Allows to batch call any user relevant functions in a single transaction,
+   * any revert in any of the actions being executed, will result in a revert of the batch
+   * @param actions includes the set of MultiCallAction that a user is able to execute
+   * @param params Array of encoded MultiCallAction parameters
+   */
+  function multiCall(bytes calldata actions, bytes[] calldata params) external;
 
   /**
    * @notice Returns the user account data across all the reserves
