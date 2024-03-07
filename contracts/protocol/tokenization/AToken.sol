@@ -7,6 +7,7 @@ import {SafeCast} from '../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {VersionedInitializable} from '../libraries/aave-upgradeability/VersionedInitializable.sol';
 import {Errors} from '../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../libraries/math/WadRayMath.sol';
+import {RayMathExplicitRounding, Rounding} from '../libraries/math/RayMathExplicitRounding.sol';
 import {IPool} from '../../interfaces/IPool.sol';
 import {IAToken} from '../../interfaces/IAToken.sol';
 import {IAaveIncentivesController} from '../../interfaces/IAaveIncentivesController.sol';
@@ -22,6 +23,7 @@ import {EIP712Base} from './base/EIP712Base.sol';
  */
 contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, IAToken {
   using WadRayMath for uint256;
+  using RayMathExplicitRounding for uint256;
   using SafeCast for uint256;
   using GPv2SafeERC20 for IERC20;
 
@@ -89,7 +91,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     uint256 amount,
     uint256 index
   ) external virtual override onlyPool returns (bool) {
-    return _mintScaled(caller, onBehalfOf, amount, index);
+    return _mintScaled(caller, onBehalfOf, amount, index, Rounding.DOWN);
   }
 
   /// @inheritdoc IAToken
@@ -99,7 +101,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     uint256 amount,
     uint256 index
   ) external virtual override onlyPool {
-    _burnScaled(from, receiverOfUnderlying, amount, index);
+    _burnScaled(from, receiverOfUnderlying, amount, index, Rounding.UP);
     if (receiverOfUnderlying != address(this)) {
       IERC20(_underlyingAsset).safeTransfer(receiverOfUnderlying, amount);
     }
@@ -110,7 +112,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
     if (amount == 0) {
       return;
     }
-    _mintScaled(address(POOL), _treasury, amount, index);
+    _mintScaled(address(POOL), _treasury, amount, index, Rounding.DOWN);
   }
 
   /// @inheritdoc IAToken
@@ -128,7 +130,7 @@ contract AToken is VersionedInitializable, ScaledBalanceTokenBase, EIP712Base, I
   function balanceOf(
     address user
   ) public view virtual override(IncentivizedERC20, IERC20) returns (uint256) {
-    return super.balanceOf(user).rayMul(POOL.getReserveNormalizedIncome(_underlyingAsset));
+    return super.balanceOf(user).rayMulRoundDown(POOL.getReserveNormalizedIncome(_underlyingAsset));
   }
 
   /// @inheritdoc IERC20
