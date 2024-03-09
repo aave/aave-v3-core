@@ -56,7 +56,7 @@ library GenericLogic {
    * @param params Additional parameters needed for the calculation
    * @return The total collateral of the user in the base currency used by the price feed
    * @return The total debt of the user in the base currency used by the price feed
-   * @return The average ltv of the user
+   * @return The maximum Loan To Value of the user - weighted average of max ltv of collateral reserves
    * @return The average liquidation threshold of the user
    * @return The health factor of the user
    * @return True if the ltv is zero, false otherwise

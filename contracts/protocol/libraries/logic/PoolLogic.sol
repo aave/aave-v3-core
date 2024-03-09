@@ -150,7 +150,7 @@ library PoolLogic {
    * @return totalDebtBase The total debt of the user in the base currency used by the price feed
    * @return availableBorrowsBase The borrowing power left of the user in the base currency used by the price feed
    * @return currentLiquidationThreshold The liquidation threshold of the user
-   * @return ltv The loan to value of The user
+   * @return ltv maximum Loan To Value of the user - weighted average of max ltv of collateral reserves
    * @return healthFactor The current health factor of the user
    */
   function executeGetUserAccountData(
