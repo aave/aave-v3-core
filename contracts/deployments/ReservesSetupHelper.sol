@@ -13,15 +13,15 @@ import {Ownable} from '../dependencies/openzeppelin/contracts/Ownable.sol';
 contract ReservesSetupHelper is Ownable {
   struct ConfigureReserveInput {
     address asset;
+    bool stableBorrowingEnabled;
+    bool borrowingEnabled;
+    bool flashLoanEnabled;
     uint256 baseLTV;
     uint256 liquidationThreshold;
     uint256 liquidationBonus;
     uint256 reserveFactor;
     uint256 borrowCap;
     uint256 supplyCap;
-    bool stableBorrowingEnabled;
-    bool borrowingEnabled;
-    bool flashLoanEnabled;
   }
 
   /**
@@ -34,7 +34,7 @@ contract ReservesSetupHelper is Ownable {
     PoolConfigurator configurator,
     ConfigureReserveInput[] calldata inputParams
   ) external onlyOwner {
-    for (uint256 i = 0; i < inputParams.length; i++) {
+    for (uint256 i; i < inputParams.length;) {
       configurator.configureReserveAsCollateral(
         inputParams[i].asset,
         inputParams[i].baseLTV,
@@ -54,6 +54,10 @@ contract ReservesSetupHelper is Ownable {
       configurator.setReserveFlashLoaning(inputParams[i].asset, inputParams[i].flashLoanEnabled);
       configurator.setSupplyCap(inputParams[i].asset, inputParams[i].supplyCap);
       configurator.setReserveFactor(inputParams[i].asset, inputParams[i].reserveFactor);
+    }
+
+    unchecked {
+      ++i;
     }
   }
 }
