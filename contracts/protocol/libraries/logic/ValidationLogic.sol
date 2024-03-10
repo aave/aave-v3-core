@@ -242,9 +242,18 @@ library ValidationLogic {
     require(vars.userCollateralInBaseCurrency != 0, Errors.COLLATERAL_BALANCE_IS_ZERO);
     require(vars.currentLtv != 0, Errors.LTV_VALIDATION_FAILED);
 
+  /**
+   * @notice The decision to use `>` instead of `>=` in this require check is based on the following rationale:
+   * 
+   * Whenever a user opens a borrow position, the borrow rate will immediately be greater than 0.
+   * This generally (though not always) causes the health factor (HF) to decrease minimally.
+   * Consequently, anyone opening a position at 1HF will see their HF drop below 1HF immediately.
+   * While this scenario can also occur at 1.00000000...1 HF, determining the precise condition
+   * is debatable and was set during the design stage without compelling reasons for alteration.
+   */
     require(
       vars.healthFactor > HEALTH_FACTOR_LIQUIDATION_THRESHOLD,
-      Errors.HEALTH_FACTOR_LOWER_THAN_LIQUIDATION_THRESHOLD
+      Errors.HEALTH_FACTOR_TOO_LOW
     );
 
     vars.amountInBaseCurrency =
