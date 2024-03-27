@@ -21,7 +21,7 @@ elif [ "$network" = "mainnet" ]; then
 fi
 
 echo "Configuring Aave v3 tokens"
-$CANNON alter aave-v3-tokens:1.19.2@main --chain-id $chainId set-url ipfs://Qmc13zyBRu3FpqZhz7wyZrnkQi4ZDzscAKXf1gCfjr9RnP
+$CANNON alter aave-v3-tokens:1.19.2@main --chain-id $chainId set-url ipfs://Qmf9pyM1ru7wh4We8jyB8wah5tUTMaYYTs3TXjJAm8f9xQ
 
 if [ "$network" = "sepolia" ]; then
     $CANNON alter aave-v3-tokens:1.19.2@main --chain-id $chainId set-contract-address AToken '0x48424f2779be0f03cDF6F02E17A591A9BF7AF89f'

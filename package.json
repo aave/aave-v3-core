@@ -61,7 +61,7 @@
     "tslint-config-prettier": "1.18.0",
     "tslint-plugin-prettier": "2.3.0",
     "typescript": "^4.5.0",
-    "hardhat-cannon": "2.10.8"
+    "hardhat-cannon": "^2.11.23"
   },
   "author": "Aave",
   "contributors": [
