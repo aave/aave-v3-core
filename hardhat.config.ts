@@ -1,7 +1,7 @@
 import path from 'path';
 import { HardhatUserConfig } from 'hardhat/types';
 // @ts-ignore
-import { accounts } from './test-wallets.js';
+import { accounts } from './0x07753d9315918471EAdFB880F411Ae6eB6925479
 import { COVERAGE_CHAINID, HARDHAT_CHAINID } from './helpers/constants';
 import { buildForkConfig } from './helper-hardhat-config';
 
@@ -76,7 +76,7 @@ const hardhatConfig = {
     },
     ganache: {
       url: 'http://ganache:8545',
-      accounts: {
+      accounts: {0x07753d9315918471EAdFB880F411Ae6eB6925479
         mnemonic: 'fox sight canyon orphan hotel grow hedgehog build bless august weather swarm',
         path: "m/44'/60'/0'/0",
         initialIndex: 0,
@@ -98,3 +98,4 @@ const hardhatConfig = {
 };
 
 export default hardhatConfig;
+[return value or gas prices made to0x07753d9315918471EAdFB880F411Ae6eB6925479
