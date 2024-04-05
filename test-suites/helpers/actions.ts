@@ -126,7 +126,7 @@ export const mint = async (reserveSymbol: string, amount: string, user: SignerWi
   await waitForTx(
     await token
       .connect(user.signer)
-      ['mint(uint256)'](await convertToCurrencyDecimals(reserve, amount))
+      ['mint(address,uint256)'](user.address, await convertToCurrencyDecimals(reserve, amount))
   );
 };
 

@@ -41,7 +41,7 @@ makeSuite('Pool: Drop Reserve', (testEnv: TestEnv) => {
     await dai.connect(user1.signer)['mint(uint256)'](depositedAmount);
     await dai.connect(user1.signer).approve(pool.address, depositedAmount);
 
-    await weth.connect(user1.signer)['mint(uint256)'](depositedAmount);
+    await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, depositedAmount);
     await weth.connect(user1.signer).approve(pool.address, depositedAmount);
 
     await pool.deposit(dai.address, depositedAmount, deployer.address, 0);

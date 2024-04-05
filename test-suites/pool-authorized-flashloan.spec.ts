@@ -34,11 +34,11 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
   });
 
   it('Deposits WETH into the reserve', async () => {
-    const { pool, weth } = testEnv;
+    const { pool, weth, deployer } = testEnv;
     const userAddress = await pool.signer.getAddress();
     const amountToDeposit = utils.parseEther('1');
 
-    expect(await weth['mint(uint256)'](amountToDeposit));
+    expect(await weth['mint(address,uint256)'](deployer.address, amountToDeposit));
 
     expect(await weth.approve(pool.address, MAX_UINT_AMOUNT));
 
@@ -324,7 +324,9 @@ makeSuite('Pool: Authorized FlashLoan', (testEnv: TestEnv) => {
     const amountToDeposit = await convertToCurrencyDecimals(weth.address, '5');
 
     // Top up user
-    expect(await weth.connect(caller.signer)['mint(uint256)'](amountToDeposit));
+    expect(
+      await weth.connect(caller.signer)['mint(address,uint256)'](caller.address, amountToDeposit)
+    );
 
     expect(await weth.connect(caller.signer).approve(pool.address, MAX_UINT_AMOUNT));
 

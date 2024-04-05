@@ -30,6 +30,7 @@ makeSuite('Pool: liquidity indexes misc tests', (testEnv: TestEnv) => {
       aave,
       dai,
       users: [user0],
+      deployer,
     } = testEnv;
 
     _mockFlashLoanReceiver = await getMockFlashLoanReceiver();
@@ -40,7 +41,7 @@ makeSuite('Pool: liquidity indexes misc tests', (testEnv: TestEnv) => {
     const userAddress = user0.address;
     const amountToDeposit = ethers.utils.parseEther('1');
 
-    await weth['mint(uint256)'](amountToDeposit);
+    await weth['mint(address,uint256)'](deployer.address, amountToDeposit);
 
     await weth.approve(pool.address, MAX_UINT_AMOUNT);
 

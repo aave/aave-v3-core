@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.3](https://github.com/aave/aave-v3-core/compare/v1.19.2...v1.19.3) (2024-03-07)
+
+
+### Bug Fixes
+
+* Bump version of v3 dependencies ([#938](https://github.com/aave/aave-v3-core/issues/938)) ([64870f0](https://github.com/aave/aave-v3-core/commit/64870f00345c8e10eefd6057bdba66f14ea0682c))
+
 ## [1.19.2](https://github.com/aave/aave-v3-core/compare/v1.19.1...v1.19.2) (2023-10-17)
 
 

@@ -63,7 +63,7 @@ contract MockFlashLoanSimpleReceiver is FlashLoanSimpleReceiverBase {
     uint256 amountToReturn = (_amountToApprove != 0) ? _amountToApprove : amount.add(premium);
     //execution does not fail - mint tokens and return them to the _destination
 
-    token.mint(premium);
+    token.mint(address(this), premium);
 
     IERC20(asset).approve(address(POOL), amountToReturn);
 

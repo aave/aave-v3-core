@@ -1,4 +1,5 @@
 import { Signer } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import {
   getPool,
   getPoolAddressesProvider,
@@ -12,15 +13,21 @@ import {
   getStableDebtToken,
   getAaveOracle,
   getACLManager,
-  getFallbackOracle,
 } from '@aave/deploy-v3/dist/helpers/contract-getters';
-import { tEthereumAddress } from '../../helpers/types';
+import {
+  waitForTx,
+  evmSnapshot,
+  evmRevert,
+  getEthersSigners,
+  deployPriceOracle,
+  Faucet,
+  getFaucet,
+} from '@aave/deploy-v3';
 import { Pool } from '../../types/Pool';
 import { AaveProtocolDataProvider } from '../../types/AaveProtocolDataProvider';
 import { MintableERC20 } from '../../types/MintableERC20';
 import { AToken } from '../../types/AToken';
 import { PoolConfigurator } from '../../types/PoolConfigurator';
-
 import { PriceOracle } from '../../types/PriceOracle';
 import { PoolAddressesProvider } from '../../types/PoolAddressesProvider';
 import { PoolAddressesProviderRegistry } from '../../types/PoolAddressesProviderRegistry';
@@ -28,7 +35,7 @@ import { WETH9Mocked } from '../../types/WETH9Mocked';
 import { AaveOracle, ACLManager, StableDebtToken, VariableDebtToken } from '../../types';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { usingTenderly } from '../../helpers/tenderly-utils';
-import { waitForTx, evmSnapshot, evmRevert, getEthersSigners } from '@aave/deploy-v3';
+import { tEthereumAddress } from '../../helpers/types';
 
 declare var hre: HardhatRuntimeEnvironment;
 
@@ -49,6 +56,7 @@ export interface TestEnv {
   helpersContract: AaveProtocolDataProvider;
   weth: WETH9Mocked;
   aWETH: AToken;
+  faucetMintable: Faucet;
   dai: MintableERC20;
   aDai: AToken;
   aAave: AToken;
@@ -80,6 +88,7 @@ const testEnv: TestEnv = {
   aaveOracle: {} as AaveOracle,
   weth: {} as WETH9Mocked,
   aWETH: {} as AToken,
+  faucetMintable: {} as Faucet,
   dai: {} as MintableERC20,
   aDai: {} as AToken,
   variableDebtDai: {} as VariableDebtToken,
@@ -117,7 +126,7 @@ export async function initializeMakeSuite() {
   testEnv.registry = await getPoolAddressesProviderRegistry();
   testEnv.aclManager = await getACLManager();
 
-  testEnv.oracle = await getFallbackOracle();
+  testEnv.oracle = await deployPriceOracle();
   testEnv.aaveOracle = await getAaveOracle();
 
   testEnv.helpersContract = await getAaveProtocolDataProvider();
@@ -146,6 +155,7 @@ export async function initializeMakeSuite() {
     throw 'Missing mandatory tokens';
   }
 
+  testEnv.faucetMintable = await getFaucet();
   testEnv.aDai = await getAToken(aDaiAddress);
   testEnv.variableDebtDai = await getVariableDebtToken(variableDebtDaiAddress);
   testEnv.stableDebtDai = await getStableDebtToken(stableDebtDaiAddress);
@@ -157,6 +167,17 @@ export async function initializeMakeSuite() {
   testEnv.aave = await getMintableERC20(aaveAddress);
   testEnv.usdc = await getMintableERC20(usdcAddress);
   testEnv.weth = await getWETHMocked(wethAddress);
+
+  // Support direct minting
+  const testReserves = reservesTokens.map((x) => x.tokenAddress);
+  await waitForTx(await testEnv.faucetMintable.setProtectedOfChild(testReserves, false));
+
+  // Setup Fallback Oracle and feed up with current AaveOracle prices
+  for (const testReserve of testReserves) {
+    const price = await testEnv.aaveOracle.getAssetPrice(testReserve);
+    await waitForTx(await testEnv.oracle.setAssetPrice(testReserve, price));
+  }
+  await waitForTx(await testEnv.aaveOracle.setFallbackOracle(testEnv.oracle.address));
 
   // Setup admins
   await waitForTx(await testEnv.aclManager.addRiskAdmin(testEnv.riskAdmin.address));

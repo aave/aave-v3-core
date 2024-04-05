@@ -36,7 +36,9 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
     const daiAmount = utils.parseEther('100');
     const wethAmount = utils.parseEther('1');
     await waitForTx(await dai.connect(user0.signer)['mint(uint256)'](daiAmount));
-    await waitForTx(await weth.connect(user1.signer)['mint(uint256)'](wethAmount));
+    await waitForTx(
+      await weth.connect(user1.signer)['mint(address,uint256)'](user1.address, wethAmount)
+    );
 
     await waitForTx(await dai.connect(user0.signer).approve(pool.address, MAX_UINT_AMOUNT));
     await waitForTx(await weth.connect(user1.signer).approve(pool.address, MAX_UINT_AMOUNT));
@@ -223,7 +225,7 @@ makeSuite('AToken: Repay', (testEnv: TestEnv) => {
     await pool.connect(user.signer).supply(dai.address, depositAmount, user.address, 0);
 
     const collateralAmount = parseUnits('100', 18);
-    await weth.connect(user.signer)['mint(uint256)'](collateralAmount);
+    await weth.connect(user.signer)['mint(address,uint256)'](user.address, collateralAmount);
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).supply(weth.address, collateralAmount, user.address, 0);
 

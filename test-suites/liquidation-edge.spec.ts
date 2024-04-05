@@ -57,7 +57,9 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
       );
 
     // Deposit eth, borrow dai
-    await weth.connect(borrower.signer)['mint(uint256)'](utils.parseEther('0.9'));
+    await weth
+      .connect(borrower.signer)
+      ['mint(address,uint256)'](borrower.address, utils.parseEther('0.9'));
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
@@ -133,7 +135,9 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
       );
 
     // Deposit eth, borrow dai
-    await weth.connect(borrower.signer)['mint(uint256)'](utils.parseEther('0.9'));
+    await weth
+      .connect(borrower.signer)
+      ['mint(address,uint256)'](borrower.address, utils.parseEther('0.9'));
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)
@@ -253,7 +257,9 @@ makeSuite('Pool Liquidation: Edge cases', (testEnv: TestEnv) => {
       );
 
     // Deposit eth, borrow dai
-    await weth.connect(borrower.signer)['mint(uint256)'](utils.parseEther('0.9'));
+    await weth
+      .connect(borrower.signer)
+      ['mint(address,uint256)'](borrower.address, utils.parseEther('0.9'));
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool
       .connect(borrower.signer)

@@ -216,7 +216,9 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     const amountETHtoDeposit = await convertToCurrencyDecimals(weth.address, '0.06775');
 
     //mints WETH to borrower
-    await weth.connect(borrower.signer)['mint(uint256)'](amountETHtoDeposit);
+    await weth
+      .connect(borrower.signer)
+      ['mint(address,uint256)'](borrower.address, amountETHtoDeposit);
 
     //approve protocol to access borrower wallet
     await weth.connect(borrower.signer).approve(pool.address, MAX_UINT_AMOUNT);
@@ -272,7 +274,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     const amountDAIToDeposit = utils.parseEther('120');
     const amountToBorrow = utils.parseUnits('65', 6);
 
-    await weth.connect(user.signer)['mint(uint256)'](amountWETHToDeposit);
+    await weth.connect(user.signer)['mint(address,uint256)'](user.address, amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 
@@ -313,7 +315,7 @@ makeSuite('PausablePool', (testEnv: TestEnv) => {
     const user = users[1];
 
     const amountWETHToDeposit = utils.parseEther('1');
-    await weth.connect(user.signer)['mint(uint256)'](amountWETHToDeposit);
+    await weth.connect(user.signer)['mint(address,uint256)'](user.address, amountWETHToDeposit);
     await weth.connect(user.signer).approve(pool.address, MAX_UINT_AMOUNT);
     await pool.connect(user.signer).deposit(weth.address, amountWETHToDeposit, user.address, '0');
 

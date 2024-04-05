@@ -33,7 +33,7 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
 
     await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
     await usdc.connect(user1.signer)['mint(uint256)'](usdcAmount);
-    await weth.connect(user2.signer)['mint(uint256)'](wethAmount);
+    await weth.connect(user2.signer)['mint(address,uint256)'](user2.address, wethAmount);
 
     await pool.connect(user1.signer).deposit(dai.address, daiAmount, user1.address, 0);
 
@@ -124,7 +124,7 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
     await weth.connect(user2.signer).approve(pool.address, MAX_UINT_AMOUNT);
 
     await dai.connect(user1.signer)['mint(uint256)'](daiAmount);
-    await weth.connect(user2.signer)['mint(uint256)'](wethAmount);
+    await weth.connect(user2.signer)['mint(address,uint256)'](user2.address, wethAmount);
 
     await pool.connect(user1.signer).supply(dai.address, daiAmount, user1.address, 0);
     await pool.connect(user2.signer).supply(weth.address, wethAmount, user2.address, 0);
