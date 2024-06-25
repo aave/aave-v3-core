@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.4](https://github.com/aave/aave-v3-core/compare/v1.19.3...v1.19.4) (2024-06-19)
+
+
+### Bug Fixes
+
+* Fix typos on techpaper ([#950](https://github.com/aave/aave-v3-core/issues/950)) ([682e86c](https://github.com/aave/aave-v3-core/commit/682e86c72db644f6992c22f97b0f5ec313ed1f5b))
+
 ## [1.19.3](https://github.com/aave/aave-v3-core/compare/v1.19.2...v1.19.3) (2024-03-07)
 
 
