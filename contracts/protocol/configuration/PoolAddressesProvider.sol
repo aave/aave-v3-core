@@ -9,7 +9,7 @@ import {InitializableImmutableAdminUpgradeabilityProxy} from '../libraries/aave-
  * @title PoolAddressesProvider
  * @author Aave
  * @notice Main registry of addresses part of or connected to the protocol, including permissioned roles
- * @dev Acts as factory of proxies and admin of those, so with right to change its implementations
+ * @dev Acts as a factory of proxies and admin of those, so with right to change its implementations
  * @dev Owned by the Aave Governance
  */
 contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
@@ -191,7 +191,7 @@ contract PoolAddressesProvider is Ownable, IPoolAddressesProvider {
   }
 
   /**
-   * @notice Returns the the implementation contract of the proxy contract by its identifier.
+   * @notice Returns the implementation contract of the proxy contract by its identifier.
    * @dev It returns ZERO if there is no registered address with the given id
    * @dev It reverts if the registered address with the given id is not `InitializableImmutableAdminUpgradeabilityProxy`
    * @param id The id
