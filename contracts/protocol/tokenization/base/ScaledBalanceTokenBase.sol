@@ -4,6 +4,7 @@ pragma solidity ^0.8.10;
 import {SafeCast} from '../../../dependencies/openzeppelin/contracts/SafeCast.sol';
 import {Errors} from '../../libraries/helpers/Errors.sol';
 import {WadRayMath} from '../../libraries/math/WadRayMath.sol';
+import {RayMathExplicitRounding, Rounding} from '../../libraries/math/RayMathExplicitRounding.sol';
 import {IPool} from '../../../interfaces/IPool.sol';
 import {IScaledBalanceToken} from '../../../interfaces/IScaledBalanceToken.sol';
 import {MintableIncentivizedERC20} from './MintableIncentivizedERC20.sol';
@@ -15,6 +16,7 @@ import {MintableIncentivizedERC20} from './MintableIncentivizedERC20.sol';
  */
 abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBalanceToken {
   using WadRayMath for uint256;
+  using RayMathExplicitRounding for uint256;
   using SafeCast for uint256;
 
   /**
@@ -61,15 +63,22 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
    * @param onBehalfOf The address of the user that will receive the scaled tokens
    * @param amount The amount of tokens getting minted
    * @param index The next liquidity index of the reserve
+   * @param rounding Rounding up or down when calculating scaled amount
    * @return `true` if the the previous balance of the user was 0
    */
   function _mintScaled(
     address caller,
     address onBehalfOf,
     uint256 amount,
-    uint256 index
+    uint256 index,
+    Rounding rounding
   ) internal returns (bool) {
-    uint256 amountScaled = amount.rayDiv(index);
+    uint256 amountScaled;
+    if (rounding == Rounding.UP) {
+      amountScaled = amount.rayDivRoundUp(index);
+    } else {
+      amountScaled = amount.rayDivRoundDown(index);
+    }
     require(amountScaled != 0, Errors.INVALID_MINT_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(onBehalfOf);
@@ -95,9 +104,21 @@ abstract contract ScaledBalanceTokenBase is MintableIncentivizedERC20, IScaledBa
    * @param target The address that will receive the underlying, if any
    * @param amount The amount getting burned
    * @param index The variable debt index of the reserve
+   * @param rounding Rounding up or down when calculating scaled amount
    */
-  function _burnScaled(address user, address target, uint256 amount, uint256 index) internal {
-    uint256 amountScaled = amount.rayDiv(index);
+  function _burnScaled(
+    address user,
+    address target,
+    uint256 amount,
+    uint256 index,
+    Rounding rounding
+  ) internal {
+    uint256 amountScaled;
+    if (rounding == Rounding.UP) {
+      amountScaled = amount.rayDivRoundUp(index);
+    } else {
+      amountScaled = amount.rayDivRoundDown(index);
+    }
     require(amountScaled != 0, Errors.INVALID_BURN_AMOUNT);
 
     uint256 scaledBalance = super.balanceOf(user);
