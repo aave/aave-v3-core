@@ -120,13 +120,11 @@ library ValidationLogic {
     uint256 amountInBaseCurrency;
     uint256 assetUnit;
     address eModePriceSource;
-    address siloedBorrowingAddress;
     bool isActive;
     bool isFrozen;
     bool isPaused;
     bool borrowingEnabled;
     bool stableRateBorrowingEnabled;
-    bool siloedBorrowingEnabled;
   }
 
   /**
@@ -191,24 +189,6 @@ library ValidationLogic {
       unchecked {
         require(vars.totalDebt <= vars.borrowCap * vars.assetUnit, Errors.BORROW_CAP_EXCEEDED);
       }
-    }
-
-    if (params.isolationModeActive) {
-      // check that the asset being borrowed is borrowable in isolation mode AND
-      // the total exposure is no bigger than the collateral debt ceiling
-      require(
-        params.reserveCache.reserveConfiguration.getBorrowableInIsolation(),
-        Errors.ASSET_NOT_BORROWABLE_IN_ISOLATION
-      );
-
-      require(
-        reservesData[params.isolationModeCollateralAddress].isolationModeTotalDebt +
-          (params.amount /
-            10 ** (vars.reserveDecimals - ReserveConfiguration.DEBT_CEILING_DECIMALS))
-            .toUint128() <=
-          params.isolationModeDebtCeiling,
-        Errors.DEBT_CEILING_EXCEEDED
-      );
     }
 
     if (params.userEModeCategory != 0) {
@@ -292,21 +272,6 @@ library ValidationLogic {
       uint256 maxLoanSizeStable = vars.availableLiquidity.percentMul(params.maxStableLoanPercent);
 
       require(params.amount <= maxLoanSizeStable, Errors.AMOUNT_BIGGER_THAN_MAX_LOAN_SIZE_STABLE);
-    }
-
-    if (params.userConfig.isBorrowingAny()) {
-      (vars.siloedBorrowingEnabled, vars.siloedBorrowingAddress) = params
-        .userConfig
-        .getSiloedBorrowingState(reservesData, reservesList);
-
-      if (vars.siloedBorrowingEnabled) {
-        require(vars.siloedBorrowingAddress == params.asset, Errors.SILOED_BORROWING_VIOLATION);
-      } else {
-        require(
-          !params.reserveCache.reserveConfiguration.getSiloedBorrowing(),
-          Errors.SILOED_BORROWING_VIOLATION
-        );
-      }
     }
   }
 
@@ -698,16 +663,12 @@ library ValidationLogic {
 
   /**
    * @notice Validates the action of activating the asset as collateral.
-   * @dev Only possible if the asset has non-zero LTV and the user is not in isolation mode
-   * @param reservesData The state of all the reserves
-   * @param reservesList The addresses of all the active reserves
+   * @dev Only possible if the asset has non-zero LTV
    * @param userConfig the user configuration
    * @param reserveConfig The reserve configuration
    * @return True if the asset can be activated as collateral, false otherwise
    */
   function validateUseAsCollateral(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveConfigurationMap memory reserveConfig
   ) internal view returns (bool) {
@@ -717,24 +678,19 @@ library ValidationLogic {
     if (!userConfig.isUsingAsCollateralAny()) {
       return true;
     }
-    (bool isolationModeActive, , ) = userConfig.getIsolationModeState(reservesData, reservesList);
 
-    return (!isolationModeActive && reserveConfig.getDebtCeiling() == 0);
+    return (reserveConfig.getDebtCeiling() == 0);
   }
 
   /**
    * @notice Validates if an asset should be automatically activated as collateral in the following actions: supply,
    * transfer, mint unbacked, and liquidate
    * @dev This is used to ensure that isolated assets are not enabled as collateral automatically
-   * @param reservesData The state of all the reserves
-   * @param reservesList The addresses of all the active reserves
    * @param userConfig the user configuration
    * @param reserveConfig The reserve configuration
    * @return True if the asset can be activated as collateral, false otherwise
    */
   function validateAutomaticUseAsCollateral(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    mapping(uint256 => address) storage reservesList,
     DataTypes.UserConfigurationMap storage userConfig,
     DataTypes.ReserveConfigurationMap memory reserveConfig,
     address aTokenAddress
@@ -751,6 +707,6 @@ library ValidationLogic {
         )
       ) return false;
     }
-    return validateUseAsCollateral(reservesData, reservesList, userConfig, reserveConfig);
+    return validateUseAsCollateral(userConfig, reserveConfig);
   }
 }

@@ -76,8 +76,6 @@ library SupplyLogic {
     if (isFirstSupply) {
       if (
         ValidationLogic.validateAutomaticUseAsCollateral(
-          reservesData,
-          reservesList,
           userConfig,
           reserveCache.reserveConfiguration,
           reserveCache.aTokenAddress
@@ -214,8 +212,6 @@ library SupplyLogic {
         DataTypes.UserConfigurationMap storage toConfig = usersConfig[params.to];
         if (
           ValidationLogic.validateAutomaticUseAsCollateral(
-            reservesData,
-            reservesList,
             toConfig,
             reserve.configuration,
             reserve.aTokenAddress
@@ -266,13 +262,8 @@ library SupplyLogic {
 
     if (useAsCollateral) {
       require(
-        ValidationLogic.validateUseAsCollateral(
-          reservesData,
-          reservesList,
-          userConfig,
-          reserveCache.reserveConfiguration
-        ),
-        Errors.USER_IN_ISOLATION_MODE_OR_LTV_ZERO
+        ValidationLogic.validateUseAsCollateral(userConfig, reserveCache.reserveConfiguration),
+        Errors.LTV_ZERO
       );
 
       userConfig.setUsingAsCollateral(reserve.id, true);

@@ -13,7 +13,6 @@ import {Helpers} from '../helpers/Helpers.sol';
 import {DataTypes} from '../types/DataTypes.sol';
 import {ValidationLogic} from './ValidationLogic.sol';
 import {ReserveLogic} from './ReserveLogic.sol';
-import {IsolationModeLogic} from './IsolationModeLogic.sol';
 
 /**
  * @title BorrowLogic library
@@ -51,7 +50,6 @@ library BorrowLogic {
     address indexed user,
     DataTypes.InterestRateMode interestRateMode
   );
-  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
    * @notice Implements the borrow feature. Borrowing allows users that provided collateral to draw liquidity from the
@@ -76,12 +74,6 @@ library BorrowLogic {
 
     reserve.updateState(reserveCache);
 
-    (
-      bool isolationModeActive,
-      address isolationModeCollateralAddress,
-      uint256 isolationModeDebtCeiling
-    ) = userConfig.getIsolationModeState(reservesData, reservesList);
-
     ValidationLogic.validateBorrow(
       reservesData,
       reservesList,
@@ -97,10 +89,7 @@ library BorrowLogic {
         reservesCount: params.reservesCount,
         oracle: params.oracle,
         userEModeCategory: params.userEModeCategory,
-        priceOracleSentinel: params.priceOracleSentinel,
-        isolationModeActive: isolationModeActive,
-        isolationModeCollateralAddress: isolationModeCollateralAddress,
-        isolationModeDebtCeiling: isolationModeDebtCeiling
+        priceOracleSentinel: params.priceOracleSentinel
       })
     );
 
@@ -128,18 +117,6 @@ library BorrowLogic {
 
     if (isFirstBorrowing) {
       userConfig.setBorrowing(reserve.id, true);
-    }
-
-    if (isolationModeActive) {
-      uint256 nextIsolationModeTotalDebt = reservesData[isolationModeCollateralAddress]
-        .isolationModeTotalDebt += (params.amount /
-        10 **
-          (reserveCache.reserveConfiguration.getDecimals() -
-            ReserveConfiguration.DEBT_CEILING_DECIMALS)).toUint128();
-      emit IsolationModeTotalDebtUpdated(
-        isolationModeCollateralAddress,
-        nextIsolationModeTotalDebt
-      );
     }
 
     reserve.updateInterestRates(
@@ -234,14 +211,6 @@ library BorrowLogic {
     if (stableDebt + variableDebt - paybackAmount == 0) {
       userConfig.setBorrowing(reserve.id, false);
     }
-
-    IsolationModeLogic.updateIsolatedDebtIfIsolated(
-      reservesData,
-      reservesList,
-      userConfig,
-      reserveCache,
-      paybackAmount
-    );
 
     if (params.useATokens) {
       IAToken(reserveCache.aTokenAddress).burn(

@@ -110,13 +110,6 @@ interface IPool {
   );
 
   /**
-   * @dev Emitted on borrow(), repay() and liquidationCall() when using isolated assets
-   * @param asset The address of the underlying asset of the reserve
-   * @param totalDebt The total isolation mode debt for the reserve
-   */
-  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
-
-  /**
    * @dev Emitted when the user selects a certain asset category for eMode
    * @param user The address of the user
    * @param categoryId The category id
@@ -669,13 +662,6 @@ interface IPool {
    * @return The eMode id
    */
   function getUserEMode(address user) external view returns (uint256);
-
-  /**
-   * @notice Resets the isolation mode total debt of the given asset to zero
-   * @dev It requires the given asset has zero debt ceiling
-   * @param asset The address of the underlying asset to reset the isolationModeTotalDebt
-   */
-  function resetIsolationModeTotalDebt(address asset) external;
 
   /**
    * @notice Returns the percentage of available liquidity that can be borrowed at once at stable rate

@@ -91,13 +91,6 @@ interface IPoolDataProvider {
   function getPaused(address asset) external view returns (bool isPaused);
 
   /**
-   * @notice Returns the siloed borrowing flag
-   * @param asset The address of the underlying asset of the reserve
-   * @return True if the asset is siloed for borrowing
-   */
-  function getSiloedBorrowing(address asset) external view returns (bool);
-
-  /**
    * @notice Returns the protocol fee on the liquidation bonus
    * @param asset The address of the underlying asset of the reserve
    * @return The protocol fee on liquidation

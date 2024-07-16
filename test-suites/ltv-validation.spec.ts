@@ -7,7 +7,7 @@ import { evmRevert, evmSnapshot } from '@aave/deploy-v3';
 import { parseUnits } from 'ethers/lib/utils';
 
 makeSuite('LTV validation', (testEnv: TestEnv) => {
-  const { LTV_VALIDATION_FAILED, USER_IN_ISOLATION_MODE_OR_LTV_ZERO } = ProtocolErrors;
+  const { LTV_VALIDATION_FAILED, LTV_ZERO } = ProtocolErrors;
 
   let snap: string;
   before(async () => {
@@ -212,7 +212,7 @@ makeSuite('LTV validation', (testEnv: TestEnv) => {
 
     await expect(
       pool.connect(user1.signer).setUserUseReserveAsCollateral(dai.address, true)
-    ).to.be.revertedWith(USER_IN_ISOLATION_MODE_OR_LTV_ZERO);
+    ).to.be.revertedWith(LTV_ZERO);
   });
 
   it('User 1 deposit zero ltv dai, dai should not be enabled as collateral', async () => {

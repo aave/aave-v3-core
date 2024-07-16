@@ -1,15 +1,15 @@
 pragma solidity 0.8.10;
 pragma experimental ABIEncoderV2;
 
-import {ReserveConfiguration} from '../munged/protocol/libraries/configuration/ReserveConfiguration.sol';
-import {DataTypes} from '../munged/protocol/libraries/types/DataTypes.sol';
+import {ReserveConfiguration} from "../munged/protocol/libraries/configuration/ReserveConfiguration.sol";
+import {DataTypes} from "../munged/protocol/libraries/types/DataTypes.sol";
 
 contract ReserveConfigurationHarness {
     DataTypes.ReserveConfigurationMap public reservesConfig;
     mapping(uint256 => uint256) public intSettersUpperBounds;
     mapping(uint256 => uint256) public intSetterslowerBounds;
     mapping(uint256 => uint256) public boolSettersCompare;
-    
+
     // Sets the Loan to Value of the reserve
     function setLtv(uint256 ltv) public {
         DataTypes.ReserveConfigurationMap memory configNew = reservesConfig;
@@ -92,30 +92,6 @@ contract ReserveConfigurationHarness {
     // Gets the paused state of the reserve
     function getPaused() public view returns (bool) {
         return ReserveConfiguration.getPaused(reservesConfig);
-    }
-
-    // Sets the borrowable in isolation flag for the reserve.
-    function setBorrowableInIsolation(bool borrowable) public {
-        DataTypes.ReserveConfigurationMap memory configNew = reservesConfig;
-        ReserveConfiguration.setBorrowableInIsolation(configNew, borrowable);
-        reservesConfig.data = configNew.data;
-    }
-
-    // Gets the borrowable in isolation flag for the reserve.
-    function getBorrowableInIsolation() public view returns (bool) {
-        return ReserveConfiguration.getBorrowableInIsolation(reservesConfig);
-    }
-
-    // Sets the siloed borrowing flag for the reserve.
-    function setSiloedBorrowing(bool siloed) public {
-        DataTypes.ReserveConfigurationMap memory configNew = reservesConfig;
-        ReserveConfiguration.setSiloedBorrowing(configNew, siloed);
-        reservesConfig.data = configNew.data;
-    }
-
-    // Gets the siloed borrowing flag for the reserve.
-    function getSiloedBorrowing() public view returns (bool) {
-        return ReserveConfiguration.getSiloedBorrowing(reservesConfig);
     }
 
     // Enables or disables borrowing on the reserve
@@ -247,55 +223,55 @@ contract ReserveConfigurationHarness {
     function executeIntSetterById(uint256 id, uint256 val) public {
         require(id >= 0 && id <= 10);
         if (id == 0) {
-        setLtv(val);
+            setLtv(val);
         } else if (id == 1) {
-        setLiquidationThreshold(val);
+            setLiquidationThreshold(val);
         } else if (id == 2) {
-        setLiquidationBonus(val);
+            setLiquidationBonus(val);
         } else if (id == 3) {
-        setDecimals(val);
+            setDecimals(val);
         } else if (id == 4) {
-        setReserveFactor(val);
+            setReserveFactor(val);
         } else if (id == 5) {
-        setBorrowCap(val);
+            setBorrowCap(val);
         } else if (id == 6) {
-        setSupplyCap(val);
+            setSupplyCap(val);
         } else if (id == 7) {
-        setLiquidationProtocolFee(val);
+            setLiquidationProtocolFee(val);
         } else if (id == 8) {
-        setEModeCategory(val);
+            setEModeCategory(val);
         } else if (id == 9) {
-        setUnbackedMintCap(val);
+            setUnbackedMintCap(val);
         } else {
-        setDebtCeiling(val);
+            setDebtCeiling(val);
         }
     }
 
     // Executes a getter of an int parameter according to the given id
-    function executeIntGetterById(uint256 id) public view returns(uint256) {
+    function executeIntGetterById(uint256 id) public view returns (uint256) {
         require(id >= 0 && id <= 10);
         if (id == 0) {
-        return getLtv();
+            return getLtv();
         } else if (id == 1) {
-        return getLiquidationThreshold();
+            return getLiquidationThreshold();
         } else if (id == 2) {
-        return getLiquidationBonus();
+            return getLiquidationBonus();
         } else if (id == 3) {
-        return getDecimals();
+            return getDecimals();
         } else if (id == 4) {
-        return getReserveFactor();
+            return getReserveFactor();
         } else if (id == 5) {
-        return getBorrowCap();
+            return getBorrowCap();
         } else if (id == 6) {
-        return getSupplyCap();
+            return getSupplyCap();
         } else if (id == 7) {
-        return getLiquidationProtocolFee();
+            return getLiquidationProtocolFee();
         } else if (id == 8) {
-        return getEModeCategory();
+            return getEModeCategory();
         } else if (id == 9) {
-        return getUnbackedMintCap();
+            return getUnbackedMintCap();
         } else {
-        return getDebtCeiling();
+            return getDebtCeiling();
         }
     }
 
@@ -303,35 +279,35 @@ contract ReserveConfigurationHarness {
     function executeBoolSetterById(uint256 id, bool val) public {
         require(id >= 0 && id <= 5);
         if (id == 0) {
-        setActive(val);
+            setActive(val);
         } else if (id == 1) {
-        setFrozen(val);
+            setFrozen(val);
         } else if (id == 2) {
-        setBorrowingEnabled(val);
+            setBorrowingEnabled(val);
         } else if (id == 3) {
-        setStableRateBorrowingEnabled(val);
+            setStableRateBorrowingEnabled(val);
         } else if (id == 4) {
-        setPaused(val);
+            setPaused(val);
         } else {
-        setBorrowableInIsolation(val);
+            setBorrowableInIsolation(val);
         }
     }
 
     // Executes a getter of a bool parameter according to the given id
-    function executeBoolGetterById(uint256 id) public view returns(bool) {
+    function executeBoolGetterById(uint256 id) public view returns (bool) {
         require(id >= 0 && id <= 5);
         if (id == 0) {
-        return getActive();
+            return getActive();
         } else if (id == 1) {
-        return getFrozen();
+            return getFrozen();
         } else if (id == 2) {
-        return getBorrowingEnabled();
+            return getBorrowingEnabled();
         } else if (id == 3) {
-        return getStableRateBorrowingEnabled();
+            return getStableRateBorrowingEnabled();
         } else if (id == 4) {
-        return getPaused();
+            return getPaused();
         } else {
-        return getBorrowableInIsolation();
+            return getBorrowableInIsolation();
         }
     }
 }

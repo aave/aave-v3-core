@@ -218,14 +218,6 @@ interface IPoolConfigurator {
   event DebtCeilingChanged(address indexed asset, uint256 oldDebtCeiling, uint256 newDebtCeiling);
 
   /**
-   * @dev Emitted when the the siloed borrowing state for an asset is changed.
-   * @param asset The address of the underlying asset of the reserve
-   * @param oldState The old siloed borrowing state
-   * @param newState The new siloed borrowing state
-   */
-  event SiloedBorrowingChanged(address indexed asset, bool oldState, bool newState);
-
-  /**
    * @dev Emitted when the bridge protocol fee is updated.
    * @param oldBridgeProtocolFee The old protocol fee, expressed in bps
    * @param newBridgeProtocolFee The new protocol fee, expressed in bps
@@ -251,13 +243,6 @@ interface IPoolConfigurator {
     uint128 oldFlashloanPremiumToProtocol,
     uint128 newFlashloanPremiumToProtocol
   );
-
-  /**
-   * @dev Emitted when the reserve is set as borrowable/non borrowable in isolation mode.
-   * @param asset The address of the underlying asset of the reserve
-   * @param borrowable True if the reserve is borrowable in isolation, false otherwise
-   */
-  event BorrowableInIsolationChanged(address asset, bool borrowable);
 
   /**
    * @notice Initializes multiple reserves.
@@ -340,17 +325,6 @@ interface IPoolConfigurator {
    * @param freeze True if the reserve needs to be frozen, false otherwise
    */
   function setReserveFreeze(address asset, bool freeze) external;
-
-  /**
-   * @notice Sets the borrowable in isolation flag for the reserve.
-   * @dev When this flag is set to true, the asset will be borrowable against isolated collaterals and the
-   * borrowed amount will be accumulated in the isolated collateral's total debt exposure
-   * @dev Only assets of the same family (e.g. USD stablecoins) should be borrowable in isolation mode to keep
-   * consistency in the debt ceiling calculations
-   * @param asset The address of the underlying asset of the reserve
-   * @param borrowable True if the asset should be borrowable in isolation, false otherwise
-   */
-  function setBorrowableInIsolation(address asset, bool borrowable) external;
 
   /**
    * @notice Pauses a reserve. A paused reserve does not allow any interaction (supply, borrow, repay,
@@ -477,10 +451,4 @@ interface IPoolConfigurator {
    * @param newDebtCeiling The new debt ceiling
    */
   function setDebtCeiling(address asset, uint256 newDebtCeiling) external;
-
-  /**
-   * @notice Sets siloed borrowing for an asset
-   * @param siloed The new siloed borrowing state
-   */
-  function setSiloedBorrowing(address asset, bool siloed) external;
 }

@@ -756,35 +756,6 @@ makeSuite('Pool: Edge cases', (testEnv: TestEnv) => {
     expect((await pool.getReservesList()).length).to.be.eq(await pool.MAX_NUMBER_RESERVES());
   });
 
-  it('Call `resetIsolationModeTotalDebt()` to reset isolationModeTotalDebt of an asset with non-zero debt ceiling', async () => {
-    const {
-      configurator,
-      pool,
-      helpersContract,
-      dai,
-      poolAdmin,
-      deployer,
-      users: [user0],
-    } = testEnv;
-
-    const debtCeiling = utils.parseUnits('10', 2);
-
-    expect(await helpersContract.getDebtCeiling(dai.address)).to.be.eq(0);
-
-    await configurator.connect(poolAdmin.signer).setDebtCeiling(dai.address, debtCeiling);
-
-    expect(await helpersContract.getDebtCeiling(dai.address)).to.be.eq(debtCeiling);
-
-    // Impersonate PoolConfigurator
-    await topUpNonPayableWithEther(deployer.signer, [configurator.address], utils.parseEther('1'));
-    await impersonateAccountsHardhat([configurator.address]);
-    const configSigner = await hre.ethers.getSigner(configurator.address);
-
-    await expect(
-      pool.connect(configSigner).resetIsolationModeTotalDebt(dai.address)
-    ).to.be.revertedWith(DEBT_CEILING_NOT_ZERO);
-  });
-
   it('Tries to initialize a reserve with an AToken, StableDebtToken, and VariableDebt each deployed with the wrong pool address (revert expected)', async () => {
     const { pool, deployer, configurator, addressesProvider } = testEnv;
 

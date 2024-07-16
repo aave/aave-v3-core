@@ -1,16 +1,16 @@
 pragma solidity 0.8.10;
 pragma experimental ABIEncoderV2;
 
-import {UserConfiguration} from '../munged/protocol/libraries/configuration/UserConfiguration.sol';
-import {DataTypes} from '../munged/protocol/libraries/types/DataTypes.sol';
-import {PoolStorage} from '../munged/protocol/pool/PoolStorage.sol';
+import {UserConfiguration} from "../munged/protocol/libraries/configuration/UserConfiguration.sol";
+import {DataTypes} from "../munged/protocol/libraries/types/DataTypes.sol";
+import {PoolStorage} from "../munged/protocol/pool/PoolStorage.sol";
 
 /*
 A wrapper contract for calling functions from the library UserConfiguration.
 */
 contract UserConfigurationHarness is PoolStorage {
     DataTypes.UserConfigurationMap public usersConfig;
-    
+
     // Sets if the user is borrowing the reserve identified by reserveIndex
     function setBorrowing(uint256 reserveIndex, bool borrowing) public {
         UserConfiguration.setBorrowing(usersConfig, reserveIndex, borrowing);
@@ -45,7 +45,7 @@ contract UserConfigurationHarness is PoolStorage {
     function isUsingAsCollateralAny() public view returns (bool) {
         return UserConfiguration.isUsingAsCollateralAny(usersConfig);
     }
-    
+
     // Checks if a user has been borrowing only one asset
     function isBorrowingOne() public view returns (bool) {
         return UserConfiguration.isBorrowingOne(usersConfig);
@@ -59,16 +59,5 @@ contract UserConfigurationHarness is PoolStorage {
     // Checks if a user has not been using any reserve for borrowing or supply
     function isEmpty() public view returns (bool) {
         return UserConfiguration.isEmpty(usersConfig);
-    }
-
-    // Returns the Isolation Mode state of the user
-    function getIsolationModeState() 
-        public view returns (bool, address, uint256) {
-        return UserConfiguration.getIsolationModeState(usersConfig, _reserves, _reservesList);
-    }
-
-    // Returns the siloed borrowing state for the user
-    function getSiloedBorrowingState() public view returns (bool, address) {
-        return UserConfiguration.getSiloedBorrowingState(usersConfig, _reserves, _reservesList);
     }
 }

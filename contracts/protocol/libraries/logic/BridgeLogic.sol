@@ -87,8 +87,6 @@ library BridgeLogic {
     if (isFirstSupply) {
       if (
         ValidationLogic.validateAutomaticUseAsCollateral(
-          reservesData,
-          reservesList,
           userConfig,
           reserveCache.reserveConfiguration,
           reserveCache.aTokenAddress

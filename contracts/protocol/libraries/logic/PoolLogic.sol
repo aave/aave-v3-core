@@ -26,7 +26,6 @@ library PoolLogic {
 
   // See `IPool` for descriptions
   event MintedToTreasury(address indexed reserve, uint256 amountMinted);
-  event IsolationModeTotalDebtUpdated(address indexed asset, uint256 totalDebt);
 
   /**
    * @notice Initialize an asset reserve and add the reserve to the list of reserves
@@ -106,21 +105,6 @@ library PoolLogic {
         emit MintedToTreasury(assetAddress, amountToMint);
       }
     }
-  }
-
-  /**
-   * @notice Resets the isolation mode total debt of the given asset to zero
-   * @dev It requires the given asset has zero debt ceiling
-   * @param reservesData The state of all the reserves
-   * @param asset The address of the underlying asset to reset the isolationModeTotalDebt
-   */
-  function executeResetIsolationModeTotalDebt(
-    mapping(address => DataTypes.ReserveData) storage reservesData,
-    address asset
-  ) external {
-    require(reservesData[asset].configuration.getDebtCeiling() == 0, Errors.DEBT_CEILING_NOT_ZERO);
-    reservesData[asset].isolationModeTotalDebt = 0;
-    emit IsolationModeTotalDebtUpdated(asset, 0);
   }
 
   /**

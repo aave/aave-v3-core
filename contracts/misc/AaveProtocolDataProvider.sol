@@ -124,11 +124,6 @@ contract AaveProtocolDataProvider is IPoolDataProvider {
   }
 
   /// @inheritdoc IPoolDataProvider
-  function getSiloedBorrowing(address asset) external view override returns (bool) {
-    return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getSiloedBorrowing();
-  }
-
-  /// @inheritdoc IPoolDataProvider
   function getLiquidationProtocolFee(address asset) external view override returns (uint256) {
     return IPool(ADDRESSES_PROVIDER.getPool()).getConfiguration(asset).getLiquidationProtocolFee();
   }

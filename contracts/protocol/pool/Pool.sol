@@ -699,13 +699,6 @@ contract Pool is VersionedInitializable, PoolStorage, IPool {
   }
 
   /// @inheritdoc IPool
-  function resetIsolationModeTotalDebt(
-    address asset
-  ) external virtual override onlyPoolConfigurator {
-    PoolLogic.executeResetIsolationModeTotalDebt(_reserves, asset);
-  }
-
-  /// @inheritdoc IPool
   function rescueTokens(
     address token,
     address to,
