@@ -24,7 +24,7 @@ Aave is a decentralized non-custodial liquidity markets protocol where users can
 
 ## Documentation
 
-See the link to the technical paper or visit the Aave Developer docs
+Refer to the link to the technical paper or visit the Aave Developer docs
 
 - [Technical Paper](./techpaper/Aave_V3_Technical_Paper.pdf)
 
@@ -44,7 +44,7 @@ V3 Round 1 - October 2021
 - [ABDK](./audits/27-01-2022_ABDK_AaveV3.pdf)
 - [OpenZeppelin](./audits/01-11-2021_OpenZeppelin_AaveV3.pdf)
 - [Trail of Bits](./audits/07-01-2022_TrailOfBits_AaveV3.pdf)
-- [Peckshield](./audits/14-01-2022_PeckShield_AaveV3.pdf)
+- [PeckShield](./audits/14-01-2022_PeckShield_AaveV3.pdf)
 
 V3 Round 2 - December 2021
 
@@ -64,7 +64,7 @@ You can install `@aave/core-v3` as an NPM package in your Hardhat or Truffle pro
 
 `npm install @aave/core-v3`
 
-Import at Solidity files:
+Import into Solidity files:
 
 ```
 import {IPool} from "@aave/core-v3/contracts/interfaces/IPool.sol";
@@ -93,7 +93,7 @@ console.log(PoolV3Artifact.abi)
 
 The repository uses Docker Compose to manage sensitive keys and load the configuration. Prior to any action like test or deploy, you must run `docker-compose up` to start the `contracts-env` container, and then connect to the container console via `docker-compose exec contracts-env bash`.
 
-Follow the next steps to setup the repository:
+Follow the next steps to set up the repository:
 
 - Install `docker` and `docker-compose`
 - Create an environment file named `.env` and fill the next environment variables
