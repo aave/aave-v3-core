@@ -57,7 +57,7 @@ library GPv2SafeERC20 {
     // NOTE: Inspecting previous return data requires assembly. Note that
     // we write the return data to memory 0 in the case where the return
     // data size is 32, this is OK since the first 64 bytes of memory are
-    // reserved by Solidy as a scratch space that can be used within
+    // reserved by Solidity as a scratch space that can be used within
     // assembly blocks.
     // <https://docs.soliditylang.org/en/v0.7.6/internals/layout_in_memory.html>
     // solhint-disable-next-line no-inline-assembly
