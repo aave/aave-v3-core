@@ -1,3 +1,7 @@
+# ⚠️ This repository is DEPRECATED and no longer maintained ⚠️
+
+For the latest Aave V3 code visit the V3 Origin Repository [here](https://github.com/aave-dao/aave-v3-origin).
+
 [![Build pass](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml/badge.svg)](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml)
 [![codecov](https://codecov.io/gh/aave/aave-v3-core/branch/master/graph/badge.svg?token=U50KN38G67)](https://codecov.io/gh/aave/aave-v3-core)
 
