@@ -1,0 +1,10 @@
+[profile.default]
+src = 'src'
+out = 'out'
+libs = ['lib']
+fuzz_runs = 10000
+optimizer = true
+
+solc = "0.8.10"
+
+# See more config options https://github.com/gakonst/foundry/tree/master/config
