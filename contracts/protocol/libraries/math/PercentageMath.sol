@@ -17,7 +17,7 @@ library PercentageMath {
 
   /**
    * @notice Executes a percentage multiplication
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param value The value of which the percentage needs to be calculated
    * @param percentage The percentage of the value to be calculated
    * @return result value percentmul percentage
@@ -40,7 +40,7 @@ library PercentageMath {
 
   /**
    * @notice Executes a percentage division
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param value The value of which the percentage needs to be calculated
    * @param percentage The percentage of the value to be calculated
    * @return result value percentdiv percentage
