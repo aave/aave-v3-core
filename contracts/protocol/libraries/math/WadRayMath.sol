@@ -21,7 +21,7 @@ library WadRayMath {
 
   /**
    * @dev Multiplies two wad, rounding half up to the nearest wad
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param a Wad
    * @param b Wad
    * @return c = a*b, in wad
@@ -39,7 +39,7 @@ library WadRayMath {
 
   /**
    * @dev Divides two wad, rounding half up to the nearest wad
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param a Wad
    * @param b Wad
    * @return c = a/b, in wad
@@ -57,7 +57,7 @@ library WadRayMath {
 
   /**
    * @notice Multiplies two ray, rounding half up to the nearest ray
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param a Ray
    * @param b Ray
    * @return c = a raymul b
@@ -75,7 +75,7 @@ library WadRayMath {
 
   /**
    * @notice Divides two ray, rounding half up to the nearest ray
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param a Ray
    * @param b Ray
    * @return c = a raydiv b
@@ -93,7 +93,7 @@ library WadRayMath {
 
   /**
    * @dev Casts ray down to wad
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param a Ray
    * @return b = a converted to wad, rounded half up to the nearest wad
    */
@@ -109,7 +109,7 @@ library WadRayMath {
 
   /**
    * @dev Converts wad up to ray
-   * @dev assembly optimized for improved gas savings, see https://twitter.com/transmissions11/status/1451131036377571328
+   * @dev assembly optimized for improved gas savings, see https://x.com/transmissions11/status/1451131036377571328
    * @param a Wad
    * @return b = a converted in ray
    */
