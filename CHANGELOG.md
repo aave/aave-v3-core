@@ -749,7 +749,7 @@
 
 * Add additional checks to liquidation tests ([e06c74f](https://www.github.com/aave/aave-v3-core/commit/e06c74fceeeb33211363e0cb1cf0e2f5549933f4))
 * Add check for previous index ([3cfc67c](https://www.github.com/aave/aave-v3-core/commit/3cfc67c9c9a9dffb78ee63aed9e2c48fa9c8a75b))
-* Add checks for avaiable liquidity in liqudations ([80cb24d](https://www.github.com/aave/aave-v3-core/commit/80cb24ddd72cd075c488f16f1a697e907ece6d30))
+* Add checks for available liquidity in liqudations ([80cb24d](https://www.github.com/aave/aave-v3-core/commit/80cb24ddd72cd075c488f16f1a697e907ece6d30))
 * Add cleanups and fixes to tests ([ccd5a96](https://www.github.com/aave/aave-v3-core/commit/ccd5a961e2e0eb6d73d5f0e696383b762daf1f3e))
 * Add fixes to OperationalValidator contracts ([829be88](https://www.github.com/aave/aave-v3-core/commit/829be8826c84fa67fce6745b5768dbee5127e5e4))
 * Add tests for `ASSET_LISTING_ADMIN` role ([84aa268](https://www.github.com/aave/aave-v3-core/commit/84aa26830124fee2fa4479e8ed3fc16ccbd38024))
