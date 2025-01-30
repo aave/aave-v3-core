@@ -266,7 +266,7 @@
 * Remove unneeded comment ([4134d89](https://www.github.com/aave/aave-v3-core/commit/4134d89707e5dec310fcb1f6945d1692d7a9cf5c))
 * Remove unneeded fields in FlashLoanLocalVars struct ([9cb3a05](https://www.github.com/aave/aave-v3-core/commit/9cb3a05efdcb388ff7329480f26de8b3cc38d249))
 * Remove unneeded import of interface in Pool ([cc49160](https://www.github.com/aave/aave-v3-core/commit/cc4916049d394fbadf63568b3ddaef74b531d087))
-* Rename flashloanRepayment internal funciton to _flashloanRepayment ([3e18b8a](https://www.github.com/aave/aave-v3-core/commit/3e18b8ad2a80776f47f72c6c9bb5dfe620400e82))
+* Rename flashloanRepayment internal function to _flashloanRepayment ([3e18b8a](https://www.github.com/aave/aave-v3-core/commit/3e18b8ad2a80776f47f72c6c9bb5dfe620400e82))
 * Replace > 0 with != 0 ([7bc9926](https://www.github.com/aave/aave-v3-core/commit/7bc99264a76453f04ac7754595ec643317b0763e))
 * Simplify `executeRepay` ([6ab4a44](https://www.github.com/aave/aave-v3-core/commit/6ab4a44d601c71784a3af47d0d3f2c1d0f09b3f4))
 * update comments ([5f09cf9](https://www.github.com/aave/aave-v3-core/commit/5f09cf90792d1e8aa71168de4822f4f4b29da0a8))
