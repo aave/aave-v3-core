@@ -4,6 +4,7 @@ For the latest Aave V3 code visit the V3 Origin Repository [here](https://github
 
 [![Build pass](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml/badge.svg)](https://github.com/aave/aave-v3-core/actions/workflows/node.js.yml)
 [![codecov](https://codecov.io/gh/aave/aave-v3-core/branch/master/graph/badge.svg?token=U50KN38G67)](https://codecov.io/gh/aave/aave-v3-core)
+[![License](https://img.shields.io/badge/License-Business%20Source%201.1-green.svg)](https://github.com/aave/aave-v3-core/blob/master/LICENSE.md)
 
 ```
         .///.                .///.     //.            .//  `/////////////-
