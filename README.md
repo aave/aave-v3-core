@@ -128,3 +128,25 @@ docker-compose exec contracts-env bash
 # A new Bash terminal is prompted, connected to the container
 npm run test
 ```
+## Contributing
+
+This repository is forked for learning and contribution practice.
+Although this version of Aave V3 is deprecated, the documentation and examples here can still help developers understand the foundations of the protocol.
+
+If you are interested in:
+
+* ⭐ Starring the repository to support open-source,
+* 🛠️ Exploring the contracts for educational purposes,
+* 🔄 Forking and experimenting with changes,
+
+feel free to do so.
+
+---
+
+## Additional Notes
+
+This update was added as part of my Web3 builder journey on **Talent Protocol**.
+The modification does not change the core smart contracts. It only adds notes for educational and contribution tracking purposes.
+
+Happy building with DeFi 🚀
+
