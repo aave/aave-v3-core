@@ -128,3 +128,5 @@ docker-compose exec contracts-env bash
 # A new Bash terminal is prompted, connected to the container
 npm run test
 ```
+<br>## Welcome to Flash Loans<br>Aave V3's flash loans enable capital-efficient DeFi—new contributors, start with the Pool contract tutorial for your first borrow. Tip: Use the UI for testing! <br>
+
